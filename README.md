@@ -5,7 +5,7 @@ It's perfect for deploying Data Products consistently that are reliable, discove
 
 ## configuration
 
-There are 2 options for configuring your next data stack. The first is to use our online configurator tool, it's live at [configurator.cndi.run] and is probably the most fun. But the config is just a file, so you can also write it by hand if you want.
+There are 2 options for configuring your next data stack. The first is to use our online configurator tool, it's live at [configurator.cndi.run](https://configurator.cndi.run) and is probably the most fun. But the config is just a file, so you can also write it by hand if you want.
 
 Let's run through the 4 parts of a `cndi-config.json` file.
 
@@ -55,7 +55,7 @@ choose from, check out the list of node properties [here]()!
 
 ## applications
 
-The next thing we need to configure is the applications that will actually run on the cluster. Up until now we have focused on making it a breeze to deploy Airflow in Kubernetes. 
+The next thing we need to configure is the applications that will actually run on the cluster. Up until now we have focused on making it a breeze to deploy [Apache Airflow](https://github.com/apache/airflow) in Kubernetes. 
 
 Lets see what that might look like:
 
@@ -65,7 +65,7 @@ Lets see what that might look like:
     "application": {
         "airflow": {
             /* 
-            Our GUI for any of our supported apps is generated from the official Helm Chart's values.schema.json but we've also layered on additional features and customizations to give you the best system for your environment
+            Each of our supported "applications" have configuration GUIs generated from the official Helm Chart's values.schema.json but we've also layered on additional features and customizations to give you the best system for your target environment
             */
             "dags": {
                 "gitSync": {
@@ -132,7 +132,29 @@ There, we have a complete `my-cndi-config.json` file. Let's see what happens whe
 cndi init -f ./my-cndi-config.json .
 ```
 
-boom
+Wow!
 
+In the current directory we've created a few files and folders. Let's go through what `cndi init` produced for us:
 
+1. a `.github` folder, with some GitHub Actions inside. These GitHub Action scripts are actually mostly just wrapping the `cndi run` command in the CNDI binary executable. As such, if you have a different CI system, you can execute the `cndi run` command on the binary there instead.
+
+2. a `cndi/cndi-config.json` file, this is essentially the config file you passed into `cndi init`, if there are any sensitive fields here, they will be stripped out, and will need to be passed in as environment variables to `cndi run`
+
+3. a `cndi/cluster` folder, containing Kubernetes manifests that will be installed on your new cluster when it is up and running. This includes things like `ingress`, and the configuration of `ArgoCD`.
+
+4. a `cndi/cluster/applications` folder, which contains a folder for each application defined in the `"applications"` section  of your `cndi-config.json`, and a generated Helm Chart inside that contains our expertly chosen defaults, and the spefic parameters you've specified yourself in the `"applications"` section of your `cndi-config.json`.
+
+5. a `./README.md` file that explains how you can use and modify these files yourself for the lifetime of the cluster
+
+## bootstrapping
+
+Our next task is to bring this cluster to life. This is going to happen in 3 phases. The first step is to push all of the files `cndi` created for us up to GitHub. 
+
+Once we've done this, the GitHub Actions contained in the repo will begin execution, because they are triggered by changes being pushed to the `main` branch.
+
+Our first push will begin to create nodes, and it's important to remember that before these nodes are Kubernetes nodes, they must first be created as virtual machines. Every platform handles their compute engine a little bit differently in terms of inputs and APIs, but CNDI is going to abstract all of that away from you.
+
+`cndi run` will parse the `nodes` entries in our new `cndi/cndi-config.json` file and will kickoff async Promises for the creation of each virtual machine. When a machine is live, cndi will install `microk8s` on each node. When microk8s is installed on the nodes, we will use it to join all the nodes together in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". This microk8s Kubernetes cluster will leverage the `argocd` plugin, and it will use that to create a GitOps binding to the `"cndi/cluster"` path of the new git repository.
+
+## sync
 
