@@ -138,7 +138,7 @@ In the current directory we've created a few files and folders. Let's go through
 
 1. a `.github` folder, with some GitHub Actions inside. These GitHub Action scripts are actually mostly just wrapping the `cndi run` command in the CNDI binary executable. As such, if you have a different CI system, you can execute the `cndi run` command on the binary there instead.
 
-2. a `cndi/cndi-config.json` file, this is essentially the config file you passed into `cndi init`, if there are any sensitive fields here, they will be stripped out, and will need to be passed in as environment variables to `cndi run`
+2. a `cndi/nodes.json` file, this is essentially the `nodes` object you passed into `cndi init`, if there are any sensitive fields here, they will be stripped out, and will need to be passed in as secret environment variables to `cndi run`.
 
 3. a `cndi/cluster` folder, containing Kubernetes manifests that will be installed on your new cluster when it is up and running. This includes things like `ingress`, and the configuration of `ArgoCD`.
 
@@ -148,13 +148,24 @@ In the current directory we've created a few files and folders. Let's go through
 
 ## bootstrapping
 
-Our next task is to bring this cluster to life. This is going to happen in 3 phases. The first step is to push all of the files `cndi` created for us up to GitHub. 
+Our next task is to bring this cluster to life.  The first step is to push all of the files `cndi` created for us up to GitHub. 
 
 Once we've done this, the GitHub Actions contained in the repo will begin execution, because they are triggered by changes being pushed to the `main` branch.
 
+## run 
+
 Our first push will begin to create nodes, and it's important to remember that before these nodes are Kubernetes nodes, they must first be created as virtual machines. Every platform handles their compute engine a little bit differently in terms of inputs and APIs, but CNDI is going to abstract all of that away from you.
 
-`cndi run` will parse the `nodes` entries in our new `cndi/cndi-config.json` file and will kickoff async Promises for the creation of each virtual machine. When a machine is live, cndi will install `microk8s` on each node. When microk8s is installed on the nodes, we will use it to join all the nodes together in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". This microk8s Kubernetes cluster will leverage the `argocd` plugin, and it will use that to create a GitOps binding to the `"cndi/cluster"` path of the new git repository.
+When changes are made to the `main` branch of our repo `cndi run` will check if there have been any changes to our `cndi/cndi-config.json` file and if so it will parse the `nodes` entries within it and will kickoff async Promises for the creation of each virtual machine that does not yet exist.
 
-## sync
+When a machine is live, cndi will install `microk8s` on each node. When microk8s is installed on the nodes, we will use it to join all the nodes together in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". 
 
+Because `argocd` has been configured to watch the `cndi/cluster` folder changes to the manifests in that folder will automatically be applied with eventual consistency, including the first commit.
+
+## overwrite
+
+When you want to further update your cluster, the process is simple. You make a change to your `cndi-config.json` file and run `cndi overwrite -f my-new-config.json`. CNDI will delete the contents of `cndi/` and it will build up that directory from scratch based on your `my-new-config.json`.
+
+CNDI does this instead of patching the files because it may be the case that your changes to `my-new-config.json` are incompatible with the modified state of the directory. Of course when you make a new pull request though, you will be making a PR with the diff between the new state of `cndi/` and the old. 
+
+You are also able to modify the manifests in `cndi/cluster` and make changes to `cndi/nodes.json` yourself, but be careful: if you then run `cndi overwrite -f my-new-config.json` after, you will blast those changes away unless they are also present in `my-new-config.json` .
