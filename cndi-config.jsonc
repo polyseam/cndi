@@ -1,0 +1,21 @@
+{
+  "nodes": [], // whoa a comma
+  "applications": {
+    "airflow": {
+      "dags": {
+        "gitSync": {
+          "enabled": true,
+          "repo": "https://github.com/polyseam/dag-bag"
+        }
+      },
+      "images": {
+        "redis": {
+          "tag": "7-bullseye"
+        }
+      }
+    }
+  },
+  "cluster": {
+    
+  }
+}
