@@ -146,26 +146,30 @@ In the current directory we've created a few files and folders. Let's go through
 
 5. a `./README.md` file that explains how you can use and modify these files yourself for the lifetime of the cluster
 
-## bootstrapping
+## first time setup
 
-Our next task is to bring this cluster to life.  The first step is to push all of the files `cndi` created for us up to GitHub. 
+Our next task is to bring this cluster to life. The first step is to push all of the files `cndi` created for us up to GitHub. 
 
 Once we've done this, the GitHub Actions contained in the repo will begin execution, because they are triggered by changes being pushed to the `main` branch.
 
-## run 
-
 Our first push will begin to create nodes, and it's important to remember that before these nodes are Kubernetes nodes, they must first be created as virtual machines. Every platform handles their compute engine a little bit differently in terms of inputs and APIs, but CNDI is going to abstract all of that away from you.
 
-When changes are made to the `main` branch of our repo `cndi run` will check if there have been any changes to our `cndi/cndi-config.json` file and if so it will parse the `nodes` entries within it and will kickoff async Promises for the creation of each virtual machine that does not yet exist.
+## run 
+
+When changes are made to the `main` branch of our repo `cndi run` will check if there have been any changes to our `cndi/nodes.json` file and if so it will kickoff async Promises for the creation of each virtual machine that does not yet exist.
 
 When a machine is live, cndi will install `microk8s` on each node. When microk8s is installed on the nodes, we will use it to join all the nodes together in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". 
 
-Because `argocd` has been configured to watch the `cndi/cluster` folder changes to the manifests in that folder will automatically be applied with eventual consistency, including the first commit.
+Because `argocd` has been configured to watch the `cndi/cluster` folder, changes to the manifests in that folder will automatically be applied with eventual consistency, including the first commit.
 
-## overwrite
+## making changes to your cluster
 
-When you want to further update your cluster, the process is simple. You make a change to your `cndi-config.json` file and run `cndi overwrite -f my-new-config.json`. CNDI will delete the contents of `cndi/` and it will build up that directory from scratch based on your `my-new-config.json`.
+When you want to further update your cluster, the process is simple. You make a change to your `cndi-config.json` file and run `cndi overwrite-with -f my-new-config.json`. CNDI will delete the contents of `cndi/` and it will build up that directory from scratch based on your `my-new-config.json`.
 
-CNDI does this instead of patching the files because it may be the case that your changes to `my-new-config.json` are incompatible with the modified state of the directory. Of course when you make a new pull request though, you will be making a PR with the diff between the new state of `cndi/` and the old. 
+CNDI does this instead of patching the files because it may be the case that your changes to `my-new-config.json` are incompatible with the state of the directory if files in there were modified by hand. Of course when you make a new pull request though, you will be making a PR with the diff between the new state of `cndi/` and the old. 
 
-You are also able to modify the manifests in `cndi/cluster` and make changes to `cndi/nodes.json` yourself, but be careful: if you then run `cndi overwrite -f my-new-config.json` after, you will blast those changes away unless they are also present in `my-new-config.json` .
+You are also able to modify the manifests in `cndi/cluster` and make changes to `cndi/nodes.json` yourself, but be careful: if you then run `cndi overwrite-with -f my-new-config.json` after manual changes, you will blast those changes away unless they are also present in `my-new-config.json` .
+
+## updating data product registry
+
+If you want to opt-in to having the polyseam data product registry track this repo as a data product, CNDI can handle this for you too! CNDI will persist information about your data product to the registry including releases, documentation, infrastructure, source code, output ports and more!
