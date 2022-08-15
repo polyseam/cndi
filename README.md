@@ -128,6 +128,8 @@ If you are using CNDI to deploy a Data Product, and want to persist information 
 
 There, we have a complete `my-cndi-config.json` file. Let's see what happens when we run:
 
+## cndi init
+
 ```bash
 cndi init -f ./my-cndi-config.json .
 ```
@@ -154,11 +156,11 @@ Once we've done this, the GitHub Actions contained in the repo will begin execut
 
 Our first push will begin to create nodes, and it's important to remember that before these nodes are Kubernetes nodes, they must first be created as virtual machines. Every platform handles their compute engine a little bit differently in terms of inputs and APIs, but CNDI is going to abstract all of that away from you.
 
-## run 
+## cndi run 
 
-When changes are made to the `main` branch of our repo `cndi run` will check if there have been any changes to our `cndi/nodes.json` file and if so it will kickoff async Promises for the creation of each virtual machine that does not yet exist.
+When changes are made to the `main` branch of our repo `cndi run` will check if there have been any changes to our `cndi/nodes.json` file and if so it will kickoff async Promises for the creation of each virtual machine that does not yet exist, and changes to those that do.
 
-When a machine is live, cndi will install `microk8s` on each node. When microk8s is installed on the nodes, we will use it to join all the nodes together in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". 
+When a virtual machine is live, cndi will install `microk8s` on each machine. When microk8s is installed on the machines, we will use it to join all the machines together as nodes in a Kubernetes cluster. When a node joins the cluster, it becomes controlled by the Kubernetes control plane, which is running on the node(s) with the `role` "controller". 
 
 Because `argocd` has been configured to watch the `cndi/cluster` folder, changes to the manifests in that folder will automatically be applied with eventual consistency, including the first commit.
 
