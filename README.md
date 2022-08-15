@@ -53,7 +53,7 @@ Here is an example `cndi-config.json` object that contains a set of nodes to dep
 With `nodes` you specify your infrastructure and there are way more options to
 choose from, check out the list of node properties [here]()!
 
-## applications
+### applications
 
 The next thing we need to configure is the applications that will actually run on the cluster. Up until now we have focused on making it a breeze to deploy [Apache Airflow](https://github.com/apache/airflow) in Kubernetes. 
 
@@ -84,7 +84,9 @@ Lets see what that might look like:
 }
 ```
 
-The last aspect of configuration is related to the Kubernetes cluster we are
+### cluster
+
+The next aspect of configuration is related to the Kubernetes cluster we are
 going to be deploying, but don't worry, we'll make it easy!
 
 ```jsonc
@@ -110,6 +112,8 @@ going to be deploying, but don't worry, we'll make it easy!
     }
 }
 ```
+
+### dpr
 
 If you are using CNDI to deploy a Data Product, and want to persist information about your Data Product to the [Polyseam Data Product Registry](https://polyseam.io/registry), just add one more block to the config:
 
@@ -174,4 +178,4 @@ You are also able to modify the manifests in `cndi/cluster` and make changes to 
 
 ## updating data product registry
 
-If you want to opt-in to having the polyseam data product registry track this repo as a data product, CNDI can handle this for you too! CNDI will persist information about your data product to the registry including releases, documentation, infrastructure, source code, output ports and more!
+If you want to opt-in to having the polyseam data product registry track this repo as a data product, CNDI can handle this for you too! Whenever you make changes to your `main` branch CNDI will persist information about your data product to the registry including releases, documentation, infrastructure, source code, output ports and more!
