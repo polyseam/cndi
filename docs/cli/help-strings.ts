@@ -2,7 +2,7 @@
 type HelpStrings = {
     default: string;
     init: string;
-    overwriteWith: string;
+    "overwrite-with": string;
     run: string;
     help: string;
 }
@@ -45,7 +45,7 @@ OPTIONS
             The directory in which to create the manifests and resources needed to deploy the cndi project. Defaults to the current directory.
  
 `.trim(),
-  overwriteWith: `
+  "overwrite-with": `
 NAME
         cndi-overwrite-with - reads a config file at the path supplied and uses it to overwrite the cndi project files in the ./cndi folder in your current directory.
 SYNOPSIS

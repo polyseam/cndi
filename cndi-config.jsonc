@@ -1,5 +1,5 @@
 {
-  "nodes": [], // whoa a comma
+  "nodes": [{ "name": "aws-worker-1", "kind": "worker"},"x"], // whoa a comma
   "applications": {
     "airflow": {
       "dags": {
@@ -15,7 +15,5 @@
       }
     }
   },
-  "cluster": {
-    
-  }
+  "cluster": {}
 }
