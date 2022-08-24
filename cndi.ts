@@ -1,7 +1,6 @@
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
-import * as base64 from "https://deno.land/std@0.152.0/encoding/base64.ts";
 
 import {
   CreateTagsCommand,
