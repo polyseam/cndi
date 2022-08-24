@@ -11,10 +11,7 @@ import {
   RunInstancesCommand,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
-import jwkToPem, { JWK } from "https://esm.sh/jwk-to-pem@2.0.5";
-
-
-/* work on ssh-ing into each node to install dependencies for the cluster */
+import createKeyPair from "./keygen/create-keypair.ts";
 
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
 
@@ -25,85 +22,14 @@ const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
 const DEFAULT_AWS_IMAGE_ID = "ami-0cf6c10214cc015c9";
 
-const SSH_KEYGEN_ALGORITHM = "RSASSA-PKCS1-v1_5";
-const SSH_KEYGEN_MODULUS_LENGTH = 2048;
-const SSH_PUBLIC_EXPONENT = new Uint8Array([0x01, 0x00, 0x01]);
-const SSH_KEYS_EXTRACTABLE = true;
 const SSH_KEY_NAME = "cndi-run-key";
 
-const { privateKey, publicKey } = await crypto.subtle.generateKey(
-  {
-    name: SSH_KEYGEN_ALGORITHM,
-    modulusLength: SSH_KEYGEN_MODULUS_LENGTH,
-    publicExponent: SSH_PUBLIC_EXPONENT,
-    hash: { name: "SHA-256" },
-  },
-  SSH_KEYS_EXTRACTABLE,
-  ["sign", "verify"],
-);
+// generate a keypair
+const {publicKeyMaterial, privateKeyMaterial} = await createKeyPair();
 
-const te = new TextEncoder();
-
-const privateKeyJWK = await crypto.subtle.exportKey("jwk", privateKey);
-
-const privatePem = jwkToPem(privateKeyJWK as JWK, { private: true });
-
-Deno.writeTextFile("private.pem", privatePem);
-
-const publicKeyJWK = await crypto.subtle.exportKey("jwk", publicKey);
-
-const decodeFormattedBase64 = (encoded: string) => {
-  return new Uint8Array(
-    atob(encoded)
-      .split("")
-      .map((c) => c.charCodeAt(0)),
-  );
-};
-
-const decodeRawBase64 = (input: string) => {
-  try {
-    return decodeFormattedBase64(
-      input.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, ""),
-    );
-  } catch (_a) {
-    throw new TypeError("The input to be decoded is not correctly encoded.");
-  }
-};
-
-const modulus = decodeRawBase64(publicKeyJWK.n as string);
-
-// thedigitalcatonline.com/blog/2018/04/25/rsa-keys/#:~:text=The%20OpenSSH%20public%20key%20format,format%20is%20encoded%20with%20Base64.
-const publicKeyUint8Array = new Uint8Array([
-  0x00,
-  0x00,
-  0x00,
-  0x07, // length of "ssh-rsa" (next 0007 bytes)
-  0x73, // "s"
-  0x73, // "s"
-  0x68, // "h"
-  0x2d, // "-"
-  0x72, // "r"
-  0x73, // "s"
-  0x61, // "a"
-  0x00,
-  0x00,
-  0x00,
-  0x03, // length of exponent (key.e) (next 3 bytes)
-  0x01,
-  0x00,
-  0x01, // exponent (key.e)
-  0x00, // length of modulus (key.n) (next 4 bytes)
-  0x00,
-  0x01,
-  0x01,
-  0x00, // bonus byte!
-  ...modulus, // modulus (key.n)
-]);
-
-const keyBody = base64.encode(publicKeyUint8Array);
-const PublicKeyMaterial = te.encode(`ssh-rsa ${keyBody} user@host`);
-
-await Deno.writeFile("public.pub", PublicKeyMaterial);
+// write public and private keys to disk (eventually we will skip this step)
+await Deno.writeFile('public.pub', publicKeyMaterial);
+await Deno.writeFile('private.pem', privateKeyMaterial);
 
 enum NodeRole {
   "controller",
@@ -158,7 +84,7 @@ const ec2Client = new EC2Client(awsConfig);
 await ec2Client.send(new EnableSerialConsoleAccessCommand({ DryRun: false }));
 await ec2Client.send(
   new ImportKeyPairCommand({
-    PublicKeyMaterial,
+    PublicKeyMaterial: publicKeyMaterial,
     KeyName: SSH_KEY_NAME,
   }),
 );
