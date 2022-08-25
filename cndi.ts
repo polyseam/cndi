@@ -1,9 +1,11 @@
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
+import "https://deno.land/std@0.152.0/dotenv/load.ts";
 
 import {
   CreateTagsCommand,
+  DescribeInstanceStatusCommand,
   EC2Client,
   EnableSerialConsoleAccessCommand,
   ImportKeyPairCommand,
@@ -11,8 +13,6 @@ import {
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
 import createKeyPair from "./keygen/create-keypair.ts";
-
-import "https://deno.land/std@0.152.0/dotenv/load.ts";
 
 import { helpStrings } from "./docs/cli/help-strings.ts";
 
@@ -24,11 +24,11 @@ const DEFAULT_AWS_IMAGE_ID = "ami-0cf6c10214cc015c9";
 const SSH_KEY_NAME = "cndi-run-key";
 
 // generate a keypair
-const {publicKeyMaterial, privateKeyMaterial} = await createKeyPair();
+const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
 // write public and private keys to disk (eventually we will skip this step)
-await Deno.writeFile('public.pub', publicKeyMaterial);
-await Deno.writeFile('private.pem', privateKeyMaterial);
+await Deno.writeFile("public.pub", publicKeyMaterial);
+await Deno.writeFile("private.pem", privateKeyMaterial);
 
 enum NodeRole {
   "controller",
@@ -132,6 +132,14 @@ const initFn = async () => {
   );
 };
 
+const getInstanceStatuses = async (instanceIds) => {
+  return ec2Client.send(
+    new DescribeInstanceStatusCommand({
+      InstanceIds: instanceIds,
+    }),
+  );
+};
+
 const overwriteWithFn = () => {
   console.log("cndi overwrite-with");
 };
@@ -141,22 +149,40 @@ const runFn = async () => {
 
   const nodes = await loadJSONC(pathToNodes);
 
+  // @ts-ignore
   const entries = nodes?.entries as Array<CNDINode>;
   console.log("entries", entries);
 
   try {
     const instances = await Promise.all(entries.map((node) => {
+      // @ts-ignore
       return aws.addNode(node, nodes?.deploymentTargetConfiguration as unknown);
     }));
-    console.log("instances", instances);
 
-    console.log(instances.length + 1, "instances created");
+    const instanceIds = instances.map((instance) =>
+    // @ts-ignore
+      instance?.Instances[0].InstanceId
+    ) as Array<string>;
+
+    const describeCmd = new DescribeInstanceStatusCommand({
+      InstanceIds: instanceIds,
+    });
+
+    let instanceStatuses = [];
+
+    while (instanceStatuses.length < instanceIds.length) {
+      instanceStatuses = await getInstanceStatuses(instanceIds);
+    }
+
+    console.log("InstanceStatuses", instanceStatuses);
+
+    console.log(instances.length, "instances created");
 
     // tagging instances with a Name corresponding to the user-specified node name
     const _instancesTagged = await Promise.all(
       instances.map((instance, idx) => {
         console.log("tagging instance", idx);
-
+        // @ts-ignore
         const { InstanceId } = instance?.Instances[0];
 
         const instanceName = entries[idx].name;
