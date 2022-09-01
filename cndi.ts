@@ -20,15 +20,9 @@ const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
 const DEFAULT_AWS_IMAGE_ID = "ami-04bbc563156a4726a";
-
-const SSH_KEY_NAME = "cndi-run-key";
-
-// generate a keypair
-const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
-
-// write public and private keys to disk (eventually we will skip this step)
-await Deno.writeFile("public.pub", publicKeyMaterial);
-await Deno.writeFile("private.pem", privateKeyMaterial);
+const KEY_NAME_PREFIX = "cndi-key-";
+const PUBLIC_KEY_FILENAME = "public.pub";
+const PRIVATE_KEY_FILENAME = "private.pem";
 
 enum NodeRole {
   "controller",
@@ -65,7 +59,8 @@ const DEFAULT_CNDI_CONFIG_PATH_JSONC = `${DEFAULT_CNDI_CONFIG_PATH}c`;
 
 const cndiArguments = flags.parse(Deno.args);
 
-const pathToConfig = cndiArguments.f ||
+const pathToConfig =
+  cndiArguments.f ||
   cndiArguments.file ||
   DEFAULT_CNDI_CONFIG_PATH_JSONC ||
   DEFAULT_CNDI_CONFIG_PATH;
@@ -80,13 +75,6 @@ const awsConfig = {
 };
 
 const ec2Client = new EC2Client(awsConfig);
-await ec2Client.send(new EnableSerialConsoleAccessCommand({ DryRun: false }));
-await ec2Client.send(
-  new ImportKeyPairCommand({
-    PublicKeyMaterial: publicKeyMaterial,
-    KeyName: SSH_KEY_NAME,
-  }),
-);
 
 const pathToNodes = path.join(Deno.cwd(), "cndi/nodes.json");
 
@@ -94,13 +82,33 @@ const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
+async function getKeyNameFromPublicKeyFile(): string {
+  // ssh-rsa foobarbaznase64encodedGibberish user@host
+  const publicKeyFileTextContent = await Deno.readTextFileSync(
+    PUBLIC_KEY_FILENAME
+  );
+
+  // fooBarBazBase64encodedGibberish
+  const publicKeyBody = publicKeyFileTextContent.split(" ")[1];
+
+  // encodedGibberish
+  const publicKeyBodyLast16Chars = publicKeyBody.slice(-16);
+
+  // cndi-key-encodedGibberish
+  const keyName = `${KEY_NAME_PREFIX}${publicKeyBodyLast16Chars}`;
+  return keyName;
+}
+
 const aws = {
   // deno-lint-ignore no-explicit-any
-  addNode: (node: CNDINode, deploymentTargetConfiguration: any) => {
+  addNode: async (node: CNDINode, deploymentTargetConfiguration: any) => {
+    const keyName = await getKeyNameFromPublicKeyFile();
+
     try {
-      const ImageId = deploymentTargetConfiguration?.aws?.ImageId ||
-        DEFAULT_AWS_IMAGE_ID;
-      const InstanceType = deploymentTargetConfiguration?.aws?.InstanceType ||
+      const ImageId =
+        deploymentTargetConfiguration?.aws?.ImageId || DEFAULT_AWS_IMAGE_ID;
+      const InstanceType =
+        deploymentTargetConfiguration?.aws?.InstanceType ||
         DEFAULT_AWS_INSTANCE_TYPE;
 
       const defaultInstanceParams = {
@@ -108,14 +116,14 @@ const aws = {
         InstanceType,
         MinCount: 1,
         MaxCount: 1,
-        KeyName: SSH_KEY_NAME,
+        KeyName: keyName,
       };
 
       return ec2Client.send(
         new RunInstancesCommand({
           ...defaultInstanceParams,
           ...node,
-        }),
+        })
       );
     } catch (e) {
       console.log("aws.addNode error", e);
@@ -124,19 +132,21 @@ const aws = {
 };
 
 const initFn = async () => {
-  const config = await loadJSONC(pathToConfig) as unknown as CNDIConfig;
+  const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
   // TODO: write /cluster and /cluster/application manifests
   await Deno.writeTextFile(
     pathToNodes,
-    JSON.stringify(config?.nodes ?? {}, null, 2),
+    JSON.stringify(config?.nodes ?? {}, null, 2)
   );
+
+  console.log("initialized your cndi project in the ./cndi directory!");
 };
 
 const getInstanceStatuses = async (instanceIds) => {
   return ec2Client.send(
     new DescribeInstanceStatusCommand({
       InstanceIds: instanceIds,
-    }),
+    })
   );
 };
 
@@ -153,15 +163,43 @@ const runFn = async () => {
   const entries = nodes?.entries as Array<CNDINode>;
   console.log("entries", entries);
 
-  try {
-    const instances = await Promise.all(entries.map((node) => {
-      // @ts-ignore
-      return aws.addNode(node, nodes?.deploymentTargetConfiguration as unknown);
-    }));
+  // generate a keypair
+  const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
-    const instanceIds = instances.map((instance) =>
-    // @ts-ignore
-      instance?.Instances[0].InstanceId
+  // write public and private keys to disk (eventually we will skip this step)
+  await Deno.writeFile(PUBLIC_KEY_FILENAME, publicKeyMaterial);
+  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial);
+
+  // redundant file read is OK for now
+  const KeyName = await getKeyNameFromPublicKeyFile();
+
+  if (entries.some((e) => e.kind === "aws")) {
+    await ec2Client.send(
+      new EnableSerialConsoleAccessCommand({ DryRun: false })
+    );
+    await ec2Client.send(
+      new ImportKeyPairCommand({
+        PublicKeyMaterial: publicKeyMaterial,
+        KeyName,
+      })
+    );
+  }
+
+  try {
+    const instances = await Promise.all(
+      entries.map((node) => {
+        // @ts-ignore
+        return aws.addNode(
+          node,
+          nodes?.deploymentTargetConfiguration as unknown
+        );
+      })
+    );
+
+    const instanceIds = instances.map(
+      (instance) =>
+        // @ts-ignore
+        instance?.Instances[0].InstanceId
     ) as Array<string>;
 
     const describeCmd = new DescribeInstanceStatusCommand({
@@ -189,17 +227,20 @@ const runFn = async () => {
 
         const tagParams = {
           Resources: [InstanceId],
-          Tags: [{
-            Key: "Name",
-            Value: instanceName,
-          }, {
-            Key: "CNDIRun",
-            Value: "true",
-          }],
+          Tags: [
+            {
+              Key: "Name",
+              Value: instanceName,
+            },
+            {
+              Key: "CNDIRun",
+              Value: "true",
+            },
+          ],
         };
 
         return ec2Client.send(new CreateTagsCommand(tagParams));
-      }),
+      })
     );
   } catch (err) {
     console.error(err);
@@ -212,7 +253,7 @@ const helpFn = (command: Command) => {
     console.log(content);
   } else {
     console.error(
-      `Command "${command}" not found. Use "cndi --help" for more information.`,
+      `Command "${command}" not found. Use "cndi --help" for more information.`
     );
   }
 };
@@ -224,7 +265,7 @@ const commands = {
   [Command.help]: helpFn,
   [Command.default]: (c: string) => {
     console.log(
-      `Command "${c}" not found. Use "cndi --help" for more information.`,
+      `Command "${c}" not found. Use "cndi --help" for more information.`
     );
   },
 };
@@ -233,9 +274,8 @@ const commandsInArgs = cndiArguments._;
 
 // if the user uses --help we will show help text
 if (cndiArguments.help || cndiArguments.h) {
-  const key = typeof cndiArguments.help === "boolean"
-    ? "default"
-    : cndiArguments.help;
+  const key =
+    typeof cndiArguments.help === "boolean" ? "default" : cndiArguments.help;
   commands.help(key);
 
   // if the user tries to run "help" instead of --help we will say that it's not a valid command

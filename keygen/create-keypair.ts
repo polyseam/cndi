@@ -7,6 +7,7 @@ const SSH_KEYGEN_MODULUS_LENGTH = 2048;
 const SSH_PUBLIC_EXPONENT = new Uint8Array([0x01, 0x00, 0x01]);
 const SSH_KEYS_EXTRACTABLE = true;
 
+
 const decodeFormattedBase64 = (encoded: string) => {
   return new Uint8Array(
     atob(encoded)
@@ -82,6 +83,6 @@ export default async function createKeypair() {
 
   return {
     publicKeyMaterial,
-    privateKeyMaterial,
+    privateKeyMaterial
   };
 }

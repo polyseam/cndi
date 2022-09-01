@@ -3,11 +3,17 @@
     "entries": [
       {
         "name": "aws-contoller",
-        "kind": "controller",
-        "InstanceType": "t2.small"
+        "role": "controller",
+        "InstanceType": "t2.small",
+        "kind": "aws"
       },
-      { "name": "aws-worker-1", "kind": "worker" },
-      { "name": "aws-worker-2", "kind": "worker", "InstanceType": "t2.micro" }
+      { "name": "aws-worker-1", "role": "worker", "kind": "aws" },
+      {
+        "name": "aws-worker-2",
+        "role": "worker",
+        "InstanceType": "t2.micro",
+        "kind": "aws"
+      }
     ],
     "deploymentTargetConfiguration": {
       "aws": {
