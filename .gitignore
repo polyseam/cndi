@@ -1,3 +1,4 @@
 .env
 private.pem
 public.pub
+.DS_Store
