@@ -2,6 +2,7 @@ import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
+import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
 
 import {
   CreateTagsCommand,
@@ -10,16 +11,21 @@ import {
   EnableSerialConsoleAccessCommand,
   ImportKeyPairCommand,
   RunInstancesCommand,
+  DescribeInstancesCommand,
+  InstanceStatus,
+  Reservation,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
 import createKeyPair from "./keygen/create-keypair.ts";
 
 import { helpStrings } from "./docs/cli/help-strings.ts";
 
+import { ssh } from "./bootstrap/ssh.ts";
+
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
-const DEFAULT_AWS_IMAGE_ID = "ami-04bbc563156a4726a";
+const DEFAULT_AWS_IMAGE_ID = "ami-0af3a0871fe1d8e4f";
 const KEY_NAME_PREFIX = "cndi-key-";
 const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
@@ -34,6 +40,13 @@ interface CNDINode {
   role: NodeRole;
   instanceType?: string;
   imageId?: string;
+}
+
+interface Instance {
+  id: string;
+  ready: boolean;
+  address: string;
+  role: "controller" | "worker";
 }
 
 interface CNDIConfig {
@@ -101,9 +114,11 @@ async function getKeyNameFromPublicKeyFile(): string {
 
 const aws = {
   // deno-lint-ignore no-explicit-any
-  addNode: async (node: CNDINode, deploymentTargetConfiguration: any) => {
-    const keyName = await getKeyNameFromPublicKeyFile();
-
+  addNode: (
+    node: CNDINode,
+    deploymentTargetConfiguration: any,
+    keyName: string
+  ) => {
     try {
       const ImageId =
         deploymentTargetConfiguration?.aws?.ImageId || DEFAULT_AWS_IMAGE_ID;
@@ -142,14 +157,6 @@ const initFn = async () => {
   console.log("initialized your cndi project in the ./cndi directory!");
 };
 
-const getInstanceStatuses = async (instanceIds) => {
-  return ec2Client.send(
-    new DescribeInstanceStatusCommand({
-      InstanceIds: instanceIds,
-    })
-  );
-};
-
 const overwriteWithFn = () => {
   console.log("cndi overwrite-with");
 };
@@ -160,7 +167,10 @@ const runFn = async () => {
   const nodes = await loadJSONC(pathToNodes);
 
   // @ts-ignore
-  const entries = nodes?.entries as Array<CNDINode>;
+  const entries = nodes?.entries.sort((e) => {
+    return e.role === "controller" ? -1 : 1;
+  }) as Array<CNDINode>;
+
   console.log("entries", entries);
 
   // generate a keypair
@@ -168,7 +178,7 @@ const runFn = async () => {
 
   // write public and private keys to disk (eventually we will skip this step)
   await Deno.writeFile(PUBLIC_KEY_FILENAME, publicKeyMaterial);
-  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial);
+  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial, {mode: 0o600});
 
   // redundant file read is OK for now
   const KeyName = await getKeyNameFromPublicKeyFile();
@@ -186,39 +196,127 @@ const runFn = async () => {
   }
 
   try {
-    const instances = await Promise.all(
+    const initializingInstances = await Promise.all(
       entries.map((node) => {
         // @ts-ignore
         return aws.addNode(
           node,
-          nodes?.deploymentTargetConfiguration as unknown
+          nodes?.deploymentTargetConfiguration as unknown,
+          KeyName
         );
       })
     );
 
-    const instanceIds = instances.map(
-      (instance) =>
-        // @ts-ignore
-        instance?.Instances[0].InstanceId
+    const instanceIds = initializingInstances.map(
+      (instance) => instance?.Instances[0].InstanceId as string
     ) as Array<string>;
 
-    const describeCmd = new DescribeInstanceStatusCommand({
-      InstanceIds: instanceIds,
-    });
+    console.log(initializingInstances.length, "instances created");
 
-    let instanceStatuses = [];
+    let instances: Array<Instance> = [];
 
-    while (instanceStatuses.length < instanceIds.length) {
-      instanceStatuses = await getInstanceStatuses(instanceIds);
-    }
+    const getInstances = async (ids: Array<string>) => {
+      console.log("instance statuses", instances);
+      await delay(10000);
+      const allRunning = ids.length === instances.length;
+      const allReady = instances.every((status) => status.ready);
 
-    console.log("InstanceStatuses", instanceStatuses);
+      if (!allRunning || !allReady) {
+        const response = await ec2Client.send(
+          new DescribeInstanceStatusCommand({ InstanceIds: ids })
+        );
 
-    console.log(instances.length, "instances created");
+        const instanceStatuses =
+          response.InstanceStatuses as Array<InstanceStatus>;
+
+        // Every instance will be in it's own Reservation because we are deploying them one by one.
+        // We deploy instances one by one so they can have different properties.
+
+        const addressesResponse = await ec2Client.send(
+          new DescribeInstancesCommand({ InstanceIds: ids })
+        );
+
+        const Reservations =
+          addressesResponse.Reservations as Array<Reservation>;
+
+        const addresses = Reservations.map((reservation) => {
+          // not sure we can guarantee return order of Reservations matches order of InstanceIds so we return the IDs too
+          const instance = reservation.Instances?.[0] as {
+            PublicIpAddress: string;
+            InstanceId: string;
+          };
+
+          return {
+            address: instance.PublicIpAddress,
+            id: instance.InstanceId,
+          };
+        });
+
+        instances = instanceStatuses.map((s, idx) => {
+          const status = s as InstanceStatus;
+          const id = status.InstanceId as string;
+          const address = addresses.find((a) => a.id === id)?.address as string;
+          const ready = status.SystemStatus?.Status === "ok";
+          const role = entries[idx].role as "controller" | "worker";
+          return {
+            id,
+            ready,
+            address,
+            role,
+          } as Instance;
+        });
+        getInstances(ids);
+      } else {
+        console.log("all instances ready");
+        bootstrapInstances();
+      }
+    };
+
+    await getInstances(instanceIds);
+
+    const bootstrapInstances = () => {
+      instances.forEach(async (vm) => {
+        console.log("sshing into ", vm.id, "at", vm.address);
+        await ssh.connect({
+          host: vm.address,
+          username: "ubuntu",
+          privateKeyPath: PRIVATE_KEY_FILENAME,
+        });
+        console.log("ssh connected");
+        if (vm.role === "controller") {
+          console.log(`${vm.id} is a controller`);
+          ssh.putFile(
+            "./add-node-controller.sh",
+            "/home/ubuntu/add-node-controller.sh"
+          );
+          console.log("put add-node-controller.sh");
+          ssh.exec("./add-node-controller.sh");
+        } else {
+          console.log(`${vm.id} is a worker`);
+          ssh.putFile(
+            "./add-node-worker.sh",
+            "/home/ubuntu/add-node-worker.sh"
+          );
+          console.log("put add-node-worker.sh");
+          ssh.exec("./add-node-workerer.sh");
+        }
+        console.log(`${vm.id} is ready`);
+      });
+    };
+
+    //   console.log('response',response)
+    //   console.log(
+    //     `${instanceStatuses.length} of ${instanceIds.length} running`
+    //   );
+    // }, 10000);
+
+    // while (instanceStatuses.length < instanceIds.length) {
+    //   await debouncedInstanceStatusesFetcher();
+    // }
 
     // tagging instances with a Name corresponding to the user-specified node name
     const _instancesTagged = await Promise.all(
-      instances.map((instance, idx) => {
+      initializingInstances.map((instance, idx) => {
         console.log("tagging instance", idx);
         // @ts-ignore
         const { InstanceId } = instance?.Instances[0];
@@ -243,6 +341,7 @@ const runFn = async () => {
       })
     );
   } catch (err) {
+    console.log('error in "cndi run"')
     console.error(err);
   }
 };
