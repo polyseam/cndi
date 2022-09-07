@@ -7,12 +7,7 @@
       "kind": "aws"
     },
     {
-      "name": "aws-worker-1",
-      "role": "worker",
-      "kind": "aws"
-    },
-    {
-      "name": "aws-worker-2",
+      "name": "aws-worker",
       "role": "worker",
       "InstanceType": "t2.micro",
       "kind": "aws"
