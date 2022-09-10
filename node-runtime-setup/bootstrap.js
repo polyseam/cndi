@@ -1,26 +1,32 @@
 const path = require("path");
 const { NodeSSH } = require("node-ssh");
+const fs = require("fs");
 
 const username = "ubuntu";
 
-// imagine these will come in as a parameter when this is a Deno module, for now we hand write them and it sucks
-const n = [
-  { host: "54.82.76.47", role: "controller" },
-  { host:  "44.211.64.35", role: "worker" },
-];
-
 const privateKeyPath = path.join(__dirname, "../private.pem");
+const nodesPath = path.join(__dirname, "./nodes.json");
+const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
+
+if(!Array.isArray(nodes)){
+  throw new Error("bootstrap.js: unable to parse ./nodes.json");
+}else{
+  console.log('bootstrap.js: nodes.json parsed successfully');
+  console.log('bootstrap.js: nodes.json:', nodes);
+}
 
 const ssh = new NodeSSH();
 
 async function bootstrap(node) {
-  const { role, host } = node;
+  // TODO: this uses the first ssh connection for every iteration instead of creating a new one for each node, so it doesn't work.
+  console.log('sshing into', node.role,'at',node.address);
+  const { role } = node;
 
-  const source = path.join(__dirname, `../bootstrap/${role}`)
+  const source = path.join(__dirname, `../bootstrap/${role}`);
   const dest = `/home/ubuntu/${role}`;
 
   await ssh.connect({
-    host,
+    host: node.address,
     username,
     privateKeyPath,
   });
@@ -28,14 +34,12 @@ async function bootstrap(node) {
   await ssh.putDirectory(source, dest);
 
   // Command
-  await ssh
-    .execCommand(`. ${role}/bootstrap.sh`, { cwd: "/home/ubuntu" })
-    .then(function (result) {
-      console.log("STDOUT: " + result.stdout);
-      console.log("STDERR: " + result.stderr);
-      ssh.dispose();
-    });
-
+  const bootstrapResult = await ssh.execCommand(`. ${role}/bootstrap.sh`, {
+    cwd: "/home/ubuntu",
+  });
+  console.log(`${node.id} stdout:`, bootstrapResult?.stdout);
+  console.log(`${node.id} stderr:`, bootstrapResult?.stderr);
+  await ssh.dispose();
 }
 
 function go(nodes) {
@@ -44,4 +48,4 @@ function go(nodes) {
   });
 }
 
-go(n);
+go(nodes);

@@ -196,17 +196,17 @@ const runFn = async () => {
   await Deno.writeTextFile(
     "bootstrap/controller/repo-config.yaml",
     `apiVersion: v1
-    kind: Secret
-    metadata:
-      name: private-repo
-      namespace: argocd
-      labels:
-        argocd.argoproj.io/secret-type: repository
-    stringData:
-      type: git
-      url: ${gitRepo}
-      username: ${gitUsername}
-      password: ${gitPassword}`
+kind: Secret
+metadata:
+  name: private-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: ${gitRepo}
+  username: ${gitUsername}
+  password: ${gitPassword}`
   );
 
   // redundant file read is OK for now
@@ -320,6 +320,11 @@ microk8s join ${vm.address}:25000/${token} --worker`
         }
         console.log(`${vm.id} is ready`);
       });
+      Deno.writeTextFileSync(
+        "./node-runtime-setup/nodes.json",
+        JSON.stringify(instances, null, 2)
+      );
+      Deno.run({ cmd: ["node", "./node-runtime-setup/bootstrap.js"] });
     };
 
     const _instancesTagged = await Promise.all(

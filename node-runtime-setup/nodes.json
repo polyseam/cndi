@@ -1,0 +1,14 @@
+[
+  {
+    "id": "i-03550648c7f353aa7",
+    "ready": true,
+    "address": "3.84.44.99",
+    "role": "controller"
+  },
+  {
+    "id": "i-0e74f883cd6c20bb7",
+    "ready": true,
+    "address": "52.5.78.88",
+    "role": "worker"
+  }
+]

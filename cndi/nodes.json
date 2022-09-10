@@ -3,13 +3,13 @@
     {
       "name": "aws-contoller",
       "role": "controller",
-      "InstanceType": "t2.small",
+      "InstanceType": "t2.large",
       "kind": "aws"
     },
     {
       "name": "aws-worker",
       "role": "worker",
-      "InstanceType": "t2.micro",
+      "InstanceType": "t2.medium",
       "kind": "aws"
     }
   ],
