@@ -3,9 +3,10 @@ const { NodeSSH } = require("node-ssh");
 
 const username = "ubuntu";
 
+// imagine these will come in as a parameter when this is a Deno module, for now we hand write them and it sucks
 const n = [
-  { host: "3.95.255.172", role: "controller" },
-  { host: "18.208.225.114", role: "worker" },
+  { host: "54.82.76.47", role: "controller" },
+  { host:  "44.211.64.35", role: "worker" },
 ];
 
 const privateKeyPath = path.join(__dirname, "../private.pem");

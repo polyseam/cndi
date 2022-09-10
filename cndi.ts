@@ -168,10 +168,9 @@ const runFn = async () => {
   // generate a keypair
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
-  const token = crypto.randomUUID().slice(0,32);
+  const token = crypto.randomUUID().slice(0, 32);
 
-  await Deno.writeTextFile("bootstrap/controller/join-token.txt", token)
-
+  await Deno.writeTextFile("bootstrap/controller/join-token.txt", token);
 
   try {
     Deno.removeSync(PRIVATE_KEY_FILENAME);
@@ -185,6 +184,30 @@ const runFn = async () => {
   await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial, {
     mode: 0o400,
   });
+
+  const gitUsername = Deno.env.get("GIT_USERNAME") as string;
+  const gitPassword = Deno.env.get("GIT_PASSWORD") as string;
+  const gitRepo = Deno.env.get("GIT_REPO") as string;
+
+  console.debug("GIT_USERNAME", gitUsername ? "good" : "undefined");
+  console.debug("GIT_PASSWORD", gitPassword ? "good" : "undefined");
+  console.debug("GIT_REPO", gitRepo ? "good" : "undefined");
+
+  await Deno.writeTextFile(
+    "bootstrap/controller/repo-config.yaml",
+    `apiVersion: v1
+    kind: Secret
+    metadata:
+      name: private-repo
+      namespace: argocd
+      labels:
+        argocd.argoproj.io/secret-type: repository
+    stringData:
+      type: git
+      url: ${gitRepo}
+      username: ${gitUsername}
+      password: ${gitPassword}`
+  );
 
   // redundant file read is OK for now
   const KeyName = await getKeyNameFromPublicKeyFile();
@@ -290,7 +313,7 @@ const runFn = async () => {
             "./bootstrap/worker/accept-invite.sh",
             `#!/bin/bash
 echo "accepting node invite with token ${token}"
-microk8s join ${vm.address}:25000/${token}`
+microk8s join ${vm.address}:25000/${token} --worker`
           );
         } else {
           console.log(`${vm.id} is a worker`);
@@ -299,17 +322,6 @@ microk8s join ${vm.address}:25000/${token}`
       });
     };
 
-    //   console.log('response',response)
-    //   console.log(
-    //     `${instanceStatuses.length} of ${instanceIds.length} running`
-    //   );
-    // }, 10000);
-
-    // while (instanceStatuses.length < instanceIds.length) {
-    //   await debouncedInstanceStatusesFetcher();
-    // }
-
-    // tagging instances with a Name corresponding to the user-specified node name
     const _instancesTagged = await Promise.all(
       initializingInstances.map((instance, idx) => {
         console.log("tagging instance", idx);
