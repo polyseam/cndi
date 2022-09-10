@@ -2,3 +2,7 @@
 private.pem
 public.pub
 .DS_Store
+
+node_modules
+join-token.txt
+accept-invite.sh

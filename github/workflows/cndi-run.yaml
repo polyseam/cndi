@@ -1,0 +1,6 @@
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+# https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action

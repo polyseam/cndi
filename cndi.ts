@@ -1,6 +1,7 @@
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
+import * as base64 from "https://deno.land/std@0.152.0/encoding/base64.ts";
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
 
@@ -26,7 +27,7 @@ const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
 const DEFAULT_AWS_IMAGE_ID = "ami-0af3a0871fe1d8e4f";
-const KEY_NAME_PREFIX = "cndi-key-";
+
 const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
 
@@ -95,21 +96,12 @@ const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
-async function getKeyNameFromPublicKeyFile(): string {
-  // ssh-rsa foobarbaznase64encodedGibberish user@host
+async function getKeyNameFromPublicKeyFile(): Promise<string> {
+  // ssh-rsa foobarbaznase64encodedGibberish cndi-key-Gibberish
   const publicKeyFileTextContent = await Deno.readTextFileSync(
     PUBLIC_KEY_FILENAME
   );
-
-  // fooBarBazBase64encodedGibberish
-  const publicKeyBody = publicKeyFileTextContent.split(" ")[1];
-
-  // encodedGibberish
-  const publicKeyBodyLast16Chars = publicKeyBody.slice(-16);
-
-  // cndi-key-encodedGibberish
-  const keyName = `${KEY_NAME_PREFIX}${publicKeyBodyLast16Chars}`;
-  return keyName;
+  return publicKeyFileTextContent.split(" ")[2];
 }
 
 const aws = {
@@ -176,9 +168,23 @@ const runFn = async () => {
   // generate a keypair
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
+  const token = crypto.randomUUID().slice(0,32);
+
+  await Deno.writeTextFile("bootstrap/controller/join-token.txt", token)
+
+
+  try {
+    Deno.removeSync(PRIVATE_KEY_FILENAME);
+    Deno.removeSync(PUBLIC_KEY_FILENAME);
+  } catch {
+    // no keys to remove
+  }
+
   // write public and private keys to disk (eventually we will skip this step)
   await Deno.writeFile(PUBLIC_KEY_FILENAME, publicKeyMaterial);
-  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial, {mode: 0o600});
+  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial, {
+    mode: 0o400,
+  });
 
   // redundant file read is OK for now
   const KeyName = await getKeyNameFromPublicKeyFile();
@@ -276,29 +282,18 @@ const runFn = async () => {
 
     const bootstrapInstances = () => {
       instances.forEach(async (vm) => {
-        console.log("sshing into ", vm.id, "at", vm.address);
-        await ssh.connect({
-          host: vm.address,
-          username: "ubuntu",
-          privateKeyPath: PRIVATE_KEY_FILENAME,
-        });
-        console.log("ssh connected");
+        console.log("bootstrapping node", vm.id, "at", vm.address);
         if (vm.role === "controller") {
           console.log(`${vm.id} is a controller`);
-          ssh.putFile(
-            "./add-node-controller.sh",
-            "/home/ubuntu/add-node-controller.sh"
+
+          await Deno.writeTextFile(
+            "./bootstrap/worker/accept-invite.sh",
+            `#!/bin/bash
+echo "accepting node invite with token ${token}"
+microk8s join ${vm.address}:25000/${token}`
           );
-          console.log("put add-node-controller.sh");
-          ssh.exec("./add-node-controller.sh");
         } else {
           console.log(`${vm.id} is a worker`);
-          ssh.putFile(
-            "./add-node-worker.sh",
-            "/home/ubuntu/add-node-worker.sh"
-          );
-          console.log("put add-node-worker.sh");
-          ssh.exec("./add-node-workerer.sh");
         }
         console.log(`${vm.id} is ready`);
       });
@@ -341,7 +336,7 @@ const runFn = async () => {
       })
     );
   } catch (err) {
-    console.log('error in "cndi run"')
+    console.log('error in "cndi run"');
     console.error(err);
   }
 };
