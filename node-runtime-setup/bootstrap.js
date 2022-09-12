@@ -42,10 +42,11 @@ async function bootstrap(node) {
   await ssh.dispose();
 }
 
-function go(nodes) {
-  nodes.forEach(async (node) => {
-    await bootstrap(node);
-  });
+async function go(nodes) {
+  // for loop that runs bootstrap for each node in the nodes array
+  for (let i = 0; i < nodes.length; i++) {
+    await bootstrap(nodes[i]);
+  }
 }
 
 go(nodes);

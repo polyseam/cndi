@@ -15,12 +15,14 @@ import {
   DescribeInstancesCommand,
   InstanceStatus,
   Reservation,
+  RunInstancesCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
 import createKeyPair from "./keygen/create-keypair.ts";
 
 import { helpStrings } from "./docs/cli/help-strings.ts";
-
+import getApplicationManifest from "./templates/application.ts";
+import getRepoConfigManifest from "./templates/repo-config.ts";
 import { ssh } from "./bootstrap/ssh.ts";
 
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -96,6 +98,19 @@ const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
+interface NodeSpec {
+  name: string;
+  role: NodeRole;
+  kind: "aws";
+  InstanceType?: string;
+}
+
+interface NodeEntry extends NodeSpec {
+  address?: string;
+  ready: boolean;
+  id?: string;
+}
+
 async function getKeyNameFromPublicKeyFile(): Promise<string> {
   // ssh-rsa foobarbaznase64encodedGibberish cndi-key-Gibberish
   const publicKeyFileTextContent = await Deno.readTextFileSync(
@@ -119,7 +134,7 @@ const aws = {
         DEFAULT_AWS_INSTANCE_TYPE;
 
       const defaultInstanceParams = {
-        ImageId,
+        ImageId, // ami-iwgniwngo
         InstanceType,
         MinCount: 1,
         MaxCount: 1,
@@ -136,6 +151,35 @@ const aws = {
       console.log("aws.addNode error", e);
     }
   },
+};
+
+const provisionNodes = async (
+  nodes: Array<NodeEntry>,
+  keyName: string
+): Promise<NodeEntry[]> => {
+  console.log("loc 159");
+  // for loop that loops through nodes
+  const config = await loadJSONC("cndi/nodes.json");
+  const provisionedNodes = [...nodes];
+  const runOutputs = await Promise.all(
+    nodes.map((node) => {
+      switch (node.kind) {
+        case "aws":
+          return aws.addNode(
+            node,
+            config?.deploymentTargetConfiguration ?? {},
+            keyName
+          );
+        default:
+          throw new Error(`Unsupported node kind: ${node.kind}`);
+      }
+    })
+  );
+  runOutputs.forEach((i, idx) => {
+    provisionedNodes[idx].id = i?.Instances[0].InstanceId;
+  });
+  console.log("loc180 -- provisionedNodes", provisionedNodes);
+  return provisionedNodes;
 };
 
 const initFn = async () => {
@@ -156,18 +200,28 @@ const overwriteWithFn = () => {
 const runFn = async () => {
   console.log("cndi run");
 
-  const nodes = await loadJSONC(pathToNodes);
+  const nodes = (await loadJSONC(pathToNodes)) as unknown as {
+    entries: Array<NodeSpec>;
+  };
 
-  // @ts-ignore
-  const entries = nodes?.entries.sort((e) => {
-    return e.role === "controller" ? -1 : 1;
-  }) as Array<CNDINode>;
+  const entries = nodes.entries.map(
+    ({ name, role, kind, InstanceType }): NodeEntry => {
+      return {
+        name,
+        role,
+        kind,
+        ready: false,
+        InstanceType,
+      };
+    }
+  );
 
-  console.log("entries", entries);
+  console.log("loc212: entries", entries);
 
   // generate a keypair
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
+  // generate a 32 character token for microk8s
   const token = crypto.randomUUID().slice(0, 32);
 
   await Deno.writeTextFile("bootstrap/controller/join-token.txt", token);
@@ -195,24 +249,21 @@ const runFn = async () => {
 
   await Deno.writeTextFile(
     "bootstrap/controller/repo-config.yaml",
-    `apiVersion: v1
-kind: Secret
-metadata:
-  name: private-repo
-  namespace: argocd
-  labels:
-    argocd.argoproj.io/secret-type: repository
-stringData:
-  type: git
-  url: ${gitRepo}
-  username: ${gitUsername}
-  password: ${gitPassword}`
+    getRepoConfigManifest(gitRepo, gitUsername, gitPassword)
+  );
+
+  await Deno.writeTextFile(
+    "bootstrap/controller/application.yaml",
+    getApplicationManifest(gitRepo)
   );
 
   // redundant file read is OK for now
   const KeyName = await getKeyNameFromPublicKeyFile();
 
+  // if there are any nodes on AWS, upload the keypair
   if (entries.some((e) => e.kind === "aws")) {
+    console.log("aws nodes found");
+    console.log("uploading keypair to aws");
     await ec2Client.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
     );
@@ -224,123 +275,46 @@ stringData:
     );
   }
 
+  console.log("provisioning nodes");
+  const provisionedInstances = await provisionNodes(entries, KeyName);
+
   try {
-    const initializingInstances = await Promise.all(
-      entries.map((node) => {
-        // @ts-ignore
-        return aws.addNode(
-          node,
-          nodes?.deploymentTargetConfiguration as unknown,
-          KeyName
-        );
-      })
-    );
+    // const initializingInstances = await Promise.all(
+    //   entries.map((node) => {
+    //     // @ts-ignore
+    //     return aws.addNode(
+    //       node,
+    //       nodes?.deploymentTargetConfiguration as unknown,
+    //       KeyName
+    //     );
+    //   })
+    // );
 
-    const instanceIds = initializingInstances.map(
-      (instance) => instance?.Instances[0].InstanceId as string
-    ) as Array<string>;
+    // const instanceIds = initializingInstances.map(
+    //   (instance) => instance?.Instances[0].InstanceId as string
+    // ) as Array<string>;
 
-    console.log(initializingInstances.length, "instances created");
+    // console.log(initializingInstances.length, "instances created");
 
-    let instances: Array<Instance> = [];
+    // let instances: Array<NodeEntry> = entries.map((entry, idx) => {
+    //   const id = initializingInstances[idx]?.Instances[0].InstanceId as string;
+    //   return {
+    //     ...entry,
+    //     id,
+    //   };
+    // });
 
-    const getInstances = async (ids: Array<string>) => {
-      console.log("instance statuses", instances);
-      await delay(10000);
-      const allRunning = ids.length === instances.length;
-      const allReady = instances.every((status) => status.ready);
-
-      if (!allRunning || !allReady) {
-        const response = await ec2Client.send(
-          new DescribeInstanceStatusCommand({ InstanceIds: ids })
-        );
-
-        const instanceStatuses =
-          response.InstanceStatuses as Array<InstanceStatus>;
-
-        // Every instance will be in it's own Reservation because we are deploying them one by one.
-        // We deploy instances one by one so they can have different properties.
-
-        const addressesResponse = await ec2Client.send(
-          new DescribeInstancesCommand({ InstanceIds: ids })
-        );
-
-        const Reservations =
-          addressesResponse.Reservations as Array<Reservation>;
-
-        const addresses = Reservations.map((reservation) => {
-          // not sure we can guarantee return order of Reservations matches order of InstanceIds so we return the IDs too
-          const instance = reservation.Instances?.[0] as {
-            PublicIpAddress: string;
-            InstanceId: string;
-          };
-
-          return {
-            address: instance.PublicIpAddress,
-            id: instance.InstanceId,
-          };
-        });
-
-        instances = instanceStatuses.map((s, idx) => {
-          const status = s as InstanceStatus;
-          const id = status.InstanceId as string;
-          const address = addresses.find((a) => a.id === id)?.address as string;
-          const ready = status.SystemStatus?.Status === "ok";
-          const role = entries[idx].role as "controller" | "worker";
-          return {
-            id,
-            ready,
-            address,
-            role,
-          } as Instance;
-        });
-        getInstances(ids);
-      } else {
-        console.log("all instances ready");
-        bootstrapInstances();
-      }
-    };
-
-    await getInstances(instanceIds);
-
-    const bootstrapInstances = () => {
-      instances.forEach(async (vm) => {
-        console.log("bootstrapping node", vm.id, "at", vm.address);
-        if (vm.role === "controller") {
-          console.log(`${vm.id} is a controller`);
-
-          await Deno.writeTextFile(
-            "./bootstrap/worker/accept-invite.sh",
-            `#!/bin/bash
-echo "accepting node invite with token ${token}"
-microk8s join ${vm.address}:25000/${token} --worker`
-          );
-        } else {
-          console.log(`${vm.id} is a worker`);
-        }
-        console.log(`${vm.id} is ready`);
-      });
-      Deno.writeTextFileSync(
-        "./node-runtime-setup/nodes.json",
-        JSON.stringify(instances, null, 2)
-      );
-      Deno.run({ cmd: ["node", "./node-runtime-setup/bootstrap.js"] });
-    };
-
-    const _instancesTagged = await Promise.all(
-      initializingInstances.map((instance, idx) => {
+    await Promise.all(
+      provisionedInstances.map((instance, idx) => {
         console.log("tagging instance", idx);
-        // @ts-ignore
-        const { InstanceId } = instance?.Instances[0];
-
-        const instanceName = entries[idx].name;
+        const { id, name } = instance;
 
         const tagParams = {
-          Resources: [InstanceId],
+          Resources: [id as string],
           Tags: [
             {
               Key: "Name",
-              Value: instanceName,
+              Value: name,
             },
             {
               Key: "CNDIRun",
@@ -352,6 +326,112 @@ microk8s join ${vm.address}:25000/${token} --worker`
         return ec2Client.send(new CreateTagsCommand(tagParams));
       })
     );
+
+    const checkAndUpdateInstances = async (instances: Array<NodeEntry>) => {
+      console.log("checking and updating instances:", instances);
+      await delay(10000); // ask aws about nodes every 10 seconds
+      // const allRunning = ids.length === instances.length;
+      const ids = instances.map((i) => i.id) as Array<string>;
+      console.log("instanceIds", ids);
+      const allReady = instances.every((status) => status.ready);
+
+      if (!allReady) {
+        console.log("nodes not all ready");
+        const response = await ec2Client.send(
+          new DescribeInstanceStatusCommand({ InstanceIds: ids })
+        );
+
+        const instanceStatuses =
+          response.InstanceStatuses as Array<InstanceStatus>;
+
+        instanceStatuses.forEach((status) => {
+          const id = status.InstanceId;
+          const ready = status.SystemStatus?.Status === "ok";
+          const instanceIndex = instances.findIndex((i) => i.id === id);
+          instances[instanceIndex] = {
+            ...instances[instanceIndex],
+            ready,
+          };
+        });
+
+        // Every instance will be in it's own Reservation because we are deploying them one by one.
+        // We deploy instances one by one so they can have different properties.
+
+        const addressesResponse = await ec2Client.send(
+          new DescribeInstancesCommand({ InstanceIds: ids })
+        );
+
+        const Reservations =
+          addressesResponse.Reservations as Array<Reservation>;
+
+        Reservations.forEach((reservation) => {
+          // not sure we can guarantee return order of Reservations matches order of InstanceIds so we return the IDs too
+
+          const instance = reservation.Instances?.[0] as {
+            PublicIpAddress: string;
+            InstanceId: string;
+          };
+
+          const instanceIndex = instances.findIndex(
+            (i) => i.id === instance.InstanceId
+          );
+          instances[instanceIndex] = {
+            ...instances[instanceIndex],
+            address: instance.PublicIpAddress,
+          };
+        });
+        checkAndUpdateInstances(instances);
+      } else {
+        console.log("all instances ready");
+        bootstrapInstances();
+      }
+    };
+
+    await checkAndUpdateInstances(provisionedInstances);
+
+    const bootstrapInstances = async () => {
+      provisionedInstances.forEach(async (vm) => {
+        // vm is live now
+        console.log("bootstrapping node", vm.id, "at", vm.address);
+        if (vm.role === NodeRole.controller) {
+          console.log(`${vm.id} is a controller`);
+
+          //
+          await Deno.writeTextFile(
+            "./bootstrap/worker/accept-invite.sh",
+            `#!/bin/bash
+echo "accepting node invite with token ${token}"
+microk8s join ${vm.address}:25000/${token} --worker`
+          );
+        } else {
+          console.log(`${vm.id} is a worker`);
+        }
+        console.log(`${vm.id} is ready`);
+      });
+
+      Deno.writeTextFileSync(
+        "./node-runtime-setup/nodes.json",
+        JSON.stringify(provisionedInstances, null, 2)
+      );
+
+      const p = Deno.run({
+        cmd: ["node", "./node-runtime-setup/bootstrap.js"],
+        stdout: "piped",
+        stderr: "piped",
+      });
+      const { code } = await p.status();
+
+      // Reading the outputs closes their pipes
+      const rawOutput = await p.output();
+      const rawError = await p.stderrOutput();
+
+      if (code === 0) {
+        await Deno.stdout.write(rawOutput);
+      } else {
+        const errorString = new TextDecoder().decode(rawError);
+        console.log(errorString);
+      }
+    };
   } catch (err) {
     console.log('error in "cndi run"');
     console.error(err);
