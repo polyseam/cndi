@@ -48,7 +48,8 @@ interface CNDINode {
 interface Instance {
   id: string;
   ready: boolean;
-  address: string;
+  privateIpAddress: string;
+  publicIpAddress: string;
   role: "controller" | "worker";
 }
 
@@ -106,9 +107,10 @@ interface NodeSpec {
 }
 
 interface NodeEntry extends NodeSpec {
-  address?: string;
   ready: boolean;
   id?: string;
+  privateIpAddress?: string;
+  publicIpAddress?: string;
 }
 
 async function getKeyNameFromPublicKeyFile(): Promise<string> {
@@ -222,7 +224,7 @@ const runFn = async () => {
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
   // generate a 32 character token for microk8s
-  const token = crypto.randomUUID().slice(0, 32);
+  const token = crypto.randomUUID().replaceAll('-','').slice(0, 32);
 
   await Deno.writeTextFile("bootstrap/controller/join-token.txt", token);
 
@@ -370,6 +372,7 @@ const runFn = async () => {
           const instance = reservation.Instances?.[0] as {
             PublicIpAddress: string;
             InstanceId: string;
+            PrivateIpAddress: string;
           };
 
           const instanceIndex = instances.findIndex(
@@ -377,7 +380,8 @@ const runFn = async () => {
           );
           instances[instanceIndex] = {
             ...instances[instanceIndex],
-            address: instance.PublicIpAddress,
+            publicIpAddress: instance.PublicIpAddress,
+            privateIpAddress: instance.PrivateIpAddress,
           };
         });
         checkAndUpdateInstances(instances);
@@ -392,7 +396,7 @@ const runFn = async () => {
     const bootstrapInstances = async () => {
       provisionedInstances.forEach(async (vm) => {
         // vm is live now
-        console.log("bootstrapping node", vm.id, "at", vm.address);
+        console.log("bootstrapping node", vm.id, "at publicIpAddress", vm.publicIpAddress);
         if (vm.role === "controller") {
           console.log(`${vm.id} is a controller`);
 
@@ -401,7 +405,7 @@ const runFn = async () => {
             "./bootstrap/worker/accept-invite.sh",
             `#!/bin/bash
 echo "accepting node invite with token ${token}"
-microk8s join ${vm.address}:25000/${token} --worker`
+microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
           );
         } else {
           console.log(`${vm.id} is a worker`);

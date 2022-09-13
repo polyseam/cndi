@@ -19,14 +19,14 @@ const ssh = new NodeSSH();
 
 async function bootstrap(node) {
   // TODO: this uses the first ssh connection for every iteration instead of creating a new one for each node, so it doesn't work.
-  console.log('sshing into', node.role,'at',node.address);
+  console.log('sshing into', node.role,'at',node.publicIpAddress);
   const { role } = node;
 
   const source = path.join(__dirname, `../bootstrap/${role}`);
   const dest = `/home/ubuntu/${role}`;
 
   await ssh.connect({
-    host: node.address,
+    host: node.publicIpAddress,
     username,
     privateKeyPath,
   });

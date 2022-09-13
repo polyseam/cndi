@@ -7,10 +7,10 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: default
   destination:
     namespace: cndi
     server: https://kubernetes.default.svc
-    project: default
   source:
     path: cndi/cluster/applications
     repoURL: ${repoUrl}
@@ -21,8 +21,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
-  syncOptions:
-    - CreateNamespace=true`;
+    syncOptions:
+      - CreateNamespace=true`;
 };
 
 export default getApplicationManifest;

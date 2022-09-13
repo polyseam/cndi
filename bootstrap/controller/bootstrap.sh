@@ -14,3 +14,7 @@ microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
 microk8s kubectl apply -f /home/ubuntu/controller/application.yaml
 
 echo "argo configured"
+
+echo "checking microk8s status"
+
+microk8s status
