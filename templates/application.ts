@@ -8,15 +8,15 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
-  namespace: cndi
-  server: https://kubernetes.default.svc
-  project: default
+    namespace: cndi
+    server: https://kubernetes.default.svc
+    project: default
   source:
-  path: cndi/cluster/applications
-  repoURL: ${repoUrl}
-  targetRevision: HEAD
-  directory:
-    recurse: true
+    path: cndi/cluster/applications
+    repoURL: ${repoUrl}
+    targetRevision: HEAD
+    directory:
+      recurse: true
   syncPolicy:
     automated:
       prune: true
