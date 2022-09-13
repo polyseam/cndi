@@ -7,3 +7,5 @@ node_modules
 join-token.txt
 accept-invite.sh
 node-runtime-setup/nodes.json
+repo-config.yaml
+application.yaml
