@@ -159,7 +159,6 @@ const provisionNodes = async (
   nodes: Array<NodeEntry>,
   keyName: string
 ): Promise<NodeEntry[]> => {
-  console.log("loc 159");
   // for loop that loops through nodes
   const config = await loadJSONC("cndi/nodes.json");
   const provisionedNodes = [...nodes];
@@ -180,7 +179,6 @@ const provisionNodes = async (
   runOutputs.forEach((i, idx) => {
     provisionedNodes[idx].id = i?.Instances[0].InstanceId;
   });
-  console.log("loc180 -- provisionedNodes", provisionedNodes);
   return provisionedNodes;
 };
 
@@ -217,8 +215,6 @@ const runFn = async () => {
       };
     }
   );
-
-  console.log("loc212: entries", entries);
 
   // generate a keypair
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
@@ -264,7 +260,7 @@ const runFn = async () => {
 
   // if there are any nodes on AWS, upload the keypair
   if (entries.some((e) => e.kind === "aws")) {
-    console.log("aws nodes found");
+    console.log("aws nodes found...");
     console.log("uploading keypair to aws");
     await ec2Client.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
@@ -281,31 +277,6 @@ const runFn = async () => {
   const provisionedInstances = await provisionNodes(entries, KeyName);
 
   try {
-    // const initializingInstances = await Promise.all(
-    //   entries.map((node) => {
-    //     // @ts-ignore
-    //     return aws.addNode(
-    //       node,
-    //       nodes?.deploymentTargetConfiguration as unknown,
-    //       KeyName
-    //     );
-    //   })
-    // );
-
-    // const instanceIds = initializingInstances.map(
-    //   (instance) => instance?.Instances[0].InstanceId as string
-    // ) as Array<string>;
-
-    // console.log(initializingInstances.length, "instances created");
-
-    // let instances: Array<NodeEntry> = entries.map((entry, idx) => {
-    //   const id = initializingInstances[idx]?.Instances[0].InstanceId as string;
-    //   return {
-    //     ...entry,
-    //     id,
-    //   };
-    // });
-
     await Promise.all(
       provisionedInstances.map((instance, idx) => {
         console.log("tagging instance", idx);
@@ -334,11 +305,9 @@ const runFn = async () => {
       await delay(10000); // ask aws about nodes every 10 seconds
       // const allRunning = ids.length === instances.length;
       const ids = instances.map((i) => i.id) as Array<string>;
-      console.log("instanceIds", ids);
       const allReady = instances.every((status) => status.ready);
 
       if (!allReady) {
-        console.log("nodes not all ready");
         const response = await ec2Client.send(
           new DescribeInstanceStatusCommand({ InstanceIds: ids })
         );
@@ -418,13 +387,15 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
         JSON.stringify(provisionedInstances, null, 2)
       );
 
+      // calling bootstrap using node.js (hack until we can use deno)
+      // TODO: maybe use deno run in compat mode?
       const p = Deno.run({
         cmd: ["node", "./node-runtime-setup/bootstrap.js"],
         stdout: "piped",
         stderr: "piped",
       });
-      const { code } = await p.status();
 
+      const { code } = await p.status();
       // Reading the outputs closes their pipes
       const rawOutput = await p.output();
       const rawError = await p.stderrOutput();
