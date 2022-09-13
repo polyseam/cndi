@@ -34,8 +34,8 @@ const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
 
 enum NodeRole {
-  "controller",
-  "worker",
+  controller = "controller",
+  worker = "worker",
 }
 
 interface CNDINode {
@@ -393,7 +393,7 @@ const runFn = async () => {
       provisionedInstances.forEach(async (vm) => {
         // vm is live now
         console.log("bootstrapping node", vm.id, "at", vm.address);
-        if (vm.role === NodeRole.controller) {
+        if (vm.role === "controller") {
           console.log(`${vm.id} is a controller`);
 
           //

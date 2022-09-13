@@ -18,9 +18,9 @@ spec:
   directory:
     recurse: true
   syncPolicy:
-  automated:
-    prune: true
-    selfHeal: true
+    automated:
+      prune: true
+      selfHeal: true
   syncOptions:
     - CreateNamespace=true`;
 };
