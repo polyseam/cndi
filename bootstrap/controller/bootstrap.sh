@@ -12,6 +12,7 @@ echo "configuring argo"
 
 microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
 microk8s kubectl apply -f /home/ubuntu/controller/application.yaml
+# microk8s kubectl apply -f /home/ubuntu/controller/argo-config.yaml
 
 echo "argo configured"
 

@@ -7,12 +7,12 @@
         "InstanceType": "t2.large",
         "kind": "aws"
       },
-      {
-        "name": "m-aws-worker",
-        "role": "worker",
-        "InstanceType": "t2.medium",
-        "kind": "aws"
-      }
+      // {
+      //   "name": "m-aws-worker",
+      //   "role": "worker",
+      //   "InstanceType": "t2.medium",
+      //   "kind": "aws"
+      // }
     ],
     "deploymentTargetConfiguration": {
       "aws": {

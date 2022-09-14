@@ -76,7 +76,7 @@ Lets see what that might look like:
       "values": {
         /*
         Each of our officially supported "applications" have configuration GUIs generated from the official Helm Chart's values.schema.json but we've also layered on additional features and customizations to give you the best system for your target environment
-        */x
+        */
         "dags": {
           "gitSync": {
             "enabled": true,

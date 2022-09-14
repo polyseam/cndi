@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   destination:
-    namespace: cndi
+    namespace: argocd
     server: https://kubernetes.default.svc
   source:
     path: cndi/cluster/applications
