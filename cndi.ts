@@ -165,12 +165,10 @@ const aws = {
       const instanceParams = {
         ...defaultInstanceParams,
         ...node,
-      }
+      };
 
       // ask aws for a new ec2 vm with the given params
-      return ec2Client.send(
-        new RunInstancesCommand(instanceParams)
-      );
+      return ec2Client.send(new RunInstancesCommand(instanceParams));
     } catch (e) {
       console.log("aws.addNode error", e);
     }
@@ -181,8 +179,7 @@ const provisionNodes = async (
   nodes: Array<NodeEntry>,
   keyName: string
 ): Promise<NodeEntry[]> => {
-
-  // use ./cndi/nodes.json to get the deployment target configuration for the current node 
+  // use ./cndi/nodes.json to get the deployment target configuration for the current node
   const config = await loadJSONC("cndi/nodes.json");
   const provisionedNodes = [...nodes]; // copy the nodes array
   const runOutputs = await Promise.all(
@@ -372,6 +369,7 @@ const runFn = async () => {
         const instanceStatuses =
           response.InstanceStatuses as Array<InstanceStatus>;
 
+        // check if instance has a ready status and updates the node entry accordingly
         instanceStatuses.forEach((status) => {
           const id = status.InstanceId;
           const ready = status.SystemStatus?.Status === "ok";
@@ -381,7 +379,6 @@ const runFn = async () => {
             ready,
           };
         });
-
 
         // ask the deployment target about the addresses for the new instances
         const addressesResponse = await ec2Client.send(
@@ -482,8 +479,6 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
     console.error(err);
   }
 };
-
-
 
 // map command to function
 const commands = {
