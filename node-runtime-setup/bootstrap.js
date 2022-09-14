@@ -17,28 +17,31 @@ if(!Array.isArray(nodes)){
 
 const ssh = new NodeSSH();
 
+// use a nodes public ip address to ssh in, copy the bootstrap script for the respective role and execute it
 async function bootstrap(node) {
-  // TODO: this uses the first ssh connection for every iteration instead of creating a new one for each node, so it doesn't work.
   console.log('sshing into', node.role,'at',node.publicIpAddress);
   const { role } = node;
 
   const source = path.join(__dirname, `../bootstrap/${role}`);
   const dest = `/home/ubuntu/${role}`;
 
+  // use keypair to connect
   await ssh.connect({
     host: node.publicIpAddress,
     username,
     privateKeyPath,
   });
 
+  // copy the contents of local ../bootstrap/${role} to remote /home/ubuntu/${role}
   await ssh.putDirectory(source, dest);
 
-  // Command
+  // remotely execute the bootstrap script we copied to the remote server
   const bootstrapResult = await ssh.execCommand(`. ${role}/bootstrap.sh`, {
     cwd: "/home/ubuntu",
   });
   console.log(`${node.id} stdout:`, bootstrapResult?.stdout);
   console.log(`${node.id} stderr:`, bootstrapResult?.stderr);
+  // kill the ssh connection
   await ssh.dispose();
 }
 

@@ -68,26 +68,30 @@ Lets see what that might look like:
 
 ```jsonc
 {
-    "nodes": {...},
-    "application": {
-        "airflow": {
-            /*
-            Each of our supported "applications" have configuration GUIs generated from the official Helm Chart's values.schema.json but we've also layered on additional features and customizations to give you the best system for your target environment
-            */
-            "dags": {
-                "gitSync": {
-                    "enabled": true,
-                    "repo":"https://github.com/polyseam/dag-bag"
-                }
-            },
-            /* If you want to customize any Helm values for an application, this is the place to do it! */
-            "images": {
-                "redis":{
-                    "tag": "7-bullseye"
-                }
-            }
+  "nodes": {...},
+  "application": {
+    "airflow": {
+      "targetRevision": "1.6.0", // version of Helm chart to use
+      "destinationNamespace": "airflow", // kubernetes namespace in which to install application
+      "values": {
+        /*
+        Each of our officially supported "applications" have configuration GUIs generated from the official Helm Chart's values.schema.json but we've also layered on additional features and customizations to give you the best system for your target environment
+        */x
+        "dags": {
+          "gitSync": {
+            "enabled": true,
+            "repo":"https://github.com/polyseam/dag-bag"
+          }
+        },
+        /* If you want to customize any Helm values for an application, this is the place to do it! */
+        "images": {
+          "redis":{
+              "tag": "7-bullseye"
+          }
         }
+      }
     }
+  }
 }
 ```
 

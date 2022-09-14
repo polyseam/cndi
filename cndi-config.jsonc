@@ -19,7 +19,7 @@
         "InstanceType": "t2.medium"
       }
     }
-  }, // whoa a comma
+  },
   "applications": {
     "airflow": {
       "targetRevision": "1.6.0",
