@@ -11,7 +11,6 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
-  type: git
   url: ${repoUrl}
   username: ${gitUsername}
   password: ${gitPassword}`;
