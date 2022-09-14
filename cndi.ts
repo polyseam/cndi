@@ -1,7 +1,6 @@
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
-import * as base64 from "https://deno.land/std@0.152.0/encoding/base64.ts";
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
 
@@ -15,15 +14,18 @@ import {
   DescribeInstancesCommand,
   InstanceStatus,
   Reservation,
-  RunInstancesCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
+
+import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
+
+// TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
+
 
 import createKeyPair from "./keygen/create-keypair.ts";
 
 import { helpStrings } from "./docs/cli/help-strings.ts";
 import getApplicationManifest from "./templates/application.ts";
 import getRepoConfigManifest from "./templates/repo-config.ts";
-import { ssh } from "./bootstrap/ssh.ts";
 
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
@@ -272,6 +274,8 @@ const runFn = async () => {
       })
     );
   }
+
+  
 
   console.log("provisioning nodes");
   const provisionedInstances = await provisionNodes(entries, KeyName);

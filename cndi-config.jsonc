@@ -2,13 +2,13 @@
   "nodes": {
     "entries": [
       {
-        "name": "aws-contoller",
+        "name": "m-aws-contoller",
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
       },
       {
-        "name": "aws-worker",
+        "name": "m-aws-worker",
         "role": "worker",
         "InstanceType": "t2.medium",
         "kind": "aws"
@@ -22,15 +22,19 @@
   }, // whoa a comma
   "applications": {
     "airflow": {
-      "dags": {
-        "gitSync": {
-          "enabled": true,
-          "repo": "https://github.com/polyseam/dag-bag"
-        }
-      },
-      "images": {
-        "redis": {
-          "tag": "7-bullseye"
+      "targetRevision": "1.6.0",
+      "destinationNamespace": "airflow",
+      "values": {
+        "dags": {
+          "gitSync": {
+            "enabled": true,
+            "repo": "https://github.com/polyseam/dag-bag"
+          }
+        },
+        "images": {
+          "redis": {
+            "tag": "7-bullseye"
+          }
         }
       }
     }
