@@ -35,6 +35,8 @@ const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
 const DEFAULT_AWS_IMAGE_ID = "ami-0af3a0871fe1d8e4f";
 
+const DEFAULT_BOOT_DISK_VOLUME_GIB = 80;
+
 // CNDI Constants
 const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
@@ -152,6 +154,7 @@ const aws = {
         deploymentTargetConfiguration?.aws?.InstanceType ||
         DEFAULT_AWS_INSTANCE_TYPE;
 
+      // CNDI V1 boot disk mapping: --block-device-mappings DeviceName=/dev/sda1,Ebs={VolumeSize=$AWS_BOOT_VOL_SIZE}
       // default node config
       const defaultInstanceParams = {
         ImageId, // ami-iwgniwngo
@@ -159,6 +162,9 @@ const aws = {
         MinCount: 1,
         MaxCount: 1,
         KeyName: keyName,
+        BlockDeviceMappings: [
+          { DeviceName: "/dev/sda1", Ebs: { VolumeSize: DEFAULT_BOOT_DISK_VOLUME_GIB } },
+        ],
       };
 
       // merge the default node config with the user-specified node config, prioritizing the user-specified config
