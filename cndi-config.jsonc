@@ -6,7 +6,7 @@
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
-      },
+      }
       // {
       //   "name": "m-aws-worker",
       //   "role": "worker",
@@ -22,18 +22,18 @@
   },
   "applications": {
     "airflow": {
+      // initializing application "airflow"
       "targetRevision": "1.6.0",
       "destinationNamespace": "airflow",
+      "repoURL": "https://airflow.apache.org",
+      "chart": "airflow",
       "values": {
         "dags": {
           "gitSync": {
             "enabled": true,
-            "repo": "https://github.com/polyseam/dag-bag"
-          }
-        },
-        "images": {
-          "redis": {
-            "tag": "7-bullseye"
+            "repo": "https://github.com/polyseam/demo-dag-bag",
+            "branch": "main",
+            "wait": 42
           }
         }
       }

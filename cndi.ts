@@ -14,6 +14,7 @@ import {
   DescribeInstancesCommand,
   InstanceStatus,
   Reservation,
+RunInstancesCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
@@ -26,8 +27,9 @@ import createKeyPair from "./keygen/create-keypair.ts";
 import { helpStrings } from "./docs/cli/help-strings.ts";
 
 // functions that return a manifest string for given parameters
-import getApplicationManifest from "./templates/application.ts";
+import getRootApplicationManifest from "./templates/root-application.ts";
 import getRepoConfigManifest from "./templates/repo-config.ts";
+import getApplicationManifest,{CNDIApplicationSpec} from "./templates/application-manifest.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -64,14 +66,21 @@ interface CNDINode {
   imageId?: string;
 }
 
-// incomplete type, config will have more options
-interface CNDIConfig {
-  nodes: {
-    entries: Array<CNDINode>;
+interface CNDINodes {
+  entries: Array<CNDINode>;
+  deploymentTargetConfiguration: {
     aws: {
       region: string;
-      defaultBootDiskSizeGB: number;
+      instanceType: string;
     };
+  };
+}
+
+// incomplete type, config will have more options
+interface CNDIConfig {
+  nodes: CNDINodes;
+  applications:{
+    [key:string]: CNDIApplicationSpec
   };
 }
 
@@ -163,7 +172,10 @@ const aws = {
         MaxCount: 1,
         KeyName: keyName,
         BlockDeviceMappings: [
-          { DeviceName: "/dev/sda1", Ebs: { VolumeSize: DEFAULT_BOOT_DISK_VOLUME_GIB } },
+          {
+            DeviceName: "/dev/sda1",
+            Ebs: { VolumeSize: DEFAULT_BOOT_DISK_VOLUME_GIB },
+          },
         ],
       };
 
@@ -186,7 +198,7 @@ const provisionNodes = async (
   keyName: string
 ): Promise<NodeEntry[]> => {
   // use ./cndi/nodes.json to get the deployment target configuration for the current node
-  const config = await loadJSONC("cndi/nodes.json");
+  const config = (await loadJSONC("cndi/nodes.json")) as unknown as CNDINodes;
   const provisionedNodes = [...nodes]; // copy the nodes array
   const runOutputs = await Promise.all(
     nodes.map((node) => {
@@ -202,10 +214,12 @@ const provisionNodes = async (
           throw new Error(`Unsupported node kind: ${node.kind}`); // if node.kind is not supported, throw
       }
     })
-  );
+  ) as Array<RunInstancesCommandOutput>;
   // for each response from the deployment target, update the node
   runOutputs.forEach((i, idx) => {
-    provisionedNodes[idx].id = i?.Instances[0].InstanceId;
+    // deno-lint-ignore no-explicit-any
+    const x = i as any;
+    provisionedNodes[idx].id = x?.Instances[0].InstanceId;
   });
 
   // return nodes that we started
@@ -232,6 +246,15 @@ const initFn = async () => {
     pathToNodes,
     JSON.stringify(config?.nodes ?? {}, null, 2)
   );
+
+  const {applications} = config;
+
+  Object.keys(applications).forEach(async (releaseName) => {
+    const applicationSpec = applications[releaseName];
+    const [manifestContent, filename] = getApplicationManifest(releaseName, applicationSpec);
+    await Deno.writeTextFile(path.join(Deno.cwd(),'cndi','cluster','applications',filename), manifestContent, {create: true, append: false});
+    console.log('created manifest:', filename);
+  })
 
   console.log("initialized your cndi project in the ./cndi directory!");
 };
@@ -306,7 +329,7 @@ const runFn = async () => {
   // generate a "root application" that all other applications will descend from
   await Deno.writeTextFile(
     "bootstrap/controller/application.yaml",
-    getApplicationManifest(gitRepo)
+    getRootApplicationManifest(gitRepo)
   );
 
   // redundant file read is OK for now
