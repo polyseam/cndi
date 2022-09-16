@@ -9,5 +9,5 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: welcome
-        run: echo "welcome to cndi :D\nThis is the step we would use to deploy nodes using 'cndi run', but it is not ready yet!"
+        run: echo "welcome to cndi!"
 # TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action
