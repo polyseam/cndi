@@ -14,7 +14,7 @@ import {
   DescribeInstancesCommand,
   InstanceStatus,
   Reservation,
-RunInstancesCommandOutput,
+  RunInstancesCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
@@ -29,7 +29,9 @@ import { helpStrings } from "./docs/cli/help-strings.ts";
 // functions that return a manifest string for given parameters
 import getRootApplicationManifest from "./templates/root-application.ts";
 import getRepoConfigManifest from "./templates/repo-config.ts";
-import getApplicationManifest,{CNDIApplicationSpec} from "./templates/application-manifest.ts";
+import getApplicationManifest, {
+  CNDIApplicationSpec,
+} from "./templates/application-manifest.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -44,12 +46,13 @@ const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
 
 // list of all commands for the CLI
+
 const enum Command {
-  init = "init", // cndi init
-  "overwrite-with" = "overwrite-with", // cndi overwrite-with
-  run = "run", // cndi run
-  help = "help", // cndi help
-  default = "default", // cndi some-random-incorrect-command
+  init = "init",
+  "overwrite-with" = "overwrite-with",
+  run = "run",
+  help = "help",
+  default = "default",
 }
 
 // node.role is either "controller" or "worker"
@@ -79,8 +82,8 @@ interface CNDINodes {
 // incomplete type, config will have more options
 interface CNDIConfig {
   nodes: CNDINodes;
-  applications:{
-    [key:string]: CNDIApplicationSpec
+  applications: {
+    [key: string]: CNDIApplicationSpec;
   };
 }
 
@@ -200,7 +203,7 @@ const provisionNodes = async (
   // use ./cndi/nodes.json to get the deployment target configuration for the current node
   const config = (await loadJSONC("cndi/nodes.json")) as unknown as CNDINodes;
   const provisionedNodes = [...nodes]; // copy the nodes array
-  const runOutputs = await Promise.all(
+  const runOutputs = (await Promise.all(
     nodes.map((node) => {
       // run a different deployment function depending on node.kind
       switch (node.kind) {
@@ -214,7 +217,7 @@ const provisionNodes = async (
           throw new Error(`Unsupported node kind: ${node.kind}`); // if node.kind is not supported, throw
       }
     })
-  ) as Array<RunInstancesCommandOutput>;
+  )) as Array<RunInstancesCommandOutput>;
   // for each response from the deployment target, update the node
   runOutputs.forEach((i, idx) => {
     // deno-lint-ignore no-explicit-any
@@ -239,7 +242,7 @@ const helpFn = (command: Command) => {
 };
 
 // COMMAND fn: cndi init
-const initFn = async () => {
+const initFn = async (isOverwriting = false) => {
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
   // TODO: write /cluster and /cluster/application manifests
   await Deno.writeTextFile(
@@ -247,14 +250,26 @@ const initFn = async () => {
     JSON.stringify(config?.nodes ?? {}, null, 2)
   );
 
-  const {applications} = config;
+  const { applications } = config;
 
   Object.keys(applications).forEach(async (releaseName) => {
     const applicationSpec = applications[releaseName];
-    const [manifestContent, filename] = getApplicationManifest(releaseName, applicationSpec);
-    await Deno.writeTextFile(path.join(Deno.cwd(),'cndi','cluster','applications',filename), manifestContent, {create: true, append: false});
-    console.log('created manifest:', filename);
-  })
+    const [manifestContent, filename] = getApplicationManifest(
+      releaseName,
+      applicationSpec
+    );
+    await Deno.writeTextFile(
+      path.join(Deno.cwd(), "cndi", "cluster", "applications", filename),
+      manifestContent,
+      { create: true, append: false }
+    );
+    console.log("created manifest:", filename);
+  });
+
+  if (isOverwriting) {
+    console.log("overwriting your cndi project in the ./cndi directory!");
+    return;
+  }
 
   console.log("initialized your cndi project in the ./cndi directory!");
 };
@@ -262,6 +277,8 @@ const initFn = async () => {
 // COMMAND fn: cndi overwrite-with
 const overwriteWithFn = () => {
   console.log("cndi overwrite-with");
+  const overwriting = true;
+  initFn(overwriting);
 };
 
 // COMMAND fn: cndi run
