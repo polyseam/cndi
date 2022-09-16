@@ -1,6 +1,7 @@
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
+import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts?s=copy";
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
 
@@ -101,6 +102,14 @@ const pathToConfig =
   DEFAULT_CNDI_CONFIG_PATH_JSONC ||
   DEFAULT_CNDI_CONFIG_PATH;
 
+// the directory in which to create the cndi folder
+const outputOption = cndiArguments.o || cndiArguments.output || Deno.cwd();
+const outputDirectory = path.join(outputOption, "cndi");
+
+// github actions setup
+const githubDirectory = path.join(outputOption, ".github");
+const noGitHub = cndiArguments["no-github"] || false;
+
 // get super secret AWS keys from the host environment
 const awsConfig = {
   apiVersion: DEFAULT_AWS_EC2_API_VERSION,
@@ -115,7 +124,7 @@ const awsConfig = {
 const ec2Client = new EC2Client(awsConfig);
 
 // cndi init populates this file with nodes from the original config file, because it is consumed downstream
-const pathToNodes = path.join(Deno.cwd(), "cndi/nodes.json");
+const pathToNodes = path.join(outputDirectory, "nodes.json");
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -201,7 +210,7 @@ const provisionNodes = async (
   keyName: string
 ): Promise<NodeEntry[]> => {
   // use ./cndi/nodes.json to get the deployment target configuration for the current node
-  const config = (await loadJSONC("cndi/nodes.json")) as unknown as CNDINodes;
+  const config = (await loadJSONC(pathToNodes)) as unknown as CNDINodes;
   const provisionedNodes = [...nodes]; // copy the nodes array
   const runOutputs = (await Promise.all(
     nodes.map((node) => {
@@ -242,17 +251,43 @@ const helpFn = (command: Command) => {
 };
 
 // COMMAND fn: cndi init
-const initFn = async (isOverwriting = false) => {
+const initFn = () => {
+  console.log(`cndi init -f "${pathToConfig}"`);
+  const initializing = true;
+  overwriteWithFn(initializing);
+};
+
+// COMMAND fn: cndi overwrite-with
+const overwriteWithFn = async (initializing = false) => {
+  if (!initializing) {
+    console.log(`cndi overwrite-with -f "${pathToConfig}"`);
+  } else if (!noGitHub) {
+    try {
+      // overwrite the github workflows and readme, do not clobber other files
+      await copy("github", githubDirectory, { overwrite: true });
+    } catch {
+      console.log("failed to copy github integration files");
+    }
+  }
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
-  // TODO: write /cluster and /cluster/application manifests
 
   try {
-    await Deno.remove("./cndi", { recursive: true });
+    await Deno.remove(path.join(outputDirectory, "nodes.json"));
+  } catch {
+    // file did not exist
+  }
+
+  try {
+    await Deno.remove(path.join(outputDirectory, "cluster", "applications"), {
+      recursive: true,
+    });
   } catch {
     // folder did not exist
   }
-  
-  await Deno.mkdir("./cndi/cluster/applications", { recursive: true });
+
+  await Deno.mkdir(path.join(outputDirectory, "cluster", "applications"), {
+    recursive: true,
+  });
 
   await Deno.writeTextFile(
     pathToNodes,
@@ -268,26 +303,18 @@ const initFn = async (isOverwriting = false) => {
       applicationSpec
     );
     await Deno.writeTextFile(
-      path.join(Deno.cwd(), "cndi", "cluster", "applications", filename),
+      path.join(outputDirectory, "cluster", "applications", filename),
       manifestContent,
       { create: true, append: false }
     );
-    console.log("created manifest:", filename);
+    console.log("created application manifest:", filename);
   });
 
-  if (isOverwriting) {
-    console.log("overwriting your cndi project in the ./cndi directory!");
-    return;
-  }
+  const completionMessage = initializing
+    ? "initialized your cndi project in the ./cndi directory!"
+    : "overwrote your cndi project in the ./cndi directory!";
 
-  console.log("initialized your cndi project in the ./cndi directory!");
-};
-
-// COMMAND fn: cndi overwrite-with
-const overwriteWithFn = () => {
-  console.log("cndi overwrite-with");
-  const overwriting = true;
-  initFn(overwriting);
+  console.log(completionMessage);
 };
 
 // COMMAND fn: cndi run

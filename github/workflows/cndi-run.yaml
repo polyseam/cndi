@@ -1,6 +1,13 @@
+name: cndi
 on:
   push:
     branches:
       - main
       - 'releases/**'
-# https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action
+jobs:
+  cndi-run:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: welcome
+        run: echo "welcome to cndi :D\nThis is the step we would use to deploy nodes using 'cndi run', but it is not ready yet!"
+# TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action

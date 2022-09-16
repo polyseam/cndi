@@ -6,6 +6,12 @@
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
+      },
+      {
+        "name": "m-aws-worker",
+        "role": "worker",
+        "InstanceType": "t2.large",
+        "kind": "aws"
       }
     ],
     "deploymentTargetConfiguration": {
@@ -26,7 +32,7 @@
             "enabled": true,
             "repo": "https://github.com/polyseam/demo-dag-bag",
             "branch": "main",
-            "wait": 43
+            "wait": 41
           }
         }
       }

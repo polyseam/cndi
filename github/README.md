@@ -1,5 +1,9 @@
-# GitHub Workflow Source
+# CNDI GitHub Workflows
 
-We will copy this folder into the user's `.github` directory.
+We have created this file and a file called `.github/workflows/cndi-run.yaml`
 
-To prevent this folder being ingested by GitHub we call it `github` without the `.` prefix.
+The workflow file is responsible for provisioning the nodes you have defined in `cndi/nodes.json`.
+
+Effectively this means that the `cndi-run.yaml` workflow is only responsible for executing the command `cndi run`.
+
+All other cluster tasks will be handled by argocd, by reading the manifests in `cndi/cluster` and the folders within that.
