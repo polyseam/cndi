@@ -12,7 +12,7 @@
     "source": {
       "helm": {
         "version": "v3",
-        "values": "{\"dags\":{\"gitSync\":{\"enabled\":true,\"repo\":\"https://github.com/polyseam/demo-dag-bag\",\"branch\":\"main\",\"wait\":42}}}"
+        "values": "{\"dags\":{\"gitSync\":{\"enabled\":true,\"repo\":\"https://github.com/polyseam/demo-dag-bag\",\"branch\":\"main\",\"wait\":43}}}"
       },
       "repoURL": "https://airflow.apache.org",
       "targetRevision": "1.6.0",

@@ -245,6 +245,15 @@ const helpFn = (command: Command) => {
 const initFn = async (isOverwriting = false) => {
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
   // TODO: write /cluster and /cluster/application manifests
+
+  try {
+    await Deno.remove("./cndi", { recursive: true });
+  } catch {
+    // folder did not exist
+  }
+  
+  await Deno.mkdir("./cndi/cluster/applications", { recursive: true });
+
   await Deno.writeTextFile(
     pathToNodes,
     JSON.stringify(config?.nodes ?? {}, null, 2)

@@ -2,7 +2,7 @@
   "nodes": {
     "entries": [
       {
-        "name": "m-aws-contoller",
+        "name": "m-aws-contoller-x",
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
@@ -26,7 +26,7 @@
             "enabled": true,
             "repo": "https://github.com/polyseam/demo-dag-bag",
             "branch": "main",
-            "wait": 42
+            "wait": 43
           }
         }
       }
