@@ -7,12 +7,6 @@
         "InstanceType": "t2.large",
         "kind": "aws"
       }
-      // {
-      //   "name": "m-aws-worker",
-      //   "role": "worker",
-      //   "InstanceType": "t2.medium",
-      //   "kind": "aws"
-      // }
     ],
     "deploymentTargetConfiguration": {
       "aws": {
@@ -22,7 +16,6 @@
   },
   "applications": {
     "airflow": {
-      // initializing application "airflow"
       "targetRevision": "1.6.0",
       "destinationNamespace": "airflow",
       "repoURL": "https://airflow.apache.org",
