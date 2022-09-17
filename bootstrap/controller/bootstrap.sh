@@ -11,8 +11,7 @@ echo "token registered"
 echo "configuring argo"
 
 microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
-microk8s kubectl apply -f /home/ubuntu/controller/application.yaml
-# microk8s kubectl apply -f /home/ubuntu/controller/argo-config.yaml
+microk8s kubectl apply -f /home/ubuntu/controller/root-application.yaml
 
 echo "argo configured"
 

@@ -18,6 +18,8 @@ import {
   RunInstancesCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
+const CNDI_HOME = path.dirname(path.fromFileUrl(import.meta.url));
+
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
 
@@ -33,6 +35,7 @@ import getRepoConfigManifest from "./templates/repo-config.ts";
 import getApplicationManifest, {
   CNDIApplicationSpec,
 } from "./templates/application-manifest.ts";
+import ChartYaml from "./templates/root-chart.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -111,6 +114,20 @@ const githubDirectory = path.join(outputOption, ".github");
 const noGitHub = cndiArguments["no-github"] || false;
 
 // get super secret AWS keys from the host environment
+
+const awsAccessKeyId = Deno.env.get("AWS_ACCESS_KEY_ID");
+const awsSecretAccessKey = Deno.env.get("AWS_SECRET_ACCESS_KEY");
+
+if (
+  typeof awsAccessKeyId !== "string" ||
+  typeof awsSecretAccessKey !== "string"
+) {
+  console.error(
+    "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set in the environment"
+  );
+  Deno.exit(1);
+}
+
 const awsConfig = {
   apiVersion: DEFAULT_AWS_EC2_API_VERSION,
   region: DEFAULT_AWS_REGION,
@@ -153,7 +170,7 @@ interface NodeEntry extends NodeSpec {
 async function getKeyNameFromPublicKeyFile(): Promise<string> {
   // ssh-rsa foobarbaznase64encodedGibberish cndi-key-Gibberish
   const publicKeyFileTextContent = await Deno.readTextFileSync(
-    PUBLIC_KEY_FILENAME
+    path.join(CNDI_HOME, PUBLIC_KEY_FILENAME)
   );
   return publicKeyFileTextContent.split(" ")[2];
 }
@@ -294,6 +311,11 @@ const overwriteWithFn = async (initializing = false) => {
     JSON.stringify(config?.nodes ?? {}, null, 2)
   );
 
+  await Deno.writeTextFile(
+    path.join(outputDirectory, "cluster", "Chart.yaml"),
+    ChartYaml
+  );
+
   const { applications } = config;
 
   Object.keys(applications).forEach(async (releaseName) => {
@@ -346,21 +368,31 @@ const runFn = async () => {
   const token = crypto.randomUUID().replaceAll("-", "").slice(0, 32);
 
   // write the token that the controller will register for it's microk8s peers
-  await Deno.writeTextFile("bootstrap/controller/join-token.txt", token);
+  await Deno.writeTextFile(
+    path.join(CNDI_HOME, "bootstrap", "controller", "join-token.txt"),
+    token
+  );
 
   // a bit extra: delete keys if they exist
   try {
-    Deno.removeSync(PRIVATE_KEY_FILENAME);
-    Deno.removeSync(PUBLIC_KEY_FILENAME);
+    Deno.removeSync(path.join(CNDI_HOME, PRIVATE_KEY_FILENAME));
+    Deno.removeSync(path.join(CNDI_HOME, PUBLIC_KEY_FILENAME));
   } catch {
     // no keys to remove, don't throw an error
   }
 
   // write public and private keys to disk (eventually we will skip this step and do it in memory)
-  await Deno.writeFile(PUBLIC_KEY_FILENAME, publicKeyMaterial);
-  await Deno.writeFile(PRIVATE_KEY_FILENAME, privateKeyMaterial, {
-    mode: 0o400, // this is a private key, make it readable only by the owner
-  });
+  await Deno.writeFile(
+    path.join(CNDI_HOME, PUBLIC_KEY_FILENAME),
+    publicKeyMaterial
+  );
+  await Deno.writeFile(
+    path.join(CNDI_HOME, PRIVATE_KEY_FILENAME),
+    privateKeyMaterial,
+    {
+      mode: 0o400, // this is a private key, make it readable only by the owner
+    }
+  );
 
   // read repo credentials from the env of the machine running this script
   // used to enable gitops with these credentials:
@@ -375,13 +407,13 @@ const runFn = async () => {
 
   // generate an argocd repo manifest with the git credentials
   await Deno.writeTextFile(
-    "bootstrap/controller/repo-config.yaml",
+    path.join(CNDI_HOME, "bootstrap", "controller", "repo-config.yaml"),
     getRepoConfigManifest(gitRepo, gitUsername, gitPassword)
   );
 
   // generate a "root application" that all other applications will descend from
   await Deno.writeTextFile(
-    "bootstrap/controller/application.yaml",
+    path.join(CNDI_HOME, "bootstrap", "controller", "root-application.yaml"),
     getRootApplicationManifest(gitRepo)
   );
 
@@ -517,7 +549,7 @@ const runFn = async () => {
 
           // we have a controller, so let's inject its private ip address and token into the worker bootstrap script
           await Deno.writeTextFile(
-            "./bootstrap/worker/accept-invite.sh",
+            path.join(CNDI_HOME, "bootstrap", "worker", "accept-invite.sh"),
             `#!/bin/bash
 echo "accepting node invite with token ${token}"
 microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
@@ -530,7 +562,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
-        "./node-runtime-setup/nodes.json",
+        path.join(CNDI_HOME, "node-runtime-setup", "nodes.json"),
         JSON.stringify(provisionedInstances, null, 2)
       );
 
@@ -538,7 +570,10 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
       // when this finishes successfully, the cluster is ready
       // TODO: maybe use deno run in compat mode?
       const p = Deno.run({
-        cmd: ["node", "./node-runtime-setup/bootstrap.js"],
+        cmd: [
+          "node",
+          path.join(CNDI_HOME, "node-runtime-setup", "bootstrap.js"),
+        ],
         stdout: "piped",
         stderr: "piped",
       });

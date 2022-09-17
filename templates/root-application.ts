@@ -12,7 +12,7 @@ spec:
     namespace: argocd
     server: https://kubernetes.default.svc
   source:
-    path: cndi/cluster/applications
+    path: cndi/cluster
     repoURL: ${repoUrl}
     targetRevision: HEAD
     directory:
