@@ -28,6 +28,12 @@
             "branch": "main",
             "wait": 70
           }
+        },
+        "createUserJob":{
+          "useHelmHooks": false
+        },
+        "migrateDatabaseJob":{
+          "useHelmHooks": false
         }
       }
     }
