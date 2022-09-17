@@ -281,10 +281,12 @@ const overwriteWithFn = async (initializing = false) => {
   } else if (!noGitHub) {
     try {
       // overwrite the github workflows and readme, do not clobber other files
-      await copy(path.join(CNDI_HOME,"github"), githubDirectory, { overwrite: true });
+      await copy(path.join(CNDI_HOME, "github"), githubDirectory, {
+        overwrite: true,
+      });
     } catch (githubCopyError) {
       console.log("failed to copy github integration files");
-      console.error(githubCopyError)
+      console.error(githubCopyError);
     }
   }
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
