@@ -38,7 +38,7 @@ import getApplicationManifest, {
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
-const DEFAULT_AWS_IMAGE_ID = "ami-0af3a0871fe1d8e4f";
+const DEFAULT_AWS_IMAGE_ID = "ami-0180ef4f54678af5f";
 
 const DEFAULT_BOOT_DISK_VOLUME_GIB = 80;
 
