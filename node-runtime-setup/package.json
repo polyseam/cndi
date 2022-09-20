@@ -1,14 +1,27 @@
 {
-  "name": "cndi-next-ssh-node",
+  "name": "cndi-next-node-runtime-setup",
   "version": "1.0.0",
   "description": "",
-  "main": "sshTest.js",
+  "main": "bootstrap.js",
+  "bin": "bootstrap.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "pkg . -C GZip"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "node-ssh": "^13.0.0"
+  },
+  "pkg": {
+    "outputPath": "./dist",
+    "targets": [
+      "node16-linux",
+      "node16-macos-x64",
+      "node16-win-x64"
+    ]
+  },
+  "devDependencies": {
+    "pkg": "^5.8.0"
   }
 }

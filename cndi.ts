@@ -574,8 +574,13 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
       // TODO: maybe use deno run in compat mode?
       const p = Deno.run({
         cmd: [
-          "node",
-          path.join(CNDI_HOME, "node-runtime-setup", "bootstrap.js"),
+          ".",
+          path.join(
+            CNDI_HOME,
+            "node-runtime-setup",
+            "dist",
+            "cndi-next-node-runtime-setup-macos-x64"
+          ),
         ],
         stdout: "piped",
         stderr: "piped",
