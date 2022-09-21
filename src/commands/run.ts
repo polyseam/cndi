@@ -442,7 +442,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
       const p = Deno.run({
         cmd: [
           "node",
-          path.join(CNDI_SRC, "node-runtime-setup", "src", "bootstrap.js"),
+          path.join(CNDI_SRC, "cndi-node-runtime-setup", "src", "bootstrap.js"),
         ],
         stdout: "piped",
         stderr: "piped",

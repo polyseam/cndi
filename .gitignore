@@ -4,9 +4,10 @@ public.pub
 .DS_Store
 
 node_modules
-join-token.txt
-accept-invite.sh
-node-runtime-setup/nodes.json
-repo-config.yaml
-application.yaml
-root-application.yaml
+
+.working
+
+.github/workflows/cndi-run.yaml
+.github/CNDI_GITHUB_README.md
+
+cndi
