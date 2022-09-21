@@ -431,7 +431,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
-        path.join(CNDI_WORKING_DIR, "nodes.live.json"),
+        path.join(CNDI_WORKING_DIR, "live.nodes.json"),
         JSON.stringify(provisionedInstances, null, 2)
       );
 

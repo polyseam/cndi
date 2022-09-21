@@ -6,7 +6,7 @@ const username = "ubuntu";
 
 const workingDir = path.join(__dirname, "..", "..", "..", ".working");
 const privateKeyPath = path.join(workingDir, "keys", "private.pem");
-const nodesPath = path.join(workingDir, "nodes.json");
+const nodesPath = path.join(workingDir, "live.nodes.json");
 
 const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
 
