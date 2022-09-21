@@ -1,0 +1,21 @@
+name: cndi
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+jobs:
+  cndi-run:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: welcome
+        run: echo "welcome to cndi!"
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: validate-nodes
+        uses: johnstonmatt/is-valid-json-action@v.1.0.1
+        with:
+          path-to-file: cndi/nodes.json
+# TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action

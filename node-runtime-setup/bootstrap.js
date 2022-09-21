@@ -1,14 +1,23 @@
 const path = require("path");
 const { NodeSSH } = require("node-ssh");
 const fs = require("fs");
+const arg = require("arg");
+
+const args = arg({
+  '--path-to-nodes': String,
+  '-n': String,
+  '--path-to-private-key': String,
+  '-k': String,
+  '--path-to-bootstrap-directory': String,
+  '-b': String
+});
+
+const nodesPath = args["--path-to-nodes"] || args["-n"];
+const privateKeyPath = args["--path-to-private-key"] || args["-k"];
+const pathToBootstrapDirectory = args["--path-to-bootstrap-directory"] || args["-b"];
 
 const username = "ubuntu";
 
-const CNDI_HOME = path.join(__dirname, "..");
-const NODE_RUNTIME_SETUP_HOME = path.join(__dirname);
-
-const privateKeyPath = path.join(CNDI_HOME, "private.pem");
-const nodesPath = path.join(NODE_RUNTIME_SETUP_HOME, "nodes.json");
 const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
 
 if (!Array.isArray(nodes)) {
@@ -25,7 +34,7 @@ async function bootstrap(node) {
   console.log("sshing into", node.role, "at", node.publicIpAddress);
   const { role } = node;
 
-  const source = path.join(CNDI_HOME, "bootstrap", role);
+  const source = path.join(pathToBootstrapDirectory, role);
   const dest = `/home/ubuntu/${role}`;
 
   // use keypair to connect

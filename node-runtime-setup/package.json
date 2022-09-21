@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "arg": "^5.0.2",
     "node-ssh": "^13.0.0"
   },
   "pkg": {

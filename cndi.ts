@@ -1,9 +1,12 @@
+console.log('cndi-ing')
 import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
 import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts?s=copy";
 import "https://deno.land/std@0.152.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
+
+import executeBootstrapBinary from "./node-runtime-setup/go.ts";
 
 import {
   CreateTagsCommand,
@@ -569,35 +572,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
         JSON.stringify(provisionedInstances, null, 2)
       );
 
-      // calling bootstrap using node.js (hack until we can use deno)
-      // when this finishes successfully, the cluster is ready
-      // TODO: maybe use deno run in compat mode?
-      const p = Deno.run({
-        cmd: [
-          ".",
-          path.join(
-            CNDI_HOME,
-            "node-runtime-setup",
-            "dist",
-            "cndi-next-node-runtime-setup-macos-x64"
-          ),
-        ],
-        stdout: "piped",
-        stderr: "piped",
-      });
-
-      const { code } = await p.status();
-      // Reading the outputs closes their pipes
-      const rawOutput = await p.output();
-      const rawError = await p.stderrOutput();
-
-      if (code === 0) {
-        // CNDI cluster deployed successfully
-        await Deno.stdout.write(rawOutput);
-      } else {
-        const errorString = new TextDecoder().decode(rawError);
-        console.log(errorString);
-      }
+      await executeBootstrapBinary();
     };
   } catch (err) {
     console.log('error in "cndi run"');

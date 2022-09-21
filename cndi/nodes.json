@@ -5,12 +5,6 @@
       "role": "controller",
       "InstanceType": "t2.large",
       "kind": "aws"
-    },
-    {
-      "name": "m-aws-worker",
-      "role": "worker",
-      "InstanceType": "t2.large",
-      "kind": "aws"
     }
   ],
   "deploymentTargetConfiguration": {
