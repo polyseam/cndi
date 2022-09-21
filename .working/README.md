@@ -8,4 +8,4 @@ CNDI currently needs to pass around some objects by writing things to the filesy
 - ./keys/private.pem
 - ./keys/public.pub
 - ./bootstrap
-- ./nodes.json
+- ./live.nodes.json
