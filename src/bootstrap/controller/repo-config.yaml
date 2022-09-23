@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: private-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: https://github.com/polyseam/cndi-next-example-cluster
+  username: johnstonmatt
+  password: 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

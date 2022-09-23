@@ -23,9 +23,9 @@ modify the cndi project
 deploy the cndi project
     run               deploys the cndi project based on the configuration in ./cndi
 
-See 'cndi help <command>' or 'cndi help <concept>'
+See 'cndi --help <command>' or 'cndi --help <concept>'
 to read about a specific subcommand or concept.
-See 'cndi help cndi' for an overview of the system.
+See 'cndi --help cndi' for an overview of the system.
 `.trim(),
   init: `
 NAME

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "m-aws-contoller-x",
+    "role": "controller",
+    "kind": "aws",
+    "ready": true,
+    "InstanceType": "t2.large",
+    "id": "i-0a8b03192848c9b8b",
+    "publicIpAddress": "44.201.254.5",
+    "privateIpAddress": "172.31.85.18"
+  }
+]

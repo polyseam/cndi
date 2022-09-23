@@ -1,10 +1,9 @@
-import * as JSONC from "https://deno.land/std@0.152.0/encoding/jsonc.ts";
-import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
-import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
+import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts?s=copy";
-import "https://deno.land/std@0.152.0/dotenv/load.ts";
-import { delay } from "https://deno.land/std@0.151.0/async/delay.ts";
-
+import { ensureDir } from "https://deno.land/std@0.156.0/fs/mod.ts";
+import "https://deno.land/std@0.156.0/dotenv/load.ts";
+import { delay } from "https://deno.land/std@0.156.0/async/delay.ts";
+import { loadJSONC } from "../utils.ts";
 import {
   CreateTagsCommand,
   DescribeInstanceStatusCommand,
@@ -16,26 +15,28 @@ import {
   InstanceStatus,
   Reservation,
   RunInstancesCommandOutput,
+  DescribeInstancesCommandOutput,
+  DescribeInstanceStatusCommandOutput,
 } from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
 
-const CNDI_HOME = path.dirname(path.fromFileUrl(import.meta.url));
+import {
+  CNDINode,
+  CNDINodes,
+  NodeEntry,
+  CNDIContext,
+  NodeSpec,
+  CNDIClients,
+} from "../types.ts";
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
 
 // utility that generates a valid rsa keypair
-import createKeyPair from "./keygen/create-keypair.ts";
-
-// the responses for running `cndi help <command>`
-import { helpStrings } from "./docs/cli/help-strings.ts";
+import createKeyPair from "../keygen/create-keypair.ts";
 
 // functions that return a manifest string for given parameters
-import getRootApplicationManifest from "./templates/root-application.ts";
-import getRepoConfigManifest from "./templates/repo-config.ts";
-import getApplicationManifest, {
-  CNDIApplicationSpec,
-} from "./templates/application-manifest.ts";
-import ChartYaml from "./templates/root-chart.ts";
+import getRootApplicationManifest from "../templates/root-application.ts";
+import getRepoConfigManifest from "../templates/repo-config.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -49,128 +50,13 @@ const DEFAULT_BOOT_DISK_VOLUME_GIB = 80;
 const PUBLIC_KEY_FILENAME = "public.pub";
 const PRIVATE_KEY_FILENAME = "private.pem";
 
-// list of all commands for the CLI
-
-const enum Command {
-  init = "init",
-  "overwrite-with" = "overwrite-with",
-  run = "run",
-  help = "help",
-  default = "default",
-}
-
-// node.role is either "controller" or "worker"
-enum NodeRole {
-  controller = "controller",
-  worker = "worker",
-}
-
-// incomplete type, nodes will have more options
-interface CNDINode {
-  name: string;
-  role: NodeRole;
-  instanceType?: string;
-  imageId?: string;
-}
-
-interface CNDINodes {
-  entries: Array<CNDINode>;
-  deploymentTargetConfiguration: {
-    aws: {
-      region: string;
-      instanceType: string;
-    };
-  };
-}
-
-// incomplete type, config will have more options
-interface CNDIConfig {
-  nodes: CNDINodes;
-  applications: {
-    [key: string]: CNDIApplicationSpec;
-  };
-}
-
-// default paths to the user's config file
-const DEFAULT_CNDI_CONFIG_PATH = path.join(Deno.cwd(), "cndi-config.json");
-const DEFAULT_CNDI_CONFIG_PATH_JSONC = `${DEFAULT_CNDI_CONFIG_PATH}c`;
-
-// parse the command line arguments
-const cndiArguments = flags.parse(Deno.args);
-
-// if the user has specified a config file, use that, otherwise use the default config file
-const pathToConfig =
-  cndiArguments.f ||
-  cndiArguments.file ||
-  DEFAULT_CNDI_CONFIG_PATH_JSONC ||
-  DEFAULT_CNDI_CONFIG_PATH;
-
-// the directory in which to create the cndi folder
-const outputOption = cndiArguments.o || cndiArguments.output || Deno.cwd();
-const outputDirectory = path.join(outputOption, "cndi");
-
-// github actions setup
-const githubDirectory = path.join(outputOption, ".github");
-const noGitHub = cndiArguments["no-github"] || false;
-
-// get super secret AWS keys from the host environment
-
-const awsAccessKeyId = Deno.env.get("AWS_ACCESS_KEY_ID");
-const awsSecretAccessKey = Deno.env.get("AWS_SECRET_ACCESS_KEY");
-
-if (
-  typeof awsAccessKeyId !== "string" ||
-  typeof awsSecretAccessKey !== "string"
-) {
-  console.error(
-    "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set in the environment"
-  );
-  Deno.exit(1);
-}
-
-const awsConfig = {
-  apiVersion: DEFAULT_AWS_EC2_API_VERSION,
-  region: DEFAULT_AWS_REGION,
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID") as string,
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY") as string,
-  },
-};
-
-// initialize AWS EC2Client sdk, used to provision virtual machines
-const ec2Client = new EC2Client(awsConfig);
-
-// cndi init populates this file with nodes from the original config file, because it is consumed downstream
-const pathToNodes = path.join(outputDirectory, "nodes.json");
-
-// helper function to load a JSONC file
-const loadJSONC = async (path: string) => {
-  return JSONC.parse(await Deno.readTextFile(path));
-};
-
-// incomplete type, NodeSpec will have more options
-// NodeSpec is the user-specified config for a node
-interface NodeSpec {
-  name: string;
-  role: NodeRole;
-  kind: "aws";
-  InstanceType?: string;
-}
-
-// incomplete type, NodeEntry will probably have more options
-// NodeEntry is the user-specified config for a node + data returned from deployment target
-interface NodeEntry extends NodeSpec {
-  ready: boolean;
-  id?: string;
-  privateIpAddress?: string;
-  publicIpAddress?: string;
-}
-
 // get the comment from a RSA public key, we use it as an identifier for the key
-async function getKeyNameFromPublicKeyFile(): Promise<string> {
+async function getKeyNameFromPublicKeyFile({
+  CNDI_WORKING_DIR,
+}: CNDIContext): Promise<string> {
   // ssh-rsa foobarbaznase64encodedGibberish cndi-key-Gibberish
   const publicKeyFileTextContent = await Deno.readTextFileSync(
-    path.join(CNDI_HOME, PUBLIC_KEY_FILENAME)
+    path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME)
   );
   return publicKeyFileTextContent.split(" ")[2];
 }
@@ -180,8 +66,12 @@ const aws = {
     node: CNDINode,
     // deno-lint-ignore no-explicit-any
     deploymentTargetConfiguration: any,
-    keyName: string
+    keyName: string,
+    ec2Client?: EC2Client
   ) => {
+    if (!ec2Client) {
+      throw new Error("aws.addNode: EC2 Client not provided");
+    }
     try {
       // set a user-specified AMI id if one is specified, otherwise use the default AMI id
       const ImageId =
@@ -224,7 +114,9 @@ const aws = {
 
 const provisionNodes = async (
   nodes: Array<NodeEntry>,
-  keyName: string
+  keyName: string,
+  pathToNodes: string,
+  clients: CNDIClients
 ): Promise<NodeEntry[]> => {
   // use ./cndi/nodes.json to get the deployment target configuration for the current node
   const config = (await loadJSONC(pathToNodes)) as unknown as CNDINodes;
@@ -237,13 +129,15 @@ const provisionNodes = async (
           return aws.addNode(
             node,
             config?.deploymentTargetConfiguration ?? {},
-            keyName
+            keyName,
+            clients?.aws
           );
         default:
           throw new Error(`Unsupported node kind: ${node.kind}`); // if node.kind is not supported, throw
       }
     })
   )) as Array<RunInstancesCommandOutput>;
+
   // for each response from the deployment target, update the node
   runOutputs.forEach((i, idx) => {
     // deno-lint-ignore no-explicit-any
@@ -255,96 +149,16 @@ const provisionNodes = async (
   return provisionedNodes;
 };
 
-// COMMAND fn: cndi help <command>
-const helpFn = (command: Command) => {
-  const content = helpStrings?.[command];
-  if (content) {
-    console.log(content);
-  } else {
-    console.error(
-      `Command "${command}" not found. Use "cndi --help" for more information.`
-    );
-  }
-};
-
-// COMMAND fn: cndi init
-const initFn = () => {
-  console.log(`cndi init -f "${pathToConfig}"`);
-  const initializing = true;
-  overwriteWithFn(initializing);
-};
-
-// COMMAND fn: cndi overwrite-with
-const overwriteWithFn = async (initializing = false) => {
-  if (!initializing) {
-    console.log(`cndi overwrite-with -f "${pathToConfig}"`);
-  } else if (!noGitHub) {
-    try {
-      // overwrite the github workflows and readme, do not clobber other files
-      await copy(path.join(CNDI_HOME, "github"), githubDirectory, {
-        overwrite: true,
-      });
-    } catch (githubCopyError) {
-      console.log("failed to copy github integration files");
-      console.error(githubCopyError);
-    }
-  }
-  const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
-
-  try {
-    await Deno.remove(path.join(outputDirectory, "nodes.json"));
-  } catch {
-    // file did not exist
-  }
-
-  try {
-    await Deno.remove(path.join(outputDirectory, "cluster", "applications"), {
-      recursive: true,
-    });
-  } catch {
-    // folder did not exist
-  }
-
-  await Deno.mkdir(path.join(outputDirectory, "cluster", "applications"), {
-    recursive: true,
-  });
-
-  await Deno.writeTextFile(
-    pathToNodes,
-    JSON.stringify(config?.nodes ?? {}, null, 2)
-  );
-
-  await Deno.writeTextFile(
-    path.join(outputDirectory, "cluster", "Chart.yaml"),
-    ChartYaml
-  );
-
-  const { applications } = config;
-
-  Object.keys(applications).forEach(async (releaseName) => {
-    const applicationSpec = applications[releaseName];
-    const [manifestContent, filename] = getApplicationManifest(
-      releaseName,
-      applicationSpec
-    );
-    await Deno.writeTextFile(
-      path.join(outputDirectory, "cluster", "applications", filename),
-      manifestContent,
-      { create: true, append: false }
-    );
-    console.log("created application manifest:", filename);
-  });
-
-  const completionMessage = initializing
-    ? "initialized your cndi project in the ./cndi directory!"
-    : "overwrote your cndi project in the ./cndi directory!";
-
-  console.log(completionMessage);
-};
-
-// COMMAND fn: cndi run
-const runFn = async () => {
+/**
+ * COMMAND fn: cndi run
+ * Creates a CNDI cluster by reading the contents of ./cndi
+ * */
+const runFn = async (context: CNDIContext) => {
   console.log("cndi run");
+
+  const clients: CNDIClients = {}; // we will add a client for each deployment target to this object
+
+  const { CNDI_WORKING_DIR, CNDI_SRC, pathToNodes } = context;
 
   // load nodes from the nodes.json file
   const nodes = (await loadJSONC(pathToNodes)) as unknown as {
@@ -370,29 +184,44 @@ const runFn = async () => {
   // generate a 32 character token for microk8s
   const token = crypto.randomUUID().replaceAll("-", "").slice(0, 32);
 
+  await Promise.all([
+    ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
+    ensureDir(path.join(CNDI_WORKING_DIR, "bootstrap")),
+  ]);
+
+  await copy(
+    path.join(CNDI_SRC, "bootstrap"),
+    path.join(CNDI_WORKING_DIR, "bootstrap"),
+    { overwrite: true }
+  );
+
   // write the token that the controller will register for it's microk8s peers
   await Deno.writeTextFile(
-    path.join(CNDI_HOME, "bootstrap", "controller", "join-token.txt"),
+    path.join(CNDI_WORKING_DIR, "bootstrap", "controller", "join-token.txt"),
     token
   );
 
   // a bit extra: delete keys if they exist
   try {
-    Deno.removeSync(path.join(CNDI_HOME, PRIVATE_KEY_FILENAME));
-    Deno.removeSync(path.join(CNDI_HOME, PUBLIC_KEY_FILENAME));
+    Deno.removeSync(path.join(CNDI_WORKING_DIR, "keys", PRIVATE_KEY_FILENAME));
+    Deno.removeSync(path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME));
   } catch {
     // no keys to remove, don't throw an error
   }
 
   // write public and private keys to disk (eventually we will skip this step and do it in memory)
   await Deno.writeFile(
-    path.join(CNDI_HOME, PUBLIC_KEY_FILENAME),
-    publicKeyMaterial
+    path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME),
+    publicKeyMaterial,
+    {
+      create: true,
+    }
   );
   await Deno.writeFile(
-    path.join(CNDI_HOME, PRIVATE_KEY_FILENAME),
+    path.join(CNDI_WORKING_DIR, "keys", PRIVATE_KEY_FILENAME),
     privateKeyMaterial,
     {
+      create: true,
       mode: 0o400, // this is a private key, make it readable only by the owner
     }
   );
@@ -410,27 +239,54 @@ const runFn = async () => {
 
   // generate an argocd repo manifest with the git credentials
   await Deno.writeTextFile(
-    path.join(CNDI_HOME, "bootstrap", "controller", "repo-config.yaml"),
+    path.join(CNDI_WORKING_DIR, "bootstrap", "controller", "repo-config.yaml"),
     getRepoConfigManifest(gitRepo, gitUsername, gitPassword)
   );
 
   // generate a "root application" that all other applications will descend from
   await Deno.writeTextFile(
-    path.join(CNDI_HOME, "bootstrap", "controller", "root-application.yaml"),
+    path.join(
+      CNDI_WORKING_DIR,
+      "bootstrap",
+      "controller",
+      "root-application.yaml"
+    ),
     getRootApplicationManifest(gitRepo)
   );
 
   // redundant file read is OK for now
-  const KeyName = await getKeyNameFromPublicKeyFile();
+  const KeyName = await getKeyNameFromPublicKeyFile(context);
 
   // if there are any nodes on AWS, upload the public key and name the key using the comment in the key
   if (entries.some((e) => e.kind === "aws")) {
+    const credentials = {
+      accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID") as string,
+      secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY") as string,
+    };
+
+    if (!credentials.accessKeyId) {
+      throw new Error("AWS_ACCESS_KEY_ID not found in env");
+    }
+
+    if (!credentials.secretAccessKey) {
+      throw new Error("AWS_SECRET_ACCESS_KEY not found in env");
+    }
+
+    const awsConfig = {
+      apiVersion: DEFAULT_AWS_EC2_API_VERSION,
+      region: Deno.env.get("AWS_REGION") || DEFAULT_AWS_REGION,
+      credentials,
+    };
+
+    clients.aws = new EC2Client(awsConfig);
+
     console.log("aws nodes found...");
     console.log("uploading keypair to aws");
-    await ec2Client.send(
+    await clients.aws.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
     );
-    await ec2Client.send(
+
+    await clients.aws.send(
       new ImportKeyPairCommand({
         PublicKeyMaterial: publicKeyMaterial,
         KeyName,
@@ -441,7 +297,12 @@ const runFn = async () => {
   console.log("provisioning nodes");
 
   // take each node entry and ask it's deployment target to provision it
-  const provisionedInstances = await provisionNodes(entries, KeyName);
+  const provisionedInstances = await provisionNodes(
+    entries,
+    KeyName,
+    pathToNodes,
+    clients
+  );
 
   // at this point we have a list of "provisioned instances" that are still waiting to come online
   try {
@@ -466,7 +327,7 @@ const runFn = async () => {
           ],
         };
 
-        return ec2Client.send(new CreateTagsCommand(tagParams));
+        return clients.aws?.send(new CreateTagsCommand(tagParams));
       })
     );
 
@@ -479,9 +340,9 @@ const runFn = async () => {
       const allReady = instances.every((status) => status.ready);
 
       if (!allReady) {
-        const response = await ec2Client.send(
+        const response = (await clients.aws?.send(
           new DescribeInstanceStatusCommand({ InstanceIds: ids })
-        );
+        )) as DescribeInstanceStatusCommandOutput;
 
         const instanceStatuses =
           response.InstanceStatuses as Array<InstanceStatus>;
@@ -498,9 +359,9 @@ const runFn = async () => {
         });
 
         // ask the deployment target about the addresses for the new instances
-        const addressesResponse = await ec2Client.send(
+        const addressesResponse = (await clients.aws?.send(
           new DescribeInstancesCommand({ InstanceIds: ids })
-        );
+        )) as DescribeInstancesCommandOutput;
 
         // Every instance will be in it's own Reservation because we are deploying them one by one.
         // We deploy instances one by one so they can have different properties.
@@ -552,7 +413,12 @@ const runFn = async () => {
 
           // we have a controller, so let's inject its private ip address and token into the worker bootstrap script
           await Deno.writeTextFile(
-            path.join(CNDI_HOME, "bootstrap", "worker", "accept-invite.sh"),
+            path.join(
+              CNDI_WORKING_DIR,
+              "bootstrap",
+              "worker",
+              "accept-invite.sh"
+            ),
             `#!/bin/bash
 echo "accepting node invite with token ${token}"
 microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
@@ -565,17 +431,18 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
-        path.join(CNDI_HOME, "node-runtime-setup", "nodes.json"),
+        path.join(CNDI_WORKING_DIR, "live.nodes.json"),
         JSON.stringify(provisionedInstances, null, 2)
       );
 
       // calling bootstrap using node.js (hack until we can use deno)
       // when this finishes successfully, the cluster is ready
-      // TODO: maybe use deno run in compat mode?
+      // TODO: use npmjs.com/pkg to create a single binary that includes node.js and the bootstrap script for every OS
+      // TODO LATER: just use deno to run the bootstrap script when SSH is supported
       const p = Deno.run({
         cmd: [
           "node",
-          path.join(CNDI_HOME, "node-runtime-setup", "bootstrap.js"),
+          path.join(CNDI_SRC, "cndi-node-runtime-setup", "src", "bootstrap.js"),
         ],
         stdout: "piped",
         stderr: "piped",
@@ -600,46 +467,4 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
   }
 };
 
-// map command to function
-const commands = {
-  [Command.init]: initFn,
-  [Command["overwrite-with"]]: overwriteWithFn,
-  [Command.run]: runFn,
-  [Command.help]: helpFn,
-  [Command.default]: (c: string) => {
-    console.log(
-      `Command "${c}" not found. Use "cndi --help" for more information.`
-    );
-  },
-};
-
-const commandsInArgs = cndiArguments._;
-
-// if the user uses --help we will show help text
-if (cndiArguments.help || cndiArguments.h) {
-  const key =
-    typeof cndiArguments.help === "boolean" ? "default" : cndiArguments.help;
-  commands.help(key);
-
-  // if the user tries to run "help" instead of --help we will say that it's not a valid command
-} else if (commandsInArgs.includes("help")) {
-  commands.help(Command.help);
-} else {
-  // in any other case we will try to run the command
-  const operation = `${commandsInArgs[0]}`;
-
-  switch (operation) {
-    case Command.init:
-      commands[Command.init]();
-      break;
-    case Command.run:
-      commands[Command.run]();
-      break;
-    case Command["overwrite-with"]:
-      commands[Command["overwrite-with"]]();
-      break;
-    default:
-      commands[Command.default](operation);
-      break;
-  }
-}
+export default runFn;

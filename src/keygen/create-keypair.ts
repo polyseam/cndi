@@ -1,9 +1,9 @@
-import * as base64 from "https://deno.land/std@0.152.0/encoding/base64.ts";
+import * as base64 from "https://deno.land/std@0.156.0/encoding/base64.ts";
 
-import jwkToPem, { JWK } from "https://esm.sh/jwk-to-pem@2.0.5";
+import jwkToPem, { JWK } from "npm:jwk-to-pem@2.0.5";
 
 // TODO: We should figure this transform out ourselves
-import NodeRSA from "npm:node-rsa";
+import NodeRSA from "npm:node-rsa@1.1.1";
 
 const SSH_KEYGEN_ALGORITHM = "RSASSA-PKCS1-v1_5";
 const SSH_KEYGEN_MODULUS_LENGTH = 2048;

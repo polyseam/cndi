@@ -4,25 +4,27 @@ const fs = require("fs");
 
 const username = "ubuntu";
 
-const privateKeyPath = path.join(__dirname, "../private.pem");
-const nodesPath = path.join(__dirname, "./nodes.json");
+const workingDir = path.join(__dirname, "..", "..", "..", ".working");
+const privateKeyPath = path.join(workingDir, "keys", "private.pem");
+const nodesPath = path.join(workingDir, "live.nodes.json");
+
 const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
 
-if(!Array.isArray(nodes)){
+if (!Array.isArray(nodes)) {
   throw new Error("bootstrap.js: unable to parse ./nodes.json");
-}else{
-  console.log('bootstrap.js: nodes.json parsed successfully');
-  console.log('bootstrap.js: nodes.json:', nodes);
+} else {
+  console.log("bootstrap.js: nodes.json parsed successfully");
+  console.log("bootstrap.js: nodes.json:", nodes);
 }
 
 const ssh = new NodeSSH();
 
 // use a nodes public ip address to ssh in, copy the bootstrap script for the respective role and execute it
 async function bootstrap(node) {
-  console.log('sshing into', node.role,'at',node.publicIpAddress);
+  console.log("sshing into", node.role, "at", node.publicIpAddress);
   const { role } = node;
 
-  const source = path.join(__dirname, `../bootstrap/${role}`);
+  const source = path.join(workingDir, "bootstrap", role);
   const dest = `/home/ubuntu/${role}`;
 
   // use keypair to connect

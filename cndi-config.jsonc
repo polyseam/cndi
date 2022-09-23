@@ -19,14 +19,20 @@
       "targetRevision": "1.6.0",
       "destinationNamespace": "airflow",
       "repoURL": "https://airflow.apache.org",
-      "chart": "airflow",
+      "chart": "airflow", // => get values.schema.json from https://github.com/apache/airflow
       "values": {
         "dags": {
           "gitSync": {
             "enabled": true,
             "repo": "https://github.com/polyseam/demo-dag-bag",
             "branch": "main",
-            "wait": 70
+            "wait": 70,
+            "subPath": ""
+          }
+        },
+        "logs": {
+          "persistence": {
+            "size": "15Gi"
           }
         },
         "createUserJob":{
