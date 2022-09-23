@@ -15,11 +15,12 @@ import overwriteWithFn from "./commands/overwrite-with.ts";
 import helpFn from "./commands/help.ts";
 
 export default function main(args: string[]) {
+  const executionDirectory = Deno.cwd();
   const CNDI_SRC = path.dirname(path.fromFileUrl(import.meta.url));
   const CNDI_HOME = path.join(CNDI_SRC, "..");
   const CNDI_WORKING_DIR = path.join(CNDI_HOME, ".working");
   // default paths to the user's config file
-  const DEFAULT_CNDI_CONFIG_PATH = path.join(CNDI_HOME, "cndi-config.json");
+  const DEFAULT_CNDI_CONFIG_PATH = path.join(executionDirectory, "cndi-config.json");
   const DEFAULT_CNDI_CONFIG_PATH_JSONC = `${DEFAULT_CNDI_CONFIG_PATH}c`;
 
   // parse the command line arguments
@@ -33,7 +34,7 @@ export default function main(args: string[]) {
     DEFAULT_CNDI_CONFIG_PATH;
 
   // the directory in which to create the cndi folder
-  const outputOption = cndiArguments.o || cndiArguments.output || CNDI_HOME;
+  const outputOption = cndiArguments.o || cndiArguments.output || executionDirectory;
   const outputDirectory = path.join(outputOption, "cndi");
   const pathToNodes = path.join(outputDirectory, "nodes.json");
   // github actions setup
@@ -41,9 +42,9 @@ export default function main(args: string[]) {
   const noGitHub = cndiArguments["no-github"] || false;
 
   const context = {
-    CNDI_HOME,
-    CNDI_SRC,
-    CNDI_WORKING_DIR,
+    CNDI_HOME, // ..
+    CNDI_SRC, // .
+    CNDI_WORKING_DIR, // ../.working
     outputDirectory,
     githubDirectory,
     noGitHub,
