@@ -190,3 +190,96 @@ You are also able to modify the manifests in `cndi/cluster` and make changes to 
 ## updating data product registry
 
 If you want to opt-in to having the polyseam data product registry track this repo as a data product, CNDI can handle this for you too! Whenever you make changes to your `main` branch CNDI will persist information about your data product to the registry including releases, documentation, infrastructure, source code, output ports and more!
+
+## building cndi-next
+
+If you are hoping to contribute to this project and want to learn the ropes, you are in the right place. Let's start with setting up your environment:
+
+### setup
+
+The first step as you might expect is to clone the repo. Take note of where you clone to, it will matter later when we setup some convenience aliases.
+
+```bash
+git clone https://github.com/polyseam/cndi-next
+```
+
+Next let's [install deno](https://deno.land/#installation), though it can be installed with a package manager, I would recommend that you install it without one. Once deno is installed, make sure you add it to your PATH.
+
+Next we want to install [NodeJS](https://nodejs.org/en/). This is necessary for now because Deno lacks some cryptography APIs required for SSHing programatically, but it will not be required when we ship. We are using LTS 16^.
+
+Now we need to use [npm](https://npmjs.com) to install those SSH libraries. To do that, change directories inside the `cndi-next` repo:
+
+```bash
+# if you have issues, make sure that npm is installed and is on your PATH
+cd ./src/cndi-node-runtime-setup && npm install
+```
+
+Let's setup a few aliases to make our experience just like it will be for the end user when we launch.
+
+```bash
+# make sure the path below is correct, pointing to the main.ts file in the repo
+alias cndi="deno run -A --unstable ~/dev/polyseam/cndi-next/main.ts"
+```
+
+### your first cluster
+
+You can now setup a new directory for the cluster you intend to create. Start with an empty folder and create a `my-cndi-config.jsonc` file. This will specify what you want in your cluster for applications, manifests, and nodes. To see an example checkout the file `cndi-config.jsonc` inside the `cndi-next` repo.
+
+```bash
+cndi init -f my-cndi-config.jsonc
+```
+
+This will scaffold out your project and you are almost ready to deploy.
+
+Let's make sure we have some environment variables set so that CNDI can provision your cluster using your cloud credentials, and setup argo to watch the cluster repo we will setup next. Create a file in the directory where you just saved `my-cndi-config.jsonc` called `.env`. Environment variables here will be read by `cndi run`.
+
+```bash
+# .env
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID="your-access-key-id"
+AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+AWS_REGION=us-east-1
+AWS_SDK_LOAD_CONFIG=1
+
+# Git Credentials
+GIT_USERNAME="your-username"
+GIT_PASSWORD="your-personal-access-token"
+GIT_REPO="https://github.com/example-org/example-repo"
+```
+
+Also, don't forget to create a `.gitignore` file there too so we can make sure the credentials we will save don't get uploaded to git.
+
+```bash
+echo ".env" >> .gitignore
+```
+
+You're all set to push this code up to GitHub, just create a repo and push up the contents of the folder.
+
+```bash
+git add .
+git commit -m 'first commit'
+git push
+```
+
+Now we just need to deploy the cluster:
+
+```
+cndi run
+```
+
+Your cluster will take a few minutes to deploy, in the meantime make sure you have `kubectl` installed, we will need that to connect to our node securely until we open it up using an `Ingress` declaration.
+
+### port-forward application
+
+Use the cloud console to ssh into your controller and run the command:
+
+```bash
+microk8s config
+```
+
+This will give you a great big blob of text, consider this your key to the cluster, with it on your machine you will be able to talk to the Kubernetes control plane.
+
+You want to take this blob and replace the IP address shown in it with the _public_ IP address of your controller listed in AWS. If you don't change the IP address it will be set to the Private IP of the node, and we can't connect to the private IP from outside of the cloud.
+
+Next you want to take that text with the modified IP, and put it in the kubernetes config file, which is probably located at `~/.kube/config`.
