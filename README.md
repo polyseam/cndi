@@ -201,22 +201,29 @@ If you are hoping to contribute to this project and want to learn the ropes, you
 
 The first step as you might expect is to clone the repo. Take note of where you clone to, it will matter later when we setup some convenience aliases.
 
+**1. Clone Repo:**
 ```bash
 git clone https://github.com/polyseam/cndi-next
 ```
 
+**2. Install Deno:**
+
 Next let's [install deno](https://deno.land/#installation), though it can be installed with a package manager, I would recommend that you install it without one. Once deno is installed, make sure you add it to your PATH.
+
+**3. Install NodeJS (temporary!):**
 
 Next we want to install [NodeJS](https://nodejs.org/en/). This is necessary for now because Deno lacks some cryptography APIs required for SSHing programatically, but it will not be required when we ship. We are using LTS 16^.
 
 Now we need to use [npm](https://npmjs.com) to install those SSH libraries. To do that, change directories inside the `cndi-next` repo:
 
+**4. npm install (temporary!):**
 ```bash
 # if you have issues, make sure that npm is installed and is on your PATH
 cd ./src/cndi-node-runtime-setup && npm install
 ```
 
-Let's setup a few aliases to make our experience just like it will be for the end user when we launch.
+**5. Setup cndi Alias:**
+Let's setup an alias to make our experience just like it will be for the end user when we launch.
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
