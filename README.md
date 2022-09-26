@@ -367,7 +367,7 @@ You should now see a login page for argo, and a place to enter a username and pa
 Let's leave the service running and get the `password` from the cluster now in a separate shell:
 
 ```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" --insecure-skip-tls-verify| base64 -d; echo
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
 ```
 
 You should now see a password displayed that looks something like:
