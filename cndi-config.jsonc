@@ -35,10 +35,10 @@
             "size": "15Gi"
           }
         },
-        "createUserJob":{
+        "createUserJob": {
           "useHelmHooks": false
         },
-        "migrateDatabaseJob":{
+        "migrateDatabaseJob": {
           "useHelmHooks": false
         }
       }
