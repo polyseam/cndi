@@ -1,6 +1,5 @@
 // list of all commands for the CLI
 
-import { EC2Client } from "https://esm.sh/v92/@aws-sdk/client-ec2@3.153.0/dist-types/EC2Client.d.ts";
 
 export const enum Command {
   init = "init",
@@ -82,7 +81,7 @@ interface NodeEntry extends NodeSpec {
 }
 
 interface CNDIClients {
-  aws?: EC2Client;
+  aws?: any;
 }
 
 export type {

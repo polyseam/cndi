@@ -1,6 +1,6 @@
 import * as base64 from "https://deno.land/std@0.156.0/encoding/base64.ts";
 
-import jwkToPem, { JWK } from "npm:jwk-to-pem@2.0.5";
+import jwkToPem from "npm:jwk-to-pem@2.0.5";
 
 // TODO: We should figure this transform out ourselves
 import NodeRSA from "npm:node-rsa@1.1.1";
@@ -89,7 +89,7 @@ export default async function createKeypair() {
   );
 
   // this private key is the string form of the private key file contents
-  const privateKeyStringPKCS8 = jwkToPem(privateKeyJWK as JWK, {
+  const privateKeyStringPKCS8 = jwkToPem(privateKeyJWK,  {
     private: true,
   });
 

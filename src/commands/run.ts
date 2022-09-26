@@ -1,5 +1,5 @@
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts?s=copy";
+import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts";
 import { ensureDir } from "https://deno.land/std@0.156.0/fs/mod.ts";
 import "https://deno.land/std@0.156.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.156.0/async/delay.ts";
@@ -12,12 +12,18 @@ import {
   ImportKeyPairCommand,
   RunInstancesCommand,
   DescribeInstancesCommand,
+} from "https://esm.sh/v95/@aws-sdk/client-ec2@3.178.0/deno/client-ec2.js";
+
+import type {
   InstanceStatus,
-  Reservation,
-  RunInstancesCommandOutput,
   DescribeInstancesCommandOutput,
+  RunInstancesCommandOutput,
+  CreateTagsCommandOutput,
   DescribeInstanceStatusCommandOutput,
-} from "https://esm.sh/@aws-sdk/client-ec2@3.153.0";
+  EnableSerialConsoleAccessCommandOutput,
+  Reservation
+} from "https://esm.sh/v95/@aws-sdk/client-ec2@3.178.0/dist-types/index.d.ts"
+
 
 import {
   CNDINode,
@@ -67,7 +73,8 @@ const aws = {
     // deno-lint-ignore no-explicit-any
     deploymentTargetConfiguration: any,
     keyName: string,
-    ec2Client?: EC2Client
+    // deno-lint-ignore no-explicit-any
+    ec2Client?: any
   ) => {
     if (!ec2Client) {
       throw new Error("aws.addNode: EC2 Client not provided");
@@ -284,7 +291,7 @@ const runFn = async (context: CNDIContext) => {
     console.log("uploading keypair to aws");
     await clients.aws.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
-    );
+    ) as EnableSerialConsoleAccessCommandOutput;
 
     await clients.aws.send(
       new ImportKeyPairCommand({
@@ -327,7 +334,7 @@ const runFn = async (context: CNDIContext) => {
           ],
         };
 
-        return clients.aws?.send(new CreateTagsCommand(tagParams));
+        return clients.aws?.send(new CreateTagsCommand(tagParams)) as CreateTagsCommandOutput;
       })
     );
 
