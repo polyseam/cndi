@@ -71,7 +71,7 @@ Lets see what that might look like:
 ```jsonc
 {
   "nodes": {...},
-  "application": {
+  "applications": {
     "airflow": {
       "targetRevision": "1.6.0", // version of Helm chart to use
       "destinationNamespace": "airflow", // kubernetes namespace in which to install application
@@ -107,7 +107,7 @@ The next aspect of configuration is related to the Kubernetes cluster we are goi
 ```jsonc
 {
   "nodes": {...},
-  "application": {...},
+  "applications": {...},
   "cluster": {// inside the "cluster" object you can put all of your custom Kubernetes manifests
     // TODO: we don't actually render these to cndi/cluster yet
     "ingress": {
@@ -132,7 +132,7 @@ If you are using CNDI to deploy a Data Product, and want to persist information 
 ```jsonc
 {
     "nodes": {...},
-    "application": {...},
+    "applications": {...},
     "cluster": {...},
     // TODO: we don't actually commit DP metadata to DPR yet
     "dpr": {
