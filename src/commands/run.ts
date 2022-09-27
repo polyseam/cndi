@@ -1,8 +1,8 @@
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts";
-import { ensureDir } from "https://deno.land/std@0.156.0/fs/mod.ts";
-import "https://deno.land/std@0.156.0/dotenv/load.ts";
-import { delay } from "https://deno.land/std@0.156.0/async/delay.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
+import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
+import "https://deno.land/std@0.157.0/dotenv/load.ts";
+import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
 import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { loadJSONC } from "../utils.ts";
 import {

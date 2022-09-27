@@ -1,7 +1,7 @@
 
-import * as flags from "https://deno.land/std@0.156.0/flags/mod.ts";
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
-import "https://deno.land/std@0.156.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
+import * as flags from "https://deno.land/std@0.157.0/flags/mod.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import "https://deno.land/std@0.157.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
 
 
 import { Command } from "./types.ts";

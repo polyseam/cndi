@@ -1,4 +1,4 @@
-import * as base64 from "https://deno.land/std@0.156.0/encoding/base64.ts";
+import * as base64 from "https://deno.land/std@0.157.0/encoding/base64.ts";
 
 import jwkToPem from "npm:jwk-to-pem@2.0.5";
 
