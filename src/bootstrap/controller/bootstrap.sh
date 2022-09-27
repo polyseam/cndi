@@ -8,6 +8,12 @@ microk8s add-node -t $joinToken -l 600
 
 echo "token registered"
 
+echo "updating admin credentials"
+
+microk8s kubectl config set-credentials admin --token $joinToken
+
+echo "admin credentials updated"
+
 echo "configuring argo"
 
 microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
