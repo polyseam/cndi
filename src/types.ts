@@ -39,6 +39,9 @@ interface CNDIConfig {
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
+  cluster: {
+    [key:string]: unknown;
+  }
 }
 
 interface CNDIApplicationSpec {

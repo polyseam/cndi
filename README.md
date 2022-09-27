@@ -109,7 +109,6 @@ The next aspect of configuration is related to the Kubernetes cluster we are goi
   "nodes": {...},
   "applications": {...},
   "cluster": {// inside the "cluster" object you can put all of your custom Kubernetes manifests
-    // TODO: we don't actually render these to cndi/cluster yet
     "ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",
