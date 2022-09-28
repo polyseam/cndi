@@ -16,6 +16,7 @@ import helpFn from "./commands/help.ts";
 
 export default function main(args: string[]) {
   const executionDirectory = Deno.cwd();
+  // CNDI_SRC is determined at compile time, that's no good
   const CNDI_SRC = path.dirname(path.fromFileUrl(import.meta.url));
   const CNDI_HOME = path.join(CNDI_SRC, "..");
   const CNDI_WORKING_DIR = path.join(CNDI_HOME, ".working");

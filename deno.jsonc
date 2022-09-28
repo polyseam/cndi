@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "compile-win": "deno compile --unstable -A --output dist/cndi-win.exe main.ts",
+    "compile-linux": "deno compile --unstable -A --output dist/cndi-linux main.ts",
+    "compile-mac": "deno compile --unstable -A --output dist/cndi-mac main.ts",
+    "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac"
+  }
+}

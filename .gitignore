@@ -11,3 +11,7 @@ node_modules
 .github/CNDI_GITHUB_README.md
 
 cndi
+
+dist/cndi-linux
+dist/cndi-mac
+dist/cndi-win.exe

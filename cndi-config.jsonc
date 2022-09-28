@@ -2,7 +2,7 @@
   "nodes": {
     "entries": [
       {
-        "name": "m-aws-contoller-x",
+        "name": "m-aws-contoller-x2",
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
