@@ -4,7 +4,8 @@ const fs = require("fs");
 
 const username = "ubuntu";
 
-const workingDir = path.join(__dirname, "..", "..", "..", ".working");
+const workingDir = process.argv[2]; // node bootstrap.js ${workingDir}
+
 const privateKeyPath = path.join(workingDir, "keys", "private.pem");
 const nodesPath = path.join(workingDir, "live.nodes.json");
 

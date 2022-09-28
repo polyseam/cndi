@@ -1,8 +1,9 @@
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts";
-import { ensureDir } from "https://deno.land/std@0.156.0/fs/mod.ts";
-import "https://deno.land/std@0.156.0/dotenv/load.ts";
-import { delay } from "https://deno.land/std@0.156.0/async/delay.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
+import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
+import "https://deno.land/std@0.157.0/dotenv/load.ts";
+import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
+import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { loadJSONC } from "../utils.ts";
 import {
   CreateTagsCommand,
@@ -21,9 +22,8 @@ import type {
   CreateTagsCommandOutput,
   DescribeInstanceStatusCommandOutput,
   EnableSerialConsoleAccessCommandOutput,
-  Reservation
-} from "https://esm.sh/v95/@aws-sdk/client-ec2@3.178.0/dist-types/index.d.ts"
-
+  Reservation,
+} from "https://esm.sh/v95/@aws-sdk/client-ec2@3.178.0/dist-types/index.d.ts";
 
 import {
   CNDINode,
@@ -33,6 +33,12 @@ import {
   NodeSpec,
   CNDIClients,
 } from "../types.ts";
+
+const binaryForPlatform = {
+  linux: "linux",
+  darwin: "macos",
+  win32: "win.exe",
+};
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
@@ -289,9 +295,9 @@ const runFn = async (context: CNDIContext) => {
 
     console.log("aws nodes found...");
     console.log("uploading keypair to aws");
-    await clients.aws.send(
+    (await clients.aws.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
-    ) as EnableSerialConsoleAccessCommandOutput;
+    )) as EnableSerialConsoleAccessCommandOutput;
 
     await clients.aws.send(
       new ImportKeyPairCommand({
@@ -334,7 +340,9 @@ const runFn = async (context: CNDIContext) => {
           ],
         };
 
-        return clients.aws?.send(new CreateTagsCommand(tagParams)) as CreateTagsCommandOutput;
+        return clients.aws?.send(
+          new CreateTagsCommand(tagParams)
+        ) as CreateTagsCommandOutput;
       })
     );
 
@@ -444,13 +452,14 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // calling bootstrap using node.js (hack until we can use deno)
       // when this finishes successfully, the cluster is ready
-      // TODO: use npmjs.com/pkg to create a single binary that includes node.js and the bootstrap script for every OS
-      // TODO LATER: just use deno to run the bootstrap script when SSH is supported
+      const currentPlatform = platform() as "linux" | "darwin" | "win32";
+      const binaryName = `cndi-node-runtime-setup-${binaryForPlatform[currentPlatform]}`;
+
+      // execute the cndi-node-runtime-setup binary for the current envionment
+      const binaryPath = path.join(CNDI_SRC, "cndi-node-runtime-setup", "dist", binaryName);
+
       const p = Deno.run({
-        cmd: [
-          "node",
-          path.join(CNDI_SRC, "cndi-node-runtime-setup", "src", "bootstrap.js"),
-        ],
+        cmd: [binaryPath, CNDI_WORKING_DIR],
         stdout: "piped",
         stderr: "piped",
       });

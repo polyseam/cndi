@@ -1,5 +1,5 @@
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.156.0/fs/copy.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 import { loadJSONC } from "../utils.ts";
 import { CNDIContext, CNDIConfig } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
