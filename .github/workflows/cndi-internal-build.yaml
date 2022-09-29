@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
 jobs:
+
   build-cnrs-binaries: # cndi-node-runtime-setup
     runs-on: ubuntu-20.04
     steps:
@@ -14,7 +15,9 @@ jobs:
         with:
           node-version: 16.x
       - run: npm ci
+        working-directory: './src/cndi-node-runtime-setup'
       - run: npm run build
+        working-directory: './src/cndi-node-runtime-setup'
       - name: Get Version from package.json
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-package-json-step
