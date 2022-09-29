@@ -4,7 +4,6 @@ import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
 import { loadJSONC } from "../utils.ts";
-import { ensureInstalled } from "../utils.ts";
 
 import {
   CreateTagsCommand,
