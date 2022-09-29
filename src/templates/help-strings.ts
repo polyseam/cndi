@@ -73,7 +73,16 @@ SYNOPSIS
 DESCRIPTION
         Reads files in the user's cndi directory and deploys as a cndi cluster
   `.trim(),
-  install:`TODO: Run this before you run other commands`.trim(),
+  install:`
+NAME
+        cndi-install - installs all critical source files needed to run the cndi CLI to the CNDI_HOME directory
+SYNOPSIS
+        cndi install
+DESCRIPTION
+        Fetches and unpacks files required for using cndi and installs them to the CNDI_HOME directory. 
+        
+        Must be run once before using cndi!
+  `.trim(),
   help:`oops! "help" is not a command, you probably meant "--help"`
 };
 
