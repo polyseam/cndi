@@ -166,7 +166,7 @@ const runFn = async (context: CNDIContext) => {
 
   const clients: CNDIClients = {}; // we will add a client for each deployment target to this object
 
-  const { CNDI_WORKING_DIR, CNDI_SRC, pathToNodes, binaryForPlatform } =
+  const { CNDI_WORKING_DIR, CNDI_SRC, CNDI_HOME, pathToNodes, binaryForPlatform } =
     context;
 
   await Promise.all([
@@ -453,9 +453,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // execute the cndi-node-runtime-setup binary for the current envionment
       const binaryPath = path.join(
-        CNDI_SRC,
-        "cndi-node-runtime-setup",
-        "dist",
+        CNDI_HOME,
         binaryName
       );
 
