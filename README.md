@@ -4,6 +4,34 @@ This is the next version of CNDI. It deploys an entire data stack in minutes.
 
 It's perfect for deploying Data Products consistently that are reliable, discoverable, maintainable, and interoperable, all while remaining flexible to the needs of each Data Product.
 
+## getting started
+
+To get started with `cndi-next` all you need to do is download the binary for your operating system, then call the install command!
+
+Different binaries are available for each OS:
+
+windows: https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-win.exe
+
+macOS: https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac
+
+linux: https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-linux
+
+
+```bash
+# download the cndi binary, allow it to be executed, add it to your path, and source your profile
+
+# linux
+curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-linux -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.profile
+
+# macos
+curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.zshrc
+
+# once cndi is on your PATH
+cndi install # this does some one-time setup
+
+# now you are ready for the useful commands, learn about those below!
+```
+
 ## configuration
 
 There are 2 options for configuring your next data stack. The first is to use our online configurator tool, it will be live at [configurator.cndi.run](https://configurator.cndi.run) and is probably the most fun. But the config is just a file, so you can also write it by hand if you want.
