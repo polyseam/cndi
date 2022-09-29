@@ -20,7 +20,7 @@ export default async function install(context: CNDIContext) {
         Deno.writeTextFileSync(path.join(CNDI_HOME, key), file, {create: true, append: false});
     })
 
-    const cndiNodeRuntimeSetupBinaryURL = `https://serveon.site/cndi-node-runtime-setup-${binaryForPlatform}`;
+    const cndiNodeRuntimeSetupBinaryURL = `https://cndi-binaries.s3.amazonaws.com/cnrs/1.0.0/cndi-node-runtime-setup-${binaryForPlatform}`;
     const cndiNodeRuntimeSetupBinaryPath = path.join(CNDI_HOME, `cndi-node-runtime-setup-${binaryForPlatform}`);
 
     const fileResponse = await fetch (cndiNodeRuntimeSetupBinaryURL);
