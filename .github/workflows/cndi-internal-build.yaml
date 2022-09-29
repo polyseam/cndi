@@ -16,7 +16,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: get version
-        uses: polyseam/get-version-from-package-json
+      - name: Get Version from package.json
+        uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-package-json-step
         with:
           path-to-package-json: './src/cndi-node-runtime-setup/package.json'
@@ -43,7 +44,8 @@ jobs:
           deno-version: v1.x
       - run: deno task build
       - name: get version
-        uses: polyseam/get-version-from-package-json
+      - name: Get Version from package.json
+        uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-deno-json-step
         with:
           path-to-package-json: './deno.jsonc'
