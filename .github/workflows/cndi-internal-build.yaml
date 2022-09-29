@@ -7,7 +7,8 @@ jobs:
   build-cnrs-binaries: # cndi-node-runtime-setup
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v3
       - name: use nodejs
         uses: actions/setup-node@v3
         with:
@@ -34,7 +35,8 @@ jobs:
   build-cndi-binaries: # cndi
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v3
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
