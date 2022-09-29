@@ -7,6 +7,7 @@ export const enum Command {
   run = "run",
   help = "help",
   default = "default",
+  install = "install",
 }
 
 // node.role is either "controller" or "worker"
@@ -62,6 +63,7 @@ interface CNDIContext {
   githubDirectory: string;
   pathToConfig: string;
   pathToNodes: string;
+  binaryForPlatform: string;
   noGitHub: boolean;
 }
 
