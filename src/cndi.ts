@@ -5,6 +5,8 @@ import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
 import { checkInstalled } from "./utils.ts";
 import { Command } from "./types.ts";
+import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
@@ -102,7 +104,7 @@ export default async function main(args: string[]) {
     if (operation !== "install" ) {
       // One time only setup
       if (!(await checkInstalled(context))) {
-        console.error("cndi is not installed. Run 'cndi install' and try again.");
+        console.error(brightRed("\ncndi is not installed!\nrun"),cyan('cndi install'),brightRed("and try again.\n"));
         Deno.exit(1);
       }
     }
