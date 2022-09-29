@@ -15,14 +15,14 @@ jobs:
         with:
           node-version: 16.x
       - run: npm ci
-        working-directory: './src/cndi-node-runtime-setup'
+        working-directory: ./src/cndi-node-runtime-setup
       - run: npm run build
-        working-directory: './src/cndi-node-runtime-setup'
+        working-directory: ./src/cndi-node-runtime-setup
       - name: Get Version from package.json
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-package-json-step
         with:
-          path-to-package-json: './src/cndi-node-runtime-setup/package.json'
+          path-to-package-json: ./src/cndi-node-runtime-setup/package.json
       - id: upload-source-code
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -32,7 +32,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
-          SOURCE_DIR: './src/cndi-node-runtime-setup/dist'
+          SOURCE_DIR: ./src/cndi-node-runtime-setup/dist
           DEST_DIR: 'cnrs/${{ steps.get-version-from-package-json-step.outputs.version }}'
 
   build-cndi-binaries: # cndi
