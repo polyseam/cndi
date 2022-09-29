@@ -3,7 +3,7 @@ import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
 import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
-
+import { checkInstalled } from "./utils.ts";
 import { Command } from "./types.ts";
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
@@ -21,14 +21,14 @@ const binaryForPlatform = {
   win32: "win.exe",
 };
 
-export default function main(args: string[]) {
+export default async function main(args: string[]) {
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   const executionDirectory = Deno.cwd();
   const homeDirectory = homedir() || "~";
   const CNDI_HOME = path.join(homeDirectory, ".cndi");
 
   // CNDI_SRC is determined at compile time, that's no good
-  const CNDI_SRC = path.join(CNDI_HOME, 'src');
+  const CNDI_SRC = path.join(CNDI_HOME, "src");
   const CNDI_WORKING_DIR = path.join(CNDI_HOME, ".working");
 
   // default paths to the user's config file
@@ -98,6 +98,15 @@ export default function main(args: string[]) {
   } else {
     // in any other case we will try to run the command
     const operation = `${commandsInArgs[0]}`;
+
+    if (operation !== "install" ) {
+      // One time only setup
+      if (!(await checkInstalled(context))) {
+        console.error("cndi is not installed. Run 'cndi install' and try again.");
+        Deno.exit(1);
+      }
+    }
+
     switch (operation) {
       case Command.install:
         commands[Command.install](context);

@@ -4,7 +4,7 @@ import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
 import { loadJSONC } from "../utils.ts";
-import { assert } from "https://deno.land/std/testing/asserts.ts";
+import { ensureInstalled } from "../utils.ts";
 
 import {
   CreateTagsCommand,
@@ -68,31 +68,6 @@ async function getKeyNameFromPublicKeyFile({
   return publicKeyFileTextContent.split(" ")[2];
 }
 
-async function ensureInstalled({
-  binaryForPlatform,
-  CNDI_HOME,
-  CNDI_SRC,
-}: CNDIContext) {
-  const CNDI_BINARY_PREFIX = "cndi-node-runtime-setup-";
-  const binaryPath = path.join(
-    CNDI_HOME,
-    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`
-  );
-
-  try {
-    await Promise.all([
-      Deno.stat(CNDI_HOME),
-      Deno.stat(CNDI_SRC),
-      Deno.stat(path.join(CNDI_SRC, "github")),
-      Deno.stat(path.join(CNDI_SRC, "bootstrap")),
-      Deno.stat(binaryPath),
-    ]);
-    return true;
-  } catch (e) {
-    console.log('not installed');
-    return false;
-  }
-}
 
 const aws = {
   addNode: (
@@ -199,12 +174,6 @@ const runFn = async (context: CNDIContext) => {
     ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
     ensureDir(path.join(CNDI_WORKING_DIR, "bootstrap")),
   ]);
-
-  if (! await ensureInstalled(context)) {
-    throw new Error(
-      "cndi run: cndi is not installed\n run 'cndi install' then try again"
-    );
-  }
 
   // load nodes from the nodes.json file
   const nodes = (await loadJSONC(pathToNodes)) as unknown as {
