@@ -23,10 +23,10 @@ export default async function install(context: CNDIContext) {
     const cndiNodeRuntimeSetupBinaryURL = `https://cndi-binaries.s3.amazonaws.com/cnrs/1.0.0/cndi-node-runtime-setup-${binaryForPlatform}`;
     const cndiNodeRuntimeSetupBinaryPath = path.join(CNDI_HOME, `cndi-node-runtime-setup-${binaryForPlatform}`);
 
-    const fileResponse = await fetch (cndiNodeRuntimeSetupBinaryURL);
+    const fileResponse = await fetch(cndiNodeRuntimeSetupBinaryURL);
     
     if(fileResponse.body){
-        const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {create: true, write: true});
+        const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {create: true, write: true, mode: 0o755});
         const writableStream = writableStreamFromWriter(file);
         await fileResponse.body.pipeTo(writableStream);
     }
