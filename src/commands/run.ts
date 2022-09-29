@@ -4,6 +4,7 @@ import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
 import { loadJSONC } from "../utils.ts";
+import cnrs from "../cnrs.ts";
 
 import {
   CreateTagsCommand,
@@ -66,7 +67,6 @@ async function getKeyNameFromPublicKeyFile({
   );
   return publicKeyFileTextContent.split(" ")[2];
 }
-
 
 const aws = {
   addNode: (
@@ -166,8 +166,13 @@ const runFn = async (context: CNDIContext) => {
 
   const clients: CNDIClients = {}; // we will add a client for each deployment target to this object
 
-  const { CNDI_WORKING_DIR, CNDI_SRC, CNDI_HOME, pathToNodes, binaryForPlatform } =
-    context;
+  const {
+    CNDI_WORKING_DIR,
+    CNDI_SRC,
+    CNDI_HOME,
+    pathToNodes,
+    binaryForPlatform,
+  } = context;
 
   await Promise.all([
     ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
@@ -440,41 +445,8 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
         console.log(`${vm.id} is ready`);
       });
 
-      // now we have a list of instances that are ready, and all the data they need to bootstrap
-      Deno.writeTextFileSync(
-        path.join(CNDI_WORKING_DIR, "live.nodes.json"),
-        JSON.stringify(provisionedInstances, null, 2)
-      );
-
-      // calling bootstrap using node.js (hack until we can use deno)
-      // when this finishes successfully, the cluster is ready
-
-      const binaryName = `cndi-node-runtime-setup-${binaryForPlatform}`;
-
-      // execute the cndi-node-runtime-setup binary for the current envionment
-      const binaryPath = path.join(
-        CNDI_HOME,
-        binaryName
-      );
-
-      const p = Deno.run({
-        cmd: [binaryPath, CNDI_WORKING_DIR],
-        stdout: "piped",
-        stderr: "piped",
-      });
-
-      const { code } = await p.status();
-      // Reading the outputs closes their pipes
-      const rawOutput = await p.output();
-      const rawError = await p.stderrOutput();
-
-      if (code === 0) {
-        // CNDI cluster deployed successfully
-        await Deno.stdout.write(rawOutput);
-      } else {
-        const errorString = new TextDecoder().decode(rawError);
-        console.log(errorString);
-      }
+      // use node entries to ssh into each node and run the bootstrap script
+      await cnrs(provisionedInstances, context);
     };
   } catch (err) {
     console.log('error in "cndi run"');

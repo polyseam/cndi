@@ -1,5 +1,5 @@
 .env
-private.pem
+#private.pem
 public.pub
 .DS_Store
 

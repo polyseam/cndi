@@ -1,32 +1,31 @@
-const path = require("path");
-const { NodeSSH } = require("node-ssh");
-const fs = require("fs");
+import { NodeSSH } from "npm:node-ssh@13.0.0";
+import { CNDIContext, NodeEntry } from "./types.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 
-const username = "ubuntu";
-
-const workingDir = process.argv[2]; // node bootstrap.js ${workingDir}
-
-const privateKeyPath = path.join(workingDir, "keys", "private.pem");
-const nodesPath = path.join(workingDir, "live.nodes.json");
-
-const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
-
-if (!Array.isArray(nodes)) {
-  throw new Error("bootstrap.js: unable to parse ./nodes.json");
-} else {
-  console.log("bootstrap.js: nodes.json parsed successfully");
-  console.log("bootstrap.js: nodes.json:", nodes);
+export interface CNRSNode {
+  id: string;
+  publicIpAddress: string;
+  role: "working" | "controller";
 }
 
-const ssh = new NodeSSH();
-
 // use a nodes public ip address to ssh in, copy the bootstrap script for the respective role and execute it
-async function bootstrap(node) {
+async function bootstrap(
+  node: NodeEntry,
+  { CNDI_WORKING_DIR, CNDI_SRC }: CNDIContext
+) {
+  const username = "ubuntu";
+  console.log("CNDI_Woking_DIR", CNDI_WORKING_DIR);
+
+  const ssh = new NodeSSH();
   console.log("sshing into", node.role, "at", node.publicIpAddress);
   const { role } = node;
 
-  const source = path.join(workingDir, "bootstrap", role);
   const dest = `/home/ubuntu/${role}`;
+  const source = path.join(CNDI_SRC, "bootstrap", role);
+  const privateKeyPath = path.join(CNDI_WORKING_DIR, "keys", "private.pem");
+
+  console.log("privateKeyPath", privateKeyPath);
+  console.log(Deno.readTextFileSync(privateKeyPath));
 
   // use keypair to connect
   await ssh.connect({
@@ -42,17 +41,19 @@ async function bootstrap(node) {
   const bootstrapResult = await ssh.execCommand(`. ${role}/bootstrap.sh`, {
     cwd: "/home/ubuntu",
   });
+
   console.log(`${node.id} stdout:`, bootstrapResult?.stdout);
   console.log(`${node.id} stderr:`, bootstrapResult?.stderr);
+
   // kill the ssh connection
   await ssh.dispose();
 }
 
-async function go(nodes) {
+async function go(nodes: Array<NodeEntry>, context: CNDIContext) {
   // for loop that runs bootstrap for each node in the nodes array
   for (let i = 0; i < nodes.length; i++) {
-    await bootstrap(nodes[i]);
+    await bootstrap(nodes[i], context);
   }
 }
 
-go(nodes);
+export default go;
