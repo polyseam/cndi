@@ -6,7 +6,7 @@
   "bin": "src/bootstrap.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pkg . -C GZip --debug"
+    "build": "pkg . --compress GZip --debug"
   },
   "author": "",
   "license": "ISC",

@@ -3,8 +3,9 @@ import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
-import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { loadJSONC } from "../utils.ts";
+import { assert } from "https://deno.land/std/testing/asserts.ts";
+
 import {
   CreateTagsCommand,
   DescribeInstanceStatusCommand,
@@ -34,12 +35,6 @@ import {
   CNDIClients,
 } from "../types.ts";
 
-const binaryForPlatform = {
-  linux: "linux",
-  darwin: "macos",
-  win32: "win.exe",
-};
-
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
 
@@ -54,7 +49,7 @@ import getRepoConfigManifest from "../templates/repo-config.ts";
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
-const DEFAULT_AWS_IMAGE_ID = "ami-0180ef4f54678af5f";
+const DEFAULT_AWS_IMAGE_ID = "ami-06e67c2c137e90884";
 
 const DEFAULT_BOOT_DISK_VOLUME_GIB = 80;
 
@@ -71,6 +66,32 @@ async function getKeyNameFromPublicKeyFile({
     path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME)
   );
   return publicKeyFileTextContent.split(" ")[2];
+}
+
+async function ensureInstalled({
+  binaryForPlatform,
+  CNDI_HOME,
+  CNDI_SRC,
+}: CNDIContext) {
+  const CNDI_BINARY_PREFIX = "cndi-node-runtime-setup-";
+  const binaryPath = path.join(
+    CNDI_HOME,
+    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`
+  );
+
+  try {
+    await Promise.all([
+      Deno.stat(CNDI_HOME),
+      Deno.stat(CNDI_SRC),
+      Deno.stat(path.join(CNDI_SRC, "github")),
+      Deno.stat(path.join(CNDI_SRC, "bootstrap")),
+      Deno.stat(binaryPath),
+    ]);
+    return true;
+  } catch (e) {
+    console.log('not installed');
+    return false;
+  }
 }
 
 const aws = {
@@ -171,7 +192,19 @@ const runFn = async (context: CNDIContext) => {
 
   const clients: CNDIClients = {}; // we will add a client for each deployment target to this object
 
-  const { CNDI_WORKING_DIR, CNDI_SRC, pathToNodes } = context;
+  const { CNDI_WORKING_DIR, CNDI_SRC, pathToNodes, binaryForPlatform } =
+    context;
+
+  await Promise.all([
+    ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
+    ensureDir(path.join(CNDI_WORKING_DIR, "bootstrap")),
+  ]);
+
+  if (! await ensureInstalled(context)) {
+    throw new Error(
+      "cndi run: cndi is not installed\n run 'cndi install' then try again"
+    );
+  }
 
   // load nodes from the nodes.json file
   const nodes = (await loadJSONC(pathToNodes)) as unknown as {
@@ -196,11 +229,6 @@ const runFn = async (context: CNDIContext) => {
 
   // generate a 32 character token for microk8s
   const token = crypto.randomUUID().replaceAll("-", "").slice(0, 32);
-
-  await Promise.all([
-    ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
-    ensureDir(path.join(CNDI_WORKING_DIR, "bootstrap")),
-  ]);
 
   await copy(
     path.join(CNDI_SRC, "bootstrap"),
@@ -452,11 +480,16 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
 
       // calling bootstrap using node.js (hack until we can use deno)
       // when this finishes successfully, the cluster is ready
-      const currentPlatform = platform() as "linux" | "darwin" | "win32";
-      const binaryName = `cndi-node-runtime-setup-${binaryForPlatform[currentPlatform]}`;
+
+      const binaryName = `cndi-node-runtime-setup-${binaryForPlatform}`;
 
       // execute the cndi-node-runtime-setup binary for the current envionment
-      const binaryPath = path.join(CNDI_SRC, "cndi-node-runtime-setup", "dist", binaryName);
+      const binaryPath = path.join(
+        CNDI_SRC,
+        "cndi-node-runtime-setup",
+        "dist",
+        binaryName
+      );
 
       const p = Deno.run({
         cmd: [binaryPath, CNDI_WORKING_DIR],
