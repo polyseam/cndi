@@ -2,9 +2,9 @@
   "version": "1.0.0",
   "tasks": {
     "stringUp": "deno run -A --unstable src/installer/doStringUp.ts",
-    "compile-win": "deno compile --unstable -A --output dist/cndi-win.exe main.ts",
-    "compile-linux": "deno compile --unstable -A --output dist/cndi-linux main.ts",
-    "compile-mac": "deno compile --unstable -A --output dist/cndi-mac main.ts",
+    "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
+    "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
+    "compile-mac": "deno compile --unstable -A --target x86_64-apple-darwin --output dist/cndi-mac main.ts",
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "build": "deno task stringUp && deno task compile-all"
   }
