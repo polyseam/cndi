@@ -15,7 +15,6 @@ jobs:
           node-version: 16.x
       - run: npm ci
       - run: npm run build
-      - name: get version
       - name: Get Version from package.json
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-package-json-step
@@ -43,7 +42,6 @@ jobs:
         with:
           deno-version: v1.x
       - run: deno task build
-      - name: get version
       - name: Get Version from package.json
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-deno-json-step
