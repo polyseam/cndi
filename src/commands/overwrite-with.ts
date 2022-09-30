@@ -1,38 +1,57 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { loadJSONC } from "../utils.ts";
+import { loadJSONC, checkInitialized } from "../utils.ts";
 import { CNDIContext, CNDIConfig } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import RootChartYaml from "../templates/root-chart.ts";
+import getDotEnv from "../templates/env.ts";
 
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
  * */
-const overwriteWithFn = async (
-  {
+const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
+  const {
     pathToConfig,
     githubDirectory,
     noGitHub,
     CNDI_SRC,
     outputDirectory,
     pathToNodes,
-  }: CNDIContext,
-  initializing = false
-) => {
+    noDotEnv,
+    dotEnvPath,
+  } = context;
   if (!initializing) {
     console.log(`cndi overwrite-with -f "${pathToConfig}"`);
-  } else if (!noGitHub) {
-    try {
-      // overwrite the github workflows and readme, do not clobber other files
-      await copy(path.join(CNDI_SRC, "github"), githubDirectory, {
-        overwrite: true,
-      });
-    } catch (githubCopyError) {
-      console.log("failed to copy github integration files");
-      console.error(githubCopyError);
+  } else {
+    const directoryContainsCNDIFiles = await checkInitialized(context);
+
+    const shouldContinue = directoryContainsCNDIFiles
+      ? confirm(
+          "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
+        )
+      : true;
+
+    if (!shouldContinue) {
+      Deno.exit(0);
+    }
+
+    if (!noGitHub) {
+      try {
+        // overwrite the github workflows and readme, do not clobber other files
+        await copy(path.join(CNDI_SRC, "github"), githubDirectory, {
+          overwrite: true,
+        });
+      } catch (githubCopyError) {
+        console.log("failed to copy github integration files");
+        console.error(githubCopyError);
+      }
+    }
+    if (!noDotEnv) {
+      await Deno.writeTextFile(dotEnvPath, getDotEnv());
     }
   }
+
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
   const cluster = config?.cluster || {};

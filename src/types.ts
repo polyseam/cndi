@@ -61,10 +61,12 @@ interface CNDIContext {
   CNDI_WORKING_DIR: string;
   outputDirectory: string;
   githubDirectory: string;
+  dotEnvPath: string;
   pathToConfig: string;
   pathToNodes: string;
   binaryForPlatform: string;
   noGitHub: boolean;
+  noDotEnv: boolean;
 }
 
 // incomplete type, NodeSpec will have more options

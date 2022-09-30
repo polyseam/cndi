@@ -58,15 +58,20 @@ export default async function main(args: string[]) {
   const pathToNodes = path.join(outputDirectory, "nodes.json");
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
+  const dotEnvPath = path.join(outputOption, ".env");
+
   const noGitHub = cndiArguments["no-github"] || false;
+  const noDotEnv = cndiArguments["no-dotenv"] || false;
 
   const context = {
-    CNDI_HOME, // ~/.cndi (or equivalent)
-    CNDI_SRC, // ~/.cndi/src
-    CNDI_WORKING_DIR, // ~/.cndi/.working
-    outputDirectory, // Deno.cwd()/cndi
-    githubDirectory, // Deno.cwd()/.github
+    CNDI_HOME, // ~/.cndi (or equivalent) (default)
+    CNDI_SRC, // ~/.cndi/src (default)
+    CNDI_WORKING_DIR, // ~/.cndi/.working (default)
+    outputDirectory, // Deno.cwd()/cndi (default)
+    githubDirectory, // Deno.cwd()/.github (default)
+    dotEnvPath, // Deno.cwd()/.env (default)
     noGitHub,
+    noDotEnv,
     pathToConfig,
     pathToNodes,
     binaryForPlatform: binaryForPlatform[currentPlatform],
