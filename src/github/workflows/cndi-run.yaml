@@ -19,8 +19,12 @@ jobs:
         with:
           path-to-file: cndi/nodes.json
       - name: setup cndi
-        uses: polyseam/setup-cndi@1.0.0
+        uses: polyseam/setup-cndi@1.0.3
+        with:
+          version: 1.0.0
+      - name: cndi chmod
+        run: chmod +x bin/cndi
+      - name: cndi install
+        run: bin/cndi install
       - name: cndi run
-        run: cndi run
-
-# TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action
+        run: bin/cndi run
