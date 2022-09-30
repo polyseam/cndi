@@ -19,7 +19,7 @@ jobs:
         with:
           path-to-file: cndi/nodes.json
       - name: setup cndi
-        uses: polyseam/setup-cndi
+        uses: polyseam/setup-cndi@1.0.0
       - name: cndi run
         run: cndi run
 
