@@ -23,6 +23,8 @@ import type {
   DescribeInstanceStatusCommandOutput,
   EnableSerialConsoleAccessCommandOutput,
   Reservation,
+  Instance,
+  EC2Client as EC2ClientType,
 } from "https://esm.sh/v95/@aws-sdk/client-ec2@3.178.0/dist-types/index.d.ts";
 
 import {
@@ -67,6 +69,45 @@ async function getKeyNameFromPublicKeyFile({
   return publicKeyFileTextContent.split(" ")[2];
 }
 
+const getUndeployedNamedNodesForRepo = async (
+  nodeNames: Array<string>,
+  ec2Client: EC2ClientType,
+  gitRepo: string
+) => {
+  console.log('checking which nodes are already deployed');
+  // get the nodes that have the repo tag
+  const describeInstancesCommand = new DescribeInstancesCommand({
+    Filters: [
+      {
+        Name: "tag:CNDIBoundToRepo",
+        Values: [gitRepo],
+      },
+      {
+        Name: "tag:Name",
+        Values: nodeNames,
+      },
+      {
+        Name: "instance-state-name",
+        Values: ["running"],
+      }
+    ],
+  });
+
+  const describeInstancesResponse = await ec2Client.send(
+    describeInstancesCommand
+  );
+
+  const deployedNodeNames = describeInstancesResponse.Reservations.map(
+    (reservation: Reservation) => {
+      const Instances = reservation.Instances as Instance[];
+      const instance = Instances[0];
+      return instance.Tags?.find(({ Key }) => Key === "Name")?.Value;
+    }
+  );
+  console.log('deployedNodeNames', deployedNodeNames);
+
+  return nodeNames.filter((nodeName) => !deployedNodeNames.includes(nodeName));
+};
 
 const aws = {
   addNode: (
@@ -166,8 +207,13 @@ const runFn = async (context: CNDIContext) => {
 
   const clients: CNDIClients = {}; // we will add a client for each deployment target to this object
 
-  const { CNDI_WORKING_DIR, CNDI_SRC, CNDI_HOME, pathToNodes, binaryForPlatform } =
-    context;
+  const {
+    CNDI_WORKING_DIR,
+    CNDI_SRC,
+    CNDI_HOME,
+    pathToNodes,
+    binaryForPlatform,
+  } = context;
 
   await Promise.all([
     ensureDir(path.join(CNDI_WORKING_DIR, "keys")),
@@ -191,6 +237,8 @@ const runFn = async (context: CNDIContext) => {
       };
     }
   );
+
+  const entriesToDeploy = [];
 
   // generate a keypair for communicating with the nodes when they come online
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
@@ -289,8 +337,19 @@ const runFn = async (context: CNDIContext) => {
 
     clients.aws = new EC2Client(awsConfig);
 
+    const undeployedNodeEntries = await getUndeployedNamedNodesForRepo(
+      entries.map(({ name }) => name),
+      clients.aws,
+      gitRepo
+    );
+
+    entriesToDeploy.push(
+      ...entries.filter((e) => undeployedNodeEntries.includes(e.name))
+    );
+
     console.log("aws nodes found...");
     console.log("uploading keypair to aws");
+
     (await clients.aws.send(
       new EnableSerialConsoleAccessCommand({ DryRun: false })
     )) as EnableSerialConsoleAccessCommandOutput;
@@ -306,8 +365,13 @@ const runFn = async (context: CNDIContext) => {
   console.log("provisioning nodes");
 
   // take each node entry and ask it's deployment target to provision it
+  if(!entriesToDeploy.length) {
+    console.log("no nodes to deploy");
+    Deno.exit(0)
+  }
+
   const provisionedInstances = await provisionNodes(
-    entries,
+    entriesToDeploy,
     KeyName,
     pathToNodes,
     clients
@@ -332,6 +396,10 @@ const runFn = async (context: CNDIContext) => {
             {
               Key: "CNDIRun",
               Value: "true",
+            },
+            {
+              Key: "CNDIBoundToRepo",
+              Value: gitRepo,
             },
           ],
         };
@@ -452,10 +520,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
       const binaryName = `cndi-node-runtime-setup-${binaryForPlatform}`;
 
       // execute the cndi-node-runtime-setup binary for the current envionment
-      const binaryPath = path.join(
-        CNDI_HOME,
-        binaryName
-      );
+      const binaryPath = path.join(CNDI_HOME, binaryName);
 
       const p = Deno.run({
         cmd: [binaryPath, CNDI_WORKING_DIR],

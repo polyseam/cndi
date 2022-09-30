@@ -18,4 +18,9 @@ jobs:
         uses: johnstonmatt/is-valid-json-action@v.1.0.1
         with:
           path-to-file: cndi/nodes.json
+      - name: setup cndi
+        uses: polyseam/setup-cndi
+      - name: cndi run
+        run: cndi run
+
 # TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action
