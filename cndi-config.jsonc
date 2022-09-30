@@ -2,7 +2,7 @@
   "nodes": {
     "entries": [
       {
-        "name": "m-aws-contoller-x2",
+        "name": "airflow-controller",
         "role": "controller",
         "InstanceType": "t2.large",
         "kind": "aws"
@@ -19,7 +19,7 @@
       "targetRevision": "1.6.0",
       "destinationNamespace": "airflow",
       "repoURL": "https://airflow.apache.org",
-      "chart": "airflow", // => get values.schema.json from https://github.com/apache/airflow
+      "chart": "airflow",
       "values": {
         "dags": {
           "gitSync": {
@@ -27,7 +27,7 @@
             "repo": "https://github.com/polyseam/demo-dag-bag",
             "branch": "main",
             "wait": 70,
-            "subPath": ""
+            "subPath": "dags"
           }
         },
         "logs": {
@@ -44,5 +44,66 @@
       }
     }
   },
-  "cluster": {}
+  "cluster": {
+    "airflow-ingress": {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "name": "airflow-ingress",
+        "namespace": "airflow"
+      },
+      "spec": {
+        "rules": [
+          {
+            "http": {
+              "paths": [
+                {
+                  "path": "/airflow",
+                  "pathType": "Prefix",
+                  "backend": {
+                    "service": {
+                      "name": "airflow-webserver",
+                      "port": {
+                        "number": 8080
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "argo-ingress": {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "name": "argo-ingress",
+        "namespace": "argocd"
+      },
+      "spec": {
+        "rules": [
+          {
+            "http": {
+              "paths": [
+                {
+                  "path": "/argo",
+                  "pathType": "Prefix",
+                  "backend": {
+                    "service": {
+                      "name": "argocd-server",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
 }
