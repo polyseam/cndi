@@ -26,7 +26,7 @@ export default async function install(context: CNDIContext) {
     const fileResponse = await fetch(cndiNodeRuntimeSetupBinaryURL);
     
     if(fileResponse.body){
-        const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {create: true, write: true, mode: 0o755});
+        const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {create: true, write: true, mode: 0o777});
         const writableStream = writableStreamFromWriter(file);
         await fileResponse.body.pipeTo(writableStream);
     }
