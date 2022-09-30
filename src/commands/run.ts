@@ -74,7 +74,7 @@ const getUndeployedNamedNodesForRepo = async (
   ec2Client: EC2ClientType,
   gitRepo: string
 ) => {
-  console.log('checking which nodes are already deployed');
+  console.log("checking which nodes are already deployed");
   // get the nodes that have the repo tag
   const describeInstancesCommand = new DescribeInstancesCommand({
     Filters: [
@@ -89,22 +89,22 @@ const getUndeployedNamedNodesForRepo = async (
       {
         Name: "instance-state-name",
         Values: ["running"],
-      }
+      },
     ],
   });
 
-  const describeInstancesResponse = await ec2Client.send(
-    describeInstancesCommand
-  );
+  // deno-lint-ignore no-explicit-any
+  const describeInstancesResponse = await ec2Client.send(describeInstancesCommand as any ) as DescribeInstancesCommandOutput;
 
-  const deployedNodeNames = describeInstancesResponse.Reservations.map(
+  const reservations = describeInstancesResponse?.Reservations as Array<Reservation>;
+
+  const deployedNodeNames = reservations.map(
     (reservation: Reservation) => {
       const Instances = reservation.Instances as Instance[];
       const instance = Instances[0];
       return instance.Tags?.find(({ Key }) => Key === "Name")?.Value;
     }
   );
-  console.log('deployedNodeNames', deployedNodeNames);
 
   return nodeNames.filter((nodeName) => !deployedNodeNames.includes(nodeName));
 };
@@ -365,9 +365,9 @@ const runFn = async (context: CNDIContext) => {
   console.log("provisioning nodes");
 
   // take each node entry and ask it's deployment target to provision it
-  if(!entriesToDeploy.length) {
+  if (!entriesToDeploy.length) {
     console.log("no nodes to deploy");
-    Deno.exit(0)
+    Deno.exit(0);
   }
 
   const provisionedInstances = await provisionNodes(
