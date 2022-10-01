@@ -10,22 +10,20 @@ This doc is going to walk through the "golden path" for CNDIv2. It uses the GitH
 
 4. Run `cndi install`
 
-5. Run `cd magic-demo` and create a `cndi-config.jsonc` file in the root of the directory
+5. Download the following file and place it in the `magic-demo` folder. [/cndi-config.jsonc](/cndi-config.jsonc)
 
-6. Download the following file and place it in the `magic-demo` folder. [/cndi-config.jsonc](/cndi-config.jsonc)
+6. Run `cndi init`
 
-7. Run `cndi init`
+7. Populate your environment variables in the `.env` file
 
-8. Populate your environment variables in the `.env` file
+8. Run `gh secret set -f .env`
 
-9. Run `gh secret set -f .env`
+9. Run `git add .`
 
-10. Run `git add .`
+10. Run `git status`
 
-11. Run `git status`
+11. Run `git commit -m 'first commit'`
 
-12. Run `git commit -m 'first commit'`
+12. Run `git push`
 
-13. Run `git push`
-
-14. Watch the magic 🪄
+13. Watch the magic 🪄
