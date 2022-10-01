@@ -3,7 +3,6 @@ const getDotEnv = (): string => {
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=
-AWS_SDK_LOAD_CONFIG=
 
 # Git Credentials
 GIT_USERNAME=
