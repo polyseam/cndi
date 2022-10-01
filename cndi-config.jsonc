@@ -45,7 +45,7 @@
     }
   },
   "cluster": {
-    "airflow-ingress": {
+    "ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",
       "metadata": {
@@ -58,43 +58,13 @@
             "http": {
               "paths": [
                 {
-                  "path": "/airflow",
+                  "path": "/",
                   "pathType": "Prefix",
                   "backend": {
                     "service": {
                       "name": "airflow-webserver",
                       "port": {
                         "number": 8080
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "argo-ingress": {
-      "apiVersion": "networking.k8s.io/v1",
-      "kind": "Ingress",
-      "metadata": {
-        "name": "argo-ingress",
-        "namespace": "argocd"
-      },
-      "spec": {
-        "rules": [
-          {
-            "http": {
-              "paths": [
-                {
-                  "path": "/argo",
-                  "pathType": "Prefix",
-                  "backend": {
-                    "service": {
-                      "name": "argocd-server",
-                      "port": {
-                        "number": 80
                       }
                     }
                   }
