@@ -1,7 +1,7 @@
 const getRepoConfigManifest = (
   repoUrl: string,
   gitUsername: string,
-  gitPassword: string
+  gitPassword: string,
 ): string => {
   return `apiVersion: v1
 kind: Secret

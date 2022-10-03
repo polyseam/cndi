@@ -61,13 +61,13 @@ const manifestFramework = {
 
 const getApplicationManifest = (
   releaseName: string,
-  applicationSpec: CNDIApplicationSpec
+  applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
   // TODO: helm and argo require that values be passed into argocd as a string when using a helm chart repo instead of git
   // This means that we need to have this very ugly string in the manifests that we generate
   const values = JSON.stringify(applicationSpec.values ?? {}).replaceAll(
     '"',
-    '\"'
+    '"',
   );
   const manifest = {
     ...manifestFramework,
@@ -78,14 +78,14 @@ const getApplicationManifest = (
       },
     },
     spec: {
-        ...manifestFramework.spec,
+      ...manifestFramework.spec,
       source: {
         ...manifestFramework.spec.source,
         repoURL: applicationSpec.repoURL,
         targetRevision: applicationSpec.targetRevision,
         chart: applicationSpec.chart,
         helm: {
-            ...manifestFramework.spec.source.helm,
+          ...manifestFramework.spec.source.helm,
           values,
         },
       },

@@ -1,6 +1,5 @@
 // list of all commands for the CLI
 
-
 export const enum Command {
   init = "init",
   "overwrite-with" = "overwrite-with",
@@ -41,8 +40,8 @@ interface CNDIConfig {
     [key: string]: CNDIApplicationSpec;
   };
   cluster: {
-    [key:string]: unknown;
-  }
+    [key: string]: unknown;
+  };
 }
 
 interface CNDIApplicationSpec {
@@ -92,12 +91,12 @@ interface CNDIClients {
 }
 
 export type {
+  CNDIApplicationSpec,
+  CNDIClients,
   CNDIConfig,
+  CNDIContext,
   CNDINode,
   CNDINodes,
-  CNDIApplicationSpec,
-  NodeSpec,
   NodeEntry,
-  CNDIClients,
-  CNDIContext,
+  NodeSpec,
 };

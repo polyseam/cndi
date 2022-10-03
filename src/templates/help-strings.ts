@@ -1,12 +1,11 @@
-
 type HelpStrings = {
-    default: string;
-    init: string;
-    install: string;
-    "overwrite-with": string;
-    run: string;
-    help: string;
-}
+  default: string;
+  init: string;
+  install: string;
+  "overwrite-with": string;
+  run: string;
+  help: string;
+};
 
 const helpStrings: HelpStrings = {
   default: `
@@ -73,7 +72,7 @@ SYNOPSIS
 DESCRIPTION
         Reads files in the user's cndi directory and deploys as a cndi cluster
   `.trim(),
-  install:`
+  install: `
 NAME
         cndi-install - installs all critical source files needed to run the cndi CLI to the CNDI_HOME directory
 SYNOPSIS
@@ -83,7 +82,7 @@ DESCRIPTION
         
         Must be run once before using cndi!
   `.trim(),
-  help:`oops! "help" is not a command, you probably meant "--help"`
+  help: `oops! "help" is not a command, you probably meant "--help"`,
 };
 
 export { helpStrings };

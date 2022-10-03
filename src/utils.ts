@@ -15,7 +15,7 @@ async function checkInstalled({
   const CNDI_BINARY_PREFIX = "cndi-node-runtime-setup-";
   const binaryPath = path.join(
     CNDI_HOME,
-    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`
+    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`,
   );
 
   try {
@@ -51,4 +51,4 @@ async function checkInitialized({
   }
 }
 
-export { loadJSONC, checkInstalled, checkInitialized };
+export { checkInitialized, checkInstalled, loadJSONC };

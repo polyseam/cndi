@@ -1,7 +1,7 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { loadJSONC, checkInitialized } from "../utils.ts";
-import { CNDIContext, CNDIConfig } from "../types.ts";
+import { checkInitialized, loadJSONC } from "../utils.ts";
+import { CNDIConfig, CNDIContext } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
@@ -9,7 +9,7 @@ import getDotEnv from "../templates/env.ts";
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
- * */
+ */
 const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const {
     pathToConfig,
@@ -28,8 +28,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
-          "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
-        )
+        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+      )
       : true;
 
     if (!shouldContinue) {
@@ -54,7 +54,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
         if (!gitignoreContents.includes(".env")) {
           await Deno.writeTextFile(
             gitignorePath,
-            gitignoreContents + "\n.env\n"
+            gitignoreContents + "\n.env\n",
           );
         }
       } catch {
@@ -93,20 +93,20 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   Object.keys(cluster).forEach(async (key) => {
     await Deno.writeTextFile(
       path.join(outputDirectory, "cluster", `${key}.json`),
-      JSON.stringify(cluster[key], null, 2)
+      JSON.stringify(cluster[key], null, 2),
     );
   });
 
   // write the cndi/nodes.json file
   await Deno.writeTextFile(
     pathToNodes,
-    JSON.stringify(config?.nodes ?? {}, null, 2)
+    JSON.stringify(config?.nodes ?? {}, null, 2),
   );
 
   // write the cndi/cluster/Chart.yaml file
   await Deno.writeTextFile(
     path.join(outputDirectory, "cluster", "Chart.yaml"),
-    RootChartYaml
+    RootChartYaml,
   );
 
   const { applications } = config;
@@ -116,12 +116,12 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
-      applicationSpec
+      applicationSpec,
     );
     await Deno.writeTextFile(
       path.join(outputDirectory, "cluster", "applications", filename),
       manifestContent,
-      { create: true, append: false }
+      { create: true, append: false },
     );
     console.log("created application manifest:", filename);
   });
