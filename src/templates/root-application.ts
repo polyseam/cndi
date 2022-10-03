@@ -1,4 +1,4 @@
-const getApplicationManifest = (repoUrl: string): string => {
+const getRootApplicationManifest = (repoUrl: string): string => {
   return `apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -25,4 +25,4 @@ spec:
       - CreateNamespace=true`;
 };
 
-export default getApplicationManifest;
+export default getRootApplicationManifest;
