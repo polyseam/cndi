@@ -1,4 +1,4 @@
-# A Demo that is very cool
+# a demo that is very cool
 
 This doc is going to walk through the "golden path" for CNDIv2. It uses the GitHub CLI, but that isn't necessary.
 
