@@ -5,7 +5,6 @@ import { CNDIContext, CNDIConfig } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
-import { createCipher } from "https://deno.land/std@0.153.0/node/_crypto/crypto_browserify/browserify_aes/encrypter.js";
 
 /**
  * COMMAND fn: cndi overwrite-with
@@ -53,7 +52,10 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       try {
         const gitignoreContents = await Deno.readTextFile(gitignorePath);
         if (!gitignoreContents.includes(".env")) {
-          await Deno.writeTextFile(gitignorePath, gitignoreContents + "\n.env\n");
+          await Deno.writeTextFile(
+            gitignorePath,
+            gitignoreContents + "\n.env\n"
+          );
         }
       } catch {
         await Deno.writeTextFile(gitignorePath, "\n.env\n");
