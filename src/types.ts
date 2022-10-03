@@ -87,6 +87,7 @@ interface NodeEntry extends NodeSpec {
 }
 
 interface CNDIClients {
+  // deno-lint-ignore no-explicit-any
   aws?: any;
 }
 

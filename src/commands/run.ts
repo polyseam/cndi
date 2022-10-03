@@ -17,6 +17,7 @@ import {
 
 import type {
   CreateTagsCommandOutput,
+  DescribeInstancesCommand as DescribeInstancesCommandType,
   DescribeInstancesCommandOutput,
   DescribeInstanceStatusCommandOutput,
   EC2Client as EC2ClientType,
@@ -91,24 +92,21 @@ const getUndeployedNamedNodesForRepo = async (
         Values: ["running"],
       },
     ],
-  });
+  }) as unknown as DescribeInstancesCommandType;
 
-  // deno-lint-ignore no-explicit-any
-  const describeInstancesResponse = await ec2Client.send(
-    describeInstancesCommand as any,
-  ) as DescribeInstancesCommandOutput;
+  const describeInstancesResponse = (await ec2Client.send(
+    describeInstancesCommand,
+  )) as DescribeInstancesCommandOutput;
 
   const reservations = describeInstancesResponse?.Reservations as Array<
     Reservation
   >;
 
-  const deployedNodeNames = reservations.map(
-    (reservation: Reservation) => {
-      const Instances = reservation.Instances as Instance[];
-      const instance = Instances[0];
-      return instance.Tags?.find(({ Key }) => Key === "Name")?.Value;
-    },
-  );
+  const deployedNodeNames = reservations.map((reservation: Reservation) => {
+    const Instances = reservation.Instances as Instance[];
+    const instance = Instances[0];
+    return instance.Tags?.find(({ Key }) => Key === "Name")?.Value;
+  });
 
   return nodeNames.filter((nodeName) => !deployedNodeNames.includes(nodeName));
 };
