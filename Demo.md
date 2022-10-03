@@ -24,6 +24,6 @@ This doc is going to walk through the "golden path" for CNDIv2. It uses the GitH
 
 11. Run `git commit -m 'first commit'`
 
-12. Run `git push`
+12. Run `git push -u origin main`
 
 13. Watch the magic 🪄
