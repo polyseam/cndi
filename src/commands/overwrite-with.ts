@@ -48,6 +48,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       }
     }
     if (!noDotEnv) {
+      await Deno.writeTextFile(path.join(dotEnvPath, '..', '.gitignore'),'.env',{create:true, append:true});
       await Deno.writeTextFile(dotEnvPath, getDotEnv());
     }
   }
