@@ -6,16 +6,19 @@ GitHub CLI, but that isn't necessary.
 1. Ensure you have the GitHub CLI
    [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
 
-2. Run `gh repo create polyseam/magic-demo --private --clone` to create a
+2. Run `gh repo create polyseam/my-repo --private --clone` to create a
    private repo
 
-3. Run
-   `curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.zshrc`
-   to get the cndi executable
+3. To download your executable run:
+
+   ```bash
+   # macos (see README.md for windows and linux)
+   curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.zshrc
+   ```
 
 4. Run `cndi install`
 
-5. Download the following file and place it in the `magic-demo` folder.
+5. Download the following file and place it in the `my-repo` folder.
    [/cndi-config.jsonc](/cndi-config.jsonc)
 
 6. Run `cndi init`
