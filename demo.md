@@ -4,10 +4,15 @@ This doc is going to walk through the "golden path" for CNDIv2. It uses the
 GitHub CLI, but that isn't necessary.
 
 1. Ensure you have the GitHub CLI
-   [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
+   [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart), it will save us some time!
 
-2. Run `gh repo create polyseam/my-repo --private --clone` to create a
-   private repo
+2. To create a private GitHub repo run:
+
+   ```bash
+   gh repo create polyseam/my-repo --private --clone
+   ```
+
+   This is where we will store the desired state of our cluster, including `node` specifications, Kubernetes manifests, and more.
 
 3. To download your executable run:
 
@@ -16,23 +21,57 @@ GitHub CLI, but that isn't necessary.
    curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.zshrc
    ```
 
-4. Run `cndi install`
+4. CNDI needs to be installed after it is downloaded, to do this one-time setup run:
 
-5. Download the following file and place it in the `my-repo` folder.
+   ```bash
+   cndi install
+   ```
+
+5. Download the following file and place it in the `my-repo` folder:
    [/cndi-config.jsonc](/cndi-config.jsonc)
 
-6. Run `cndi init`
+   That file name `cndi-config.jsonc` is the default name for a cndi config file, so now when you are in the same directory cndi can pick it up automatically.
 
-7. Populate your environment variables in the `.env` file
+6. To initialize your cndi project run:
 
-8. Run `gh secret set -f .env`
+   ```bash
+   # if the file was not in this directory you could use the -f option to point to it
 
-9. Run `git add .`
+   cndi init
+   ```
 
-10. Run `git status`
+7. Populate your environment variables in the `.env` file.
 
-11. Run `git commit -m 'first commit'`
+   Running `cndi init` created a number of files, we need to add our own secrets to the `.env` file it created. Note: these are `gitignored` and should never be commited.
 
-12. Run `git push -u origin main`
+8. To take your secret variables and add them as repo secrets run:
+
+   ```bash
+   gh secret set -f .env
+   ```
+
+9. To stage the files cndi created for us run:
+
+   ```bash
+   git add .
+   ```
+
+10. To view the contents you are about to push to your repo run:
+
+   ```bash
+   git status
+   ```
+
+11. Commit those changes:
+
+   ```bash
+   git commit -m 'first commit'
+   ```
+
+12. Push those changes:
+
+   ```bash
+   git push -u origin main
+   ```
 
 13. Watch the magic 🪄
