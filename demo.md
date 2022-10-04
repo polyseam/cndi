@@ -63,7 +63,7 @@ GitHub CLI, but that isn't necessary.
    ```
 
 11. Commit those changes:
-   
+
    ```bash
    git commit -m 'first commit'
    ```
