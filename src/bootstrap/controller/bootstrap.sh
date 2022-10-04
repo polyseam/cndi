@@ -8,6 +8,8 @@ echo "Installing microk8s"
 sudo snap install microk8s --classic --channel=1.25/stable
 echo "Adding user to group"
 sudo usermod -a -G microk8s ubuntu
+echo "granting access to ~/.kube"
+sudo chown -f -R ubuntu ~/.kube
 echo "awaiting microk8s to be ready"
 sudo microk8s status --wait-ready
 echo "microk8s is ready"
@@ -37,14 +39,11 @@ sudo microk8s kubectl create namespace argocd
 echo "installing argocd with manifest"
 sudo microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-echo "sleeping for 60 seconds to allow argocd to start"
-sleep 60
+echo "configuring argocd"
 
-echo "configuring argo"
-
-microk8s kubectl apply -f /home/ubuntu/controller/argo-cmd-params.yaml
-microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
-microk8s kubectl apply -f /home/ubuntu/controller/root-application.yaml
+sudo microk8s kubectl apply -f /home/ubuntu/controller/argo-cmd-params.yaml
+sudo microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
+sudo microk8s kubectl apply -f /home/ubuntu/controller/root-application.yaml
 
 echo "argo configured"
 
