@@ -52,7 +52,7 @@ import getArgoCdCmdParamsConfigMap from "../templates/argo-cmd-params.ts";
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_AWS_INSTANCE_TYPE = "t2.micro";
-const DEFAULT_AWS_IMAGE_ID = "ami-0f779a94d1221cb60";
+const DEFAULT_AWS_IMAGE_ID = "ami-052e34d026807ed88";
 
 const DEFAULT_BOOT_DISK_VOLUME_GIB = 80;
 
