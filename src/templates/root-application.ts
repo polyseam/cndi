@@ -22,7 +22,13 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true`;
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 4m`;
 };
 
 export default getRootApplicationManifest;
