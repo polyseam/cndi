@@ -46,6 +46,7 @@ import createKeyPair from "../keygen/create-keypair.ts";
 // functions that return a manifest string for given parameters
 import getRootApplicationManifest from "../templates/root-application.ts";
 import getRepoConfigManifest from "../templates/repo-config.ts";
+import getArgoCdCmdParamsConfigMap from "../templates/argo-cmd-params.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -310,6 +311,16 @@ const runFn = async (context: CNDIContext) => {
       "root-application.yaml",
     ),
     getRootApplicationManifest(gitRepo),
+  );
+
+  await Deno.writeTextFile(
+    path.join(
+      CNDI_WORKING_DIR,
+      "bootstrap",
+      "controller",
+      "argo-cmd-params.yaml",
+    ),
+    getArgoCdCmdParamsConfigMap(),
   );
 
   // redundant file read is OK for now
