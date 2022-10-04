@@ -519,7 +519,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`,
         } else {
           console.log(`${vm.id} is a worker`);
         }
-        console.log(`${vm.id} is ready`);
+        console.log(`${vm.id} has booted up\nbootstrapping with cnrs`);
       });
 
       // now we have a list of instances that are ready, and all the data they need to bootstrap
