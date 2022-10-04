@@ -29,7 +29,7 @@ echo "installing argocd with manifest"
 sudo microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 echo "configuring argo"
 
-microk8s kubectl apply -f /home/ubuntu/controller/argo-cmd-commands.yaml
+microk8s kubectl apply -f /home/ubuntu/controller/argo-cmd-params.yaml
 microk8s kubectl apply -f /home/ubuntu/controller/repo-config.yaml
 microk8s kubectl apply -f /home/ubuntu/controller/root-application.yaml
 
