@@ -36,6 +36,10 @@ echo "creating argocd namespace"
 sudo microk8s kubectl create namespace argocd
 echo "installing argocd with manifest"
 sudo microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+echo "sleeping for 60 seconds to allow argocd to start"
+sleep 60
+
 echo "configuring argo"
 
 microk8s kubectl apply -f /home/ubuntu/controller/argo-cmd-params.yaml
