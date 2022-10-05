@@ -8,9 +8,9 @@ the needs of each Data Product.
 
 ## getting started
 
-To get started with `cndi-next` all you need to do is download the binary for
-your operating system, then call the install command!
+To get started with `cndi-next` all you need to do is download the binary for your operating system, then call the install command! 
 
+These binaries are compiled from the current state of the `main` branch.
 Different binaries are available for each OS:
 
 windows: https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-win.exe
