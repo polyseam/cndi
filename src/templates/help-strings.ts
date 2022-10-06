@@ -3,9 +3,29 @@ type HelpStrings = {
   init: string;
   install: string;
   "overwrite-with": string;
+  ow: string;
   run: string;
   help: string;
 };
+
+const owHelpString = `
+NAME
+        cndi-overwrite-with - reads a config file at the path supplied and uses it to overwrite the cndi project files in the ./cndi folder in your current directory.
+SYNOPSIS
+        cndi overwrite-with [-f <config-file>] [-o <directory>]
+        cndi ow [-f <config-file>] [-o <directory>]
+
+DESCRIPTION
+        Reads a config file and transforms that into a directory structure in the target directory that can later be deployed with "cndi run"
+OPTIONS
+        -f, --file
+            The file to read the config from. Defaults to "./cndi-config.jsonc" in the current directory. You can use this to specify properties of the CNDI cluster we will deploy updates to on your behalf.
+      
+            To generate a config file with our interactive tool, visit https://configurator.cndi.run (IN THE FUTURE)
+
+        -o --output <directory>
+            The directory in which to replace the manifests and resources needed to deploy the cndi project. Defaults to the current directory.
+`.trim();
 
 const helpStrings: HelpStrings = {
   default: `
@@ -48,22 +68,8 @@ OPTIONS
             The directory in which to create the manifests and resources needed to deploy the cndi project. Defaults to the current directory.
  
 `.trim(),
-  "overwrite-with": `
-NAME
-        cndi-overwrite-with - reads a config file at the path supplied and uses it to overwrite the cndi project files in the ./cndi folder in your current directory.
-SYNOPSIS
-        cndi overwrite-with [-f <config-file>] [-o <directory>]
-DESCRIPTION
-        Reads a config file and transforms that into a directory structure in the target directory that can later be deployed with "cndi run"
-OPTIONS
-        -f, --file
-            The file to read the config from. Defaults to "./cndi-config.jsonc" in the current directory. You can use this to specify properties of the CNDI cluster we will deploy updates to on your behalf.
-      
-            To generate a config file with our interactive tool, visit https://configurator.cndi.run (IN THE FUTURE)
-
-        -o --output <directory>
-            The directory in which to replace the manifests and resources needed to deploy the cndi project. Defaults to the current directory.
-`.trim(),
+  "overwrite-with": owHelpString,
+  ow: owHelpString,
   run: `
 NAME
         cndi-run - reads all manifests and other resources in the target directory and deploys them to deploy the project as a CNDI cluster
