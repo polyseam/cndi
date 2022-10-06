@@ -43,6 +43,8 @@ import {
 // utility that generates a valid rsa keypair
 import createKeyPair from "../keygen/create-keypair.ts";
 
+import cnrs from "../cnrs.ts";
+
 // functions that return a manifest string for given parameters
 import getRootApplicationManifest from "../templates/root-application.ts";
 import getRepoConfigManifest from "../templates/repo-config.ts";
@@ -66,7 +68,7 @@ async function getKeyNameFromPublicKeyFile({
 }: CNDIContext): Promise<string> {
   // ssh-rsa foobarbaznase64encodedGibberish cndi-key-Gibberish
   const publicKeyFileTextContent = await Deno.readTextFileSync(
-    path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME),
+    path.join(CNDI_WORKING_DIR, "keys", PUBLIC_KEY_FILENAME)
   );
   return publicKeyFileTextContent.split(" ")[2];
 }
@@ -74,7 +76,7 @@ async function getKeyNameFromPublicKeyFile({
 const getUndeployedNamedNodesForRepo = async (
   nodeNames: Array<string>,
   ec2Client: EC2ClientType,
-  gitRepo: string,
+  gitRepo: string
 ) => {
   console.log("checking which nodes are already deployed");
   // get the nodes that have the repo tag
@@ -96,12 +98,11 @@ const getUndeployedNamedNodesForRepo = async (
   }) as unknown as DescribeInstancesCommandType;
 
   const describeInstancesResponse = (await ec2Client.send(
-    describeInstancesCommand,
+    describeInstancesCommand
   )) as DescribeInstancesCommandOutput;
 
-  const reservations = describeInstancesResponse?.Reservations as Array<
-    Reservation
-  >;
+  const reservations =
+    describeInstancesResponse?.Reservations as Array<Reservation>;
 
   const deployedNodeNames = reservations.map((reservation: Reservation) => {
     const Instances = reservation.Instances as Instance[];
@@ -119,18 +120,19 @@ const aws = {
     deploymentTargetConfiguration: any,
     keyName: string,
     // deno-lint-ignore no-explicit-any
-    ec2Client?: any,
+    ec2Client?: any
   ) => {
     if (!ec2Client) {
       throw new Error("aws.addNode: EC2 Client not provided");
     }
     try {
       // set a user-specified AMI id if one is specified, otherwise use the default AMI id
-      const ImageId = deploymentTargetConfiguration?.aws?.ImageId ||
-        DEFAULT_AWS_IMAGE_ID;
+      const ImageId =
+        deploymentTargetConfiguration?.aws?.ImageId || DEFAULT_AWS_IMAGE_ID;
 
       // set a user-specified instance type if one is specified, otherwise use the default instance type
-      const InstanceType = deploymentTargetConfiguration?.aws?.InstanceType ||
+      const InstanceType =
+        deploymentTargetConfiguration?.aws?.InstanceType ||
         DEFAULT_AWS_INSTANCE_TYPE;
 
       // CNDI V1 boot disk mapping: --block-device-mappings DeviceName=/dev/sda1,Ebs={VolumeSize=$AWS_BOOT_VOL_SIZE}
@@ -167,7 +169,7 @@ const provisionNodes = async (
   nodes: Array<NodeEntry>,
   keyName: string,
   pathToNodes: string,
-  clients: CNDIClients,
+  clients: CNDIClients
 ): Promise<NodeEntry[]> => {
   // use ./cndi/nodes.json to get the deployment target configuration for the current node
   const config = (await loadJSONC(pathToNodes)) as unknown as CNDINodes;
@@ -181,12 +183,12 @@ const provisionNodes = async (
             node,
             config?.deploymentTargetConfiguration ?? {},
             keyName,
-            clients?.aws,
+            clients?.aws
           );
         default:
           throw new Error(`Unsupported node kind: ${node.kind}`); // if node.kind is not supported, throw
       }
-    }),
+    })
   )) as Array<RunInstancesCommandOutput>;
 
   // for each response from the deployment target, update the node
@@ -237,7 +239,7 @@ const runFn = async (context: CNDIContext) => {
         ready: false,
         InstanceType,
       };
-    },
+    }
   );
 
   const entriesToDeploy = [];
@@ -251,13 +253,13 @@ const runFn = async (context: CNDIContext) => {
   await copy(
     path.join(CNDI_SRC, "bootstrap"),
     path.join(CNDI_WORKING_DIR, "bootstrap"),
-    { overwrite: true },
+    { overwrite: true }
   );
 
   // write the token that the controller will register for it's microk8s peers
   await Deno.writeTextFile(
     path.join(CNDI_WORKING_DIR, "bootstrap", "controller", "join-token.txt"),
-    token,
+    token
   );
 
   // a bit extra: delete keys if they exist
@@ -274,7 +276,7 @@ const runFn = async (context: CNDIContext) => {
     publicKeyMaterial,
     {
       create: true,
-    },
+    }
   );
   await Deno.writeFile(
     path.join(CNDI_WORKING_DIR, "keys", PRIVATE_KEY_FILENAME),
@@ -282,7 +284,7 @@ const runFn = async (context: CNDIContext) => {
     {
       create: true,
       mode: 0o400, // this is a private key, make it readable only by the owner
-    },
+    }
   );
 
   // read repo credentials from the env of the machine running this script
@@ -299,7 +301,7 @@ const runFn = async (context: CNDIContext) => {
   // generate an argocd repo manifest with the git credentials
   await Deno.writeTextFile(
     path.join(CNDI_WORKING_DIR, "bootstrap", "controller", "repo-config.yaml"),
-    getRepoConfigManifest(gitRepo, gitUsername, gitPassword),
+    getRepoConfigManifest(gitRepo, gitUsername, gitPassword)
   );
 
   // generate a "root application" that all other applications will descend from
@@ -308,9 +310,9 @@ const runFn = async (context: CNDIContext) => {
       CNDI_WORKING_DIR,
       "bootstrap",
       "controller",
-      "root-application.yaml",
+      "root-application.yaml"
     ),
-    getRootApplicationManifest(gitRepo),
+    getRootApplicationManifest(gitRepo)
   );
 
   await Deno.writeTextFile(
@@ -318,9 +320,9 @@ const runFn = async (context: CNDIContext) => {
       CNDI_WORKING_DIR,
       "bootstrap",
       "controller",
-      "argo-cmd-params.yaml",
+      "argo-cmd-params.yaml"
     ),
-    getArgoCdCmdParamsConfigMap(),
+    getArgoCdCmdParamsConfigMap()
   );
 
   // redundant file read is OK for now
@@ -352,25 +354,25 @@ const runFn = async (context: CNDIContext) => {
     const undeployedNodeEntries = await getUndeployedNamedNodesForRepo(
       entries.map(({ name }) => name),
       clients.aws,
-      gitRepo,
+      gitRepo
     );
 
     entriesToDeploy.push(
-      ...entries.filter((e) => undeployedNodeEntries.includes(e.name)),
+      ...entries.filter((e) => undeployedNodeEntries.includes(e.name))
     );
 
     console.log("aws nodes found...");
     console.log("uploading keypair to aws");
 
     (await clients.aws.send(
-      new EnableSerialConsoleAccessCommand({ DryRun: false }),
+      new EnableSerialConsoleAccessCommand({ DryRun: false })
     )) as EnableSerialConsoleAccessCommandOutput;
 
     await clients.aws.send(
       new ImportKeyPairCommand({
         PublicKeyMaterial: publicKeyMaterial,
         KeyName,
-      }),
+      })
     );
   }
 
@@ -386,7 +388,7 @@ const runFn = async (context: CNDIContext) => {
     entriesToDeploy,
     KeyName,
     pathToNodes,
-    clients,
+    clients
   );
 
   // at this point we have a list of "provisioned instances" that are still waiting to come online
@@ -417,9 +419,9 @@ const runFn = async (context: CNDIContext) => {
         };
 
         return clients.aws?.send(
-          new CreateTagsCommand(tagParams),
+          new CreateTagsCommand(tagParams)
         ) as CreateTagsCommandOutput;
-      }),
+      })
     );
 
     // every few seconds we want to ask if our nodes are online yet
@@ -432,12 +434,11 @@ const runFn = async (context: CNDIContext) => {
 
       if (!allReady) {
         const response = (await clients.aws?.send(
-          new DescribeInstanceStatusCommand({ InstanceIds: ids }),
+          new DescribeInstanceStatusCommand({ InstanceIds: ids })
         )) as DescribeInstanceStatusCommandOutput;
 
-        const instanceStatuses = response.InstanceStatuses as Array<
-          InstanceStatus
-        >;
+        const instanceStatuses =
+          response.InstanceStatuses as Array<InstanceStatus>;
 
         // check if instance has a ready status and updates the node entry accordingly
         instanceStatuses.forEach((status) => {
@@ -452,14 +453,13 @@ const runFn = async (context: CNDIContext) => {
 
         // ask the deployment target about the addresses for the new instances
         const addressesResponse = (await clients.aws?.send(
-          new DescribeInstancesCommand({ InstanceIds: ids }),
+          new DescribeInstancesCommand({ InstanceIds: ids })
         )) as DescribeInstancesCommandOutput;
 
         // Every instance will be in it's own Reservation because we are deploying them one by one.
         // We deploy instances one by one so they can have different properties.
-        const Reservations = addressesResponse.Reservations as Array<
-          Reservation
-        >;
+        const Reservations =
+          addressesResponse.Reservations as Array<Reservation>;
 
         Reservations.forEach((reservation) => {
           // not sure we can guarantee return order of Reservations matches order of InstanceIds so we return the IDs too
@@ -471,7 +471,7 @@ const runFn = async (context: CNDIContext) => {
           };
 
           const instanceIndex = instances.findIndex(
-            (i) => i.id === instance.InstanceId,
+            (i) => i.id === instance.InstanceId
           );
           instances[instanceIndex] = {
             ...instances[instanceIndex],
@@ -498,7 +498,7 @@ const runFn = async (context: CNDIContext) => {
           "bootstrapping node",
           vm.id,
           "at publicIpAddress",
-          vm.publicIpAddress,
+          vm.publicIpAddress
         );
 
         if (vm.role === "controller") {
@@ -510,11 +510,11 @@ const runFn = async (context: CNDIContext) => {
               CNDI_WORKING_DIR,
               "bootstrap",
               "worker",
-              "accept-invite.sh",
+              "accept-invite.sh"
             ),
             `#!/bin/bash
 echo "accepting node invite with token ${token}"
-microk8s join ${vm.privateIpAddress}:25000/${token} --worker`,
+microk8s join ${vm.privateIpAddress}:25000/${token} --worker`
           );
         } else {
           console.log(`${vm.id} is a worker`);
@@ -522,38 +522,7 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`,
         console.log(`${vm.id} has booted up\nbootstrapping with cnrs`);
       });
 
-      // now we have a list of instances that are ready, and all the data they need to bootstrap
-      Deno.writeTextFileSync(
-        path.join(CNDI_WORKING_DIR, "live.nodes.json"),
-        JSON.stringify(provisionedInstances, null, 2),
-      );
-
-      // calling bootstrap using node.js (hack until we can use deno)
-      // when this finishes successfully, the cluster is ready
-
-      const binaryName = `cndi-node-runtime-setup-${binaryForPlatform}`;
-
-      // execute the cndi-node-runtime-setup binary for the current envionment
-      const binaryPath = path.join(CNDI_HOME, binaryName);
-
-      const p = Deno.run({
-        cmd: [binaryPath, CNDI_WORKING_DIR],
-        stdout: "piped",
-        stderr: "piped",
-      });
-
-      const { code } = await p.status();
-      // Reading the outputs closes their pipes
-      const rawOutput = await p.output();
-      const rawError = await p.stderrOutput();
-
-      if (code === 0) {
-        // CNDI cluster deployed successfully
-        await Deno.stdout.write(rawOutput);
-      } else {
-        const errorString = new TextDecoder().decode(rawError);
-        console.log(errorString);
-      }
+      await cnrs(provisionedInstances, context);
     };
   } catch (err) {
     console.log('error in "cndi run"');
