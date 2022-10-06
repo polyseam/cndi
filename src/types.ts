@@ -7,6 +7,7 @@ export const enum Command {
   help = "help",
   default = "default",
   install = "install",
+  ow="ow",
 }
 
 // node.role is either "controller" or "worker"

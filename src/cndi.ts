@@ -79,6 +79,7 @@ export default async function main(args: string[]) {
   const commands = {
     [Command.init]: initFn,
     [Command["overwrite-with"]]: overwriteWithFn,
+    [Command.ow]: overwriteWithFn,
     [Command.run]: runFn,
     [Command.help]: helpFn,
     [Command.install]: installFn,
@@ -128,6 +129,9 @@ export default async function main(args: string[]) {
         commands[Command.run](context);
         break;
       case Command["overwrite-with"]:
+        commands[Command["overwrite-with"]](context);
+        break;
+      case Command.ow:
         commands[Command["overwrite-with"]](context);
         break;
       default:
