@@ -6,8 +6,8 @@ GitHub CLI, but that isn't necessary.
 1. Ensure you have the GitHub CLI
    [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
 
-2. Run `gh repo create polyseam/my-repo --private --clone` to create a
-   private repo
+2. Run `gh repo create polyseam/my-repo --private --clone` to create a private
+   repo
 
 3. To download your executable run:
 
