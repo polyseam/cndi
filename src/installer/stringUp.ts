@@ -19,9 +19,8 @@ export default function stringUp(directories: Array<string>, out: string) {
     }
   });
 
-  const embeddedFiles = `export const embeddedFiles = ${
-    JSON.stringify(fileContents)
-  }`;
+  const embeddedFiles = `// This file is generated automatically, do not edit!
+export const embeddedFiles = ${JSON.stringify(fileContents)}`;
 
   Deno.writeTextFileSync(out, embeddedFiles);
 }
