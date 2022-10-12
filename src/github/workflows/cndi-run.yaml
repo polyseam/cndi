@@ -10,22 +10,37 @@ jobs:
     steps:
       - name: welcome
         run: echo "welcome to cndi!"
+
       - name: checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: validate-nodes
         uses: johnstonmatt/is-valid-json-action@v.1.0.1
         with:
           path-to-file: cndi/nodes.json
+
       - name: setup cndi
         uses: polyseam/setup-cndi@1.0.3
         with:
           version: 1.0.0
+
       - name: cndi chmod
         run: chmod +x bin/cndi # make cndi cli executable
+
       - name: cndi install
         run: bin/cndi install # run 'cndi install'
+
+      # this next step is loading the state.json from the most recent successful run
+      # this is only necessary in actions because actions have an ephemeral disk layer
+      - name: load-state-json
+        uses: actions/download-artifact@v3
+        with:
+          name: state-json
+          path: ~/.cndi/.working/state.json
+
+      # this is the core of the workflow
       - name: cndi run
         env:
           GIT_REPO:  https://github.com/${{ github.repository}}
@@ -35,3 +50,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: bin/cndi run  # run 'cndi run'
+
+      # if the deployment was successful we want to save the current state of the nodes for next time
+      # this is only necessary in actions because actions have an ephemeral disk layer
+      - name: cache-state-json
+        uses: actions/upload-artifact@v2
+        with:
+          name: state-json
+          path: ~/.cndi/.working/state.json
