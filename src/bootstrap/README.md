@@ -6,3 +6,6 @@ The contents of the `worker` directory will be copied to each vm with the role
 
 When all the files are copied to a node, we run `/${role}/bootstrap.sh` on the
 node, and it does the final runtime setup
+
+These files will be modified then installed in the `.cndi/src/bootstrap`
+directory.

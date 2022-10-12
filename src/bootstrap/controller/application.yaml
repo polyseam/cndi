@@ -12,7 +12,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     path: cndi/cluster
-    repoURL: https://github.com/polyseam/cndi-next-example-cluster
+    repoURL: _repoURL_
     targetRevision: HEAD
     directory:
       recurse: true

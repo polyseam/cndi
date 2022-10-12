@@ -6,6 +6,6 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
-  url: https://github.com/polyseam/cndi-next-example-cluster
-  username: johnstonmatt
-  password: ghp_6458611d1ef14082b137fea7cfd41f99
+  url: _url_
+  username: _username_
+  password: _password_

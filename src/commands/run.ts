@@ -47,6 +47,7 @@ import createKeyPair from "../keygen/create-keypair.ts";
 import getRootApplicationManifest from "../templates/root-application.ts";
 import getRepoConfigManifest from "../templates/repo-config.ts";
 import getArgoCdCmdParamsConfigMap from "../templates/argo-cmd-params.ts";
+import getAcceptInviteTemplate from "../templates/accept-node-invite.ts";
 
 // AWS Constants
 const DEFAULT_AWS_EC2_API_VERSION = "2016-11-15";
@@ -245,8 +246,20 @@ const runFn = async (context: CNDIContext) => {
   // generate a keypair for communicating with the nodes when they come online
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
-  // generate a 32 character token for microk8s
-  const token = crypto.randomUUID().replaceAll("-", "").slice(0, 32);
+  let t;
+
+  try {
+    t = JSON.parse(
+      await Deno.readTextFile(path.join(CNDI_WORKING_DIR, "state.json")),
+    );
+    console.log("state.json found, using existing token");
+  } catch {
+    console.log("state.json not found, creating token");
+  }
+
+  const token = t?.token
+    ? t.token
+    : crypto.randomUUID().replaceAll("-", "").slice(0, 32);
 
   await copy(
     path.join(CNDI_SRC, "bootstrap"),
@@ -426,7 +439,7 @@ const runFn = async (context: CNDIContext) => {
     const checkAndUpdateInstances = async (instances: Array<NodeEntry>) => {
       console.log("checking and updating instances:", instances);
       await delay(10000); // ask aws about nodes every 10 seconds
-      // const allRunning = ids.length === instances.length;
+
       const ids = instances.map((i) => i.id) as Array<string>;
       const allReady = instances.every((status) => status.ready);
 
@@ -512,9 +525,7 @@ const runFn = async (context: CNDIContext) => {
               "worker",
               "accept-invite.sh",
             ),
-            `#!/bin/bash
-echo "accepting node invite with token ${token}"
-microk8s join ${vm.privateIpAddress}:25000/${token} --worker`,
+            getAcceptInviteTemplate(token, vm.privateIpAddress as string),
           );
         } else {
           console.log(`${vm.id} is a worker`);
@@ -524,13 +535,12 @@ microk8s join ${vm.privateIpAddress}:25000/${token} --worker`,
 
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
-        path.join(CNDI_WORKING_DIR, "live.nodes.json"),
-        JSON.stringify(provisionedInstances, null, 2),
+        path.join(CNDI_WORKING_DIR, "state.json"),
+        JSON.stringify({ nodes: provisionedInstances, token }, null, 2),
       );
 
       // calling bootstrap using node.js (hack until we can use deno)
       // when this finishes successfully, the cluster is ready
-
       const binaryName = `cndi-node-runtime-setup-${binaryForPlatform}`;
 
       // execute the cndi-node-runtime-setup binary for the current envionment

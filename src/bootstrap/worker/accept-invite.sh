@@ -1,3 +1,8 @@
 #!/bin/bash
-echo "accepting node invite with token 90e6f615fb01441aa1aa8597f50d1784"
-microk8s join 172.31.85.18:25000/90e6f615fb01441aa1aa8597f50d1784 --worker
+
+# This file will be copied to CNDI_HOME/src/bootstrap/worker/accept-invite.sh
+# It will never be executed or templated, only replaced.
+
+exit 1
+echo "accepting node invite with token _TOKEN_"
+microk8s join _IP_ADDRESS_:25000/_TOKEN_ --worker
