@@ -36,6 +36,7 @@ jobs:
       # this is only necessary in actions because actions have an ephemeral disk layer
       - name: load-state-json
         uses: actions/download-artifact@v3
+        continue-on-error: true
         with:
           name: state-json
           path: ~/.cndi/.working/state.json
@@ -53,7 +54,7 @@ jobs:
 
       # if the deployment was successful we want to save the current state of the nodes for next time
       # this is only necessary in actions because actions have an ephemeral disk layer
-      - name: cache-state-json
+      - name: save-state-json
         uses: actions/upload-artifact@v2
         with:
           name: state-json
