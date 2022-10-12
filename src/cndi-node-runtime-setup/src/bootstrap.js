@@ -4,18 +4,19 @@ const fs = require("fs");
 
 const username = "ubuntu";
 
+// this is fragile, if we don't pass in an argument npmjs.com/package/pkg does weird bundling things (invariant)
 const workingDir = process.argv[2]; // node bootstrap.js ${workingDir}
 
 const privateKeyPath = path.join(workingDir, "keys", "private.pem");
-const nodesPath = path.join(workingDir, "live.nodes.json");
+const nodesPath = path.join(workingDir, "state.json");
 
-const nodes = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
+const { nodes } = JSON.parse(fs.readFileSync(nodesPath, "utf8"));
 
 if (!Array.isArray(nodes)) {
-  throw new Error("bootstrap.js: unable to parse ./nodes.json");
+  throw new Error('bootstrap.js: unable to parse state.json["nodes"]');
 } else {
-  console.log("bootstrap.js: nodes.json parsed successfully");
-  console.log("bootstrap.js: nodes.json:", nodes);
+  console.log('bootstrap.js: state.json["nodes"] parsed successfully');
+  console.log('bootstrap.js: state.json["nodes"]:', nodes);
 }
 
 const ssh = new NodeSSH();
@@ -42,6 +43,7 @@ async function bootstrap(node) {
   const bootstrapResult = await ssh.execCommand(`. ${role}/bootstrap.sh`, {
     cwd: "/home/ubuntu",
   });
+
   console.log(`${node.id} stdout:`, bootstrapResult?.stdout);
   console.log(`${node.id} stderr:`, bootstrapResult?.stderr);
   // kill the ssh connection
