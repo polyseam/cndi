@@ -345,7 +345,6 @@ read by `cndi run`.
 AWS_ACCESS_KEY_ID="your-access-key-id"
 AWS_SECRET_ACCESS_KEY="your-secret-access-key"
 AWS_REGION=us-east-1
-AWS_SDK_LOAD_CONFIG=1
 
 # Git Credentials
 GIT_USERNAME="your-username"
