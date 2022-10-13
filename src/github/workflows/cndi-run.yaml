@@ -32,16 +32,7 @@ jobs:
       - name: cndi install
         run: bin/cndi install # run 'cndi install'
 
-      # this next step is loading the state.json from the most recent successful run
-      # this is only necessary in actions because actions have an ephemeral disk layer
-      - name: load-state-json
-        uses: actions/download-artifact@v3
-        continue-on-error: true
-        with:
-          name: 'state-json'
-          path: ~/.cndi/.working/state.json
-
-      # this is the core of the workflow
+      # this next step is the core of the workflow
       - name: cndi run
         env:
           GIT_REPO:  https://github.com/${{ github.repository}}
@@ -51,12 +42,3 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: bin/cndi run  # run 'cndi run'
-
-      # if the deployment was successful we want to save the current state of the nodes for next time
-      # this is only necessary in actions because actions have an ephemeral disk layer
-      - name: save-state-json
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'state-json'
-          path: ~/.cndi/.working/state.json
-        
