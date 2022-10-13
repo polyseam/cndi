@@ -246,20 +246,7 @@ const runFn = async (context: CNDIContext) => {
   // generate a keypair for communicating with the nodes when they come online
   const { publicKeyMaterial, privateKeyMaterial } = await createKeyPair();
 
-  let t;
-
-  try {
-    t = JSON.parse(
-      await Deno.readTextFile(path.join(CNDI_WORKING_DIR, "state.json")),
-    );
-    console.log("state.json found, using existing token");
-  } catch {
-    console.log("state.json not found, creating token");
-  }
-
-  const token = t?.token
-    ? t.token
-    : crypto.randomUUID().replaceAll("-", "").slice(0, 32);
+  const token = crypto.randomUUID().replaceAll("-", "").slice(0, 32);
 
   await copy(
     path.join(CNDI_SRC, "bootstrap"),
@@ -408,7 +395,7 @@ const runFn = async (context: CNDIContext) => {
       // give each node a 'name tag' according to node.name
       provisionedInstances.map((instance, idx) => {
         console.log("tagging instance", idx);
-        const { id, name } = instance;
+        const { id, name, role } = instance;
 
         const tagParams = {
           Resources: [id as string],
@@ -421,6 +408,10 @@ const runFn = async (context: CNDIContext) => {
             {
               Key: "CNDIRun",
               Value: "true",
+            },
+            {
+              Key: "CNDINodeRole",
+              Value: role
             },
             {
               Key: "CNDIBoundToRepo",
