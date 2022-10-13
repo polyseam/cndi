@@ -1,18 +1,9 @@
-# cndi-next
-
-Cloud-Native Data Infrastructure
-
-This is the next version of CNDI. It deploys an entire data stack in minutes.
-
-It's perfect for deploying Data Products consistently that are reliable,
-discoverable, maintainable, and interoperable, all while remaining flexible to
-the needs of each Data Product.
 
 <div align="center">
   <br>
   <!-- <img alt="" src="" width="300px"> -->
-  <h1>CNDI</h1>
-  <strong>Deploy Cloud-Native Data Infratructure in Minutes</strong>
+  <h1>cndi-next</h1>
+  <div>Deploy <strong>Cloud-Native Data Infratructure</strong> in Minutes</div>
 </div>
 <br>
 <p align="center">
@@ -35,6 +26,12 @@ the needs of each Data Product.
     <img src="https://img.shields.io/twitter/follow/Polyseam?label=Follow&style=social" alt="Twitter">
   </a>
 </p>
+
+This is the next version of CNDI. It deploys an entire data stack in minutes!
+
+It's perfect for deploying Data Products consistently that are reliable,
+discoverable, maintainable, and interoperable, all while remaining flexible to
+the needs of each stack.
 
 ## getting started
 
