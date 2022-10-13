@@ -23,7 +23,7 @@ main() {
 		esac
 	fi
 
-	cndi_uri="https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-${target}"
+	cndi_uri="https://cndi-binaries.s3.amazonaws.com/cndi/main/cndi-${target}"
 
 	exe="$cndi_install/cndi"
 
@@ -36,7 +36,7 @@ main() {
 	chmod +x "$exe"
 
 	echo "cndi was downloaded successfully to $exe"
-    
+
 	if command -v cndi >/dev/null; then
         cndi install
 		echo "Run 'cndi --help' to get started"
