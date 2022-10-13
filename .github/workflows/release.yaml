@@ -1,8 +1,8 @@
-name: cndi-internal-build # used by the cndi team, not end users
+name: release # used by the cndi team, not end users
 on:
   push:
     branches:
-      - 'main'
+      - 'releases/**'
 jobs:
 
   build-cnrs-binaries: # cndi-node-runtime-setup

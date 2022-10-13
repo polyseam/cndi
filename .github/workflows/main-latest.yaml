@@ -1,0 +1,63 @@
+name: main-latest # used by the cndi team, not end users
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+
+  build-cnrs-binaries: # cndi-node-runtime-setup
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: use nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - run: npm ci
+        working-directory: ./src/cndi-node-runtime-setup
+      - run: npm run build
+        working-directory: ./src/cndi-node-runtime-setup
+      - name: Get Version from package.json
+        uses: polyseam/get-version-from-package-json@1.0.0
+        id: get-version-from-package-json-step
+        with:
+          path-to-package-json: ./src/cndi-node-runtime-setup/package.json
+      - id: upload-source-code
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: "cndi-binaries"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+          SOURCE_DIR: ./src/cndi-node-runtime-setup/dist
+          DEST_DIR: 'cnrs/main'
+
+  build-cndi-binaries: # cndi
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: use deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - run: deno task build
+      - name: Get Version from package.json
+        uses: polyseam/get-version-from-package-json@1.0.0
+        id: get-version-from-deno-json-step
+        with:
+          path-to-package-json: './deno.jsonc'
+      - id: upload-source-code
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: "cndi-binaries"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+          SOURCE_DIR: './dist'
+          DEST_DIR: 'cndi/main'
