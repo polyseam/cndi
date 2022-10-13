@@ -28,7 +28,7 @@ the needs of each Data Product.
   <a href="https://github.com/polyseam/cndi-next/releases">
     <img src="https://img.shields.io/github/v/release/polyseam/cndi-next.svg?style=flat" alt="GitHub Release">
   </a>
-  <a href="https://discord.gg/U2peSNf23P">
+  <a href="https://discord.gg/ygt2rpegJ5">
     <img src="https://img.shields.io/discord/956275914596040754.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" alt="Discord">
   </a>
   <a href="https://twitter.com/Polyseam">
