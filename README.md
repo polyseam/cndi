@@ -1,14 +1,45 @@
 # cndi-next
 
+Cloud-Native Data Infrastructure
+
 This is the next version of CNDI. It deploys an entire data stack in minutes.
 
 It's perfect for deploying Data Products consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each Data Product.
 
+<div align="center">
+  <br>
+  <!-- <img alt="" src="" width="300px"> -->
+  <h1>CNDI</h1>
+  <strong>Deploy Cloud-Native Data Infratructure in Minutes</strong>
+</div>
+<br>
+<p align="center">
+  <a href="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yaml">
+    <img src="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yaml/badge.svg" alt="Release" style="max-width: 100%;">
+  </a>
+  <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
+  <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi-next" alt="GitHub code size in bytes">
+  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi-next" alt="GitHub commit activity">
+  <a href="https://github.com/polyseam/cndi-next/issues">
+    <img src="https://img.shields.io/github/issues/polyseam/cndi-next" alt="GitHub issues">
+  </a>
+  <a href="https://github.com/polyseam/cndi-next/releases">
+    <img src="https://img.shields.io/github/v/release/polyseam/cndi-next.svg?style=flat" alt="GitHub Release">
+  </a>
+  <a href="https://discord.gg/ygt2rpegJ5">
+    <img src="https://img.shields.io/discord/956275914596040754.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" alt="Discord">
+  </a>
+  <a href="https://twitter.com/Polyseam">
+    <img src="https://img.shields.io/twitter/follow/Polyseam?label=Follow&style=social" alt="Twitter">
+  </a>
+</p>
+
 ## getting started
 
 ```bash
+# if you are on windows you should run this in 'git bash'
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh | sh
 ```
 

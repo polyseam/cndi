@@ -61,7 +61,3 @@ jobs:
           AWS_REGION: 'us-east-1'
           SOURCE_DIR: './dist'
           DEST_DIR: 'cndi/${{ steps.get-version-from-deno-json-step.outputs.version }}'
-
-      
-
-# TODO: https://docs.github.com/en/actions/creating-actions/developing-a-third-party-cli-action
