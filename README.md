@@ -43,12 +43,6 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh 
 
 ## configuration
 
-There are 2 options for configuring your next data stack. The first is to use
-our online configurator tool, it will be live at
-[configurator.cndi.run](https://configurator.cndi.run) and is probably the most
-fun. But the config is just a file, so you can also write it by hand if you
-want.
-
 Let's run through the 4 parts of a `cndi-config.json` file.
 
 ### nodes
@@ -73,7 +67,7 @@ These nodes must each be one of the following `kinds`:
 
 We also specify the node `role`, this is either `"controller"` or `"worker"`.
 
-Here is an example `cndi-config.json` object that contains a set of node entries
+Here is an example `cndi-config.jsonc` object that contains a set of node entries
 to deploy:
 
 ```jsonc
@@ -116,7 +110,7 @@ The next thing we need to configure is the applications that will actually run
 on the cluster. With CNDIv1 we focused on making it a breeze to deploy
 [Apache Airflow](https://github.com/apache/airflow) in Kubernetes.
 
-Lets see what that might look like:
+Lets see what that might look like now in cndi-next:
 
 ```jsonc
 {
@@ -128,6 +122,7 @@ Lets see what that might look like:
       "repoURL": "https://airflow.apache.org",
       "chart": "airflow",
       "values": {
+        // where you configure your Helm chart values.yaml
         "dags": {
           "gitSync": {
             "enabled": true,
@@ -175,7 +170,7 @@ going to be deploying, but don't worry, we'll make it easy!
 }
 ```
 
-### dpr
+### dpr (not yet!)
 
 If you are using CNDI to deploy a Data Product, and want to persist information
 about your Data Product to the
@@ -187,7 +182,7 @@ more block to the config:
     "nodes": {...},
     "applications": {...},
     "cluster": {...},
-    // TODO: we don't actually commit DP metadata to DPR yet
+    // This feature isn't ready yet, but if you are interested please sign up at polyseam.io/registry !
     "dpr": {
         "organization": "daff",
         "domain": "playlists",
@@ -196,7 +191,7 @@ more block to the config:
 }
 ```
 
-There, we have a complete `my-cndi-config.json` file. Let's see what happens
+There, we have a complete `my-cndi-config.jsonc` file. Let's see what happens
 when we run:
 
 ## cndi init
@@ -284,7 +279,7 @@ You are also able to modify the manifests in `cndi/cluster` and make changes to
 `cndi overwrite-with -f my-new-config.json` after manual changes, you will blast
 those changes away unless they are also present in `my-new-config.json` .
 
-## updating data product registry
+## updating data product registry (not yet!)
 
 If you want to opt-in to having the polyseam data product registry track this
 repo as a data product, CNDI can handle this for you too! Whenever you make
@@ -314,12 +309,11 @@ Next let's [install deno](https://deno.land/#installation), though it can be
 installed with a package manager, I would recommend that you install it without
 one. Once deno is installed, make sure you add it to your PATH.
 
-**3. Setup cndi Alias:** Let's setup an alias to make our experience just like
-it will be for the end user when we launch.
+**3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno source code as if it were the regular CLI, without colliding with the released `cndi` binary
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
-alias cndi="deno run -A --unstable ~/dev/polyseam/cndi-next/main.ts"
+alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi-next/main.ts"
 ```
 
 ### your first cluster
