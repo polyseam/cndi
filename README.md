@@ -16,8 +16,8 @@ the needs of each Data Product.
 </div>
 <br>
 <p align="center">
-  <a href="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yml">
-    <img src="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yml/badge.svg" alt="Release" style="max-width: 100%;">
+  <a href="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yaml">
+    <img src="https://github.com/polyseam/cndi-next/actions/workflows/cndi-internal-build.yaml/badge.svg" alt="Release" style="max-width: 100%;">
   </a>
   <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
   <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi-next" alt="GitHub code size in bytes">
