@@ -1,7 +1,7 @@
 
 <div align="center">
   <br>
-  <!-- <img alt="" src="" width="300px"> -->
+  <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
   <h1>cndi-next</h1>
   <div>Deploy <strong>Cloud-Native Data Infratructure</strong> in Minutes</div>
 </div>
