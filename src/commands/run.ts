@@ -411,7 +411,7 @@ const runFn = async (context: CNDIContext) => {
             },
             {
               Key: "CNDINodeRole",
-              Value: role
+              Value: role,
             },
             {
               Key: "CNDIBoundToRepo",

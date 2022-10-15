@@ -1,4 +1,3 @@
-
 <div align="center">
   <br>
   <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
@@ -67,8 +66,8 @@ These nodes must each be one of the following `kinds`:
 
 We also specify the node `role`, this is either `"controller"` or `"worker"`.
 
-Here is an example `cndi-config.jsonc` object that contains a set of node entries
-to deploy:
+Here is an example `cndi-config.jsonc` object that contains a set of node
+entries to deploy:
 
 ```jsonc
 {
@@ -309,7 +308,9 @@ Next let's [install deno](https://deno.land/#installation), though it can be
 installed with a package manager, I would recommend that you install it without
 one. Once deno is installed, make sure you add it to your PATH.
 
-**3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno source code as if it were the regular CLI, without colliding with the released `cndi` binary
+**3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno
+source code as if it were the regular CLI, without colliding with the released
+`cndi` binary
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
