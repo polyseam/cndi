@@ -11,13 +11,22 @@ jobs:
       - name: welcome
         run: echo "welcome to cndi!"
 
+      - name: create working directory
+        run: mkdir -p $HOME/.cndi/.working && sudo chmod -R 777 $HOME/.cndi
+
+      - name: pull existing state
+        run: curl --fail --create-dirs https://raw.githubusercontent.com/${{ github.repository }}/_state/state.json --output ~/.cndi/.working || mkdir -p $HOME/.cndi/.working && echo '{"nodes":[]}' | tee $HOME/.cndi/.working/state.json
+
+      - name: make state readable
+        run: sudo chmod 777 $HOME/.cndi/.working/state.json
+
       - name: checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
       - name: validate-nodes
-        uses: johnstonmatt/is-valid-json-action@v.1.0.1
+        uses: johnstonmatt/is-valid-json-action@v.1.2.1
         with:
           path-to-file: cndi/nodes.json
 
@@ -42,9 +51,16 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: bin/cndi run  # run 'cndi run'
+        
         # work is done, let's do some hacky stuff to persist state
+      - name: make state readable
+        run: sudo chmod 777 $HOME/.cndi/.working/state.json
+
+      - name: display final state
+        run: echo "$(cat $HOME/.cndi/.working/state.json)"
+
       - name: validate-state
-        uses: johnstonmatt/is-valid-json-action@v.1.0.1
+        uses: johnstonmatt/is-valid-json-action@v.1.2.1
         with:
           path-to-file: ~/.cndi/.working/state.json
 
