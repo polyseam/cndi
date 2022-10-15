@@ -38,11 +38,11 @@ export default async function install(context: CNDIContext) {
     });
   });
 
-  const version = 'main';
+  const version = "main";
 
   const cndiNodeRuntimeSetupBinaryURL =
     `https://cndi-binaries.s3.amazonaws.com/cnrs/${version}/cndi-node-runtime-setup-${binaryForPlatform}`;
-    
+
   const cndiNodeRuntimeSetupBinaryPath = path.join(
     CNDI_HOME,
     `cndi-node-runtime-setup-${binaryForPlatform}`,
