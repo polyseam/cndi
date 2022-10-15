@@ -527,7 +527,7 @@ const runFn = async (context: CNDIContext) => {
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
         path.join(CNDI_WORKING_DIR, "state.json"),
-        JSON.stringify({ nodes: provisionedInstances, token }, null, 2),
+        JSON.stringify({ nodes: provisionedInstances }, null, 2),
       );
 
       // calling bootstrap using node.js (hack until we can use deno)

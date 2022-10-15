@@ -42,3 +42,25 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: bin/cndi run  # run 'cndi run'
+        # work is done, let's do some hacky stuff to persist state
+      - name: validate-state
+        uses: johnstonmatt/is-valid-json-action@v.1.0.1
+        with:
+          path-to-file: ~/.cndi/.working/state.json
+
+      - name: remove repo contents
+        run: git rm -r .
+
+      - name: assess damages
+        run: git status
+
+      - name: copy state
+        run: 'mv ~/.cndi/.working/state.json .'
+
+      - name: persist-state
+        uses: EndBug/add-and-commit@v9
+        with:
+          new_branch: _state
+          push: origin _state --set-upstream --force
+          add: state.json
+          commiter_name: CNDI Bot
