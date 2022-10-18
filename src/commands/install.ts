@@ -38,17 +38,17 @@ export default async function install(context: CNDIContext) {
     });
   });
 
-  const version = "main";
+  const version = "1.3.2";
 
-  const cndiNodeRuntimeSetupBinaryURL =
-    `https://cndi-binaries.s3.amazonaws.com/cnrs/${version}/cndi-node-runtime-setup-${binaryForPlatform}`;
+  const terraformBinaryURL =
+    `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${binaryForPlatform}`;
 
   const cndiNodeRuntimeSetupBinaryPath = path.join(
     CNDI_HOME,
-    `cndi-node-runtime-setup-${binaryForPlatform}`,
+    `terraform-${binaryForPlatform}`,
   );
 
-  const fileResponse = await fetch(cndiNodeRuntimeSetupBinaryURL);
+  const fileResponse = await fetch(terraformBinaryURL);
 
   if (fileResponse.body) {
     const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {
