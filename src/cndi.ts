@@ -52,8 +52,13 @@ export default async function main(args: string[]) {
   // the directory in which to create the cndi folder
   const outputOption = cndiArguments.o || cndiArguments.output ||
     executionDirectory;
-  const outputDirectory = path.join(outputOption, "cndi");
-  const pathToNodes = path.join(outputDirectory, "nodes.json");
+
+  const projectDirectory = path.join(outputOption);
+
+  const projectCndiDirectory = path.join(projectDirectory, "cndi");
+  
+  const pathToNodes = path.join(projectCndiDirectory, "terraform", "nodes");
+
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
   const dotEnvPath = path.join(outputOption, ".env");
@@ -65,7 +70,8 @@ export default async function main(args: string[]) {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
     CNDI_SRC, // ~/.cndi/src (default)
     CNDI_WORKING_DIR, // ~/.cndi/.working (default)
-    outputDirectory, // Deno.cwd()/cndi (default)
+    projectDirectory,
+    projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)
     dotEnvPath, // Deno.cwd()/.env (default)
     noGitHub,

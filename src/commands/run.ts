@@ -3,7 +3,7 @@ import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
-import { loadJSONC } from "../utils.ts";
+import { loadJSONC, getPrettyJSONString } from "../utils.ts";
 
 import {
   CreateTagsCommand,
@@ -527,7 +527,7 @@ const runFn = async (context: CNDIContext) => {
       // now we have a list of instances that are ready, and all the data they need to bootstrap
       Deno.writeTextFileSync(
         path.join(CNDI_WORKING_DIR, "state.json"),
-        JSON.stringify({ nodes: provisionedInstances }, null, 2),
+        getPrettyJSONString({ nodes: provisionedInstances }),
       );
 
       // calling bootstrap using node.js (hack until we can use deno)

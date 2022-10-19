@@ -7,15 +7,19 @@ const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
+function getPrettyJSONString(object: unknown) {
+  return JSON.stringify(object, null, 2);
+}
+
 async function checkInstalled({
   binaryForPlatform,
   CNDI_HOME,
   CNDI_SRC,
 }: CNDIContext) {
-  const CNDI_BINARY_PREFIX = "cndi-node-runtime-setup-";
+  const TERRAFORM_BINARY_PREFIX = "terraform-";
   const binaryPath = path.join(
     CNDI_HOME,
-    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`,
+    `${TERRAFORM_BINARY_PREFIX}${binaryForPlatform}`
   );
 
   try {
@@ -34,14 +38,14 @@ async function checkInstalled({
 }
 
 async function checkInitialized({
-  outputDirectory,
+  projectCndiDirectory,
   githubDirectory,
   dotEnvPath,
 }: CNDIContext) {
   // if any of these files/folders don't exist, return false
   try {
     await Promise.all([
-      Deno.stat(outputDirectory),
+      Deno.stat(projectCndiDirectory),
       Deno.stat(githubDirectory),
       Deno.stat(dotEnvPath),
     ]);
@@ -51,4 +55,4 @@ async function checkInitialized({
   }
 }
 
-export { checkInitialized, checkInstalled, loadJSONC };
+export { checkInitialized, checkInstalled, loadJSONC, getPrettyJSONString };

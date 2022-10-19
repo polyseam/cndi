@@ -1,8 +1,10 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { checkInitialized, loadJSONC } from "../utils.ts";
-import { CNDIConfig, CNDIContext } from "../types.ts";
+import { checkInitialized, loadJSONC, getPrettyJSONString } from "../utils.ts";
+import { CNDIConfig, CNDIContext, BaseNodeEntrySpec, DeploymentTargetConfiguration } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
+import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
+import getTerraformRootFile from "../templates/terraform-root-file.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
 
@@ -16,7 +18,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     githubDirectory,
     noGitHub,
     CNDI_SRC,
-    outputDirectory,
+    projectCndiDirectory,
     pathToNodes,
     noDotEnv,
     dotEnvPath,
@@ -28,8 +30,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
-      )
+          "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
+        )
       : true;
 
     if (!shouldContinue) {
@@ -54,7 +56,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
         if (!gitignoreContents.includes(".env")) {
           await Deno.writeTextFile(
             gitignorePath,
-            gitignoreContents + "\n.env\n",
+            gitignoreContents + "\n.env\n"
           );
         }
       } catch {
@@ -69,15 +71,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const cluster = config?.cluster || {};
 
   try {
-    // remove cndi/nodes.json
-    await Deno.remove(path.join(outputDirectory, "nodes.json"));
-  } catch {
-    // file did not exist
-  }
-
-  try {
     // remove all files in cndi/cluster
-    await Deno.remove(path.join(outputDirectory, "cluster"), {
+    await Deno.remove(path.join(projectCndiDirectory, "cluster"), {
       recursive: true,
     });
   } catch {
@@ -85,28 +80,52 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   }
 
   // create 'cndi/' 'cndi/cluster' and 'cndi/cluster/applications'
-  await Deno.mkdir(path.join(outputDirectory, "cluster", "applications"), {
+  await Deno.mkdir(path.join(projectCndiDirectory, "cluster", "applications"), {
+    recursive: true,
+  });
+
+  // create 'cndi/' 'cndi/terraform' and 'cndi/terraform/nodes'
+  await Deno.mkdir(path.join(projectCndiDirectory, "terraform", "nodes"), {
     recursive: true,
   });
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
   Object.keys(cluster).forEach(async (key) => {
     await Deno.writeTextFile(
-      path.join(outputDirectory, "cluster", `${key}.json`),
-      JSON.stringify(cluster[key], null, 2),
+      path.join(projectCndiDirectory, "cluster", `${key}.json`),
+      getPrettyJSONString(cluster[key])
     );
   });
 
-  // write the cndi/nodes.json file
-  await Deno.writeTextFile(
-    pathToNodes,
-    JSON.stringify(config?.nodes ?? {}, null, 2),
-  );
+  // write the terraform nodes files
+
+  // write terraform root file
+
+
+
+
+  const { nodes } = config;
+
+  const terraformRootFile = getTerraformRootFile(nodes)
+
+  await Deno.writeTextFile(path.join(projectCndiDirectory,'terraform', 'cndi.tf.json'),terraformRootFile)
+
+  const { entries } = nodes;
+  const deploymentTargetConfiguration = nodes.deploymentTargetConfiguration as DeploymentTargetConfiguration;
+
+  entries.forEach((entry: BaseNodeEntrySpec) => {
+    const nodeFileContents: string = getTerraformNodeResource(entry, deploymentTargetConfiguration);
+
+    Deno.writeTextFile(
+      path.join(pathToNodes, `${entry.name}.tf.json`),
+      nodeFileContents, {create: true}
+    );
+  });
 
   // write the cndi/cluster/Chart.yaml file
   await Deno.writeTextFile(
-    path.join(outputDirectory, "cluster", "Chart.yaml"),
-    RootChartYaml,
+    path.join(projectCndiDirectory, "cluster", "Chart.yaml"),
+    RootChartYaml
   );
 
   const { applications } = config;
@@ -116,12 +135,12 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
-      applicationSpec,
+      applicationSpec
     );
     await Deno.writeTextFile(
-      path.join(outputDirectory, "cluster", "applications", filename),
+      path.join(projectCndiDirectory, "cluster", "applications", filename),
       manifestContent,
-      { create: true, append: false },
+      { create: true, append: false }
     );
     console.log("created application manifest:", filename);
   });

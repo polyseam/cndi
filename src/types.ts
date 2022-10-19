@@ -1,5 +1,9 @@
 // list of all commands for the CLI
 
+export const enum NodeKind {
+  aws = "aws",
+}
+
 export const enum Command {
   init = "init",
   "overwrite-with" = "overwrite-with",
@@ -20,23 +24,45 @@ export const enum NodeRole {
 interface CNDINode {
   name: string;
   role: NodeRole;
-  instanceType?: string;
-  imageId?: string;
+  kind: NodeKind;
+  instance_type?: string;
+  ami?: string;
 }
 
-interface CNDINodes {
-  entries: Array<CNDINode>;
-  deploymentTargetConfiguration: {
-    aws: {
-      region: string;
-      instanceType: string;
-    };
-  };
+interface CNDINodesSpec {
+  entries: Array<BaseNodeEntrySpec>;
+  deploymentTargetConfiguration: DeploymentTargetConfiguration;
+}
+
+// cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
+interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
+  ami: string;
+  instance_type: string;
+  availability_zone: string;
+}
+
+// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
+interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+  ami?: string;
+  instance_type?: string;
+  region?: string;
+  availability_zone?: string;
+}
+
+interface AWSTerraformProviderConfiguration {
+  profile: string;
+  region: string;
+}
+
+interface DeploymentTargetConfiguration {
+  aws: AWSDeploymentTargetConfiguration;
+  gcp: unknown;
+  azure: unknown;
 }
 
 // incomplete type, config will have more options
 interface CNDIConfig {
-  nodes: CNDINodes;
+  nodes: CNDINodesSpec;
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
@@ -59,7 +85,8 @@ interface CNDIContext {
   CNDI_HOME: string;
   CNDI_SRC: string;
   CNDI_WORKING_DIR: string;
-  outputDirectory: string;
+  projectDirectory: string;
+  projectCndiDirectory: string;
   githubDirectory: string;
   dotEnvPath: string;
   pathToConfig: string;
@@ -69,27 +96,77 @@ interface CNDIContext {
   noDotEnv: boolean;
 }
 
-// incomplete type, NodeSpec will have more options
-// NodeSpec is the user-specified config for a node
-interface NodeSpec {
+// cndi-config.jsonc["nodes"]["entries"][*]
+interface BaseNodeEntrySpec {
   name: string;
   role: NodeRole;
-  kind: "aws";
-  InstanceType?: string;
-}
-
-// incomplete type, NodeEntry will probably have more options
-// NodeEntry is the user-specified config for a node + data returned from deployment target
-interface NodeEntry extends NodeSpec {
-  ready: boolean;
-  id?: string;
-  privateIpAddress?: string;
-  publicIpAddress?: string;
+  kind: NodeKind;
 }
 
 interface CNDIClients {
   // deno-lint-ignore no-explicit-any
   aws?: any;
+}
+
+interface TerraformDependencies {
+  required_providers: Array<{
+    [key:string]:{
+      source: string;
+      version: string;
+    }
+  }>,
+  required_version: string,
+}
+
+interface TerraformRootFileData {
+  locals: [
+    {
+      bootstrap_token: "${random_string.generated_token.result}";
+      controller_node_ip: "${aws_instance.controller.private_ip}";
+      git_password: "${var.git_password}";
+      git_username: "${var.git_username}";
+      repo_url: "${var.repo_url}";
+    }
+  ];
+  provider: {
+    // deno-lint-ignore ban-types
+    random: [{}];
+    aws?: Array<AWSTerraformProviderConfiguration>
+  };
+  resource: {
+    random_password: {
+      generated_token: [
+        {
+          length: 32;
+          special: false;
+          upper: false;
+        }
+      ];
+    };
+  };
+  terraform: [
+    TerraformDependencies
+  ];
+  variable: {
+    git_password: [
+      {
+        description: "password for accessing the repositories";
+        type: "${string}";
+      }
+    ];
+    git_username: [
+      {
+        description: "password for accessing the repositories";
+        type: "${string}";
+      }
+    ];
+    repo_url: [
+      {
+        description: "repository to access";
+        type: "${string}";
+      }
+    ];
+  };
 }
 
 export type {
@@ -98,7 +175,12 @@ export type {
   CNDIConfig,
   CNDIContext,
   CNDINode,
-  CNDINodes,
-  NodeEntry,
-  NodeSpec,
+  CNDINodesSpec,
+  BaseNodeEntrySpec,
+  AWSNodeEntrySpec,
+  AWSDeploymentTargetConfiguration,
+  DeploymentTargetConfiguration,
+  TerraformRootFileData,
+  AWSTerraformProviderConfiguration,
+  TerraformDependencies,
 };

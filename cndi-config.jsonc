@@ -4,13 +4,13 @@
       {
         "name": "airflow-controller",
         "role": "controller",
-        "InstanceType": "t2.large",
+        "instance_type": "t2.large",
         "kind": "aws"
       }
     ],
     "deploymentTargetConfiguration": {
       "aws": {
-        "InstanceType": "t2.medium"
+        "instance_type": "t2.medium"
       }
     }
   },
