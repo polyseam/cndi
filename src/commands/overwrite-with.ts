@@ -8,6 +8,9 @@ import getTerraformRootFile from "../templates/terraform-root-file.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
 
+import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
+import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
+
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
@@ -89,6 +92,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     recursive: true,
   });
 
+
+  // write tftpl terraform template for the user_data bootstrap script
+  await Deno.writeTextFile(path.join(pathToNodes,'worker_bootstrap_cndi.sh.tftpl'), workerBootstrapTerrformTemplate);
+  await Deno.writeTextFile(path.join(pathToNodes,'controller_bootstrap_cndi.sh.tftpl'), controllerBootstrapTerraformTemplate);
+
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
   Object.keys(cluster).forEach(async (key) => {
     await Deno.writeTextFile(
@@ -97,27 +105,23 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     );
   });
 
-  // write the terraform nodes files
-
-  // write terraform root file
-
-
-
-
   const { nodes } = config;
 
+
+  // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
   const terraformRootFile = getTerraformRootFile(nodes)
 
-  await Deno.writeTextFile(path.join(projectCndiDirectory,'terraform', 'cndi.tf.json'),terraformRootFile)
+  // write terraform root file
+  await Deno.writeTextFile(path.join(pathToNodes,'setup-cndi.tf.json'), terraformRootFile)
 
   const { entries } = nodes;
   const deploymentTargetConfiguration = nodes.deploymentTargetConfiguration as DeploymentTargetConfiguration;
 
+  // write terraform nodes files
   entries.forEach((entry: BaseNodeEntrySpec) => {
     const nodeFileContents: string = getTerraformNodeResource(entry, deploymentTargetConfiguration);
-
     Deno.writeTextFile(
-      path.join(pathToNodes, `${entry.name}.tf.json`),
+      path.join(pathToNodes, `${entry.name}.cndi-node.tf.json`),
       nodeFileContents, {create: true}
     );
   });

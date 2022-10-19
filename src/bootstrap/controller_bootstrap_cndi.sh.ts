@@ -1,4 +1,11 @@
+// controller bootstrap script
+const bootstrapShellScript = `
 #!/bin/bash
+
+# Controller Bootstrap Template
+
+echo "bootstrapping controller"
+
 echo "Installing nfs-common"
 sudo apt-get install nfs-common -y
 
@@ -15,8 +22,8 @@ echo "awaiting microk8s to be ready"
 sudo microk8s status --wait-ready
 echo "microk8s is ready"
 
-echo "microk8s add-node: creating node invite with token ${bootstrap_token}"
-sudo microk8s add-node --token ${bootstrap_token} -l 3600
+echo "microk8s add-node: creating node invite with token \${bootstrap_token}"
+sudo microk8s add-node --token \${bootstrap_token} -l 3600
 
 echo "token registered"
 
@@ -56,9 +63,9 @@ metadata:
     argocd.argoproj.io/secret-type: repository
 stringData:
   type: git
-  url: ${repo_url}
-  password: ${git_password}
-  username: ${git_username}
+  url: \${repo_url}
+  password: \${git_password}
+  username:\${git_username}
 EOF
 
 echo "apply argocd root app"
@@ -77,7 +84,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     path: cndi/cluster
-    repoURL: ${repo_url}
+    repoURL: \${repo_url}
     targetRevision: HEAD
     directory:
       recurse: true
@@ -91,3 +98,5 @@ EOF
 
 echo "argo configured"
 echo "controller bootstrap complete"
+`
+export default bootstrapShellScript

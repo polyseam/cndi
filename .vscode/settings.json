@@ -1,6 +1,5 @@
 {
   "deno.enable": true,
-  "deno.unstable": true,
   "files.associations": {
     "*.sh.tftpl": "shellscript"
   }

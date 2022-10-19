@@ -44,7 +44,7 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
   if (role === "controller") {
     const user_data = `
-    \${templatefile("controller_bootstrap.sh.tftpl",
+    \${templatefile("controller_bootstrap_cndi.sh.tftpl",
         { bootstrap_token = "\${local.bootstrap_token}"
           repo_url        = "\${local.repo_url}"
           git_password    = "\${local.git_password}"
@@ -66,7 +66,7 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
   } else if (role === "worker") {
 
     const user_data = `
-    \${templatefile("controller_bootstrap.sh.tftpl",
+    \${templatefile("worker_bootstrap_cndi.sh.tftpl",
         { bootstrap_token    = "\${local.bootstrap_token}"
           controller_node_ip = "\${local.repo_url}"
         }
