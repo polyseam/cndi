@@ -41,19 +41,19 @@ const terraformRootFileData: TerraformRootFileData = {
     git_password: [
       {
         description: "password for accessing the repositories",
-        type: "${string}",
+        type: "string",
       },
     ],
     git_username: [
       {
         description: "password for accessing the repositories",
-        type: "${string}",
+        type: "string",
       },
     ],
     repo_url: [
       {
         description: "repository to access",
-        type: "${string}",
+        type: "string",
       },
     ],
   },

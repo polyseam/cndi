@@ -44,11 +44,13 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
   if (role === "controller") {
     const user_data = `
-    \${templatefile("controller_bootstrap_cndi.sh.tftpl",
-        { bootstrap_token = "\${local.bootstrap_token}"
-          repo_url        = "\${local.repo_url}"
-          git_password    = "\${local.git_password}"
-          git_username    = "\${local.git_username}"
+    \${
+      templatefile("controller_bootstrap_cndi.sh.tftpl",
+        { 
+          bootstrap_token: "\${local.bootstrap_token}"
+          repo_url: "\${local.repo_url}"
+          git_password: "\${local.git_password}"
+          git_username: "\${local.git_username}"
         }
       })
     }
@@ -67,8 +69,9 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
     const user_data = `
     \${templatefile("worker_bootstrap_cndi.sh.tftpl",
-        { bootstrap_token    = "\${local.bootstrap_token}"
-          controller_node_ip = "\${local.repo_url}"
+        { 
+          bootstrap_token: "\${local.bootstrap_token}"
+          controller_node_ip: "\${local.repo_url}"
         }
       })
     }
@@ -76,7 +79,7 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
     const workerNodeResourceObj = {...nodeResource}
 
 
-    workerNodeResourceObj.resource.aws_instance[name][0].depends_on = ["${"+'aws_instance.'+controllerName+"}"];
+    workerNodeResourceObj.resource.aws_instance[name][0].depends_on = [`aws_instance.${controllerName}`];
     workerNodeResourceObj.resource.aws_instance[name][0].user_data = user_data;
 
     const workerNodeResourceString = getPrettyJSONString(workerNodeResourceObj);
