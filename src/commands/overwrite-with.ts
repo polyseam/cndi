@@ -1,7 +1,7 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 import { checkInitialized, loadJSONC, getPrettyJSONString } from "../utils.ts";
-import { CNDIConfig, CNDIContext, BaseNodeEntrySpec, DeploymentTargetConfiguration } from "../types.ts";
+import { CNDIConfig, CNDIContext, BaseNodeEntrySpec, DeploymentTargetConfiguration, NodeKind } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
 import getTerraformRootFile from "../templates/terraform-root-file.ts";
@@ -117,9 +117,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const { entries } = nodes;
   const deploymentTargetConfiguration = nodes.deploymentTargetConfiguration as DeploymentTargetConfiguration;
 
+
+  let controllerName = entries.find(entry=> (entry.role === "controller"))?.name
+
+  console.log('controllerName', controllerName)
+
   // write terraform nodes files
   entries.forEach((entry: BaseNodeEntrySpec) => {
-    const nodeFileContents: string = getTerraformNodeResource(entry, deploymentTargetConfiguration);
+    const nodeFileContents: string = getTerraformNodeResource(entry, deploymentTargetConfiguration, controllerName);
     Deno.writeTextFile(
       path.join(pathToNodes, `${entry.name}.cndi-node.tf.json`),
       nodeFileContents, {create: true}

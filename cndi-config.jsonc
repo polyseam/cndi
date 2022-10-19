@@ -2,8 +2,14 @@
   "nodes": {
     "entries": [
       {
-        "name": "airflow-controller",
+        "name": "controller-alpha",
         "role": "controller",
+        "instance_type": "t2.large",
+        "kind": "aws"
+      },
+      {
+        "name": "worker-alpha",
+        "role": "worker",
         "instance_type": "t2.large",
         "kind": "aws"
       }

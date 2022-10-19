@@ -54,6 +54,21 @@ interface AWSTerraformProviderConfiguration {
   region: string;
 }
 
+interface AWSTerraformNodeResource {
+  resource: {
+    aws_instance: {
+      [name: string]: Array<{ami: string, instance_type: string, availability_zone: string, 
+        tags:{
+          Name: string,
+          CNDINodeRole: NodeRole,
+        },
+        user_data?: string,
+        depends_on?: Array<string>,
+      }>
+    }
+  }
+}
+
 interface DeploymentTargetConfiguration {
   aws: AWSDeploymentTargetConfiguration;
   gcp: unknown;
@@ -182,5 +197,6 @@ export type {
   DeploymentTargetConfiguration,
   TerraformRootFileData,
   AWSTerraformProviderConfiguration,
+  AWSTerraformNodeResource,
   TerraformDependencies,
 };
