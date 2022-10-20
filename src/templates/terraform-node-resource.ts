@@ -15,7 +15,7 @@ const getTerraformNodeResource = (
 };
 
 const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfiguration: AWSDeploymentTargetConfiguration, controllerName:string) => {
-  const DEFAULT_AMI = "ami-0c2b8ca1dad447f8a";
+  const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_AVAILABILITY_ZONE = "us-east-1a";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
 
@@ -43,18 +43,7 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
   
 
   if (role === "controller") {
-    const user_data = `
-    \${
-      templatefile("controller_bootstrap_cndi.sh.tftpl",
-        { 
-          bootstrap_token: "\${local.bootstrap_token}"
-          repo_url: "\${local.repo_url}"
-          git_password: "\${local.git_password}"
-          git_username: "\${local.git_username}"
-        }
-      })
-    }
-    `.trim();
+    const user_data = "${templatefile(\"controller_bootstrap_cndi.sh.tftpl\",{ \"bootstrap_token\": \"${local.bootstrap_token}\", \"git_repo\": \"${local.git_repo}\", \"git_password\": \"${local.git_password}\", \"git_username\": \"${local.git_username}\"})}"
 
     const controllerNodeResourceObj = {...nodeResource}
 
@@ -67,17 +56,8 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
   } else if (role === "worker") {
 
-    const user_data = `
-    \${templatefile("worker_bootstrap_cndi.sh.tftpl",
-        { 
-          bootstrap_token: "\${local.bootstrap_token}"
-          controller_node_ip: "\${local.repo_url}"
-        }
-      })
-    }
-    `.trim();
+    const user_data = "${templatefile(\"worker_bootstrap_cndi.sh.tftpl\",{\"bootstrap_token\": \"${local.bootstrap_token}\", \"controller_node_ip\": \"${local.controller_node_ip}\"})}"
     const workerNodeResourceObj = {...nodeResource}
-
 
     workerNodeResourceObj.resource.aws_instance[name][0].depends_on = [`aws_instance.${controllerName}`];
     workerNodeResourceObj.resource.aws_instance[name][0].user_data = user_data;

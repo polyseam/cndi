@@ -3,15 +3,16 @@ import { TerraformRootFileData } from "../../types.ts";
 const terraformRootFileData: TerraformRootFileData = {
   locals: [
     {
-      bootstrap_token: "${random_string.generated_token.result}",
-      controller_node_ip: "${aws_instance.controller.private_ip}",
+      bootstrap_token: "${random_password.generated_token.result}",
+      controller_node_ip: "",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
-      repo_url: "${var.repo_url}",
+      git_repo: "${var.git_repo}",
     },
   ],
   provider: {
     random: [{}],
+    aws:[{}]
   },
   resource: {
     random_password: {
@@ -50,9 +51,9 @@ const terraformRootFileData: TerraformRootFileData = {
         type: "string",
       },
     ],
-    repo_url: [
+    git_repo: [
       {
-        description: "repository to access",
+        description: "repository URL to access",
         type: "string",
       },
     ],

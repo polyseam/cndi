@@ -9,10 +9,7 @@ import {
 
 import terraformRootFileData from "./data/terraform-root-file-data.ts";
 
-const awsTerraformProviderConfiguration: AWSTerraformProviderConfiguration = {
-  profile: "default",
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-};
+const awsTerraformProviderConfiguration = {};
 
 const terraformDependencies: TerraformDependencies = {
   required_providers: [
@@ -34,10 +31,12 @@ const awsTerraformProviderDependency = {
 };
 
 const provider = {
-  aws: [awsTerraformProviderConfiguration],
+  aws: [{}],
 };
 
 const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
+  let controllerName = cndiNodesSpec.entries.find(entry=> (entry.role === "controller"))?.name as string;
+
   const providersRequired = new Set(
     cndiNodesSpec.entries.map((entry: BaseNodeEntrySpec) => {
       return entry.kind as NodeKind;
@@ -45,6 +44,8 @@ const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
   );
 
   const mainTerraformFileObject = { ...terraformRootFileData };
+
+  mainTerraformFileObject.locals[0].controller_node_ip = `aws_instance.${controllerName}.private_ip`;
 
   mainTerraformFileObject.provider = {
     ...mainTerraformFileObject.provider,

@@ -63,7 +63,7 @@ metadata:
     argocd.argoproj.io/secret-type: repository
 stringData:
   type: git
-  url: \${repo_url}
+  url: \${git_repo}
   password: \${git_password}
   username:\${git_username}
 EOF
@@ -84,7 +84,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     path: cndi/cluster
-    repoURL: \${repo_url}
+    repoURL: \${git_repo}
     targetRevision: HEAD
     directory:
       recurse: true
