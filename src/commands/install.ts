@@ -45,6 +45,8 @@ export default async function install(context: CNDIContext) {
   const terraformBinaryURL =
     `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${fileSuffixForPlatform}`;
 
+  const openpgpBinaryURL = `https://cndi-binaries.s3.amazonaws.com/openpgp/${version}/openpgp-${fileSuffixForPlatform}`;
+
   const cndiNodeRuntimeSetupBinaryPath = path.join(
     CNDI_HOME,
     `terraform-${fileSuffixForPlatform}`,

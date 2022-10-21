@@ -1,12 +1,12 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
+import * as openpgp from 'https://esm.sh/openpgp@5.5.0/dist/openpgp.mjs';
 import { checkInitialized, loadJSONC, getPrettyJSONString } from "../utils.ts";
 import {
   CNDIConfig,
   CNDIContext,
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
-  NodeKind,
 } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
@@ -22,6 +22,14 @@ import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootst
  * Overwrites ./cndi directory with the specified config file
  */
 const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
+
+  const pgpKey = await openpgp.generateKey({
+    userIDs: [{ name: 'Matt Johnston', email: 'matt.johnston@polyseam.io' }], 
+    format: 'object',
+  })
+
+  console.log('pgpKey', pgpKey)
+
   const {
     pathToConfig,
     githubDirectory,
@@ -58,6 +66,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
         console.error(githubCopyError);
       }
     }
+
     if (!noDotEnv) {
       const gitignorePath = path.join(dotEnvPath, "..", ".gitignore");
       try {
@@ -71,6 +80,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       } catch {
         await Deno.writeTextFile(gitignorePath, "\n.env\n");
       }
+
       await Deno.writeTextFile(dotEnvPath, getDotEnv());
     }
   }
@@ -133,8 +143,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   let controllerName = entries.find((entry) => entry.role === "controller")
     ?.name as string;
-
-  console.log("controllerName", controllerName);
 
   // write terraform nodes files
   entries.forEach((entry: BaseNodeEntrySpec) => {

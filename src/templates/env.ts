@@ -7,7 +7,9 @@ AWS_REGION=
 # Git Credentials
 GIT_USERNAME=
 GIT_PASSWORD=
-GIT_REPO=`;
+GIT_REPO=
+TERRAFORM_STATE_PASSPHRASE=${crypto.randomUUID()}
+`;
 };
 
 export default getDotEnv;

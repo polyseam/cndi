@@ -1,9 +1,4 @@
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { ensureDir } from "https://deno.land/std@0.157.0/fs/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
-import { delay } from "https://deno.land/std@0.157.0/async/delay.ts";
-import { loadJSONC, getPrettyJSONString } from "../utils.ts";
 import { CNDIContext } from "../types.ts";
 
 /**
@@ -16,7 +11,6 @@ const runFn = async ({
 }: CNDIContext) => {
   console.log("cndi run");
   try {
-    console.log("pathToTerraformResources", pathToTerraformResources);
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = await Deno.run({
       cmd: [

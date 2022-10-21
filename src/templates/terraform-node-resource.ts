@@ -65,7 +65,6 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
     const controllerNodeResourceString = getPrettyJSONString(controllerNodeResourceObj);
 
-    console.log("nodeResource:", controllerNodeResourceString);
     return controllerNodeResourceString;
 
   } else if (role === "worker") {
@@ -78,7 +77,6 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
 
     const workerNodeResourceString = getPrettyJSONString(workerNodeResourceObj);
 
-    console.log("nodeResource:", workerNodeResourceString);
     return workerNodeResourceString;
   }
   throw new Error(`NodeSpec.role must be "worker" or "controller": \n you entered "${role}"`);
