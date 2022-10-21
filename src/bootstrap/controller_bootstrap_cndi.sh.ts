@@ -65,7 +65,7 @@ stringData:
   type: git
   url: \${git_repo}
   password: \${git_password}
-  username:\${git_username}
+  username: \${git_username}
 EOF
 
 echo "apply argocd root app"
