@@ -49,7 +49,6 @@ export default async function main(args: string[]) {
   const projectDirectory = path.join(outputOption);
 
   const projectCndiDirectory = path.join(projectDirectory, "cndi");
-  console.log("projectCndiDirectory", projectCndiDirectory);
 
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
