@@ -23,7 +23,6 @@ export default async function main(args: string[]) {
 
   // CNDI_SRC is determined at compile time, that's no good
   const CNDI_SRC = path.join(CNDI_HOME, "src");
-  const CNDI_WORKING_DIR = path.join(CNDI_HOME, ".working");
 
   // default paths to the user's config file
   const DEFAULT_CNDI_CONFIG_PATH = path.join(
@@ -73,7 +72,6 @@ export default async function main(args: string[]) {
   const context = {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
     CNDI_SRC, // ~/.cndi/src (default)
-    CNDI_WORKING_DIR, // ~/.cndi/.working (default)
     projectDirectory,
     projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)

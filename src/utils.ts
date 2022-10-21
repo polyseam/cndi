@@ -22,8 +22,6 @@ async function checkInstalled({
     await Promise.all([
       Deno.stat(CNDI_HOME),
       Deno.stat(CNDI_SRC),
-      Deno.stat(path.join(CNDI_SRC, "github")),
-      Deno.stat(path.join(CNDI_SRC, "bootstrap")),
       Deno.stat(pathToTerraformBinary),
     ]);
 

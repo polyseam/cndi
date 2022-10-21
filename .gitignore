@@ -5,7 +5,6 @@ public.pub
 
 node_modules
 
-.working
 
 .github/workflows/cndi-run.yaml
 .github/CNDI_GITHUB_README.md

@@ -15,9 +15,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      
-      - name: pull encrypted tf state if it exists
-        run: curl --fail --create-dirs https://raw.githubusercontent.com/${{ github.repository }}/_state/terraform.tfstate.gpg --output $HOME/.cndi/.working/terraform.tfstate.gpg || echo "no tf state, starting from scratch"
 
       - name: decrypt terraform state
         run: gpg --batch --passphrase {{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d > cndi/terraform/terraform.tfstate

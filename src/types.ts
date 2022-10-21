@@ -103,7 +103,6 @@ interface CNDIApplicationSpec {
 interface CNDIContext {
   CNDI_HOME: string;
   CNDI_SRC: string;
-  CNDI_WORKING_DIR: string;
   projectDirectory: string;
   projectCndiDirectory: string;
   githubDirectory: string;
