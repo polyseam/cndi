@@ -12,6 +12,29 @@ const runFn = async ({
 }: CNDIContext) => {
   console.log("cndi run");
   try {
+    
+    const git_username = Deno.env.get('GIT_USERNAME')
+    if(!git_username) {
+      console.error('GIT_USERNAME env var is not set')
+      Deno.exit(33)
+    }
+
+    const git_password = Deno.env.get('GIT_PASSWORD')
+    if(!git_password) {
+      console.error('GIT_PASSWORD env var is not set')
+      Deno.exit(33)
+    }
+
+    const git_repo = Deno.env.get('GIT_REPO')
+    if(!git_repo) {
+      console.error('GIT_REPO env var is not set')
+      Deno.exit(33)
+    }
+
+    Deno.env.set('TF_VAR_git_username', git_username);
+    Deno.env.set('TF_VAR_git_password', git_password);
+    Deno.env.set('TF_VAR_git_repo', git_repo);
+
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = await Deno.run({
       cmd: [
@@ -41,10 +64,7 @@ const runFn = async ({
         pathToTerraformBinary,
         `-chdir=${pathToTerraformResources}`,
         "apply",
-        "-auto-approve",
-        `-var git_repo=${Deno.env.get("GIT_REPO")}`,
-        `-var git_username=${Deno.env.get("GIT_USERNAME")}`,
-        `-var git_password=${Deno.env.get("GIT_PASSWORD")}`,
+        "-auto-approve"
       ],
       "stderr": "piped",
       "stdout": "piped",
