@@ -1,7 +1,7 @@
 # a demo that is very cool
 
 This doc is going to walk through the "golden path" for CNDIv2. It uses the
-GitHub CLI, but that isn't necessary.
+GitHub CLI for creating GitHub Actions Secrets, but that isn't necessary.
 
 1. Ensure you have the GitHub CLI
    [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
@@ -11,28 +11,26 @@ GitHub CLI, but that isn't necessary.
 
 3. To download your executable run:
 
-   ```bash
-   # macos (see README.md for windows and linux)
-   curl https://cndi-binaries.s3.amazonaws.com/cndi/1.0.0/cndi-mac -o $HOME/bin/cndi --create-dirs && chmod +x $HOME/bin/cndi && source ~/.zshrc
-   ```
+```bash
+# if you are on windows you should run this in 'git bash'
+curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh | sh
+```
 
-4. Run `cndi install`
-
-5. Download the following file and place it in the `my-repo` folder.
+4. Download the following file and place it in the `my-repo` folder.
    [/cndi-config.jsonc](/cndi-config.jsonc)
 
-6. Run `cndi init`
+5. Run `cndi init`
 
-7. Populate your environment variables in the `.env` file
+6. Populate your environment variables in the `.env` file
 
-8. Run `gh secret set -f .env`
+7. Run `gh secret set -f .env`
 
-9. Run `git add .`
+8. Run `git add .`
 
-10. Run `git status`
+9. Run `git status`
 
-11. Run `git commit -m 'first commit'`
+10. Run `git commit -m 'first commit'`
 
-12. Run `git push -u origin main`
+11. Run `git push -u origin main`
 
-13. Watch the magic 🪄
+12. Watch the magic 🪄
