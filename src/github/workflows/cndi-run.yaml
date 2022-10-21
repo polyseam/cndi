@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: decrypt terraform state
-        run: gpg --batch --passphrase {{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d > cndi/terraform/terraform.tfstate
+        run: gpg --batch --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d > cndi/terraform/terraform.tfstate
         continue-on-error: true # if we try to encrypt a non-existent tfstate file, that's fine
 
       - name: setup cndi
@@ -46,7 +46,7 @@ jobs:
         run: mv cndi/terraform/terraform.tfstate ~/
       
       - name: encrypt terraform state
-        run: gpg --batch --symmetric --passphrase {{ secrets.TERRAFORM_STATE_PASSPHRASE }} ~/terraform.tfstate
+        run: gpg --symmetric --batch --yes --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }}  ~/terraform.tfstate
 
       - name: remove repo contents
         run: git rm -r .
