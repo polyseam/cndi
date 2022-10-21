@@ -3,13 +3,10 @@ import {
   BaseNodeEntrySpec,
   CNDINodesSpec,
   NodeKind,
-  AWSTerraformProviderConfiguration,
   TerraformDependencies,
 } from "../types.ts";
 
 import terraformRootFileData from "./data/terraform-root-file-data.ts";
-
-const awsTerraformProviderConfiguration = {};
 
 const terraformDependencies: TerraformDependencies = {
   required_providers: [
@@ -30,12 +27,9 @@ const awsTerraformProviderDependency = {
   },
 };
 
-const provider = {
-  aws: [{}],
-};
 
 const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
-  let controllerName = cndiNodesSpec.entries.find(entry=> (entry.role === "controller"))?.name as string;
+  const controllerName = cndiNodesSpec.entries.find(entry=> (entry.role === "controller"))?.name as string;
 
   const providersRequired = new Set(
     cndiNodesSpec.entries.map((entry: BaseNodeEntrySpec) => {
@@ -47,21 +41,9 @@ const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
 
   mainTerraformFileObject.locals[0].controller_node_ip = `aws_instance.${controllerName}.private_ip`;
 
-  mainTerraformFileObject.provider = {
-    ...mainTerraformFileObject.provider,
-    ...provider,
-  };
 
-  // add parts of main.tf file that are required if kind===aws
+  // add parts of setup-cndi.tf file that are required if kind===aws
   if (providersRequired.has(NodeKind.aws)) {
-    const region = cndiNodesSpec.deploymentTargetConfiguration.aws?.region;
-
-    // add aws provider configuration
-    mainTerraformFileObject.provider.aws =
-      provider.aws as Array<AWSTerraformProviderConfiguration>;
-    mainTerraformFileObject.provider.aws[0].region =
-      region ?? awsTerraformProviderConfiguration.region;
-
       // add aws provider dependency
     terraformDependencies.required_providers[0].aws =
       awsTerraformProviderDependency.aws;

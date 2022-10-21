@@ -49,24 +49,28 @@ interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
   availability_zone?: string;
 }
 
-interface AWSTerraformProviderConfiguration {
-  profile: string;
-  region: string;
-}
-
 interface AWSTerraformNodeResource {
   resource: {
     aws_instance: {
-      [name: string]: Array<{ami: string, instance_type: string, availability_zone: string, 
-        tags:{
-          Name: string,
-          CNDINodeRole: NodeRole,
-        },
-        user_data?: string,
-        depends_on?: Array<string>,
-      }>
-    }
-  }
+      [name: string]: Array<{
+        ami: string;
+        instance_type: string;
+        availability_zone: string;
+        tags: {
+          Name: string;
+          CNDINodeRole: NodeRole;
+        };
+        user_data?: string;
+        depends_on?: Array<string>;
+        ebs_block_device?: Array<{
+          device_name: string;
+          volume_size: number;
+          volume_type: string;
+          delete_on_termination: boolean;
+        }>;
+      }>;
+    };
+  };
 }
 
 interface DeploymentTargetConfiguration {
@@ -105,8 +109,11 @@ interface CNDIContext {
   githubDirectory: string;
   dotEnvPath: string;
   pathToConfig: string;
-  pathToNodes: string;
-  binaryForPlatform: string;
+  pathToTerraformResources: string;
+  pathToKubernetesManifests: string;
+  pathToTerraformBinary: string;
+  pathToCNDIBinary: string;
+  fileSuffixForPlatform: string;
   noGitHub: boolean;
   noDotEnv: boolean;
 }
@@ -125,12 +132,12 @@ interface CNDIClients {
 
 interface TerraformDependencies {
   required_providers: Array<{
-    [key:string]:{
+    [key: string]: {
       source: string;
       version: string;
-    }
-  }>,
-  required_version: string,
+    };
+  }>;
+  required_version: string;
 }
 
 interface TerraformRootFileData {
@@ -144,9 +151,8 @@ interface TerraformRootFileData {
     }
   ];
   provider: {
-    // deno-lint-ignore ban-types
-    random: [{}];
-    aws?: [{}];
+    random: [Record<never, never>]; // equal to [{}]
+    aws: [Record<never, never>]; // equal to [{}]
   };
   resource: {
     random_password: {
@@ -159,9 +165,7 @@ interface TerraformRootFileData {
       ];
     };
   };
-  terraform: [
-    TerraformDependencies
-  ];
+  terraform: [TerraformDependencies];
   variable: {
     git_password: [
       {
@@ -196,7 +200,6 @@ export type {
   AWSDeploymentTargetConfiguration,
   DeploymentTargetConfiguration,
   TerraformRootFileData,
-  AWSTerraformProviderConfiguration,
   AWSTerraformNodeResource,
   TerraformDependencies,
 };

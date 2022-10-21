@@ -25,7 +25,7 @@ export default async function install(context: CNDIContext) {
 
   spinner.start();
 
-  const { CNDI_HOME, binaryForPlatform } = context;
+  const { CNDI_HOME, fileSuffixForPlatform } = context;
   Object.keys(embeddedFiles).forEach((key) => {
     const k = key as EmbeddedFileKey;
     const folder = path.dirname(k) as string;
@@ -38,14 +38,16 @@ export default async function install(context: CNDIContext) {
     });
   });
 
+
+  // TODO: configurable?
   const version = "1.3.2";
 
   const terraformBinaryURL =
-    `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${binaryForPlatform}`;
+    `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${fileSuffixForPlatform}`;
 
   const cndiNodeRuntimeSetupBinaryPath = path.join(
     CNDI_HOME,
-    `terraform-${binaryForPlatform}`,
+    `terraform-${fileSuffixForPlatform}`,
   );
 
   const fileResponse = await fetch(terraformBinaryURL);

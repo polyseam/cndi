@@ -25,6 +25,19 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
   const availability_zone = entry?.availability_zone || deploymentTargetConfiguration?.availability_zone || DEFAULT_AVAILABILITY_ZONE;
   const instance_type = entry?.instance_type || deploymentTargetConfiguration?.instance_type || DEFAULT_INSTANCE_TYPE;
 
+  const delete_on_termination = false;  // TODO: prove this is good
+  const device_name = "/dev/sda1";
+  const volume_size = 80; //GiB
+  const volume_type = 'gp3'; // general purpose SSD
+
+// TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
+  const ebs_block_device = [{
+    device_name,
+    volume_size,
+    volume_type,
+    delete_on_termination
+  }]
+
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
       aws_instance: {
@@ -36,6 +49,7 @@ const getAWSNodeResource = (entry: AWSNodeEntrySpec, deploymentTargetConfigurati
             Name: name,
             CNDINodeRole: role,
           },
+          ebs_block_device,
         }],
       },
     },

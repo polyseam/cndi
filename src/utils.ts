@@ -1,5 +1,7 @@
 import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
+
 
 import { CNDIContext } from "./types.ts";
 // helper function to load a JSONC file
@@ -12,15 +14,10 @@ function getPrettyJSONString(object: unknown) {
 }
 
 async function checkInstalled({
-  binaryForPlatform,
+  pathToTerraformBinary,
   CNDI_HOME,
   CNDI_SRC,
 }: CNDIContext) {
-  const TERRAFORM_BINARY_PREFIX = "terraform-";
-  const binaryPath = path.join(
-    CNDI_HOME,
-    `${TERRAFORM_BINARY_PREFIX}${binaryForPlatform}`
-  );
 
   try {
     // if any of these files/folders don't exist, return false
@@ -29,8 +26,9 @@ async function checkInstalled({
       Deno.stat(CNDI_SRC),
       Deno.stat(path.join(CNDI_SRC, "github")),
       Deno.stat(path.join(CNDI_SRC, "bootstrap")),
-      Deno.stat(binaryPath),
+      Deno.stat(pathToTerraformBinary)
     ]);
+
     return true;
   } catch {
     return false;
@@ -55,4 +53,15 @@ async function checkInitialized({
   }
 }
 
-export { checkInitialized, checkInstalled, loadJSONC, getPrettyJSONString };
+const getFileSuffixForPlatform = () => {
+  const fileSuffixForPlatform = {
+    linux: "linux",
+    darwin: "macos",
+    win32: "win.exe",
+  };
+  const currentPlatform = platform() as "linux" | "darwin" | "win32";
+  return fileSuffixForPlatform[currentPlatform];
+}
+
+
+export { checkInitialized, checkInstalled, loadJSONC, getPrettyJSONString, getFileSuffixForPlatform };
