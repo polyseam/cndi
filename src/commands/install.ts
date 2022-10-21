@@ -38,16 +38,13 @@ export default async function install(context: CNDIContext) {
     });
   });
 
-
   // TODO: configurable?
   const version = "1.3.2";
 
   const terraformBinaryURL =
     `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${fileSuffixForPlatform}`;
 
-  const openpgpBinaryURL = `https://cndi-binaries.s3.amazonaws.com/openpgp/${version}/openpgp-${fileSuffixForPlatform}`;
-
-  const cndiNodeRuntimeSetupBinaryPath = path.join(
+  const terraformBinaryPath = path.join(
     CNDI_HOME,
     `terraform-${fileSuffixForPlatform}`,
   );
@@ -55,7 +52,7 @@ export default async function install(context: CNDIContext) {
   const fileResponse = await fetch(terraformBinaryURL);
 
   if (fileResponse.body) {
-    const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {
+    const file = await Deno.open(terraformBinaryPath, {
       create: true,
       write: true,
       mode: 0o777,

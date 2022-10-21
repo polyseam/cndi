@@ -148,7 +148,7 @@ interface TerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
-    }
+    },
   ];
   provider: {
     random: [Record<never, never>]; // equal to [{}]
@@ -161,7 +161,7 @@ interface TerraformRootFileData {
           length: 32;
           special: false;
           upper: false;
-        }
+        },
       ];
     };
   };
@@ -171,35 +171,35 @@ interface TerraformRootFileData {
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_username: [
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_repo: [
       {
         description: "repository URL to access";
         type: "string";
-      }
+      },
     ];
   };
 }
 
 export type {
+  AWSDeploymentTargetConfiguration,
+  AWSNodeEntrySpec,
+  AWSTerraformNodeResource,
+  BaseNodeEntrySpec,
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
   CNDIContext,
   CNDINode,
   CNDINodesSpec,
-  BaseNodeEntrySpec,
-  AWSNodeEntrySpec,
-  AWSDeploymentTargetConfiguration,
   DeploymentTargetConfiguration,
-  TerraformRootFileData,
-  AWSTerraformNodeResource,
   TerraformDependencies,
+  TerraformRootFileData,
 };

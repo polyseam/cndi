@@ -2,7 +2,6 @@ import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 
-
 import { CNDIContext } from "./types.ts";
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -18,7 +17,6 @@ async function checkInstalled({
   CNDI_HOME,
   CNDI_SRC,
 }: CNDIContext) {
-
   try {
     // if any of these files/folders don't exist, return false
     await Promise.all([
@@ -26,7 +24,7 @@ async function checkInstalled({
       Deno.stat(CNDI_SRC),
       Deno.stat(path.join(CNDI_SRC, "github")),
       Deno.stat(path.join(CNDI_SRC, "bootstrap")),
-      Deno.stat(pathToTerraformBinary)
+      Deno.stat(pathToTerraformBinary),
     ]);
 
     return true;
@@ -61,7 +59,12 @@ const getFileSuffixForPlatform = () => {
   };
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   return fileSuffixForPlatform[currentPlatform];
-}
+};
 
-
-export { checkInitialized, checkInstalled, loadJSONC, getPrettyJSONString, getFileSuffixForPlatform };
+export {
+  checkInitialized,
+  checkInstalled,
+  getFileSuffixForPlatform,
+  getPrettyJSONString,
+  loadJSONC,
+};

@@ -98,5 +98,5 @@ EOF
 
 echo "argo configured"
 echo "controller bootstrap complete"
-`.trim()
-export default bootstrapShellScript
+`.trim();
+export default bootstrapShellScript;

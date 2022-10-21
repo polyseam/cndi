@@ -34,6 +34,6 @@ done
 echo 'cluster joined'
 
 echo 'worker bootstrap complete'
-`.trim()
+`.trim();
 
-export default bootstrapShellScript
+export default bootstrapShellScript;

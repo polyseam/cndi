@@ -35,7 +35,6 @@ const runFn = async ({
 
     ranTerraformInit.close();
 
-
     const ranTerraformApply = await Deno.run({
       cmd: [
         pathToTerraformBinary,
@@ -59,7 +58,6 @@ const runFn = async ({
     }
 
     ranTerraformApply.close();
-
   } catch (err) {
     console.log('error in "cndi run"');
     console.error(err);

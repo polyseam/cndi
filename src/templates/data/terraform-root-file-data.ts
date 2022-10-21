@@ -12,7 +12,7 @@ const terraformRootFileData: TerraformRootFileData = {
   ],
   provider: {
     random: [{}],
-    aws:[{}]
+    aws: [{}],
   },
   resource: {
     random_password: {
