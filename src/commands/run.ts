@@ -1,6 +1,7 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { CNDIContext } from "../types.ts";
 
+
 /**
  * COMMAND fn: cndi run
  * Creates a CNDI cluster by reading the contents of ./cndi
@@ -41,6 +42,9 @@ const runFn = async ({
         `-chdir=${pathToTerraformResources}`,
         "apply",
         "-auto-approve",
+        `-var git_repo=${Deno.env.get("GIT_REPO")}`,
+        `-var git_username=${Deno.env.get("GIT_USERNAME")}`,
+        `-var git_password=${Deno.env.get("GIT_PASSWORD")}`,
       ],
       "stderr": "piped",
       "stdout": "piped",

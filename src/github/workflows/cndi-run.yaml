@@ -57,10 +57,10 @@ jobs:
       - name: copy encrypted state back into repo
         run: 'mv ~/terraform.tfstate.gpg .'
 
-      - name: persist-state
+      - name: persist terraform state
         uses: EndBug/add-and-commit@v9
         with:
           new_branch: _state
           push: origin _state --set-upstream --force
-          add: 
+          add: terraform.tfstate.gpg
           commiter_name: CNDI Bot
