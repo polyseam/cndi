@@ -25,7 +25,7 @@ export default async function install(context: CNDIContext) {
 
   spinner.start();
 
-  const { CNDI_HOME, binaryForPlatform } = context;
+  const { CNDI_HOME, fileSuffixForPlatform } = context;
   Object.keys(embeddedFiles).forEach((key) => {
     const k = key as EmbeddedFileKey;
     const folder = path.dirname(k) as string;
@@ -38,20 +38,21 @@ export default async function install(context: CNDIContext) {
     });
   });
 
-  const version = "main";
+  // TODO: configurable?
+  const version = "1.3.2";
 
-  const cndiNodeRuntimeSetupBinaryURL =
-    `https://cndi-binaries.s3.amazonaws.com/cnrs/${version}/cndi-node-runtime-setup-${binaryForPlatform}`;
+  const terraformBinaryURL =
+    `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${fileSuffixForPlatform}`;
 
-  const cndiNodeRuntimeSetupBinaryPath = path.join(
+  const terraformBinaryPath = path.join(
     CNDI_HOME,
-    `cndi-node-runtime-setup-${binaryForPlatform}`,
+    `terraform-${fileSuffixForPlatform}`,
   );
 
-  const fileResponse = await fetch(cndiNodeRuntimeSetupBinaryURL);
+  const fileResponse = await fetch(terraformBinaryURL);
 
   if (fileResponse.body) {
-    const file = await Deno.open(cndiNodeRuntimeSetupBinaryPath, {
+    const file = await Deno.open(terraformBinaryPath, {
       create: true,
       write: true,
       mode: 0o777,

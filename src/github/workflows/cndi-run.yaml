@@ -11,24 +11,17 @@ jobs:
       - name: welcome
         run: echo "welcome to cndi!"
 
-      - name: create working directory
-        run: mkdir -p $HOME/.cndi/.working && sudo chmod -R 777 $HOME/.cndi
-
-      - name: pull existing state
-        run: curl --fail --create-dirs https://raw.githubusercontent.com/${{ github.repository }}/_state/state.json --output ~/.cndi/.working || mkdir -p $HOME/.cndi/.working && echo '{"nodes":[]}' | tee $HOME/.cndi/.working/state.json
-
-      - name: make state readable
-        run: sudo chmod 777 $HOME/.cndi/.working/state.json
-
       - name: checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      
+      - name: pull encrypted tf state if it exists
+        run: curl --fail --create-dirs https://raw.githubusercontent.com/${{ github.repository }}/_state/terraform.tfstate.gpg --output $HOME/.cndi/.working/terraform.tfstate.gpg || echo "no tf state, starting from scratch"
 
-      - name: validate-nodes
-        uses: johnstonmatt/is-valid-json-action@v.1.2.1
-        with:
-          path-to-file: cndi/nodes.json
+      - name: decrypt terraform state
+        run: gpg --batch --passphrase {{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d > cndi/terraform/terraform.tfstate
+        continue-on-error: true # if we try to encrypt a non-existent tfstate file, that's fine
 
       - name: setup cndi
         uses: polyseam/setup-cndi@1.0.3
@@ -51,18 +44,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: bin/cndi run  # run 'cndi run'
-        
-        # work is done, let's do some hacky stuff to persist state
-      - name: make state readable
-        run: sudo chmod 777 $HOME/.cndi/.working/state.json
 
-      - name: display final state
-        run: echo "$(cat $HOME/.cndi/.working/state.json)"
-
-      - name: validate-state
-        uses: johnstonmatt/is-valid-json-action@v.1.2.1
-        with:
-          path-to-file: ~/.cndi/.working/state.json
+      - name: move state out of repo
+        run: mv cndi/terraform/terraform.tfstate ~/
+      
+      - name: encrypt terraform state
+        run: gpg --batch --symmetric --passphrase {{ secrets.TERRAFORM_STATE_PASSPHRASE }} ~/terraform.tfstate
 
       - name: remove repo contents
         run: git rm -r .
@@ -70,13 +57,13 @@ jobs:
       - name: assess damages
         run: git status
 
-      - name: copy state
-        run: 'mv ~/.cndi/.working/state.json .'
+      - name: copy encrypted state back into repo
+        run: 'mv ~/terraform.tfstate.gpg .'
 
       - name: persist-state
         uses: EndBug/add-and-commit@v9
         with:
           new_branch: _state
           push: origin _state --set-upstream --force
-          add: state.json
+          add: 
           commiter_name: CNDI Bot

@@ -1,3 +1,4 @@
+import { getPrettyJSONString } from "../utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -65,10 +66,8 @@ const getApplicationManifest = (
 ): [string, string] => {
   // TODO: helm and argo require that values be passed into argocd as a string when using a helm chart repo instead of git
   // This means that we need to have this very ugly string in the manifests that we generate
-  const values = JSON.stringify(applicationSpec.values ?? {}).replaceAll(
-    '"',
-    '"',
-  );
+  const values = JSON.stringify(applicationSpec.values ?? {});
+
   const manifest = {
     ...manifestFramework,
     metadata: {
@@ -95,7 +94,7 @@ const getApplicationManifest = (
       },
     },
   };
-  return [JSON.stringify(manifest, null, 2), `${releaseName}.application.json`];
+  return [getPrettyJSONString(manifest), `${releaseName}.application.json`];
 };
 
 export default getApplicationManifest;
