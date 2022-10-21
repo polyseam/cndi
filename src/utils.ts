@@ -1,5 +1,6 @@
 import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 
 import { CNDIContext } from "./types.ts";
 // helper function to load a JSONC file
@@ -7,17 +8,15 @@ const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
+function getPrettyJSONString(object: unknown) {
+  return JSON.stringify(object, null, 2);
+}
+
 async function checkInstalled({
-  binaryForPlatform,
+  pathToTerraformBinary,
   CNDI_HOME,
   CNDI_SRC,
 }: CNDIContext) {
-  const CNDI_BINARY_PREFIX = "cndi-node-runtime-setup-";
-  const binaryPath = path.join(
-    CNDI_HOME,
-    `${CNDI_BINARY_PREFIX}${binaryForPlatform}`,
-  );
-
   try {
     // if any of these files/folders don't exist, return false
     await Promise.all([
@@ -25,8 +24,9 @@ async function checkInstalled({
       Deno.stat(CNDI_SRC),
       Deno.stat(path.join(CNDI_SRC, "github")),
       Deno.stat(path.join(CNDI_SRC, "bootstrap")),
-      Deno.stat(binaryPath),
+      Deno.stat(pathToTerraformBinary),
     ]);
+
     return true;
   } catch {
     return false;
@@ -34,14 +34,14 @@ async function checkInstalled({
 }
 
 async function checkInitialized({
-  outputDirectory,
+  projectCndiDirectory,
   githubDirectory,
   dotEnvPath,
 }: CNDIContext) {
   // if any of these files/folders don't exist, return false
   try {
     await Promise.all([
-      Deno.stat(outputDirectory),
+      Deno.stat(projectCndiDirectory),
       Deno.stat(githubDirectory),
       Deno.stat(dotEnvPath),
     ]);
@@ -51,4 +51,20 @@ async function checkInitialized({
   }
 }
 
-export { checkInitialized, checkInstalled, loadJSONC };
+const getFileSuffixForPlatform = () => {
+  const fileSuffixForPlatform = {
+    linux: "linux",
+    darwin: "macos",
+    win32: "win.exe",
+  };
+  const currentPlatform = platform() as "linux" | "darwin" | "win32";
+  return fileSuffixForPlatform[currentPlatform];
+};
+
+export {
+  checkInitialized,
+  checkInstalled,
+  getFileSuffixForPlatform,
+  getPrettyJSONString,
+  loadJSONC,
+};

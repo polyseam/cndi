@@ -77,7 +77,7 @@ entries to deploy:
         "kind": "gcp",
         "role": "controller",
         "name": "gcp-controller",
-        "InstanceType": "t2.large"
+        "machine_type": "t2.large"
       },
       {
         "kind": "gcp",
@@ -92,7 +92,7 @@ entries to deploy:
     ],
     "deploymentTargetConfiguration": {
       "aws": {
-        "InstanceType": "t2.medium"
+        "instance_type": "t2.medium"
       }
     }
   }

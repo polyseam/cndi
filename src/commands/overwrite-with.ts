@@ -1,23 +1,41 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { checkInitialized, loadJSONC } from "../utils.ts";
-import { CNDIConfig, CNDIContext } from "../types.ts";
+import * as openpgp from "https://esm.sh/openpgp@5.5.0/dist/openpgp.mjs";
+import { checkInitialized, getPrettyJSONString, loadJSONC } from "../utils.ts";
+import {
+  BaseNodeEntrySpec,
+  CNDIConfig,
+  CNDIContext,
+  DeploymentTargetConfiguration,
+} from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
+import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
+import getTerraformRootFile from "../templates/terraform-root-file.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
+
+import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
+import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
 
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
  */
 const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
+  const pgpKey = await openpgp.generateKey({
+    userIDs: [{ name: "Matt Johnston", email: "matt.johnston@polyseam.io" }],
+    format: "object",
+  });
+
+  console.log("pgpKey", pgpKey);
+
   const {
     pathToConfig,
     githubDirectory,
     noGitHub,
     CNDI_SRC,
-    outputDirectory,
-    pathToNodes,
+    pathToKubernetesManifests,
+    pathToTerraformResources,
     noDotEnv,
     dotEnvPath,
   } = context;
@@ -47,6 +65,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
         console.error(githubCopyError);
       }
     }
+
     if (!noDotEnv) {
       const gitignorePath = path.join(dotEnvPath, "..", ".gitignore");
       try {
@@ -60,6 +79,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       } catch {
         await Deno.writeTextFile(gitignorePath, "\n.env\n");
       }
+
       await Deno.writeTextFile(dotEnvPath, getDotEnv());
     }
   }
@@ -69,15 +89,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const cluster = config?.cluster || {};
 
   try {
-    // remove cndi/nodes.json
-    await Deno.remove(path.join(outputDirectory, "nodes.json"));
-  } catch {
-    // file did not exist
-  }
-
-  try {
     // remove all files in cndi/cluster
-    await Deno.remove(path.join(outputDirectory, "cluster"), {
+    await Deno.remove(path.join(pathToKubernetesManifests), {
       recursive: true,
     });
   } catch {
@@ -85,27 +98,68 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   }
 
   // create 'cndi/' 'cndi/cluster' and 'cndi/cluster/applications'
-  await Deno.mkdir(path.join(outputDirectory, "cluster", "applications"), {
+  await Deno.mkdir(path.join(pathToKubernetesManifests, "applications"), {
     recursive: true,
   });
+
+  // create 'cndi/' 'cndi/terraform' and 'cndi/terraform/nodes'
+  await Deno.mkdir(pathToTerraformResources, {
+    recursive: true,
+  });
+
+  // write tftpl terraform template for the user_data bootstrap script
+  await Deno.writeTextFile(
+    path.join(pathToTerraformResources, "worker_bootstrap_cndi.sh.tftpl"),
+    workerBootstrapTerrformTemplate,
+  );
+  await Deno.writeTextFile(
+    path.join(pathToTerraformResources, "controller_bootstrap_cndi.sh.tftpl"),
+    controllerBootstrapTerraformTemplate,
+  );
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
   Object.keys(cluster).forEach(async (key) => {
     await Deno.writeTextFile(
-      path.join(outputDirectory, "cluster", `${key}.json`),
-      JSON.stringify(cluster[key], null, 2),
+      path.join(pathToKubernetesManifests, `${key}.json`),
+      getPrettyJSONString(cluster[key]),
     );
   });
 
-  // write the cndi/nodes.json file
+  const { nodes } = config;
+
+  // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
+  const terraformRootFile = getTerraformRootFile(nodes);
+
+  // write terraform root file
   await Deno.writeTextFile(
-    pathToNodes,
-    JSON.stringify(config?.nodes ?? {}, null, 2),
+    path.join(pathToTerraformResources, "setup-cndi.tf.json"),
+    terraformRootFile,
   );
+
+  const { entries } = nodes;
+  const deploymentTargetConfiguration = nodes
+    .deploymentTargetConfiguration as DeploymentTargetConfiguration;
+
+  const controllerName = entries.find((entry) => entry.role === "controller")
+    ?.name as string;
+
+  // write terraform nodes files
+  entries.forEach((entry: BaseNodeEntrySpec) => {
+    const nodeFileContents: string = getTerraformNodeResource(
+      entry,
+      deploymentTargetConfiguration,
+      controllerName,
+    );
+    Deno.writeTextFile(
+      path.join(pathToTerraformResources, `${entry.name}.cndi-node.tf.json`),
+      nodeFileContents,
+      { create: true },
+    );
+  });
 
   // write the cndi/cluster/Chart.yaml file
   await Deno.writeTextFile(
-    path.join(outputDirectory, "cluster", "Chart.yaml"),
+    path.join(pathToKubernetesManifests, "Chart.yaml"),
     RootChartYaml,
   );
 
@@ -119,7 +173,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       applicationSpec,
     );
     await Deno.writeTextFile(
-      path.join(outputDirectory, "cluster", "applications", filename),
+      path.join(pathToKubernetesManifests, "applications", filename),
       manifestContent,
       { create: true, append: false },
     );

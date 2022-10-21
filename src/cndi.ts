@@ -1,9 +1,8 @@
 import * as flags from "https://deno.land/std@0.157.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
-import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
-import { checkInstalled } from "./utils.ts";
+import { checkInstalled, getFileSuffixForPlatform } from "./utils.ts";
 import { Command } from "./types.ts";
 import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
@@ -16,14 +15,8 @@ import overwriteWithFn from "./commands/overwrite-with.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 
-const binaryForPlatform = {
-  linux: "linux",
-  darwin: "macos",
-  win32: "win.exe",
-};
-
 export default async function main(args: string[]) {
-  const currentPlatform = platform() as "linux" | "darwin" | "win32";
+  const fileSuffixForPlatform = getFileSuffixForPlatform();
   const executionDirectory = Deno.cwd();
   const homeDirectory = homedir() || "~";
   const CNDI_HOME = path.join(homeDirectory, ".cndi");
@@ -52,8 +45,12 @@ export default async function main(args: string[]) {
   // the directory in which to create the cndi folder
   const outputOption = cndiArguments.o || cndiArguments.output ||
     executionDirectory;
-  const outputDirectory = path.join(outputOption, "cndi");
-  const pathToNodes = path.join(outputDirectory, "nodes.json");
+
+  const projectDirectory = path.join(outputOption);
+
+  const projectCndiDirectory = path.join(projectDirectory, "cndi");
+  console.log("projectCndiDirectory", projectCndiDirectory);
+
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
   const dotEnvPath = path.join(outputOption, ".env");
@@ -61,18 +58,35 @@ export default async function main(args: string[]) {
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
 
+  const pathToTerraformBinary = path.join(
+    CNDI_HOME,
+    `terraform-${fileSuffixForPlatform}`,
+  );
+
+  const pathToCNDIBinary = path.join(
+    CNDI_HOME,
+    `cndi-${fileSuffixForPlatform}`,
+  );
+
+  const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
+  const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster");
+
   const context = {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
     CNDI_SRC, // ~/.cndi/src (default)
     CNDI_WORKING_DIR, // ~/.cndi/.working (default)
-    outputDirectory, // Deno.cwd()/cndi (default)
+    projectDirectory,
+    projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)
     dotEnvPath, // Deno.cwd()/.env (default)
     noGitHub,
     noDotEnv,
     pathToConfig,
-    pathToNodes,
-    binaryForPlatform: binaryForPlatform[currentPlatform],
+    pathToTerraformBinary,
+    pathToKubernetesManifests,
+    pathToCNDIBinary,
+    pathToTerraformResources,
+    fileSuffixForPlatform,
   };
 
   // map command to function
