@@ -45,7 +45,6 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
 interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
   ami?: string;
   instance_type?: string;
-  region?: string;
   availability_zone?: string;
 }
 
