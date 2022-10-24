@@ -11,16 +11,28 @@ jobs:
       - name: welcome
         run: echo "welcome to cndi!"
 
-      - name: checkout
+      - name: checkout state
+        uses: actions/checkout@v3
+        continue-on-error: true # first run has no state branch
+        with:
+          fetch-depth: 0
+          ref: '_state'
+
+      - name: save state
+        run: mv ./terraform.tfstate.gpg ~/terraform.tfstate.gpg
+        continue-on-error: true # first run has no state
+      
+      - name: echo state
+        run: stat ~/terraform.tfstate.gpg
+        continue-on-error: true # first run has no state
+
+      - name: checkout repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: pull existing tfstate
-        run: curl --fail --create-dirs https://raw.githubusercontent.com/${{ github.repository }}/_state/terraform.tfstate.gpg --output cndi/terraform
-
       - name: decrypt terraform state
-        run: gpg --batch --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d cndi/terraform/terraform.tfstate.gpg > cndi/terraform/terraform.tfstate && rm cndi/terraform/terraform.tfstate.gpg
+        run: gpg --batch --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d ~/terraform.tfstate.gpg > cndi/terraform/terraform.tfstate
         continue-on-error: true # if we try to encrypt a non-existent tfstate file, that's fine
 
       - name: show decrypted state
