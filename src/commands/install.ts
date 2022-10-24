@@ -14,7 +14,9 @@ import {
 
 type EmbeddedFileKey = keyof typeof embeddedFiles;
 
-export default async function install({CNDI_HOME, fileSuffixForPlatform}: CNDIContext) {
+export default async function install(
+  { CNDI_HOME, fileSuffixForPlatform }: CNDIContext,
+) {
   const spinner = new TerminalSpinner({
     text: "cndi installing",
     color: "cyan",
@@ -24,7 +26,6 @@ export default async function install({CNDI_HOME, fileSuffixForPlatform}: CNDICo
   });
 
   spinner.start();
-
 
   Object.keys(embeddedFiles).forEach((key) => {
     const k = key as EmbeddedFileKey;
