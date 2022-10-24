@@ -96,7 +96,7 @@ spec:
     - CreateNamespace=false
 EOF
 
-# kubectl -n "sealed-secrets" create secret tls "sealed-secret-keypair" --cert="\${sealed-secret-cert}" --key="\${sealed-secret-key}"
+# kubectl -n "sealed-secrets" create secret tls "sealed-secret-keypair" --cert="" --key=""
 # kubectl -n "sealed-secrets" label secret "sealed-secret-keypair" sealedsecrets.bitnami.com/sealed-secrets-key=active
 
 echo "argo configured"
