@@ -14,7 +14,9 @@ import {
 
 type EmbeddedFileKey = keyof typeof embeddedFiles;
 
-export default async function install(context: CNDIContext) {
+export default async function install(
+  { CNDI_HOME, fileSuffixForPlatform }: CNDIContext,
+) {
   const spinner = new TerminalSpinner({
     text: "cndi installing",
     color: "cyan",
@@ -25,7 +27,6 @@ export default async function install(context: CNDIContext) {
 
   spinner.start();
 
-  const { CNDI_HOME, fileSuffixForPlatform } = context;
   Object.keys(embeddedFiles).forEach((key) => {
     const k = key as EmbeddedFileKey;
     const folder = path.dirname(k) as string;
