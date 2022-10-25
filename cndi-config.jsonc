@@ -51,6 +51,17 @@
     }
   },
   "cluster": {
+    "my-secret": {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "my-secret",
+        "namespace": "default"
+      },
+      "stringData": {
+        "my-secret-key": "my-secret-value"
+      }
+    },
     "ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",

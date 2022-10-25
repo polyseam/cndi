@@ -1,20 +1,172 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import { checkInitialized, getPrettyJSONString, loadJSONC } from "../utils.ts";
+import {
+  checkInitialized,
+  getPrettyJSONString,
+  loadJSONC,
+  padPrivatePem,
+  padPublicPem,
+  trimPemString,
+} from "../utils.ts";
 import {
   BaseNodeEntrySpec,
   CNDIConfig,
   CNDIContext,
   DeploymentTargetConfiguration,
+  KubernetesManifest,
+  KubernetesSecret,
+  SealedSecretsKeys,
 } from "../types.ts";
 import getApplicationManifest from "../templates/application-manifest.ts";
 import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
 import getTerraformRootFile from "../templates/terraform-root-file.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
+import getSealedSecretManifest from "../templates/sealed-secret-manifest.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
+
+const createSealedSecretsKeys = async ({
+  pathToKeys,
+  pathToOpenSSL,
+}: CNDIContext): Promise<SealedSecretsKeys> => {
+  Deno.mkdir(pathToKeys, { recursive: true });
+  const sealed_secrets_public_key_path = path.join(pathToKeys, "public.pem");
+  const sealed_secrets_private_key_path = path.join(pathToKeys, "private.pem");
+
+  let sealed_secrets_private_key;
+  let sealed_secrets_public_key;
+
+  const ranOpenSSLGenerateKeyPair = await Deno.run({
+    cmd: [
+      pathToOpenSSL,
+      "req",
+      "-x509",
+      "-newkey",
+      "rsa:4096",
+      "-utf8",
+      "-keyout",
+      sealed_secrets_private_key_path,
+      "-out",
+      sealed_secrets_public_key_path,
+      "-nodes",
+      "-subj",
+      "/CN=sealed-secret/O=sealed-secret",
+    ],
+    stdout: "piped",
+    stderr: "piped",
+  });
+
+  const generateKeyPairStatus = await ranOpenSSLGenerateKeyPair.status();
+  const generateKeyPairStderr = await ranOpenSSLGenerateKeyPair.stderrOutput();
+
+  if (generateKeyPairStatus.code !== 0) {
+    Deno.stdout.write(generateKeyPairStderr);
+    Deno.exit(251); // arbitrary exit code
+  } else {
+    sealed_secrets_private_key = await Deno.readTextFile(
+      sealed_secrets_private_key_path,
+    );
+    sealed_secrets_public_key = await Deno.readTextFile(
+      sealed_secrets_public_key_path,
+    );
+    Deno.remove(pathToKeys, { recursive: true });
+  }
+
+  ranOpenSSLGenerateKeyPair.close();
+
+  return {
+    sealed_secrets_private_key,
+    sealed_secrets_public_key,
+  };
+};
+
+const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
+  const sealed_secrets_public_key_material = Deno.env
+    .get("SEALED_SECRETS_PUBLIC_KEY_MATERIAL")
+    ?.trim().replaceAll("_", "\n");
+  const sealed_secrets_private_key_material = Deno.env
+    .get("SEALED_SECRETS_PRIVATE_KEY_MATERIAL")
+    ?.trim().replaceAll("_", "\n");
+
+  if (!sealed_secrets_public_key_material) {
+    console.log("SEALED_SECRETS_PUBLIC_KEY_MATERIAL not found in environment");
+    return null;
+  }
+
+  if (!sealed_secrets_private_key_material) {
+    console.log("SEALED_SECRETS_PRIVATE_KEY_MATERIAL not found in environment");
+    return null;
+  }
+
+  const sealedSecrets = {
+    sealed_secrets_private_key: padPrivatePem(
+      sealed_secrets_private_key_material,
+    ),
+    sealed_secrets_public_key: padPublicPem(sealed_secrets_public_key_material),
+  };
+
+  return sealedSecrets;
+};
+
+const loadTerraformStatePassphrase = (): string | null => {
+  const terraform_state_passphrase = Deno.env
+    .get("TERRAFORM_STATE_PASSPHRASE")
+    ?.trim();
+
+  if (!terraform_state_passphrase) {
+    console.log("TERRAFORM_STATE_PASSPHRASE not found in environment");
+    return null;
+  }
+
+  return terraform_state_passphrase;
+};
+
+const createTerraformStatePassphrase = (): string => {
+  return crypto.randomUUID();
+};
+
+const updateGitIgnore = async (gitignorePath: string) => {
+  const dotEnvIgnoreEntry = "\n.env\n";
+  const dotKeysIgnoreEntry = "\n.keys/\n";
+  const terraformIgnoreEntry =
+    "\ncndi/terraform/.terraform*\ncndi/terraform/*.tfstate*\ncndi/terraform/.terraform/\n";
+  const gitignoreContents = await Deno.readTextFile(gitignorePath);
+  try {
+    // gitignore exists in user's project directory
+
+    if (!gitignoreContents.includes("env")) {
+      await Deno.writeTextFile(
+        gitignorePath,
+        gitignoreContents + dotEnvIgnoreEntry,
+      );
+    }
+
+    if (!gitignoreContents.includes(".keys")) {
+      await Deno.writeTextFile(
+        gitignorePath,
+        gitignoreContents + dotKeysIgnoreEntry,
+      );
+    }
+
+    if (!gitignoreContents.includes("terraform")) {
+      await Deno.writeTextFile(
+        gitignorePath,
+        gitignoreContents + terraformIgnoreEntry,
+      );
+    }
+  } catch {
+    // gitignore does not exist in user's project directory, create it
+    await Deno.writeTextFile(
+      gitignorePath,
+      "# cndi files\n" +
+        dotEnvIgnoreEntry +
+        dotKeysIgnoreEntry +
+        terraformIgnoreEntry,
+    );
+  }
+};
 
 /**
  * COMMAND fn: cndi overwrite-with
@@ -26,14 +178,27 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     githubDirectory,
     noGitHub,
     CNDI_SRC,
+    projectDirectory,
     pathToKubernetesManifests,
     pathToTerraformResources,
     noDotEnv,
     dotEnvPath,
+    noKeys,
+    pathToKeys,
+    pathToOpenSSL,
+    pathToKubeseal,
   } = context;
+
   if (!initializing) {
     console.log(`cndi overwrite-with -f "${pathToConfig}"`);
-  } else {
+  }
+
+  const sealedSecretsKeys = loadSealedSecretsKeys() ||
+    (await createSealedSecretsKeys(context));
+  const terraformStatePassphrase = loadTerraformStatePassphrase() ||
+    createTerraformStatePassphrase();
+
+  if (initializing) {
     const directoryContainsCNDIFiles = await checkInitialized(context);
 
     const shouldContinue = directoryContainsCNDIFiles
@@ -58,21 +223,15 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       }
     }
 
-    if (!noDotEnv) {
-      const gitignorePath = path.join(dotEnvPath, "..", ".gitignore");
-      try {
-        const gitignoreContents = await Deno.readTextFile(gitignorePath);
-        if (!gitignoreContents.includes(".env")) {
-          await Deno.writeTextFile(
-            gitignorePath,
-            gitignoreContents + "\n.env\n",
-          );
-        }
-      } catch {
-        await Deno.writeTextFile(gitignorePath, "\n.env\n");
-      }
+    // update gitignore
+    const gitignorePath = path.join(projectDirectory, ".gitignore");
+    updateGitIgnore(gitignorePath);
 
-      await Deno.writeTextFile(dotEnvPath, getDotEnv());
+    if (!noDotEnv) {
+      await Deno.writeTextFile(
+        dotEnvPath,
+        getDotEnv(sealedSecretsKeys, terraformStatePassphrase),
+      );
     }
   }
 
@@ -109,11 +268,31 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     controllerBootstrapTerraformTemplate,
   );
 
+  const tempPublicKeyFilePath = await Deno.makeTempFile();
+
+  await Deno.writeTextFile(
+    tempPublicKeyFilePath,
+    sealedSecretsKeys.sealed_secrets_public_key,
+  );
+
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
   Object.keys(cluster).forEach(async (key) => {
+    const manifestObj = cluster[key] as KubernetesManifest;
+
+    if (manifestObj?.kind && manifestObj.kind === "Secret") {
+      const secret = cluster[key] as KubernetesSecret;
+      const secretName = `${key}.json`;
+      await Deno.writeTextFile(
+        path.join(pathToKubernetesManifests, secretName),
+        await getSealedSecretManifest(secret, tempPublicKeyFilePath, context),
+      );
+      console.log(`created encrypted secret:`, secretName);
+      return;
+    }
+
     await Deno.writeTextFile(
       path.join(pathToKubernetesManifests, `${key}.json`),
-      getPrettyJSONString(cluster[key]),
+      getPrettyJSONString(manifestObj),
     );
   });
 

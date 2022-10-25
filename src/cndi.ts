@@ -2,7 +2,11 @@ import * as flags from "https://deno.land/std@0.157.0/flags/mod.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import "https://deno.land/std@0.157.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
 import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
-import { checkInstalled, getFileSuffixForPlatform } from "./utils.ts";
+import {
+  checkInstalled,
+  getFileSuffixForPlatform,
+  getPathToOpenSSLForPlatform,
+} from "./utils.ts";
 import { Command } from "./types.ts";
 import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
@@ -17,12 +21,17 @@ import installFn from "./commands/install.ts";
 
 export default async function main(args: string[]) {
   const fileSuffixForPlatform = getFileSuffixForPlatform();
+  const pathToOpenSSL = getPathToOpenSSLForPlatform();
   const executionDirectory = Deno.cwd();
   const homeDirectory = homedir() || "~";
   const CNDI_HOME = path.join(homeDirectory, ".cndi");
 
   // CNDI_SRC is determined at compile time, that's no good
   const CNDI_SRC = path.join(CNDI_HOME, "src");
+  const pathToKubeseal = path.join(
+    CNDI_HOME,
+    `kubeseal-${fileSuffixForPlatform}`,
+  );
 
   // default paths to the user's config file
   const DEFAULT_CNDI_CONFIG_PATH = path.join(
@@ -55,6 +64,7 @@ export default async function main(args: string[]) {
 
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
+  const noKeys = cndiArguments["no-keys"] || false;
 
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
@@ -68,6 +78,7 @@ export default async function main(args: string[]) {
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
   const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster");
+  const pathToKeys = path.join(outputOption, ".keys");
 
   const context = {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
@@ -84,6 +95,10 @@ export default async function main(args: string[]) {
     pathToCNDIBinary,
     pathToTerraformResources,
     fileSuffixForPlatform,
+    pathToOpenSSL,
+    pathToKeys,
+    pathToKubeseal,
+    noKeys,
   };
 
   // map command to function

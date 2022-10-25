@@ -77,7 +77,7 @@ const getAWSNodeResource = (
 
   if (role === "controller") {
     const user_data =
-      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}"})}';
+      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key_material": "${local.sealed_secrets_private_key_material}", "sealed_secrets_public_key_material": "${local.sealed_secrets_public_key_material}" })}';
 
     const controllerNodeResourceObj = { ...nodeResource };
 

@@ -29,9 +29,34 @@ const runFn = async ({
       Deno.exit(33);
     }
 
+    const sealed_secrets_private_key_material = Deno.env.get(
+      "SEALED_SECRETS_PRIVATE_KEY_MATERIAL",
+    )?.trim().replaceAll("_", "\n");
+
+    if (!sealed_secrets_private_key_material) {
+      console.error("SEALED_SECRETS_PRIVATE_KEY_MATERIAL env var is not set");
+      Deno.exit(33);
+    }
+
+    const sealed_secrets_public_key_material = Deno.env.get(
+      "SEALED_SECRETS_PUBLIC_KEY_MATERIAL",
+    )?.trim().replaceAll("_", "\n");
+    if (!sealed_secrets_public_key_material) {
+      console.error("SEALED_SECRETS_PUBLIC_KEY_MATERIAL env var is not set");
+      Deno.exit(33);
+    }
+
     Deno.env.set("TF_VAR_git_username", git_username);
     Deno.env.set("TF_VAR_git_password", git_password);
     Deno.env.set("TF_VAR_git_repo", git_repo);
+    Deno.env.set(
+      "TF_VAR_sealed_secrets_public_key_material",
+      sealed_secrets_public_key_material,
+    );
+    Deno.env.set(
+      "TF_VAR_sealed_secrets_private_key_material",
+      sealed_secrets_private_key_material,
+    );
 
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = await Deno.run({
