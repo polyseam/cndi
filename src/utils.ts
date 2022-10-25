@@ -59,10 +59,21 @@ const getFileSuffixForPlatform = () => {
   return fileSuffixForPlatform[currentPlatform];
 };
 
+const getPathToOpenSSLForPlatform = () => {
+  const currentPlatform = platform() as "linux" | "darwin" | "win32";
+
+  if (currentPlatform === "win32") {
+    return path.join("/", "Program Files", "Git", "usr", "bin", "openssl.exe");
+  }
+
+  return path.join("/", "usr", "bin", "openssl");
+};
+
 export {
   checkInitialized,
   checkInstalled,
   getFileSuffixForPlatform,
+  getPathToOpenSSLForPlatform,
   getPrettyJSONString,
   loadJSONC,
 };
