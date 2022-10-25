@@ -58,6 +58,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          SEALED_SECRETS_PRIVATE_KEY: ${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}
+          SEALED_SECRETS_PUBLIC_KEY: ${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}
         run: bin/cndi run  # run 'cndi run'
 
       - name: move state out of repo
