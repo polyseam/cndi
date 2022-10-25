@@ -85,10 +85,10 @@ const createSealedSecretsKeys = async ({
 const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
   const sealed_secrets_public_key_material = Deno.env
     .get("SEALED_SECRETS_PUBLIC_KEY_MATERIAL")
-    ?.trim();
+    ?.trim().replaceAll('_','\n');
   const sealed_secrets_private_key_material = Deno.env
     .get("SEALED_SECRETS_PRIVATE_KEY_MATERIAL")
-    ?.trim();
+    ?.trim().replaceAll('_','\n');
 
   if (!sealed_secrets_public_key_material) {
     console.log("SEALED_SECRETS_PUBLIC_KEY_MATERIAL not found in environment");
