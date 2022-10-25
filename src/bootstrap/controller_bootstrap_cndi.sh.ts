@@ -46,8 +46,10 @@ echo "all microk8s addons enabled!"
 echo "setting the default storageClass"
 sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{ "storageclass.kubernetes.io/is-default-class": "true" } } }'
 
-echo "applying sealed-secrets custom key"
+echo "installing sealed-secrets"
+sudo microk8s kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml
 
+echo "applying sealed-secrets custom key"
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Secret

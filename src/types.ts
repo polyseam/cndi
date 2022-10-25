@@ -99,7 +99,6 @@ interface KubernetesSecret extends KubernetesManifest {
   data: Record<string, string>;
 }
 
-
 interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -202,12 +201,14 @@ interface TerraformRootFileData {
       {
         description: "private key for decrypting sealed secrets";
         type: "string";
-      }
+      },
     ];
-    sealed_secrets_public_key: [{
-      description: "public key for encrypting sealed secrets";
-      type: "string";
-    }];
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets";
+        type: "string";
+      },
+    ];
   };
 }
 
@@ -223,8 +224,8 @@ export type {
   CNDINode,
   CNDINodesSpec,
   DeploymentTargetConfiguration,
-  KubernetesSecret,
   KubernetesManifest,
+  KubernetesSecret,
   TerraformDependencies,
   TerraformRootFileData,
 };

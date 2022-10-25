@@ -62,19 +62,19 @@ export default async function install(
     await terraformFileResponse.body.pipeTo(terraformWritableStream);
   }
 
-
   const kubesealBinaryPath = path.join(
     CNDI_HOME,
     `kubeseal-${fileSuffixForPlatform}`,
   );
 
-  const kubesealVersion = 'v0.19.1'
+  const kubesealVersion = "v0.19.1";
 
-  const kubesealBinaryURL = `https://cndi-binaries.s3.amazonaws.com/kubeseal/${kubesealVersion}/kubeseal-${fileSuffixForPlatform}`;
+  const kubesealBinaryURL =
+    `https://cndi-binaries.s3.amazonaws.com/kubeseal/${kubesealVersion}/kubeseal-${fileSuffixForPlatform}`;
 
   const kubesealFileResponse = await fetch(kubesealBinaryURL);
 
-  if(kubesealFileResponse.body) {
+  if (kubesealFileResponse.body) {
     const kubesealFile = await Deno.open(kubesealBinaryPath, {
       create: true,
       write: true,

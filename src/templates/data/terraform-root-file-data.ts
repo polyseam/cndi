@@ -57,6 +57,18 @@ const terraformRootFileData: TerraformRootFileData = {
         type: "string",
       },
     ],
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets",
+        type: "string",
+      },
+    ],
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets",
+        type: "string",
+      },
+    ],
   },
 };
 

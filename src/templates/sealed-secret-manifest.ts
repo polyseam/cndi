@@ -1,10 +1,9 @@
 import { CNDIContext, KubernetesSecret } from "../types.ts";
 import { getPrettyJSONString } from "../utils.ts";
 
-
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,
-  { pathToKubeseal, pathToKeys }: CNDIContext
+  { pathToKubeseal, pathToKeys }: CNDIContext,
 ): Promise<string> => {
   let sealed = "";
   const secretPath = await Deno.makeTempFile();
