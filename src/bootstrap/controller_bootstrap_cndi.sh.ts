@@ -46,6 +46,23 @@ echo "all microk8s addons enabled!"
 echo "setting the default storageClass"
 sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{ "storageclass.kubernetes.io/is-default-class": "true" } } }'
 
+echo "applying sealed-secrets custom key"
+
+sudo microk8s kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+  labels:
+    sealedsecrets.bitnami.com/sealed-secrets-key=active
+type: kubernetes.io/tls
+data:
+  tls.crt: |
+        \${sealed_secrets_public_key}
+  tls.key: |
+        \${sealed_secrets_private_key}
+EOF
+
 echo "creating argocd namespace"
 sudo microk8s kubectl create namespace argocd
 
@@ -95,25 +112,8 @@ spec:
     syncOptions:
     - CreateNamespace=false
 EOF
-
-echo "applying sealed-secrets custom key"
-
-sudo microk8s kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: secret-tls
-  labels:
-    sealedsecrets.bitnami.com/sealed-secrets-key=active
-type: kubernetes.io/tls
-data:
-  tls.crt: |
-        \${sealed_secrets_public_key}
-  tls.key: |
-        \${sealed_secrets_private_key}
-EOF
-
 echo "argo configured"
+
 echo "controller bootstrap complete"
 `.trim();
 export default bootstrapShellScript;
