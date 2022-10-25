@@ -96,8 +96,23 @@ spec:
     - CreateNamespace=false
 EOF
 
-# kubectl -n "sealed-secrets" create secret tls "sealed-secret-keypair" --cert="" --key=""
-# kubectl -n "sealed-secrets" label secret "sealed-secret-keypair" sealedsecrets.bitnami.com/sealed-secrets-key=active
+echo "applying sealed-secrets custom key"
+
+sudo microk8s kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+  labels:
+    sealedsecrets.bitnami.com/sealed-secrets-key=active
+type: kubernetes.io/tls
+data:
+  # the data is abbreviated in this example
+  tls.crt: |
+        \${sealed_secrets_public_key}
+  tls.key: |
+        \${sealed_secrets_private_key}
+EOF
 
 echo "argo configured"
 echo "controller bootstrap complete"
