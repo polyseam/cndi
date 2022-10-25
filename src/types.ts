@@ -89,6 +89,17 @@ interface CNDIConfig {
   };
 }
 
+interface KubernetesManifest {
+  apiVersion: string;
+  kind: string;
+}
+
+interface KubernetesSecret extends KubernetesManifest {
+  kind: "Secret";
+  data: Record<string, string>;
+}
+
+
 interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -114,6 +125,10 @@ interface CNDIContext {
   fileSuffixForPlatform: string;
   noGitHub: boolean;
   noDotEnv: boolean;
+  pathToOpenSSL: string;
+  pathToKeys: string;
+  pathToKubeseal: string;
+  noKeys: boolean;
 }
 
 // cndi-config.jsonc["nodes"]["entries"][*]
@@ -198,6 +213,8 @@ export type {
   CNDINode,
   CNDINodesSpec,
   DeploymentTargetConfiguration,
+  KubernetesSecret,
+  KubernetesManifest,
   TerraformDependencies,
   TerraformRootFileData,
 };
