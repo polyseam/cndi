@@ -75,7 +75,8 @@ const trimPemString = (key: string): string => {
 };
 
 const padPrivatePem = (keyMaterial: string): string => {
-  const paddedPrivateKey = `${PRIVATE_KEY_TOP}${keyMaterial}${PRIVATE_KEY_BOTTOM}`;
+  const paddedPrivateKey =
+    `${PRIVATE_KEY_TOP}${keyMaterial}${PRIVATE_KEY_BOTTOM}`;
   return paddedPrivateKey;
 };
 
@@ -101,7 +102,7 @@ export {
   getPathToOpenSSLForPlatform,
   getPrettyJSONString,
   loadJSONC,
-  trimPemString,
   padPrivatePem,
   padPublicPem,
+  trimPemString,
 };

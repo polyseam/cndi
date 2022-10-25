@@ -231,7 +231,7 @@ export type {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
+  SealedSecretsKeys,
   TerraformDependencies,
   TerraformRootFileData,
-  SealedSecretsKeys
 };

@@ -2,12 +2,15 @@ import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { SealedSecretsKeys } from "../types.ts";
 import { trimPemString } from "../utils.ts";
 
-const getDotEnv = (sealedSecretsKeys: SealedSecretsKeys, terraformStatePassphrase:string): string => {
+const getDotEnv = (
+  sealedSecretsKeys: SealedSecretsKeys,
+  terraformStatePassphrase: string,
+): string => {
   const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_public_key
+    sealedSecretsKeys.sealed_secrets_public_key,
   );
   const SEALED_SECRETS_PRIVATE_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_private_key
+    sealedSecretsKeys.sealed_secrets_private_key,
   );
 
   return `# AWS Credentials
