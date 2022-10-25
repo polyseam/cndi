@@ -107,7 +107,6 @@ metadata:
     sealedsecrets.bitnami.com/sealed-secrets-key=active
 type: kubernetes.io/tls
 data:
-  # the data is abbreviated in this example
   tls.crt: |
         \${sealed_secrets_public_key}
   tls.key: |
