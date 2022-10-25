@@ -3,7 +3,8 @@ import { getPrettyJSONString } from "../utils.ts";
 
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,
-  { pathToKubeseal, pathToKeys }: CNDIContext,
+  publicKeyFilePath: string,
+  {pathToKubeseal}: CNDIContext,
 ): Promise<string> => {
   let sealed = "";
   const secretPath = await Deno.makeTempFile();
@@ -13,11 +14,9 @@ const getSealedSecretManifest = async (
     mode: 0o777,
   });
 
-  const pathToCert = `${pathToKeys}/cert.pem`;
-
   const cmd = [
     pathToKubeseal,
-    `--cert=${pathToCert}`,
+    `--cert=${publicKeyFilePath}`,
     `--secret-file=${secretPath}`,
   ];
 

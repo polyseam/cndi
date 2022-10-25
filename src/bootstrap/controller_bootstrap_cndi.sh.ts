@@ -60,9 +60,9 @@ metadata:
 type: kubernetes.io/tls
 data:
   tls.crt: |
-        \${sealed_secrets_public_key}
+        \${sealed_secrets_public_key_material}
   tls.key: |
-        \${sealed_secrets_private_key}
+        \${sealed_secrets_private_key_material}
 EOF
 
 echo "creating argocd namespace"

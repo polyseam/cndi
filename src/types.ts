@@ -197,19 +197,24 @@ interface TerraformRootFileData {
         type: "string";
       },
     ];
-    sealed_secrets_private_key: [
+    sealed_secrets_private_key_material: [
       {
-        description: "private key for decrypting sealed secrets";
+        description: "private key material for decrypting sealed secrets";
         type: "string";
       },
     ];
-    sealed_secrets_public_key: [
+    sealed_secrets_public_key_material: [
       {
-        description: "public key for encrypting sealed secrets";
+        description: "public key material for encrypting sealed secrets";
         type: "string";
       },
     ];
   };
+}
+
+interface SealedSecretsKeys {
+  sealed_secrets_private_key: string;
+  sealed_secrets_public_key: string;
 }
 
 export type {
@@ -228,4 +233,5 @@ export type {
   KubernetesSecret,
   TerraformDependencies,
   TerraformRootFileData,
+  SealedSecretsKeys
 };
