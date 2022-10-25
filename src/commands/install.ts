@@ -40,26 +40,49 @@ export default async function install(
   });
 
   // TODO: configurable?
-  const version = "1.3.2";
+  const terraformVersion = "1.3.2";
 
   const terraformBinaryURL =
-    `https://cndi-binaries.s3.amazonaws.com/terraform/${version}/terraform-${fileSuffixForPlatform}`;
+    `https://cndi-binaries.s3.amazonaws.com/terraform/${terraformVersion}/terraform-${fileSuffixForPlatform}`;
 
   const terraformBinaryPath = path.join(
     CNDI_HOME,
     `terraform-${fileSuffixForPlatform}`,
   );
 
-  const fileResponse = await fetch(terraformBinaryURL);
+  const terraformFileResponse = await fetch(terraformBinaryURL);
 
-  if (fileResponse.body) {
-    const file = await Deno.open(terraformBinaryPath, {
+  if (terraformFileResponse.body) {
+    const terraformFile = await Deno.open(terraformBinaryPath, {
       create: true,
       write: true,
       mode: 0o777,
     });
-    const writableStream = writableStreamFromWriter(file);
-    await fileResponse.body.pipeTo(writableStream);
-    spinner.succeed("cndi installed");
+    const terraformWritableStream = writableStreamFromWriter(terraformFile);
+    await terraformFileResponse.body.pipeTo(terraformWritableStream);
   }
+
+
+  const kubesealBinaryPath = path.join(
+    CNDI_HOME,
+    `kubeseal-${fileSuffixForPlatform}`,
+  );
+
+  const kubesealVersion = 'v0.19.1'
+
+  const kubesealBinaryURL = `https://cndi-binaries.s3.amazonaws.com/kubeseal/${kubesealVersion}/kubeseal-${fileSuffixForPlatform}`;
+
+  const kubesealFileResponse = await fetch(kubesealBinaryURL);
+
+  if(kubesealFileResponse.body) {
+    const kubesealFile = await Deno.open(kubesealBinaryPath, {
+      create: true,
+      write: true,
+      mode: 0o777,
+    });
+    const kubesealWritableStream = writableStreamFromWriter(kubesealFile);
+    await kubesealFileResponse.body.pipeTo(kubesealWritableStream);
+  }
+
+  spinner.succeed("cndi installed");
 }
