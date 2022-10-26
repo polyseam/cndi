@@ -48,12 +48,10 @@ sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{
 
 
 echo "installing sealed-secrets\n"
-echo "creating namespace \"sealed-secrets\""
-sudo microk8s kubectl create namespace sealed-secrets
 
 echo "installing sealed-secrets-controller"
 
-sudo microk8s kubectl --namespace sealed-secrets apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
+sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
 
 echo "writing sealed-secrets keypair to disk"
 
@@ -72,13 +70,13 @@ echo "---\n"
 
 echo "applying sealed-secrets custom key"
 
-kubectl -n "sealed-secrets" create secret tls "cndi-sealed-secrets-key" --cert="./public.crt" --key="./private.key"
-kubectl -n "sealed-secrets" label secret "cndi-sealed-secrets-key" sealedsecrets.bitnami.com/sealed-secrets-key=active
+sudo microk8s kubectl -n "kube-system" create secret tls "cndi-sealed-secrets-key" --cert="./public.crt" --key="./private.key"
+sudo microk8s kubectl -n "kube-system" label secret "cndi-sealed-secrets-key" sealedsecrets.bitnami.com/sealed-secrets-key=active
 
 echo "\nsealed-secrets key "cndi-sealed-secrets-key" created\n"
 
 echo "deleting sealed-secrets pod so it can pick up the new key"
-sudo microk8s kubectl --namespace sealed-secrets delete pod -l name=sealed-secrets-controller
+sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller
 
 echo "removing key files from disk"
 rm public.crt
