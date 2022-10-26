@@ -41,7 +41,7 @@ const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
   const mainTerraformFileObject = { ...terraformRootFileData };
 
   mainTerraformFileObject.locals[0].controller_node_ip =
-    `aws_instance.${controllerName}.private_ip`;
+    `\${aws_instance.${controllerName}.private_ip}`;
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (providersRequired.has(NodeKind.aws)) {
