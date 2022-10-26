@@ -46,10 +46,14 @@ echo "all microk8s addons enabled!"
 echo "setting the default storageClass"
 sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{ "storageclass.kubernetes.io/is-default-class": "true" } } }'
 
-echo "installing sealed-secrets"
-sudo microk8s kubectl --namespace sealed-secrets apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
 
-echo "applying sealed-secrets custom key"
+echo "installing sealed-secrets\n"
+echo "creating namespace \"sealed-secrets\""
+sudo microk8s kubectl create namespace sealed-secrets
+
+echo "installing sealed-secrets-controller"
+
+sudo microk8s kubectl --namespace sealed-secrets apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
 
 echo "writing sealed-secrets keypair to disk"
 
@@ -65,6 +69,8 @@ echo "---\n"
 echo "sealed-secrets private key:"
 cat private.key
 echo "---\n"
+
+echo "applying sealed-secrets custom key"
 
 kubectl -n "sealed-secrets" create secret tls "cndi-sealed-secrets-key" --cert="./public.crt" --key="./private.key"
 kubectl -n "sealed-secrets" label secret "cndi-sealed-secrets-key" sealedsecrets.bitnami.com/sealed-secrets-key=active
