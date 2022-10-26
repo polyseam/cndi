@@ -160,8 +160,10 @@ interface TerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
-      sealed_secrets_private_key_material: "${var.sealed_secrets_private_key_material}",
-      sealed_secrets_public_key_material: "${var.sealed_secrets_public_key_material}"
+      sealed_secrets_private_key_material:
+        "${var.sealed_secrets_private_key_material}";
+      sealed_secrets_public_key_material:
+        "${var.sealed_secrets_public_key_material}";
     },
   ];
   provider: {

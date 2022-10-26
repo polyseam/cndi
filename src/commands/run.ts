@@ -1,5 +1,6 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { CNDIContext } from "../types.ts";
+import { encode } from "https://deno.land/std@0.160.0/encoding/base64.ts";
 
 /**
  * COMMAND fn: cndi run
@@ -51,11 +52,11 @@ const runFn = async ({
     Deno.env.set("TF_VAR_git_repo", git_repo);
     Deno.env.set(
       "TF_VAR_sealed_secrets_public_key_material",
-      sealed_secrets_public_key_material,
+      encode(sealed_secrets_public_key_material),
     );
     Deno.env.set(
       "TF_VAR_sealed_secrets_private_key_material",
-      sealed_secrets_private_key_material,
+      encode(sealed_secrets_private_key_material),
     );
 
     // terraform.tfstate will be in this folder after the first run
