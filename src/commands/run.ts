@@ -1,7 +1,7 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { CNDIContext } from "../types.ts";
 import { encode } from "https://deno.land/std@0.160.0/encoding/base64.ts";
-import { padPrivatePem, padPublicPem} from '../utils.ts'
+import { padPrivatePem, padPublicPem } from "../utils.ts";
 
 /**
  * COMMAND fn: cndi run
@@ -48,8 +48,12 @@ const runFn = async ({
       Deno.exit(33);
     }
 
-    const sealed_secrets_private_key = padPrivatePem(sealed_secrets_private_key_material);
-    const sealed_secrets_public_key = padPublicPem(sealed_secrets_public_key_material);
+    const sealed_secrets_private_key = padPrivatePem(
+      sealed_secrets_private_key_material,
+    );
+    const sealed_secrets_public_key = padPublicPem(
+      sealed_secrets_public_key_material,
+    );
 
     Deno.env.set("TF_VAR_git_username", git_username);
     Deno.env.set("TF_VAR_git_password", git_password);
