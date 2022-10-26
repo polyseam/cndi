@@ -84,10 +84,12 @@ const createSealedSecretsKeys = async ({
 const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
   const sealed_secrets_public_key_material = Deno.env
     .get("SEALED_SECRETS_PUBLIC_KEY_MATERIAL")
-    ?.trim().replaceAll("_", "\n");
+    ?.trim()
+    .replaceAll("_", "\n");
   const sealed_secrets_private_key_material = Deno.env
     .get("SEALED_SECRETS_PRIVATE_KEY_MATERIAL")
-    ?.trim().replaceAll("_", "\n");
+    ?.trim()
+    .replaceAll("_", "\n");
 
   if (!sealed_secrets_public_key_material) {
     console.log("SEALED_SECRETS_PUBLIC_KEY_MATERIAL not found in environment");
@@ -240,7 +242,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   try {
     // remove all files in cndi/cluster
-    await Deno.remove(path.join(pathToKubernetesManifests), {
+    await Deno.remove(pathToKubernetesManifests, {
       recursive: true,
     });
   } catch {
@@ -252,7 +254,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     recursive: true,
   });
 
-  // create 'cndi/' 'cndi/terraform' and 'cndi/terraform/nodes'
+  // create 'cndi/' 'cndi/terraform'
   await Deno.mkdir(pathToTerraformResources, {
     recursive: true,
   });
@@ -262,6 +264,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     path.join(pathToTerraformResources, "worker_bootstrap_cndi.sh.tftpl"),
     workerBootstrapTerrformTemplate,
   );
+
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "controller_bootstrap_cndi.sh.tftpl"),
     controllerBootstrapTerraformTemplate,
@@ -323,7 +326,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     Deno.writeTextFile(
       path.join(pathToTerraformResources, `${entry.name}.cndi-node.tf.json`),
       nodeFileContents,
-      { create: true },
     );
   });
 
@@ -345,7 +347,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     await Deno.writeTextFile(
       path.join(pathToKubernetesManifests, "applications", filename),
       manifestContent,
-      { create: true, append: false },
     );
     console.log("created application manifest:", filename);
   });
