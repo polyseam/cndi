@@ -47,10 +47,10 @@ echo "setting the default storageClass"
 sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{ "storageclass.kubernetes.io/is-default-class": "true" } } }'
 
 echo "installing sealed-secrets"
-sudo microk8s kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml
+sudo microk8s kubectl --namespace sealed-secrets apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
 
 echo "applying sealed-secrets custom key"
-sudo microk8s kubectl apply -f - <<EOF
+sudo microk8s kubectl --namespace sealed-secrets apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
@@ -64,6 +64,10 @@ data:
   tls.key: |
         \${sealed_secrets_private_key_material}
 EOF
+
+echo "sealed-secrets installed"
+echo "deleting sealed-secrets pod so it can pick up the new key"
+sudo microk8s kubectl --namespace sealed-secrets delete pod -l name=sealed-secrets-controller
 
 echo "creating argocd namespace"
 sudo microk8s kubectl create namespace argocd
