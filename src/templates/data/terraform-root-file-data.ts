@@ -8,10 +8,10 @@ const terraformRootFileData: TerraformRootFileData = {
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",
-      sealed_secrets_private_key_material:
-        "${var.sealed_secrets_private_key_material}",
-      sealed_secrets_public_key_material:
-        "${var.sealed_secrets_public_key_material}",
+      sealed_secrets_private_key:
+        "${var.sealed_secrets_private_key}",
+      sealed_secrets_public_key:
+        "${var.sealed_secrets_public_key}",
     },
   ],
   provider: {
@@ -61,15 +61,15 @@ const terraformRootFileData: TerraformRootFileData = {
         type: "string",
       },
     ],
-    sealed_secrets_private_key_material: [
+    sealed_secrets_private_key: [
       {
-        description: "private key material for decrypting sealed secrets",
+        description: "private key for decrypting sealed secrets",
         type: "string",
       },
     ],
-    sealed_secrets_public_key_material: [
+    sealed_secrets_public_key: [
       {
-        description: "public key material for encrypting sealed secrets",
+        description: "public key for encrypting sealed secrets",
         type: "string",
       },
     ],
