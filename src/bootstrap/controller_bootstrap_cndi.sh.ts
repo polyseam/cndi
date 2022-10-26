@@ -56,7 +56,7 @@ kind: Secret
 metadata:
   name: secret-tls
   labels:
-    sealedsecrets.bitnami.com/sealed-secrets-key=active
+    sealedsecrets.bitnami.com/sealed-secrets-key: active
 type: kubernetes.io/tls
 data:
   tls.crt: |
