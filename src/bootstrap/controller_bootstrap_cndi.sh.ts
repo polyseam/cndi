@@ -50,24 +50,33 @@ echo "installing sealed-secrets"
 sudo microk8s kubectl --namespace sealed-secrets apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
 
 echo "applying sealed-secrets custom key"
-sudo microk8s kubectl --namespace sealed-secrets apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: secret-tls
-  labels:
-    sealedsecrets.bitnami.com/sealed-secrets-key: active
-type: kubernetes.io/tls
-data:
-  tls.crt: |
-        \${sealed_secrets_public_key_material}
-  tls.key: |
-        \${sealed_secrets_private_key_material}
-EOF
 
-echo "sealed-secrets installed"
+echo "writing sealed-secrets keypair to disk"
+
+echo "\${sealed_secrets_public_key}" > public.crt
+echo "\${sealed_secrets_private_key}" > private.key
+
+echo "TODO: remove logging of secrets"
+
+echo "sealed-secrets public key:"
+cat public.crt
+echo "---\n"
+
+echo "sealed-secrets private key:"
+cat private.key
+echo "---\n"
+
+kubectl -n "sealed-secrets" create secret tls "cndi-sealed-secrets-key" --cert="./public.crt" --key="./private.key"
+kubectl -n "sealed-secrets" label secret "cndi-sealed-secrets-key" sealedsecrets.bitnami.com/sealed-secrets-key=active
+
+echo "\nsealed-secrets key "cndi-sealed-secrets-key" created\n"
+
 echo "deleting sealed-secrets pod so it can pick up the new key"
 sudo microk8s kubectl --namespace sealed-secrets delete pod -l name=sealed-secrets-controller
+
+echo "removing key files from disk"
+rm public.crt
+rm private.key
 
 echo "creating argocd namespace"
 sudo microk8s kubectl create namespace argocd
@@ -118,6 +127,7 @@ spec:
     syncOptions:
     - CreateNamespace=false
 EOF
+
 echo "argo configured"
 
 echo "controller bootstrap complete"
