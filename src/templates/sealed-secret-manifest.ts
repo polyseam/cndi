@@ -18,7 +18,7 @@ const getSealedSecretManifest = async (
     pathToKubeseal,
     `--cert=${publicKeyFilePath}`,
     `--secret-file=${secretPath}`,
-    `--scope=cluster-wide`
+    `--scope=cluster-wide`,
   ];
 
   const ranKubeseal = Deno.run({
