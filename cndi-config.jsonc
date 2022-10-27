@@ -22,7 +22,7 @@
   },
   "applications": {
     "airflow": {
-      "targetRevision": "1.6.0",
+      "targetRevision": "1.7.0",
       "destinationNamespace": "airflow",
       "repoURL": "https://airflow.apache.org",
       "chart": "airflow",
@@ -58,8 +58,8 @@
         "name": "my-secret",
         "namespace": "default"
       },
-      "stringData": {
-        "my-secret-key": "my-secret-value"
+      "data": {
+        "my-secret-key": "$.cndi.secrets.my-secret-key"
       }
     },
     "ingress": {

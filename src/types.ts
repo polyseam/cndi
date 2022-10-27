@@ -127,6 +127,7 @@ interface CNDIContext {
   pathToOpenSSL: string;
   pathToKeys: string;
   pathToKubeseal: string;
+  gitignorePath: string;
   noKeys: boolean;
 }
 

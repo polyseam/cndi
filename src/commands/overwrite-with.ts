@@ -184,10 +184,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     pathToTerraformResources,
     noDotEnv,
     dotEnvPath,
-    noKeys,
-    pathToKeys,
-    pathToOpenSSL,
-    pathToKubeseal,
   } = context;
 
   if (!initializing) {

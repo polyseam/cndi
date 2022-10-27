@@ -78,6 +78,7 @@ export default async function main(args: string[]) {
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
   const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster");
+  const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
 
   const context = {
@@ -99,6 +100,7 @@ export default async function main(args: string[]) {
     pathToKeys,
     pathToKubeseal,
     noKeys,
+    gitignorePath,
   };
 
   // map command to function
