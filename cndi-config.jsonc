@@ -2,16 +2,17 @@
   "nodes": {
     "entries": [
       {
-        "name": "controller-alpha",
+        "name": "airflow-controller-alpha",
         "role": "controller",
-        "instance_type": "t2.large",
-        "kind": "aws"
+        "instance_type": "m5a.xlarge",
+        "kind": "aws",
+        "volume_size": 128 // GiB
       },
       {
-        "name": "worker-alpha",
+        "name": "worker-xyz",
         "role": "worker",
-        "instance_type": "t2.large",
-        "kind": "aws"
+        "kind": "aws",
+        "volume_size": 128
       }
     ],
     "deploymentTargetConfiguration": {
@@ -30,15 +31,17 @@
         "dags": {
           "gitSync": {
             "enabled": true,
-            "repo": "https://github.com/polyseam/demo-dag-bag",
+            "repo": "https://github.com/johnstonmatt/demo-dag-bag", // private repo that requires credentials
+            "credentialsSecret": "git-credentials",
             "branch": "main",
-            "wait": 70,
+            "wait": 40,
             "subPath": "dags"
           }
         },
         "logs": {
           "persistence": {
-            "size": "15Gi"
+            "size": "15Gi",
+            "enabled": true
           }
         },
         "createUserJob": {
@@ -51,15 +54,16 @@
     }
   },
   "cluster": {
-    "my-secret": {
-      "kind": "Secret",
+    "git-credentials-secret": {
       "apiVersion": "v1",
+      "kind": "Secret",
       "metadata": {
-        "name": "my-secret",
-        "namespace": "default"
+        "name": "git-credentials",
+        "namespace": "airflow"
       },
       "stringData": {
-        "my-secret-key": "$.cndi.secrets.my-secret-key"
+        "GIT_SYNC_USERNAME": "$.cndi.secrets.GIT_USERNAME",
+        "GIT_SYNC_PASSWORD": "$.cndi.secrets.GIT_PASSWORD"
       }
     },
     "ingress": {

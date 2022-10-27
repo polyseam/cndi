@@ -96,7 +96,21 @@ interface KubernetesManifest {
 
 interface KubernetesSecret extends KubernetesManifest {
   kind: "Secret";
-  data: Record<string, string>;
+  data?: {
+    [key: string]: string;
+  };
+  stringData?: {
+    [key: string]: string;
+  };
+  metadata: {
+    name: string;
+  };
+}
+
+interface KubernetesSecretWithStringData extends KubernetesSecret {
+  stringData: {
+    [key: string]: string;
+  };
 }
 
 interface CNDIApplicationSpec {
@@ -234,6 +248,7 @@ export type {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
+  KubernetesSecretWithStringData,
   SealedSecretsKeys,
   TerraformDependencies,
   TerraformRootFileData,
