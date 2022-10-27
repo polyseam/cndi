@@ -58,7 +58,7 @@
         "name": "my-secret",
         "namespace": "default"
       },
-      "data": {
+      "stringData": {
         "my-secret-key": "$.cndi.secrets.my-secret-key"
       }
     },
