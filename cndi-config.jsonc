@@ -32,7 +32,7 @@
           "gitSync": {
             "enabled": true,
             "repo": "https://github.com/johnstonmatt/demo-dag-bag", // private repo that requires credentials
-            "credentialsSecret": "git-credentials",
+            "credentialsSecret": "airflow-git-credentials",
             "branch": "main",
             "wait": 40,
             "subPath": "dags"
@@ -58,7 +58,7 @@
       "apiVersion": "v1",
       "kind": "Secret",
       "metadata": {
-        "name": "git-credentials",
+        "name": "airflow-git-credentials",
         "namespace": "airflow"
       },
       "stringData": {

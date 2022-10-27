@@ -169,6 +169,32 @@ going to be deploying, but don't worry, we'll make it easy!
 }
 ```
 
+Pro tip! If you want to add a new secret to use inside of your Kubernetes
+cluster, we make this possible by encrypting your secrets with
+[sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) so they can
+live in your repo securely and be picked up by ArgoCD automatically.
+
+```jsonc
+{
+  "nodes": {...},
+  "applications": {...},
+  "cluster": {
+    "airflow-git-credentials-secret": {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "metadata": {
+        "name": "airflow-git-credentials",
+        "namespace": "airflow"
+      },
+      "stringData": {
+        "GIT_SYNC_USERNAME": "$.cndi.secrets.GIT_USERNAME",
+        "GIT_SYNC_PASSWORD": "$.cndi.secrets.GIT_PASSWORD"
+      }
+    }
+  }
+}
+```
+
 ### dpr (not yet!)
 
 If you are using CNDI to deploy a Data Product, and want to persist information
