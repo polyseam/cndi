@@ -77,7 +77,7 @@ entries to deploy:
         "kind": "gcp",
         "role": "controller",
         "name": "gcp-controller",
-        "machine_type": "t2.large"
+        "machine_type": "m5a.xlarge"
       },
       {
         "kind": "gcp",
@@ -92,7 +92,7 @@ entries to deploy:
     ],
     "deploymentTargetConfiguration": {
       "aws": {
-        "instance_type": "t2.medium"
+        "instance_type": "m5a.large"
       }
     }
   }
@@ -128,7 +128,7 @@ Lets see what that might look like now in cndi-next:
             "repo": "https://github.com/polyseam/demo-dag-bag",
             "branch": "main",
             "wait": 70,
-            "subPath": "/dags"
+            "subPath": "dags"
           }
         },
         // These options are required by Airflow in this context
@@ -196,7 +196,7 @@ when we run:
 ## cndi init
 
 ```bash
-cndi init -f ./my-cndi-config.json .
+cndi init -f ./my-cndi-config.jsonc .
 ```
 
 Wow!
@@ -209,10 +209,9 @@ what `cndi init` produced for us:
    binary executable. As such, if you have a different CI system, you can
    execute the `cndi run` command on the binary there instead.
 
-2. a `cndi/nodes.json` file, this is essentially the `nodes` object you passed
-   into `cndi init`, if there are any sensitive fields here, they will be
-   stripped out, and will need to be passed in as secret environment variables
-   to `cndi run`.
+2. a `cndi/terraform` folder, containing the infrastructure resources cndi has
+   generated for terraform, which cndi will apply automatically every time
+   `cndi run` is executed.
 
 3. a `cndi/cluster` folder, containing Kubernetes manifests that will be
    installed on your new cluster when it is up and running. This includes things
@@ -245,9 +244,10 @@ you.
 ## cndi run
 
 When changes are made to the `main` branch of our repo `cndi run` will check if
-there have been any changes to our `cndi/nodes.json` file and if so it will
-kickoff async Promises for the creation of each virtual machine that does not
-yet exist, and changes to those that do.
+there have been any changes to our `cndi/terraform`, and if the state of the
+desired cluster in these files is different than the actual cluster in the
+cloud, terraform will apply the necessary changes to the infrastructure to make
+the real-world state match the desired state in the repo.
 
 When a virtual machine is live, cndi will install `microk8s` on each machine.
 When microk8s is installed on the machines, we will use it to join all the
@@ -274,7 +274,7 @@ pull request though, you will be making a PR with the diff between the new state
 of `cndi/` and the old.
 
 You are also able to modify the manifests in `cndi/cluster` and make changes to
-`cndi/nodes.json` yourself, but be careful: if you then run
+`cndi/terraform` resources yourself, but be careful: if you then run
 `cndi overwrite-with -f my-new-config.json` after manual changes, you will blast
 those changes away unless they are also present in `my-new-config.json` .
 
@@ -514,4 +514,5 @@ That concludes the section on setting up CNDI for development, you should now
 have an operational CNDI Cluster! 🎉
 
 If you have any issues please message [Matt](https://github.com/johnstonmatt) or
-[Tamika](https://github.com/IamTamika) in the Polyseam Chat.
+[Tamika](https://github.com/IamTamika) in the
+[Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).

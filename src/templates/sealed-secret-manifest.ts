@@ -31,7 +31,7 @@ const parseCndiSecret = (
         outputSecret.stringData[dataEntryKey] = decodedSecretEnvVal;
       } else {
         throw new Error(
-          'Secret string literals are not supported. Use "$.cndi.secrets." prefix to reference environment variables.',
+          `Secret string literals are not supported. Use "$.cndi.secrets." prefix to reference environment variables.\n at ${inputSecret.metadata.name}.stringData.${dataEntryKey}`,
         );
       }
     });
@@ -49,7 +49,7 @@ const parseCndiSecret = (
         outputSecret.stringData[dataEntryKey] = secretEnvVal;
       } else {
         throw new Error(
-          'Secret string literals are not supported. Use "$.cndi.secrets." prefix to reference environment variables.',
+          `Secret string literals are not supported. Use "$.cndi.secrets." prefix to reference environment variables.\n at ${inputSecret.metadata.name}.stringData.${dataEntryKey}`,
         );
       }
     });

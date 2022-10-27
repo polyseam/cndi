@@ -62,7 +62,7 @@
         "namespace": "airflow"
       },
       "stringData": {
-        "GIT_SYNC_USERNAME": "$.cndi.secrets.GIT_USERNAME",
+        "GIT_SYNC_USERNAME": "FOO",
         "GIT_SYNC_PASSWORD": "$.cndi.secrets.GIT_PASSWORD"
       }
     },
