@@ -249,6 +249,15 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     // folder did not exist
   }
 
+  try {
+    // remove all files in cndi/terraform
+    await Deno.remove(pathToTerraformResources, {
+      recursive: true,
+    });
+  } catch {
+    // folder did not exist
+  }
+
   // create 'cndi/' 'cndi/cluster' and 'cndi/cluster/applications'
   await Deno.mkdir(path.join(pathToKubernetesManifests, "applications"), {
     recursive: true,
