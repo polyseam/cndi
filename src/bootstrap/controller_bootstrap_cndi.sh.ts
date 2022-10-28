@@ -41,6 +41,9 @@ sudo microk8s enable community
 echo "  nfs"
 sudo microk8s enable nfs
 
+echo "  cert-manager"
+sudo microk8s enable cert-manager
+
 echo "all microk8s addons enabled!"
 
 echo "setting the default storageClass"
