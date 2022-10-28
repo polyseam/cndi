@@ -47,9 +47,8 @@ main() {
 		*) shell_profile=".bashrc" ;;
 		esac
 
-        . $HOME/$shell_profile
-		exec "$SHELL"
-        
+		echo "Run the following to make cndi accessible globally:"
+		echo "  sudo cp $exe /usr/local/bin/"
 		echo "Run '$exe --help' to get started"
 	fi
 
