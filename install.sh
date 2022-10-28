@@ -48,6 +48,7 @@ main() {
 		esac
 
         . $HOME/$shell_profile
+		exec "$SHELL"
         
 		echo "Run '$exe --help' to get started"
 	fi
