@@ -47,7 +47,7 @@ main() {
 		*) shell_profile=".bashrc" ;;
 		esac
 
-        source $HOME/$shell_profile
+        . $HOME/$shell_profile
         
 		echo "Run '$exe --help' to get started"
 	fi
