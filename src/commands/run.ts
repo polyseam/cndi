@@ -1,6 +1,5 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { CNDIContext } from "../types.ts";
-import { encode } from "https://deno.land/std@0.160.0/encoding/base64.ts";
 import { padPrivatePem, padPublicPem } from "../utils.ts";
 
 /**

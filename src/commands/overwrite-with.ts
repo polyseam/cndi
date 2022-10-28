@@ -6,7 +6,6 @@ import {
   loadJSONC,
   padPrivatePem,
   padPublicPem,
-  trimPemString,
 } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
