@@ -4,6 +4,7 @@ import { trimPemString } from "../utils.ts";
 const getDotEnv = (
   sealedSecretsKeys: SealedSecretsKeys,
   terraformStatePassphrase: string,
+  argoUIReadonlyPassword: string,
 ): string => {
   const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
     sealedSecretsKeys.sealed_secrets_public_key,
@@ -32,6 +33,9 @@ SEALED_SECRETS_PUBLIC_KEY_MATERIAL="${
 
 # Terraform State Passphrase
 TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
+
+# ArgoCD UI Readonly Password
+ARGOUI_READONLY_PASSWORD=${argoUIReadonlyPassword}
 `;
 };
 

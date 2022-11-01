@@ -175,6 +175,7 @@ interface TerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
+      argoui_readonly_password: "${var.argoui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
     },
@@ -223,6 +224,12 @@ interface TerraformRootFileData {
     sealed_secrets_public_key: [
       {
         description: "public key for encrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    argoui_readonly_password: [
+      {
+        description: "password for accessing the argo ui";
         type: "string";
       },
     ];
