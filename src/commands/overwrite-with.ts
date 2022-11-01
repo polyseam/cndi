@@ -127,6 +127,23 @@ const createTerraformStatePassphrase = (): string => {
   return crypto.randomUUID();
 };
 
+const loadArgoUIReadonlyPassword = (): string | null => {
+  const argoui_readonly_password = Deno.env
+    .get("ARGOUI_READONLY_PASSWORD")
+    ?.trim();
+
+  if (!argoui_readonly_password) {
+    console.log("ARGOUI_READONLY_PASSWORD not found in environment");
+    return null;
+  }
+
+  return argoui_readonly_password;
+};
+
+const createArgoUIReadOnlyPassword = (): string => {
+  return crypto.randomUUID();
+};
+
 const updateGitIgnore = async (gitignorePath: string) => {
   const dotEnvIgnoreEntry = "\n.env\n";
   const dotKeysIgnoreEntry = "\n.keys/\n";
@@ -194,6 +211,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     (await createSealedSecretsKeys(context));
   const terraformStatePassphrase = loadTerraformStatePassphrase() ||
     createTerraformStatePassphrase();
+  const argoUIReadonlyPassword = loadArgoUIReadonlyPassword() ||
+    createArgoUIReadOnlyPassword();
 
   if (initializing) {
     const directoryContainsCNDIFiles = await checkInitialized(context);
@@ -227,7 +246,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     if (!noDotEnv) {
       await Deno.writeTextFile(
         dotEnvPath,
-        getDotEnv(sealedSecretsKeys, terraformStatePassphrase),
+        getDotEnv(
+          sealedSecretsKeys,
+          terraformStatePassphrase,
+          argoUIReadonlyPassword,
+        ),
       );
     }
   }

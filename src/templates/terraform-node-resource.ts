@@ -43,7 +43,8 @@ const getAWSNodeResource = (
     deploymentTargetConfiguration?.availability_zone ||
     DEFAULT_AVAILABILITY_ZONE;
   const instance_type = entry?.instance_type ||
-    deploymentTargetConfiguration?.instance_type || DEFAULT_INSTANCE_TYPE;
+    deploymentTargetConfiguration?.instance_type ||
+    DEFAULT_INSTANCE_TYPE;
 
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
@@ -51,33 +52,37 @@ const getAWSNodeResource = (
   const volume_type = "gp3"; // general purpose SSD
 
   // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-  const ebs_block_device = [{
-    device_name,
-    volume_size,
-    volume_type,
-    delete_on_termination,
-  }];
+  const ebs_block_device = [
+    {
+      device_name,
+      volume_size,
+      volume_type,
+      delete_on_termination,
+    },
+  ];
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
       aws_instance: {
-        [name]: [{
-          ami,
-          instance_type,
-          availability_zone,
-          tags: {
-            Name: name,
-            CNDINodeRole: role,
+        [name]: [
+          {
+            ami,
+            instance_type,
+            availability_zone,
+            tags: {
+              Name: name,
+              CNDINodeRole: role,
+            },
+            ebs_block_device,
           },
-          ebs_block_device,
-        }],
+        ],
       },
     },
   };
 
   if (role === "controller") {
     const user_data =
-      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}" })}';
+      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argoui_readonly_password": "${local.argoui_readonly_password}" })}';
 
     const controllerNodeResourceObj = { ...nodeResource };
 

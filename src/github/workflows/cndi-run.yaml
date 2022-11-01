@@ -55,6 +55,7 @@ jobs:
           GIT_REPO:  https://github.com/${{ github.repository}}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+          ARGOUI_READONLY_PASSWORD: ${{ secrets.ARGOUI_READONLY_PASSWORD }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
