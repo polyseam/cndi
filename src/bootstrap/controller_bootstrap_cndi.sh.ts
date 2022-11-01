@@ -117,7 +117,7 @@ metadata:
   labels:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
-data:
+stringData:
   admin.enabled: "true"
   accounts.readonlyuser: login
   timeout.reconciliation: 70s # default is 180s
