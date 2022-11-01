@@ -17,60 +17,6 @@
       }
     ]
   },
-  "applications": {
-    "airflow": {
-      "targetRevision": "1.7.0",
-      "destinationNamespace": "airflow",
-      "repoURL": "https://airflow.apache.org",
-      "chart": "airflow",
-      "values": {
-        "dags": {
-          "gitSync": {
-            "enabled": true,
-            "repo": "https://github.com/johnstonmatt/demo-dag-bag", // private repo that requires credentials
-            "credentialsSecret": "airflow-git-credentials",
-            "branch": "main",
-            "wait": 40,
-            "subPath": "dags"
-          }
-        },
-        "config": {
-          "webserver": {
-            "expose_config": "True",
-            "instance_name": "Polyseam",
-            "enable_proxy_fix": "True",
-            "base_url": "https://airflow.cndi.xyz"
-          },
-          "operators": {
-            "default_owner": "Polyseam"
-          }
-        },
-        "ingress": {
-          "web": {
-            "enabled": true,
-            "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt"
-            },
-            "hosts": [
-              {
-                "name": "airflow.cndi.xyz",
-                "tls": {
-                  "secretName": "lets-encrypt-private-key",
-                  "enabled": true
-                }
-              }
-            ]
-          }
-        },
-        "createUserJob": {
-          "useHelmHooks": false
-        },
-        "migrateDatabaseJob": {
-          "useHelmHooks": false
-        }
-      }
-    }
-  },
   "cluster": {
     "git-credentials-secret": {
       "apiVersion": "v1",
@@ -150,6 +96,60 @@
             }
           }
         ]
+      }
+    }
+  },
+  "applications": {
+    "airflow": {
+      "targetRevision": "1.7.0",
+      "destinationNamespace": "airflow",
+      "repoURL": "https://airflow.apache.org",
+      "chart": "airflow",
+      "values": {
+        "dags": {
+          "gitSync": {
+            "enabled": true,
+            "repo": "https://github.com/johnstonmatt/demo-dag-bag", // private repo that requires credentials
+            "credentialsSecret": "airflow-git-credentials",
+            "branch": "main",
+            "wait": 40,
+            "subPath": "dags"
+          }
+        },
+        "config": {
+          "webserver": {
+            "expose_config": "True",
+            "instance_name": "Polyseam",
+            "enable_proxy_fix": "True",
+            "base_url": "https://airflow.cndi.xyz"
+          },
+          "operators": {
+            "default_owner": "Polyseam"
+          }
+        },
+        "ingress": {
+          "web": {
+            "enabled": true,
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt"
+            },
+            "hosts": [
+              {
+                "name": "airflow.cndi.xyz",
+                "tls": {
+                  "secretName": "lets-encrypt-private-key",
+                  "enabled": true
+                }
+              }
+            ]
+          }
+        },
+        "createUserJob": {
+          "useHelmHooks": false
+        },
+        "migrateDatabaseJob": {
+          "useHelmHooks": false
+        }
       }
     }
   }
