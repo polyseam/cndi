@@ -315,8 +315,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   );
 
   const { entries } = nodes;
-  const deploymentTargetConfiguration = nodes
-    .deploymentTargetConfiguration as DeploymentTargetConfiguration;
+  const deploymentTargetConfiguration = nodes?.deploymentTargetConfiguration ||
+    ({} as DeploymentTargetConfiguration);
 
   const controllerName = entries.find((entry) => entry.role === "controller")
     ?.name as string;

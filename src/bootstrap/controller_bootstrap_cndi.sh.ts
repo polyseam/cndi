@@ -107,6 +107,41 @@ stringData:
   username: \${git_username}
 EOF
 
+echo "applying argocd ConfigMap manifest"
+sudo microk8s kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  admin.enabled: "true"
+  accounts.readonlyuser: login
+  timeout.reconciliation: 70s # default is 180s
+EOF
+
+echo "creating argocd readonlyuser account"
+
+NOW="'$(date +%FT%T%Z)'"
+
+sudo microk8s kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: readonlyuser-account
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-secret
+    app.kubernetes.io/part-of: argocd
+stringData:
+  accounts.readonlyuser.password: \${argoui_readonly_password}
+  accounts.readonlyuser.passwordMtime: $NOW
+EOF
+
 echo "apply argocd root app"
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: argoproj.io/v1alpha1
