@@ -114,6 +114,7 @@ data:
 EOF
 
 echo "creating argocd readonlyuser account"
+NOW="'$(date +%FT%T%Z)'"
 
 sudo microk8s kubectl patch -f - <<EOF
 apiVersion: v1
@@ -127,6 +128,7 @@ metadata:
     app.kubernetes.io/part-of: argocd
 stringData:
   accounts.readonlyuser.password: \${argoui_readonly_password}
+  accounts.readonlyuser.passwordMtime: \${NOW}
 EOF
 
 echo "apply argocd root app"
