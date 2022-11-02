@@ -49,7 +49,6 @@ echo "all microk8s addons enabled!"
 echo "setting the default storageClass"
 sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations":{ "storageclass.kubernetes.io/is-default-class": "true" } } }'
 
-
 echo "installing sealed-secrets\n"
 
 echo "installing sealed-secrets-controller"
@@ -97,27 +96,6 @@ stringData:
   username: \${git_username}
 EOF
 
-echo "applying argocd ConfigMap manifest"
-sudo microk8s kubectl apply -f - <<EOF
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: argocd-cm
-  namespace: argocd
-  labels:
-    app.kubernetes.io/name: argocd-cm
-    app.kubernetes.io/part-of: argocd
-data:
-  admin.enabled: "true"
-  accounts.readonlyuser: login, apiKey
-  timeout.reconciliation: 70s # default is 180s
-EOF
-
-echo "creating argocd readonlyuser account"
-NOW="'$(date +%FT%T%Z)'"
-
-sudo microk8s kubectl -n argocd patch secret argocd-secret -p '{ "stringData": { "accounts.readonlyuser.password": "\${argoui_readonly_password}"} }'
-
 echo "apply argocd root app"
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: argoproj.io/v1alpha1
@@ -149,5 +127,7 @@ EOF
 echo "argo configured"
 
 echo "controller bootstrap complete"
+
+sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify | base64 -d > $HOME/argo-password.txt
 `.trim();
 export default bootstrapShellScript;
