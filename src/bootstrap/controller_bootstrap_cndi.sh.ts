@@ -61,16 +61,6 @@ echo "writing sealed-secrets keypair to disk"
 echo "\${sealed_secrets_public_key}" > public.crt
 echo "\${sealed_secrets_private_key}" > private.key
 
-echo "TODO: remove logging of secrets"
-
-echo "sealed-secrets public key:"
-cat public.crt
-echo "---\n"
-
-echo "sealed-secrets private key:"
-cat private.key
-echo "---\n"
-
 echo "applying sealed-secrets custom key"
 
 sudo microk8s kubectl -n "kube-system" create secret tls "cndi-sealed-secrets-key" --cert="./public.crt" --key="./private.key"
@@ -119,13 +109,15 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   admin.enabled: "true"
-  accounts.readonlyuser: login
+  accounts.readonlyuser: login, apiKey
   timeout.reconciliation: 70s # default is 180s
 EOF
 
 echo "creating argocd readonlyuser account"
 
 NOW="'$(date +%FT%T%Z)'"
+
+echo "readonlyuser password: \${readonlyuser_password}"
 
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: v1
