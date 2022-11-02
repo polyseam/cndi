@@ -117,7 +117,7 @@ echo "creating argocd readonlyuser account"
 
 NOW="'$(date +%FT%T%Z)'"
 
-echo "readonlyuser password: \${readonlyuser_password}"
+echo "readonlyuser password: \${argoui_readonly_password}"
 
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: v1
