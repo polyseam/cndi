@@ -209,8 +209,10 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const sealedSecretsKeys = loadSealedSecretsKeys() ||
     (await createSealedSecretsKeys(context));
+
   const terraformStatePassphrase = loadTerraformStatePassphrase() ||
     createTerraformStatePassphrase();
+
   const argoUIReadonlyPassword = loadArgoUIReadonlyPassword() ||
     createArgoUIReadOnlyPassword();
 

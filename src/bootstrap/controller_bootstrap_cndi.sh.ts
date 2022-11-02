@@ -115,23 +115,18 @@ EOF
 
 echo "creating argocd readonlyuser account"
 
-NOW="'$(date +%FT%T%Z)'"
-
-echo "readonlyuser password: \${argoui_readonly_password}"
-
 sudo microk8s kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: readonlyuser-account
+  name: argocd-secret
   namespace: argocd
   labels:
     app.kubernetes.io/name: argocd-secret
     app.kubernetes.io/part-of: argocd
 stringData:
   accounts.readonlyuser.password: \${argoui_readonly_password}
-  accounts.readonlyuser.passwordMtime: $NOW
 EOF
 
 echo "apply argocd root app"
