@@ -116,7 +116,7 @@ EOF
 echo "creating argocd readonlyuser account"
 NOW="'$(date +%FT%T%Z)'"
 
-sudo microk8s kubectl patch -f - <<EOF
+sudo microk8s kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 type: Opaque
