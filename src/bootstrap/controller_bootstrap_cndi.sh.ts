@@ -115,7 +115,7 @@ EOF
 
 echo "creating argocd readonlyuser account"
 
-sudo microk8s kubectl apply -f - <<EOF
+sudo microk8s kubectl patch -f - <<EOF
 apiVersion: v1
 kind: Secret
 type: Opaque
