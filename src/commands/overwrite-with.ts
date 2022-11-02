@@ -141,7 +141,7 @@ const loadArgoUIReadonlyPassword = (): string | null => {
 };
 
 const createArgoUIReadOnlyPassword = (): string => {
-  return crypto.randomUUID();
+  return crypto.randomUUID().replaceAll("-", "");
 };
 
 const updateGitIgnore = async (gitignorePath: string) => {
