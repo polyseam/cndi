@@ -61,6 +61,7 @@ interface AWSTerraformNodeResource {
         };
         user_data?: string;
         depends_on?: Array<string>;
+        vpc_security_group_ids?: Array<{
         ebs_block_device?: Array<{
           device_name: string;
           volume_size: number;
