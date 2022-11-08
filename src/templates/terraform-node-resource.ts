@@ -60,7 +60,7 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
-
+const subnet_id = "subnet"
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
       aws_instance: {
@@ -74,6 +74,7 @@ const getAWSNodeResource = (
               CNDINodeRole: role,
             },
             ebs_block_device,
+            subnet_id,
           },
         ],
       },
