@@ -577,10 +577,10 @@ interface TerraformRootFileData {
     }];
 
 
-    rt_cidr_block: [{
+    destination_cidr_block: [{
 
       default: "0.0.0.0/0";
-      description: "CIDR block for the route table";
+      description: "CIDR block for the route";
       type: "string";
 
     }];
