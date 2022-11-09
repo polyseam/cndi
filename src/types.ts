@@ -352,16 +352,16 @@ interface TerraformRootFileData {
       argoui_readonly_password: "${var.argoui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-      gateway_id: "${aws_internet_gateway.igw.id}";
-      load_balancer_arn: "${aws_lb.nlb.arn}";
-      route_table_id: "${aws_route_table.rt.id}";
-      subnet_id: "${aws_subnet.subnet.id}";
-      target_group_http_arn: "${aws_lb_target_group.tg-http.arn}";
-      target_group_https_arn: "${aws_lb_target_group.tg-https.arn}";
-      target_id: "${aws_instance.controller.id}";
-      vpc_id: "${aws_vpc.vpc.id}";
-      vpc_security_group_id: "${aws_security_group.sg.id}";
-      route_table: "${aws_route_table.rt}";
+      gateway_id: string;
+      load_balancer_arn: string
+      route_table_id: string;
+      subnet_id: string
+      target_group_http_arn: string;
+      target_group_https_arn: string;
+      target_id: string;
+      vpc_id: string;
+      vpc_security_group_id: string;
+      route_table: string;
     },
   ];
   provider: {
