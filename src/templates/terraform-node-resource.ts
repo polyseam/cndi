@@ -79,6 +79,7 @@ const getAWSNodeResource = (
             },
             ebs_block_device,
             subnet_id,
+            vpc_security_group_ids,
           },
         ],
       },
