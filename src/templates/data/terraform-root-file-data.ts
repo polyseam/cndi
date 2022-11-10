@@ -463,25 +463,6 @@ const terraformRootFileData: TerraformRootFileData = {
 
     }],
 
-
-    instance_ami: [{
-
-      default: "ami-0c1704bac156af62c",
-      description: "ID of the AMI used",
-      type: "string",
-
-    }],
-
-
-    instance_type: [{
-
-      default: "m5a.xlarge",
-      description: "Type of the instance",
-      type: "string",
-
-    }],
-
-
     ebs_block_device_name: [{
 
       default: "/dev/sda1",
