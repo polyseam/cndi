@@ -144,6 +144,12 @@
             ]
           }
         },
+        "logs": {
+          "persistence": {
+            "enabled": true,
+            "size": "15Gi"
+          }
+        },
         "createUserJob": {
           "useHelmHooks": false
         },
