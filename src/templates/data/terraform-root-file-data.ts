@@ -27,7 +27,7 @@ const terraformRootFileData: TerraformRootFileData = {
     random: [{}],
     aws: [{}],
   },
-  resource: {
+  resource: [{
     random_password: {
       generated_token: [
         {
