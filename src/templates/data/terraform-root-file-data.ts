@@ -37,7 +37,215 @@ const terraformRootFileData: TerraformRootFileData = {
         },
       ],
     },
+    aws_internet_gateway: {
+      igw: {
+        tags: { Name: "${var.owner}-internet-gateway" },
+        vpc_id: "${local.vpc_id}",
+      },
+    },
+    aws_lb: {
+      nlb: {
+        internal: false,
+        load_balancer_type: "network",
+        name: "${var.owner}-nlb",
+        subnets: ["${local.subnet_id}"],
+      },
+    },
+    aws_route: {
+      r: {
+        depends_on: ["aws_route_table.rt"],
+        route_table_id: "${local.route_table_id}",
+        destination_cidr_block: "${var.destination_cidr_block}",
+        gateway_id: "${local.gateway_id}",
+      },
+    },
+    aws_route_table: {
+      rt: {
+        tags: { Name: "${var.owner}-aws-route-table" },
+        vpc_id: "${local.vpc_id}",
+      },
+    }, aws_route_table_association: {
+      rt_sbn_asso: {
+        route_table_id: "${local.route_table_id}",
+        subnet_id: "${local.subnet_id}",
+      },
+    }, aws_subnet: {
+      subnet: {
+        availability_zone: "${var.aws_region}${var.aws_region_az}",
+        cidr_block: "${var.sbn_cidr_block}",
+        map_public_ip_on_launch: "${var.sbn_public_ip}",
+        tags: { Name: "${var.owner}-subnet" },
+        vpc_id: "${local.vpc_id}",
+      },
+    },
+    aws_security_group: [
+      {
+        sg: [
+          {
+            description: "Security firewall",
+            egress: [
+              {
+                cidr_blocks: ["${var.sg_egress_cidr_block}"],
+                description: "All traffic",
+                from_port: "${var.sg_egress_all}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                protocol: "${var.sg_egress_proto}",
+                security_groups: [],
+                self: false,
+                to_port: "${var.sg_egress_all}",
+              },
+            ],
+            ingress: [
+              {
+                cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+                description: "SSH port to access EC2 instances",
+                from_port: "${var.sg_ingress_ssh}",
+                protocol: "${var.sg_ingress_proto}",
+                to_port: "${var.sg_ingress_ssh}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                security_groups: [],
+                self: false,
+              },
+              {
+                cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+                description: "Port for HTTP traffic",
+                from_port: "${var.sg_ingress_http}",
+                protocol: "${var.sg_ingress_proto}",
+                to_port: "${var.sg_ingress_http}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                security_groups: [],
+                self: false,
+              },
+              {
+                cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+                description: "Port for HTTPS traffic",
+                from_port: "${var.sg_ingress_https}",
+                protocol: "${var.sg_ingress_proto}",
+                to_port: "${var.sg_ingress_https}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                security_groups: [],
+                self: false,
+              },
+              {
+                cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+                description: "Kubernetes API server port to access cluster from local machine",
+                from_port: "${var.sg_ingress_k8s_API}",
+                protocol: "${var.sg_ingress_proto}",
+                to_port: "${var.sg_ingress_k8s_API}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                security_groups: [],
+                self: false,
+              },
+              {
+                cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+                description: "Nodeport port to quickly access applications INSECURE",
+                from_port: "${var.sg_ingress_nodeport_range_start}",
+                protocol: "${var.sg_ingress_proto}",
+                to_port: "${var.sg_ingress_nodeport_range_end}",
+                ipv6_cidr_blocks: [],
+                prefix_list_ids: [],
+                security_groups: [],
+                self: false,
+              },
+            ],
+            name: "${var.owner}-sg",
+            vpc_id: "${local.vpc_id}",
+          },
+        ],
+      },
+    ], aws_lb_target_group: {
+      "tg-http": [
+        {
+          name: "${var.owner}-tg-http",
+          port: "${var.tg_http}",
+          protocol: "${var.tg_http_proto}",
+          vpc_id: "${local.vpc_id}",
+        },
+      ],
+    },
   },
+  {
+    aws_lb_target_group_attachment: {
+      "tg-http-target": [
+        {
+          target_group_arn: "${local.target_group_http_arn}",
+          target_id: "${local.target_id}",
+        },
+      ],
+    },
+  },
+  {
+    aws_lb_listener: {
+      "tg-http-listener": [
+        {
+          default_action: [
+            {
+              target_group_arn: "${local.target_group_http_arn}",
+              type: "forward",
+            },
+          ],
+          load_balancer_arn: "${local.load_balancer_arn}",
+          port: "${var.tg_http}",
+          protocol: "${var.tg_http_proto}",
+        },
+      ],
+    },
+  },
+  {
+    aws_lb_target_group: {
+      "tg-https": [
+        {
+          name: "${var.owner}-tg-https",
+          port: "${var.tg_https}",
+          protocol: "${var.tg_https_proto}",
+          vpc_id: "${local.vpc_id}",
+        },
+      ],
+    },
+  },
+  {
+    aws_lb_target_group_attachment: {
+      "tg-https-target": [
+        {
+          target_group_arn: "${local.target_group_https_arn}",
+          target_id: "${local.target_id}",
+        },
+      ],
+    },
+  },
+  {
+    aws_lb_listener: {
+      "tg-https-listener": [
+        {
+          default_action: [
+            {
+              target_group_arn: "${local.target_group_https_arn}",
+              type: "forward",
+            },
+          ],
+          load_balancer_arn: "${local.load_balancer_arn}",
+          port: "${var.tg_https}",
+          protocol: "${var.tg_https_proto}",
+        },
+      ],
+    }, aws_vpc: {
+      vpc: {
+        cidr_block: "${var.vpc_cidr_block}",
+        enable_dns_hostnames: "${var.vpc_dns_hostnames}",
+        enable_dns_support: "${var.vpc_dns_support}",
+        tags: { Name: "${var.owner}-vpc" },
+      },
+    },
+
+
+  }
+  ],
+
   terraform: [
     {
       required_providers: [
