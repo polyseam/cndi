@@ -60,7 +60,11 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
-const subnet_id = "subnet"
+  const subnet_id = "${local.subnet_id}";
+  const vpc_security_group_ids = [
+    "${local.vpc_security_group_id}"
+  ];
+  const vpc_id = "${local.vpc_id}"
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
       aws_instance: {
