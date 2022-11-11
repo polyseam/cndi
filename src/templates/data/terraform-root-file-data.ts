@@ -309,50 +309,42 @@ const terraformRootFileData: TerraformRootFileData = {
 
     }],
 
-
     sg_ingress_http: [{
-      default: "80", description: "Port for HTTP traffic", type: "string"
+      default: "80",
+      description: "Port for HTTP traffic",
+      type: "string",
     }],
 
-
     sg_ingress_https: [{
-
       default: "443",
       description: "Port for HTTPS traffic",
       type: "string",
-
     }],
-
 
     sg_ingress_ssh: [{
-      default: "22", description: "Port used SSL traffic", type: "string"
+      default: "22",
+      description: "Port used SSL traffic",
+      type: "string",
     }],
 
-
     sg_ingress_k8s_API: [{
-
       default: "16443",
       description: "Port used for Kubernetes API server",
       type: "string",
-
     }],
-
 
     sg_ingress_nodeport_range_start: [{
-
       default: "30000",
-      description: "Nodeport start range port to quickly access applications INSECURE",
+      description:
+        "Nodeport start range port to quickly access applications INSECURE",
       type: "string",
-
     }],
 
-
     sg_ingress_nodeport_range_end: [{
-
       default: "33000",
-      description: "Nodeport end range port to quickly access applications INSECURE",
+      description:
+        "Nodeport end range port to quickly access applications INSECURE",
       type: "string",
-
     }],
 
 
