@@ -326,16 +326,7 @@ interface TerraformRootFileData {
       argoui_readonly_password: "${var.argoui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-      gateway_id: string;
-      load_balancer_arn: string
-      route_table_id: string;
-      subnet_id: string
-      target_group_http_arn: string;
-      target_group_https_arn: string;
       target_id: string;
-      vpc_id: string;
-      vpc_security_group_id: string;
-      route_table: string;
     },
   ];
   provider: {
