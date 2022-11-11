@@ -347,16 +347,23 @@ interface TerraformRootFileData {
   terraform: [TerraformDependencies];
   variable: {
 
-    aws_region: [{
-
-      default: "us-east-1";
-      description: "AWS region";
-      type: "string"
-
-    }];
-
+  resource: [{
+    random_password: RandomTerraformRandomPasswordResource;
+    aws_internet_gateway: AWSTerraformInternetGatewayResource;
+    aws_lb: AWSTerraformLoadBalancerResource;
+    aws_route: AWSTerraformRouteResource;
+    aws_route_table: AWSTerraformRouteTableResource;
+    aws_route_table_association: AWSTerraformRouteTableAssociationResource;
+    aws_subnet: AWSTerraformSubnetResource;
+    aws_security_group: AWSTerraformSecurityGroupResource;
+    aws_lb_target_group: AWSTerraformTargetGroupResource;
+    aws_lb_listener: AWSTerraformTargetGroupListenerResource;
+    aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
+    aws_vpc: AWSTerraformVPCResource;
+  }];
+  terraform: [TerraformDependencies];
+  variable: {
     owner: [{
-
       default: "polyseam";
       description: "Org Name";
       type: "string"
