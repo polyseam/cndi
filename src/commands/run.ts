@@ -113,7 +113,8 @@ const runFn = async ({
     const applyStderr = await ranTerraformApply.stderrOutput();
 
     if (applyStatus.code !== 0) {
-      Deno.stdout.write(applyStderr);
+      console.log("terraform apply failed");
+      await Deno.stdout.write(applyStderr);
       Deno.exit(252); // arbitrary exit code
     } else {
       Deno.stdout.write(applyOutput);
