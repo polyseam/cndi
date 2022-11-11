@@ -73,176 +73,152 @@ interface AWSTerraformNodeResource {
     };
   };
 }
+interface RandomTerraformRandomPasswordResource {
+  generated_token: Array<{
+    length: number;
+    special: boolean;
+    upper: boolean;
+  }>;
+}
 
 interface AWSTerraformInternetGatewayResource {
-  resource: {
-    aws_internet_gateway: {
-      igw: {
-        tags: {
-          Name: string
-        }
-        vpc_id: string
-      }
-    }
-  }
-}
-interface AWSTerraformLoadBalancerResource {
-  resource: {
-    aws_lb: {
-      nlb: {
-        internal: boolean;
-        load_balancer_type: string;
-        name: string;
-        subnets: Array<string>;
-      };
+  igw: {
+    tags: {
+      Name: string;
     };
-  }
+    vpc_id: string;
+  };
 }
+
+interface AWSTerraformLoadBalancerResource {
+  nlb: {
+    internal: boolean;
+    load_balancer_type: string;
+    name: string;
+    subnets: Array<string>;
+  };
+}
+
 interface AWSTerraformRouteResource {
-  resource: {
-    aws_route: {
-      r: {
-        depends_on: Array<string>
-        route_table_id: string
-        destination_cidr_block: string
-        gateway_id: string
-      }
-    }
-  }
+  r: {
+    depends_on: Array<string>;
+    route_table_id: string;
+    destination_cidr_block: string;
+    gateway_id: string;
+  };
 }
 interface AWSTerraformRouteTableResource {
-  resource: {
-    aws_route_table: {
-      rt: {
-        tags: {
-          Name: string
-        }
-        vpc_id: string
-      }
-    }
-  }
-}interface AWSTerraformRouteTableAssociationResource {
-  resource: {
-    aws_route_table_association: {
-      rt_sbn_asso: {
-        route_table_id: string
-        subnet_id: string
-      }
-    }
-  }
+  rt: {
+    tags: {
+      Name: string;
+    };
+    vpc_id: string;
+  };
+}
+interface AWSTerraformRouteTableAssociationResource {
+  rt_sbn_asso: {
+    route_table_id: string;
+    subnet_id: string;
+  };
 }
 
 interface AWSTerraformSubnetResource {
-  resource: {
-    aws_subnet: {
-      subnet: {
-        availability_zone: string
-        cidr_block: string
-        map_public_ip_on_launch: string
-        tags: {
-          Name: string
-        }
-        vpc_id: string
-      }
-    }
-  }
+  subnet: {
+    availability_zone: string;
+    cidr_block: string;
+    map_public_ip_on_launch: string;
+    tags: {
+      Name: string;
+    };
+    vpc_id: string;
+  };
 }
 interface AWSTerraformSecurityGroupResource {
-  resource: {
-    aws_security_group: Array<{
-      sg: Array<{
-        description: string
-        egress: Array<{
-          cidr_blocks: Array<string>
-          description: string
-          from_port: string
-          ipv6_cidr_blocks: Array<any>
-          prefix_list_ids: Array<any>
-          protocol: string
-          security_groups: Array<any>
-          self: boolean
-          to_port: string
-        }>
-        ingress: Array<{
-          cidr_blocks: Array<string>
-          description: string
-          from_port: string
-          protocol: string
-          to_port: string
-          ipv6_cidr_blocks: Array<any>
-          prefix_list_ids: Array<any>
-          security_groups: Array<any>
-          self: boolean
-        }>
-        name: string
-        vpc_id: string
-      }>
-    }>
-  }
+  sg: Array<{
+    description: string;
+    egress: Array<{
+      cidr_blocks: Array<string>;
+      description: string;
+      from_port: string;
+      ipv6_cidr_blocks: Array<any>;
+      prefix_list_ids: Array<any>;
+      protocol: string;
+      security_groups: Array<any>;
+      self: boolean;
+      to_port: string;
+    }>;
+    ingress: Array<{
+      cidr_blocks: Array<string>;
+      description: string;
+      from_port: string;
+      protocol: string;
+      to_port: string;
+      ipv6_cidr_blocks: Array<any>;
+      prefix_list_ids: Array<any>;
+      security_groups: Array<any>;
+      self: boolean;
+    }>;
+    name: string;
+    vpc_id: string;
+  }>;
 }
-interface AWSTerraformTargetGroupsResource {
-  resource: Array<{
-    aws_lb_target_group?: {
-      "tg-https"?: Array<{
-        name: string
-        port: string
-        protocol: string
-        vpc_id: string
-      }>
-      "tg-http"?: Array<{
-        name: string
-        port: string
-        protocol: string
-        vpc_id: string
-      }>
-    }
-    aws_lb_target_group_attachment?: {
-      "tg-https-target"?: Array<{
-        target_group_arn: string
-        target_id: string
-      }>
-      "tg-http-target"?: Array<{
-        target_group_arn: string
-        target_id: string
-      }>
-    }
-    aws_lb_listener?: {
-      "tg-https-listener"?: Array<{
-        default_action: Array<{
-          target_group_arn: string
-          type: string
-        }>
-        load_balancer_arn: string
-        port: string
-        protocol: string
-      }>
-      "tg-http-listener"?: Array<{
-        default_action: Array<{
-          target_group_arn: string
-          type: string
-        }>
-        load_balancer_arn: string
-        port: string
-        protocol: string
-      }>
-    }
-  }>
 
+interface AWSTerraformTargetGroupResource {
+  "tg-http": Array<{
+    name: string;
+    port: string;
+    protocol: string;
+    vpc_id: string;
+  }>;
+  "tg-https": Array<{
+    name: string;
+    port: string;
+    protocol: string;
+    vpc_id: string;
+  }>;
 }
+
+interface AWSTerraformTargetGroupAttachmentResource {
+  "tg-https-target": Array<{
+    target_group_arn: string;
+    target_id: string;
+  }>;
+  "tg-http-target": Array<{
+    target_group_arn: string;
+    target_id: string;
+  }>;
+}
+
+interface AWSTerraformTargetGroupListenerResource {
+  "tg-https-listener": Array<{
+    default_action: Array<{
+      target_group_arn: string;
+      type: string;
+    }>;
+    load_balancer_arn: string;
+    port: string;
+    protocol: string;
+  }>;
+  "tg-http-listener": Array<{
+    default_action: Array<{
+      target_group_arn: string;
+      type: string;
+    }>;
+    load_balancer_arn: string;
+    port: string;
+    protocol: string;
+  }>;
+}
+
 interface AWSTerraformVPCResource {
-  resource: {
-    aws_vpc: {
-      vpc: {
-        cidr_block: string
-        enable_dns_hostnames: string
-        enable_dns_support: string
-        tags: {
-          Name: string
-        }
-      }
-    }
-  }
-
+  vpc: {
+    cidr_block: string;
+    enable_dns_hostnames: string;
+    enable_dns_support: string;
+    tags: {
+      Name: string;
+    };
+  };
 }
 interface DeploymentTargetConfiguration {
   aws: AWSDeploymentTargetConfiguration;
