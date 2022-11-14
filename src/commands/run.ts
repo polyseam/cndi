@@ -1,6 +1,6 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
+import setTF_VARs from "../setTF_VARs.ts";
 import { CNDIContext } from "../types.ts";
-import { padPrivatePem, padPublicPem } from "../utils.ts";
 
 /**
  * COMMAND fn: cndi run
@@ -12,66 +12,7 @@ const runFn = async ({
 }: CNDIContext) => {
   console.log("cndi run");
   try {
-    const git_username = Deno.env.get("GIT_USERNAME");
-    if (!git_username) {
-      console.error("GIT_USERNAME env var is not set");
-      Deno.exit(31);
-    }
-
-    const git_password = Deno.env.get("GIT_PASSWORD");
-    if (!git_password) {
-      console.error("GIT_PASSWORD env var is not set");
-      Deno.exit(32);
-    }
-
-    const git_repo = Deno.env.get("GIT_REPO");
-    if (!git_repo) {
-      console.error("GIT_REPO env var is not set");
-      Deno.exit(33);
-    }
-
-    const argoui_readonly_password = Deno.env.get("ARGOUI_READONLY_PASSWORD");
-    if (!argoui_readonly_password) {
-      console.error("ARGOUI_READONLY_PASSWORD env var is not set");
-      Deno.exit(34);
-    }
-
-    const sealed_secrets_private_key_material = Deno.env.get(
-      "SEALED_SECRETS_PRIVATE_KEY_MATERIAL",
-    )?.trim().replaceAll("_", "\n");
-
-    if (!sealed_secrets_private_key_material) {
-      console.error("SEALED_SECRETS_PRIVATE_KEY_MATERIAL env var is not set");
-      Deno.exit(35);
-    }
-
-    const sealed_secrets_public_key_material = Deno.env.get(
-      "SEALED_SECRETS_PUBLIC_KEY_MATERIAL",
-    )?.trim().replaceAll("_", "\n");
-    if (!sealed_secrets_public_key_material) {
-      console.error("SEALED_SECRETS_PUBLIC_KEY_MATERIAL env var is not set");
-      Deno.exit(36);
-    }
-
-    const sealed_secrets_private_key = padPrivatePem(
-      sealed_secrets_private_key_material,
-    );
-    const sealed_secrets_public_key = padPublicPem(
-      sealed_secrets_public_key_material,
-    );
-
-    Deno.env.set("TF_VAR_git_username", git_username);
-    Deno.env.set("TF_VAR_git_password", git_password);
-    Deno.env.set("TF_VAR_git_repo", git_repo);
-    Deno.env.set("TF_VAR_argoui_readonly_password", argoui_readonly_password);
-    Deno.env.set(
-      "TF_VAR_sealed_secrets_public_key",
-      sealed_secrets_public_key,
-    );
-    Deno.env.set(
-      "TF_VAR_sealed_secrets_private_key",
-      sealed_secrets_private_key,
-    );
+    setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = await Deno.run({
@@ -89,10 +30,11 @@ const runFn = async ({
     const initStderr = await ranTerraformInit.stderrOutput();
 
     if (initStatus.code !== 0) {
-      Deno.stdout.write(initStderr);
+      console.log("terraform init failed");
+      await Deno.stdout.write(initStderr);
       Deno.exit(251); // arbitrary exit code
     } else {
-      Deno.stdout.write(initOutput);
+      await Deno.stdout.write(initOutput);
     }
 
     ranTerraformInit.close();
@@ -113,10 +55,11 @@ const runFn = async ({
     const applyStderr = await ranTerraformApply.stderrOutput();
 
     if (applyStatus.code !== 0) {
-      Deno.stdout.write(applyStderr);
+      console.log("terraform apply failed");
+      await Deno.stdout.write(applyStderr);
       Deno.exit(252); // arbitrary exit code
     } else {
-      Deno.stdout.write(applyOutput);
+      await Deno.stdout.write(applyOutput);
     }
 
     ranTerraformApply.close();

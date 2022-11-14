@@ -3,6 +3,7 @@ type HelpStrings = {
   init: string;
   install: string;
   "overwrite-with": string;
+  terraform: string;
   ow: string;
   run: string;
   help: string;
@@ -87,6 +88,14 @@ DESCRIPTION
         Fetches and unpacks files required for using cndi and installs them to the CNDI_HOME directory. 
         
         Must be run once before using cndi!
+  `.trim(),
+  terraform: `
+NAME
+        cndi-terrafrom - wraps the terraform cli so that it can be used within a cndi context
+SYNOPSIS
+        cndi terraform <command>
+DESCRIPTION
+        Runs the terraform CLI with the proper cndi environment variables set.
   `.trim(),
   help: `oops! "help" is not a command, you probably meant "--help"`,
 };
