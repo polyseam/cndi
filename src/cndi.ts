@@ -18,6 +18,7 @@ import initFn from "./commands/init.ts";
 import overwriteWithFn from "./commands/overwrite-with.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
+import terraformFn from "./commands/terraform.ts";
 
 export default async function main(args: string[]) {
   const fileSuffixForPlatform = getFileSuffixForPlatform();
@@ -111,6 +112,7 @@ export default async function main(args: string[]) {
     [Command.run]: runFn,
     [Command.help]: helpFn,
     [Command.install]: installFn,
+    [Command.terraform]: terraformFn,
     [Command.default]: (c: string) => {
       console.log(
         `Command "${c}" not found. Use "cndi --help" for more information.`,
@@ -161,6 +163,9 @@ export default async function main(args: string[]) {
         break;
       case Command.ow:
         commands[Command["overwrite-with"]](context);
+        break;
+      case Command.terraform:
+        commands[Command.terraform](context, args.slice(1));
         break;
       default:
         commands[Command.default](operation);

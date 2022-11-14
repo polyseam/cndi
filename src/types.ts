@@ -11,6 +11,7 @@ export const enum Command {
   help = "help",
   default = "default",
   install = "install",
+  terraform = "terraform",
   ow = "ow",
 }
 
