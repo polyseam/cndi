@@ -60,6 +60,8 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
+  const subnet_id = "${aws_subnet.subnet.id}";
+  const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
@@ -74,6 +76,8 @@ const getAWSNodeResource = (
               CNDINodeRole: role,
             },
             ebs_block_device,
+            subnet_id,
+            vpc_security_group_ids,
           },
         ],
       },
