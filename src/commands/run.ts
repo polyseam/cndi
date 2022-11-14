@@ -11,10 +11,8 @@ const runFn = async ({
   pathToTerraformResources,
 }: CNDIContext) => {
   console.log("cndi run");
-  try { 
-
+  try {
     setTF_VARs(); // set TF_VARs using CNDI's .env variables
-
 
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = await Deno.run({

@@ -45,10 +45,10 @@ export default function setTF_VARs() {
   }
 
   const sealed_secrets_private_key = padPrivatePem(
-    sealed_secrets_private_key_material
+    sealed_secrets_private_key_material,
   );
   const sealed_secrets_public_key = padPublicPem(
-    sealed_secrets_public_key_material
+    sealed_secrets_public_key_material,
   );
 
   Deno.env.set("TF_VAR_git_username", git_username);

@@ -6,7 +6,7 @@ import setTF_VARs from "../setTF_VARs.ts";
  */
 export default async function terraform(
   { pathToTerraformBinary, pathToTerraformResources }: CNDIContext,
-  args: string[]
+  args: string[],
 ) {
   console.log("cndi terraform", args.join(" "));
 
