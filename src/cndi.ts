@@ -66,6 +66,7 @@ export default async function main(args: string[]) {
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
   const noKeys = cndiArguments["no-keys"] || false;
+  const template = cndiArguments.t || cndiArguments.template || null;
 
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
@@ -85,6 +86,7 @@ export default async function main(args: string[]) {
   const context = {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
     CNDI_SRC, // ~/.cndi/src (default)
+    template, // the name of the config file in /templates to use
     projectDirectory,
     projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)

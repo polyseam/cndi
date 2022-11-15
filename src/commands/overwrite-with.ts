@@ -16,13 +16,13 @@ import {
   KubernetesSecret,
   SealedSecretsKeys,
 } from "../types.ts";
-import getApplicationManifest from "../templates/application-manifest.ts";
-import getTerraformNodeResource from "../templates/terraform-node-resource.ts";
-import getTerraformRootFile from "../templates/terraform-root-file.ts";
-import RootChartYaml from "../templates/root-chart.ts";
-import getDotEnv from "../templates/env.ts";
-import getSealedSecretManifest from "../templates/sealed-secret-manifest.ts";
-import getReadme from "../templates/readme.ts";
+import getApplicationManifest from "../outputs/application-manifest.ts";
+import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
+import getTerraformRootFile from "../outputs/terraform-root-file.ts";
+import RootChartYaml from "../outputs/root-chart.ts";
+import getDotEnv from "../outputs/env.ts";
+import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
+import getReadme from "../outputs/readme.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
@@ -259,7 +259,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
     await Deno.writeTextFile(
       path.join(projectDirectory, "README.md"),
-      getReadme(),
+      getReadme(context),
     );
   }
 

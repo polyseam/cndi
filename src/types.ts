@@ -292,6 +292,7 @@ interface CNDIContext {
   pathToKubeseal: string;
   gitignorePath: string;
   noKeys: boolean;
+  template: string;
 }
 
 // cndi-config.jsonc["nodes"]["entries"][*]
