@@ -1,4 +1,4 @@
-const getREADME = () : string => {
+const getREADME = (): string => {
   return `
 # my-cndi-project
 
@@ -70,7 +70,7 @@ Now that you have a cluster, you can update it by:
 
 If you've modified your nodes, the infrastructure should be updated with Terraform. If you've modified your Kubernetes manifests, the changes to the manifests will be applied to the cluster.
 
-`
+`;
 };
 
 export default getREADME;
