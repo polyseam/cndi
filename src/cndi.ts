@@ -14,9 +14,6 @@ import {
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
-// import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
-// TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
-
 import runFn from "./commands/run.ts";
 import initFn from "./commands/init.ts";
 import overwriteWithFn from "./commands/overwrite-with.ts";
@@ -66,6 +63,9 @@ export default async function main(args: string[]) {
     );
     Deno.exit(1);
   }
+
+  // use an interactive prompt if the user enables it
+  const interactive = cndiArguments.i || cndiArguments.interactive || false;
 
   // if the user has specified a config file, use that, otherwise use the default config file
   const pathToConfig = template ? null : cndiArguments.f ||
@@ -123,6 +123,7 @@ export default async function main(args: string[]) {
     pathToOpenSSL,
     pathToKeys,
     pathToKubeseal,
+    interactive,
     noKeys,
     gitignorePath,
   };

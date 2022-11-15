@@ -26,6 +26,7 @@ import getReadme from "../outputs/readme.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
+import { cyan } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const createSealedSecretsKeys = async ({
   pathToKeys,
@@ -247,13 +248,53 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     updateGitIgnore(gitignorePath);
 
     if (!noDotEnv) {
+      let GIT_USERNAME = "";
+      let GIT_REPO = "";
+      let GIT_PASSWORD = "";
+      let AWS_REGION = "us-east-1";
+      let AWS_ACCESS_KEY_ID = "";
+      let AWS_SECRET_ACCESS_KEY = "";
+
+      if (context.interactive) {
+        GIT_USERNAME = (await prompt(
+          cyan("Enter your GitHub username:"),
+          GIT_USERNAME,
+        )) as string;
+        GIT_REPO = (await prompt(
+          cyan("Enter your GitHub repository URL:"),
+          GIT_REPO,
+        )) as string;
+        GIT_PASSWORD = (await prompt(
+          cyan("Enter your GitHub password:"),
+          GIT_PASSWORD,
+        )) as string;
+        AWS_REGION = (await prompt(
+          cyan("Enter your AWS region:"),
+          AWS_REGION,
+        )) as string;
+        AWS_ACCESS_KEY_ID = (await prompt(
+          cyan("Enter your AWS access key ID:"),
+          AWS_ACCESS_KEY_ID,
+        )) as string;
+        AWS_SECRET_ACCESS_KEY = (await prompt(
+          cyan("Enter your AWS secret access key"),
+          AWS_SECRET_ACCESS_KEY,
+        )) as string;
+      }
+
       await Deno.writeTextFile(
         dotEnvPath,
-        getDotEnv(
+        getDotEnv({
           sealedSecretsKeys,
           terraformStatePassphrase,
           argoUIReadonlyPassword,
-        ),
+          GIT_USERNAME,
+          GIT_REPO,
+          GIT_PASSWORD,
+          AWS_REGION,
+          AWS_ACCESS_KEY_ID,
+          AWS_SECRET_ACCESS_KEY,
+        }),
       );
     }
 
