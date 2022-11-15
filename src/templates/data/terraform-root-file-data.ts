@@ -146,6 +146,18 @@ const terraformRootFileData: TerraformRootFileData = {
               security_groups: [],
               self: false,
             },
+            {
+              cidr_blocks: ["${var.sg_ingress_cidr_block}"],
+              description:
+              "Port used for Microk8s Join token",
+              from_port: "${var.sg_ingress_microk8s}",
+              protocol: "${var.sg_ingress_proto}",
+              to_port: "${var.sg_ingress_microk8s}",
+              ipv6_cidr_blocks: [],
+              prefix_list_ids: [],
+              security_groups: [],
+              self: false,
+            },
           ],
           name: "${var.owner}-sg",
           vpc_id: "${aws_vpc.vpc.id}",
@@ -289,7 +301,11 @@ const terraformRootFileData: TerraformRootFileData = {
       description: "Port used for Kubernetes API server",
       type: "string",
     }],
-
+    sg_ingress_microk8s: [{
+      default: "25000",
+      description: "Port used for Microk8s Join token",
+      type: "string",
+    }],
     sg_ingress_nodeport_range_start: [{
       default: "30000",
       description:
