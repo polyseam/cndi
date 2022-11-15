@@ -22,6 +22,7 @@ import getTerraformRootFile from "../templates/terraform-root-file.ts";
 import RootChartYaml from "../templates/root-chart.ts";
 import getDotEnv from "../templates/env.ts";
 import getSealedSecretManifest from "../templates/sealed-secret-manifest.ts";
+import getReadme from "../templates/readme.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
@@ -255,6 +256,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
         ),
       );
     }
+
+    await Deno.writeTextFile(
+      path.join(projectDirectory, "README.md"),
+      getReadme(),
+    );
   }
 
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
