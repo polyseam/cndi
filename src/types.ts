@@ -403,6 +403,12 @@ interface TerraformRootFileData {
       default: "16443";
       description: "Port used for Kubernetes API server";
       type: "string";
+    }];    
+    
+    sg_ingress_microk8s: [{
+      default: "25000";
+      description: "Port used for Microk8s Join token";
+      type: "string";
     }];
 
     sg_ingress_nodeport_range_start: [{
