@@ -51,15 +51,16 @@ export default async function main(args: string[]) {
   if (template && (cndiArguments.f || cndiArguments.file)) {
     const templateArg = cndiArguments.template ? "--template" : "-t";
     const fileArg = cndiArguments.file ? "--file" : "-f";
-    console.log("\n");
+
     console.log(
-      brightRed(
-        `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
-      ),
+      `\n${
+        brightRed(
+          `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
+        )
+      }\n`,
     );
-    console.log("\n");
     console.log(
-      yellow(`did you mean to use "--output" instead of "${fileArg}"?`),
+      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`),
     );
     Deno.exit(1);
   }
