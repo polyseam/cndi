@@ -8,7 +8,11 @@ import {
   getPathToOpenSSLForPlatform,
 } from "./utils.ts";
 import { Command } from "./types.ts";
-import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import {
+  brightRed,
+  cyan,
+  yellow,
+} from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 // import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
 // TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
@@ -45,8 +49,26 @@ export default async function main(args: string[]) {
   // parse the command line arguments
   const cndiArguments = flags.parse(args);
 
+  const template = cndiArguments.t || cndiArguments.template || null;
+
+  if (template && (cndiArguments.f || cndiArguments.file)) {
+    const templateArg = cndiArguments.template ? "--template" : "-t";
+    const fileArg = cndiArguments.file ? "--file" : "-f";
+    console.log("\n");
+    console.log(
+      brightRed(
+        `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
+      ),
+    );
+    console.log("\n");
+    console.log(
+      yellow(`did you mean to use "--output" instead of "${fileArg}"?`),
+    );
+    Deno.exit(1);
+  }
+
   // if the user has specified a config file, use that, otherwise use the default config file
-  const pathToConfig = cndiArguments.f ||
+  const pathToConfig = template ? null : cndiArguments.f ||
     cndiArguments.file ||
     DEFAULT_CNDI_CONFIG_PATH_JSONC ||
     DEFAULT_CNDI_CONFIG_PATH;
@@ -66,7 +88,6 @@ export default async function main(args: string[]) {
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
   const noKeys = cndiArguments["no-keys"] || false;
-  const template = cndiArguments.t || cndiArguments.template || null;
 
   const pathToTerraformBinary = path.join(
     CNDI_HOME,

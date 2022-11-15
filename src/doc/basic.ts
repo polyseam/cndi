@@ -1,4 +1,4 @@
-const basicReadmeBlock=`
+const basicReadmeBlock = `
 ### logging into argocd
 
 When the \`cndi run\` command is finished, you should have a controller vm spinning up in the [AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3), by connecting to this node you should be able to get the new [ArgoCD](https://argo-cd.readthedocs.io) password.
@@ -19,6 +19,6 @@ Now that you have a cluster, you can update it by:
 3. pushing all files to the \`"main"\` branch again
 
 If you've modified your nodes, the infrastructure should be updated with Terraform. If you've modified your Kubernetes manifests, the changes to the manifests will be applied to the cluster.
-`.trim()
+`.trim();
 
-export default basicReadmeBlock
+export default basicReadmeBlock;
