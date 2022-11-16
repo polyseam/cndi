@@ -3,14 +3,17 @@ import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import overwriteWithFn from "./overwrite-with.ts";
 
+import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+
 import airflowTlsTemplate from "../templates/airflow-tls.ts";
 import basicTemplate from "../templates/basic.ts";
 
 import availableTemplates from "../templates/available-templates.ts";
 
-function getAirflowTlsTemplateAnswers(
+async function getAirflowTlsTemplateAnswers(
   context: CNDIContext,
-): AirflowTlsTemplateAnswers {
+): Promise<AirflowTlsTemplateAnswers> {
   const { interactive } = context;
 
   let argocdDomainName = "argocd.example.com";
@@ -19,24 +22,33 @@ function getAirflowTlsTemplateAnswers(
   let letsEncryptClusterIssuerEmailAddress = "admin@example.com";
 
   if (interactive) {
-    argocdDomainName = prompt(
-      cyan("Please enter the domain name you want argocd to be accessible on:"),
-      argocdDomainName,
-    ) as string;
-    airflowDomainName = prompt(
-      cyan(
+    argocdDomainName = await Input.prompt({
+      message: cyan(
+        "Please enter the domain name you want argocd to be accessible on:",
+      ),
+      default: argocdDomainName,
+    }) as string;
+
+    airflowDomainName = await Input.prompt({
+      message: cyan(
         "Please enter the domain name you want airflow to be accessible on:",
       ),
-      airflowDomainName,
-    ) as string;
-    dagRepoUrl = prompt(
-      cyan("Please enter the url of the git repo containing your dags:"),
-      dagRepoUrl,
-    ) as string;
-    letsEncryptClusterIssuerEmailAddress = prompt(
-      cyan("Please enter the email address you want to use for lets encrypt:"),
-      letsEncryptClusterIssuerEmailAddress,
-    ) as string;
+      default: airflowDomainName,
+    }) as string;
+
+    dagRepoUrl = await Input.prompt({
+      message: cyan(
+        "Please enter the url of the git repo containing your dags:",
+      ),
+      default: dagRepoUrl,
+    }) as string;
+
+    letsEncryptClusterIssuerEmailAddress = await Input.prompt({
+      message: cyan(
+        "Please enter the email address you want to use for lets encrypt:",
+      ),
+      default: letsEncryptClusterIssuerEmailAddress,
+    }) as string;
   }
 
   return {
@@ -47,10 +59,12 @@ function getAirflowTlsTemplateAnswers(
   };
 }
 
-const getTemplateString = (context: CNDIContext): string | null => {
+const getTemplateString = async (
+  context: CNDIContext,
+): Promise<string | null> => {
   switch (context.template) {
     case "airflow-tls":
-      return airflowTlsTemplate(getAirflowTlsTemplateAnswers(context));
+      return airflowTlsTemplate(await getAirflowTlsTemplateAnswers(context));
     case "basic":
       return basicTemplate();
     default:
@@ -71,10 +85,13 @@ export default async function init(context: CNDIContext) {
   let { template } = context;
 
   if (interactive && !template) {
-    template = prompt(
-      cyan("Please enter the template you want to use:"),
-      "basic",
-    ) as string;
+    template = await Select.prompt({
+      message: cyan("Pick a template"),
+      options: [
+        { name: "basic", value: "basic" },
+        { name: "airflow-tls", value: "airflow-tls" },
+      ],
+    });
   }
 
   // if the user has specified a template, use that
@@ -95,7 +112,7 @@ export default async function init(context: CNDIContext) {
 
     const configOutputPath = path.join(projectDirectory, CNDI_CONFIG_FILENAME);
 
-    const templateString = getTemplateString({ ...context, template });
+    const templateString = await getTemplateString({ ...context, template });
 
     if (!templateString) {
       console.error(`Template "${template}" not yet implemented.`);
