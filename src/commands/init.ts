@@ -37,7 +37,9 @@ async function getAirflowTlsTemplateAnswers(
     }) as string;
 
     dagRepoUrl = await Input.prompt({
-      message: "Please enter the url of the git repo containing your dags:",
+      message: cyan(
+        "Please enter the url of the git repo containing your dags:",
+      ),
       default: dagRepoUrl,
     }) as string;
 

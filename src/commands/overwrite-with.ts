@@ -255,17 +255,17 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
       if (context.interactive) {
         GIT_USERNAME = (await Input.prompt({
-          message: "Enter your GitHub username:",
+          message: cyan("Enter your GitHub username:"),
           default: GIT_USERNAME,
         })) as string;
 
         GIT_REPO = (await Input.prompt({
-          message: "Enter your GitHub repository URL:",
+          message: cyan("Enter your GitHub repository URL:"),
           default: GIT_REPO,
         })) as string;
 
         GIT_PASSWORD = (await Secret.prompt({
-          message: cyan("Enter your GitHub password:"),
+          message: cyan("Enter your GitHub Personal Access Token:"),
           default: GIT_PASSWORD,
         })) as string;
 
