@@ -64,8 +64,6 @@ These nodes must each be one of the following `kinds`:
 - [ ] remote
 - [ ] vmware
 
-We also specify the node `role`, this is either `"controller"` or `"worker"`.
-
 Here is an example `cndi-config.jsonc` object that contains a set of node
 entries to deploy:
 
@@ -75,19 +73,16 @@ entries to deploy:
     "entries": [
       {
         "kind": "gcp",
-        "role": "controller",
-        "name": "gcp-controller",
+        "name": "gcp-node-x",
         "machine_type": "m5a.xlarge"
       },
       {
         "kind": "gcp",
-        "role": "worker",
-        "name": "gcp-worker"
+        "name": "gcp-node-y"
       },
       {
         "kind": "aws", // whoa, multicloud!
-        "role": "worker",
-        "name": "aws-worker"
+        "name": "aws-node-z"
       }
     ],
     "deploymentTargetConfiguration": {

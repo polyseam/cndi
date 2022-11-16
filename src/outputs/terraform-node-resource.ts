@@ -4,6 +4,7 @@ import {
   AWSTerraformNodeResource,
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
+  NodeRole
 } from "../types.ts";
 import { getPrettyJSONString } from "../utils.ts";
 
@@ -36,7 +37,11 @@ const getAWSNodeResource = (
   const DEFAULT_AVAILABILITY_ZONE = "us-east-1a";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
 
-  const { name, role } = entry;
+  const { name } = entry;
+
+  const worker = entry?.worker || false;
+
+  const role = worker ? NodeRole.worker : NodeRole.controller;
 
   const ami = entry?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
   const availability_zone = entry?.availability_zone ||
@@ -106,6 +111,7 @@ const getAWSNodeResource = (
     workerNodeResourceObj.resource.aws_instance[name][0].depends_on = [
       `aws_instance.${controllerName}`,
     ];
+    
     workerNodeResourceObj.resource.aws_instance[name][0].user_data = user_data;
 
     const workerNodeResourceString = getPrettyJSONString(workerNodeResourceObj);

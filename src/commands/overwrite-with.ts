@@ -393,7 +393,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const deploymentTargetConfiguration = nodes?.deploymentTargetConfiguration ||
     ({} as DeploymentTargetConfiguration);
 
-  const controllerName = entries.find((entry) => entry.role === "controller")
+  const controllerName = entries.find((entry) => !entry?.worker)
     ?.name as string;
 
   // write terraform nodes files

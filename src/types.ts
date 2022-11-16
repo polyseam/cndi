@@ -22,20 +22,11 @@ export const enum Command {
   ow = "ow",
 }
 
-// node.role is either "controller" or "worker"
 export const enum NodeRole {
   controller = "controller",
   worker = "worker",
 }
 
-// incomplete type, nodes will have more options
-interface CNDINode {
-  name: string;
-  role: NodeRole;
-  kind: NodeKind;
-  instance_type?: string;
-  ami?: string;
-}
 
 interface CNDINodesSpec {
   entries: Array<BaseNodeEntrySpec>;
@@ -318,7 +309,7 @@ interface CNDIContext {
 // cndi-config.jsonc["nodes"]["entries"][*]
 interface BaseNodeEntrySpec {
   name: string;
-  role: NodeRole;
+  worker?: boolean;
   kind: NodeKind;
 }
 
