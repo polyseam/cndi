@@ -26,6 +26,8 @@ import getReadme from "../outputs/readme.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
+import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { cyan } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const createSealedSecretsKeys = async ({
@@ -93,12 +95,10 @@ const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
     .replaceAll("_", "\n");
 
   if (!sealed_secrets_public_key_material) {
-    console.log("SEALED_SECRETS_PUBLIC_KEY_MATERIAL not found in environment");
     return null;
   }
 
   if (!sealed_secrets_private_key_material) {
-    console.log("SEALED_SECRETS_PRIVATE_KEY_MATERIAL not found in environment");
     return null;
   }
 
@@ -118,7 +118,6 @@ const loadTerraformStatePassphrase = (): string | null => {
     ?.trim();
 
   if (!terraform_state_passphrase) {
-    console.log("TERRAFORM_STATE_PASSPHRASE not found in environment");
     return null;
   }
 
@@ -135,7 +134,6 @@ const loadArgoUIReadonlyPassword = (): string | null => {
     ?.trim();
 
   if (!argoui_readonly_password) {
-    console.log("ARGOUI_READONLY_PASSWORD not found in environment");
     return null;
   }
 
@@ -256,30 +254,35 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       let AWS_SECRET_ACCESS_KEY = "";
 
       if (context.interactive) {
-        GIT_USERNAME = (await prompt(
-          cyan("Enter your GitHub username:"),
-          GIT_USERNAME,
-        )) as string;
-        GIT_REPO = (await prompt(
-          cyan("Enter your GitHub repository URL:"),
-          GIT_REPO,
-        )) as string;
-        GIT_PASSWORD = (await prompt(
-          cyan("Enter your GitHub password:"),
-          GIT_PASSWORD,
-        )) as string;
-        AWS_REGION = (await prompt(
-          cyan("Enter your AWS region:"),
-          AWS_REGION,
-        )) as string;
-        AWS_ACCESS_KEY_ID = (await prompt(
-          cyan("Enter your AWS access key ID:"),
-          AWS_ACCESS_KEY_ID,
-        )) as string;
-        AWS_SECRET_ACCESS_KEY = (await prompt(
-          cyan("Enter your AWS secret access key"),
-          AWS_SECRET_ACCESS_KEY,
-        )) as string;
+        GIT_USERNAME = (await Input.prompt({
+          message: "Enter your GitHub username:",
+          default: GIT_USERNAME,
+        })) as string;
+
+        GIT_REPO = (await Input.prompt({
+          message: "Enter your GitHub repository URL:",
+          default: GIT_REPO,
+        })) as string;
+
+        GIT_PASSWORD = (await Secret.prompt({
+          message: cyan("Enter your GitHub password:"),
+          default: GIT_PASSWORD,
+        })) as string;
+
+        AWS_REGION = (await Input.prompt({
+          message: cyan("Enter your AWS region:"),
+          default: AWS_REGION,
+        })) as string;
+
+        AWS_ACCESS_KEY_ID = (await Secret.prompt({
+          message: cyan("Enter your AWS access key ID:"),
+          default: AWS_ACCESS_KEY_ID,
+        })) as string;
+
+        AWS_SECRET_ACCESS_KEY = (await Secret.prompt({
+          message: cyan("Enter your AWS secret access key:"),
+          default: AWS_ACCESS_KEY_ID,
+        })) as string;
       }
 
       await Deno.writeTextFile(
