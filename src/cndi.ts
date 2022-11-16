@@ -8,10 +8,11 @@ import {
   getPathToOpenSSLForPlatform,
 } from "./utils.ts";
 import { Command } from "./types.ts";
-import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-
-// import * as GCPComputeEngine from 'https://esm.sh/@google-cloud/compute';
-// TODO: const gcpClient = new GCPComputeEngine.InstancesClient();
+import {
+  brightRed,
+  cyan,
+  yellow,
+} from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 import runFn from "./commands/run.ts";
 import initFn from "./commands/init.ts";
@@ -45,8 +46,30 @@ export default async function main(args: string[]) {
   // parse the command line arguments
   const cndiArguments = flags.parse(args);
 
+  const template = cndiArguments.t || cndiArguments.template || null;
+
+  if (template && (cndiArguments.f || cndiArguments.file)) {
+    const templateArg = cndiArguments.template ? "--template" : "-t";
+    const fileArg = cndiArguments.file ? "--file" : "-f";
+
+    console.log(
+      `\n${
+        brightRed(
+          `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
+        )
+      }\n`,
+    );
+    console.log(
+      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`),
+    );
+    Deno.exit(1);
+  }
+
+  // use an interactive prompt if the user enables it
+  const interactive = cndiArguments.i || cndiArguments.interactive || false;
+
   // if the user has specified a config file, use that, otherwise use the default config file
-  const pathToConfig = cndiArguments.f ||
+  const pathToConfig = template ? null : cndiArguments.f ||
     cndiArguments.file ||
     DEFAULT_CNDI_CONFIG_PATH_JSONC ||
     DEFAULT_CNDI_CONFIG_PATH;
@@ -85,6 +108,7 @@ export default async function main(args: string[]) {
   const context = {
     CNDI_HOME, // ~/.cndi (or equivalent) (default)
     CNDI_SRC, // ~/.cndi/src (default)
+    template, // the name of the config file in /templates to use
     projectDirectory,
     projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)
@@ -100,6 +124,7 @@ export default async function main(args: string[]) {
     pathToOpenSSL,
     pathToKeys,
     pathToKubeseal,
+    interactive,
     noKeys,
     gitignorePath,
   };

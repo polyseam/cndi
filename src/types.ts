@@ -4,6 +4,13 @@ export const enum NodeKind {
   aws = "aws",
 }
 
+interface AirflowTlsTemplateAnswers {
+  argocdDomainName: string;
+  airflowDomainName: string;
+  dagRepoUrl: string;
+  letsEncryptClusterIssuerEmailAddress: string;
+}
+
 export const enum Command {
   init = "init",
   "overwrite-with" = "overwrite-with",
@@ -272,6 +279,18 @@ interface CNDIApplicationSpec {
   };
 }
 
+interface DotEnvArgs {
+  sealedSecretsKeys: SealedSecretsKeys;
+  terraformStatePassphrase: string;
+  argoUIReadonlyPassword: string;
+  AWS_REGION: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  GIT_USERNAME: string;
+  GIT_PASSWORD: string;
+  GIT_REPO: string;
+}
+
 interface CNDIContext {
   CNDI_HOME: string;
   CNDI_SRC: string;
@@ -292,6 +311,8 @@ interface CNDIContext {
   pathToKubeseal: string;
   gitignorePath: string;
   noKeys: boolean;
+  template: string;
+  interactive: boolean;
 }
 
 // cndi-config.jsonc["nodes"]["entries"][*]
@@ -548,6 +569,7 @@ interface SealedSecretsKeys {
 }
 
 export type {
+  AirflowTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
   AWSTerraformNodeResource,
@@ -559,6 +581,7 @@ export type {
   CNDINode,
   CNDINodesSpec,
   DeploymentTargetConfiguration,
+  DotEnvArgs,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,

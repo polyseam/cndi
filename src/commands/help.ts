@@ -1,4 +1,4 @@
-import { helpStrings } from "../templates/help-strings.ts";
+import { helpStrings } from "../doc/help-strings.ts";
 import { Command } from "../types.ts";
 /**
  * COMMAND fn: cndi help
