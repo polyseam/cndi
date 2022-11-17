@@ -129,15 +129,15 @@ const createTerraformStatePassphrase = (): string => {
 };
 
 const loadArgoUIReadonlyPassword = (): string | null => {
-  const argoui_readonly_password = Deno.env
-    .get("ARGOUI_READONLY_PASSWORD")
+  const argo_ui_readonly_password = Deno.env
+    .get("ARGO_UI_READONLY_PASSWORD")
     ?.trim();
 
-  if (!argoui_readonly_password) {
+  if (!argo_ui_readonly_password) {
     return null;
   }
 
-  return argoui_readonly_password;
+  return argo_ui_readonly_password;
 };
 
 const createArgoUIReadOnlyPassword = (): string => {
