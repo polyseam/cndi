@@ -1,5 +1,5 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { checkInitialized, getPrettyJSONString, loadJSONC } from "../utils.ts";
+import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
   CNDIConfig,
