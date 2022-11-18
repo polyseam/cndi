@@ -238,6 +238,12 @@ export default async function init(c: CNDIContext) {
 
   let template = c.template;
 
+  const echoCommand = `cndi init ${template ? `--template ${template}` : ""} ${
+    c?.interactive ? "--interactive" : ""
+  } ${c?.pathToConfig ? `--file ${c.pathToConfig}` : ""}`;
+
+  console.log(echoCommand);
+
   const directoryContainsCNDIFiles = await checkInitialized(c);
 
   const shouldContinue = directoryContainsCNDIFiles
@@ -308,8 +314,6 @@ export default async function init(c: CNDIContext) {
 
   // if the user has specified a template, use that
   if (template) {
-    console.log(`cndi init --template ${template}\n`);
-
     const configOutputPath = path.join(projectDirectory, CNDI_CONFIG_FILENAME);
 
     const templateString = await getTemplateString({ ...context, template });
