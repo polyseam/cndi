@@ -364,11 +364,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     if (manifestObj?.kind && manifestObj.kind === "Secret") {
       const secret = cluster[key] as KubernetesSecret;
       const secretName = `${key}.json`;
-      await Deno.writeTextFile(
-        path.join(pathToKubernetesManifests, secretName),
-        await getSealedSecretManifest(secret, tempPublicKeyFilePath, context),
+      const sealedSecretManifest = await getSealedSecretManifest(
+        secret,
+        tempPublicKeyFilePath,
+        context,
       );
-      console.log(`created encrypted secret:`, secretName);
+
+      if (sealedSecretManifest) {
+        Deno.writeTextFileSync(
+          path.join(pathToKubernetesManifests, secretName),
+          sealedSecretManifest,
+        );
+        console.log(`created encrypted secret:`, secretName);
+      }
       return;
     }
 
@@ -418,13 +426,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const { applications } = config;
 
   // write the `cndi/cluster/applications/${applicationName}.application.json` file for each application
-  Object.keys(applications).forEach(async (releaseName) => {
+
+  Object.keys(applications).forEach((releaseName) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
       applicationSpec,
     );
-    await Deno.writeTextFile(
+    Deno.writeTextFileSync(
       path.join(pathToKubernetesManifests, "applications", filename),
       manifestContent,
     );

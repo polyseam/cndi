@@ -261,6 +261,7 @@ interface KubernetesSecret extends KubernetesManifest {
   metadata: {
     name: string;
   };
+  isPlaceholder: boolean;
 }
 
 interface KubernetesSecretWithStringData extends KubernetesSecret {

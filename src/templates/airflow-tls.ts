@@ -42,8 +42,8 @@ export default function getAirflowTlsTemplate({
           namespace: "airflow",
         },
         stringData: {
-          GIT_USERNAME: "$.cndi.secrets.GIT_USERNAME",
-          GIT_PASSWORD: "$.cndi.secrets.GIT_PASSWORD",
+          GIT_SYNC_USERNAME: "$.cndi.secrets.GIT_SYNC_USERNAME",
+          GIT_SYNC_PASSWORD: "$.cndi.secrets.GIT_SYNC_PASSWORD",
         },
       },
       "cert-manager-cluster-issuer": {

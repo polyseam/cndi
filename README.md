@@ -542,3 +542,5 @@ have an operational CNDI Cluster! 🎉
 If you have any issues please message [Matt](https://github.com/johnstonmatt) or
 [Tamika](https://github.com/IamTamika) in the
 [Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).
+
+<!-- DMINR -->
