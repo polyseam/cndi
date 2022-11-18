@@ -135,8 +135,7 @@ const parseCndiSecret = (
           );
           outputSecret.isPlaceholder = true;
         } else {
-          const decodedSecretEnvVal = atob(secretEnvVal);
-          outputSecret.stringData[dataEntryKey] = decodedSecretEnvVal;
+          outputSecret.stringData[dataEntryKey] = secretEnvVal;
           outputSecret.isPlaceholder = false;
         }
       } else {
