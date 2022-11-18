@@ -1,12 +1,5 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
-import {
-  checkInitialized,
-  getPrettyJSONString,
-  loadJSONC,
-  padPrivatePem,
-  padPublicPem,
-} from "../utils.ts";
+import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
   CNDIConfig,
@@ -14,297 +7,55 @@ import {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
-  SealedSecretsKeys,
 } from "../types.ts";
 import getApplicationManifest from "../outputs/application-manifest.ts";
 import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
 import getTerraformRootFile from "../outputs/terraform-root-file.ts";
 import RootChartYaml from "../outputs/root-chart.ts";
-import getDotEnv from "../outputs/env.ts";
 import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
-import getReadme from "../outputs/readme.ts";
 
 import workerBootstrapTerrformTemplate from "../bootstrap/worker_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerraformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
-import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
-import { cyan } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
-const createSealedSecretsKeys = async ({
-  pathToKeys,
-  pathToOpenSSL,
-}: CNDIContext): Promise<SealedSecretsKeys> => {
-  Deno.mkdir(pathToKeys, { recursive: true });
-  const sealed_secrets_public_key_path = path.join(pathToKeys, "public.pem");
-  const sealed_secrets_private_key_path = path.join(pathToKeys, "private.pem");
+import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 
-  let sealed_secrets_private_key;
-  let sealed_secrets_public_key;
+import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
-  const ranOpenSSLGenerateKeyPair = await Deno.run({
-    cmd: [
-      pathToOpenSSL,
-      "req",
-      "-x509",
-      "-nodes",
-      "-newkey",
-      "rsa:4096",
-      "-keyout",
-      sealed_secrets_private_key_path,
-      "-out",
-      sealed_secrets_public_key_path,
-      "-subj",
-      "/CN=sealed-secret/O=sealed-secret",
-    ],
-    stdout: "piped",
-    stderr: "piped",
-  });
-
-  const generateKeyPairStatus = await ranOpenSSLGenerateKeyPair.status();
-  const generateKeyPairStderr = await ranOpenSSLGenerateKeyPair.stderrOutput();
-
-  if (generateKeyPairStatus.code !== 0) {
-    Deno.stdout.write(generateKeyPairStderr);
-    Deno.exit(251); // arbitrary exit code
-  } else {
-    sealed_secrets_private_key = await Deno.readTextFile(
-      sealed_secrets_private_key_path,
-    );
-    sealed_secrets_public_key = await Deno.readTextFile(
-      sealed_secrets_public_key_path,
-    );
-    Deno.remove(pathToKeys, { recursive: true });
-  }
-
-  ranOpenSSLGenerateKeyPair.close();
-
-  return {
-    sealed_secrets_private_key,
-    sealed_secrets_public_key,
-  };
-};
-
-const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
-  const sealed_secrets_public_key_material = Deno.env
-    .get("SEALED_SECRETS_PUBLIC_KEY_MATERIAL")
-    ?.trim()
-    .replaceAll("_", "\n");
-  const sealed_secrets_private_key_material = Deno.env
-    .get("SEALED_SECRETS_PRIVATE_KEY_MATERIAL")
-    ?.trim()
-    .replaceAll("_", "\n");
-
-  if (!sealed_secrets_public_key_material) {
-    return null;
-  }
-
-  if (!sealed_secrets_private_key_material) {
-    return null;
-  }
-
-  const sealedSecrets = {
-    sealed_secrets_private_key: padPrivatePem(
-      sealed_secrets_private_key_material,
-    ),
-    sealed_secrets_public_key: padPublicPem(sealed_secrets_public_key_material),
-  };
-
-  return sealedSecrets;
-};
-
-const loadTerraformStatePassphrase = (): string | null => {
-  const terraform_state_passphrase = Deno.env
-    .get("TERRAFORM_STATE_PASSPHRASE")
-    ?.trim();
-
-  if (!terraform_state_passphrase) {
-    return null;
-  }
-
-  return terraform_state_passphrase;
-};
-
-const createTerraformStatePassphrase = (): string => {
-  return crypto.randomUUID();
-};
-
-const loadArgoUIReadonlyPassword = (): string | null => {
-  const argo_ui_readonly_password = Deno.env
-    .get("ARGO_UI_READONLY_PASSWORD")
-    ?.trim();
-
-  if (!argo_ui_readonly_password) {
-    return null;
-  }
-
-  return argo_ui_readonly_password;
-};
-
-const createArgoUIReadOnlyPassword = (): string => {
-  return crypto.randomUUID().replaceAll("-", "");
-};
-
-const updateGitIgnore = async (gitignorePath: string) => {
-  const dotEnvIgnoreEntry = "\n.env\n";
-  const dotKeysIgnoreEntry = "\n.keys/\n";
-  const terraformIgnoreEntry =
-    "\ncndi/terraform/.terraform*\ncndi/terraform/*.tfstate*\ncndi/terraform/.terraform/\n";
-  try {
-    const gitignoreContents = await Deno.readTextFile(gitignorePath);
-
-    // gitignore exists in user's project directory
-
-    if (!gitignoreContents.includes("env")) {
-      await Deno.writeTextFile(
-        gitignorePath,
-        gitignoreContents + dotEnvIgnoreEntry,
-      );
-    }
-
-    if (!gitignoreContents.includes(".keys")) {
-      await Deno.writeTextFile(
-        gitignorePath,
-        gitignoreContents + dotKeysIgnoreEntry,
-      );
-    }
-
-    if (!gitignoreContents.includes("terraform")) {
-      await Deno.writeTextFile(
-        gitignorePath,
-        gitignoreContents + terraformIgnoreEntry,
-      );
-    }
-  } catch {
-    // gitignore does not exist in user's project directory, create it
-    await Deno.writeTextFile(
-      gitignorePath,
-      "# cndi files\n" +
-        dotEnvIgnoreEntry +
-        dotKeysIgnoreEntry +
-        terraformIgnoreEntry,
-    );
-  }
-};
+import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
 
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
  */
 const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
-  const {
-    pathToConfig,
-    githubDirectory,
-    noGitHub,
-    CNDI_SRC,
-    projectDirectory,
-    pathToKubernetesManifests,
-    pathToTerraformResources,
-    noDotEnv,
-    dotEnvPath,
-  } = context;
+  const { pathToConfig, pathToKubernetesManifests, pathToTerraformResources } =
+    context;
 
-  if (!initializing) {
-    console.log(`cndi overwrite-with -f "${pathToConfig}"`);
-  }
-
-  const sealedSecretsKeys = loadSealedSecretsKeys() ||
-    (await createSealedSecretsKeys(context));
-
-  const terraformStatePassphrase = loadTerraformStatePassphrase() ||
-    createTerraformStatePassphrase();
-
-  const argoUIReadonlyPassword = loadArgoUIReadonlyPassword() ||
-    createArgoUIReadOnlyPassword();
+  let sealedSecretsKeys;
+  let terraformStatePassphrase;
+  let argoUIReadOnlyPassword;
 
   if (initializing) {
-    const directoryContainsCNDIFiles = await checkInitialized(context);
+    sealedSecretsKeys = context.sealedSecretsKeys;
+    terraformStatePassphrase = context.terraformStatePassphrase;
+    argoUIReadOnlyPassword = context.argoUIReadOnlyPassword;
+  } else {
+    console.log(`cndi overwrite-with -f "${pathToConfig}"`);
+    sealedSecretsKeys = loadSealedSecretsKeys();
+    terraformStatePassphrase = loadTerraformStatePassphrase();
+    argoUIReadOnlyPassword = loadArgoUIReadOnlyPassword();
+  }
 
-    const shouldContinue = directoryContainsCNDIFiles
-      ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
-      )
-      : true;
+  if (!sealedSecretsKeys) {
+    throw new Error(`ow: "sealedSecretsKeys" are undefined`);
+  }
 
-    if (!shouldContinue) {
-      Deno.exit(0);
-    }
+  if (!argoUIReadOnlyPassword) {
+    throw new Error(`ow: "argoUIReadOnlyPassword" is undefined`);
+  }
 
-    if (!noGitHub) {
-      try {
-        // overwrite the github workflows and readme, do not clobber other files
-        await copy(path.join(CNDI_SRC, "github"), githubDirectory, {
-          overwrite: true,
-        });
-      } catch (githubCopyError) {
-        console.log("failed to copy github integration files");
-        console.error(githubCopyError);
-      }
-    }
-
-    // update gitignore
-    const gitignorePath = path.join(projectDirectory, ".gitignore");
-    updateGitIgnore(gitignorePath);
-
-    if (!noDotEnv) {
-      let GIT_USERNAME = "";
-      let GIT_REPO = "";
-      let GIT_PASSWORD = "";
-      let AWS_REGION = "us-east-1";
-      let AWS_ACCESS_KEY_ID = "";
-      let AWS_SECRET_ACCESS_KEY = "";
-
-      if (context.interactive) {
-        GIT_USERNAME = (await Input.prompt({
-          message: cyan("Enter your GitHub username:"),
-          default: GIT_USERNAME,
-        })) as string;
-
-        GIT_REPO = (await Input.prompt({
-          message: cyan("Enter your GitHub repository URL:"),
-          default: GIT_REPO,
-        })) as string;
-
-        GIT_PASSWORD = (await Secret.prompt({
-          message: cyan("Enter your GitHub Personal Access Token:"),
-          default: GIT_PASSWORD,
-        })) as string;
-
-        AWS_REGION = (await Input.prompt({
-          message: cyan("Enter your AWS region:"),
-          default: AWS_REGION,
-        })) as string;
-
-        AWS_ACCESS_KEY_ID = (await Secret.prompt({
-          message: cyan("Enter your AWS access key ID:"),
-          default: AWS_ACCESS_KEY_ID,
-        })) as string;
-
-        AWS_SECRET_ACCESS_KEY = (await Secret.prompt({
-          message: cyan("Enter your AWS secret access key:"),
-          default: AWS_ACCESS_KEY_ID,
-        })) as string;
-      }
-
-      await Deno.writeTextFile(
-        dotEnvPath,
-        getDotEnv({
-          sealedSecretsKeys,
-          terraformStatePassphrase,
-          argoUIReadonlyPassword,
-          GIT_USERNAME,
-          GIT_REPO,
-          GIT_PASSWORD,
-          AWS_REGION,
-          AWS_ACCESS_KEY_ID,
-          AWS_SECRET_ACCESS_KEY,
-        }),
-      );
-    }
-
-    await Deno.writeTextFile(
-      path.join(projectDirectory, "README.md"),
-      getReadme(context),
-    );
+  if (!terraformStatePassphrase) {
+    throw new Error(`ow: "terraformStatePassphrase" is undefined`);
   }
 
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;

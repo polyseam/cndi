@@ -13,17 +13,6 @@ import {
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const stubEnvEntry = (envName: string, dotEnvPath: string) => {
-  const env = Deno.readTextFileSync(dotEnvPath);
-  const content = `\n${envName}=${envName}${PLACEHOLDER_SUFFIX}\n`;
-
-  if (!env.includes(content)) {
-    Deno.writeTextFileSync(dotEnvPath, content, {
-      append: true,
-    });
-  }
-};
-
 const parseCndiSecret = (
   inputSecret: KubernetesSecret,
   dotEnvPath: string,
@@ -52,8 +41,7 @@ const parseCndiSecret = (
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
         // if the secret is a placeholder or undefined we need to tell the user to update their .env file
-        if (!secretEnvVal || secretValueIsPlaceholder) {
-          stubEnvEntry(secretEnvName, dotEnvPath);
+        if (secretValueIsPlaceholder) {
           console.log(
             yellow(
               `\n\n${
@@ -67,6 +55,24 @@ const parseCndiSecret = (
             `You need to replace `,
             cyan(placeholder),
             `with the desired value in "${dotEnvPath}"\n`,
+          );
+          outputSecret.isPlaceholder = true;
+        } else if (!secretEnvVal) {
+          console.log(
+            yellow(
+              `\n\n${
+                brightRed(
+                  "ERROR",
+                )
+              }: ${secretEnvName} not found in environment`,
+            ),
+          );
+          console.log(
+            `You need to add a value for ${
+              cyan(
+                secretEnvName,
+              )
+            } in "${dotEnvPath}"\n`,
           );
           outputSecret.isPlaceholder = true;
         } else {
@@ -94,8 +100,7 @@ const parseCndiSecret = (
 
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
-        if (!secretEnvVal || secretValueIsPlaceholder) {
-          stubEnvEntry(secretEnvName, dotEnvPath); // sets a placeholder in the .env file
+        if (secretValueIsPlaceholder) {
           console.log(
             yellow(
               `\n\n${
@@ -111,8 +116,27 @@ const parseCndiSecret = (
             `with the desired value in "${dotEnvPath}"\n`,
           );
           outputSecret.isPlaceholder = true;
+        } else if (!secretEnvVal) {
+          console.log(
+            yellow(
+              `\n\n${
+                brightRed(
+                  "ERROR",
+                )
+              }: ${secretEnvName} not found in environment`,
+            ),
+          );
+          console.log(
+            `You need to add a value for ${
+              cyan(
+                secretEnvName,
+              )
+            } in "${dotEnvPath}"\n`,
+          );
+          outputSecret.isPlaceholder = true;
         } else {
-          outputSecret.stringData[dataEntryKey] = secretEnvVal;
+          const decodedSecretEnvVal = atob(secretEnvVal);
+          outputSecret.stringData[dataEntryKey] = decodedSecretEnvVal;
           outputSecret.isPlaceholder = false;
         }
       } else {
