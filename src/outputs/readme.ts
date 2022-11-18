@@ -1,14 +1,8 @@
-import { CNDIContext } from "../types.ts";
-
 import coreReadmeBlock from "../doc/core.ts";
-
 import basicReadmeBlock from "../doc/basic.ts";
 import airflowTlsReadmeBlock from "../doc/airflow-tls.ts";
 
-const enum Template {
-  "airflow-tls" = "airflow-tls",
-  "basic" = "basic",
-}
+import { Template } from "../types.ts";
 
 type TemplateBlock = {
   [key in Template]: string;
@@ -23,8 +17,7 @@ ${airflowTlsReadmeBlock}
   basic: basicReadmeBlock,
 };
 
-const getREADME = (context: CNDIContext): string => {
-  const { template } = context;
+const getREADME = (template?: Template): string => {
   const templateBlock = templateBlocks[template as Template];
 
   // returns a readme which is the core readme block, and any template specific blocks

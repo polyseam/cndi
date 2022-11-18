@@ -264,6 +264,12 @@ interface KubernetesSecret extends KubernetesManifest {
   isPlaceholder: boolean;
 }
 
+interface EnvObject {
+  [key: string]: {
+    value?: string;
+    comment?: string;
+  };
+}
 interface KubernetesSecretWithStringData extends KubernetesSecret {
   stringData: {
     [key: string]: string;
@@ -278,18 +284,6 @@ interface CNDIApplicationSpec {
   values: {
     [key: string]: unknown;
   };
-}
-
-interface DotEnvArgs {
-  sealedSecretsKeys: SealedSecretsKeys;
-  terraformStatePassphrase: string;
-  argoUIReadonlyPassword: string;
-  AWS_REGION: string;
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
-  GIT_USERNAME: string;
-  GIT_PASSWORD: string;
-  GIT_REPO: string;
 }
 
 interface CNDIContext {
@@ -314,6 +308,9 @@ interface CNDIContext {
   noKeys: boolean;
   template: string;
   interactive: boolean;
+  sealedSecretsKeys?: SealedSecretsKeys;
+  terraformStatePassphrase?: string;
+  argoUIReadOnlyPassword?: string;
 }
 
 // cndi-config.jsonc["nodes"]["entries"][*]
@@ -568,6 +565,10 @@ interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
   sealed_secrets_public_key: string;
 }
+const enum Template {
+  "airflow-tls" = "airflow-tls",
+  "basic" = "basic",
+}
 
 export type {
   AirflowTlsTemplateAnswers,
@@ -582,11 +583,12 @@ export type {
   CNDINode,
   CNDINodesSpec,
   DeploymentTargetConfiguration,
-  DotEnvArgs,
+  EnvObject,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
   SealedSecretsKeys,
+  Template,
   TerraformDependencies,
   TerraformRootFileData,
 };

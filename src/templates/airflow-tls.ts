@@ -1,5 +1,37 @@
-import { AirflowTlsTemplateAnswers } from "../types.ts";
+import { AirflowTlsTemplateAnswers, CNDIContext, EnvObject } from "../types.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
+import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getPrettyJSONString } from "../utils.ts";
+
+const getAirflowTlsTemplateEnvObject = async (
+  context: CNDIContext,
+): Promise<EnvObject> => {
+  let GIT_SYNC_USERNAME = "";
+  let GIT_SYNC_PASSWORD = "";
+
+  if (context.interactive) {
+    GIT_SYNC_USERNAME = (await Input.prompt({
+      message: cyan("Please enter your git username for Airflow DAG Storage:"),
+      default: GIT_SYNC_USERNAME,
+    })) as string;
+
+    GIT_SYNC_PASSWORD = (await Secret.prompt({
+      message: cyan("Please enter your git password for Airflow DAG Storage:"),
+      default: GIT_SYNC_PASSWORD,
+    })) as string;
+  }
+  const airflowTlsTemplateEnvObject = {
+    GIT_SYNC_USERNAME: {
+      comment: "airflow-git-credentials secret values for DAG Storage",
+      value: GIT_SYNC_USERNAME,
+    },
+    GIT_SYNC_PASSWORD: {
+      value: GIT_SYNC_PASSWORD,
+    },
+  };
+  return airflowTlsTemplateEnvObject;
+};
 
 export default function getAirflowTlsTemplate({
   argocdDomainName,
@@ -177,3 +209,5 @@ export default function getAirflowTlsTemplate({
     },
   });
 }
+
+export { getAirflowTlsTemplateEnvObject };
