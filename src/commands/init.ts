@@ -240,7 +240,7 @@ export default async function init(c: CNDIContext) {
 
   const echoCommand = `cndi init ${template ? `--template ${template}` : ""} ${
     c?.interactive ? "--interactive" : ""
-  } ${c?.pathToConfig ? `--file ${c.pathToConfig}` : ""}`;
+  } ${c?.pathToConfig && !c?.interactive ? `--file ${c.pathToConfig}` : ""}`;
 
   console.log(echoCommand);
 
