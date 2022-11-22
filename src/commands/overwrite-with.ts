@@ -1,4 +1,5 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
@@ -23,6 +24,7 @@ import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassph
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
 
+const owLabel = white("ow:");
 /**
  * COMMAND fn: cndi overwrite-with
  * Overwrites ./cndi directory with the specified config file
@@ -40,22 +42,25 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     terraformStatePassphrase = context.terraformStatePassphrase;
     argoUIReadOnlyPassword = context.argoUIReadOnlyPassword;
   } else {
-    console.log(`cndi overwrite-with -f "${pathToConfig}"`);
+    console.log(`cndi overwrite-with --file "${pathToConfig}"`);
     sealedSecretsKeys = loadSealedSecretsKeys();
     terraformStatePassphrase = loadTerraformStatePassphrase();
     argoUIReadOnlyPassword = loadArgoUIReadOnlyPassword();
   }
 
   if (!sealedSecretsKeys) {
-    throw new Error(`ow: "sealedSecretsKeys" are undefined`);
+    console.log(owLabel, `"sealedSecretsKeys" are undefined`);
+    Deno.exit(1);
   }
 
   if (!argoUIReadOnlyPassword) {
-    throw new Error(`ow: "argoUIReadOnlyPassword" is undefined`);
+    console.log(owLabel, `"argoUIReadOnlyPassword" is undefined`);
+    Deno.exit(1);
   }
 
   if (!terraformStatePassphrase) {
-    throw new Error(`ow: "terraformStatePassphrase" is undefined`);
+    console.log(owLabel, `"terraformStatePassphrase" is undefined`);
+    Deno.exit(1);
   }
 
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
