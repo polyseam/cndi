@@ -1,6 +1,9 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
+import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import setTF_VARs from "../setTF_VARs.ts";
 import { CNDIContext } from "../types.ts";
+
+const runLabel = white("run:");
 
 /**
  * COMMAND fn: cndi run
@@ -21,8 +24,8 @@ const runFn = async ({
         `-chdir=${pathToTerraformResources}`,
         "init",
       ],
-      "stderr": "piped",
-      "stdout": "piped",
+      stderr: "piped",
+      stdout: "piped",
     });
 
     const initStatus = await ranTerraformInit.status();
@@ -30,9 +33,9 @@ const runFn = async ({
     const initStderr = await ranTerraformInit.stderrOutput();
 
     if (initStatus.code !== 0) {
-      console.log("terraform init failed");
+      console.log(runLabel, brightRed("terraform init failed"));
       await Deno.stdout.write(initStderr);
-      Deno.exit(251); // arbitrary exit code
+      Deno.exit(1); // arbitrary exit code
     } else {
       await Deno.stdout.write(initOutput);
     }
@@ -46,8 +49,8 @@ const runFn = async ({
         "apply",
         "-auto-approve",
       ],
-      "stderr": "piped",
-      "stdout": "piped",
+      stderr: "piped",
+      stdout: "piped",
     });
 
     const applyStatus = await ranTerraformApply.status();
@@ -55,7 +58,7 @@ const runFn = async ({
     const applyStderr = await ranTerraformApply.stderrOutput();
 
     if (applyStatus.code !== 0) {
-      console.log("terraform apply failed");
+      console.log(runLabel, brightRed("terraform apply failed"));
       await Deno.stdout.write(applyStderr);
       Deno.exit(252); // arbitrary exit code
     } else {
@@ -64,8 +67,7 @@ const runFn = async ({
 
     ranTerraformApply.close();
   } catch (err) {
-    console.log('error in "cndi run"');
-    console.error(err);
+    console.log(runLabel, brightRed("unhandled error"), err);
   }
 };
 

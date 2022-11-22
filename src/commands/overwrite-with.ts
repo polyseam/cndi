@@ -23,6 +23,7 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
+import { brightRed } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const owLabel = white("ow:");
 /**
@@ -42,24 +43,24 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     terraformStatePassphrase = context.terraformStatePassphrase;
     argoUIReadOnlyPassword = context.argoUIReadOnlyPassword;
   } else {
-    console.log(`cndi overwrite-with --file "${pathToConfig}"`);
+    console.log(`cndi overwrite-with --file "${pathToConfig}"\n`);
     sealedSecretsKeys = loadSealedSecretsKeys();
     terraformStatePassphrase = loadTerraformStatePassphrase();
     argoUIReadOnlyPassword = loadArgoUIReadOnlyPassword();
   }
 
   if (!sealedSecretsKeys) {
-    console.log(owLabel, `"sealedSecretsKeys" are undefined`);
+    console.log(owLabel, brightRed(`"sealedSecretsKeys" are undefined`));
     Deno.exit(1);
   }
 
   if (!argoUIReadOnlyPassword) {
-    console.log(owLabel, `"argoUIReadOnlyPassword" is undefined`);
+    console.log(owLabel, brightRed(`"argoUIReadOnlyPassword" is undefined`));
     Deno.exit(1);
   }
 
   if (!terraformStatePassphrase) {
-    console.log(owLabel, `"terraformStatePassphrase" is undefined`);
+    console.log(owLabel, brightRed(`"terraformStatePassphrase" is undefined`));
     Deno.exit(1);
   }
 

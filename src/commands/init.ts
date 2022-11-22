@@ -273,7 +273,7 @@ export default async function init(c: CNDIContext) {
           )
         }\n`,
       );
-      Deno.exit(3);
+      Deno.exit(1);
     }
   } else if (c.interactive) {
     if (!template) {
