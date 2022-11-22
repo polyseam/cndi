@@ -13,7 +13,7 @@ const runFn = async ({
   pathToTerraformBinary,
   pathToTerraformResources,
 }: CNDIContext) => {
-  console.log("cndi run");
+  console.log("cndi run\n");
   try {
     setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
@@ -60,7 +60,7 @@ const runFn = async ({
     if (applyStatus.code !== 0) {
       console.log(runLabel, brightRed("terraform apply failed"));
       await Deno.stdout.write(applyStderr);
-      Deno.exit(252); // arbitrary exit code
+      Deno.exit(1); // arbitrary exit code
     } else {
       await Deno.stdout.write(applyOutput);
     }
