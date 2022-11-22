@@ -9,6 +9,7 @@ import {
   cyan,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import { white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
@@ -82,9 +83,21 @@ const parseCndiSecret = (
         }
       } else {
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
-        throw new Error(
-          `Secret string literals are not supported. Use "${CNDI_SECRETS_PREFIX}" prefix to reference environment variables.\n at ${inputSecret.metadata.name}.stringData.${dataEntryKey}`,
+        console.log(
+          white("outputs/sealed-secret-manifest:"),
+          brightRed(
+            `Secret string literals are not supported. Use ${
+              cyan(
+                `"${CNDI_SECRETS_PREFIX}"`,
+              )
+            } prefix to reference environment variables at ${
+              white(
+                `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
+              )
+            }`,
+          ),
         );
+        Deno.exit(1);
       }
     });
 
@@ -139,15 +152,31 @@ const parseCndiSecret = (
           outputSecret.isPlaceholder = false;
         }
       } else {
-        throw new Error(
-          `Secret string literals are not supported. Use "${CNDI_SECRETS_PREFIX}" prefix to reference environment variables.\n at ${inputSecret.metadata.name}.stringData.${dataEntryKey}`,
+        console.log(
+          white("outputs/sealed-secret-manifest:"),
+          brightRed(
+            `Secret string literals are not supported. Use ${
+              cyan(
+                `"${CNDI_SECRETS_PREFIX}"`,
+              )
+            } prefix to reference environment variables at ${
+              white(
+                `"${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
+              )
+            }`,
+          ),
         );
+        Deno.exit(1);
       }
     });
   } else {
-    throw new Error(
-      `Secret "${inputSecret.metadata.name}" has no data or stringData`,
+    console.log(
+      white("outputs/sealed-secret-manifest:"),
+      brightRed(
+        `Secret "${inputSecret.metadata.name}" has no data or stringData`,
+      ),
     );
+    Deno.exit(1);
   }
   delete outputSecret.data;
   return outputSecret;

@@ -1,3 +1,4 @@
+import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
@@ -23,7 +24,11 @@ const getTerraformNodeResource = (
       );
 
     default:
-      throw new Error(`node kind: "${kind}" not yet supported`);
+      console.log(
+        white("outputs/terraform-node-resource:"),
+        brightRed(`node kind: ${white(`"${kind}"`)} not yet supported`),
+      );
+      Deno.exit(1);
   }
 };
 
@@ -112,9 +117,15 @@ const getAWSNodeResource = (
 
     return workerNodeResourceString;
   }
-  throw new Error(
-    `NodeSpec.role must be "worker" or "controller": \n you entered "${role}"`,
+  console.log(
+    white("outputs/terraform-node-resource:"),
+    brightRed(
+      `node role must be "worker" or "controller" you entered ${
+        white(`"${role}"`)
+      }`,
+    ),
   );
+  Deno.exit(1);
 };
 
 export default getTerraformNodeResource;

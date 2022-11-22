@@ -9,7 +9,11 @@ import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 
 import { trimPemString } from "../utils.ts";
 
-import { brightRed, cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import {
+  brightRed,
+  cyan,
+  white,
+} from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import overwriteWithFn from "./overwrite-with.ts";
 
@@ -34,6 +38,7 @@ import availableTemplates from "../templates/available-templates.ts";
 import writeEnvObject from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
 import getREADME from "../outputs/readme.ts";
+const initLabel = white("init:");
 
 async function getAirflowTlsTemplateAnswers(
   context: CNDIContext,
@@ -114,17 +119,27 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   const ARGO_UI_READONLY_PASSWORD = argoUIReadOnlyPassword;
 
   if (!sealedSecretsKeys) {
-    throw new Error(`init: "sealedSecretsKeys" is not defined in context`);
+    console.log(
+      initLabel,
+      brightRed(`"sealedSecretsKeys" is not defined in context`),
+    );
+    Deno.exit(1);
   }
 
   if (!TERRAFORM_STATE_PASSPHRASE) {
-    throw new Error(
-      `init: "terraformStatePassphrase" is not defined in context`,
+    console.log(
+      initLabel,
+      brightRed(`"terraformStatePassphrase" is not defined in context`),
     );
+    Deno.exit(1);
   }
 
   if (!ARGO_UI_READONLY_PASSWORD) {
-    throw new Error(`init: "argoUIReadOnlyPassword" is not defined in context`);
+    console.log(
+      initLabel,
+      brightRed(`"argoUIReadOnlyPassword" is not defined in context`),
+    );
+    Deno.exit(1);
   }
 
   const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
@@ -238,11 +253,45 @@ export default async function init(c: CNDIContext) {
 
   let template = c.template;
 
-  const echoCommand = `cndi init ${template ? `--template ${template}` : ""} ${
-    c?.interactive ? "--interactive" : ""
-  } ${c?.pathToConfig && !c?.interactive ? `--file ${c.pathToConfig}` : ""}`;
-
-  console.log(echoCommand);
+  // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
+  if (!template && !c.interactive) {
+    try {
+      console.log(`cndi init --file "${c.pathToConfig}"\n`);
+      Deno.readFileSync(c.pathToConfig);
+    } catch {
+      // if config is not found at 'pathToConfig' we want to throw an error
+      console.log(
+        initLabel,
+        brightRed(
+          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`,
+        ),
+      );
+      console.log(
+        `if you don't have a cndi-config file try ${
+          cyan(
+            "cndi init --interactive",
+          )
+        }\n`,
+      );
+      Deno.exit(1);
+    }
+  } else if (c.interactive) {
+    if (!template) {
+      console.log("cndi init --interactive\n");
+    } else {
+      console.log(`cndi init --interactive --template ${template}\n`);
+    }
+  } else {
+    if (`${template}` === "true") { // if template flag is truthy but empty, throw error
+      console.log(`cndi init --template\n`);
+      console.error(
+        initLabel,
+        brightRed(`--template (-t) flag requires a value`),
+      );
+      Deno.exit(1);
+    }
+    console.log(`cndi init --template ${template}\n`);
+  }
 
   const directoryContainsCNDIFiles = await checkInitialized(c);
 
@@ -258,6 +307,7 @@ export default async function init(c: CNDIContext) {
 
   if (template && !availableTemplates.includes(template)) {
     console.log(
+      initLabel,
       brightRed(`The template you selected "${template}" is not available.\n`),
     );
 
@@ -302,8 +352,12 @@ export default async function init(c: CNDIContext) {
         overwrite: true,
       });
     } catch (githubCopyError) {
-      console.log("failed to copy github integration files");
+      console.log(
+        initLabel,
+        brightRed("failed to copy github integration files"),
+      );
       console.error(githubCopyError);
+      Deno.exit(1);
     }
   }
 
@@ -319,7 +373,10 @@ export default async function init(c: CNDIContext) {
     const templateString = await getTemplateString({ ...context, template });
 
     if (!templateString) {
-      console.error(`Template "${template}" not yet implemented.`);
+      console.error(
+        initLabel,
+        brightRed(`Template "${white(template)}" not yet implemented.`),
+      );
       Deno.exit(1);
     }
 
@@ -330,10 +387,7 @@ export default async function init(c: CNDIContext) {
       { ...context, pathToConfig: configOutputPath },
       initializing,
     );
-
     return;
-  } else {
-    console.log(`cndi init -f "${context.pathToConfig}"`);
   }
 
   overwriteWithFn(context, initializing);

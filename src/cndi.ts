@@ -22,6 +22,7 @@ import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
 
 export default async function main(args: string[]) {
+  console.log(); /* blank line */
   const fileSuffixForPlatform = getFileSuffixForPlatform();
   const pathToOpenSSL = getPathToOpenSSLForPlatform();
   const executionDirectory = Deno.cwd();
