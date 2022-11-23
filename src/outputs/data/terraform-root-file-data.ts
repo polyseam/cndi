@@ -4,7 +4,7 @@ const terraformRootFileData: TerraformRootFileData = {
   locals: [
     {
       bootstrap_token: "${random_password.generated_token.result}",
-      controller_node_ip: "",
+      leader_node_ip: "",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",

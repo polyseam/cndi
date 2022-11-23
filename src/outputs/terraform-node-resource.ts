@@ -1,4 +1,4 @@
-import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+import { brightRed, white, yellow } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
@@ -35,7 +35,7 @@ const getTerraformNodeResource = (
 const getAWSNodeResource = (
   entry: AWSNodeEntrySpec,
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
-  controllerName: string,
+  leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_AVAILABILITY_ZONE = "us-east-1a";
@@ -89,11 +89,36 @@ const getAWSNodeResource = (
     },
   };
 
-  if (role === "controller") {
+  if (role === "leader") {
     const user_data =
-      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" })}';
+      '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" })}';
+
+    const leaderNodeResourceObj = { ...nodeResource };
+
+    leaderNodeResourceObj.resource.aws_instance[name][0].user_data = user_data;
+
+    const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
+
+    return leaderNodeResourceString;
+  } else {
+
+    // if the role is non-null and also not controller, warn the user and run default
+    if(role?.length && role !== 'controller'){
+      console.log(
+        white("outputs/terraform-node-resource:"),
+        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+      );
+      console.log(yellow('defaulting node role to'), '"controller"\n');
+    }
+
+    const user_data =
+      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
 
     const controllerNodeResourceObj = { ...nodeResource };
+
+    controllerNodeResourceObj.resource.aws_instance[name][0].depends_on = [
+      `aws_instance.${leaderName}`,
+    ];
 
     controllerNodeResourceObj.resource.aws_instance[name][0].user_data =
       user_data;
@@ -103,29 +128,7 @@ const getAWSNodeResource = (
     );
 
     return controllerNodeResourceString;
-  } else if (role === "worker") {
-    const user_data =
-      '${templatefile("worker_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "controller_node_ip": "${local.controller_node_ip}"})}';
-    const workerNodeResourceObj = { ...nodeResource };
-
-    workerNodeResourceObj.resource.aws_instance[name][0].depends_on = [
-      `aws_instance.${controllerName}`,
-    ];
-    workerNodeResourceObj.resource.aws_instance[name][0].user_data = user_data;
-
-    const workerNodeResourceString = getPrettyJSONString(workerNodeResourceObj);
-
-    return workerNodeResourceString;
   }
-  console.log(
-    white("outputs/terraform-node-resource:"),
-    brightRed(
-      `node role must be "worker" or "controller" you entered ${
-        white(`"${role}"`)
-      }`,
-    ),
-  );
-  Deno.exit(1);
 };
 
 export default getTerraformNodeResource;

@@ -22,10 +22,10 @@ export const enum Command {
   ow = "ow",
 }
 
-// node.role is either "controller" or "worker"
+// node.role is either "leader" or "controller"
 export const enum NodeRole {
+  leader = "leader",
   controller = "controller",
-  worker = "worker",
 }
 
 // incomplete type, nodes will have more options
@@ -339,7 +339,7 @@ interface TerraformRootFileData {
   locals: [
     {
       bootstrap_token: "${random_password.generated_token.result}";
-      controller_node_ip: string;
+      leader_node_ip: string;
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";

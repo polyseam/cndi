@@ -7,21 +7,19 @@ export default function getBasicTemplate(): string {
         {
           name: "x-node",
           kind: "aws",
-          role: "controller",
+          role: "leader",
           instance_type: "m5a.xlarge",
           volume_size: 128, // GiB
         },
         {
           name: "y-node",
           kind: "aws",
-          role: "worker",
           instance_type: "m5a.large",
           volume_size: 128,
         },
         {
           name: "z-node",
           kind: "aws",
-          role: "worker",
           instance_type: "m5a.large",
           volume_size: 128,
         },

@@ -28,8 +28,8 @@ const awsTerraformProviderDependency = {
 };
 
 const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
-  const controllerName = cndiNodesSpec.entries.find(
-    (entry) => (entry.role === "controller"),
+  const leaderName = cndiNodesSpec.entries.find(
+    (entry) => (entry.role === "leader"),
   )?.name as string;
 
   const providersRequired = new Set(
@@ -40,11 +40,11 @@ const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
 
   const mainTerraformFileObject = { ...terraformRootFileData };
 
-  mainTerraformFileObject.locals[0].controller_node_ip =
-    `\${aws_instance.${controllerName}.private_ip}`;
+  mainTerraformFileObject.locals[0].leader_node_ip =
+    `\${aws_instance.${leaderName}.private_ip}`;
 
   mainTerraformFileObject.locals[0].target_id =
-    `\${aws_instance.${controllerName}.id}`;
+    `\${aws_instance.${leaderName}.id}`;
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (providersRequired.has(NodeKind.aws)) {

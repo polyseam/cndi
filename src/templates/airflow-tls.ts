@@ -45,21 +45,19 @@ export default function getAirflowTlsTemplate({
         {
           name: "x-airflow-node",
           kind: "aws",
-          role: "controller",
+          role: "leader",
           instance_type: "m5a.xlarge",
           volume_size: 128,
         },
         {
           name: "y-airflow-node",
           kind: "aws",
-          role: "worker",
           instance_type: "m5a.large",
           volume_size: 128,
         },
         {
           name: "z-airflow-node",
           kind: "aws",
-          role: "worker",
           instance_type: "m5a.large",
           volume_size: 128,
         },
