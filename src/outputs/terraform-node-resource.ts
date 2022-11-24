@@ -1,4 +1,8 @@
-import { brightRed, white, yellow } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+import {
+  brightRed,
+  white,
+  yellow,
+} from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
@@ -37,7 +41,6 @@ const getAWSNodeResource = (
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
-
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
   const { name, role } = entry;
@@ -95,14 +98,13 @@ const getAWSNodeResource = (
 
     return leaderNodeResourceString;
   } else {
-
     // if the role is non-null and also not controller, warn the user and run default
-    if(role?.length && role !== 'controller'){
+    if (role?.length && role !== "controller") {
       console.log(
         white("outputs/terraform-node-resource:"),
         yellow(`node role: ${white(`"${role}"`)} is not supported`),
       );
-      console.log(yellow('defaulting node role to'), '"controller"\n');
+      console.log(yellow("defaulting node role to"), '"controller"\n');
     }
 
     const user_data =
