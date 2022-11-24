@@ -210,6 +210,9 @@ interface AWSTerraformTargetGroupListenerResource {
     load_balancer_arn: string;
     port: string;
     protocol: string;
+    tags: {
+      Name: string;
+    };
   }>;
   "tg-http-listener": Array<{
     default_action: Array<{
@@ -219,6 +222,9 @@ interface AWSTerraformTargetGroupListenerResource {
     load_balancer_arn: string;
     port: string;
     protocol: string;
+    tags: {
+      Name: string;
+    };
   }>;
 }
 
