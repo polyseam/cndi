@@ -38,13 +38,19 @@ const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
     }),
   );
 
+  const allInstanceIDs = (
+    cndiNodesSpec.entries.map((entry) => {
+      return `\${aws_instance.${entry.name}.id}`;
+    }));
+
   const mainTerraformFileObject = { ...terraformRootFileData };
 
   mainTerraformFileObject.locals[0].leader_node_ip =
     `\${aws_instance.${leaderName}.private_ip}`;
 
   mainTerraformFileObject.locals[0].target_id =
-    `\${aws_instance.${leaderName}.id}`;
+    allInstanceIDs
+
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (providersRequired.has(NodeKind.aws)) {
