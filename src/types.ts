@@ -356,7 +356,7 @@ interface TerraformRootFileData {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-      target_id: string;
+      target_id: string[];
     },
   ];
   provider: {
