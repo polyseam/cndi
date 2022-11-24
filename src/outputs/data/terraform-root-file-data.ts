@@ -316,6 +316,24 @@ const terraformRootFileData: TerraformRootFileData = {
       type: "string",
     }],
 
+    sg_ingress_cidr_block: [{
+      default: "0.0.0.0/0",
+      description: "CIDR block for the ingres rule",
+      type: "string",
+    }],
+
+    sg_ingress_all: [{
+      default: "0",
+      description: "Port used for the All ingress rule",
+      type: "string",
+    }],
+
+    sg_ingress_proto_all: [{
+      default: "-1",
+      description: "Protocol used for the egress rule",
+      type: "string"
+    }],
+
     sg_egress_proto: [{
       default: "-1",
       description: "Protocol used for the egress rule",
@@ -328,11 +346,7 @@ const terraformRootFileData: TerraformRootFileData = {
       type: "string",
     }],
 
-    sg_ingress_cidr_block: [{
-      default: "0.0.0.0/0",
-      description: "CIDR block for the ingres rule",
-      type: "string",
-    }],
+
 
     sg_egress_cidr_block: [{
       default: "0.0.0.0/0",
