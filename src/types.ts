@@ -428,6 +428,18 @@ interface TerraformRootFileData {
       type: "string";
     }];
 
+    sg_ingress_proto_all: [{
+      default: "-1";
+      description: "Protocol used for the egress rule";
+      type: "string";
+    }];
+
+    sg_ingress_all: [{
+      default: "0";
+      description: "Port used for the All ingress rule";
+      type: "string";
+    }];
+
     sg_ingress_k8s_API: [{
       default: "16443";
       description: "Port used for Kubernetes API server";
