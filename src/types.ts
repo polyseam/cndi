@@ -62,7 +62,6 @@ interface AWSTerraformNodeResource {
       [name: string]: Array<{
         ami: string;
         instance_type: string;
-        availability_zone: string;
         tags: {
           Name: string;
           CNDINodeRole: NodeRole;
