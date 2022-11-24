@@ -38,8 +38,8 @@ const terraformRootFileData: TerraformRootFileData = {
       nlb: {
         internal: false,
         load_balancer_type: "network",
-        name: "${var.owner}-nlb",
         subnets: ["${aws_subnet.subnet.id}"],
+        tags: { Name: "${var.owner}-nlb" },
       },
     },
     aws_route: {
@@ -158,13 +158,14 @@ const terraformRootFileData: TerraformRootFileData = {
             }
           ],
           vpc_id: "${aws_vpc.vpc.id}",
+          tags: { Name: "${var.owner}-sg" },
         },
       ],
     },
     aws_lb_target_group: {
       "tg-http": [
         {
-          name: "${var.owner}-tg-http",
+          tags: { Name: "${var.owner}-http-target-group " },
           port: "${var.tg_http}",
           protocol: "${var.tg_http_proto}",
           vpc_id: "${aws_vpc.vpc.id}",
@@ -172,7 +173,7 @@ const terraformRootFileData: TerraformRootFileData = {
       ],
       "tg-https": [
         {
-          name: "${var.owner}-tg-https",
+          tags: { Name: "${var.owner}-https-target-group " },
           port: "${var.tg_https}",
           protocol: "${var.tg_https_proto}",
           vpc_id: "${aws_vpc.vpc.id}",
@@ -191,6 +192,7 @@ const terraformRootFileData: TerraformRootFileData = {
           load_balancer_arn: "${aws_lb.nlb.arn}",
           port: "${var.tg_https}",
           protocol: "${var.tg_https_proto}",
+          tags: { Name: "${var.owner}-https-target-group-listener" }
         },
       ],
       "tg-http-listener": [
@@ -201,6 +203,7 @@ const terraformRootFileData: TerraformRootFileData = {
               type: "forward",
             },
           ],
+          tags: { Name: "${var.owner}-https-target-group-listeners" },
           load_balancer_arn: "${aws_lb.nlb.arn}",
           port: "${var.tg_http}",
           protocol: "${var.tg_http_proto}",
