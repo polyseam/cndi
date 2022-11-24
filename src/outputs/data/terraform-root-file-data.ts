@@ -64,7 +64,6 @@ const terraformRootFileData: TerraformRootFileData = {
     },
     aws_subnet: {
       subnet: {
-        availability_zone: "us-east-1a",
         cidr_block: "${var.sbn_cidr_block}",
         map_public_ip_on_launch: "${var.sbn_public_ip}",
         tags: { Name: "${var.owner}-subnet" },
