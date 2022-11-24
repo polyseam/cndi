@@ -37,16 +37,11 @@ const getAWSNodeResource = (
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
+
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
-  const DEFAULT_AVAILABILITY_ZONE = "us-east-1a";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
-
   const { name, role } = entry;
-
   const ami = entry?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
-  const availability_zone = entry?.availability_zone ||
-    deploymentTargetConfiguration?.availability_zone ||
-    DEFAULT_AVAILABILITY_ZONE;
   const instance_type = entry?.instance_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
@@ -75,7 +70,6 @@ const getAWSNodeResource = (
           {
             ami,
             instance_type,
-            availability_zone,
             tags: {
               Name: name,
               CNDINodeRole: role,
