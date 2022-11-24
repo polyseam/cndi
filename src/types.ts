@@ -173,13 +173,17 @@ interface AWSTerraformSecurityGroupResource {
 
 interface AWSTerraformTargetGroupResource {
   "tg-http": Array<{
-    name: string;
+    tags: {
+      Name: string;
+    };
     port: string;
     protocol: string;
     vpc_id: string;
   }>;
   "tg-https": Array<{
-    name: string;
+    tags: {
+      Name: string;
+    };
     port: string;
     protocol: string;
     vpc_id: string;
