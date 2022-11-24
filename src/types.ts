@@ -131,6 +131,7 @@ interface AWSTerraformRouteTableAssociationResource {
 
 interface AWSTerraformSubnetResource {
   subnet: {
+    availability_zone: string;
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
@@ -164,7 +165,9 @@ interface AWSTerraformSecurityGroupResource {
       security_groups: Array<any>;
       self: boolean;
     }>;
-    name: string;
+    tags: {
+      Name: string;
+    };
     vpc_id: string;
   }>;
 }
