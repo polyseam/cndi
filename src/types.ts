@@ -101,7 +101,6 @@ interface AWSTerraformLoadBalancerResource {
   nlb: {
     internal: boolean;
     load_balancer_type: string;
-    name: string;
     subnets: Array<string>;
   };
 }
