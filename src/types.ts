@@ -131,7 +131,6 @@ interface AWSTerraformRouteTableAssociationResource {
 
 interface AWSTerraformSubnetResource {
   subnet: {
-    availability_zone: string;
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
