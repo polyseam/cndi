@@ -7,6 +7,7 @@ import {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
   AWSTerraformNodeResource,
+  AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
 } from "../types.ts";
@@ -65,6 +66,24 @@ const getAWSNodeResource = (
   ];
   const subnet_id = "${aws_subnet.subnet.id}";
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
+  const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
+  const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";
+  const target_id = `\${aws_instance.${name}.id}`;
+  const aws_lb_target_group_attachment:
+    AWSTerraformTargetGroupAttachmentResource = {
+      [`tg-https-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_https,
+          target_id,
+        },
+      ],
+      [`tg-http-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_http,
+          target_id,
+        },
+      ],
+    };
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
@@ -83,6 +102,7 @@ const getAWSNodeResource = (
           },
         ],
       },
+      aws_lb_target_group_attachment,
     },
   };
 
