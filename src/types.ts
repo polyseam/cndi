@@ -62,7 +62,6 @@ interface AWSTerraformNodeResource {
       [name: string]: Array<{
         ami: string;
         instance_type: string;
-        availability_zone: string;
         tags: {
           Name: string;
           CNDINodeRole: NodeRole;
@@ -79,6 +78,7 @@ interface AWSTerraformNodeResource {
         }>;
       }>;
     };
+    aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
   };
 }
 interface RandomTerraformRandomPasswordResource {
@@ -102,8 +102,8 @@ interface AWSTerraformLoadBalancerResource {
   nlb: {
     internal: boolean;
     load_balancer_type: string;
-    name: string;
     subnets: Array<string>;
+    tags: { Name: string };
   };
 }
 
@@ -132,7 +132,6 @@ interface AWSTerraformRouteTableAssociationResource {
 
 interface AWSTerraformSubnetResource {
   subnet: {
-    availability_zone: string;
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
@@ -166,20 +165,26 @@ interface AWSTerraformSecurityGroupResource {
       security_groups: Array<any>;
       self: boolean;
     }>;
-    name: string;
+    tags: {
+      Name: string;
+    };
     vpc_id: string;
   }>;
 }
 
 interface AWSTerraformTargetGroupResource {
   "tg-http": Array<{
-    name: string;
+    tags: {
+      Name: string;
+    };
     port: string;
     protocol: string;
     vpc_id: string;
   }>;
   "tg-https": Array<{
-    name: string;
+    tags: {
+      Name: string;
+    };
     port: string;
     protocol: string;
     vpc_id: string;
@@ -187,11 +192,7 @@ interface AWSTerraformTargetGroupResource {
 }
 
 interface AWSTerraformTargetGroupAttachmentResource {
-  "tg-https-target": Array<{
-    target_group_arn: string;
-    target_id: string;
-  }>;
-  "tg-http-target": Array<{
+  [httptarget: string]: Array<{
     target_group_arn: string;
     target_id: string;
   }>;
@@ -206,6 +207,9 @@ interface AWSTerraformTargetGroupListenerResource {
     load_balancer_arn: string;
     port: string;
     protocol: string;
+    tags: {
+      Name: string;
+    };
   }>;
   "tg-http-listener": Array<{
     default_action: Array<{
@@ -215,6 +219,9 @@ interface AWSTerraformTargetGroupListenerResource {
     load_balancer_arn: string;
     port: string;
     protocol: string;
+    tags: {
+      Name: string;
+    };
   }>;
 }
 
@@ -346,7 +353,6 @@ interface TerraformRootFileData {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-      target_id: string;
     },
   ];
   provider: {
@@ -365,7 +371,6 @@ interface TerraformRootFileData {
     aws_security_group: AWSTerraformSecurityGroupResource;
     aws_lb_target_group: AWSTerraformTargetGroupResource;
     aws_lb_listener: AWSTerraformTargetGroupListenerResource;
-    aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
     aws_vpc: AWSTerraformVPCResource;
   }];
   terraform: [TerraformDependencies];
@@ -415,6 +420,18 @@ interface TerraformRootFileData {
     sg_ingress_ssh: [{
       default: "22";
       description: "Port used SSL traffic";
+      type: "string";
+    }];
+
+    sg_ingress_proto_all: [{
+      default: "-1";
+      description: "Protocol used for the egress rule";
+      type: "string";
+    }];
+
+    sg_ingress_all: [{
+      default: "0";
+      description: "Port used for the All ingress rule";
       type: "string";
     }];
 
@@ -575,6 +592,7 @@ export type {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
   AWSTerraformNodeResource,
+  AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
   CNDIApplicationSpec,
   CNDIClients,
