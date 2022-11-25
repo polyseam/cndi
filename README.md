@@ -64,7 +64,8 @@ These nodes must each be one of the following `kinds`:
 - [ ] remote
 - [ ] vmware
 
-We also specify the node `role`, this is either `"controller"` or `"worker"`.
+We also specify the node `role`, this is `"controller"` by default, and exactly
+one node must be a `leader"`.
 
 Here is an example `cndi-config.jsonc` object that contains a set of node
 entries to deploy:
@@ -75,19 +76,17 @@ entries to deploy:
     "entries": [
       {
         "kind": "gcp",
-        "role": "controller",
-        "name": "gcp-controller",
+        "role": "leader",
+        "name": "gcp-alpha",
         "machine_type": "m5a.xlarge"
       },
       {
-        "kind": "gcp",
-        "role": "worker",
-        "name": "gcp-worker"
+        "name": "gcp-beta",
+        "kind": "gcp" // coming soon!
       },
       {
-        "kind": "aws", // whoa, multicloud!
-        "role": "worker",
-        "name": "aws-worker"
+        "name": "aws-charlie",
+        "kind": "aws" // whoa, multicloud!
       }
     ],
     "deploymentTargetConfiguration": {
@@ -418,8 +417,8 @@ machines, in AWS this is the
 (the region parameter of this url must be updated if your instances are not in
 `us-east-1`).
 
-Click on the node id link in the UI for your controller, then click `Connect` in
-the top right. Copy the `"Public IP address"` value and paste it in a note for
+Click on the node id link in the UI for your leader, then click `Connect` in the
+top right. Copy the `"Public IP address"` value and paste it in a note for
 yourself. We will need it later to connect to our node remotely. Type `"ubuntu"`
 into the `User name` field, and click `Connect`.
 
@@ -461,9 +460,9 @@ users:
 **3. Update IP Address in Kubernetes Config:**
 
 You want to take this yaml blob to a text editor and replace the IP address
-listed and replace it with the _public_ IP address of your controller node that
-you copied just before connecting. If you don't change the IP address it will be
-set to the Private IP of the node, and we can't connect to the private IP from
+listed and replace it with the _public_ IP address of your leader node that you
+copied just before connecting. If you don't change the IP address it will be set
+to the Private IP of the node, and we can't connect to the private IP from
 outside of the cloud.
 
 **4. Add Kubernetes config to your work station:**

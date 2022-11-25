@@ -4,14 +4,13 @@ const terraformRootFileData: TerraformRootFileData = {
   locals: [
     {
       bootstrap_token: "${random_password.generated_token.result}",
-      controller_node_ip: "",
+      leader_node_ip: "",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
-      target_id: "",
     },
   ],
   provider: {
@@ -38,8 +37,8 @@ const terraformRootFileData: TerraformRootFileData = {
       nlb: {
         internal: false,
         load_balancer_type: "network",
-        name: "${var.owner}-nlb",
         subnets: ["${aws_subnet.subnet.id}"],
+        tags: { Name: "${var.owner}-nlb" },
       },
     },
     aws_route: {
@@ -64,7 +63,6 @@ const terraformRootFileData: TerraformRootFileData = {
     },
     aws_subnet: {
       subnet: {
-        availability_zone: "us-east-1a",
         cidr_block: "${var.sbn_cidr_block}",
         map_public_ip_on_launch: "${var.sbn_public_ip}",
         tags: { Name: "${var.owner}-subnet" },
@@ -146,16 +144,28 @@ const terraformRootFileData: TerraformRootFileData = {
               security_groups: [],
               self: false,
             },
+            {
+              cidr_blocks: ["${var.vpc_cidr_block}"],
+              description:
+                "Inbound rule that enables traffic between EC2 instances in the VPC ",
+              from_port: "${var.sg_ingress_all}",
+              protocol: "${var.sg_ingress_proto_all}",
+              to_port: "${var.sg_ingress_all}",
+              ipv6_cidr_blocks: [],
+              prefix_list_ids: [],
+              security_groups: [],
+              self: false,
+            },
           ],
-          name: "${var.owner}-sg",
           vpc_id: "${aws_vpc.vpc.id}",
+          tags: { Name: "${var.owner}-sg" },
         },
       ],
     },
     aws_lb_target_group: {
       "tg-http": [
         {
-          name: "${var.owner}-tg-http",
+          tags: { Name: "${var.owner}-http-target-group " },
           port: "${var.tg_http}",
           protocol: "${var.tg_http_proto}",
           vpc_id: "${aws_vpc.vpc.id}",
@@ -163,7 +173,7 @@ const terraformRootFileData: TerraformRootFileData = {
       ],
       "tg-https": [
         {
-          name: "${var.owner}-tg-https",
+          tags: { Name: "${var.owner}-https-target-group " },
           port: "${var.tg_https}",
           protocol: "${var.tg_https_proto}",
           vpc_id: "${aws_vpc.vpc.id}",
@@ -182,6 +192,7 @@ const terraformRootFileData: TerraformRootFileData = {
           load_balancer_arn: "${aws_lb.nlb.arn}",
           port: "${var.tg_https}",
           protocol: "${var.tg_https_proto}",
+          tags: { Name: "${var.owner}-https-target-group-listener" },
         },
       ],
       "tg-http-listener": [
@@ -192,23 +203,10 @@ const terraformRootFileData: TerraformRootFileData = {
               type: "forward",
             },
           ],
+          tags: { Name: "${var.owner}-https-target-group-listeners" },
           load_balancer_arn: "${aws_lb.nlb.arn}",
           port: "${var.tg_http}",
           protocol: "${var.tg_http_proto}",
-        },
-      ],
-    },
-    aws_lb_target_group_attachment: {
-      "tg-https-target": [
-        {
-          target_group_arn: "${aws_lb_target_group.tg-https.arn}",
-          target_id: "${local.target_id}",
-        },
-      ],
-      "tg-http-target": [
-        {
-          target_group_arn: "${aws_lb_target_group.tg-http.arn}",
-          target_id: "${local.target_id}",
         },
       ],
     },
@@ -304,6 +302,24 @@ const terraformRootFileData: TerraformRootFileData = {
       type: "string",
     }],
 
+    sg_ingress_cidr_block: [{
+      default: "0.0.0.0/0",
+      description: "CIDR block for the ingres rule",
+      type: "string",
+    }],
+
+    sg_ingress_all: [{
+      default: "0",
+      description: "Port used for the All ingress rule",
+      type: "string",
+    }],
+
+    sg_ingress_proto_all: [{
+      default: "-1",
+      description: "Protocol used for the egress rule",
+      type: "string",
+    }],
+
     sg_egress_proto: [{
       default: "-1",
       description: "Protocol used for the egress rule",
@@ -313,12 +329,6 @@ const terraformRootFileData: TerraformRootFileData = {
     sg_egress_all: [{
       default: "0",
       description: "Port used for the egress rule",
-      type: "string",
-    }],
-
-    sg_ingress_cidr_block: [{
-      default: "0.0.0.0/0",
-      description: "CIDR block for the ingres rule",
       type: "string",
     }],
 

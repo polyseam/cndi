@@ -6,6 +6,7 @@ export default function getGitignore(): string {
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/
+.DS_Store
 `;
   return gitignoreContents.trim();
 }

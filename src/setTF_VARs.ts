@@ -5,7 +5,6 @@ const setTF_VARsLabel = white("setTF_VARs:");
 
 export default function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
-
   if (!git_username) {
     console.log(setTF_VARsLabel, brightRed("GIT_USERNAME env var is not set"));
     Deno.exit(1);
