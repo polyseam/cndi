@@ -1,4 +1,6 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
+import { copy } from "https://deno.land/std@0.166.0/streams/conversion.ts";
+
 import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import setTF_VARs from "../setTF_VARs.ts";
 import { CNDIContext } from "../types.ts";
@@ -18,7 +20,7 @@ const runFn = async ({
     setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
     // terraform.tfstate will be in this folder after the first run
-    const ranTerraformInit = await Deno.run({
+    const ranTerraformInit = Deno.run({
       cmd: [
         pathToTerraformBinary,
         `-chdir=${pathToTerraformResources}`,
@@ -28,21 +30,19 @@ const runFn = async ({
       stdout: "piped",
     });
 
+    copy(ranTerraformInit.stdout, Deno.stdout);
+    copy(ranTerraformInit.stderr, Deno.stderr);
+
     const initStatus = await ranTerraformInit.status();
-    const initOutput = await ranTerraformInit.output();
-    const initStderr = await ranTerraformInit.stderrOutput();
 
     if (initStatus.code !== 0) {
       console.log(runLabel, brightRed("terraform init failed"));
-      await Deno.stdout.write(initStderr);
-      Deno.exit(1); // arbitrary exit code
-    } else {
-      await Deno.stdout.write(initOutput);
+      Deno.exit(1);
     }
 
     ranTerraformInit.close();
 
-    const ranTerraformApply = await Deno.run({
+    const ranTerraformApply = Deno.run({
       cmd: [
         pathToTerraformBinary,
         `-chdir=${pathToTerraformResources}`,
@@ -53,16 +53,14 @@ const runFn = async ({
       stdout: "piped",
     });
 
+    copy(ranTerraformApply.stdout, Deno.stdout);
+    copy(ranTerraformApply.stderr, Deno.stderr);
+
     const applyStatus = await ranTerraformApply.status();
-    const applyOutput = await ranTerraformApply.output();
-    const applyStderr = await ranTerraformApply.stderrOutput();
 
     if (applyStatus.code !== 0) {
       console.log(runLabel, brightRed("terraform apply failed"));
-      await Deno.stdout.write(applyStderr);
-      Deno.exit(1); // arbitrary exit code
-    } else {
-      await Deno.stdout.write(applyOutput);
+      Deno.exit(1);
     }
 
     ranTerraformApply.close();

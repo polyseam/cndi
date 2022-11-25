@@ -14,7 +14,7 @@ const createSealedSecretsKeys = async ({
   let sealed_secrets_private_key;
   let sealed_secrets_public_key;
 
-  const ranOpenSSLGenerateKeyPair = await Deno.run({
+  const ranOpenSSLGenerateKeyPair = Deno.run({
     cmd: [
       pathToOpenSSL,
       "req",

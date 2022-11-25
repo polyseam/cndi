@@ -1,5 +1,7 @@
 import { CNDIContext } from "../types.ts";
 import setTF_VARs from "../setTF_VARs.ts";
+import { copy } from "https://deno.land/std@0.166.0/streams/conversion.ts";
+
 /**
  * COMMAND fn: cndi terraform
  * Wraps the terraform cli with a CNDI context
@@ -17,6 +19,9 @@ export default async function terraform(
     "stderr": "piped",
     "stdout": "piped",
   });
+
+  copy(ranProxiedTerraformCmd.stdout, Deno.stdout);
+  copy(ranProxiedTerraformCmd.stderr, Deno.stderr);
 
   const proxiedTerraformCmdStatus = await ranProxiedTerraformCmd.status();
   const proxiedTerraformCmdOutput = await ranProxiedTerraformCmd.output();
