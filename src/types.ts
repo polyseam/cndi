@@ -78,6 +78,7 @@ interface AWSTerraformNodeResource {
         }>;
       }>;
     };
+    aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
   };
 }
 interface RandomTerraformRandomPasswordResource {
