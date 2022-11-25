@@ -592,6 +592,7 @@ export type {
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
   AWSTerraformNodeResource,
+  AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
   CNDIApplicationSpec,
   CNDIClients,
