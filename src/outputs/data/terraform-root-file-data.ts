@@ -210,20 +210,6 @@ const terraformRootFileData: TerraformRootFileData = {
         },
       ],
     },
-    aws_lb_target_group_attachment: {
-      "tg-https-target": [
-        {
-          target_group_arn: "${aws_lb_target_group.tg-https.arn}",
-          target_id: "${local.target_id}",
-        },
-      ],
-      "tg-http-target": [
-        {
-          target_group_arn: "${aws_lb_target_group.tg-http.arn}",
-          target_id: "${local.target_id}",
-        },
-      ],
-    },
     aws_vpc: {
       vpc: {
         cidr_block: "${var.vpc_cidr_block}",
