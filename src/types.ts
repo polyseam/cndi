@@ -192,11 +192,7 @@ interface AWSTerraformTargetGroupResource {
 }
 
 interface AWSTerraformTargetGroupAttachmentResource {
-  "tg-https-target": Array<{
-    target_group_arn: string;
-    target_id: string;
-  }>;
-  "tg-http-target": Array<{
+  [httptarget: string]: Array<{
     target_group_arn: string;
     target_id: string;
   }>;
@@ -357,7 +353,6 @@ interface TerraformRootFileData {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-      target_id: string[];
     },
   ];
   provider: {
@@ -376,7 +371,6 @@ interface TerraformRootFileData {
     aws_security_group: AWSTerraformSecurityGroupResource;
     aws_lb_target_group: AWSTerraformTargetGroupResource;
     aws_lb_listener: AWSTerraformTargetGroupListenerResource;
-    aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
     aws_vpc: AWSTerraformVPCResource;
   }];
   terraform: [TerraformDependencies];
