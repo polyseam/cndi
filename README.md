@@ -58,8 +58,8 @@ powerful they are.
 These nodes must each be one of the following `kinds`:
 
 - [x] aws
+- [x] gcp
 - [ ] azure
-- [ ] gcp
 - [ ] local
 - [ ] remote
 - [ ] vmware
@@ -82,7 +82,7 @@ entries to deploy:
       },
       {
         "name": "gcp-beta",
-        "kind": "gcp" // coming soon!
+        "kind": "gcp"
       },
       {
         "name": "aws-charlie",

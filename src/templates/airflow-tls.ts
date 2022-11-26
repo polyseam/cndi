@@ -1,8 +1,8 @@
-import { AirflowTlsTemplateAnswers, CNDIContext, EnvObject } from "../types.ts";
+import { AirflowTlsTemplateAnswers, CNDIContext, EnvObject, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getPrettyJSONString } from "../utils.ts";
+import { getPrettyJSONString, getDefaultVmTypeForKind } from "../utils.ts";
 
 const getAirflowTlsTemplateEnvObject = async (
   context: CNDIContext,
@@ -21,6 +21,7 @@ const getAirflowTlsTemplateEnvObject = async (
       default: GIT_SYNC_PASSWORD,
     })) as string;
   }
+  
   const airflowTlsTemplateEnvObject = {
     GIT_SYNC_USERNAME: {
       comment: "airflow-git-credentials secret values for DAG Storage",
@@ -33,32 +34,33 @@ const getAirflowTlsTemplateEnvObject = async (
   return airflowTlsTemplateEnvObject;
 };
 
-export default function getAirflowTlsTemplate({
+export default function getAirflowTlsTemplate(kind: NodeKind,{
   argocdDomainName,
   airflowDomainName,
   dagRepoUrl,
   letsEncryptClusterIssuerEmailAddress,
 }: AirflowTlsTemplateAnswers): string {
+  const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
   return getPrettyJSONString({
     nodes: {
       entries: [
         {
           name: "x-airflow-node",
-          kind: "aws",
+          kind,
           role: "leader",
-          instance_type: "m5a.xlarge",
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
         {
           name: "y-airflow-node",
-          kind: "aws",
-          instance_type: "m5a.large",
+          kind,
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
         {
           name: "z-airflow-node",
-          kind: "aws",
-          instance_type: "m5a.large",
+          kind,
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
       ],

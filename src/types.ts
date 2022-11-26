@@ -2,6 +2,7 @@
 
 export const enum NodeKind {
   aws = "aws",
+  gcp = "gcp",
 }
 
 interface AirflowTlsTemplateAnswers {

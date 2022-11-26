@@ -1,10 +1,5 @@
 import { getPrettyJSONString } from "../utils.ts";
-import {
-  BaseNodeEntrySpec,
-  CNDINodesSpec,
-  NodeKind,
-  TerraformDependencies,
-} from "../types.ts";
+import { NodeKind, TerraformDependencies } from "../types.ts";
 
 import terraformRootFileData from "./data/terraform-root-file-data.ts";
 
@@ -27,30 +22,26 @@ const awsTerraformProviderDependency = {
   },
 };
 
-const getTerraformRootFile = (cndiNodesSpec: CNDINodesSpec): string => {
-  const leaderName = cndiNodesSpec.entries.find(
-    (entry) => (entry.role === "leader"),
-  )?.name as string;
+interface GetTerraformRootFileArgs {
+  leaderName: string;
+  requiredProviders: Set<string>;
+}
 
-  const providersRequired = new Set(
-    cndiNodesSpec.entries.map((entry: BaseNodeEntrySpec) => {
-      return entry.kind as NodeKind;
-    }),
-  );
-
+const getTerraformRootFile = ({
+  leaderName,
+  requiredProviders,
+}: GetTerraformRootFileArgs): string => {
   // TODO: create compute engine instance
   // TODO: create compute engine instance group
   // TODO: create compute engine tcp load balancer
   // TODO: create vpc
   // TODO: link with _existing_ gcp project OR create new gcp project
-  
+
   const mainTerraformFileObject = { ...terraformRootFileData };
 
-  mainTerraformFileObject.locals[0].leader_node_ip =
-    `\${aws_instance.${leaderName}.private_ip}`;
-
   // add parts of setup-cndi.tf file that are required if kind===aws
-  if (providersRequired.has(NodeKind.aws)) {
+  if (requiredProviders.has(NodeKind.aws)) {
+    mainTerraformFileObject.locals[0].leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`;
     // add aws provider dependency
     terraformDependencies.required_providers[0].aws =
       awsTerraformProviderDependency.aws;

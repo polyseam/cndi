@@ -1,5 +1,6 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
@@ -8,6 +9,7 @@ import {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
+  NodeKind,
 } from "../types.ts";
 import getApplicationManifest from "../outputs/application-manifest.ts";
 import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
@@ -23,7 +25,11 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
-import { brightRed } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+import {
+  brightRed,
+  yellow,
+  cyan,
+} from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const owLabel = white("ow:");
 /**
@@ -99,19 +105,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   // write tftpl terraform template for the user_data bootstrap script
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "leader_bootstrap_cndi.sh.tftpl"),
-    leaderBootstrapTerraformTemplate,
+    leaderBootstrapTerraformTemplate
   );
 
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "controller_bootstrap_cndi.sh.tftpl"),
-    controllerBootstrapTerrformTemplate,
+    controllerBootstrapTerrformTemplate
   );
 
   const tempPublicKeyFilePath = await Deno.makeTempFile();
 
   await Deno.writeTextFile(
     tempPublicKeyFilePath,
-    sealedSecretsKeys.sealed_secrets_public_key,
+    sealedSecretsKeys.sealed_secrets_public_key
   );
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
@@ -124,13 +130,13 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       const sealedSecretManifest = await getSealedSecretManifest(
         secret,
         tempPublicKeyFilePath,
-        context,
+        context
       );
 
       if (sealedSecretManifest) {
         Deno.writeTextFileSync(
           path.join(pathToKubernetesManifests, secretName),
-          sealedSecretManifest,
+          sealedSecretManifest
         );
         console.log(`created encrypted secret:`, secretName);
       }
@@ -139,14 +145,16 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
     await Deno.writeTextFile(
       path.join(pathToKubernetesManifests, `${key}.json`),
-      getPrettyJSONString(manifestObj),
+      getPrettyJSONString(manifestObj)
     );
   });
 
   const { nodes } = config;
 
   const { entries } = nodes;
-  const deploymentTargetConfiguration = nodes?.deploymentTargetConfiguration ||
+
+  const deploymentTargetConfiguration =
+    nodes?.deploymentTargetConfiguration ||
     ({} as DeploymentTargetConfiguration);
 
   const leaders = entries.filter((entry) => entry.role === "leader");
@@ -158,13 +166,87 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const leader = leaders[0];
 
+  const requiredProviders = new Set(
+    entries.map((entry: BaseNodeEntrySpec) => {
+      return entry.kind as NodeKind;
+    })
+  );
+
+  if (requiredProviders.size !== 1) {
+    console.log(
+      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`)
+    );
+    console.log(
+      `your nodes have the following ${brightRed(
+        `${requiredProviders.size}`
+      )} "kind"s:`
+    );
+    requiredProviders.forEach((kind) => {
+      console.log(` - ${yellow(kind)}`);
+    });
+    console.log();
+  }
+
+  if (requiredProviders.has(NodeKind.gcp)) {
+    const GCPPathToServiceAccountKeyEnvKey = "GCP_PATH_TO_SERVICE_ACCOUNT_KEY";
+    const GCPServiceAccountKeyEnvKey = "GCP_SERVICE_ACCOUNT_KEY";
+
+    const GCPPathToServiceAccountKey = Deno.env.get(
+      GCPPathToServiceAccountKeyEnvKey
+    );
+    const GCPServiceAccountKey = Deno.env.get(GCPServiceAccountKeyEnvKey);
+
+    // if the user interactively provides a path to a service account key, we copy it to `.env` and discard the path
+    if (GCPPathToServiceAccountKey && !GCPServiceAccountKey) {
+      try {
+        const keyText = await Deno.readTextFile(
+          GCPPathToServiceAccountKey.replace("~", homedir() || "~")
+        );
+
+        if (keyText) {
+          const dotEnvContents = Deno.readTextFileSync(context.dotEnvPath);
+          const dotEnvLines = dotEnvContents.split("\n");
+          const newDotEnvLines = dotEnvLines.map((line) => {
+            if (line.indexOf(GCPPathToServiceAccountKeyEnvKey) === 0) {
+              const keyTextMinified = JSON.stringify(keyText, null, 0);
+              Deno.env.set(GCPServiceAccountKeyEnvKey, keyTextMinified);
+              return `${GCPServiceAccountKeyEnvKey}=${keyTextMinified}`;
+            }
+            return line;
+          });
+          const newDotEnvContents = newDotEnvLines.join("\n");
+          Deno.writeTextFileSync(context.dotEnvPath, newDotEnvContents);
+        }
+      } catch (error) {
+        console.error(error);
+        console.log(
+          owLabel,
+          brightRed(`GCP Service Account Key not found at path:`),
+          `"${GCPPathToServiceAccountKey}"`
+        );
+      }
+    } else if (!GCPPathToServiceAccountKey && !GCPServiceAccountKey) {
+      console.log(
+        owLabel,
+        brightRed(`you need to have either`),
+        `\"${GCPPathToServiceAccountKeyEnvKey}\"`,
+        brightRed("or"),
+        `\"${GCPServiceAccountKeyEnvKey}\"`,
+        brightRed(`defined in the environment when depolying to "gcp"`)
+      );
+    }
+  }
+
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  const terraformRootFile = getTerraformRootFile(nodes);
+  const terraformRootFile = getTerraformRootFile({
+    leaderName: leader.name,
+    requiredProviders,
+  });
 
   // write terraform root file
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "setup-cndi.tf.json"),
-    terraformRootFile,
+    terraformRootFile
   );
 
   // write terraform nodes files
@@ -172,18 +254,18 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const nodeFileContents: string = getTerraformNodeResource(
       entry,
       deploymentTargetConfiguration,
-      leader.name,
+      leader.name
     );
     Deno.writeTextFile(
       path.join(pathToTerraformResources, `${entry.name}.cndi-node.tf.json`),
-      nodeFileContents,
+      nodeFileContents
     );
   });
 
   // write the cndi/cluster/Chart.yaml file
   await Deno.writeTextFile(
     path.join(pathToKubernetesManifests, "Chart.yaml"),
-    RootChartYaml,
+    RootChartYaml
   );
 
   const { applications } = config;
@@ -194,11 +276,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
-      applicationSpec,
+      applicationSpec
     );
     Deno.writeTextFileSync(
       path.join(pathToKubernetesManifests, "applications", filename),
-      manifestContent,
+      manifestContent
     );
     console.log("created application manifest:", filename);
   });

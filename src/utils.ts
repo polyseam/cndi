@@ -95,7 +95,22 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
+function getDefaultVmTypeForKind(kind: string): [string, string]  {
+  switch (kind) {
+    // most recent 4vCPU/16GiB Ram VMs
+    case "aws":
+      return ["instance_type", "m5a.xlarge"];
+    case "gcp":
+      return ["machine_type", "n2-standard-4"];
+    default:
+      console.log("Unknown kind: " + kind);
+      Deno.exit(1);
+  }
+}
+
+
 export {
+  getDefaultVmTypeForKind,
   checkInitialized,
   checkInstalled,
   getFileSuffixForPlatform,
