@@ -253,7 +253,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
 
   coreEnvObject.GIT_PASSWORD = {
     value: context.interactive
-      ? ((await Input.prompt({
+      ? ((await Secret.prompt({
           message: cyan("Enter your GitHub Personal Access Token:"),
           default: GIT_PASSWORD,
         })) as string)
