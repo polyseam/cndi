@@ -346,6 +346,7 @@ export default async function init(c: CNDIContext) {
   const terraformStatePassphrase = createTerraformStatePassphrase();
   const argoUIReadOnlyPassword = createArgoUIReadOnlyPassword();
 
+  // we need to keep these generated values in memory for automatically calling overwrite-with immediately after init
   const context = {
     ...c,
     sealedSecretsKeys,
