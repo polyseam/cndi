@@ -401,6 +401,7 @@ export default async function init(c: CNDIContext) {
       options: [
         { name: "basic", value: "basic" },
         { name: "airflow-tls", value: "airflow-tls" },
+        { name: "mastodon-tls", value: "mastodon-tls" },
       ],
     });
   }
