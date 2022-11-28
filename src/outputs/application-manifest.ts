@@ -1,9 +1,16 @@
+import { brightWhite } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import {
+  brightRed,
+  cyan,
+  white,
+} from "https://deno.land/std@0.161.0/fmt/colors.ts";
 import { getPrettyJSONString } from "../utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
   destinationNamespace: string;
   chart?: string;
+  path?: string;
   values: {
     [key: string]: unknown;
   };
@@ -68,6 +75,24 @@ const getApplicationManifest = (
   // This means that we need to have this very ugly string in the manifests that we generate
   const values = JSON.stringify(applicationSpec.values ?? {});
 
+  const specSourcePath = applicationSpec.path;
+  const specSourceChart = applicationSpec.chart;
+
+  if (!specSourcePath && !specSourceChart) {
+    const releaseNameForPrint = cyan(`"${releaseName}"`);
+    console.log(
+      white("application-manifest:"),
+      brightRed(
+        `either applications[${releaseNameForPrint}].${brightWhite("path")}`,
+      ),
+      brightRed(
+        `or applications[${releaseNameForPrint}].${
+          brightWhite("chart")
+        } must be defined`,
+      ),
+    );
+  }
+
   const manifest = {
     ...manifestFramework,
     metadata: {
@@ -81,6 +106,7 @@ const getApplicationManifest = (
       source: {
         ...manifestFramework.spec.source,
         repoURL: applicationSpec.repoURL,
+        path: applicationSpec.path,
         targetRevision: applicationSpec.targetRevision,
         chart: applicationSpec.chart,
         helm: {
