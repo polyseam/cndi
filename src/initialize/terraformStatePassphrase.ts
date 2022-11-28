@@ -1,3 +1,5 @@
+import { getSecretOfLength } from "../utils.ts";
+
 const loadTerraformStatePassphrase = (): string | null => {
   const terraform_state_passphrase = Deno.env
     .get("TERRAFORM_STATE_PASSPHRASE")
@@ -11,7 +13,7 @@ const loadTerraformStatePassphrase = (): string | null => {
 };
 
 const createTerraformStatePassphrase = (): string => {
-  return crypto.randomUUID().replaceAll("-", "");
+  return getSecretOfLength(32);
 };
 
 export { createTerraformStatePassphrase, loadTerraformStatePassphrase };

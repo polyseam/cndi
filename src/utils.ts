@@ -108,6 +108,22 @@ function getDefaultVmTypeForKind(kind: string): [string, string] {
   }
 }
 
+function base10intToHex(decimal: number): string {
+  // if the int8 in hex is less than 2 characters, prepend 0
+  const hex = decimal.toString(16).padStart(2, "0");
+  return hex;
+}
+
+function getSecretOfLength(len = 32): string {
+  if (len % 2) {
+    throw new Error("password length must be even");
+  }
+
+  const values = new Uint8Array(len / 2);
+  crypto.getRandomValues(values);
+  return Array.from(values, base10intToHex).join("");
+}
+
 export {
   checkInitialized,
   checkInstalled,
@@ -115,6 +131,7 @@ export {
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
   getPrettyJSONString,
+  getSecretOfLength,
   loadJSONC,
   padPrivatePem,
   padPublicPem,
