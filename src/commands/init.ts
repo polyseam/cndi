@@ -353,8 +353,15 @@ export default async function init(c: CNDIContext) {
     argoUIReadOnlyPassword,
   };
 
-  const { noGitHub, CNDI_SRC, githubDirectory, interactive, projectDirectory } =
-    context;
+  const {
+    noGitHub,
+    CNDI_SRC,
+    githubDirectory,
+    interactive,
+    projectDirectory,
+    gitignorePath,
+    dotEnvPath,
+  } = context;
 
   if (interactive && !template) {
     template = await Select.prompt({
@@ -363,7 +370,7 @@ export default async function init(c: CNDIContext) {
     });
   }
 
-  await Deno.writeTextFile(context.gitignorePath, getGitignoreContents());
+  await Deno.writeTextFile(gitignorePath, getGitignoreContents());
 
   const envObject = await getEnvObject({
     ...context,
@@ -373,7 +380,7 @@ export default async function init(c: CNDIContext) {
     argoUIReadOnlyPassword,
   });
 
-  await writeEnvObject(context.dotEnvPath, envObject);
+  await writeEnvObject(dotEnvPath, envObject);
 
   if (!noGitHub) {
     try {
@@ -392,7 +399,7 @@ export default async function init(c: CNDIContext) {
   }
 
   await Deno.writeTextFile(
-    path.join(context.projectDirectory, "README.md"),
+    path.join(projectDirectory, "README.md"),
     getREADME((template as Template) || null),
   );
 
