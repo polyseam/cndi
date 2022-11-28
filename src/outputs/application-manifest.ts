@@ -71,7 +71,7 @@ const manifestFramework = {
 
 const getApplicationManifest = (
   releaseName: string,
-  applicationSpec: CNDIApplicationSpec
+  applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
   // TODO: helm and argo require that values be passed into argocd as a string when using a helm chart repo instead of git
   // This means that we need to have this very ugly string in the manifests that we generate
@@ -85,13 +85,15 @@ const getApplicationManifest = (
     console.log(
       applicationManifestLabel,
       brightRed(
-        `either applications[${releaseNameForPrint}].${brightWhite("path")}`
+        `either applications[${releaseNameForPrint}].${brightWhite("path")}`,
       ),
       brightRed(
-        `or applications[${releaseNameForPrint}].${brightWhite(
-          "chart"
-        )} must be defined`
-      )
+        `or applications[${releaseNameForPrint}].${
+          brightWhite(
+            "chart",
+          )
+        } must be defined`,
+      ),
     );
   }
 
