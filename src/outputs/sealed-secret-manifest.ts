@@ -14,7 +14,7 @@ import { white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const sealedSecretManifestLabel = white("outputs/sealed-secret-manifest:")
+const sealedSecretManifestLabel = white("outputs/sealed-secret-manifest:");
 
 const parseCndiSecret = (
   inputSecret: KubernetesSecret,

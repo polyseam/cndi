@@ -95,7 +95,7 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
-function getDefaultVmTypeForKind(kind: string): [string, string]  {
+function getDefaultVmTypeForKind(kind: string): [string, string] {
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
     case "aws":
@@ -108,11 +108,10 @@ function getDefaultVmTypeForKind(kind: string): [string, string]  {
   }
 }
 
-
 export {
-  getDefaultVmTypeForKind,
   checkInitialized,
   checkInstalled,
+  getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
   getPrettyJSONString,

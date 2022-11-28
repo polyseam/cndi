@@ -41,7 +41,8 @@ const getTerraformRootFile = ({
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (requiredProviders.has(NodeKind.aws)) {
-    mainTerraformFileObject.locals[0].leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`;
+    mainTerraformFileObject.locals[0].leader_node_ip =
+      `\${aws_instance.${leaderName}.private_ip}`;
     // add aws provider dependency
     terraformDependencies.required_providers[0].aws =
       awsTerraformProviderDependency.aws;

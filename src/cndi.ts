@@ -22,7 +22,7 @@ import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
 
-const cndiLabel = white('cndi:');
+const cndiLabel = white("cndi:");
 
 export default async function main(args: string[]) {
   console.log(); /* blank line */

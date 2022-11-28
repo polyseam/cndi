@@ -1,7 +1,6 @@
-import { getPrettyJSONString, getDefaultVmTypeForKind } from "../utils.ts";
+import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 
-
-export default function getBasicTemplate(kind:string): string {
+export default function getBasicTemplate(kind: string): string {
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
 
   return getPrettyJSONString({
