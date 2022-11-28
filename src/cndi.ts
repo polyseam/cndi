@@ -11,6 +11,7 @@ import { Command } from "./types.ts";
 import {
   brightRed,
   cyan,
+  white,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
@@ -20,6 +21,8 @@ import overwriteWithFn from "./commands/overwrite-with.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
+
+const cndiLabel = white('cndi:');
 
 export default async function main(args: string[]) {
   console.log(); /* blank line */
@@ -54,7 +57,8 @@ export default async function main(args: string[]) {
     const fileArg = cndiArguments.file ? "--file" : "-f";
 
     console.log(
-      `\n${
+      cndiLabel,
+      `${
         brightRed(
           `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
         )
@@ -166,6 +170,7 @@ export default async function main(args: string[]) {
       // One time only setup
       if (!(await checkInstalled(context))) {
         console.error(
+          cndiLabel,
           brightRed("\ncndi is not installed!\nrun"),
           cyan("cndi install"),
           brightRed("and try again.\n"),
