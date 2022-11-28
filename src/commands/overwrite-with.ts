@@ -219,12 +219,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
           Deno.writeTextFileSync(context.dotEnvPath, newDotEnvContents);
         }
       } catch (error) {
-        console.error(error);
-        console.log(
-          owLabel,
-          brightRed(`GCP Service Account Key not found at path:`),
-          `"${GCPPathToServiceAccountKey}"`,
-        );
+        if (error instanceof Deno.errors.NotFound) {
+          console.log(
+            owLabel,
+            brightRed(`GCP Service Account Key not found at path:`),
+            `"${GCPPathToServiceAccountKey}"`,
+          );
+        } else {
+          console.log(
+            owLabel,
+            brightRed(`Unhandled error reading GCP Service Account Key:`),
+          );
+          console.log(error);
+        }
       }
     } else if (!GCPPathToServiceAccountKey && !GCPServiceAccountKey) {
       console.log(
