@@ -45,6 +45,8 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
+const applicationManifestLabel = white("outputs/application-manifest");
+
 const manifestFramework = {
   apiVersion: DEFAULT_ARGOCD_API_VERSION,
   kind: "Application",
@@ -81,13 +83,15 @@ const getApplicationManifest = (
   if (!specSourcePath && !specSourceChart) {
     const releaseNameForPrint = cyan(`"${releaseName}"`);
     console.log(
-      white("application-manifest:"),
+      applicationManifestLabel,
       brightRed(
         `either applications[${releaseNameForPrint}].${brightWhite("path")}`,
       ),
       brightRed(
         `or applications[${releaseNameForPrint}].${
-          brightWhite("chart")
+          brightWhite(
+            "chart",
+          )
         } must be defined`,
       ),
     );
