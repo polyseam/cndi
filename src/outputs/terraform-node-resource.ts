@@ -11,7 +11,9 @@ import {
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
 } from "../types.ts";
+
 import { getPrettyJSONString } from "../utils.ts";
+const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
 const getTerraformNodeResource = (
   entry: BaseNodeEntrySpec,
@@ -30,7 +32,7 @@ const getTerraformNodeResource = (
 
     default:
       console.log(
-        white("outputs/terraform-node-resource:"),
+        terraformNodeResourceLabel,
         brightRed(`node kind: ${white(`"${kind}"`)} not yet supported`),
       );
       Deno.exit(1);
@@ -121,7 +123,7 @@ const getAWSNodeResource = (
     // if the role is non-null and also not controller, warn the user and run default
     if (role?.length && role !== "controller") {
       console.log(
-        white("outputs/terraform-node-resource:"),
+        terraformNodeResourceLabel,
         yellow(`node role: ${white(`"${role}"`)} is not supported`),
       );
       console.log(yellow("defaulting node role to"), '"controller"\n');

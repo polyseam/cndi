@@ -14,6 +14,8 @@ import { white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
+const sealedSecretManifestLabel = white("outputs/sealed-secret-manifest:")
+
 const parseCndiSecret = (
   inputSecret: KubernetesSecret,
   dotEnvPath: string,
@@ -84,7 +86,7 @@ const parseCndiSecret = (
       } else {
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
         console.log(
-          white("outputs/sealed-secret-manifest:"),
+          sealedSecretManifestLabel,
           brightRed(
             `Secret string literals are not supported. Use ${
               cyan(
@@ -153,7 +155,7 @@ const parseCndiSecret = (
         }
       } else {
         console.log(
-          white("outputs/sealed-secret-manifest:"),
+          sealedSecretManifestLabel,
           brightRed(
             `Secret string literals are not supported. Use ${
               cyan(
@@ -171,7 +173,7 @@ const parseCndiSecret = (
     });
   } else {
     console.log(
-      white("outputs/sealed-secret-manifest:"),
+      sealedSecretManifestLabel,
       brightRed(
         `Secret "${inputSecret.metadata.name}" has no data or stringData`,
       ),
