@@ -1,8 +1,8 @@
 import {
-  AirflowTlsTemplateAnswers,
   CNDIContext,
   EnvObject,
   NodeKind,
+  SealedSecretsKeys,
   Template,
 } from "../types.ts";
 
@@ -29,8 +29,10 @@ import { createTerraformStatePassphrase } from "../initialize/terraformStatePass
 import { createArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
 
 import airflowTlsTemplate, {
+  getAirflowTlsTemplateAnswers,
   getAirflowTlsTemplateEnvObject,
 } from "../templates/airflow-tls.ts";
+
 import basicTemplate from "../templates/basic.ts";
 
 import { checkInitialized } from "../utils.ts";
@@ -40,59 +42,10 @@ import writeEnvObject from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
 import getREADME from "../outputs/readme.ts";
 
-
 const initLabel = white("init:");
 
-async function getAirflowTlsTemplateAnswers(
-  context: CNDIContext
-): Promise<AirflowTlsTemplateAnswers> {
-  const { interactive } = context;
-
-  let argocdDomainName = "argocd.example.com";
-  let airflowDomainName = "airflow.example.com";
-  let dagRepoUrl = "https://github.com/polyseam/demo-dag-bag";
-  let letsEncryptClusterIssuerEmailAddress = "admin@example.com";
-
-  if (interactive) {
-    dagRepoUrl = (await Input.prompt({
-      message: cyan(
-        "Please enter the url of the git repo containing your dags:"
-      ),
-      default: dagRepoUrl,
-    })) as string;
-
-    argocdDomainName = (await Input.prompt({
-      message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:"
-      ),
-      default: argocdDomainName,
-    })) as string;
-
-    airflowDomainName = (await Input.prompt({
-      message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:"
-      ),
-      default: airflowDomainName,
-    })) as string;
-
-    letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
-      message: cyan(
-        "Please enter the email address you want to use for lets encrypt:"
-      ),
-      default: letsEncryptClusterIssuerEmailAddress,
-    })) as string;
-  }
-
-  return {
-    argocdDomainName,
-    airflowDomainName,
-    dagRepoUrl,
-    letsEncryptClusterIssuerEmailAddress,
-  };
-}
-
 const getTemplateString = async (
-  context: CNDIContext
+  context: CNDIContext,
 ): Promise<string | null> => {
   const templateKind = context.template.split("/")[0] as NodeKind; // e.g. aws
   const templateBase = context.template.split("/")[1]; // e.g. airflow-tls
@@ -101,7 +54,7 @@ const getTemplateString = async (
     case "airflow-tls":
       return airflowTlsTemplate(
         templateKind,
-        await getAirflowTlsTemplateAnswers(context)
+        await getAirflowTlsTemplateAnswers(context.interactive),
       );
     case "basic":
       return basicTemplate(templateKind);
@@ -120,27 +73,27 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
     comment: "AWS",
     value: context.interactive
       ? ((await Input.prompt({
-          message: cyan("Enter your AWS region:"),
-          default: AWS_REGION,
-        })) as string)
+        message: cyan("Enter your AWS region:"),
+        default: AWS_REGION,
+      })) as string)
       : AWS_REGION,
   };
 
   awsEnvObject.AWS_ACCESS_KEY_ID = {
     value: context.interactive
       ? ((await Secret.prompt({
-          message: cyan("Enter your AWS access key ID:"),
-          default: AWS_ACCESS_KEY_ID,
-        })) as string)
+        message: cyan("Enter your AWS access key ID:"),
+        default: AWS_ACCESS_KEY_ID,
+      })) as string)
       : AWS_ACCESS_KEY_ID,
   };
 
   awsEnvObject.AWS_SECRET_ACCESS_KEY = {
     value: context.interactive
       ? ((await Secret.prompt({
-          message: cyan("Enter your AWS secret access key:"),
-          default: AWS_SECRET_ACCESS_KEY,
-        })) as string)
+        message: cyan("Enter your AWS secret access key:"),
+        default: AWS_SECRET_ACCESS_KEY,
+      })) as string)
       : AWS_SECRET_ACCESS_KEY,
   };
   return awsEnvObject;
@@ -156,25 +109,33 @@ const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
     comment: "GCP",
     value: context.interactive
       ? ((await Input.prompt({
-          message: cyan("Enter your GCP project ID:"),
-          default: GCP_PROJECT_ID,
-        })) as string)
+        message: cyan("Enter your GCP project ID:"),
+        default: GCP_PROJECT_ID,
+      })) as string)
       : GCP_PROJECT_ID,
   };
 
   gcpEnvObject.GCP_PATH_TO_SERVICE_ACCOUNT_KEY = {
     value: context.interactive
       ? ((await Input.prompt({
-          message: cyan("Enter your GCP service account key json:"),
-          default: GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
-        })) as string)
+        message: cyan("Enter your GCP service account key json:"),
+        default: GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
+      })) as string)
       : GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
   };
 
   return gcpEnvObject;
 };
 
-const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
+interface GetEnvObjectArgs extends CNDIContext {
+  sealedSecretsKeys: SealedSecretsKeys;
+  terraformStatePassphrase: string;
+  argoUIReadOnlyPassword: string;
+}
+
+const getCoreEnvObject = async (
+  context: GetEnvObjectArgs,
+): Promise<EnvObject> => {
   const {
     sealedSecretsKeys,
     terraformStatePassphrase,
@@ -192,7 +153,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!sealedSecretsKeys) {
     console.log(
       initLabel,
-      brightRed(`"sealedSecretsKeys" is not defined in context`)
+      brightRed(`"sealedSecretsKeys" is not defined in context`),
     );
     Deno.exit(1);
   }
@@ -200,7 +161,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!TERRAFORM_STATE_PASSPHRASE) {
     console.log(
       initLabel,
-      brightRed(`"terraformStatePassphrase" is not defined in context`)
+      brightRed(`"terraformStatePassphrase" is not defined in context`),
     );
     Deno.exit(1);
   }
@@ -208,17 +169,17 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!ARGO_UI_READONLY_PASSWORD) {
     console.log(
       initLabel,
-      brightRed(`"argoUIReadOnlyPassword" is not defined in context`)
+      brightRed(`"argoUIReadOnlyPassword" is not defined in context`),
     );
     Deno.exit(1);
   }
 
   const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_public_key
+    sealedSecretsKeys.sealed_secrets_public_key,
   ).replaceAll("\n", "_");
 
   const SEALED_SECRETS_PRIVATE_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_private_key
+    sealedSecretsKeys.sealed_secrets_private_key,
   ).replaceAll("\n", "_");
 
   const coreEnvObject: EnvObject = {
@@ -245,27 +206,27 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
     comment: "git credentials",
     value: context.interactive
       ? ((await Input.prompt({
-          message: cyan("Enter your GitHub username:"),
-          default: GIT_USERNAME,
-        })) as string)
+        message: cyan("Enter your GitHub username:"),
+        default: GIT_USERNAME,
+      })) as string)
       : GIT_USERNAME,
   };
 
   coreEnvObject.GIT_PASSWORD = {
     value: context.interactive
       ? ((await Secret.prompt({
-          message: cyan("Enter your GitHub Personal Access Token:"),
-          default: GIT_PASSWORD,
-        })) as string)
+        message: cyan("Enter your GitHub Personal Access Token:"),
+        default: GIT_PASSWORD,
+      })) as string)
       : GIT_PASSWORD,
   };
 
   coreEnvObject.GIT_REPO = {
     value: context.interactive
       ? await Input.prompt({
-          message: cyan("Enter your GitHub repository URL:"),
-          default: GIT_REPO,
-        })
+        message: cyan("Enter your GitHub repository URL:"),
+        default: GIT_REPO,
+      })
       : GIT_REPO,
   };
 
@@ -280,7 +241,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   }
 };
 
-const getEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
+const getEnvObject = async (context: GetEnvObjectArgs): Promise<EnvObject> => {
   const coreEnvObject = await getCoreEnvObject(context);
 
   if (!context?.template) {
@@ -323,13 +284,15 @@ export default async function init(c: CNDIContext) {
       console.log(
         initLabel,
         brightRed(
-          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`
-        )
+          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`,
+        ),
       );
       console.log(
-        `if you don't have a cndi-config file try ${cyan(
-          "cndi init --interactive"
-        )}\n`
+        `if you don't have a cndi-config file try ${
+          cyan(
+            "cndi init --interactive",
+          )
+        }\n`,
       );
       Deno.exit(1);
     }
@@ -345,7 +308,7 @@ export default async function init(c: CNDIContext) {
       console.log(`cndi init --template\n`);
       console.error(
         initLabel,
-        brightRed(`--template (-t) flag requires a value`)
+        brightRed(`--template (-t) flag requires a value`),
       );
       Deno.exit(1);
     }
@@ -356,21 +319,21 @@ export default async function init(c: CNDIContext) {
 
   const shouldContinue = directoryContainsCNDIFiles
     ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
-      )
+      "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+    )
     : true;
 
   if (!shouldContinue) {
     Deno.exit(0);
   }
 
-  const templateUnavailable =
-    template && !availableTemplates.includes(template);
+  const templateUnavailable = template &&
+    !availableTemplates.includes(template);
 
   if (templateUnavailable) {
     console.log(
       initLabel,
-      brightRed(`The template you selected "${template}" is not available.\n`)
+      brightRed(`The template you selected "${template}" is not available.\n`),
     );
 
     console.log("Available templates are:\n");
@@ -402,7 +365,13 @@ export default async function init(c: CNDIContext) {
 
   await Deno.writeTextFile(context.gitignorePath, getGitignoreContents());
 
-  const envObject = await getEnvObject({ ...context, template });
+  const envObject = await getEnvObject({
+    ...context,
+    template,
+    sealedSecretsKeys,
+    terraformStatePassphrase,
+    argoUIReadOnlyPassword,
+  });
 
   await writeEnvObject(context.dotEnvPath, envObject);
 
@@ -415,7 +384,7 @@ export default async function init(c: CNDIContext) {
     } catch (githubCopyError) {
       console.log(
         initLabel,
-        brightRed("failed to copy github integration files")
+        brightRed("failed to copy github integration files"),
       );
       console.error(githubCopyError);
       Deno.exit(1);
@@ -424,7 +393,7 @@ export default async function init(c: CNDIContext) {
 
   await Deno.writeTextFile(
     path.join(context.projectDirectory, "README.md"),
-    getREADME((template as Template) || null)
+    getREADME((template as Template) || null),
   );
 
   // if the user has specified a template, use that
@@ -436,7 +405,7 @@ export default async function init(c: CNDIContext) {
     if (!templateString) {
       console.error(
         initLabel,
-        brightRed(`Template "${white(template)}" not yet implemented.`)
+        brightRed(`Template "${white(template)}" not yet implemented.`),
       );
       Deno.exit(1);
     }
@@ -446,7 +415,7 @@ export default async function init(c: CNDIContext) {
     // because there is no "pathToConfig" when using a template, we need to set it here
     overwriteWithFn(
       { ...context, pathToConfig: configOutputPath },
-      initializing
+      initializing,
     );
     return;
   }
