@@ -1,80 +1,142 @@
-import { AirflowTlsTemplateAnswers, CNDIContext, EnvObject } from "../types.ts";
+import {
+  MastodonTlsTemplateAnswers,
+  CNDIContext,
+  EnvObject,
+} from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getPrettyJSONString } from "../utils.ts";
 
-const getAirflowTlsTemplateEnvObject = async (
-  context: CNDIContext,
+const getMastodonTlsTemplateEnvObject = async (
+  context: CNDIContext
 ): Promise<EnvObject> => {
-  let GIT_SYNC_USERNAME = "";
-  let GIT_SYNC_PASSWORD = "";
+  let POSTGRESQL_PASSWORD = "";
+  let REDIS_PASSWORD = "";
 
   if (context.interactive) {
-    GIT_SYNC_USERNAME = (await Input.prompt({
-      message: cyan("Please enter your git username for Airflow DAG Storage:"),
-      default: GIT_SYNC_USERNAME,
+    POSTGRESQL_PASSWORD = (await Input.prompt({
+      message: cyan(
+        "Please enter a new password for mastadon's postgres instance:"
+      ),
+      default: POSTGRESQL_PASSWORD,
     })) as string;
 
-    GIT_SYNC_PASSWORD = (await Secret.prompt({
-      message: cyan("Please enter your git password for Airflow DAG Storage:"),
-      default: GIT_SYNC_PASSWORD,
+    REDIS_PASSWORD = (await Secret.prompt({
+      message: cyan(
+        "Please enter a new password for mastadon's redis instance:"
+      ),
+      default: REDIS_PASSWORD,
     })) as string;
   }
-  
-  const airflowTlsTemplateEnvObject = {
-    GIT_SYNC_USERNAME: {
-      comment: "airflow-git-credentials secret values for DAG Storage",
-      value: GIT_SYNC_USERNAME,
+
+  const mastodonTlsTemplateEnvObject = {
+    POSTGRESQL_PASSWORD: {
+      comment: "postgres password, username is 'mastodon'",
+      value: POSTGRESQL_PASSWORD,
     },
-    GIT_SYNC_PASSWORD: {
-      value: GIT_SYNC_PASSWORD,
+    REDIS_PASSWORD: {
+      comment: "redis",
+      value: REDIS_PASSWORD,
     },
   };
-  return airflowTlsTemplateEnvObject;
+
+  return mastodonTlsTemplateEnvObject;
 };
 
-export default function getAirflowTlsTemplate({
+export default function getMastodonTlsTemplate({
+  adminUsername,
+  adminEmail,
   argocdDomainName,
-  airflowDomainName,
-  dagRepoUrl,
+  mastodonDomainName,
   letsEncryptClusterIssuerEmailAddress,
-}: AirflowTlsTemplateAnswers): string {
+}: MastodonTlsTemplateAnswers): string {
   return getPrettyJSONString({
     nodes: {
       entries: [
         {
-          name: "x-airflow-node",
+          name: "x-mastodon-node",
           kind: "aws",
           role: "leader",
           instance_type: "m5a.xlarge",
           volume_size: 128,
         },
         {
-          name: "y-airflow-node",
+          name: "y-mastodon-node",
           kind: "aws",
           instance_type: "m5a.large",
           volume_size: 128,
         },
         {
-          name: "z-airflow-node",
+          name: "z-mastodon-node",
           kind: "aws",
           instance_type: "m5a.large",
           volume_size: 128,
         },
       ],
     },
+    applications: {
+      mastodon: {
+        targetRevision: "3.0.0",
+        destinationNamespace: "mastodon",
+        repoURL: "https://github.com/mastodon/mastodon",
+        chart: "mastodon",
+        values: {
+          mastodon: {
+            createAdmin: {
+              enabled: true,
+              email: adminEmail,
+              username: adminUsername,
+            },
+            web_domain: mastodonDomainName,
+          },
+        },
+        ingress: {
+          enabled: true,
+          annotations: {
+            "cert-manager.io/cluster-issuer": "lets-encrypt",
+            "kubernetes.io/tls-acme": "true",
+            "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+          },
+          tls: [
+            {
+              hosts: [mastodonDomainName],
+              secretName: "lets-encrypt-private-key",
+            },
+          ],
+        },
+        postgresql: {
+          auth: {
+            existingSecret: "postgresql-password",
+          },
+        },
+        redis: {
+          existingSecret: "redis-password",
+        },
+      },
+    },
     cluster: {
-      "git-credentials-secret": {
+      "postgresql-password": {
         apiVersion: "v1",
         kind: "Secret",
         metadata: {
-          name: "airflow-git-credentials",
-          namespace: "airflow",
+          name: "postgresql-password",
+          namespace: "mastodon",
         },
         stringData: {
-          GIT_SYNC_USERNAME: "$.cndi.secrets.GIT_SYNC_USERNAME",
-          GIT_SYNC_PASSWORD: "$.cndi.secrets.GIT_SYNC_PASSWORD",
+          password: "$.cndi.secrets.POSTGRESQL_PASSWORD",
+        },
+      },
+      "redis-password": {
+        apiVersion: "v1",
+        kind: "Secret",
+        metadata: {
+          name: "redis-password",
+          namespace: "mastodon",
+        },
+        stringData: {
+          password: "$.cndi.secrets.REDIS_PASSWORD",
         },
       },
       "cert-manager-cluster-issuer": {
@@ -146,67 +208,7 @@ export default function getAirflowTlsTemplate({
         },
       },
     },
-    applications: {
-      airflow: {
-        targetRevision: "1.7.0",
-        destinationNamespace: "airflow",
-        repoURL: "https://airflow.apache.org",
-        chart: "airflow",
-        values: {
-          dags: {
-            gitSync: {
-              enabled: true,
-              repo: dagRepoUrl, // private repo that requires credentials
-              credentialsSecret: "airflow-git-credentials",
-              branch: "main",
-              wait: 40,
-              subPath: "dags",
-            },
-          },
-          config: {
-            webserver: {
-              expose_config: "True",
-              instance_name: "Polyseam",
-              enable_proxy_fix: "True",
-              base_url: `https://${airflowDomainName}`,
-            },
-            operators: {
-              default_owner: "Polyseam",
-            },
-          },
-          ingress: {
-            web: {
-              enabled: true,
-              annotations: {
-                "cert-manager.io/cluster-issuer": "lets-encrypt",
-              },
-              hosts: [
-                {
-                  name: airflowDomainName,
-                  tls: {
-                    secretName: "lets-encrypt-private-key",
-                    enabled: true,
-                  },
-                },
-              ],
-            },
-          },
-          logs: {
-            persistence: {
-              enabled: true,
-              size: "15Gi",
-            },
-          },
-          createUserJob: {
-            useHelmHooks: false,
-          },
-          migrateDatabaseJob: {
-            useHelmHooks: false,
-          },
-        },
-      },
-    },
   });
 }
 
-export { getAirflowTlsTemplateEnvObject };
+export { getMastodonTlsTemplateEnvObject };

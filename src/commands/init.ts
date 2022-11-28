@@ -1,5 +1,6 @@
 import {
   AirflowTlsTemplateAnswers,
+  MastodonTlsTemplateAnswers,
   CNDIContext,
   EnvObject,
   Template,
@@ -30,6 +31,9 @@ import { createArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPasswo
 import airflowTlsTemplate, {
   getAirflowTlsTemplateEnvObject,
 } from "../templates/airflow-tls.ts";
+import mastodonTlsTemplate, {
+  getMastodonTlsTemplateEnvObject,
+} from "../templates/mastodon-tls.ts";
 import basicTemplate from "../templates/basic.ts";
 
 import { checkInitialized } from "../utils.ts";
@@ -41,7 +45,7 @@ import getREADME from "../outputs/readme.ts";
 const initLabel = white("init:");
 
 async function getAirflowTlsTemplateAnswers(
-  context: CNDIContext,
+  context: CNDIContext
 ): Promise<AirflowTlsTemplateAnswers> {
   const { interactive } = context;
 
@@ -53,28 +57,28 @@ async function getAirflowTlsTemplateAnswers(
   if (interactive) {
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:",
+        "Please enter the domain name you want argocd to be accessible on:"
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:",
+        "Please enter the domain name you want airflow to be accessible on:"
       ),
       default: airflowDomainName,
     })) as string;
 
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:",
+        "Please enter the url of the git repo containing your dags:"
       ),
       default: dagRepoUrl,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:",
+        "Please enter the email address you want to use for lets encrypt:"
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -88,12 +92,69 @@ async function getAirflowTlsTemplateAnswers(
   };
 }
 
+async function getMastodonTlsTemplateAnswers(
+  context: CNDIContext
+): Promise<MastodonTlsTemplateAnswers> {
+  let argocdDomainName = "argocd.example.com";
+  let mastodonDomainName = "mastodon.example.com";
+  let adminUsername = 'owner';
+  let adminEmail = 'owner@example.com'
+  let letsEncryptClusterIssuerEmailAddress = "owner@example.com";
+
+  if (context.interactive) {
+    argocdDomainName = (await Input.prompt({
+      message: cyan(
+        "Please enter the domain name you want argocd to be accessible on:"
+      ),
+      default: argocdDomainName,
+    })) as string;
+
+    mastodonDomainName = (await Input.prompt({
+      message: cyan(
+        "Please enter the domain name you want mastodon to be accessible on:"
+      ),
+      default: mastodonDomainName,
+    })) as string;
+
+    adminUsername = (await Input.prompt({
+      message: cyan(
+        "Please enter the username for your new mastodon cluster admin:"
+      ),
+      default: adminUsername,
+    })) as string;
+
+    adminEmail = (await Input.prompt({
+      message: cyan(
+        "Please enter the email for your new mastodon cluster admin:"
+      ),
+      default: adminEmail,
+    })) as string;
+
+    letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
+      message: cyan(
+        "Please enter the email address you want to use for lets encrypt:"
+      ),
+      default: letsEncryptClusterIssuerEmailAddress,
+    })) as string;
+  }
+
+  return {
+    argocdDomainName,
+    mastodonDomainName,
+    adminUsername,
+    adminEmail,
+    letsEncryptClusterIssuerEmailAddress,
+  };
+}
+
 const getTemplateString = async (
-  context: CNDIContext,
+  context: CNDIContext
 ): Promise<string | null> => {
   switch (context.template) {
     case "airflow-tls":
       return airflowTlsTemplate(await getAirflowTlsTemplateAnswers(context));
+    case "mastodon-tls":
+      return mastodonTlsTemplate(await getMastodonTlsTemplateAnswers(context));
     case "basic":
       return basicTemplate();
     default:
@@ -121,7 +182,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!sealedSecretsKeys) {
     console.log(
       initLabel,
-      brightRed(`"sealedSecretsKeys" is not defined in context`),
+      brightRed(`"sealedSecretsKeys" is not defined in context`)
     );
     Deno.exit(1);
   }
@@ -129,7 +190,7 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!TERRAFORM_STATE_PASSPHRASE) {
     console.log(
       initLabel,
-      brightRed(`"terraformStatePassphrase" is not defined in context`),
+      brightRed(`"terraformStatePassphrase" is not defined in context`)
     );
     Deno.exit(1);
   }
@@ -137,17 +198,17 @@ const getCoreEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
   if (!ARGO_UI_READONLY_PASSWORD) {
     console.log(
       initLabel,
-      brightRed(`"argoUIReadOnlyPassword" is not defined in context`),
+      brightRed(`"argoUIReadOnlyPassword" is not defined in context`)
     );
     Deno.exit(1);
   }
 
   const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_public_key,
+    sealedSecretsKeys.sealed_secrets_public_key
   ).replaceAll("\n", "_");
 
   const SEALED_SECRETS_PRIVATE_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_private_key,
+    sealedSecretsKeys.sealed_secrets_private_key
   ).replaceAll("\n", "_");
 
   if (context.interactive) {
@@ -235,6 +296,11 @@ const getEnvObject = async (context: CNDIContext): Promise<EnvObject> => {
         ...coreEnvObject,
         ...(await getAirflowTlsTemplateEnvObject(context)),
       };
+    case "mastodon-tls":
+      return {
+        ...coreEnvObject,
+        ...(await getMastodonTlsTemplateEnvObject(context)),
+      };
     case "basic":
       return coreEnvObject;
     default:
@@ -263,15 +329,13 @@ export default async function init(c: CNDIContext) {
       console.log(
         initLabel,
         brightRed(
-          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`,
-        ),
+          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`
+        )
       );
       console.log(
-        `if you don't have a cndi-config file try ${
-          cyan(
-            "cndi init --interactive",
-          )
-        }\n`,
+        `if you don't have a cndi-config file try ${cyan(
+          "cndi init --interactive"
+        )}\n`
       );
       Deno.exit(1);
     }
@@ -282,11 +346,12 @@ export default async function init(c: CNDIContext) {
       console.log(`cndi init --interactive --template ${template}\n`);
     }
   } else {
-    if (`${template}` === "true") { // if template flag is truthy but empty, throw error
+    if (`${template}` === "true") {
+      // if template flag is truthy but empty, throw error
       console.log(`cndi init --template\n`);
       console.error(
         initLabel,
-        brightRed(`--template (-t) flag requires a value`),
+        brightRed(`--template (-t) flag requires a value`)
       );
       Deno.exit(1);
     }
@@ -297,8 +362,8 @@ export default async function init(c: CNDIContext) {
 
   const shouldContinue = directoryContainsCNDIFiles
     ? confirm(
-      "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
-    )
+        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
+      )
     : true;
 
   if (!shouldContinue) {
@@ -308,7 +373,7 @@ export default async function init(c: CNDIContext) {
   if (template && !availableTemplates.includes(template)) {
     console.log(
       initLabel,
-      brightRed(`The template you selected "${template}" is not available.\n`),
+      brightRed(`The template you selected "${template}" is not available.\n`)
     );
 
     console.log("Available templates are:\n");
@@ -354,7 +419,7 @@ export default async function init(c: CNDIContext) {
     } catch (githubCopyError) {
       console.log(
         initLabel,
-        brightRed("failed to copy github integration files"),
+        brightRed("failed to copy github integration files")
       );
       console.error(githubCopyError);
       Deno.exit(1);
@@ -363,7 +428,7 @@ export default async function init(c: CNDIContext) {
 
   await Deno.writeTextFile(
     path.join(context.projectDirectory, "README.md"),
-    getREADME((template as Template) || null),
+    getREADME((template as Template) || null)
   );
 
   // if the user has specified a template, use that
@@ -375,7 +440,7 @@ export default async function init(c: CNDIContext) {
     if (!templateString) {
       console.error(
         initLabel,
-        brightRed(`Template "${white(template)}" not yet implemented.`),
+        brightRed(`Template "${white(template)}" not yet implemented.`)
       );
       Deno.exit(1);
     }
@@ -385,7 +450,7 @@ export default async function init(c: CNDIContext) {
     // because there is no "pathToConfig" when using a template, we need to set it here
     overwriteWithFn(
       { ...context, pathToConfig: configOutputPath },
-      initializing,
+      initializing
     );
     return;
   }

@@ -11,6 +11,14 @@ interface AirflowTlsTemplateAnswers {
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
+interface MastodonTlsTemplateAnswers {
+  adminUsername: string;
+  adminEmail: string;
+  argocdDomainName: string;
+  mastodonDomainName: string;
+  letsEncryptClusterIssuerEmailAddress: string;
+}
+
 export const enum Command {
   init = "init",
   "overwrite-with" = "overwrite-with",
@@ -584,11 +592,13 @@ interface SealedSecretsKeys {
 }
 const enum Template {
   "airflow-tls" = "airflow-tls",
+  "mastadon-tls"="mastadon-tls",
   "basic" = "basic",
 }
 
 export type {
   AirflowTlsTemplateAnswers,
+  MastodonTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
   AWSNodeEntrySpec,
   AWSTerraformNodeResource,
