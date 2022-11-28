@@ -1,3 +1,3 @@
-const availableTemplates = ["airflow-tls", "basic"];
+const availableTemplates = ["basic", "airflow-tls", "mastodon-tls"];
 
 export default availableTemplates;
