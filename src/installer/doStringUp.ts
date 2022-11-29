@@ -1,5 +1,9 @@
 import stringUp from "./stringUp.ts";
 
-stringUp([
-  "./src/github",
-], `${Deno.cwd()}/src/installer/embedded/all.ts`);
+stringUp(
+  {
+    directoryPaths: ["./src/github"],
+    filePaths: ["./deno.jsonc"],
+  },
+  `${Deno.cwd()}/src/installer/embedded/all.ts`,
+);
