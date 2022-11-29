@@ -158,7 +158,6 @@ export default async function main(args: string[]) {
 
   // if the user uses --help we will show help text
   if (cndiArguments.help) {
-    console.log(cndiArguments);
     const key = typeof cndiArguments.help === "boolean"
       ? "default"
       : cndiArguments.help;
