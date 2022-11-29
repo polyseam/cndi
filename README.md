@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh 
 
 ## configuration
 
-Let's run through the 4 parts of a `cndi-config.json` file.
+Let's run through the 3 parts of a `cndi-config.json` file.
 
 ### nodes
 
@@ -65,7 +65,7 @@ These nodes must each be one of the following `kinds`:
 - [ ] vmware
 
 We also specify the node `role`, this is `"controller"` by default, and exactly
-one node must be a `leader"`.
+one node must be a `"leader"`.
 
 Here is an example `cndi-config.jsonc` object that contains a set of node
 entries to deploy:
@@ -168,10 +168,16 @@ going to be deploying, but don't worry, we'll make it easy!
 }
 ```
 
-Pro tip! If you want to add a new secret to use inside of your Kubernetes
-cluster, we make this possible by encrypting your secrets with
+Pro tip!
+
+If you want to add a new secret to use inside of your Kubernetes cluster, we
+make this possible by encrypting your secrets with
 [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) so they can
-live in your repo securely and be picked up by ArgoCD automatically.
+live in your repo securely and be picked up by ArgoCD automatically. To add a
+secret to your cluster add the value to your `.env` file, and CNDI will seal it.
+The example below results in sealing the environment variables `"GIT_USERNAME"`
+and `"GIT_PASSWORD"`, into the destination secret key names
+`"GIT_SYNC_USERNAME"` and `"GIT_SYNC_PASSWORD"` respectively.
 
 ```jsonc
 {
@@ -191,27 +197,6 @@ live in your repo securely and be picked up by ArgoCD automatically.
       }
     }
   }
-}
-```
-
-### dpr (not yet!)
-
-If you are using CNDI to deploy a Data Product, and want to persist information
-about your Data Product to the
-[Polyseam Data Product Registry](https://polyseam.io/registry), just add one
-more block to the config:
-
-```jsonc
-{
-    "nodes": {...},
-    "applications": {...},
-    "cluster": {...},
-    // This feature isn't ready yet, but if you are interested please sign up at polyseam.io/registry !
-    "dpr": {
-        "organization": "daff",
-        "domain": "playlists",
-        "data-product": "top-running-songs"
-    }
 }
 ```
 
@@ -248,13 +233,28 @@ what `cndi init` produced for us:
    expertly chosen defaults, and the spefic parameters you've specified yourself
    in the `"applications"` section of your `cndi-config.json`.
 
-5. a `./README.md` file that explains how you can use and modify these files
+5. a `.env` file which contains all of your environment variables that CNDI
+   relies on, these values must be environment variables that are defined and
+   valid when `cndi run` is executed.
+
+6. a `.gitginore` file to ensure secret values never get published as source
+   files to your repo
+
+7. a `./README.md` file that explains how you can use and modify these files
    yourself for the lifetime of the cluster
 
 ## first time setup
 
-Our next task is to bring this cluster to life. The first step is to push all of
-the files `cndi` created for us up to GitHub.
+Our next task is to bring this cluster to life. The first step is to set the
+environment variables from your `.env` file as GitHub Actions Secrets. This is
+made very easy with the [GitHub CLI](https://github.com/cli/cli).
+
+```bash
+gh secret set -f .env
+```
+
+Now all we need to do is push up all of our source files that CNDI generated to
+GitHub.
 
 Once we've done this, the GitHub Actions contained in the repo will begin
 execution, because they are triggered by changes being pushed to the `main`
@@ -302,14 +302,6 @@ You are also able to modify the manifests in `cndi/cluster` and make changes to
 `cndi/terraform` resources yourself, but be careful: if you then run
 `cndi overwrite-with -f my-new-config.json` after manual changes, you will blast
 those changes away unless they are also present in `my-new-config.json` .
-
-## updating data product registry (not yet!)
-
-If you want to opt-in to having the polyseam data product registry track this
-repo as a data product, CNDI can handle this for you too! Whenever you make
-changes to your `main` branch CNDI will persist information about your data
-product to the registry including releases, documentation, infrastructure,
-source code, output ports and more!
 
 ## building cndi-next (Contributor Guide)
 
