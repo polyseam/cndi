@@ -118,7 +118,7 @@ const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
   gcpEnvObject.GCP_PATH_TO_SERVICE_ACCOUNT_KEY = {
     value: context.interactive
       ? ((await Input.prompt({
-        message: cyan("Enter your GCP service account key json:"),
+        message: cyan("Enter the path to your GCP service account key json:"),
         default: GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
       })) as string)
       : GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
