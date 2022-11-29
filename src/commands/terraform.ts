@@ -10,7 +10,7 @@ export default async function terraform(
   { pathToTerraformBinary, pathToTerraformResources }: CNDIContext,
   args: string[],
 ) {
-  console.log("cndi terraform", args.join(" "), '\n');
+  console.log("cndi terraform", args.join(" "), "\n");
 
   setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
