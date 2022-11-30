@@ -27,12 +27,25 @@ interface GetTerraformRootFileArgs {
   requiredProviders: Set<string>;
 }
 
-const getTerraformRootFile = ({
+const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
-}: GetTerraformRootFileArgs): string => {
-
+}: GetTerraformRootFileArgs): Promise<string> => {
   const mainTerraformFileObject = { ...terraformRootFileData };
+
+  if (requiredProviders.has("gcp")) {
+    // if terraform can't find credentials automatically
+    // we probably need this:
+
+    const tempFilePath = await Deno.makeTempFile();
+    Deno.writeTextFileSync(
+      tempFilePath,
+      Deno.env.get("GOOGLE_CREDENTIALS") as string,
+    ); // contents of service account JSON written to temp file
+    Deno.env.set("GOOGLE_APPLICATION_CREDENTIALS", tempFilePath); // set env var to give terraform path to temp file
+
+    return getPrettyJSONString(mainTerraformFileObject);
+  }
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (requiredProviders.has(NodeKind.aws)) {
