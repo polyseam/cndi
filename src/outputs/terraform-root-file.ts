@@ -31,11 +31,6 @@ const getTerraformRootFile = ({
   leaderName,
   requiredProviders,
 }: GetTerraformRootFileArgs): string => {
-  // TODO: create compute engine instance
-  // TODO: create compute engine instance group
-  // TODO: create compute engine tcp load balancer
-  // TODO: create vpc
-  // TODO: link with _existing_ gcp project OR create new gcp project
 
   const mainTerraformFileObject = { ...terraformRootFileData };
 
