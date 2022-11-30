@@ -254,7 +254,7 @@ const getEnvObject = async (context: GetEnvObjectArgs): Promise<EnvObject> => {
     case "airflow-tls":
       return {
         ...coreEnvObject,
-        ...(await getAirflowTlsTemplateEnvObject(context)),
+        ...(await getAirflowTlsTemplateEnvObject(context.interactive)),
       };
     case "basic":
       return coreEnvObject;

@@ -9,13 +9,41 @@ import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 
+interface CustomizedConfig {
+  [key: string]: unknown;
+}
+
+type Customizer = (interactive: boolean) => Promise<CustomizedConfig>;
+
+interface CNDITemplateOptions {
+  getEnvObject: (interactive: boolean) => Promise<EnvObject>;
+  getTemplate: (kind: NodeKind, interactive: boolean) => Promise<string>;
+  customizer: Customizer;
+}
+
+interface AirflowTlsCustomizedConfig extends CustomizedConfig {
+  argocdDomainName: string;
+  airflowDomainName: string;
+  dagRepoUrl: string;
+  letsEncryptClusterIssuerEmailAddress: string;
+}
+
+class CNDITemplate {
+  options: CNDITemplateOptions;
+  name: string;
+  constructor(name: string, options: CNDITemplateOptions) {
+    this.name = name;
+    this.options = options;
+  }
+}
+
 const getAirflowTlsTemplateEnvObject = async (
-  context: CNDIContext,
+  interactive: boolean
 ): Promise<EnvObject> => {
   let GIT_SYNC_USERNAME = "";
   let GIT_SYNC_PASSWORD = "";
 
-  if (context.interactive) {
+  if (interactive) {
     GIT_SYNC_USERNAME = (await Input.prompt({
       message: cyan("Please enter your git username for Airflow DAG Storage:"),
       default: GIT_SYNC_USERNAME,
@@ -39,9 +67,9 @@ const getAirflowTlsTemplateEnvObject = async (
   return airflowTlsTemplateEnvObject;
 };
 
-async function getAirflowTlsTemplateAnswers(
-  interactive: boolean,
-): Promise<AirflowTlsTemplateAnswers> {
+async function customizeAirflowTlsTemplate(
+  interactive: boolean
+): Promise<AirflowTlsCustomizedConfig> {
   let argocdDomainName = "argocd.example.com";
   let airflowDomainName = "airflow.example.com";
   let dagRepoUrl = "https://github.com/polyseam/demo-dag-bag";
@@ -50,28 +78,28 @@ async function getAirflowTlsTemplateAnswers(
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:",
+        "Please enter the url of the git repo containing your dags:"
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:",
+        "Please enter the domain name you want argocd to be accessible on:"
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:",
+        "Please enter the domain name you want airflow to be accessible on:"
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:",
+        "Please enter the email address you want to use for lets encrypt:"
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -85,12 +113,20 @@ async function getAirflowTlsTemplateAnswers(
   };
 }
 
-export default function getAirflowTlsTemplate(kind: NodeKind, {
-  argocdDomainName,
-  airflowDomainName,
-  dagRepoUrl,
-  letsEncryptClusterIssuerEmailAddress,
-}: AirflowTlsTemplateAnswers): string {
+export default async function getAirflowTlsTemplate(
+  { interactive, template }: CNDIContext,
+  customizer: Customizer
+): Promise<string> {
+
+  const kind = template.split("/")[0];
+
+  const {
+    letsEncryptClusterIssuerEmailAddress,
+    airflowDomainName,
+    argocdDomainName,
+    dagRepoUrl,
+  } = await await customizer(interactive);
+
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
   return getPrettyJSONString({
     nodes: {
@@ -261,4 +297,14 @@ export default function getAirflowTlsTemplate(kind: NodeKind, {
   });
 }
 
-export { getAirflowTlsTemplateAnswers, getAirflowTlsTemplateEnvObject };
+const ctx = { interactive: true };
+
+const t = new CNDITemplate("airflow-tls", {
+  getEnvObject: getAirflowTlsTemplateEnvObject,
+  getTemplate: getAirflowTlsTemplate(
+    ctx.interactive,
+    customizeAirflowTlsTemplate
+  ),
+});
+
+export { getAirflowTlsTemplateEnvObject };
