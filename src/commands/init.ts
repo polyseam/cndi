@@ -100,19 +100,19 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
 };
 
 const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
-  const GCP_PROJECT_ID = "";
+  const GCP_REGION = "us-central1";
   const GCP_PATH_TO_SERVICE_ACCOUNT_KEY = "";
 
   const gcpEnvObject: EnvObject = {};
 
-  gcpEnvObject.GCP_PROJECT_ID = {
+  gcpEnvObject.GCP_REGION = {
     comment: "GCP",
     value: context.interactive
       ? ((await Input.prompt({
-        message: cyan("Enter your GCP project ID:"),
-        default: GCP_PROJECT_ID,
+        message: cyan("Enter your GCP Region:"),
+        default: GCP_REGION,
       })) as string)
-      : GCP_PROJECT_ID,
+      : GCP_REGION,
   };
 
   gcpEnvObject.GCP_PATH_TO_SERVICE_ACCOUNT_KEY = {

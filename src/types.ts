@@ -346,8 +346,9 @@ interface TerraformDependencies {
 interface TerraformRootFileData {
   locals: [
     {
-      bootstrap_token: "${random_password.generated_token.result}";
       leader_node_ip: string;
+      region: string;
+      bootstrap_token: "${random_password.generated_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
@@ -358,187 +359,246 @@ interface TerraformRootFileData {
   ];
   provider: {
     random: [Record<never, never>]; // equal to [{}]
-    aws: [Record<never, never>]; // equal to [{}]
+    aws?: Array<{ region: string }>;
+    gcp?: Array<{ region: string; project: string }>;
   };
 
-  resource: [{
-    random_password: RandomTerraformRandomPasswordResource;
-    aws_internet_gateway: AWSTerraformInternetGatewayResource;
-    aws_lb: AWSTerraformLoadBalancerResource;
-    aws_route: AWSTerraformRouteResource;
-    aws_route_table: AWSTerraformRouteTableResource;
-    aws_route_table_association: AWSTerraformRouteTableAssociationResource;
-    aws_subnet: AWSTerraformSubnetResource;
-    aws_security_group: AWSTerraformSecurityGroupResource;
-    aws_lb_target_group: AWSTerraformTargetGroupResource;
-    aws_lb_listener: AWSTerraformTargetGroupListenerResource;
-    aws_vpc: AWSTerraformVPCResource;
-  }];
+  resource: [
+    {
+      random_password: RandomTerraformRandomPasswordResource;
+      aws_internet_gateway: AWSTerraformInternetGatewayResource;
+      aws_lb: AWSTerraformLoadBalancerResource;
+      aws_route: AWSTerraformRouteResource;
+      aws_route_table: AWSTerraformRouteTableResource;
+      aws_route_table_association: AWSTerraformRouteTableAssociationResource;
+      aws_subnet: AWSTerraformSubnetResource;
+      aws_security_group: AWSTerraformSecurityGroupResource;
+      aws_lb_target_group: AWSTerraformTargetGroupResource;
+      aws_lb_listener: AWSTerraformTargetGroupListenerResource;
+      aws_vpc: AWSTerraformVPCResource;
+    },
+  ];
+
   terraform: [TerraformDependencies];
   variable: {
-    owner: [{
-      default: "polyseam";
-      description: "Org Name";
-      type: "string";
-    }];
+    owner: [
+      {
+        default: "polyseam";
+        description: "Org Name";
+        type: "string";
+      },
+    ];
 
-    vpc_cidr_block: [{
-      default: "10.0.0.0/16";
-      description: "CIDR block for the VPC";
-      type: "string";
-    }];
+    vpc_cidr_block: [
+      {
+        default: "10.0.0.0/16";
+        description: "CIDR block for the VPC";
+        type: "string";
+      },
+    ];
 
-    vpc_dns_support: [{
-      default: true;
-      description: "Enable DNS support in the VPC";
-      type: "bool";
-    }];
+    vpc_dns_support: [
+      {
+        default: true;
+        description: "Enable DNS support in the VPC";
+        type: "bool";
+      },
+    ];
 
-    vpc_dns_hostnames: [{
-      default: true;
-      description: "Enable DNS hostnames in the VPC";
-      type: "bool";
-    }];
+    vpc_dns_hostnames: [
+      {
+        default: true;
+        description: "Enable DNS hostnames in the VPC";
+        type: "bool";
+      },
+    ];
 
-    sg_ingress_proto: [{
-      default: "tcp";
-      description: "Protocol used for the ingress rule";
-      type: "string";
-    }];
+    sg_ingress_proto: [
+      {
+        default: "tcp";
+        description: "Protocol used for the ingress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_http: [{
-      default: "80";
-      description: "Port for HTTP traffic";
-      type: "string";
-    }];
+    sg_ingress_http: [
+      {
+        default: "80";
+        description: "Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_https: [{
-      default: "443";
-      description: "Port for HTTPS traffic";
-      type: "string";
-    }];
+    sg_ingress_https: [
+      {
+        default: "443";
+        description: "Port for HTTPS traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_ssh: [{
-      default: "22";
-      description: "Port used SSL traffic";
-      type: "string";
-    }];
+    sg_ingress_ssh: [
+      {
+        default: "22";
+        description: "Port used SSL traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_proto_all: [{
-      default: "-1";
-      description: "Protocol used for the egress rule";
-      type: "string";
-    }];
+    sg_ingress_proto_all: [
+      {
+        default: "-1";
+        description: "Protocol used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_all: [{
-      default: "0";
-      description: "Port used for the All ingress rule";
-      type: "string";
-    }];
+    sg_ingress_all: [
+      {
+        default: "0";
+        description: "Port used for the All ingress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_k8s_API: [{
-      default: "16443";
-      description: "Port used for Kubernetes API server";
-      type: "string";
-    }];
+    sg_ingress_k8s_API: [
+      {
+        default: "16443";
+        description: "Port used for Kubernetes API server";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_nodeport_range_start: [{
-      default: "30000";
-      description:
-        "Nodeport start range port to quickly access applications INSECURE";
-      type: "string";
-    }];
+    sg_ingress_nodeport_range_start: [
+      {
+        default: "30000";
+        description:
+          "Nodeport start range port to quickly access applications INSECURE";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_nodeport_range_end: [{
-      default: "33000";
-      description:
-        "Nodeport end range port to quickly access applications INSECURE";
-      type: "string";
-    }];
+    sg_ingress_nodeport_range_end: [
+      {
+        default: "33000";
+        description:
+          "Nodeport end range port to quickly access applications INSECURE";
+        type: "string";
+      },
+    ];
 
-    sg_egress_proto: [{
-      default: "-1";
-      description: "Protocol used for the egress rule";
-      type: "string";
-    }];
+    sg_egress_proto: [
+      {
+        default: "-1";
+        description: "Protocol used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    sg_egress_all: [{
-      default: "0";
-      description: "Port used for the egress rule";
-      type: "string";
-    }];
+    sg_egress_all: [
+      {
+        default: "0";
+        description: "Port used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the ingres rule";
-      type: "string";
-    }];
+    sg_ingress_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the ingres rule";
+        type: "string";
+      },
+    ];
 
-    sg_egress_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the egress rule";
-      type: "string";
-    }];
+    sg_egress_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the egress rule";
+        type: "string";
+      },
+    ];
 
-    tg_http: [{
-      default: "80";
-      description: "Target Group Port for HTTP traffic";
-      type: "string";
-    }];
+    tg_http: [
+      {
+        default: "80";
+        description: "Target Group Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    tg_http_proto: [{
-      default: "TCP";
-      description: "Protocol used for the HTTP Target Group";
-      type: "string";
-    }];
+    tg_http_proto: [
+      {
+        default: "TCP";
+        description: "Protocol used for the HTTP Target Group";
+        type: "string";
+      },
+    ];
 
-    tg_https: [{
-      default: "443";
-      description: "Target Group Port for HTTP traffic";
-      type: "string";
-    }];
+    tg_https: [
+      {
+        default: "443";
+        description: "Target Group Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    tg_https_proto: [{
-      default: "TCP";
-      description: "Protocol used for the HTTP Target Group";
-      type: "string";
-    }];
+    tg_https_proto: [
+      {
+        default: "TCP";
+        description: "Protocol used for the HTTP Target Group";
+        type: "string";
+      },
+    ];
 
-    sbn_public_ip: [{
-      default: true;
-      description: "Assign public IP to the instance launched into the subnet";
-      type: "bool";
-    }];
+    sbn_public_ip: [
+      {
+        default: true;
+        description:
+          "Assign public IP to the instance launched into the subnet";
+        type: "bool";
+      },
+    ];
 
-    sbn_cidr_block: [{
-      default: "10.0.1.0/24";
-      description: "CIDR block for the subnet";
-      type: "string";
-    }];
+    sbn_cidr_block: [
+      {
+        default: "10.0.1.0/24";
+        description: "CIDR block for the subnet";
+        type: "string";
+      },
+    ];
 
-    destination_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the route";
-      type: "string";
-    }];
+    destination_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the route";
+        type: "string";
+      },
+    ];
 
-    ebs_block_device_name: [{
-      default: "/dev/sda1";
-      description: "name of the ebs block device";
-      type: "string";
-    }];
+    ebs_block_device_name: [
+      {
+        default: "/dev/sda1";
+        description: "name of the ebs block device";
+        type: "string";
+      },
+    ];
 
-    ebs_block_device_size: [{
-      default: "80";
-      description: "name of the ebs block device";
-      type: "string";
-    }];
+    ebs_block_device_size: [
+      {
+        default: "80";
+        description: "name of the ebs block device";
+        type: "string";
+      },
+    ];
 
-    ebs_block_device_volume_type: [{
-      default: "gp3";
-      description: "volume_type of the ebs block device";
-      type: "string";
-    }];
+    ebs_block_device_volume_type: [
+      {
+        default: "gp3";
+        description: "volume_type of the ebs block device";
+        type: "string";
+      },
+    ];
 
     git_password: [
       {
