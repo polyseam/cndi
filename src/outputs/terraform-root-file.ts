@@ -45,11 +45,20 @@ const getTerraformRootFile = async ({
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
   const mainTerraformFileObject = { ...terraformRootFileData };
 
+  if (!googleCredentials) {
+    console.log(
+      terraformRootFileLabel,
+      '"GOOGLE_CREDENTIALS"',
+      brightRed(`is undefined\nPlease set`),
+      '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
+      brightRed("and try again\n"),
+    );
+    Deno.exit(1);
+  }
+
   if (requiredProviders.has("gcp")) {
     const region = (Deno.env.get("GCP_REGION") as string) || DEFAULT_GCP_REGION;
-
     let parsedJSONServiceAccountKey: { project_id: string };
-
     try {
       parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
     } catch {

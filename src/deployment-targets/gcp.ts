@@ -65,7 +65,7 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
           `${GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY}${PLACEHOLDER_SUFFIX}`;
 
         // check if the value is the default value uninitialized variables
-        if (GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY === placeholderPathVal) {
+        if (gcp_path_to_service_account_key === placeholderPathVal) {
           console.log(
             yellow(
               `\n\n${
