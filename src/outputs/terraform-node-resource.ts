@@ -10,6 +10,9 @@ import {
   AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
+  GCPDeploymentTargetConfiguration,
+  GCPNodeEntrySpec,
+  GCPTerraformNodeResource,
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
