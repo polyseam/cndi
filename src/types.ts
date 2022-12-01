@@ -36,13 +36,28 @@ interface CNDINode {
   kind: NodeKind;
   instance_type?: string;
   ami?: string;
+  machine_type?: string;
+  image?: string;
+  size?:number
 }
 
 interface CNDINodesSpec {
   entries: Array<BaseNodeEntrySpec>;
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
+// cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
+interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+  machine_type?: string;
+  image?: string;
+  size?:number
 
+}
+// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
+interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+  machine_type?: string;
+  image?: string;
+  size?:number
+}
 interface GCPTerraformNodeResource {
   resource: {
     google_compute_instance: {
