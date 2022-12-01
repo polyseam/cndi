@@ -29,6 +29,12 @@ const getTerraformNodeResource = (
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
       );
+    case "gcp":
+      return getGCPNodeResource(
+        entry as GCPNodeEntrySpec,
+        deploymentTargetConfiguration.aws as GCPDeploymentTargetConfiguration,
+        controllerName,
+      );
 
     default:
       console.log(
