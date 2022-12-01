@@ -861,4 +861,9 @@ export type {
   Template,
   TerraformDependencies,
   TerraformRootFileData,
+  GCPTerraformRootFileData,
+  GCPTerraformNodeResource,
+  GCPNodeEntrySpec,
+  GCPDeploymentTargetConfiguration,
+  GCPTerraformInstanceGroupResource
 };
