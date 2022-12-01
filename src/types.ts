@@ -43,6 +43,123 @@ interface CNDINodesSpec {
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
 
+interface GCPTerraformNodeResource {
+  resource: {
+    google_compute_instance: {
+      [name: string]: {
+        allow_stopping_for_update: boolean
+        boot_disk: Array<{
+          auto_delete: boolean
+          initialize_params: Array<{
+            image: string
+            size: number
+            type: string
+          }>
+        }>
+        depends_on?: Array<string>
+        machine_type: string
+        metadata: {
+          user_data?: string
+        }
+        name: string
+        network_interface: Array<{
+          access_config: Array<{
+            network_tier: string
+          }>
+          network: string
+          subnetwork: string
+        }>
+        tags: Array<string>
+      }
+    },
+
+  }
+}
+
+interface GCPTerraformInstanceGroupResource {
+  cndi_cluster: {
+    description: string
+    instances: Array<string>
+    name: string
+    named_port: Array<{
+      name: string
+      port: string
+    }>
+    zone: string
+  }
+}
+
+interface GCPTerraformNetworkResource {
+  cndi_vpc_network: {
+    auto_create_subnetworks: boolean
+    name: string
+  }
+}
+
+interface GCPTerraformSubNetworkResource {
+  cndi_vpc_subnetwork: {
+    ip_cidr_range: string
+    name: string
+    network: string
+  }
+}
+interface GCPTerraformFirewallResource {
+  [cndi_firewall: string]: {
+    allow: Array<{
+      ports?: Array<string>
+      protocol?: string
+    }>
+    description: string
+    direction: string
+    name: string
+    network: string
+    source_ranges: Array<string>
+  }
+}
+interface GCPTerraformNATResource {
+  cndi_nat: {
+    name: string
+    nat_ip_allocate_option: string
+    router: string
+    source_subnetwork_ip_ranges_to_nat: string
+  }
+}
+interface GCPTerraformHTTPpForwardingRuleResource {
+  cndi_http_forwarding_rule: {
+    backend_service: string
+    name: string
+    network_tier: string
+    ports: Array<string>
+  }
+}
+interface GCPTerraformRegionHealthcheckResource {
+  cndi_healthcheck: {
+    check_interval_sec: number
+    name: string
+    tcp_health_check: Array<{
+      port: number
+    }>
+    timeout_sec: number
+  }
+}
+interface GCPTerraformRegionBackendServiceResource {
+  cndi_backend_service: Array<{
+    backend: Array<{
+      group: string
+    }>
+    health_checks: Array<string>
+    load_balancing_scheme: string
+    name: string
+    port_name: string
+    protocol: string
+  }>
+}
+interface GCPTerraformRouterResource {
+  cndi_router: {
+    name: string
+    network: string
+  }
+}
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
   ami: string;
