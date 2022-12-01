@@ -43,7 +43,6 @@ const getTerraformRootFile = async ({
   requiredProviders,
 }: GetTerraformRootFileArgs): Promise<string> => {
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
-
   const mainTerraformFileObject = { ...terraformRootFileData };
 
   if (requiredProviders.has("gcp")) {

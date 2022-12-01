@@ -1,6 +1,4 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
@@ -25,9 +23,13 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
+
+import { getGoogleCredentials } from "../deployment-targets/gcp.ts";
+
 import {
   brightRed,
   cyan,
+  white,
   yellow,
 } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
@@ -189,80 +191,9 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   }
 
   if (requiredProviders.has(NodeKind.gcp)) {
-    const GCPPathToServiceAccountKeyEnvKey = "GCP_PATH_TO_SERVICE_ACCOUNT_KEY";
-    const GCPServiceAccountKeyEnvKey = "GOOGLE_CREDENTIALS";
-
-    const GCPPathToServiceAccountKey = Deno.env.get(
-      GCPPathToServiceAccountKeyEnvKey,
-    );
-    const GCPServiceAccountKey = Deno.env.get(GCPServiceAccountKeyEnvKey);
-
-    // if the user interactively provides a path to a service account key, we copy it to `.env` and discard the path
-    if (GCPPathToServiceAccountKey && !GCPServiceAccountKey) {
-      try {
-        const keyText = await Deno.readTextFile(
-          GCPPathToServiceAccountKey.replace("~", homedir() || "~"),
-        );
-
-        if (keyText) {
-          const dotEnvContents = Deno.readTextFileSync(context.dotEnvPath);
-          const dotEnvLines = dotEnvContents.split("\n");
-          const newDotEnvLines = dotEnvLines.map((line) => {
-            if (line.indexOf(GCPPathToServiceAccountKeyEnvKey) === 0) {
-              const keyTextMinified = JSON.stringify(keyText, null, 0);
-              Deno.env.set(GCPServiceAccountKeyEnvKey, keyTextMinified);
-              return `${GCPServiceAccountKeyEnvKey}=${keyTextMinified}`;
-            }
-            return line;
-          });
-          const newDotEnvContents = newDotEnvLines.join("\n");
-          Deno.writeTextFileSync(context.dotEnvPath, newDotEnvContents);
-        }
-      } catch (error) {
-        if (error instanceof Deno.errors.NotFound) {
-          const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
-          const placeholderPathVal =
-            `${GCPPathToServiceAccountKeyEnvKey}${PLACEHOLDER_SUFFIX}`;
-          if (GCPPathToServiceAccountKey === placeholderPathVal) {
-            console.log(
-              yellow(
-                `\n\n${
-                  brightRed(
-                    "ERROR",
-                  )
-                }: ${GCPPathToServiceAccountKeyEnvKey} not found in environment`,
-              ),
-            );
-            console.log(
-              `You need to replace `,
-              cyan(placeholderPathVal),
-              `with the desired value in "${context.dotEnvPath}"\n`,
-            );
-          } else {
-            console.log(
-              owLabel,
-              brightRed(`GCP Service Account Key not found at path:`),
-              `"${GCPPathToServiceAccountKey}"`,
-            );
-          }
-        } else {
-          console.log(
-            owLabel,
-            brightRed(`Unhandled error reading GCP Service Account Key:`),
-          );
-          console.log(error);
-        }
-      }
-    } else if (!GCPPathToServiceAccountKey && !GCPServiceAccountKey) {
-      console.log(
-        owLabel,
-        brightRed(`you need to have either`),
-        `\"${GCPPathToServiceAccountKeyEnvKey}\"`,
-        brightRed("or"),
-        `\"${GCPServiceAccountKeyEnvKey}\"`,
-        brightRed(`defined in the environment when depolying to "gcp"`),
-      );
-    }
+    // if there is a service account key path, read the contents and write them to .env and this runtime env
+    // caution: this needs to run before the terraform root file is created
+    await getGoogleCredentials(context.dotEnvPath);
   }
 
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
