@@ -459,7 +459,81 @@ interface TerraformDependencies {
   }>;
   required_version: string;
 }
+interface GCPTerraformRootFileData {
+  locals: [
+    { region: string;
+      zone: "${local.region}-a";
+      leader_node_ip: string;
+      bootstrap_token: "${random_password.generated_token.result}";
+      git_password: "${var.git_password}";
+      git_username: "${var.git_username}";
+      git_repo: "${var.git_repo}";
+      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
+      sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
+    },
+  ];
+  provider: {
+    random: [Record<never, never>]; // equal to [{}]
+    aws?: Array<{ region: string }>;
+    gcp?: Array<{ region: string; project: string; zone?: string }>;
+  };
 
+  resource: [
+    {
+      random_password: RandomTerraformRandomPasswordResource;
+      google_compute_instance_group :GCPTerraformInstanceGroupResource
+      google_compute_network: GCPTerraformNetworkResource
+      google_compute_subnetwork: GCPTerraformSubNetworkResource
+      google_compute_firewall: GCPTerraformFirewallResource
+      google_compute_router: GCPTerraformRouterResource
+      google_compute_router_nat: GCPTerraformNATResource
+      google_compute_forwarding_rule: GCPTerraformHTTPpForwardingRuleResource;
+      google_compute_region_health_check: GCPTerraformRegionHealthcheckResource
+      google_compute_region_backend_service: GCPTerraformRegionBackendServiceResource
+    }
+  ];
+
+  terraform: [TerraformDependencies];
+  variable: {
+    git_password: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_username: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_repo: [
+      {
+        description: "repository URL to access";
+        type: "string";
+      },
+    ];
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    argo_ui_readonly_password: [
+      {
+        description: "password for accessing the argo ui";
+        type: "string";
+      },
+    ];
+  };
+}
 interface TerraformRootFileData {
   locals: [
     {
