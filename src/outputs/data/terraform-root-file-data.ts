@@ -546,7 +546,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         cndi_vpc_subnetwork: {
           ip_cidr_range: "10.0.0.0/16",
           name: "cndi-vpc-network-subnetwork",
-          network: "${google_compute_network.cndi_vpc_network.id}",
+          network: "${google_compute_network.cndi_vpc_network.self_link}",
         },
       },
       google_compute_firewall: {
@@ -560,7 +560,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
           description: "Security firewall",
           direction: "INGRESS",
           name: "cndi-allow-external-traffic",
-          network: "${google_compute_network.cndi_vpc_network.id}",
+          network: "${google_compute_network.cndi_vpc_network.self_link}",
           source_ranges: ["0.0.0.0/0"],
         },
         "cndi_allow_internal_traffic": {
@@ -573,7 +573,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
             "Inbound rule that enables traffic between EC2 instances in the VPC",
           direction: "INGRESS",
           name: "cndi-allow-internal-traffic",
-          network: "${google_compute_network.cndi_vpc_network.id}",
+          network: "${google_compute_network.cndi_vpc_network.self_link}",
           source_ranges: [
             "${google_compute_subnetwork.cndi_vpc_subnetwork.ip_cidr_range}",
           ],
@@ -582,7 +582,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
       google_compute_router: {
         cndi_router: {
           name: "cndi-router",
-          network: "${google_compute_network.cndi_vpc_network.id}",
+          network: "${google_compute_network.cndi_vpc_network.self_link}",
         },
       },
       google_compute_router_nat: {
@@ -596,7 +596,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
       google_compute_forwarding_rule: {
         cndi_http_forwarding_rule: {
           backend_service:
-            "${google_compute_region_backend_service.cndi_backend_service.id}",
+            "${google_compute_region_backend_service.cndi_backend_service.self_link}",
           name: "cndi-forwarding-rule",
           network_tier: "STANDARD",
           ports: ["80", "443"],
@@ -614,10 +614,13 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         cndi_backend_service: [
           {
             backend: [
-              { group: "${google_compute_instance_group.cndi_cluster.id}" },
+              {
+                group:
+                  "${google_compute_instance_group.cndi_cluster.self_link}",
+              },
             ],
             health_checks: [
-              "${google_compute_region_health_check.cndi_healthcheck.id}",
+              "${google_compute_region_health_check.cndi_healthcheck.self_link}",
             ],
             load_balancing_scheme: "EXTERNAL",
             name: "cndi-backend-service",

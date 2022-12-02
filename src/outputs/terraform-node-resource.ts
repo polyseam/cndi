@@ -65,8 +65,9 @@ const getGCPNodeResource = (
   const size = entry?.size || entry?.volume_size || DEFAULT_SIZE;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
   const network_tier = "STANDARD";
-  const network = "${google_compute_network.cndi_vpc_network.id}"; //The name of the network to attach this interface to.
-  const subnetwork = "${google_compute_subnetwork.cndi_vpc_subnetwork.id}"; //The name or self_link of the subnetwork to attach this interface to.
+  const network = "${google_compute_network.cndi_vpc_network.self_link}"; //The name of the network to attach this interface to.
+  const subnetwork =
+    "${google_compute_subnetwork.cndi_vpc_subnetwork.self_link}"; //The name or self_link of the subnetwork to attach this interface to.
   const access_config = [{ network_tier }]; //Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
 
   const boot_disk = [

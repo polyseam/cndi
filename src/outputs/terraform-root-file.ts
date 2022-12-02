@@ -90,7 +90,7 @@ const getTerraformRootFile = async ({
 
     gcpMainTerraformFileObject.resource[0].google_compute_instance_group
       .cndi_cluster.instances = nodeEntryNames.map((name) =>
-        `\${google_compute_instance.${name}.id}`
+        `\${google_compute_instance.${name}.self_link}`
       );
 
     gcpMainTerraformFileObject.provider.google = [
