@@ -44,7 +44,7 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
         // and replace the line that has the path with the a line that has the contents of the service account key
         const newDotEnvLines = dotEnvLines.map((line) => {
           if (line.indexOf(GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY) === 0) {
-            const keyTextMinified = JSON.stringify(keyText, null, 0);
+            const keyTextMinified = keyText.replaceAll("\n", " ");
             Deno.env.set(GOOGLE_CREDENTIALS_ENVKEY, keyTextMinified);
             return `${GOOGLE_CREDENTIALS_ENVKEY}=${keyTextMinified}`; // eg. GOOGLE_CREDENTIALS="{"project_id":"my-project-id"...}"
           }
