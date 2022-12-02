@@ -1,4 +1,5 @@
 import {
+  CNDIConfig,
   CNDIContext,
   EnvObject,
   NodeKind,
@@ -45,16 +46,17 @@ import getREADME from "../outputs/readme.ts";
 const initLabel = white("init:");
 
 const getTemplateString = async (
-  context: CNDIContext,
+  template: string,
+  interactive: boolean,
 ): Promise<string | null> => {
-  const templateKind = context.template.split("/")[0] as NodeKind; // e.g. aws
-  const templateBase = context.template.split("/")[1]; // e.g. airflow-tls
+  const templateKind = template.split("/")[0] as NodeKind; // e.g. aws
+  const templateBase = template.split("/")[1]; // e.g. airflow-tls
 
   switch (templateBase) {
     case "airflow-tls":
       return airflowTlsTemplate(
         templateKind,
-        await getAirflowTlsTemplateAnswers(context.interactive),
+        await getAirflowTlsTemplateAnswers(interactive),
       );
     case "basic":
       return basicTemplate(templateKind);
@@ -63,7 +65,7 @@ const getTemplateString = async (
   }
 };
 
-const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
+const prepareAWSEnv = async (interactive: boolean): Promise<EnvObject> => {
   const AWS_REGION = "us-east-1";
   const AWS_ACCESS_KEY_ID = "";
   const AWS_SECRET_ACCESS_KEY = "";
@@ -71,7 +73,7 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
 
   awsEnvObject.AWS_REGION = {
     comment: "AWS",
-    value: context.interactive
+    value: interactive
       ? ((await Input.prompt({
         message: cyan("Enter your AWS region:"),
         default: AWS_REGION,
@@ -80,7 +82,7 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
   };
 
   awsEnvObject.AWS_ACCESS_KEY_ID = {
-    value: context.interactive
+    value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your AWS access key ID:"),
         default: AWS_ACCESS_KEY_ID,
@@ -89,7 +91,7 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
   };
 
   awsEnvObject.AWS_SECRET_ACCESS_KEY = {
-    value: context.interactive
+    value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your AWS secret access key:"),
         default: AWS_SECRET_ACCESS_KEY,
@@ -99,7 +101,7 @@ const prepareAWSEnv = async (context: CNDIContext): Promise<EnvObject> => {
   return awsEnvObject;
 };
 
-const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
+const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
   const GCP_REGION = "us-central1";
   const GCP_PATH_TO_SERVICE_ACCOUNT_KEY = "";
 
@@ -107,7 +109,7 @@ const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
 
   gcpEnvObject.GCP_REGION = {
     comment: "GCP",
-    value: context.interactive
+    value: interactive
       ? ((await Input.prompt({
         message: cyan("Enter your GCP Region:"),
         default: GCP_REGION,
@@ -116,7 +118,7 @@ const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
   };
 
   gcpEnvObject.GCP_PATH_TO_SERVICE_ACCOUNT_KEY = {
-    value: context.interactive
+    value: interactive
       ? ((await Input.prompt({
         message: cyan("Enter the path to your GCP service account key json:"),
         default: GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
@@ -127,14 +129,15 @@ const prepareGCPEnv = async (context: CNDIContext): Promise<EnvObject> => {
   return gcpEnvObject;
 };
 
-interface GetEnvObjectArgs extends CNDIContext {
+interface CNDIContextWithGeneratedValues extends CNDIContext {
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
   argoUIReadOnlyPassword: string;
 }
 
 const getCoreEnvObject = async (
-  context: GetEnvObjectArgs,
+  context: CNDIContextWithGeneratedValues,
+  kind: NodeKind,
 ): Promise<EnvObject> => {
   const {
     sealedSecretsKeys,
@@ -200,8 +203,6 @@ const getCoreEnvObject = async (
     },
   };
 
-  const kind = context.template.split("/")[0];
-
   coreEnvObject.GIT_USERNAME = {
     comment: "git credentials",
     value: context.interactive
@@ -232,17 +233,26 @@ const getCoreEnvObject = async (
 
   switch (kind) {
     case "aws":
-      return { ...coreEnvObject, ...(await prepareAWSEnv(context)) };
+      return {
+        ...coreEnvObject,
+        ...(await prepareAWSEnv(context.interactive)),
+      };
     case "gcp":
-      return { ...coreEnvObject, ...(await prepareGCPEnv(context)) };
+      return {
+        ...coreEnvObject,
+        ...(await prepareGCPEnv(context.interactive)),
+      };
     default:
       console.log(brightRed(`kind "${kind}" is not yet supported`));
       Deno.exit(1);
   }
 };
 
-const getEnvObject = async (context: GetEnvObjectArgs): Promise<EnvObject> => {
-  const coreEnvObject = await getCoreEnvObject(context);
+const getEnvObject = async (
+  context: CNDIContextWithGeneratedValues,
+  kind: NodeKind,
+): Promise<EnvObject> => {
+  const coreEnvObject = await getCoreEnvObject(context, kind);
 
   if (!context?.template) {
     return coreEnvObject;
@@ -254,7 +264,7 @@ const getEnvObject = async (context: GetEnvObjectArgs): Promise<EnvObject> => {
     case "airflow-tls":
       return {
         ...coreEnvObject,
-        ...(await getAirflowTlsTemplateEnvObject(context)),
+        ...(await getAirflowTlsTemplateEnvObject(context.interactive)),
       };
     case "basic":
       return coreEnvObject;
@@ -272,37 +282,54 @@ export default async function init(c: CNDIContext) {
   const initializing = true;
   const CNDI_CONFIG_FILENAME = "cndi-config.jsonc";
 
+  // kind comes in from one of 2 places
+  // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
+  // 2. if the user brings their own config file, we read it from the first node entry in the config file
+  let kind: NodeKind | undefined;
+
   let template = c.template;
 
   // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-  if (!template && !c.interactive) {
+  const useCNDIConfigFile = !c.interactive && !template;
+
+  if (useCNDIConfigFile) {
     try {
       console.log(`cndi init --file "${c.pathToConfig}"\n`);
-      Deno.readFileSync(c.pathToConfig);
-    } catch {
-      // if config is not found at 'pathToConfig' we want to throw an error
-      console.log(
-        initLabel,
-        brightRed(
-          `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`,
-        ),
-      );
-      console.log(
-        `if you don't have a cndi-config file try ${
-          cyan(
-            "cndi init --interactive",
-          )
-        }\n`,
-      );
-      Deno.exit(1);
+      const config = JSON.parse(
+        Deno.readTextFileSync(c.pathToConfig),
+      ) as CNDIConfig;
+      // 1. the user brought their own config file, we use the kind of the first node
+      kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
+    } catch (e) {
+      if (e instanceof Deno.errors.NotFound) {
+        // if config is not found at 'pathToConfig' we want to throw an error
+        console.log(
+          initLabel,
+          brightRed(
+            `cndi-config file not found at ${white(`"${c.pathToConfig}"`)}\n`,
+          ),
+        );
+        console.log(
+          `if you don't have a cndi-config file try ${
+            cyan(
+              "cndi init --interactive",
+            )
+          }\n`,
+        );
+        Deno.exit(1);
+      }
     }
   } else if (c.interactive) {
-    if (!template) {
-      console.log("cndi init --interactive\n");
-    } else {
+    if (template) {
+      // 2a. the user used a template name, we pull the 'kind' out of it
+      kind = template.split("/")[0] as NodeKind;
       console.log(`cndi init --interactive --template ${template}\n`);
+    } else {
+      // we don't know the kind so we need to get it when the user chooses a template (see 2c)
+      console.log("cndi init --interactive\n");
     }
   } else {
+    // if the user passes -t or --template with no value, we raise an error
     if (`${template}` === "true") {
       // if template flag is truthy but empty, throw error
       console.log(`cndi init --template\n`);
@@ -313,6 +340,8 @@ export default async function init(c: CNDIContext) {
       Deno.exit(1);
     }
     console.log(`cndi init --template ${template}\n`);
+    // 2b.the user has passed a template name, we pull the 'kind'out of it
+    kind = template?.split("/")[0] as NodeKind;
   }
 
   const directoryContainsCNDIFiles = await checkInitialized(c);
@@ -327,18 +356,20 @@ export default async function init(c: CNDIContext) {
     Deno.exit(0);
   }
 
-  const templateUnavailable = template &&
-    !availableTemplates.includes(template);
+  if (template) {
+    const templateUnavailable = !availableTemplates.includes(template);
+    if (templateUnavailable) {
+      console.log(
+        initLabel,
+        brightRed(
+          `The template you selected "${template}" is not available.\n`,
+        ),
+      );
 
-  if (templateUnavailable) {
-    console.log(
-      initLabel,
-      brightRed(`The template you selected "${template}" is not available.\n`),
-    );
-
-    console.log("Available templates are:\n");
-    console.log(`${availableTemplates.map((t) => cyan(t)).join(", ")}\n`);
-    Deno.exit(1);
+      console.log("Available templates are:\n");
+      console.log(`${availableTemplates.map((t) => cyan(t)).join(", ")}\n`);
+      Deno.exit(1);
+    }
   }
 
   // GENERATE ENV VARS
@@ -369,6 +400,13 @@ export default async function init(c: CNDIContext) {
       message: cyan("Pick a template"),
       options: availableTemplates,
     });
+    // 2c. the user finally selected a template, we pull the 'kind' out of it
+    kind = template.split("/")[0] as NodeKind;
+  }
+
+  if (!kind) {
+    console.log(initLabel, brightRed(`"kind" cannot be inferred`));
+    Deno.exit(1);
   }
 
   await Deno.writeTextFile(gitignorePath, getGitignoreContents());
@@ -379,7 +417,7 @@ export default async function init(c: CNDIContext) {
     sealedSecretsKeys,
     terraformStatePassphrase,
     argoUIReadOnlyPassword,
-  });
+  }, kind);
 
   await writeEnvObject(dotEnvPath, envObject);
 
@@ -408,7 +446,7 @@ export default async function init(c: CNDIContext) {
   if (template) {
     const configOutputPath = path.join(projectDirectory, CNDI_CONFIG_FILENAME);
 
-    const templateString = await getTemplateString({ ...context, template });
+    const templateString = await getTemplateString(template, interactive);
 
     if (!templateString) {
       console.error(

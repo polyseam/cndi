@@ -314,8 +314,8 @@ interface CNDIContext {
   pathToKubeseal: string;
   gitignorePath: string;
   noKeys: boolean;
-  template: string;
   interactive: boolean;
+  template?: string;
   sealedSecretsKeys?: SealedSecretsKeys;
   terraformStatePassphrase?: string;
   argoUIReadOnlyPassword?: string;

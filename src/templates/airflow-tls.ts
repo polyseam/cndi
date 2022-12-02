@@ -10,12 +10,12 @@ import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 
 const getAirflowTlsTemplateEnvObject = async (
-  context: CNDIContext,
+  interactive: boolean,
 ): Promise<EnvObject> => {
   let GIT_SYNC_USERNAME = "";
   let GIT_SYNC_PASSWORD = "";
 
-  if (context.interactive) {
+  if (interactive) {
     GIT_SYNC_USERNAME = (await Input.prompt({
       message: cyan("Please enter your git username for Airflow DAG Storage:"),
       default: GIT_SYNC_USERNAME,
