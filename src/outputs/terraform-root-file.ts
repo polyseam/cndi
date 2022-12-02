@@ -33,6 +33,7 @@ const googleTerraformProviderDependency = {
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
+  nodeEntryNames: Array<string>
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -40,6 +41,7 @@ const terraformRootFileLabel = white("outputs/terraform-root-file:");
 const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
+  nodeEntryNames
 }: GetTerraformRootFileArgs): Promise<string> => {
 
 
@@ -84,8 +86,16 @@ const getTerraformRootFile = async ({
     gcpMainTerraformFileObject.locals[0].leader_node_ip =
       `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
-    gcpMainTerraformFileObject.provider.gcp = [
-      { region, project: parsedJSONServiceAccountKey.project_id },
+    gcpMainTerraformFileObject.locals[0].region =
+      region
+
+    gcpMainTerraformFileObject.resource[0].google_compute_instance_group.cndi_cluster.instances = nodeEntryNames.map((name) =>
+      `\${google_compute_instance.${name}.id}`
+      )
+
+
+    gcpMainTerraformFileObject.provider.google = [
+      { region, zone: `${region}-a`, project: parsedJSONServiceAccountKey.project_id },
     ];
 
     gcpMainTerraformFileObject.terraform = [terraformDependencies];
@@ -112,7 +122,7 @@ const getTerraformRootFile = async ({
     return getPrettyJSONString(awsMainTerraformFileObject);
   }
 
- console.log(terraformRootFileLabel,"required providers must contain either \"gcp\" or \"aws\"")
+  console.log(terraformRootFileLabel, "required providers must contain either \"gcp\" or \"aws\"")
   Deno.exit(1)
 
 };

@@ -50,6 +50,8 @@ interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
   machine_type?: string;
   image?: string;
   size?:number
+  volume_size?:number
+  instance_type?: string;
 
 }
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
@@ -180,6 +182,9 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
+  volume_size?:number
+  size?:number
+  machine_type?: string;
 }
 
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
@@ -491,7 +496,7 @@ interface GCPTerraformRootFileData {
   provider: {
     random: [Record<never, never>]; // equal to [{}]
     aws?: Array<{ region: string }>;
-    gcp?: Array<{ region: string; project: string; zone?: string }>;
+    google?: Array<{ region: string; project: string; zone?: string }>;
   };
 
   resource: [
