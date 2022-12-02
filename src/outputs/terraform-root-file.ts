@@ -4,7 +4,6 @@ import { NodeKind, TerraformDependencies } from "../types.ts";
 import { terraformRootFileData, gcpTerraformRootFileData } from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { denoErrorToNodeError } from "https://deno.land/std@0.157.0/node/internal/errors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";

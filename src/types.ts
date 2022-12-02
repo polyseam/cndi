@@ -74,7 +74,7 @@ interface GCPTerraformNodeResource {
         depends_on?: Array<string>
         machine_type: string
         metadata: {
-          user_data?: string
+          "user-data"?: string
         }
         name: string
         network_interface: Array<{
