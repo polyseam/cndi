@@ -46,18 +46,18 @@ const getTerraformRootFile = async ({
   // copy original terraformRootFileData to working copy for GCP using js spread operator
   const mainTerraformFileObject = { ...terraformRootFileData };
 
-  if (!googleCredentials) {
-    console.log(
-      terraformRootFileLabel,
-      '"GOOGLE_CREDENTIALS"',
-      brightRed(`is undefined\nPlease set`),
-      '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
-      brightRed("and try again\n"),
-    );
-    Deno.exit(1);
-  }
-
   if (requiredProviders.has("gcp")) {
+    if (!googleCredentials) {
+      console.log(
+        terraformRootFileLabel,
+        '"GOOGLE_CREDENTIALS"',
+        brightRed(`is undefined\nPlease set`),
+        '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
+        brightRed("and try again\n"),
+      );
+      Deno.exit(1);
+    }
+
     const region = (Deno.env.get("GCP_REGION") as string) || DEFAULT_GCP_REGION;
     let parsedJSONServiceAccountKey: { project_id: string };
     try {
