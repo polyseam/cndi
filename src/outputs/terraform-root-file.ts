@@ -44,7 +44,7 @@ const getTerraformRootFile = async ({
 }: GetTerraformRootFileArgs): Promise<string> => {
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
   const mainTerraformFileObject = { ...terraformRootFileData };
-
+  const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData};
   if (!googleCredentials) {
     console.log(
       terraformRootFileLabel,
@@ -78,16 +78,16 @@ const getTerraformRootFile = async ({
     terraformDependencies.required_providers[0].google =
       googleTerraformProviderDependency;
 
-    mainTerraformFileObject.locals[0].leader_node_ip =
+      gcpMainTerraformFileObject.locals[0].leader_node_ip =
       `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
-    mainTerraformFileObject.provider.gcp = [
+      gcpMainTerraformFileObject.provider.gcp = [
       { region, project: parsedJSONServiceAccountKey.project_id },
     ];
 
-    mainTerraformFileObject.terraform = [terraformDependencies];
+    gcpMainTerraformFileObject.terraform = [terraformDependencies];
 
-    return getPrettyJSONString(mainTerraformFileObject);
+    return getPrettyJSONString(gcpMainTerraformFileObject);
   }
 
   // add parts of setup-cndi.tf file that are required if kind===aws
