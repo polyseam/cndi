@@ -1,7 +1,7 @@
 import { getPrettyJSONString } from "../utils.ts";
 import { NodeKind, TerraformDependencies } from "../types.ts";
 
-import terraformRootFileData from "./data/terraform-root-file-data.ts";
+import {terraformRootFileData,gcpTerraformRootFileData} from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightWhite } from "https://deno.land/std@0.158.0/fmt/colors.ts";
