@@ -6,11 +6,13 @@ import {
   checkInstalled,
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
+  loadJSONC,
 } from "./utils.ts";
 import { Command } from "./types.ts";
 import {
   brightRed,
   cyan,
+  white,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
@@ -20,6 +22,11 @@ import overwriteWithFn from "./commands/overwrite-with.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
+
+const cndiLabel = white("src/cndi:");
+
+const KUBESEAL_VERSION = "0.19.1";
+const TERRAFORM_VERSION = "1.3.2";
 
 export default async function main(args: string[]) {
   console.log(); /* blank line */
@@ -54,7 +61,8 @@ export default async function main(args: string[]) {
     const fileArg = cndiArguments.file ? "--file" : "-f";
 
     console.log(
-      `\n${
+      cndiLabel,
+      `${
         brightRed(
           `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
         )
@@ -149,7 +157,7 @@ export default async function main(args: string[]) {
   const commandsInArgs = cndiArguments._;
 
   // if the user uses --help we will show help text
-  if (cndiArguments.help || cndiArguments.h) {
+  if (cndiArguments.help) {
     const key = typeof cndiArguments.help === "boolean"
       ? "default"
       : cndiArguments.help;
@@ -160,12 +168,29 @@ export default async function main(args: string[]) {
     commands.help(Command.help);
   } else {
     // in any other case we will try to run the command
-    const operation = `${commandsInArgs[0]}`;
+    const operation = `${commandsInArgs[0] ?? ""}`;
+
+    if (!operation) {
+      if (cndiArguments.version) {
+        const { version } = (await loadJSONC(
+          path.join(CNDI_HOME, "deno.jsonc"),
+        )) as { version: string };
+        console.log("cndi version:", version);
+        console.log("kubeseal version:", KUBESEAL_VERSION);
+        console.log("terraform version:", TERRAFORM_VERSION, "\n");
+        Deno.exit(0);
+      }
+      console.log(
+        `"cndi" must be called with a subcommand. Use "cndi --help" for more information.`,
+      );
+      Deno.exit(1);
+    }
 
     if (operation !== "install") {
       // One time only setup
       if (!(await checkInstalled(context))) {
         console.error(
+          cndiLabel,
           brightRed("\ncndi is not installed!\nrun"),
           cyan("cndi install"),
           brightRed("and try again.\n"),

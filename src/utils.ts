@@ -95,12 +95,43 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
+function getDefaultVmTypeForKind(kind: string): [string, string] {
+  switch (kind) {
+    // most recent 4vCPU/16GiB Ram VMs
+    case "aws":
+      return ["instance_type", "m5a.xlarge"];
+    case "gcp":
+      return ["machine_type", "n2-standard-4"];
+    default:
+      console.log("Unknown kind: " + kind);
+      Deno.exit(1);
+  }
+}
+
+function base10intToHex(decimal: number): string {
+  // if the int8 in hex is less than 2 characters, prepend 0
+  const hex = decimal.toString(16).padStart(2, "0");
+  return hex;
+}
+
+function getSecretOfLength(len = 32): string {
+  if (len % 2) {
+    throw new Error("password length must be even");
+  }
+
+  const values = new Uint8Array(len / 2);
+  crypto.getRandomValues(values);
+  return Array.from(values, base10intToHex).join("");
+}
+
 export {
   checkInitialized,
   checkInstalled,
+  getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
   getPrettyJSONString,
+  getSecretOfLength,
   loadJSONC,
   padPrivatePem,
   padPublicPem,

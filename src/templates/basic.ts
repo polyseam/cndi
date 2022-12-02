@@ -1,26 +1,28 @@
-import { getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 
-export default function getBasicTemplate(): string {
+export default function getBasicTemplate(kind: string): string {
+  const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
+
   return getPrettyJSONString({
     nodes: {
       entries: [
         {
           name: "x-node",
-          kind: "aws",
+          kind,
           role: "leader",
-          instance_type: "m5a.xlarge",
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128, // GiB
         },
         {
           name: "y-node",
-          kind: "aws",
-          instance_type: "m5a.large",
+          kind,
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
         {
           name: "z-node",
-          kind: "aws",
-          instance_type: "m5a.large",
+          kind,
+          [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
       ],

@@ -1,5 +1,4 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeEntrySpec,
@@ -8,6 +7,7 @@ import {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
+  NodeKind,
 } from "../types.ts";
 import getApplicationManifest from "../outputs/application-manifest.ts";
 import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
@@ -23,7 +23,15 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
-import { brightRed } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+
+import { getGoogleCredentials } from "../deployment-targets/gcp.ts";
+
+import {
+  brightRed,
+  cyan,
+  white,
+  yellow,
+} from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const owLabel = white("ow:");
 /**
@@ -146,6 +154,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const { nodes } = config;
 
   const { entries } = nodes;
+
   const deploymentTargetConfiguration = nodes?.deploymentTargetConfiguration ||
     ({} as DeploymentTargetConfiguration);
 
@@ -158,8 +167,43 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const leader = leaders[0];
 
+  const requiredProviders = new Set(
+    entries.map((entry: BaseNodeEntrySpec) => {
+      return entry.kind as NodeKind;
+    }),
+  );
+
+  if (requiredProviders.size !== 1) {
+    console.log(
+      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`),
+    );
+    console.log(
+      `your nodes have the following ${
+        brightRed(
+          `${requiredProviders.size}`,
+        )
+      } "kind"s:`,
+    );
+    requiredProviders.forEach((kind) => {
+      console.log(` - ${yellow(kind)}`);
+    });
+    console.log();
+  }
+
+  if (requiredProviders.has(NodeKind.gcp)) {
+    // if there is a service account key path, read the contents and write them to .env and this runtime env
+    // caution: this needs to run before the terraform root file is created
+    await getGoogleCredentials(context.dotEnvPath);
+  }
+
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  const terraformRootFile = getTerraformRootFile(nodes);
+  const terraformRootFile = await getTerraformRootFile({
+    leaderName: leader.name,
+    requiredProviders,
+    nodeEntryNames: entries.map((entry) => {
+      return entry.name;
+    }),
+  });
 
   // write terraform root file
   await Deno.writeTextFile(

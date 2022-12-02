@@ -2,6 +2,7 @@
 
 export const enum NodeKind {
   aws = "aws",
+  gcp = "gcp",
 }
 
 interface AirflowTlsTemplateAnswers {
@@ -35,18 +36,153 @@ interface CNDINode {
   kind: NodeKind;
   instance_type?: string;
   ami?: string;
+  machine_type?: string;
+  image?: string;
+  size?: number;
 }
 
 interface CNDINodesSpec {
   entries: Array<BaseNodeEntrySpec>;
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
+// cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
+interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+  machine_type?: string;
+  image?: string;
+  size?: number;
+  volume_size?: number;
+  instance_type?: string;
+}
+// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
+interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+  machine_type?: string;
+  image?: string;
+  size?: number;
+}
+interface GCPTerraformNodeResource {
+  resource: {
+    google_compute_instance: {
+      [name: string]: {
+        allow_stopping_for_update: boolean;
+        boot_disk: Array<{
+          auto_delete: boolean;
+          initialize_params: Array<{
+            image: string;
+            size: number;
+            type: string;
+          }>;
+        }>;
+        depends_on?: Array<string>;
+        machine_type: string;
+        metadata: {
+          "user-data"?: string;
+        };
+        name: string;
+        network_interface: Array<{
+          access_config: Array<{
+            network_tier: string;
+          }>;
+          network: string;
+          subnetwork: string;
+        }>;
+        tags: Array<string>;
+      };
+    };
+  };
+}
 
+interface GCPTerraformInstanceGroupResource {
+  cndi_cluster: {
+    description: string;
+    instances: Array<string>;
+    name: string;
+    named_port: Array<{
+      name: string;
+      port: string;
+    }>;
+    zone: string;
+  };
+}
+
+interface GCPTerraformNetworkResource {
+  cndi_vpc_network: {
+    auto_create_subnetworks: boolean;
+    name: string;
+  };
+}
+
+interface GCPTerraformSubNetworkResource {
+  cndi_vpc_subnetwork: {
+    ip_cidr_range: string;
+    name: string;
+    network: string;
+  };
+}
+interface GCPTerraformFirewallResource {
+  [cndi_firewall: string]: {
+    allow: Array<{
+      ports?: Array<string>;
+      protocol?: string;
+    }>;
+    description: string;
+    direction: string;
+    name: string;
+    network: string;
+    source_ranges: Array<string>;
+  };
+}
+interface GCPTerraformNATResource {
+  cndi_nat: {
+    name: string;
+    nat_ip_allocate_option: string;
+    router: string;
+    source_subnetwork_ip_ranges_to_nat: string;
+  };
+}
+interface GCPTerraformHTTPpForwardingRuleResource {
+  cndi_http_forwarding_rule: {
+    backend_service: string;
+    name: string;
+    network_tier: string;
+    ports: Array<string>;
+  };
+}
+interface GCPTerraformRegionHealthcheckResource {
+  cndi_healthcheck: {
+    check_interval_sec: number;
+    name: string;
+    tcp_health_check: Array<{
+      port: number;
+    }>;
+    timeout_sec: number;
+  };
+}
+interface GCPTerraformRegionBackendServiceResource {
+  cndi_backend_service: Array<{
+    backend: Array<{
+      group: string;
+    }>;
+    health_checks: Array<string>;
+    load_balancing_scheme: string;
+    name: string;
+    port_name: string;
+    protocol: string;
+  }>;
+}
+interface GCPTerraformRouterResource {
+  cndi_router: {
+    name: string;
+    network: string;
+  };
+}
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
+  volume_size?: number;
+  size?: number;
+  machine_type?: string;
 }
 
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
@@ -313,8 +449,8 @@ interface CNDIContext {
   pathToKubeseal: string;
   gitignorePath: string;
   noKeys: boolean;
-  template: string;
   interactive: boolean;
+  template?: string;
   sealedSecretsKeys?: SealedSecretsKeys;
   terraformStatePassphrase?: string;
   argoUIReadOnlyPassword?: string;
@@ -341,12 +477,13 @@ interface TerraformDependencies {
   }>;
   required_version: string;
 }
-
-interface TerraformRootFileData {
+interface GCPTerraformRootFileData {
   locals: [
     {
-      bootstrap_token: "${random_password.generated_token.result}";
+      region: string;
+      zone: "${local.region}-a";
       leader_node_ip: string;
+      bootstrap_token: "${random_password.generated_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
@@ -357,187 +494,322 @@ interface TerraformRootFileData {
   ];
   provider: {
     random: [Record<never, never>]; // equal to [{}]
-    aws: [Record<never, never>]; // equal to [{}]
+    aws?: Array<{ region: string }>;
+    google?: Array<{ region: string; project: string; zone?: string }>;
   };
 
-  resource: [{
-    random_password: RandomTerraformRandomPasswordResource;
-    aws_internet_gateway: AWSTerraformInternetGatewayResource;
-    aws_lb: AWSTerraformLoadBalancerResource;
-    aws_route: AWSTerraformRouteResource;
-    aws_route_table: AWSTerraformRouteTableResource;
-    aws_route_table_association: AWSTerraformRouteTableAssociationResource;
-    aws_subnet: AWSTerraformSubnetResource;
-    aws_security_group: AWSTerraformSecurityGroupResource;
-    aws_lb_target_group: AWSTerraformTargetGroupResource;
-    aws_lb_listener: AWSTerraformTargetGroupListenerResource;
-    aws_vpc: AWSTerraformVPCResource;
-  }];
+  resource: [
+    {
+      random_password: RandomTerraformRandomPasswordResource;
+      google_compute_instance_group: GCPTerraformInstanceGroupResource;
+      google_compute_network: GCPTerraformNetworkResource;
+      google_compute_subnetwork: GCPTerraformSubNetworkResource;
+      google_compute_firewall: GCPTerraformFirewallResource;
+      google_compute_router: GCPTerraformRouterResource;
+      google_compute_router_nat: GCPTerraformNATResource;
+      google_compute_forwarding_rule: GCPTerraformHTTPpForwardingRuleResource;
+      google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
+      google_compute_region_backend_service:
+        GCPTerraformRegionBackendServiceResource;
+    },
+  ];
+
   terraform: [TerraformDependencies];
   variable: {
-    owner: [{
-      default: "polyseam";
-      description: "Org Name";
-      type: "string";
-    }];
+    git_password: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_username: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_repo: [
+      {
+        description: "repository URL to access";
+        type: "string";
+      },
+    ];
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    argo_ui_readonly_password: [
+      {
+        description: "password for accessing the argo ui";
+        type: "string";
+      },
+    ];
+  };
+}
+interface TerraformRootFileData {
+  locals: [
+    {
+      leader_node_ip: string;
+      region: string;
+      bootstrap_token: "${random_password.generated_token.result}";
+      git_password: "${var.git_password}";
+      git_username: "${var.git_username}";
+      git_repo: "${var.git_repo}";
+      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
+      sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
+    },
+  ];
+  provider: {
+    random: [Record<never, never>]; // equal to [{}]
+    aws?: Array<{ region: string }>;
+    gcp?: Array<{ region: string; project: string }>;
+  };
 
-    vpc_cidr_block: [{
-      default: "10.0.0.0/16";
-      description: "CIDR block for the VPC";
-      type: "string";
-    }];
+  resource: [
+    {
+      random_password: RandomTerraformRandomPasswordResource;
+      aws_internet_gateway: AWSTerraformInternetGatewayResource;
+      aws_lb: AWSTerraformLoadBalancerResource;
+      aws_route: AWSTerraformRouteResource;
+      aws_route_table: AWSTerraformRouteTableResource;
+      aws_route_table_association: AWSTerraformRouteTableAssociationResource;
+      aws_subnet: AWSTerraformSubnetResource;
+      aws_security_group: AWSTerraformSecurityGroupResource;
+      aws_lb_target_group: AWSTerraformTargetGroupResource;
+      aws_lb_listener: AWSTerraformTargetGroupListenerResource;
+      aws_vpc: AWSTerraformVPCResource;
+    },
+  ];
 
-    vpc_dns_support: [{
-      default: true;
-      description: "Enable DNS support in the VPC";
-      type: "bool";
-    }];
+  terraform: [TerraformDependencies];
+  variable: {
+    owner: [
+      {
+        default: "polyseam";
+        description: "Org Name";
+        type: "string";
+      },
+    ];
 
-    vpc_dns_hostnames: [{
-      default: true;
-      description: "Enable DNS hostnames in the VPC";
-      type: "bool";
-    }];
+    vpc_cidr_block: [
+      {
+        default: "10.0.0.0/16";
+        description: "CIDR block for the VPC";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_proto: [{
-      default: "tcp";
-      description: "Protocol used for the ingress rule";
-      type: "string";
-    }];
+    vpc_dns_support: [
+      {
+        default: true;
+        description: "Enable DNS support in the VPC";
+        type: "bool";
+      },
+    ];
 
-    sg_ingress_http: [{
-      default: "80";
-      description: "Port for HTTP traffic";
-      type: "string";
-    }];
+    vpc_dns_hostnames: [
+      {
+        default: true;
+        description: "Enable DNS hostnames in the VPC";
+        type: "bool";
+      },
+    ];
 
-    sg_ingress_https: [{
-      default: "443";
-      description: "Port for HTTPS traffic";
-      type: "string";
-    }];
+    sg_ingress_proto: [
+      {
+        default: "tcp";
+        description: "Protocol used for the ingress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_ssh: [{
-      default: "22";
-      description: "Port used SSL traffic";
-      type: "string";
-    }];
+    sg_ingress_http: [
+      {
+        default: "80";
+        description: "Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_proto_all: [{
-      default: "-1";
-      description: "Protocol used for the egress rule";
-      type: "string";
-    }];
+    sg_ingress_https: [
+      {
+        default: "443";
+        description: "Port for HTTPS traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_all: [{
-      default: "0";
-      description: "Port used for the All ingress rule";
-      type: "string";
-    }];
+    sg_ingress_ssh: [
+      {
+        default: "22";
+        description: "Port used SSL traffic";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_k8s_API: [{
-      default: "16443";
-      description: "Port used for Kubernetes API server";
-      type: "string";
-    }];
+    sg_ingress_proto_all: [
+      {
+        default: "-1";
+        description: "Protocol used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_nodeport_range_start: [{
-      default: "30000";
-      description:
-        "Nodeport start range port to quickly access applications INSECURE";
-      type: "string";
-    }];
+    sg_ingress_all: [
+      {
+        default: "0";
+        description: "Port used for the All ingress rule";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_nodeport_range_end: [{
-      default: "33000";
-      description:
-        "Nodeport end range port to quickly access applications INSECURE";
-      type: "string";
-    }];
+    sg_ingress_k8s_API: [
+      {
+        default: "16443";
+        description: "Port used for Kubernetes API server";
+        type: "string";
+      },
+    ];
 
-    sg_egress_proto: [{
-      default: "-1";
-      description: "Protocol used for the egress rule";
-      type: "string";
-    }];
+    sg_ingress_nodeport_range_start: [
+      {
+        default: "30000";
+        description:
+          "Nodeport start range port to quickly access applications INSECURE";
+        type: "string";
+      },
+    ];
 
-    sg_egress_all: [{
-      default: "0";
-      description: "Port used for the egress rule";
-      type: "string";
-    }];
+    sg_ingress_nodeport_range_end: [
+      {
+        default: "33000";
+        description:
+          "Nodeport end range port to quickly access applications INSECURE";
+        type: "string";
+      },
+    ];
 
-    sg_ingress_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the ingres rule";
-      type: "string";
-    }];
+    sg_egress_proto: [
+      {
+        default: "-1";
+        description: "Protocol used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    sg_egress_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the egress rule";
-      type: "string";
-    }];
+    sg_egress_all: [
+      {
+        default: "0";
+        description: "Port used for the egress rule";
+        type: "string";
+      },
+    ];
 
-    tg_http: [{
-      default: "80";
-      description: "Target Group Port for HTTP traffic";
-      type: "string";
-    }];
+    sg_ingress_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the ingres rule";
+        type: "string";
+      },
+    ];
 
-    tg_http_proto: [{
-      default: "TCP";
-      description: "Protocol used for the HTTP Target Group";
-      type: "string";
-    }];
+    sg_egress_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the egress rule";
+        type: "string";
+      },
+    ];
 
-    tg_https: [{
-      default: "443";
-      description: "Target Group Port for HTTP traffic";
-      type: "string";
-    }];
+    tg_http: [
+      {
+        default: "80";
+        description: "Target Group Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    tg_https_proto: [{
-      default: "TCP";
-      description: "Protocol used for the HTTP Target Group";
-      type: "string";
-    }];
+    tg_http_proto: [
+      {
+        default: "TCP";
+        description: "Protocol used for the HTTP Target Group";
+        type: "string";
+      },
+    ];
 
-    sbn_public_ip: [{
-      default: true;
-      description: "Assign public IP to the instance launched into the subnet";
-      type: "bool";
-    }];
+    tg_https: [
+      {
+        default: "443";
+        description: "Target Group Port for HTTP traffic";
+        type: "string";
+      },
+    ];
 
-    sbn_cidr_block: [{
-      default: "10.0.1.0/24";
-      description: "CIDR block for the subnet";
-      type: "string";
-    }];
+    tg_https_proto: [
+      {
+        default: "TCP";
+        description: "Protocol used for the HTTP Target Group";
+        type: "string";
+      },
+    ];
 
-    destination_cidr_block: [{
-      default: "0.0.0.0/0";
-      description: "CIDR block for the route";
-      type: "string";
-    }];
+    sbn_public_ip: [
+      {
+        default: true;
+        description:
+          "Assign public IP to the instance launched into the subnet";
+        type: "bool";
+      },
+    ];
 
-    ebs_block_device_name: [{
-      default: "/dev/sda1";
-      description: "name of the ebs block device";
-      type: "string";
-    }];
+    sbn_cidr_block: [
+      {
+        default: "10.0.1.0/24";
+        description: "CIDR block for the subnet";
+        type: "string";
+      },
+    ];
 
-    ebs_block_device_size: [{
-      default: "80";
-      description: "name of the ebs block device";
-      type: "string";
-    }];
+    destination_cidr_block: [
+      {
+        default: "0.0.0.0/0";
+        description: "CIDR block for the route";
+        type: "string";
+      },
+    ];
 
-    ebs_block_device_volume_type: [{
-      default: "gp3";
-      description: "volume_type of the ebs block device";
-      type: "string";
-    }];
+    ebs_block_device_name: [
+      {
+        default: "/dev/sda1";
+        description: "name of the ebs block device";
+        type: "string";
+      },
+    ];
+
+    ebs_block_device_size: [
+      {
+        default: "80";
+        description: "name of the ebs block device";
+        type: "string";
+      },
+    ];
+
+    ebs_block_device_volume_type: [
+      {
+        default: "gp3";
+        description: "volume_type of the ebs block device";
+        type: "string";
+      },
+    ];
 
     git_password: [
       {
@@ -602,6 +874,11 @@ export type {
   CNDINodesSpec,
   DeploymentTargetConfiguration,
   EnvObject,
+  GCPDeploymentTargetConfiguration,
+  GCPNodeEntrySpec,
+  GCPTerraformInstanceGroupResource,
+  GCPTerraformNodeResource,
+  GCPTerraformRootFileData,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,

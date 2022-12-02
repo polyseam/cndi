@@ -1,3 +1,5 @@
+import { getSecretOfLength } from "../utils.ts";
+
 const loadArgoUIReadOnlyPassword = (): string | null => {
   const argo_ui_readonly_password = Deno.env
     .get("ARGO_UI_READONLY_PASSWORD")
@@ -11,7 +13,7 @@ const loadArgoUIReadOnlyPassword = (): string | null => {
 };
 
 const createArgoUIReadOnlyPassword = (): string => {
-  return crypto.randomUUID().replaceAll("-", "");
+  return getSecretOfLength(32);
 };
 
 export { createArgoUIReadOnlyPassword, loadArgoUIReadOnlyPassword };
