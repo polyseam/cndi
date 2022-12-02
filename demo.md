@@ -13,7 +13,7 @@ GitHub CLI for creating GitHub Actions Secrets, but that isn't necessary.
 
 ```bash
 # if you are on windows you should run this in 'git bash'
-curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
 4. Download the following file and place it in the `my-repo` folder.
