@@ -24,7 +24,6 @@ const getTerraformNodeResource = (
   controllerName: string,
 ): string => {
   const { kind } = entry;
-
   switch (kind) {
     case "aws":
       return getAWSNodeResource(
@@ -106,12 +105,11 @@ const getGCPNodeResource = (
 
   if (role === "leader") {
     const user_data =
-      '"user-data":${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" })}';
+      '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" })}';
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.google_compute_instance[name].metadata
-      .user_data = user_data;
+    leaderNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -127,7 +125,7 @@ const getGCPNodeResource = (
     }
 
     const user_data =
-      '"user-data":${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
 
     const controllerNodeResourceObj = { ...nodeResource };
 
@@ -136,8 +134,7 @@ const getGCPNodeResource = (
         `google_compute_instance.${leaderName}`,
       ];
 
-    controllerNodeResourceObj.resource.google_compute_instance[name].metadata
-      .user_data = user_data;
+    controllerNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
