@@ -684,5 +684,4 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   },
 };
 
-export default terraformRootFileData;
-gcpTerraformRootFileData;
+export {terraformRootFileData,gcpTerraformRootFileData};
