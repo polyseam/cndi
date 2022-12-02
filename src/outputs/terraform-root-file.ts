@@ -4,7 +4,6 @@ import { NodeKind, TerraformDependencies } from "../types.ts";
 import {terraformRootFileData,gcpTerraformRootFileData} from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { brightWhite } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
@@ -43,6 +42,8 @@ const getTerraformRootFile = async ({
   requiredProviders,
 }: GetTerraformRootFileArgs): Promise<string> => {
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
+
+  // copy original terraformRootFileData to working copy for GCP using js spread operator
   const mainTerraformFileObject = { ...terraformRootFileData };
   const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData};
   if (!googleCredentials) {
