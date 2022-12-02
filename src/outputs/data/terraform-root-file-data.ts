@@ -1,4 +1,7 @@
-import { TerraformRootFileData } from "../../types.ts";
+import {
+  GCPTerraformRootFileData,
+  TerraformRootFileData,
+} from "../../types.ts";
 
 const terraformRootFileData: TerraformRootFileData = {
   locals: [
@@ -492,5 +495,193 @@ const terraformRootFileData: TerraformRootFileData = {
     ],
   },
 };
+const gcpTerraformRootFileData: GCPTerraformRootFileData = {
+  locals: [
+    {
+      zone: "${local.region}-a",
+      region: "",
+      leader_node_ip: "",
+      bootstrap_token: "${random_password.generated_token.result}",
+      git_password: "${var.git_password}",
+      git_username: "${var.git_username}",
+      git_repo: "${var.git_repo}",
+      argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
+      sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
+      sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
+    },
+  ],
+  provider: {
+    random: [{}],
+  },
+  resource: [
+    {
+      random_password: {
+        generated_token: [
+          {
+            length: 32,
+            special: false,
+            upper: false,
+          },
+        ],
+      },
+      google_compute_instance_group: {
+        cndi_cluster: {
+          description: "group of instances that form a cndi cluster",
+          instances: [
+           
+          ],
+          name: "cndi-cluster",
+          named_port: [
+            { name: "http", port: "80" },
+            { name: "https", port: "443" },
+          ],
+          zone: "${local.zone}",
+        },
+      },
+      google_compute_network: {
+        cndi_vpc_network: {
+          auto_create_subnetworks: false,
+          name: "cndi-vpc-network",
+        },
+      },
+      google_compute_subnetwork: {
+        cndi_vpc_subnetwork: {
+          ip_cidr_range: "10.0.0.0/16",
+          name: "cndi-vpc-network-subnetwork",
+          network: "${google_compute_network.cndi_vpc_network.id}",
+        },
+      },
+      google_compute_firewall: {
+        "cndi_allow_external_traffic": {
+          allow: [
+            { ports: ["22"], protocol: "tcp" },
+            { ports: ["80"], protocol: "tcp" },
+            { ports: ["443"], protocol: "tcp" },
+            { ports: ["30000-33000"], protocol: "tcp" },
+          ],
+          description: "Security firewall",
+          direction: "INGRESS",
+          name: "cndi-allow-external-traffic",
+          network: "${google_compute_network.cndi_vpc_network.id}",
+          source_ranges: ["0.0.0.0/0"],
+        },
+        "cndi_allow_internal_traffic": {
+          allow: [
+            { ports: ["0-65535"], protocol: "tcp" },
+            { ports: ["0-65535"], protocol: "udp" },
+            { protocol: "icmp" },
+          ],
+          description:
+            "Inbound rule that enables traffic between EC2 instances in the VPC",
+          direction: "INGRESS",
+          name: "cndi-allow-internal-traffic",
+          network: "${google_compute_network.cndi_vpc_network.id}",
+          source_ranges: [
+            "${google_compute_subnetwork.cndi_vpc_subnetwork.ip_cidr_range}",
+          ],
+        },
+      },
+      google_compute_router: {
+        cndi_router: {
+          name: "cndi-router",
+          network: "${google_compute_network.cndi_vpc_network.id}",
+        },
+      },
+      google_compute_router_nat: {
+        cndi_nat: {
+          name: "cndi-router-nat",
+          nat_ip_allocate_option: "AUTO_ONLY",
+          router: "${google_compute_router.cndi_router.name}",
+          source_subnetwork_ip_ranges_to_nat: "ALL_SUBNETWORKS_ALL_IP_RANGES",
+        },
+      },
+      google_compute_forwarding_rule: {
+        cndi_http_forwarding_rule: {
+          backend_service:
+            "${google_compute_region_backend_service.cndi_backend_service.id}",
+          name: "cndi-forwarding-rule",
+          network_tier: "STANDARD",
+          ports: ["80", "443"],
+        },
+      },
+      google_compute_region_health_check: {
+        cndi_healthcheck: {
+          check_interval_sec: 1,
+          name: "cndi-healthcheck",
+          tcp_health_check: [{ port: 80 }],
+          timeout_sec: 1,
+        },
+      },
+      google_compute_region_backend_service: {
+        cndi_backend_service: [
+          {
+            backend: [
+              { group: "${google_compute_instance_group.cndi_cluster.id}" },
+            ],
+            health_checks: [
+              "${google_compute_region_health_check.cndi_healthcheck.id}",
+            ],
+            load_balancing_scheme: "EXTERNAL",
+            name: "cndi-backend-service",
+            port_name: "http",
+            protocol: "TCP",
+          },
+        ],
+      },
+    },
+  ],
 
-export default terraformRootFileData;
+  terraform: [
+    {
+      required_providers: [
+        {
+          external: {
+            source: "hashicorp/external",
+            version: "2.2.2",
+          },
+        },
+      ],
+      required_version: ">= 1.2.0",
+    },
+  ],
+  variable: {
+    git_password: [
+      {
+        description: "password for accessing the repositories",
+        type: "string",
+      },
+    ],
+    git_username: [
+      {
+        description: "password for accessing the repositories",
+        type: "string",
+      },
+    ],
+    git_repo: [
+      {
+        description: "repository URL to access",
+        type: "string",
+      },
+    ],
+    argo_ui_readonly_password: [
+      {
+        description: "password for accessing the argo ui",
+        type: "string",
+      },
+    ],
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets",
+        type: "string",
+      },
+    ],
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets",
+        type: "string",
+      },
+    ],
+  },
+};
+
+export {terraformRootFileData,gcpTerraformRootFileData};

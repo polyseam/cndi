@@ -200,7 +200,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const terraformRootFile = await getTerraformRootFile({
     leaderName: leader.name,
     requiredProviders,
+    nodeEntryNames:entries.map((entry)=>{
+      return entry.name
+    })
   });
+
 
   // write terraform root file
   await Deno.writeTextFile(

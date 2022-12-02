@@ -10,6 +10,9 @@ import {
   AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
   DeploymentTargetConfiguration,
+  GCPDeploymentTargetConfiguration,
+  GCPNodeEntrySpec,
+  GCPTerraformNodeResource,
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
@@ -21,12 +24,17 @@ const getTerraformNodeResource = (
   controllerName: string,
 ): string => {
   const { kind } = entry;
-
   switch (kind) {
     case "aws":
       return getAWSNodeResource(
         entry as AWSNodeEntrySpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
+        controllerName,
+      );
+    case "gcp":
+      return getGCPNodeResource(
+        entry as GCPNodeEntrySpec,
+        deploymentTargetConfiguration.aws as GCPDeploymentTargetConfiguration,
         controllerName,
       );
 
@@ -36,6 +44,104 @@ const getTerraformNodeResource = (
         brightRed(`node kind: ${white(`"${kind}"`)} not yet supported`),
       );
       Deno.exit(1);
+  }
+};
+const getGCPNodeResource = (
+  entry: GCPNodeEntrySpec,
+  deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
+  leaderName: string,
+) => {
+  const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
+  const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
+  const { name, role } = entry;
+  const image = entry?.image || deploymentTargetConfiguration?.image ||
+    DEFAULT_IMAGE;
+  const machine_type = entry?.machine_type || entry?.instance_type||
+    deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
+  const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties. 
+  const auto_delete = true; // Whether the disk will be auto-deleted when the instance is deleted. Defaults to true.
+ // The size of the image in gigabytes
+  const DEFAULT_SIZE= 100
+  const size = entry?.size || entry?.volume_size  ||DEFAULT_SIZE
+  const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
+  const network_tier = "STANDARD";
+  const network = "${google_compute_network.cndi_vpc_network.id}";//The name of the network to attach this interface to.
+  const subnetwork = "${google_compute_subnetwork.cndi_vpc_subnetwork.id}";//The name or self_link of the subnetwork to attach this interface to.
+  const access_config = [{ network_tier }];//Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
+
+
+  const boot_disk = [
+    {
+      auto_delete,
+      initialize_params: [
+        { image, size, type },
+      ],
+    },
+  ];
+
+  const network_interface = [
+    {
+      access_config,
+      network,
+      subnetwork,
+    },
+  ];
+
+  const nodeResource: GCPTerraformNodeResource = {
+    resource: {
+      google_compute_instance: {
+        [name]: {
+          allow_stopping_for_update,
+          boot_disk,
+          depends_on: [],
+          machine_type,
+          metadata: {},
+          name: name,
+          network_interface,
+          tags: [name],
+        },
+      },
+    },
+  };
+
+  if (role === "leader") {
+    const user_data =
+      '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" })}';
+
+    const leaderNodeResourceObj = { ...nodeResource };
+
+    leaderNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
+
+    const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
+
+    return leaderNodeResourceString;
+  } else {
+    // if the role is non-null and also not controller, warn the user and run default
+    if (role?.length && role !== "controller") {
+      console.log(
+        terraformNodeResourceLabel,
+        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+      );
+      console.log(yellow("defaulting node role to"), '"controller"\n');
+    }
+
+    const user_data =
+      '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+
+    const controllerNodeResourceObj = { ...nodeResource };
+
+    controllerNodeResourceObj.resource.google_compute_instance[name]
+      .depends_on = [
+        `google_compute_instance.${leaderName}`,
+      ];
+
+    controllerNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
+
+    const controllerNodeResourceString = getPrettyJSONString(
+      controllerNodeResourceObj,
+    );
+
+    return controllerNodeResourceString;
   }
 };
 
@@ -48,13 +154,14 @@ const getAWSNodeResource = (
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
   const { name, role } = entry;
   const ami = entry?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
-  const instance_type = entry?.instance_type ||
+  const instance_type = entry?.instance_type || entry?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 
+  const DEFAULT_VOLUME_SIZE = 100
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
-  const volume_size = 80; //GiB
+  const volume_size = entry?.volume_size || entry?.size|| DEFAULT_VOLUME_SIZE//GiB
   const volume_type = "gp3"; // general purpose SSD
 
   // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]

@@ -1,7 +1,7 @@
 import { getPrettyJSONString } from "../utils.ts";
 import { NodeKind, TerraformDependencies } from "../types.ts";
 
-import terraformRootFileData from "./data/terraform-root-file-data.ts";
+import { terraformRootFileData, gcpTerraformRootFileData } from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
@@ -33,6 +33,7 @@ const googleTerraformProviderDependency = {
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
+  nodeEntryNames: Array<string>
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -40,13 +41,16 @@ const terraformRootFileLabel = white("outputs/terraform-root-file:");
 const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
+  nodeEntryNames
 }: GetTerraformRootFileArgs): Promise<string> => {
-  const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
+
 
   // copy original terraformRootFileData to working copy for GCP using js spread operator
-  const mainTerraformFileObject = { ...terraformRootFileData };
+
 
   if (requiredProviders.has("gcp")) {
+    const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData };
+    const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
     if (!googleCredentials) {
       console.log(
         terraformRootFileLabel,
@@ -79,36 +83,48 @@ const getTerraformRootFile = async ({
     terraformDependencies.required_providers[0].google =
       googleTerraformProviderDependency;
 
-    mainTerraformFileObject.locals[0].leader_node_ip =
+    gcpMainTerraformFileObject.locals[0].leader_node_ip =
       `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
-    mainTerraformFileObject.provider.gcp = [
-      { region, project: parsedJSONServiceAccountKey.project_id },
+    gcpMainTerraformFileObject.locals[0].region =
+      region
+
+    gcpMainTerraformFileObject.resource[0].google_compute_instance_group.cndi_cluster.instances = nodeEntryNames.map((name) =>
+      `\${google_compute_instance.${name}.id}`
+      )
+
+
+    gcpMainTerraformFileObject.provider.google = [
+      { region, zone: `${region}-a`, project: parsedJSONServiceAccountKey.project_id },
     ];
 
-    mainTerraformFileObject.terraform = [terraformDependencies];
+    gcpMainTerraformFileObject.terraform = [terraformDependencies];
 
-    return getPrettyJSONString(mainTerraformFileObject);
+    return getPrettyJSONString(gcpMainTerraformFileObject);
   }
 
   // add parts of setup-cndi.tf file that are required if kind===aws
   if (requiredProviders.has(NodeKind.aws)) {
+    const awsMainTerraformFileObject = { ...terraformRootFileData };
     const region = Deno.env.get("AWS_REGION") || DEFAULT_AWS_REGION;
 
-    mainTerraformFileObject.locals[0].leader_node_ip =
+    awsMainTerraformFileObject.locals[0].leader_node_ip =
       `\${aws_instance.${leaderName}.private_ip}`;
 
     // TODO: verify that this provider configuration is being consumed instead of the environment variable
-    mainTerraformFileObject.provider.aws = [{ region }];
+    awsMainTerraformFileObject.provider.aws = [{ region }];
 
     // add aws provider dependency
     terraformDependencies.required_providers[0].aws =
       awsTerraformProviderDependency;
 
-    mainTerraformFileObject.terraform = [terraformDependencies];
+    awsMainTerraformFileObject.terraform = [terraformDependencies];
+    return getPrettyJSONString(awsMainTerraformFileObject);
   }
 
-  return getPrettyJSONString(mainTerraformFileObject);
+  console.log(terraformRootFileLabel, "required providers must contain either \"gcp\" or \"aws\"")
+  Deno.exit(1)
+
 };
 
 export default getTerraformRootFile;
