@@ -9,7 +9,7 @@ import {
 
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 
-import { trimPemString } from "../utils.ts";
+import { loadJSONC, trimPemString } from "../utils.ts";
 
 import {
   brightRed,
@@ -295,9 +295,9 @@ export default async function init(c: CNDIContext) {
   if (useCNDIConfigFile) {
     try {
       console.log(`cndi init --file "${c.pathToConfig}"\n`);
-      const config = JSON.parse(
-        Deno.readTextFileSync(c.pathToConfig),
-      ) as CNDIConfig;
+      const config = await loadJSONC(
+        c.pathToConfig,
+      ) as unknown as CNDIConfig;
       // 1. the user brought their own config file, we use the kind of the first node
       kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
     } catch (e) {
