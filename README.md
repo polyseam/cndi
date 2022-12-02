@@ -1,23 +1,23 @@
 <div align="center">
   <br>
   <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
-  <h1>cndi-next</h1>
+  <h1>cndi</h1>
   <div>Deploy <strong>Cloud-Native Data Infratructure</strong> in Minutes</div>
 </div>
 <br>
 <p align="center">
-  <a href="https://github.com/polyseam/cndi-next/actions/workflows/main-latest.yaml">
-    <img src="https://github.com/polyseam/cndi-next/actions/workflows/main-latest.yaml/badge.svg" alt="main release" style="max-width: 100%;">
+  <a href="https://github.com/polyseam/cndi/actions/workflows/main-latest.yaml">
+    <img src="https://github.com/polyseam/cndi/actions/workflows/main-latest.yaml/badge.svg" alt="main release" style="max-width: 100%;">
   </a>
   <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
-  <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi-next" alt="GitHub code size in bytes">
-  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi-next" alt="GitHub commit activity">
-  <a href="https://github.com/polyseam/cndi-next/issues">
-    <img src="https://img.shields.io/github/issues/polyseam/cndi-next" alt="GitHub issues">
+  <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi" alt="GitHub code size in bytes">
+  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi" alt="GitHub commit activity">
+  <a href="https://github.com/polyseam/cndi/issues">
+    <img src="https://img.shields.io/github/issues/polyseam/cndi" alt="GitHub issues">
   </a>
   <!-- TODO: add when there are releases-->
-  <!-- <a href="https://github.com/polyseam/cndi-next/releases">
-    <img src="https://img.shields.io/github/v/release/polyseam/cndi-next.svg?style=flat" alt="GitHub Release">
+  <!-- <a href="https://github.com/polyseam/cndi/releases">
+    <img src="https://img.shields.io/github/v/release/polyseam/cndi.svg?style=flat" alt="GitHub Release">
   </a> -->
   <a href="https://discord.gg/ygt2rpegJ5">
     <img src="https://img.shields.io/discord/956275914596040754.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" alt="Discord">
@@ -27,7 +27,7 @@
   </a>
 </p>
 
-This is the next version of CNDI. It deploys an entire data stack in minutes!
+Welcome to CNDI, it deploys an entire data stack in minutes!
 
 It's perfect for deploying Data Products consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
@@ -37,7 +37,7 @@ the needs of each stack.
 
 ```bash
 # if you are on windows you should run this in 'git bash'
-curl -fsSL https://raw.githubusercontent.com/polyseam/cndi-next/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
 ## configuration
@@ -108,7 +108,7 @@ The next thing we need to configure is the applications that will actually run
 on the cluster. With CNDIv1 we focused on making it a breeze to deploy
 [Apache Airflow](https://github.com/apache/airflow) in Kubernetes.
 
-Lets see what that might look like now in cndi-next:
+Lets see what that might look like now in cndi:
 
 ```jsonc
 {
@@ -303,7 +303,7 @@ You are also able to modify the manifests in `cndi/cluster` and make changes to
 `cndi overwrite-with -f my-new-config.json` after manual changes, you will blast
 those changes away unless they are also present in `my-new-config.json` .
 
-## building cndi-next (Contributor Guide)
+## building cndi (Contributor Guide)
 
 If you are hoping to contribute to this project and want to learn the ropes, you
 are in the right place. Let's start with setting up your environment:
@@ -316,7 +316,7 @@ clone to, it will matter later when we setup some convenience aliases.
 **1. Clone Repo:**
 
 ```bash
-git clone https://github.com/polyseam/cndi-next
+git clone https://github.com/polyseam/cndi
 ```
 
 **2. Install Deno:**
@@ -331,7 +331,7 @@ source code as if it were the regular CLI, without colliding with the released
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
-alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi-next/main.ts"
+alias cndi="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
 ```
 
 ### your first cluster
@@ -339,7 +339,7 @@ alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi-next/main.ts"
 You can now setup a new directory for the cluster you intend to create. Start
 with an empty folder and create a `my-cndi-config.jsonc` file. This will specify
 what you want in your cluster for applications, manifests, and nodes. To see an
-example checkout the file `cndi-config.jsonc` inside the `cndi-next` repo.
+example checkout the file `cndi-config.jsonc` inside the `cndi` repo.
 
 ```bash
 cndi init -f my-cndi-config.jsonc
