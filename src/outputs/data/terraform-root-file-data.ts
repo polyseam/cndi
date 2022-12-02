@@ -527,9 +527,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
       google_compute_instance_group: {
         cndi_cluster: {
           description: "group of instances that form a cndi cluster",
-          instances: [
-           
-          ],
+          instances: [],
           name: "cndi-cluster",
           named_port: [
             { name: "http", port: "80" },
@@ -684,4 +682,4 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   },
 };
 
-export {terraformRootFileData,gcpTerraformRootFileData};
+export { gcpTerraformRootFileData, terraformRootFileData };

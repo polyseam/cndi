@@ -38,7 +38,7 @@ interface CNDINode {
   ami?: string;
   machine_type?: string;
   image?: string;
-  size?:number
+  size?: number;
 }
 
 interface CNDINodesSpec {
@@ -49,141 +49,139 @@ interface CNDINodesSpec {
 interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
   machine_type?: string;
   image?: string;
-  size?:number
-  volume_size?:number
+  size?: number;
+  volume_size?: number;
   instance_type?: string;
-
 }
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
 interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
   machine_type?: string;
   image?: string;
-  size?:number
+  size?: number;
 }
 interface GCPTerraformNodeResource {
   resource: {
     google_compute_instance: {
       [name: string]: {
-        allow_stopping_for_update: boolean
+        allow_stopping_for_update: boolean;
         boot_disk: Array<{
-          auto_delete: boolean
+          auto_delete: boolean;
           initialize_params: Array<{
-            image: string
-            size: number
-            type: string
-          }>
-        }>
-        depends_on?: Array<string>
-        machine_type: string
+            image: string;
+            size: number;
+            type: string;
+          }>;
+        }>;
+        depends_on?: Array<string>;
+        machine_type: string;
         metadata: {
-          "user-data"?: string
-        }
-        name: string
+          "user-data"?: string;
+        };
+        name: string;
         network_interface: Array<{
           access_config: Array<{
-            network_tier: string
-          }>
-          network: string
-          subnetwork: string
-        }>
-        tags: Array<string>
-      }
-    },
-
-  }
+            network_tier: string;
+          }>;
+          network: string;
+          subnetwork: string;
+        }>;
+        tags: Array<string>;
+      };
+    };
+  };
 }
 
 interface GCPTerraformInstanceGroupResource {
   cndi_cluster: {
-    description: string
-    instances: Array<string>
-    name: string
+    description: string;
+    instances: Array<string>;
+    name: string;
     named_port: Array<{
-      name: string
-      port: string
-    }>
-    zone: string
-  }
+      name: string;
+      port: string;
+    }>;
+    zone: string;
+  };
 }
 
 interface GCPTerraformNetworkResource {
   cndi_vpc_network: {
-    auto_create_subnetworks: boolean
-    name: string
-  }
+    auto_create_subnetworks: boolean;
+    name: string;
+  };
 }
 
 interface GCPTerraformSubNetworkResource {
   cndi_vpc_subnetwork: {
-    ip_cidr_range: string
-    name: string
-    network: string
-  }
+    ip_cidr_range: string;
+    name: string;
+    network: string;
+  };
 }
 interface GCPTerraformFirewallResource {
   [cndi_firewall: string]: {
     allow: Array<{
-      ports?: Array<string>
-      protocol?: string
-    }>
-    description: string
-    direction: string
-    name: string
-    network: string
-    source_ranges: Array<string>
-  }
+      ports?: Array<string>;
+      protocol?: string;
+    }>;
+    description: string;
+    direction: string;
+    name: string;
+    network: string;
+    source_ranges: Array<string>;
+  };
 }
 interface GCPTerraformNATResource {
   cndi_nat: {
-    name: string
-    nat_ip_allocate_option: string
-    router: string
-    source_subnetwork_ip_ranges_to_nat: string
-  }
+    name: string;
+    nat_ip_allocate_option: string;
+    router: string;
+    source_subnetwork_ip_ranges_to_nat: string;
+  };
 }
 interface GCPTerraformHTTPpForwardingRuleResource {
   cndi_http_forwarding_rule: {
-    backend_service: string
-    name: string
-    network_tier: string
-    ports: Array<string>
-  }
+    backend_service: string;
+    name: string;
+    network_tier: string;
+    ports: Array<string>;
+  };
 }
 interface GCPTerraformRegionHealthcheckResource {
   cndi_healthcheck: {
-    check_interval_sec: number
-    name: string
+    check_interval_sec: number;
+    name: string;
     tcp_health_check: Array<{
-      port: number
-    }>
-    timeout_sec: number
-  }
+      port: number;
+    }>;
+    timeout_sec: number;
+  };
 }
 interface GCPTerraformRegionBackendServiceResource {
   cndi_backend_service: Array<{
     backend: Array<{
-      group: string
-    }>
-    health_checks: Array<string>
-    load_balancing_scheme: string
-    name: string
-    port_name: string
-    protocol: string
-  }>
+      group: string;
+    }>;
+    health_checks: Array<string>;
+    load_balancing_scheme: string;
+    name: string;
+    port_name: string;
+    protocol: string;
+  }>;
 }
 interface GCPTerraformRouterResource {
   cndi_router: {
-    name: string
-    network: string
-  }
+    name: string;
+    network: string;
+  };
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
-  volume_size?:number
-  size?:number
+  volume_size?: number;
+  size?: number;
   machine_type?: string;
 }
 
@@ -481,7 +479,8 @@ interface TerraformDependencies {
 }
 interface GCPTerraformRootFileData {
   locals: [
-    { region: string;
+    {
+      region: string;
       zone: "${local.region}-a";
       leader_node_ip: string;
       bootstrap_token: "${random_password.generated_token.result}";
@@ -502,16 +501,17 @@ interface GCPTerraformRootFileData {
   resource: [
     {
       random_password: RandomTerraformRandomPasswordResource;
-      google_compute_instance_group :GCPTerraformInstanceGroupResource
-      google_compute_network: GCPTerraformNetworkResource
-      google_compute_subnetwork: GCPTerraformSubNetworkResource
-      google_compute_firewall: GCPTerraformFirewallResource
-      google_compute_router: GCPTerraformRouterResource
-      google_compute_router_nat: GCPTerraformNATResource
+      google_compute_instance_group: GCPTerraformInstanceGroupResource;
+      google_compute_network: GCPTerraformNetworkResource;
+      google_compute_subnetwork: GCPTerraformSubNetworkResource;
+      google_compute_firewall: GCPTerraformFirewallResource;
+      google_compute_router: GCPTerraformRouterResource;
+      google_compute_router_nat: GCPTerraformNATResource;
       google_compute_forwarding_rule: GCPTerraformHTTPpForwardingRuleResource;
-      google_compute_region_health_check: GCPTerraformRegionHealthcheckResource
-      google_compute_region_backend_service: GCPTerraformRegionBackendServiceResource
-    }
+      google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
+      google_compute_region_backend_service:
+        GCPTerraformRegionBackendServiceResource;
+    },
   ];
 
   terraform: [TerraformDependencies];
@@ -874,6 +874,11 @@ export type {
   CNDINodesSpec,
   DeploymentTargetConfiguration,
   EnvObject,
+  GCPDeploymentTargetConfiguration,
+  GCPNodeEntrySpec,
+  GCPTerraformInstanceGroupResource,
+  GCPTerraformNodeResource,
+  GCPTerraformRootFileData,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
@@ -881,9 +886,4 @@ export type {
   Template,
   TerraformDependencies,
   TerraformRootFileData,
-  GCPTerraformRootFileData,
-  GCPTerraformNodeResource,
-  GCPNodeEntrySpec,
-  GCPDeploymentTargetConfiguration,
-  GCPTerraformInstanceGroupResource
 };

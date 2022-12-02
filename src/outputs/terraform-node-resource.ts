@@ -56,19 +56,18 @@ const getGCPNodeResource = (
   const { name, role } = entry;
   const image = entry?.image || deploymentTargetConfiguration?.image ||
     DEFAULT_IMAGE;
-  const machine_type = entry?.machine_type || entry?.instance_type||
+  const machine_type = entry?.machine_type || entry?.instance_type ||
     deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
-  const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties. 
+  const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
   const auto_delete = true; // Whether the disk will be auto-deleted when the instance is deleted. Defaults to true.
- // The size of the image in gigabytes
-  const DEFAULT_SIZE= 100
-  const size = entry?.size || entry?.volume_size  ||DEFAULT_SIZE
+  // The size of the image in gigabytes
+  const DEFAULT_SIZE = 100;
+  const size = entry?.size || entry?.volume_size || DEFAULT_SIZE;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
   const network_tier = "STANDARD";
-  const network = "${google_compute_network.cndi_vpc_network.id}";//The name of the network to attach this interface to.
-  const subnetwork = "${google_compute_subnetwork.cndi_vpc_subnetwork.id}";//The name or self_link of the subnetwork to attach this interface to.
-  const access_config = [{ network_tier }];//Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
-
+  const network = "${google_compute_network.cndi_vpc_network.id}"; //The name of the network to attach this interface to.
+  const subnetwork = "${google_compute_subnetwork.cndi_vpc_subnetwork.id}"; //The name or self_link of the subnetwork to attach this interface to.
+  const access_config = [{ network_tier }]; //Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
 
   const boot_disk = [
     {
@@ -110,7 +109,8 @@ const getGCPNodeResource = (
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
+    leaderNodeResourceObj.resource.google_compute_instance[name]
+      .metadata["user-data"] = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -135,7 +135,8 @@ const getGCPNodeResource = (
         `google_compute_instance.${leaderName}`,
       ];
 
-    controllerNodeResourceObj.resource.google_compute_instance[name].metadata["user-data"] = user_data;
+    controllerNodeResourceObj.resource.google_compute_instance[name]
+      .metadata["user-data"] = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
@@ -158,10 +159,10 @@ const getAWSNodeResource = (
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 
-  const DEFAULT_VOLUME_SIZE = 100
+  const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
-  const volume_size = entry?.volume_size || entry?.size|| DEFAULT_VOLUME_SIZE//GiB
+  const volume_size = entry?.volume_size || entry?.size || DEFAULT_VOLUME_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
 
   // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
