@@ -83,7 +83,7 @@ const getGCPNodeResource = (
   ];
   const google_compute_disk = {
     [`${name}-cndi-disk`]: {
-      name,
+      name: `${name}-cndi-disk`,
       image,
       size,
       type,
