@@ -522,7 +522,7 @@ interface GCPTerraformRootFileData {
       google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
       google_compute_region_backend_service:
         GCPTerraformRegionBackendServiceResource;
-      google_project_services: GCPTerraformProjectServiceResource;
+      google_project_service: GCPTerraformProjectServiceResource;
     },
   ];
 
