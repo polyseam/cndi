@@ -65,12 +65,7 @@ interface GCPTerraformNodeResource {
       [name: string]: {
         allow_stopping_for_update: boolean;
         boot_disk: Array<{
-          auto_delete: boolean;
-          initialize_params: Array<{
-            image: string;
-            size: number;
-            type: string;
-          }>;
+          source: string;
         }>;
         depends_on?: Array<string>;
         machine_type: string;
