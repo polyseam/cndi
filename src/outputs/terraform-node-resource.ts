@@ -59,9 +59,7 @@ const getGCPNodeResource = (
   const machine_type = entry?.machine_type || entry?.instance_type ||
     deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
-  const auto_delete = true; // Whether the disk will be auto-deleted when the instance is deleted. Defaults to true.
-  // The size of the image in gigabytes
-  const DEFAULT_SIZE = 100;
+  const DEFAULT_SIZE = 100; // The size of the image in gigabytes
   const size = entry?.size || entry?.volume_size || DEFAULT_SIZE;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
   const network_tier = "STANDARD";
