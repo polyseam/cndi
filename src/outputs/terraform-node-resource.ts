@@ -67,7 +67,7 @@ const getGCPNodeResource = (
   const subnetwork =
     "${google_compute_subnetwork.cndi_vpc_subnetwork.self_link}"; //The name or self_link of the subnetwork to attach this interface to.
   const access_config = [{ network_tier }]; //Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
-  const source = `google_compute_disk.${name}-cndi-disk.self_link`;
+  const source = `\${google_compute_disk.${name}-cndi-disk.self_link}`;
   const boot_disk = [
     {
       source,
