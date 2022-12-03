@@ -88,9 +88,18 @@ interface GCPTerraformNodeResource {
         tags: Array<string>;
       };
     };
+    google_compute_disk: GCPTerraformDiskResource;
   };
 }
 
+interface GCPTerraformDiskResource {
+  [cndi_disk: string]: {
+    name: string;
+    size: number;
+    type: string;
+    image: string;
+  };
+}
 
 interface GCPTerraformProjectServicesResource {
   cndi_enable_project_services: {
