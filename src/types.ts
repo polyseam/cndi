@@ -91,6 +91,13 @@ interface GCPTerraformNodeResource {
   };
 }
 
+
+interface GCPTerraformProjectServicesResource {
+  cndi_enable_project_services: {
+    disable_on_destroy: boolean;
+    services: Array<string>;
+  };
+}
 interface GCPTerraformInstanceGroupResource {
   cndi_cluster: {
     description: string;
@@ -511,6 +518,7 @@ interface GCPTerraformRootFileData {
       google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
       google_compute_region_backend_service:
         GCPTerraformRegionBackendServiceResource;
+      google_project_services: GCPTerraformProjectServicesResource;
     },
   ];
 
