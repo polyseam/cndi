@@ -83,7 +83,14 @@ const getGCPNodeResource = (
       subnetwork,
     },
   ];
-
+  const google_compute_disk = {
+    [`${name}-cndi-disk`]: {
+      name,
+      image,
+      size,
+      type,
+    },
+  };
   const nodeResource: GCPTerraformNodeResource = {
     resource: {
       google_compute_instance: {
@@ -98,6 +105,7 @@ const getGCPNodeResource = (
           tags: [name],
         },
       },
+      google_compute_disk,
     },
   };
 
