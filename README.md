@@ -46,14 +46,16 @@ Let's run through the 3 parts of a `cndi-config.json` file.
 
 ### nodes
 
-We specify an object called `nodes` with some default configuration and an array
-of node `entries`. Each `node entry` represents a virtual machine we will create
-on your behalf.
+We specify an object called `nodes` with an array of node `entries`. Each
+`node entry` represents a virtual machine we will create on your behalf.
 
 These nodes will become nodes in your Kubernetes cluster, but you don't need to
 worry about that. You specify how many virtual machines to create in order to
 run your new data stack, and you specify where they will be deployed, and how
 powerful they are.
+
+Don't worry too much about getting the number of nodes or their size right the
+first time, you can adjust them later on the fly!
 
 These nodes must each be one of the following `kinds`:
 
@@ -75,23 +77,23 @@ entries to deploy:
   "nodes": {
     "entries": [
       {
+        "name": "gcp-alpha",
         "kind": "gcp",
         "role": "leader",
-        "name": "gcp-alpha",
-        "machine_type": "m5a.xlarge"
+        "machine_type": "n2-standard-16"
       },
       {
         "name": "gcp-beta",
         "kind": "gcp"
       },
       {
-        "name": "aws-charlie",
-        "kind": "aws" // whoa, multicloud!
+        "name": "gcp-charlie",
+        "kind": "gcp"
       }
     ],
     "deploymentTargetConfiguration": {
-      "aws": {
-        "instance_type": "m5a.large"
+      "gcp": {
+        "machine_type": "n2-standard-8" // this overrides the default machine_type
       }
     }
   }
@@ -99,8 +101,7 @@ entries to deploy:
 }
 ```
 
-With `nodes` you specify your infrastructure and there will be many more options
-to choose from soon!
+With `nodes` you specify your infrastructure, and we handle tying all your nodes together as a unified cluster.
 
 ### applications
 
@@ -108,7 +109,7 @@ The next thing we need to configure is the applications that will actually run
 on the cluster. With CNDIv1 we focused on making it a breeze to deploy
 [Apache Airflow](https://github.com/apache/airflow) in Kubernetes.
 
-Lets see what that might look like now in cndi:
+Lets see how we accomplish this here in this new and improved CNDI:
 
 ```jsonc
 {
