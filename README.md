@@ -35,9 +35,46 @@ the needs of each stack.
 
 ## getting started
 
+### installation
+
 ```bash
 # if you are on windows you should run this in 'git bash'
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+# when cndi is successfully added to your PATH and executable, run:
+cndi install
+```
+
+### interactive usage
+
+CNDI is always ran inside of a git repository, for the sake of this example we
+are using GitHub. The first step is to create a new repository, and then clone
+it locally. This is made easy by using the [gh cli](https://github.com/cli/cli).
+
+```bash
+# create a repo and clone it locally
+gh repo create cndi-example --private --clone && cd cndi-example
+# initialize a new cndi project using CNDI's interactive mode
+cndi init -i
+# select a template, and fill out the interactive prompts
+```
+
+After you've answered the prompts, you will have a new `cndi-config.jsonc` file
+and all other files described in the [cndi init](#cndi-init) section of this
+README.
+
+```bash
+# let's now add all of the environment variables we require 
+# for deployment from our `.env` file, to GitHub Actions Secrets
+gh secret set -f .env
+```
+
+Finally, let's deploy!
+
+```bash
+git add .
+git status # make sure you are happy with the changes
+git commit -m "initial commit"
+git push # deployment starts now!
 ```
 
 ## configuration
@@ -46,14 +83,16 @@ Let's run through the 3 parts of a `cndi-config.json` file.
 
 ### nodes
 
-We specify an object called `nodes` with some default configuration and an array
-of node `entries`. Each `node entry` represents a virtual machine we will create
-on your behalf.
+We specify an object called `nodes` with an array of node `entries`. Each
+`NodeEntry` represents a virtual machine we will create on your behalf.
 
 These nodes will become nodes in your Kubernetes cluster, but you don't need to
 worry about that. You specify how many virtual machines to create in order to
 run your new data stack, and you specify where they will be deployed, and how
 powerful they are.
+
+Don't worry too much about getting the number of nodes or their size right the
+first time, you can adjust them later on the fly!
 
 These nodes must each be one of the following `kinds`:
 
@@ -75,23 +114,23 @@ entries to deploy:
   "nodes": {
     "entries": [
       {
+        "name": "gcp-alpha",
         "kind": "gcp",
         "role": "leader",
-        "name": "gcp-alpha",
-        "machine_type": "m5a.xlarge"
+        "machine_type": "n2-standard-16"
       },
       {
         "name": "gcp-beta",
         "kind": "gcp"
       },
       {
-        "name": "aws-charlie",
-        "kind": "aws" // whoa, multicloud!
+        "name": "gcp-charlie",
+        "kind": "gcp"
       }
     ],
     "deploymentTargetConfiguration": {
-      "aws": {
-        "instance_type": "m5a.large"
+      "gcp": {
+        "machine_type": "n2-standard-8" // this overrides the default machine_type
       }
     }
   }
@@ -99,8 +138,8 @@ entries to deploy:
 }
 ```
 
-With `nodes` you specify your infrastructure and there will be many more options
-to choose from soon!
+With `nodes` you specify your infrastructure, and we handle tying all your nodes
+together as a unified cluster.
 
 ### applications
 
@@ -108,14 +147,14 @@ The next thing we need to configure is the applications that will actually run
 on the cluster. With CNDIv1 we focused on making it a breeze to deploy
 [Apache Airflow](https://github.com/apache/airflow) in Kubernetes.
 
-Lets see what that might look like now in cndi:
+Lets see how we accomplish this here in this new and improved CNDI:
 
 ```jsonc
 {
   "nodes": {...},
   "applications": {
     "airflow": {
-      "targetRevision": "1.6.0", // version of Helm chart to use
+      "targetRevision": "1.7.0", // version of Helm chart to use
       "destinationNamespace": "airflow", // kubernetes namespace in which to install application
       "repoURL": "https://airflow.apache.org",
       "chart": "airflow",
@@ -131,10 +170,10 @@ Lets see what that might look like now in cndi:
           }
         },
         // These options are required by Airflow in this context
-        "createUserJob":{
+        "createUserJob": {
           "useHelmHooks": false
         },
-        "migrateDatabaseJob":{
+        "migrateDatabaseJob": {
           "useHelmHooks": false
         }
       }
@@ -145,8 +184,11 @@ Lets see what that might look like now in cndi:
 
 ### cluster
 
-The next aspect of configuration is related to the Kubernetes cluster we are
-going to be deploying, but don't worry, we'll make it easy!
+The third aspect of a `cndi-config` file is the `"cluster"` object. Any objects
+here will be used as Kubernetes Manifests and they'll be applied to your cluster
+through ArgoCD. This gives CNDI infinite flexibility, so you can deploy any
+Kubernetes resource you want. You only need to modify this object if you want to
+go beyond one of the templates we provide, otherwise you can ignore it!
 
 ```jsonc
 {
@@ -206,7 +248,7 @@ when we run:
 ## cndi init
 
 ```bash
-cndi init -f ./my-cndi-config.jsonc .
+cndi init -f ./my-cndi-config.jsonc
 ```
 
 Wow!
@@ -214,24 +256,25 @@ Wow!
 In the current directory we've created a few files and folders. Let's go through
 what `cndi init` produced for us:
 
-1. a `.github` folder, with some GitHub Actions inside. These GitHub Action
-   scripts are actually mostly just wrapping the `cndi run` command in the CNDI
-   binary executable. As such, if you have a different CI system, you can
-   execute the `cndi run` command on the binary there instead.
+1. a `.github` folder, with a GitHub Action inside. The workflow is mostly just
+   wrapping the `cndi run` command in the CNDI binary executable. As such, if
+   you have a different CI system, you can execute the `cndi run` command on the
+   binary there instead.
 
 2. a `cndi/terraform` folder, containing the infrastructure resources cndi has
    generated for terraform, which cndi will apply automatically every time
    `cndi run` is executed.
 
 3. a `cndi/cluster` folder, containing Kubernetes manifests that will be
-   installed on your new cluster when it is up and running. This includes things
-   like `ingress`, and the configuration of `ArgoCD`.
+   installed on your new cluster when it is up and running. This includes
+   manifests like `Ingress` from the `"cluster"` section of your
+   `cndi-config.jsonc`.
 
 4. a `cndi/cluster/applications` folder, which contains a folder for each
    application defined in the `"applications"` section of your
-   `cndi-config.json`, and a generated Helm Chart inside that contains our
+   `cndi-config.jsonc`, and a generated Helm Chart inside that contains our
    expertly chosen defaults, and the spefic parameters you've specified yourself
-   in the `"applications"` section of your `cndi-config.json`.
+   in the `"applications"` section of your `cndi-config.jsonc`.
 
 5. a `.env` file which contains all of your environment variables that CNDI
    relies on, these values must be environment variables that are defined and
@@ -278,30 +321,35 @@ When a virtual machine is live, cndi will install `microk8s` on each machine.
 When microk8s is installed on the machines, we will use it to join all the
 machines together as nodes in a Kubernetes cluster. When a node joins the
 cluster, it becomes controlled by the Kubernetes control plane, which is running
-on the node(s) with the `role` "controller".
+on the node(s) with the `role` `"controller"` or `"leader"`.
 
-Because `argocd` has been configured to watch the `cndi/cluster` folder, changes
+Because `ArgoCD` has been configured to watch the `cndi/cluster` folder, changes
 to the manifests in that folder will automatically be applied with eventual
 consistency, including the first commit.
 
 ## making changes to your cluster
 
 When you want to further update your cluster, the process is simple. You make a
-change to your `cndi-config.json` file and run
-`cndi overwrite-with -f my-new-config.json`. CNDI will delete the contents of
+change to your `cndi-config.jsonc` file and run
+`cndi overwrite-with -f my-new-config.jsonc`. CNDI will delete the contents of
 `cndi/` and it will build up that directory from scratch based on your
-`my-new-config.json`.
+`my-new-config.jsonc`.
 
 CNDI does this instead of patching the files because it may be the case that
-your changes to `my-new-config.json` are incompatible with the state of the
+your changes to `my-new-config.jsonc` are incompatible with the state of the
 directory if files in there were modified by hand. Of course when you make a new
 pull request though, you will be making a PR with the diff between the new state
 of `cndi/` and the old.
 
-You are also able to modify the manifests in `cndi/cluster` and make changes to
-`cndi/terraform` resources yourself, but be careful: if you then run
-`cndi overwrite-with -f my-new-config.json` after manual changes, you will blast
-those changes away unless they are also present in `my-new-config.json` .
+Note: Your SealedSecret manifests will be updated any time `cndi overwrite-with`
+is called, but the underlying secrets themselves are not changing. This causes a
+git diff, but there is no material impact to the cluster.
+
+Alternatively to running `cndi ow` (`cndi overwrite-with`), you are also able to
+modify the manifests in `cndi/cluster` and make changes to `cndi/terraform`
+resources yourself, but be careful: if you then run
+`cndi ow -f my-new-config.jsonc` after manual changes, you will blast those
+changes away unless they are also present in `my-new-config.jsonc` .
 
 ## building cndi (Contributor Guide)
 
