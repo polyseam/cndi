@@ -37,9 +37,15 @@ the needs of each stack.
 
 ### installation
 
+To install CNDI we need to perform just 2 steps, the first is to download the `cndi` binary, and the second is to run `cndi install`.
+
 ```bash
 # if you are on windows you should run this in 'git bash'
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+# now add the binary to your PATH such that it is executable in your shell
+```
+
+```bash
 # when cndi is successfully added to your PATH and executable, run:
 cndi install
 ```
