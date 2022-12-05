@@ -58,9 +58,10 @@ const runFn = async ({
 
     const applyStatus = await ranTerraformApply.status();
 
+    // if `terraform apply` fails, exit the process and swallow the error
     if (applyStatus.code !== 0) {
       console.log(runLabel, brightRed("terraform apply failed"));
-      Deno.exit(1);
+      Deno.exit(0);
     }
 
     ranTerraformApply.close();
