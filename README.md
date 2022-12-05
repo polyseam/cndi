@@ -44,7 +44,7 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 cndi install
 ```
 
-### usage
+### interactive usage
 
 CNDI is always ran inside of a git repository, for the sake of this example we
 are using GitHub. The first step is to create a new repository, and then clone
@@ -61,6 +61,21 @@ cndi init -i
 After you've answered the prompts, you will have a new `cndi-config.jsonc` file
 and all other files described in the [cndi init](#cndi-init) section of this
 README.
+
+```bash
+# let's now add all of the environment variables we require 
+# for deployment from our `.env` file, to GitHub Actions Secrets
+gh secret set -f .env
+```
+
+Finally, let's deploy!
+
+```bash
+git add .
+git status # make sure you are happy with the changes
+git commit -m "initial commit"
+git push # deployment starts now!
+```
 
 ## configuration
 
