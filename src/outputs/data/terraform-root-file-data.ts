@@ -525,10 +525,14 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         ],
       },
       google_project_service: {
-        cndi_enable_project_service: {
+        cndi_enable_cloudresourcemanager_service: {
+          disable_on_destroy: false,
+          service: "cloudresourcemanager.googleapis.com"
+        }, 
+        cndi_enable_compute_service: {
           disable_on_destroy: false,
           service: "compute.googleapis.com"
-        },
+        }, 
       },
       google_compute_instance_group: {
         cndi_cluster: {

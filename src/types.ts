@@ -97,10 +97,10 @@ interface GCPTerraformDiskResource {
 }
 
 interface GCPTerraformProjectServiceResource {
-  cndi_enable_project_service: {
+  [cndi_enable_project_service: string]: {
     disable_on_destroy: boolean;
     service: string;
-  };
+  }
 }
 interface GCPTerraformInstanceGroupResource {
   cndi_cluster: {
