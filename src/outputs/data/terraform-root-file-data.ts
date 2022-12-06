@@ -527,12 +527,14 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
       google_project_service: {
         cndi_enable_cloudresourcemanager_service: {
           disable_on_destroy: false,
-          service: "cloudresourcemanager.googleapis.com"
-        }, 
+          service: "cloudresourcemanager.googleapis.com",
+          depends_on: []
+        },
         cndi_enable_compute_service: {
           disable_on_destroy: false,
-          service: "compute.googleapis.com"
-        }, 
+          service: "compute.googleapis.com",
+          depends_on: ["google_project_service.cndi_enable_cloudresourcemanager_service"]
+        },
       },
       google_compute_instance_group: {
         cndi_cluster: {
@@ -550,6 +552,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         cndi_vpc_network: {
           auto_create_subnetworks: false,
           name: "cndi-vpc-network",
+          depends_on: ["google_project_service.cndi_enable_compute_service"]
         },
       },
       google_compute_subnetwork: {
@@ -618,6 +621,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
           name: "cndi-healthcheck",
           tcp_health_check: [{ port: 80 }],
           timeout_sec: 1,
+          depends_on: ["google_project_service.cndi_enable_compute_service"]
         },
       },
       google_compute_region_backend_service: {
