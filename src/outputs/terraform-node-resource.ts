@@ -87,7 +87,7 @@ const getGCPNodeResource = (
       image,
       size,
       type,
-      depends_on: ["google_project_service.cndi_enable_compute_service"]
+      depends_on: ["google_project_service.cndi_enable_compute_service"],
     },
   };
   const nodeResource: GCPTerraformNodeResource = {
@@ -186,19 +186,19 @@ const getAWSNodeResource = (
   const target_id = `\${aws_instance.${name}.id}`;
   const aws_lb_target_group_attachment:
     AWSTerraformTargetGroupAttachmentResource = {
-    [`tg-https-target-${name}`]: [
-      {
-        target_group_arn: target_group_arn_https,
-        target_id,
-      },
-    ],
-    [`tg-http-target-${name}`]: [
-      {
-        target_group_arn: target_group_arn_http,
-        target_id,
-      },
-    ],
-  };
+      [`tg-https-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_https,
+          target_id,
+        },
+      ],
+      [`tg-http-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_http,
+          target_id,
+        },
+      ],
+    };
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {

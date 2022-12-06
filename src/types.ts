@@ -101,7 +101,7 @@ interface GCPTerraformProjectServiceResource {
     disable_on_destroy: boolean;
     service: string;
     depends_on?: Array<string>;
-  }
+  };
 }
 interface GCPTerraformInstanceGroupResource {
   cndi_cluster: {
