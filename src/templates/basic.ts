@@ -1,6 +1,7 @@
+import { Template } from "./Template.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 
-export default function getBasicTemplate(kind: string): string {
+function getBasicTemplate(kind: string): string {
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
 
   return getPrettyJSONString({
@@ -66,3 +67,15 @@ export default function getBasicTemplate(kind: string): string {
     applications: {},
   });
 }
+
+const basicTemplate = new Template("basic", {
+  getConfiguration: async (_: boolean) => {
+    return await {};
+  },
+  getEnv: async (_: boolean) => {
+    return await {};
+  },
+  getTemplate: getBasicTemplate,
+});
+
+export default basicTemplate;

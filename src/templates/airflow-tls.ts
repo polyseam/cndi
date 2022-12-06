@@ -1,6 +1,4 @@
 import {
-  AirflowTlsTemplateAnswers,
-  CNDIContext,
   EnvObject,
   NodeKind,
 } from "../types.ts";
@@ -8,10 +6,17 @@ import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { Template, GetTemplateFn, GetConfigurationFn } from "./Template.ts";
 
-const getAirflowTlsTemplateEnvObject = async (
-  interactive: boolean,
-): Promise<EnvObject> => {
+interface AirflowTlsConfiguration {
+  argocdDomainName: string;
+  airflowDomainName: string;
+  dagRepoUrl: string;
+  letsEncryptClusterIssuerEmailAddress: string;
+}
+
+// airflowTlsTemplate.getEnv()
+const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   let GIT_SYNC_USERNAME = "";
   let GIT_SYNC_PASSWORD = "";
 
@@ -39,9 +44,10 @@ const getAirflowTlsTemplateEnvObject = async (
   return airflowTlsTemplateEnvObject;
 };
 
-async function getAirflowTlsTemplateAnswers(
-  interactive: boolean,
-): Promise<AirflowTlsTemplateAnswers> {
+// airflowTlsTemplate.getConfiguration()
+async function getAirflowTlsConfiguration(
+  interactive: boolean
+): Promise<AirflowTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let airflowDomainName = "airflow.example.com";
   let dagRepoUrl = "https://github.com/polyseam/demo-dag-bag";
@@ -50,28 +56,28 @@ async function getAirflowTlsTemplateAnswers(
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:",
+        "Please enter the url of the git repo containing your dags:"
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:",
+        "Please enter the domain name you want argocd to be accessible on:"
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:",
+        "Please enter the domain name you want airflow to be accessible on:"
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:",
+        "Please enter the email address you want to use for lets encrypt:"
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -85,12 +91,18 @@ async function getAirflowTlsTemplateAnswers(
   };
 }
 
-export default function getAirflowTlsTemplate(kind: NodeKind, {
-  argocdDomainName,
-  airflowDomainName,
-  dagRepoUrl,
-  letsEncryptClusterIssuerEmailAddress,
-}: AirflowTlsTemplateAnswers): string {
+// airflowTlsTemplate.getTemplate()
+function getAirflowTlsTemplate(
+  kind: NodeKind,
+  input: AirflowTlsConfiguration
+): string {
+  const {
+    argocdDomainName,
+    airflowDomainName,
+    dagRepoUrl,
+    letsEncryptClusterIssuerEmailAddress,
+  } = input;
+
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
   return getPrettyJSONString({
     nodes: {
@@ -261,4 +273,10 @@ export default function getAirflowTlsTemplate(kind: NodeKind, {
   });
 }
 
-export { getAirflowTlsTemplateAnswers, getAirflowTlsTemplateEnvObject };
+const airflowTlsTemplate = new Template("airflow-tls", {
+  getEnv,
+  getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
+  getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
+});
+
+export default airflowTlsTemplate;
