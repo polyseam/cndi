@@ -1,6 +1,7 @@
 import {
   brightRed,
   cyan,
+  green,
   white,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
@@ -78,7 +79,9 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
           console.log(
             `You need to replace `,
             cyan(placeholderPathVal),
-            `with the desired value in "${dotEnvPath}"\n`,
+            `with the desired value in "${dotEnvPath}"\nthen run ${
+              green("cndi ow")
+            }\n`,
           );
         } else {
           // if the path was provided by the user, but we couldn't find a file at that path and it was not the default value
