@@ -1,12 +1,9 @@
-import {
-  EnvObject,
-  NodeKind,
-} from "../types.ts";
+import { EnvObject, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
-import { Template, GetTemplateFn, GetConfigurationFn } from "./Template.ts";
+import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
 
 interface AirflowTlsConfiguration {
   argocdDomainName: string;
@@ -46,7 +43,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
 // airflowTlsTemplate.getConfiguration()
 async function getAirflowTlsConfiguration(
-  interactive: boolean
+  interactive: boolean,
 ): Promise<AirflowTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let airflowDomainName = "airflow.example.com";
@@ -56,28 +53,28 @@ async function getAirflowTlsConfiguration(
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:"
+        "Please enter the url of the git repo containing your dags:",
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:"
+        "Please enter the domain name you want argocd to be accessible on:",
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:"
+        "Please enter the domain name you want airflow to be accessible on:",
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:"
+        "Please enter the email address you want to use for lets encrypt:",
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -94,7 +91,7 @@ async function getAirflowTlsConfiguration(
 // airflowTlsTemplate.getTemplate()
 function getAirflowTlsTemplate(
   kind: NodeKind,
-  input: AirflowTlsConfiguration
+  input: AirflowTlsConfiguration,
 ): string {
   const {
     argocdDomainName,

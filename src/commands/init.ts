@@ -29,16 +29,12 @@ import { createTerraformStatePassphrase } from "../initialize/terraformStatePass
 
 import { createArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
 
-import airflowTlsTemplate, {
-  getAirflowTlsTemplateAnswers,
-  getAirflowTlsTemplateEnvObject,
-} from "../templates/airflow-tls.ts";
-
+import airflowTlsTemplate from "../templates/airflow-tls.ts";
 import basicTemplate from "../templates/basic.ts";
 
 import { checkInitialized } from "../utils.ts";
 
-import availableTemplates from "../templates/available-templates.ts";
+import getAvailableTemplates from "../templates/get-available-templates.ts";
 import writeEnvObject from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
 import getREADME from "../outputs/readme.ts";
@@ -54,12 +50,12 @@ const getTemplateString = async (
 
   switch (templateBase) {
     case "airflow-tls":
-      return airflowTlsTemplate(
+      return airflowTlsTemplate.getTemplate(
         templateKind,
-        await getAirflowTlsTemplateAnswers(interactive),
+        await airflowTlsTemplate.getConfiguration(interactive),
       );
     case "basic":
-      return basicTemplate(templateKind);
+      return basicTemplate.getTemplate(templateKind, {});
     default:
       return null;
   }
@@ -264,7 +260,7 @@ const getEnvObject = async (
     case "airflow-tls":
       return {
         ...coreEnvObject,
-        ...(await getAirflowTlsTemplateEnvObject(context.interactive)),
+        ...(await airflowTlsTemplate.getEnv(context.interactive)),
       };
     case "basic":
       return coreEnvObject;
@@ -295,9 +291,7 @@ export default async function init(c: CNDIContext) {
   if (useCNDIConfigFile) {
     try {
       console.log(`cndi init --file "${c.pathToConfig}"\n`);
-      const config = await loadJSONC(
-        c.pathToConfig,
-      ) as unknown as CNDIConfig;
+      const config = (await loadJSONC(c.pathToConfig)) as unknown as CNDIConfig;
       // 1. the user brought their own config file, we use the kind of the first node
       kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
     } catch (e) {
@@ -356,8 +350,10 @@ export default async function init(c: CNDIContext) {
     Deno.exit(0);
   }
 
+  const availableTemplates = getAvailableTemplates();
+
   if (template) {
-    const templateUnavailable = !availableTemplates.includes(template);
+    const templateUnavailable = availableTemplates.includes(template);
     if (templateUnavailable) {
       console.log(
         initLabel,
@@ -411,13 +407,16 @@ export default async function init(c: CNDIContext) {
 
   await Deno.writeTextFile(gitignorePath, getGitignoreContents());
 
-  const envObject = await getEnvObject({
-    ...context,
-    template,
-    sealedSecretsKeys,
-    terraformStatePassphrase,
-    argoUIReadOnlyPassword,
-  }, kind);
+  const envObject = await getEnvObject(
+    {
+      ...context,
+      template,
+      sealedSecretsKeys,
+      terraformStatePassphrase,
+      argoUIReadOnlyPassword,
+    },
+    kind,
+  );
 
   await writeEnvObject(dotEnvPath, envObject);
 
