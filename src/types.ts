@@ -100,6 +100,7 @@ interface GCPTerraformProjectServiceResource {
   [cndi_enable_project_service: string]: {
     disable_on_destroy: boolean;
     service: string;
+    depends_on?: Array<string>;
   }
 }
 interface GCPTerraformInstanceGroupResource {
@@ -119,6 +120,7 @@ interface GCPTerraformNetworkResource {
   cndi_vpc_network: {
     auto_create_subnetworks: boolean;
     name: string;
+    depends_on?: Array<string>;
   };
 }
 
@@ -166,6 +168,7 @@ interface GCPTerraformRegionHealthcheckResource {
       port: number;
     }>;
     timeout_sec: number;
+    depends_on?: Array<string>;
   };
 }
 interface GCPTerraformRegionBackendServiceResource {
