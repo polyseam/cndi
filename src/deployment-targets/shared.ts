@@ -11,8 +11,6 @@ import { trimPemString } from "../utils.ts";
 import { prepareAWSEnv } from "../deployment-targets/aws.ts";
 import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
 
-import { Template } from "../templates/Template.ts";
-
 import {
   brightRed,
   cyan,
@@ -140,23 +138,6 @@ const getCoreEnvObject = async (
   }
 };
 
-const getEnvObject = async (
-  tpl: Template,
-  context: CNDIContextWithGeneratedValues,
-  kind: NodeKind,
-): Promise<EnvObject> => {
-  const coreEnvObject = await getCoreEnvObject(context, kind);
-
-  if (!context?.template) {
-    return coreEnvObject;
-  }
-
-  return {
-    ...coreEnvObject,
-    ...(await tpl.getEnv(context.interactive)),
-  };
-};
-
 const availableDeploymentTargets = ["aws", "gcp"];
 
-export { availableDeploymentTargets, getEnvObject };
+export { availableDeploymentTargets, getCoreEnvObject };

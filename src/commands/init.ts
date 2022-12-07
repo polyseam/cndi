@@ -17,7 +17,7 @@ import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
 
 import {
   availableDeploymentTargets,
-  getEnvObject,
+  getCoreEnvObject,
 } from "../deployment-targets/shared.ts";
 
 import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
@@ -186,7 +186,7 @@ export default async function init(context: CNDIContext) {
 
   const template: Template = availableTemplates.find(
     (t) => t.name === baseTemplateName,
-  ) as Template;
+  ) as Template; // we know this exists because we checked it above
 
   if (!kind) {
     console.log(initLabel, brightRed(`"kind" cannot be inferred`));
@@ -202,13 +202,19 @@ export default async function init(context: CNDIContext) {
 
   await Deno.writeTextFile(gitignorePath, getGitignoreContents());
 
-  const envObject = await getEnvObject(
-    template,
+  const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
     kind,
   );
 
-  await writeEnvObject(dotEnvPath, envObject);
+  const templateEnvObject = template
+    ? await template.getEnv(context.interactive)
+    : {};
+
+  await writeEnvObject(dotEnvPath, {
+    ...coreEnvObject,
+    ...templateEnvObject,
+  });
 
   if (!noGitHub) {
     try {
@@ -245,14 +251,10 @@ export default async function init(context: CNDIContext) {
       pathToConfig: configOutputPath,
     };
 
-    console.log("finalContext", finalContext);
-
     // because there is no "pathToConfig" when using a template, we need to set it here
     overwriteWithFn(finalContext, initializing);
     return;
   }
-
-  console.log("cndiContextWithGeneratedValues", cndiContextWithGeneratedValues);
 
   overwriteWithFn(cndiContextWithGeneratedValues, initializing);
 }
