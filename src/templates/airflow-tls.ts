@@ -12,6 +12,12 @@ interface AirflowTlsConfiguration {
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
+const readmeBlock = `
+### dns setup
+
+To set up DNS and TLS you just need to login to your registrar and set 2 A records that point from your 2 application subdomains to the public IP address of your controller node.
+`.trim()
+
 // airflowTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   let GIT_SYNC_USERNAME = "";
@@ -274,6 +280,7 @@ const airflowTlsTemplate = new Template("airflow-tls", {
   getEnv,
   getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
+  readmeBlock
 });
 
 export default airflowTlsTemplate;
