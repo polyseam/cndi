@@ -7,9 +7,10 @@ import { getPrettyJSONString } from "../utils.ts";
 import {
   brightRed,
   cyan,
+  green,
+  white,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
@@ -57,7 +58,9 @@ const parseCndiSecret = (
           console.log(
             `You need to replace `,
             cyan(placeholder),
-            `with the desired value in "${dotEnvPath}"\n`,
+            `with the desired value in "${dotEnvPath}"\nthen run ${
+              green("cndi ow")
+            }\n`,
           );
           outputSecret.isPlaceholder = true;
         } else if (!secretEnvVal) {
@@ -75,7 +78,7 @@ const parseCndiSecret = (
               cyan(
                 secretEnvName,
               )
-            } in "${dotEnvPath}"\n`,
+            } in "${dotEnvPath}"\nthen run ${green("cndi ow")}\n`,
           );
           outputSecret.isPlaceholder = true;
         } else {
@@ -128,7 +131,9 @@ const parseCndiSecret = (
           console.log(
             `You need to replace `,
             cyan(placeholder),
-            `with the desired value in "${dotEnvPath}"\n`,
+            `with the desired value in "${dotEnvPath}"\nthen run ${
+              green("cndi ow")
+            }\n`,
           );
           outputSecret.isPlaceholder = true;
         } else if (!secretEnvVal) {
@@ -146,7 +151,7 @@ const parseCndiSecret = (
               cyan(
                 secretEnvName,
               )
-            } in "${dotEnvPath}"\n`,
+            } in "${dotEnvPath}"\nthen run ${green("cndi ow")}\n`,
           );
           outputSecret.isPlaceholder = true;
         } else {

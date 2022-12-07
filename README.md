@@ -37,7 +37,8 @@ the needs of each stack.
 
 ### installation
 
-To install CNDI we need to perform just 2 steps, the first is to download the `cndi` binary, and the second is to run `cndi install`.
+To install CNDI we need to perform just 2 steps, the first is to download the
+`cndi` binary, and the second is to run `cndi install`.
 
 ```bash
 # if you are on windows you should run this in 'git bash'

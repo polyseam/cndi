@@ -1,6 +1,7 @@
 import {
   brightRed,
   cyan,
+  green,
   white,
   yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
@@ -46,7 +47,7 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
           if (line.indexOf(GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY) === 0) {
             const keyTextMinified = keyText.replaceAll("\n", " ");
             Deno.env.set(GOOGLE_CREDENTIALS_ENVKEY, keyTextMinified);
-            return `${GOOGLE_CREDENTIALS_ENVKEY}=${keyTextMinified}`; // eg. GOOGLE_CREDENTIALS="{"project_id":"my-project-id"...}"
+            return `# ${GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY}=${gcp_path_to_service_account_key}\n${GOOGLE_CREDENTIALS_ENVKEY}=${keyTextMinified}`; // eg. GOOGLE_CREDENTIALS="{"project_id":"my-project-id"...}"
           }
           return line;
         });
@@ -78,7 +79,9 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
           console.log(
             `You need to replace `,
             cyan(placeholderPathVal),
-            `with the desired value in "${dotEnvPath}"\n`,
+            `with the desired value in "${dotEnvPath}"\nthen run ${
+              green("cndi ow")
+            }\n`,
           );
         } else {
           // if the path was provided by the user, but we couldn't find a file at that path and it was not the default value
