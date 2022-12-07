@@ -61,6 +61,7 @@ export default async function init(context: CNDIContext) {
       const config = (await loadJSONC(
         context.pathToConfig,
       )) as unknown as CNDIConfig;
+
       // 1. the user brought their own config file, we use the kind of the first node
       kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
     } catch (e) {
@@ -76,6 +77,8 @@ export default async function init(context: CNDIContext) {
             }\n`,
           ),
         );
+
+        // and suggest a solution
         console.log(
           `if you don't have a cndi-config file try ${
             cyan(
@@ -106,6 +109,7 @@ export default async function init(context: CNDIContext) {
       );
       Deno.exit(1);
     }
+
     console.log(`cndi init --template ${context.template}\n`);
     // 2b.the user has passed a template name, we pull the 'kind'out of it
     kind = context.template?.split("/")[0] as NodeKind;
