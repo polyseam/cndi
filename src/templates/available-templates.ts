@@ -1,8 +1,5 @@
-const availableTemplates = [
-  "aws/airflow-tls",
-  "aws/basic",
-  "gcp/airflow-tls",
-  "gcp/basic",
-];
+import airflowTlsTemplate from "./airflow-tls.ts";
+import basicTemplate from "./basic.ts";
 
+const availableTemplates = [basicTemplate, airflowTlsTemplate];
 export default availableTemplates;

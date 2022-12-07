@@ -1,4 +1,22 @@
-const coreReadmeBlock = `
+import { EnvObject, NodeKind } from "../types.ts";
+
+export type GetTemplateFn = (
+  kind: NodeKind,
+  input: Record<string, unknown>,
+) => string;
+
+export type GetConfigurationFn = (
+  interactive: boolean,
+) => Promise<Record<string, unknown>>;
+
+export interface TemplateOptions {
+  getConfiguration: (interactive: boolean) => Promise<Record<string, unknown>>;
+  getEnv: (interactive: boolean) => Promise<EnvObject>;
+  getTemplate: (kind: NodeKind, input: Record<string, unknown>) => string;
+  readmeBlock: string;
+}
+
+const readmeCore = `
 # my-cndi-project
 
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
@@ -47,6 +65,33 @@ git push
 \`\`\`
 
 Now that you have pushed to the \`"main"\` branch, the [/.github/workflows/cndi-run.yaml](/.github/workflows/cndi-run.yaml) workflow will run, and call the \`cndi run\` command. This will deploy your cluster to the cloud, and then apply the Kubernetes manifests to it.
-`;
+`.trim();
 
-export default coreReadmeBlock;
+export class Template {
+  name: string;
+  options: TemplateOptions;
+  env: EnvObject = {};
+  configuration = {};
+  readmeCore = readmeCore;
+  readmeBlock: string;
+
+  constructor(name: string, options: TemplateOptions) {
+    this.name = name;
+    this.options = options;
+    this.readmeBlock = options.readmeBlock;
+  }
+
+  async getConfiguration(interactive: boolean) {
+    this.configuration = await this.options.getConfiguration(interactive);
+    return await this.configuration;
+  }
+
+  async getEnv(interactive: boolean) {
+    this.env = await this.options.getEnv(interactive);
+    return await this.env;
+  }
+
+  getTemplate(kind: NodeKind, configuration: Record<string, unknown>) {
+    return this.options.getTemplate(kind, configuration);
+  }
+}

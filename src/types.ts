@@ -869,10 +869,6 @@ interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
   sealed_secrets_public_key: string;
 }
-const enum Template {
-  "airflow-tls" = "airflow-tls",
-  "basic" = "basic",
-}
 
 export type {
   AirflowTlsTemplateAnswers,
@@ -898,7 +894,6 @@ export type {
   KubernetesSecret,
   KubernetesSecretWithStringData,
   SealedSecretsKeys,
-  Template,
   TerraformDependencies,
   TerraformRootFileData,
 };

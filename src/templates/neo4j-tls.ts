@@ -1,3 +1,8 @@
+/**
+ * This template is used to deploy a neo4j cluster with TLS enabled.
+ * it is not ready and shouldn't yet be added to available-templates.ts.
+ */
+
 import { EnvObject, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
@@ -5,65 +10,40 @@ import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
 
-interface AirflowTlsConfiguration {
+interface Neo4jTlsConfiguration {
   argocdDomainName: string;
-  airflowDomainName: string;
-  dagRepoUrl: string;
+  neo4jDomainName: string;
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
-const readmeBlock = `
-### dns setup
-
-To set up DNS and TLS you just need to login to your registrar and set 2 A records that point from your 2 application subdomains to the public IP address of your controller node.
-`.trim();
-
-// airflowTlsTemplate.getEnv()
+// neo4jTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
-  let GIT_SYNC_USERNAME = "";
-  let GIT_SYNC_PASSWORD = "";
+  let NEO4J_PASSWORD = "";
 
   if (interactive) {
-    GIT_SYNC_USERNAME = (await Input.prompt({
-      message: cyan("Please enter your git username for Airflow DAG Storage:"),
-      default: GIT_SYNC_USERNAME,
-    })) as string;
-
-    GIT_SYNC_PASSWORD = (await Secret.prompt({
-      message: cyan("Please enter your git password for Airflow DAG Storage:"),
-      default: GIT_SYNC_PASSWORD,
+    NEO4J_PASSWORD = (await Secret.prompt({
+      message: cyan("Please enter your new Neo4j password:"),
+      default: NEO4J_PASSWORD,
     })) as string;
   }
 
-  const airflowTlsTemplateEnvObject = {
-    GIT_SYNC_USERNAME: {
-      comment: "airflow-git-credentials secret values for DAG Storage",
-      value: GIT_SYNC_USERNAME,
-    },
-    GIT_SYNC_PASSWORD: {
-      value: GIT_SYNC_PASSWORD,
+  const neo4jTlsTemplateEnvObject = {
+    NEO4J_PASSWORD: {
+      value: NEO4J_PASSWORD,
     },
   };
-  return airflowTlsTemplateEnvObject;
+  return neo4jTlsTemplateEnvObject;
 };
 
 // airflowTlsTemplate.getConfiguration()
-async function getAirflowTlsConfiguration(
+async function getNeo4jTlsConfiguration(
   interactive: boolean,
-): Promise<AirflowTlsConfiguration> {
+): Promise<Neo4jTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
-  let airflowDomainName = "airflow.example.com";
-  let dagRepoUrl = "https://github.com/polyseam/demo-dag-bag";
+  let neo4jDomainName = "neo4j.example.com";
   let letsEncryptClusterIssuerEmailAddress = "admin@example.com";
 
   if (interactive) {
-    dagRepoUrl = (await Input.prompt({
-      message: cyan(
-        "Please enter the url of the git repo containing your dags:",
-      ),
-      default: dagRepoUrl,
-    })) as string;
-
     argocdDomainName = (await Input.prompt({
       message: cyan(
         "Please enter the domain name you want argocd to be accessible on:",
@@ -71,11 +51,11 @@ async function getAirflowTlsConfiguration(
       default: argocdDomainName,
     })) as string;
 
-    airflowDomainName = (await Input.prompt({
+    neo4jDomainName = (await Input.prompt({
       message: cyan(
         "Please enter the domain name you want airflow to be accessible on:",
       ),
-      default: airflowDomainName,
+      default: neo4jDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
@@ -88,21 +68,19 @@ async function getAirflowTlsConfiguration(
 
   return {
     argocdDomainName,
-    airflowDomainName,
-    dagRepoUrl,
+    neo4jDomainName,
     letsEncryptClusterIssuerEmailAddress,
   };
 }
 
-// airflowTlsTemplate.getTemplate()
-function getAirflowTlsTemplate(
+// neo4jTlsTemplate.getTemplate()
+function getNeo4jTlsTemplate(
   kind: NodeKind,
-  input: AirflowTlsConfiguration,
+  input: Neo4jTlsConfiguration,
 ): string {
   const {
     argocdDomainName,
-    airflowDomainName,
-    dagRepoUrl,
+    neo4jDomainName,
     letsEncryptClusterIssuerEmailAddress,
   } = input;
 
@@ -111,20 +89,20 @@ function getAirflowTlsTemplate(
     nodes: {
       entries: [
         {
-          name: "x-airflow-node",
+          name: "x-neo4j-node",
           kind,
           role: "leader",
           [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
         {
-          name: "y-airflow-node",
+          name: "y-neo4j-node",
           kind,
           [vmTypeKey]: vmTypeValue,
           volume_size: 128,
         },
         {
-          name: "z-airflow-node",
+          name: "z-neo4j-node",
           kind,
           [vmTypeKey]: vmTypeValue,
           volume_size: 128,
@@ -132,18 +110,6 @@ function getAirflowTlsTemplate(
       ],
     },
     cluster: {
-      "git-credentials-secret": {
-        apiVersion: "v1",
-        kind: "Secret",
-        metadata: {
-          name: "airflow-git-credentials",
-          namespace: "airflow",
-        },
-        stringData: {
-          GIT_SYNC_USERNAME: "$.cndi.secrets.GIT_SYNC_USERNAME",
-          GIT_SYNC_PASSWORD: "$.cndi.secrets.GIT_SYNC_PASSWORD",
-        },
-      },
       "cert-manager-cluster-issuer": {
         apiVersion: "cert-manager.io/v1",
         kind: "ClusterIssuer",
@@ -214,73 +180,63 @@ function getAirflowTlsTemplate(
       },
     },
     applications: {
-      airflow: {
-        targetRevision: "1.7.0",
-        destinationNamespace: "airflow",
-        repoURL: "https://airflow.apache.org",
-        chart: "airflow",
-        values: {
-          dags: {
-            gitSync: {
-              enabled: true,
-              repo: dagRepoUrl, // private repo that requires credentials
-              credentialsSecret: "airflow-git-credentials",
-              branch: "main",
-              wait: 40,
-              subPath: "dags",
-            },
+      neo4j: {
+        name: "neo4j",
+        edition: "community",
+
+        resources: {
+          cpu: "3",
+          memory: "3Gi",
+        },
+        "password-from-secret": "neo4j-password-secret",
+      },
+      ssl: {
+        https: {
+          privateKey: {
+            secretName: "lets-encrypt-private-key",
+            subPath: "tls.key",
           },
-          config: {
-            webserver: {
-              expose_config: "True",
-              instance_name: "Polyseam",
-              enable_proxy_fix: "True",
-              base_url: `https://${airflowDomainName}`,
-            },
-            operators: {
-              default_owner: "Polyseam",
-            },
-          },
-          ingress: {
-            web: {
-              enabled: true,
-              annotations: {
-                "cert-manager.io/cluster-issuer": "lets-encrypt",
-              },
-              hosts: [
-                {
-                  name: airflowDomainName,
-                  tls: {
-                    secretName: "lets-encrypt-private-key",
-                    enabled: true,
-                  },
-                },
-              ],
-            },
-          },
-          logs: {
-            persistence: {
-              enabled: true,
-              size: "15Gi",
-            },
-          },
-          createUserJob: {
-            useHelmHooks: false,
-          },
-          migrateDatabaseJob: {
-            useHelmHooks: false,
+          publicCertificate: {
+            secretName: "https-cert",
+            subPath: "tls.crt",
           },
         },
+        bolt: {
+          privateKey: {
+            secretName: "https-cert",
+            subPath: "tls.key",
+          },
+          publicCertificate: {
+            secretName: "https-cert",
+            subPath: "tls.crt",
+          },
+        },
+      },
+      env: {
+        NEO4JLABS_PLUGINS: '["apoc"]',
+      },
+      volumes: {
+        data: {
+          mode: "volume",
+          volume: {
+            gcePersistentDisk: {
+              pdName: "untribe-neo4j-disk",
+            },
+          },
+        },
+      },
+      config: {
+        "dbms.default_advertised_address": neo4jDomainName,
       },
     },
   });
 }
 
-const airflowTlsTemplate = new Template("airflow-tls", {
+const neo4jTlsTemplate = new Template("neo4j-tls", {
   getEnv,
-  getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
-  getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
-  readmeBlock,
+  getTemplate: getNeo4jTlsTemplate as unknown as GetTemplateFn,
+  getConfiguration: getNeo4jTlsConfiguration as unknown as GetConfigurationFn,
+  readmeBlock: ``,
 });
 
-export default airflowTlsTemplate;
+export default neo4jTlsTemplate;
