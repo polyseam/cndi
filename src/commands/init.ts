@@ -44,6 +44,10 @@ const initLabel = white("init:");
  * and initializes workflows in .github
  */
 export default async function init(context: CNDIContext) {
+  // context.template?:string is the template name the user chose with the --template or -t flag
+  // template:Template is a different thing, it is the object that is associated with a selected template name
+  // template:Template does not have a "kind" associated, it takes one as an argument in it's applicable methods
+
   const initializing = true;
   const CNDI_CONFIG_FILENAME = "cndi-config.jsonc"; // this is used for writing a cndi-config.jsonc file when using templates
 
@@ -167,20 +171,22 @@ export default async function init(context: CNDIContext) {
     dotEnvPath,
   } = context;
 
-  const baseTemplate = context.template?.split("/")[1]; // eg. "airflow-tls"
-
-  const template: Template = availableTemplates.find(
-    (t) => t.name === baseTemplate,
-  ) as Template;
+  let baseTemplateName = context.template?.split("/")[1]; // eg. "airflow-tls"
 
   if (interactive && !context.template) {
-    const templateName = await Select.prompt({
+    const selectedTemplateName = await Select.prompt({
       message: cyan("Pick a template"),
       options: templateNamesList,
     });
+
+    baseTemplateName = selectedTemplateName.split("/")[1]; // eg. "airflow-tls"
     // 2c. the user finally selected a template, we pull the 'kind' out of it
-    kind = templateName.split("/")[0] as NodeKind;
+    kind = selectedTemplateName.split("/")[0] as NodeKind;
   }
+
+  const template: Template = availableTemplates.find(
+    (t) => t.name === baseTemplateName,
+  ) as Template;
 
   if (!kind) {
     console.log(initLabel, brightRed(`"kind" cannot be inferred`));
@@ -234,16 +240,19 @@ export default async function init(context: CNDIContext) {
 
     await Deno.writeTextFile(configOutputPath, templateString);
 
+    const finalContext = {
+      ...cndiContextWithGeneratedValues,
+      pathToConfig: configOutputPath,
+    };
+
+    console.log("finalContext", finalContext);
+
     // because there is no "pathToConfig" when using a template, we need to set it here
-    overwriteWithFn(
-      {
-        ...cndiContextWithGeneratedValues,
-        pathToConfig: configOutputPath,
-      },
-      initializing,
-    );
+    overwriteWithFn(finalContext, initializing);
     return;
   }
 
-  overwriteWithFn(context, initializing);
+  console.log("cndiContextWithGeneratedValues", cndiContextWithGeneratedValues);
+
+  overwriteWithFn(cndiContextWithGeneratedValues, initializing);
 }
