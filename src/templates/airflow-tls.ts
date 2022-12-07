@@ -16,7 +16,7 @@ const readmeBlock = `
 ### dns setup
 
 To set up DNS and TLS you just need to login to your registrar and set 2 A records that point from your 2 application subdomains to the public IP address of your controller node.
-`.trim()
+`.trim();
 
 // airflowTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
@@ -280,7 +280,7 @@ const airflowTlsTemplate = new Template("airflow-tls", {
   getEnv,
   getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
-  readmeBlock
+  readmeBlock,
 });
 
 export default airflowTlsTemplate;

@@ -7,6 +7,9 @@ import {
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
 
+import { EnvObject } from "../types.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+
 const deploymentTargetsLabel = white("deployment-targets/gcp:");
 
 const GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY =
@@ -112,4 +115,32 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
   }
 };
 
-export { getGoogleCredentials };
+const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
+  const GCP_REGION = "us-central1";
+  const GCP_PATH_TO_SERVICE_ACCOUNT_KEY = "";
+
+  const gcpEnvObject: EnvObject = {};
+
+  gcpEnvObject.GCP_REGION = {
+    comment: "GCP",
+    value: interactive
+      ? ((await Input.prompt({
+        message: cyan("Enter your GCP Region:"),
+        default: GCP_REGION,
+      })) as string)
+      : GCP_REGION,
+  };
+
+  gcpEnvObject.GCP_PATH_TO_SERVICE_ACCOUNT_KEY = {
+    value: interactive
+      ? ((await Input.prompt({
+        message: cyan("Enter the path to your GCP service account key json:"),
+        default: GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
+      })) as string)
+      : GCP_PATH_TO_SERVICE_ACCOUNT_KEY,
+  };
+
+  return gcpEnvObject;
+};
+
+export { getGoogleCredentials, prepareGCPEnv };

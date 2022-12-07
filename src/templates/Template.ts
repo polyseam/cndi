@@ -2,11 +2,11 @@ import { EnvObject, NodeKind } from "../types.ts";
 
 export type GetTemplateFn = (
   kind: NodeKind,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
 ) => string;
 
 export type GetConfigurationFn = (
-  interactive: boolean
+  interactive: boolean,
 ) => Promise<Record<string, unknown>>;
 
 export interface TemplateOptions {

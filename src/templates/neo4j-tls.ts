@@ -1,3 +1,8 @@
+/**
+ * This template is used to deploy a neo4j cluster with TLS enabled.
+ * it is not ready and shouldn't yet be added to available-templates.ts.
+ */
+
 import { EnvObject, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
@@ -16,7 +21,6 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   let NEO4J_PASSWORD = "";
 
   if (interactive) {
-
     NEO4J_PASSWORD = (await Secret.prompt({
       message: cyan("Please enter your new Neo4j password:"),
       default: NEO4J_PASSWORD,
@@ -24,7 +28,6 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   }
 
   const neo4jTlsTemplateEnvObject = {
-
     NEO4J_PASSWORD: {
       value: NEO4J_PASSWORD,
     },
@@ -34,7 +37,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
 // airflowTlsTemplate.getConfiguration()
 async function getNeo4jTlsConfiguration(
-  interactive: boolean
+  interactive: boolean,
 ): Promise<Neo4jTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let neo4jDomainName = "neo4j.example.com";
@@ -43,21 +46,21 @@ async function getNeo4jTlsConfiguration(
   if (interactive) {
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:"
+        "Please enter the domain name you want argocd to be accessible on:",
       ),
       default: argocdDomainName,
     })) as string;
 
     neo4jDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:"
+        "Please enter the domain name you want airflow to be accessible on:",
       ),
       default: neo4jDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:"
+        "Please enter the email address you want to use for lets encrypt:",
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -73,7 +76,7 @@ async function getNeo4jTlsConfiguration(
 // neo4jTlsTemplate.getTemplate()
 function getNeo4jTlsTemplate(
   kind: NodeKind,
-  input: Neo4jTlsConfiguration
+  input: Neo4jTlsConfiguration,
 ): string {
   const {
     argocdDomainName,
@@ -178,14 +181,14 @@ function getNeo4jTlsTemplate(
     },
     applications: {
       neo4j: {
-        name: 'neo4j',
-        edition: 'community',
-        
+        name: "neo4j",
+        edition: "community",
+
         resources: {
           cpu: "3",
           memory: "3Gi",
         },
-        "password-from-secret": 'neo4j-password-secret',
+        "password-from-secret": "neo4j-password-secret",
       },
       ssl: {
         https: {
@@ -233,6 +236,7 @@ const neo4jTlsTemplate = new Template("neo4j-tls", {
   getEnv,
   getTemplate: getNeo4jTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getNeo4jTlsConfiguration as unknown as GetConfigurationFn,
+  readmeBlock: ``,
 });
 
 export default neo4jTlsTemplate;
