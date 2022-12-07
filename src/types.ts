@@ -65,12 +65,7 @@ interface GCPTerraformNodeResource {
       [name: string]: {
         allow_stopping_for_update: boolean;
         boot_disk: Array<{
-          auto_delete: boolean;
-          initialize_params: Array<{
-            image: string;
-            size: number;
-            type: string;
-          }>;
+          source: string;
         }>;
         depends_on?: Array<string>;
         machine_type: string;
@@ -88,9 +83,26 @@ interface GCPTerraformNodeResource {
         tags: Array<string>;
       };
     };
+    google_compute_disk: GCPTerraformDiskResource;
   };
 }
 
+interface GCPTerraformDiskResource {
+  [cndi_disk: string]: {
+    name: string;
+    size: number;
+    type: string;
+    image: string;
+  };
+}
+
+interface GCPTerraformProjectServiceResource {
+  [cndi_enable_project_service: string]: {
+    disable_on_destroy: boolean;
+    service: string;
+    depends_on?: Array<string>;
+  };
+}
 interface GCPTerraformInstanceGroupResource {
   cndi_cluster: {
     description: string;
@@ -108,6 +120,7 @@ interface GCPTerraformNetworkResource {
   cndi_vpc_network: {
     auto_create_subnetworks: boolean;
     name: string;
+    depends_on?: Array<string>;
   };
 }
 
@@ -155,6 +168,7 @@ interface GCPTerraformRegionHealthcheckResource {
       port: number;
     }>;
     timeout_sec: number;
+    depends_on?: Array<string>;
   };
 }
 interface GCPTerraformRegionBackendServiceResource {
@@ -511,6 +525,7 @@ interface GCPTerraformRootFileData {
       google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
       google_compute_region_backend_service:
         GCPTerraformRegionBackendServiceResource;
+      google_project_service: GCPTerraformProjectServiceResource;
     },
   ];
 

@@ -59,9 +59,7 @@ const getGCPNodeResource = (
   const machine_type = entry?.machine_type || entry?.instance_type ||
     deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
-  const auto_delete = true; // Whether the disk will be auto-deleted when the instance is deleted. Defaults to true.
-  // The size of the image in gigabytes
-  const DEFAULT_SIZE = 100;
+  const DEFAULT_SIZE = 100; // The size of the image in gigabytes
   const size = entry?.size || entry?.volume_size || DEFAULT_SIZE;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
   const network_tier = "STANDARD";
@@ -69,13 +67,10 @@ const getGCPNodeResource = (
   const subnetwork =
     "${google_compute_subnetwork.cndi_vpc_subnetwork.self_link}"; //The name or self_link of the subnetwork to attach this interface to.
   const access_config = [{ network_tier }]; //Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
-
+  const source = `\${google_compute_disk.${name}-cndi-disk.self_link}`;
   const boot_disk = [
     {
-      auto_delete,
-      initialize_params: [
-        { image, size, type },
-      ],
+      source,
     },
   ];
 
@@ -86,7 +81,15 @@ const getGCPNodeResource = (
       subnetwork,
     },
   ];
-
+  const google_compute_disk = {
+    [`${name}-cndi-disk`]: {
+      name: `${name}-cndi-disk`,
+      image,
+      size,
+      type,
+      depends_on: ["google_project_service.cndi_enable_compute_service"],
+    },
+  };
   const nodeResource: GCPTerraformNodeResource = {
     resource: {
       google_compute_instance: {
@@ -101,6 +104,7 @@ const getGCPNodeResource = (
           tags: [name],
         },
       },
+      google_compute_disk,
     },
   };
 
