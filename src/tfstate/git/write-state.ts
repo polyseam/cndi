@@ -9,26 +9,24 @@ const git = simpleGit();
 const gitWriteStateLabel = white("tfstate/git/write-state:");
 
 export default async function pushStateFromRun(
-  pathToTerraformResources: string
+  pathToTerraformResources: string,
 ) {
   const isGitRepo = await git.checkIsRepo();
 
   if (!isGitRepo) {
     console.log(
       gitWriteStateLabel,
-      '"cndi run" must be executed inside a git repository'
+      '"cndi run" must be executed inside a git repository',
     );
     Deno.exit(1);
   }
 
-  // const currentBranch = (
-  //   await git.raw("symbolic-ref", "--short", "HEAD")
-  // ).trim();
-
   const originalBranch = (await git.branch()).current;
 
+  const pathToState = path.join(pathToTerraformResources, "terraform.tfstate");
+
   const state = Deno.readTextFileSync(
-    path.join(pathToTerraformResources, "terraform.tfstate")
+    pathToState,
   );
 
   try {
@@ -37,7 +35,7 @@ export default async function pushStateFromRun(
   } catch {
     console.log(
       gitWriteStateLabel,
-      "corrupted state, please run 'cndi run' again"
+      "corrupted state, please run 'cndi run' again",
     );
     Deno.exit(1);
   }
@@ -48,7 +46,7 @@ export default async function pushStateFromRun(
     console.log(
       gitWriteStateLabel,
       yellow("TERRAFORM_STATE_PASSPHRASE"),
-      "is not set in your environment file"
+      "is not set in your environment file",
     );
     Deno.exit(1);
   }
@@ -56,14 +54,14 @@ export default async function pushStateFromRun(
   try {
     await git.checkout({ "--orphan": "_state" });
   } catch {
-    await git.checkoutLocalBranch("_state");
+    await git.checkout("_state");
   }
 
   const encryptedState = encrypt(state, secret);
 
   const pathToNewState = path.join(
     pathToTerraformResources,
-    "terraform.tfstate.encrypted"
+    "terraform.tfstate.encrypted",
   );
 
   try {
@@ -71,28 +69,32 @@ export default async function pushStateFromRun(
   } catch {
     console.log(
       gitWriteStateLabel,
-      "failed to write encrypted tfstate to disk"
+      "failed to write encrypted tfstate to disk",
     );
   }
   try {
-    await git.raw("add", pathToNewState, '--force');
+    await git.raw("add", pathToNewState, "--force");
     await git.commit(
-      `automated commit from cndi run: ${Math.floor(Date.now() / 1000)}`
+      `automated commit from cndi run: ${Math.floor(Date.now() / 1000)}`,
+      [pathToNewState],
     );
   } catch (e) {
     console.log(
       gitWriteStateLabel,
-      "failed to commit encrypted tfstate to '_state' branch"
+      "failed to commit encrypted tfstate to '_state' branch",
     );
     console.log(e);
   }
+
   try {
-    await git.push("origin", "_state");
-  } catch {
+    await git.push("origin", "_state", { "--force": null });
+  } catch (pushError) {
     console.log(
       gitWriteStateLabel,
-      "failed to push encrypted tfstate to remote '_state' branch"
+      "failed to push encrypted terraform.tfstate to remote '_state' branch",
     );
+    console.log('did you forget to add an "origin" remote?');
+    console.log(pushError);
   }
 
   await git.checkout(originalBranch || "main");
