@@ -1,6 +1,9 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { copy } from "https://deno.land/std@0.166.0/streams/conversion.ts";
 
+import pullStateForRun from "../tfstate/git/read-state.ts";
+import pushStateFromRun from "../tfstate/git/write-state.ts";
+
 import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import setTF_VARs from "../setTF_VARs.ts";
 import { CNDIContext } from "../types.ts";
@@ -18,6 +21,8 @@ const runFn = async ({
   console.log("cndi run\n");
   try {
     setTF_VARs(); // set TF_VARs using CNDI's .env variables
+
+    await pullStateForRun(pathToTerraformResources);
 
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = Deno.run({
@@ -57,6 +62,8 @@ const runFn = async ({
     copy(ranTerraformApply.stderr, Deno.stderr);
 
     const applyStatus = await ranTerraformApply.status();
+
+    await pushStateFromRun(pathToTerraformResources);
 
     // if `terraform apply` fails, exit the process and swallow the error
     if (applyStatus.code !== 0) {
