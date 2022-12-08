@@ -51,7 +51,8 @@ const getGCPNodeResource = (
   deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
-  const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
+  const DEFAULT_IMAGE =
+    "projects/cndi-builder/global/images/cndi-microk8s-dl-1670504689"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
   const { name, role } = entry;
   const image = entry?.image || deploymentTargetConfiguration?.image ||
@@ -156,7 +157,7 @@ const getAWSNodeResource = (
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
-  const DEFAULT_AMI = "ami-0c1704bac156af62c";
+  const DEFAULT_AMI = "ami-04143b2dc1748c9d1";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
   const { name, role } = entry;
   const ami = entry?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
