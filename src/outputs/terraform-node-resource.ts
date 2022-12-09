@@ -67,7 +67,9 @@ const getGCPNodeResource = (
   const subnetwork =
     "${google_compute_subnetwork.cndi_vpc_subnetwork.self_link}"; //The name or self_link of the subnetwork to attach this interface to.
   const access_config = [{ network_tier }]; //Access config that set whether the instance can be accessed via the Internet. Omitting = not accessible from the Internet.
-  const source = `\${google_compute_disk.${name}-cndi-disk.self_link}`;
+  const disk_name = `${name}-cndi-disk`;
+  const source = `\${google_compute_disk.${disk_name}.self_link}`;
+  const suffix = `\${random_string.${name}-suffix.result}`;
   const boot_disk = [
     {
       source,
@@ -82,12 +84,22 @@ const getGCPNodeResource = (
     },
   ];
   const google_compute_disk = {
-    [`${name}-cndi-disk`]: {
-      name: `${name}-cndi-disk`,
+    [disk_name]: {
+      name: disk_name,
       image,
       size,
       type,
       depends_on: ["google_project_service.cndi_enable_compute_service"],
+    },
+  };
+  const random_string = {
+    [`${name}-suffix`]: {
+      keepers: {
+        size: `\${google_compute_disk.${disk_name}.size}`,
+      },
+      length: 4,
+      special: false,
+      upper: false,
     },
   };
   const nodeResource: GCPTerraformNodeResource = {
@@ -99,7 +111,7 @@ const getGCPNodeResource = (
           depends_on: [],
           machine_type,
           metadata: {},
-          name: name,
+          name: `${name}-${suffix}`,
           network_interface,
           tags: [name],
         },
