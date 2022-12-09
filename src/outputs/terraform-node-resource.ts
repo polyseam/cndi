@@ -105,6 +105,7 @@ const getGCPNodeResource = (
         },
       },
       google_compute_disk,
+      random_string,
     },
   };
 
