@@ -84,6 +84,10 @@ interface GCPTerraformNodeResource {
       };
     };
     google_compute_disk: GCPTerraformDiskResource;
+    random_string: GCPTerraformRandomStringResource;
+  };
+}
+
 interface GCPTerraformRandomStringResource {
   [suffix: string]: {
     keepers: {
