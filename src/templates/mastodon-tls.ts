@@ -73,7 +73,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   let REDIS_PASSWORD = "";
 
   if (interactive) {
-    POSTGRESQL_PASSWORD = (await Input.prompt({
+    POSTGRESQL_PASSWORD = (await Secret.prompt({
       message: cyan(
         "Please enter a new password for mastadon's postgres instance:"
       ),
