@@ -36,7 +36,7 @@ const googleTerraformProviderDependency = {
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
-  nodeEntryNames: Array<string>;
+  nodeNames: Array<string>;
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -44,7 +44,7 @@ const terraformRootFileLabel = white("outputs/terraform-root-file:");
 const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
-  nodeEntryNames,
+  nodeNames,
 }: GetTerraformRootFileArgs): Promise<string> => {
   // copy original terraformRootFileData to working copy for GCP using js spread operator
 
@@ -89,7 +89,7 @@ const getTerraformRootFile = async ({
     gcpMainTerraformFileObject.locals[0].region = region;
 
     gcpMainTerraformFileObject.resource[0].google_compute_instance_group
-      .cndi_cluster.instances = nodeEntryNames.map((name) =>
+      .cndi_cluster.instances = nodeNames.map((name) =>
         `\${google_compute_instance.${name}.self_link}`
       );
 

@@ -1,7 +1,7 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   CNDIConfig,
   CNDIContext,
   DeploymentTargetConfiguration,
@@ -151,14 +151,12 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     );
   });
 
-  const { nodes } = config;
+  const { nodes } = config.infrastructure.cndi;
 
-  const { entries } = nodes;
-
-  const deploymentTargetConfiguration = nodes?.deploymentTargetConfiguration ||
+  const deploymentTargetConfiguration = config.infrastructure.cndi.deploymentTargetConfiguration ||
     ({} as DeploymentTargetConfiguration);
 
-  const leaders = entries.filter((entry) => entry.role === "leader");
+  const leaders = nodes.filter((node) => node.role === "leader");
 
   if (leaders.length !== 1) {
     console.log(owLabel, brightRed(`There must be exactly one leader node`));
@@ -168,8 +166,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const leader = leaders[0];
 
   const requiredProviders = new Set(
-    entries.map((entry: BaseNodeEntrySpec) => {
-      return entry.kind as NodeKind;
+    nodes.map((node: BaseNodeItemSpec) => {
+      return node.kind as NodeKind;
     }),
   );
 
@@ -200,8 +198,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const terraformRootFile = await getTerraformRootFile({
     leaderName: leader.name,
     requiredProviders,
-    nodeEntryNames: entries.map((entry) => {
-      return entry.name;
+    nodeNames: nodes.map((node) => {
+      return node.name;
     }),
   });
 
@@ -212,14 +210,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   );
 
   // write terraform nodes files
-  entries.forEach((entry: BaseNodeEntrySpec) => {
+  nodes.forEach((node: BaseNodeItemSpec) => {
     const nodeFileContents: string = getTerraformNodeResource(
-      entry,
+      node,
       deploymentTargetConfiguration,
       leader.name,
     );
     Deno.writeTextFile(
-      path.join(pathToTerraformResources, `${entry.name}.cndi-node.tf.json`),
+      path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),
       nodeFileContents,
     );
   });

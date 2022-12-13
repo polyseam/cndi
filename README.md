@@ -32,7 +32,7 @@ It's perfect for deploying Data Products consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each stack.
 
-## getting started
+## usage
 
 ### installation
 
@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 cndi install
 ```
 
-### interactive usage
+### interactive mode
 
 CNDI is always ran inside of a git repository, for the sake of this example we
 are using GitHub. The first step is to create a new repository, and then clone
@@ -69,7 +69,7 @@ and all other files described in the [cndi init](#cndi-init) section of this
 README.
 
 ```bash
-# let's now add all of the environment variables we require 
+# let's now add all of the environment variables we require
 # for deployment from our `.env` file, to GitHub Actions Secrets
 gh secret set -f .env
 ```
@@ -87,20 +87,21 @@ git push # deployment starts now!
 
 Let's run through the 3 parts of a `cndi-config.json` file.
 
-### nodes
+### infrastructure and nodes
 
-We specify an object called `nodes` with an array of node `entries`. Each
-`NodeEntry` represents a virtual machine we will create on your behalf.
+For the first section of our config we specify an object called
+`"infrastructure"`, and within that we are going to define an object for
+`"cndi"` specifically. Currently `"cndi"` only manages our `"nodes"` which are
+defined as an Array of `NodeSpec`s.
 
 These nodes will become nodes in your Kubernetes cluster, but you don't need to
 worry about that. You specify how many virtual machines to create in order to
-run your new data stack, and you specify where they will be deployed, and how
-powerful they are.
+run your new data stack, where they will be deployed, and how powerful they are.
 
 Don't worry too much about getting the number of nodes or their size right the
 first time, you can adjust them later on the fly!
 
-These nodes must each be one of the following `kinds`:
+These nodes must each be one of the following `kind`s:
 
 - [x] aws
 - [x] gcp
@@ -117,26 +118,28 @@ entries to deploy:
 
 ```jsonc
 {
-  "nodes": {
-    "entries": [
-      {
-        "name": "gcp-alpha",
-        "kind": "gcp",
-        "role": "leader",
-        "machine_type": "n2-standard-16"
-      },
-      {
-        "name": "gcp-beta",
-        "kind": "gcp"
-      },
-      {
-        "name": "gcp-charlie",
-        "kind": "gcp"
-      }
-    ],
-    "deploymentTargetConfiguration": {
-      "gcp": {
-        "machine_type": "n2-standard-8" // this overrides the default machine_type
+  "infrastructure": {
+    "cndi": {
+      "nodes": [
+        {
+          "name": "gcp-alpha",
+          "kind": "gcp",
+          "role": "leader",
+          "machine_type": "n2-standard-16"
+        },
+        {
+          "name": "gcp-beta",
+          "kind": "gcp"
+        },
+        {
+          "name": "gcp-charlie",
+          "kind": "gcp"
+        }
+      ],
+      "deploymentTargetConfiguration": {
+        "gcp": {
+          "machine_type": "n2-standard-8" // this overrides the default machine_type
+        }
       }
     }
   }
@@ -157,7 +160,7 @@ Lets see how we accomplish this here in this new and improved CNDI:
 
 ```jsonc
 {
-  "nodes": {...},
+  "infrastructure": {...},
   "applications": {
     "airflow": {
       "targetRevision": "1.7.0", // version of Helm chart to use
@@ -198,7 +201,7 @@ go beyond one of the templates we provide, otherwise you can ignore it!
 
 ```jsonc
 {
-  "nodes": {...},
+  "infrastructure": {...},
   "applications": {...},
   "cluster": {// inside the "cluster" object you can put all of your custom Kubernetes manifests
     "ingress": {
@@ -229,7 +232,7 @@ and `"GIT_PASSWORD"`, into the destination secret key names
 
 ```jsonc
 {
-  "nodes": {...},
+  "infrastructure": {...},
   "applications": {...},
   "cluster": {
     "airflow-git-credentials-secret": {
@@ -385,7 +388,7 @@ source code as if it were the regular CLI, without colliding with the released
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
-alias cndi="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
+alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
 ```
 
 ### your first cluster

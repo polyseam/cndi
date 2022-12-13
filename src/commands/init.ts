@@ -36,6 +36,8 @@ import coreReadme from "../doc/core.ts";
 
 import { Template } from "../templates/Template.ts";
 
+import { yellow } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+
 const initLabel = white("init:");
 
 /**
@@ -53,7 +55,7 @@ export default async function init(context: CNDIContext) {
 
   // kind comes in from one of 2 places
   // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
-  // 2. if the user brings their own config file, we read it from the first node entry in the config file
+  // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
   let kind: NodeKind | undefined;
 
   // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
@@ -63,32 +65,57 @@ export default async function init(context: CNDIContext) {
     try {
       console.log(`cndi init --file "${context.pathToConfig}"\n`);
       const config = (await loadJSONC(
-        context.pathToConfig,
+        context.pathToConfig
       )) as unknown as CNDIConfig;
 
+      if (!config.infrastructure) {
+        console.log(
+          initLabel,
+          brightRed(
+            `cndi-config file found was at ${white(
+              `"${context.pathToConfig}"`
+            )} but it does not have an ${cyan('"infrastructure"')} key\n`
+          )
+        );
+
+        // TODO: remove this warning, there are at most only a few people using the old syntax
+        const badconfig = config as unknown as Record<string, unknown>;
+        if (badconfig?.nodes) {
+          console.log(
+            initLabel,
+            yellow(
+              `You appear to be using the deprecated pre-release config syntax. Sorry!`
+            )
+          );
+          console.log(
+            initLabel,
+            "please read more about the 1.x.x syntax at",
+            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes")
+          );
+        }
+
+        Deno.exit(1);
+      }
+
       // 1. the user brought their own config file, we use the kind of the first node
-      kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
+      kind = config.infrastructure.cndi.nodes[0].kind as NodeKind; // only works when all nodes are the same kind
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
         // if config is not found at 'pathToConfig' we want to throw an error
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file not found at ${
-              white(
-                `"${context.pathToConfig}"`,
-              )
-            }\n`,
-          ),
+            `cndi-config file not found at ${white(
+              `"${context.pathToConfig}"`
+            )}\n`
+          )
         );
 
         // and suggest a solution
         console.log(
-          `if you don't have a cndi-config file try ${
-            cyan(
-              "cndi init --interactive",
-            )
-          }\n`,
+          `if you don't have a cndi-config file try ${cyan(
+            "cndi init --interactive"
+          )}\n`
         );
         Deno.exit(1);
       }
@@ -109,7 +136,7 @@ export default async function init(context: CNDIContext) {
       console.log(`cndi init --template\n`);
       console.error(
         initLabel,
-        brightRed(`--template (-t) flag requires a value`),
+        brightRed(`--template (-t) flag requires a value`)
       );
       Deno.exit(1);
     }
@@ -123,8 +150,8 @@ export default async function init(context: CNDIContext) {
 
   const shouldContinue = directoryContainsCNDIFiles
     ? confirm(
-      "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
-    )
+        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
+      )
     : true;
 
   if (!shouldContinue) {
@@ -146,8 +173,8 @@ export default async function init(context: CNDIContext) {
       console.log(
         initLabel,
         brightRed(
-          `The template you selected "${context.template}" is not available.\n`,
-        ),
+          `The template you selected "${context.template}" is not available.\n`
+        )
       );
 
       console.log("Available templates are:\n");
@@ -185,7 +212,7 @@ export default async function init(context: CNDIContext) {
   }
 
   const template: Template = availableTemplates.find(
-    (t) => t.name === baseTemplateName,
+    (t) => t.name === baseTemplateName
   ) as Template; // we know this exists because we checked it above
 
   if (!kind) {
@@ -204,7 +231,7 @@ export default async function init(context: CNDIContext) {
 
   const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
-    kind,
+    kind
   );
 
   const templateEnvObject = template
@@ -225,7 +252,7 @@ export default async function init(context: CNDIContext) {
     } catch (githubCopyError) {
       console.log(
         initLabel,
-        brightRed("failed to copy github integration files"),
+        brightRed("failed to copy github integration files")
       );
       console.error(githubCopyError);
       Deno.exit(1);
@@ -235,7 +262,7 @@ export default async function init(context: CNDIContext) {
   // write a readme, extend via Template.readmeBlock if it exists
   await Deno.writeTextFile(
     path.join(projectDirectory, "README.md"),
-    coreReadme + (template?.readmeBlock || ""),
+    coreReadme + (template?.readmeBlock || "")
   );
 
   // if the user has specified a template, use that

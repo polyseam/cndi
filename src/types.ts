@@ -42,11 +42,11 @@ interface CNDINode {
 }
 
 interface CNDINodesSpec {
-  entries: Array<BaseNodeEntrySpec>;
+  entries: Array<BaseNodeItemSpec>;
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
-interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+interface GCPNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -54,7 +54,7 @@ interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
   instance_type?: string;
 }
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
-interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -190,7 +190,7 @@ interface GCPTerraformRouterResource {
   };
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
+interface AWSNodeItemSpec extends BaseNodeItemSpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
@@ -200,7 +200,7 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
 }
 
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
-interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -393,7 +393,12 @@ interface DeploymentTargetConfiguration {
 
 // incomplete type, config will have more options
 interface CNDIConfig {
-  nodes: CNDINodesSpec;
+  infrastructure: {
+    cndi: {
+      deploymentTargetConfiguration: DeploymentTargetConfiguration;
+      nodes: Array<BaseNodeItemSpec>;
+    };
+  };
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
@@ -471,7 +476,7 @@ interface CNDIContext {
 }
 
 // cndi-config.jsonc["nodes"]["entries"][*]
-interface BaseNodeEntrySpec {
+interface BaseNodeItemSpec {
   name: string;
   role: NodeRole;
   kind: NodeKind;
@@ -873,10 +878,10 @@ interface SealedSecretsKeys {
 export type {
   AirflowTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
-  AWSNodeEntrySpec,
+  AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
@@ -886,7 +891,7 @@ export type {
   DeploymentTargetConfiguration,
   EnvObject,
   GCPDeploymentTargetConfiguration,
-  GCPNodeEntrySpec,
+  GCPNodeItemSpec,
   GCPTerraformInstanceGroupResource,
   GCPTerraformNodeResource,
   GCPTerraformRootFileData,

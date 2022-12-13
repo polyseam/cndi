@@ -23,7 +23,7 @@ main() {
 		esac
 	fi
 
-	cndi_uri="https://cndi-binaries.s3.amazonaws.com/cndi/main/cndi-${target}"
+	cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}"
 
 	exe="$cndi_install/cndi"
 
