@@ -15,10 +15,9 @@
   <a href="https://github.com/polyseam/cndi/issues">
     <img src="https://img.shields.io/github/issues/polyseam/cndi" alt="GitHub issues">
   </a>
-  <!-- TODO: add when there are releases-->
-  <!-- <a href="https://github.com/polyseam/cndi/releases">
+  <a href="https://github.com/polyseam/cndi/releases">
     <img src="https://img.shields.io/github/v/release/polyseam/cndi.svg?style=flat" alt="GitHub Release">
-  </a> -->
+  </a>
   <a href="https://discord.gg/ygt2rpegJ5">
     <img src="https://img.shields.io/discord/956275914596040754.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" alt="Discord">
   </a>
