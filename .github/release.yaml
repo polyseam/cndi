@@ -17,7 +17,7 @@ changelog:
         - enhancement
       exclude:
         labels:
-          - deployment-target
+          - deployment target
 
     - title: Bug Fixes 🐛
       labels:

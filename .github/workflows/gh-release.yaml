@@ -14,7 +14,7 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-          
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -30,4 +30,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
+            Release.txt
             dist/cndi-*
