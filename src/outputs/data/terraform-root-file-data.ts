@@ -8,6 +8,7 @@ const terraformRootFileData: TerraformRootFileData = {
     {
       region: "",
       leader_node_ip: "",
+      node_count: "",
       bootstrap_token: "${random_password.generated_token.result}",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
@@ -20,6 +21,33 @@ const terraformRootFileData: TerraformRootFileData = {
   provider: {
     random: [{}],
   },
+  data: [
+    {
+      aws_ec2_instance_type_offerings: [
+        {
+          "available_az_for_controller-airflow-node-1_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["t3.medium"] }],
+              location_type: "availability-zone",
+            },
+          ],
+          "available_az_for_controller-airflow-node-2_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["t2.medium"] }],
+              location_type: "availability-zone",
+            },
+          ],
+          "available_az_for_leader-airflow-node_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["m5a.xlarge"] }],
+              location_type: "availability-zone",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+},
   resource: [
     {
       random_password: {
@@ -41,7 +69,7 @@ const terraformRootFileData: TerraformRootFileData = {
         nlb: {
           internal: false,
           load_balancer_type: "network",
-          subnets: ["${aws_subnet.subnet.id}"],
+          subnets: "${aws_subnet.subnet[*].id",
           tags: { Name: "${var.owner}-nlb" },
         },
       },
@@ -61,13 +89,16 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table_association: {
         rt_sbn_asso: {
+          count: "${local.node_count}",
           route_table_id: "${aws_route_table.rt.id}",
-          subnet_id: "${aws_subnet.subnet.id}",
+          subnet_id: "${element(aws_subnet.subnet[*].id, count.index)}",
         },
       },
       aws_subnet: {
         subnet: {
-          cidr_block: "${var.sbn_cidr_block}",
+          count: "${local.node_count}",
+          availability_zone: "${element(local.availability_zones, count.index)}",
+          cidr_block: "${element(var.sbn_cidr_block, count.index)}",
           map_public_ip_on_launch: "${var.sbn_public_ip}",
           tags: { Name: "${var.owner}-subnet" },
           vpc_id: "${aws_vpc.vpc.id}",
@@ -127,7 +158,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.sg_ingress_cidr_block}"],
                 description:
-                  "Kubernetes API server port to access cluster from local machine",
+                "Kubernetes API server port to access cluster from local machine",
                 from_port: "${var.sg_ingress_k8s_API}",
                 protocol: "${var.sg_ingress_proto}",
                 to_port: "${var.sg_ingress_k8s_API}",
@@ -139,7 +170,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.sg_ingress_cidr_block}"],
                 description:
-                  "Nodeport port to quickly access applications INSECURE",
+                "Nodeport port to quickly access applications INSECURE",
                 from_port: "${var.sg_ingress_nodeport_range_start}",
                 protocol: "${var.sg_ingress_proto}",
                 to_port: "${var.sg_ingress_nodeport_range_end}",
@@ -151,7 +182,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.vpc_cidr_block}"],
                 description:
-                  "Inbound rule that enables traffic between EC2 instances in the VPC ",
+                "Inbound rule that enables traffic between EC2 instances in the VPC ",
                 from_port: "${var.sg_ingress_all}",
                 protocol: "${var.sg_ingress_proto_all}",
                 to_port: "${var.sg_ingress_all}",
@@ -315,7 +346,7 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: "30000",
         description:
-          "Nodeport start range port to quickly access applications INSECURE",
+        "Nodeport start range port to quickly access applications INSECURE",
         type: "string",
       },
     ],
@@ -324,7 +355,7 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: "33000",
         description:
-          "Nodeport end range port to quickly access applications INSECURE",
+        "Nodeport end range port to quickly access applications INSECURE",
         type: "string",
       },
     ],
@@ -413,16 +444,21 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: true,
         description:
-          "Assign public IP to the instance launched into the subnet",
+        "Assign public IP to the instance launched into the subnet",
         type: "bool",
       },
     ],
 
     sbn_cidr_block: [
       {
-        default: "10.0.1.0/24",
+        default: ["10.0.1.0/24",
+          "10.0.2.0/24",
+          "10.0.3.0/24",
+          "10.0.4.0/24",
+          "10.0.5.0/24",
+          "10.0.6.0/24",],
         description: "CIDR block for the subnet",
-        type: "string",
+        type: "list(string)",
       },
     ],
 

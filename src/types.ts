@@ -231,6 +231,17 @@ interface AWSTerraformNodeResource {
     aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
   };
 }
+
+interface AWSTerraformEc2InstanceTypeOfferingsDataSource {
+  [ec2_inst_type: string]: Array<{
+    filter: Array<{
+      name: string
+      values: Array<string>
+    }>
+    location_type: string
+  }>
+}
+
 interface RandomTerraformRandomPasswordResource {
   generated_token: Array<{
     length: number;
@@ -252,7 +263,7 @@ interface AWSTerraformLoadBalancerResource {
   nlb: {
     internal: boolean;
     load_balancer_type: string;
-    subnets: Array<string>;
+    subnets: string;
     tags: { Name: string };
   };
 }
@@ -275,6 +286,7 @@ interface AWSTerraformRouteTableResource {
 }
 interface AWSTerraformRouteTableAssociationResource {
   rt_sbn_asso: {
+    count: string;
     route_table_id: string;
     subnet_id: string;
   };
@@ -282,6 +294,8 @@ interface AWSTerraformRouteTableAssociationResource {
 
 interface AWSTerraformSubnetResource {
   subnet: {
+    count: string;
+    availability_zone: string
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
@@ -524,7 +538,7 @@ interface GCPTerraformRootFileData {
       google_compute_forwarding_rule: GCPTerraformHTTPpForwardingRuleResource;
       google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
       google_compute_region_backend_service:
-        GCPTerraformRegionBackendServiceResource;
+      GCPTerraformRegionBackendServiceResource;
       google_project_service: GCPTerraformProjectServiceResource;
     },
   ];
@@ -572,6 +586,7 @@ interface GCPTerraformRootFileData {
 interface TerraformRootFileData {
   locals: [
     {
+      node_count: string
       leader_node_ip: string;
       region: string;
       bootstrap_token: "${random_password.generated_token.result}";
@@ -588,7 +603,9 @@ interface TerraformRootFileData {
     aws?: Array<{ region: string }>;
     gcp?: Array<{ region: string; project: string }>;
   };
-
+  data:[ {
+    aws_ec2_instance_type_offerings: AWSTerraformEc2InstanceTypeOfferingsDataSource 
+  }]
   resource: [
     {
       random_password: RandomTerraformRandomPasswordResource;
@@ -699,7 +716,7 @@ interface TerraformRootFileData {
       {
         default: "30000";
         description:
-          "Nodeport start range port to quickly access applications INSECURE";
+        "Nodeport start range port to quickly access applications INSECURE";
         type: "string";
       },
     ];
@@ -708,7 +725,7 @@ interface TerraformRootFileData {
       {
         default: "33000";
         description:
-          "Nodeport end range port to quickly access applications INSECURE";
+        "Nodeport end range port to quickly access applications INSECURE";
         type: "string";
       },
     ];
@@ -781,16 +798,22 @@ interface TerraformRootFileData {
       {
         default: true;
         description:
-          "Assign public IP to the instance launched into the subnet";
+        "Assign public IP to the instance launched into the subnet";
         type: "bool";
       },
     ];
 
     sbn_cidr_block: [
       {
-        default: "10.0.1.0/24";
+        default:
+        ["10.0.1.0/24",
+          "10.0.2.0/24",
+          "10.0.3.0/24",
+          "10.0.4.0/24",
+          "10.0.5.0/24",
+          "10.0.6.0/24"]
         description: "CIDR block for the subnet";
-        type: "string";
+        type: "list(string)";
       },
     ];
 

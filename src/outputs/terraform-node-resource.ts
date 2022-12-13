@@ -9,6 +9,7 @@ import {
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
   BaseNodeEntrySpec,
+  CNDIConfig,
   DeploymentTargetConfiguration,
   GCPDeploymentTargetConfiguration,
   GCPNodeEntrySpec,
@@ -22,6 +23,7 @@ const getTerraformNodeResource = (
   entry: BaseNodeEntrySpec,
   deploymentTargetConfiguration: DeploymentTargetConfiguration,
   controllerName: string,
+  
 ): string => {
   const { kind } = entry;
   switch (kind) {
@@ -30,6 +32,7 @@ const getTerraformNodeResource = (
         entry as AWSNodeEntrySpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
+        
       );
     case "gcp":
       return getGCPNodeResource(
@@ -153,6 +156,7 @@ const getGCPNodeResource = (
 
 const getAWSNodeResource = (
   entry: AWSNodeEntrySpec,
+ 
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
@@ -163,7 +167,7 @@ const getAWSNodeResource = (
   const instance_type = entry?.instance_type || entry?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
-
+  
   const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
@@ -179,7 +183,7 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
-  const subnet_id = "${aws_subnet.subnet.id}";
+  const subnet_id = `\${aws_subnet.subnet[0].id}`;
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
   const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
   const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";
