@@ -8,6 +8,7 @@ const terraformRootFileData: TerraformRootFileData = {
     {
       region: "",
       leader_node_ip: "",
+      node_count: "",
       bootstrap_token: "${random_password.generated_token.result}",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
@@ -15,11 +16,38 @@ const terraformRootFileData: TerraformRootFileData = {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
+      availability_zones: '',
     },
   ],
   provider: {
     random: [{}],
   },
+  data: [
+    {
+      aws_ec2_instance_type_offerings: [
+        {
+          "available_az_for_controller-airflow-node-1_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["t3.medium"] }],
+              location_type: "availability-zone",
+            },
+          ],
+          "available_az_for_controller-airflow-node-2_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["t2.medium"] }],
+              location_type: "availability-zone",
+            },
+          ],
+          "available_az_for_leader-airflow-node_instance_type": [
+            {
+              filter: [{ name: "instance-type", values: ["m5a.xlarge"] }],
+              location_type: "availability-zone",
+            },
+          ],
+        },
+      ],
+    },
+  ],
   resource: [
     {
       random_password: {
@@ -41,7 +69,7 @@ const terraformRootFileData: TerraformRootFileData = {
         nlb: {
           internal: false,
           load_balancer_type: "network",
-          subnets: ["${aws_subnet.subnet.id}"],
+          subnets: "${aws_subnet.subnet[*].id}",
           tags: { Name: "${var.owner}-nlb" },
         },
       },
@@ -61,13 +89,17 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table_association: {
         rt_sbn_asso: {
+          count: "${local.node_count}",
           route_table_id: "${aws_route_table.rt.id}",
-          subnet_id: "${aws_subnet.subnet.id}",
+          subnet_id: "${element(aws_subnet.subnet[*].id, count.index)}",
         },
       },
       aws_subnet: {
         subnet: {
-          cidr_block: "${var.sbn_cidr_block}",
+          count: "${local.node_count}",
+          availability_zone:
+            "${element(local.availability_zones, count.index)}",
+          cidr_block: "${element(var.sbn_cidr_block, count.index)}",
           map_public_ip_on_launch: "${var.sbn_public_ip}",
           tags: { Name: "${var.owner}-subnet" },
           vpc_id: "${aws_vpc.vpc.id}",
@@ -420,9 +452,16 @@ const terraformRootFileData: TerraformRootFileData = {
 
     sbn_cidr_block: [
       {
-        default: "10.0.1.0/24",
+        default: [
+          "10.0.1.0/24",
+          "10.0.2.0/24",
+          "10.0.3.0/24",
+          "10.0.4.0/24",
+          "10.0.5.0/24",
+          "10.0.6.0/24",
+        ],
         description: "CIDR block for the subnet",
-        type: "string",
+        type: "list(string)",
       },
     ],
 
@@ -495,6 +534,7 @@ const terraformRootFileData: TerraformRootFileData = {
     ],
   },
 };
+
 const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   locals: [
     {
@@ -565,7 +605,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         },
       },
       google_compute_firewall: {
-        "cndi_allow_external_traffic": {
+        cndi_allow_external_traffic: {
           allow: [
             { ports: ["22"], protocol: "tcp" },
             { ports: ["80"], protocol: "tcp" },
@@ -578,7 +618,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
           network: "${google_compute_network.cndi_vpc_network.self_link}",
           source_ranges: ["0.0.0.0/0"],
         },
-        "cndi_allow_internal_traffic": {
+        cndi_allow_internal_traffic: {
           allow: [
             { ports: ["0-65535"], protocol: "tcp" },
             { ports: ["0-65535"], protocol: "udp" },
