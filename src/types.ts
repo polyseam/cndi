@@ -311,10 +311,10 @@ interface AWSTerraformSecurityGroupResource {
       cidr_blocks: Array<string>;
       description: string;
       from_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
       protocol: string;
-      security_groups: Array<any>;
+      security_groups: [];
       self: boolean;
       to_port: string;
     }>;
@@ -324,9 +324,9 @@ interface AWSTerraformSecurityGroupResource {
       from_port: string;
       protocol: string;
       to_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
-      security_groups: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
+      security_groups: [];
       self: boolean;
     }>;
     tags: {

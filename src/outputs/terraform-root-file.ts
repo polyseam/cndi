@@ -118,11 +118,11 @@ const getTerraformRootFile = async ({
 
     const awsNodeEntries = nodes as Array<AWSNodeItemSpec>;
 
+    // this block is to ensure we only deploy nodes to compatible AWS Availability Zones
     const availabilityZoneKeys: string[] = [];
 
     awsNodeEntries.forEach((entry) => {
       const azKey = `available_az_for_${entry.name}_instance_type`;
-
       availabilityZoneKeys.push(
         `data.aws_ec2_instance_type_offerings.${azKey}.locations`
       );
