@@ -16,6 +16,7 @@ const terraformRootFileData: TerraformRootFileData = {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
+      availability_zones: '',
     },
   ],
   provider: {
@@ -47,7 +48,6 @@ const terraformRootFileData: TerraformRootFileData = {
       ],
     },
   ],
-},
   resource: [
     {
       random_password: {
@@ -69,7 +69,7 @@ const terraformRootFileData: TerraformRootFileData = {
         nlb: {
           internal: false,
           load_balancer_type: "network",
-          subnets: "${aws_subnet.subnet[*].id",
+          subnets: "${aws_subnet.subnet[*].id}",
           tags: { Name: "${var.owner}-nlb" },
         },
       },
@@ -97,7 +97,8 @@ const terraformRootFileData: TerraformRootFileData = {
       aws_subnet: {
         subnet: {
           count: "${local.node_count}",
-          availability_zone: "${element(local.availability_zones, count.index)}",
+          availability_zone:
+            "${element(local.availability_zones, count.index)}",
           cidr_block: "${element(var.sbn_cidr_block, count.index)}",
           map_public_ip_on_launch: "${var.sbn_public_ip}",
           tags: { Name: "${var.owner}-subnet" },
@@ -158,7 +159,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.sg_ingress_cidr_block}"],
                 description:
-                "Kubernetes API server port to access cluster from local machine",
+                  "Kubernetes API server port to access cluster from local machine",
                 from_port: "${var.sg_ingress_k8s_API}",
                 protocol: "${var.sg_ingress_proto}",
                 to_port: "${var.sg_ingress_k8s_API}",
@@ -170,7 +171,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.sg_ingress_cidr_block}"],
                 description:
-                "Nodeport port to quickly access applications INSECURE",
+                  "Nodeport port to quickly access applications INSECURE",
                 from_port: "${var.sg_ingress_nodeport_range_start}",
                 protocol: "${var.sg_ingress_proto}",
                 to_port: "${var.sg_ingress_nodeport_range_end}",
@@ -182,7 +183,7 @@ const terraformRootFileData: TerraformRootFileData = {
               {
                 cidr_blocks: ["${var.vpc_cidr_block}"],
                 description:
-                "Inbound rule that enables traffic between EC2 instances in the VPC ",
+                  "Inbound rule that enables traffic between EC2 instances in the VPC ",
                 from_port: "${var.sg_ingress_all}",
                 protocol: "${var.sg_ingress_proto_all}",
                 to_port: "${var.sg_ingress_all}",
@@ -346,7 +347,7 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: "30000",
         description:
-        "Nodeport start range port to quickly access applications INSECURE",
+          "Nodeport start range port to quickly access applications INSECURE",
         type: "string",
       },
     ],
@@ -355,7 +356,7 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: "33000",
         description:
-        "Nodeport end range port to quickly access applications INSECURE",
+          "Nodeport end range port to quickly access applications INSECURE",
         type: "string",
       },
     ],
@@ -444,19 +445,21 @@ const terraformRootFileData: TerraformRootFileData = {
       {
         default: true,
         description:
-        "Assign public IP to the instance launched into the subnet",
+          "Assign public IP to the instance launched into the subnet",
         type: "bool",
       },
     ],
 
     sbn_cidr_block: [
       {
-        default: ["10.0.1.0/24",
+        default: [
+          "10.0.1.0/24",
           "10.0.2.0/24",
           "10.0.3.0/24",
           "10.0.4.0/24",
           "10.0.5.0/24",
-          "10.0.6.0/24",],
+          "10.0.6.0/24",
+        ],
         description: "CIDR block for the subnet",
         type: "list(string)",
       },
@@ -531,6 +534,7 @@ const terraformRootFileData: TerraformRootFileData = {
     ],
   },
 };
+
 const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   locals: [
     {
@@ -601,7 +605,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         },
       },
       google_compute_firewall: {
-        "cndi_allow_external_traffic": {
+        cndi_allow_external_traffic: {
           allow: [
             { ports: ["22"], protocol: "tcp" },
             { ports: ["80"], protocol: "tcp" },
@@ -614,7 +618,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
           network: "${google_compute_network.cndi_vpc_network.self_link}",
           source_ranges: ["0.0.0.0/0"],
         },
-        "cndi_allow_internal_traffic": {
+        cndi_allow_internal_traffic: {
           allow: [
             { ports: ["0-65535"], protocol: "tcp" },
             { ports: ["0-65535"], protocol: "udp" },
