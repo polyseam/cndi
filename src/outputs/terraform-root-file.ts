@@ -1,5 +1,10 @@
 import { getPrettyJSONString } from "../utils.ts";
-import { NodeKind, TerraformDependencies } from "../types.ts";
+import {
+  AWSNodeItemSpec,
+  BaseNodeItemSpec,
+  NodeKind,
+  TerraformDependencies,
+} from "../types.ts";
 
 import {
   gcpTerraformRootFileData,
@@ -36,7 +41,7 @@ const googleTerraformProviderDependency = {
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
-  nodeNames: Array<string>;
+  nodes: Array<BaseNodeItemSpec>;
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -44,8 +49,11 @@ const terraformRootFileLabel = white("outputs/terraform-root-file:");
 const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
-  nodeNames,
+  nodes,
 }: GetTerraformRootFileArgs): Promise<string> => {
+  const nodeNames = nodes.map((entry) => entry.name);
+
+  const nodeCount = nodes.length;
   // copy original terraformRootFileData to working copy for GCP using js spread operator
 
   if (requiredProviders.has("gcp")) {
@@ -57,7 +65,7 @@ const getTerraformRootFile = async ({
         '"GOOGLE_CREDENTIALS"',
         brightRed(`is undefined\nPlease set`),
         '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
-        brightRed("and try again\n"),
+        brightRed("and try again\n")
       );
       Deno.exit(1);
     }
@@ -69,7 +77,7 @@ const getTerraformRootFile = async ({
     } catch {
       console.log(
         terraformRootFileLabel,
-        brightRed("failed to parse service account key json"),
+        brightRed("failed to parse service account key json")
       );
       Deno.exit(1);
     }
@@ -83,15 +91,12 @@ const getTerraformRootFile = async ({
     terraformDependencies.required_providers[0].google =
       googleTerraformProviderDependency;
 
-    gcpMainTerraformFileObject.locals[0].leader_node_ip =
-      `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
+    gcpMainTerraformFileObject.locals[0].leader_node_ip = `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
     gcpMainTerraformFileObject.locals[0].region = region;
 
-    gcpMainTerraformFileObject.resource[0].google_compute_instance_group
-      .cndi_cluster.instances = nodeNames.map((name) =>
-        `\${google_compute_instance.${name}.self_link}`
-      );
+    gcpMainTerraformFileObject.resource[0].google_compute_instance_group.cndi_cluster.instances =
+      nodeNames.map((name) => `\${google_compute_instance.${name}.self_link}`);
 
     gcpMainTerraformFileObject.provider.google = [
       {
@@ -111,8 +116,35 @@ const getTerraformRootFile = async ({
     const awsMainTerraformFileObject = { ...terraformRootFileData };
     const region = Deno.env.get("AWS_REGION") || DEFAULT_AWS_REGION;
 
-    awsMainTerraformFileObject.locals[0].leader_node_ip =
-      `\${aws_instance.${leaderName}.private_ip}`;
+    const awsNodeEntries = nodes as Array<AWSNodeItemSpec>;
+
+    const availabilityZoneKeys: string[] = [];
+
+    awsNodeEntries.forEach((entry) => {
+      const azKey = `available_az_for_${entry.name}_instance_type`;
+
+      availabilityZoneKeys.push(
+        `data.aws_ec2_instance_type_offerings.${azKey}.locations`
+      );
+
+      awsMainTerraformFileObject.data[0].aws_ec2_instance_type_offerings[0][
+        azKey
+      ] = [
+        {
+          filter: [{ name: "instance-type", values: [entry.instance_type] }],
+          location_type: "availability-zone",
+        },
+      ];
+    });
+
+    awsMainTerraformFileObject.locals[0].availability_zones = `\${sort(setintersection(${availabilityZoneKeys.join(
+      ","
+    )}))}`;
+
+    awsMainTerraformFileObject.locals[0].leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`;
+
+    // maybe this should be a string??
+    awsMainTerraformFileObject.locals[0].node_count = `${nodeCount}`;
 
     // TODO: verify that this provider configuration is being consumed instead of the environment variable
     awsMainTerraformFileObject.provider.aws = [{ region }];
@@ -127,7 +159,7 @@ const getTerraformRootFile = async ({
 
   console.log(
     terraformRootFileLabel,
-    'required providers must contain either "gcp" or "aws"',
+    'required providers must contain either "gcp" or "aws"'
   );
   Deno.exit(1);
 };

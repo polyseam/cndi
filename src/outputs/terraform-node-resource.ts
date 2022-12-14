@@ -30,6 +30,7 @@ const getTerraformNodeResource = (
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
+        
       );
     case "gcp":
       return getGCPNodeResource(
@@ -46,6 +47,7 @@ const getTerraformNodeResource = (
       Deno.exit(1);
   }
 };
+
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
@@ -158,12 +160,12 @@ const getAWSNodeResource = (
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
-  const { name, role } = node;
+  const { name, role, nodeIndex } = node;
   const ami = node?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
   const instance_type = node?.instance_type || node?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
-
+  
   const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
@@ -179,7 +181,8 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
-  const subnet_id = "${aws_subnet.subnet.id}";
+
+  const subnet_id = `\${aws_subnet.subnet[${nodeIndex}].id}`;
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
   const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
   const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";
