@@ -1,6 +1,4 @@
 const coreReadmeBlock = `
-# my-cndi-project
-
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
 
 ## files and directories

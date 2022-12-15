@@ -407,22 +407,24 @@ interface DeploymentTargetConfiguration {
 
 // incomplete type, config will have more options
 interface CNDIConfig {
+  project_name?: string;
+  cndi_version?: string;
   infrastructure: {
     cndi: {
-      deploymentTargetConfiguration: DeploymentTargetConfiguration;
+      deploymentTargetConfiguration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
     };
   };
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster: {
+  cluster_manifests: {
     [key: string]: unknown;
   };
 }
 
 interface KubernetesManifest {
-  apiVersion: string;
+  cndiVersion: string;
   kind: string;
 }
 
@@ -489,12 +491,12 @@ interface CNDIContext {
   argoUIReadOnlyPassword?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][*]
+// cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
 interface BaseNodeItemSpec {
   name: string;
-  role: NodeRole;
   kind: NodeKind;
-  nodeIndex: number;
+  role?: NodeRole; // default: controller
+  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
 }
 
 interface CNDIClients {
@@ -926,5 +928,5 @@ export type {
   KubernetesSecretWithStringData,
   SealedSecretsKeys,
   TerraformDependencies,
-  TerraformRootFileData,
+  TerraformRootFileData
 };

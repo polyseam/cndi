@@ -13,29 +13,35 @@ import {
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   GCPTerraformNodeResource,
+NodeRole,
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
 const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
+interface NodeSpecWithNodeIndex extends BaseNodeItemSpec {
+  nodeIndex: number;
+}
+
 const getTerraformNodeResource = (
-  node: BaseNodeItemSpec,
+  node:  NodeSpecWithNodeIndex,
   deploymentTargetConfiguration: DeploymentTargetConfiguration,
   controllerName: string,
 ): string => {
   const { kind } = node;
+
   switch (kind) {
     case "aws":
       return getAWSNodeResource(
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
-        
       );
+
     case "gcp":
       return getGCPNodeResource(
         node as GCPNodeItemSpec,
-        deploymentTargetConfiguration.aws as GCPDeploymentTargetConfiguration,
+        deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
       );
 
@@ -160,7 +166,9 @@ const getAWSNodeResource = (
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
-  const { name, role, nodeIndex } = node;
+  const { name } = node;
+  const role = node.role as NodeRole;
+  const nodeIndex = node.nodeIndex;
   const ami = node?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
   const instance_type = node?.instance_type || node?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||

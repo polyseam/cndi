@@ -74,7 +74,12 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
-  const cluster = config?.cluster || {};
+  if(!config?.project_name){
+    console.log(owLabel, brightRed(`you need to specify a ${cyan('"project_name"')} for your CNDI cluster, it is used to tag resources we create`));
+    Deno.exit(1);
+  }
+
+  const cluster_manifests = config?.cluster_manifests || {};
 
   try {
     // remove all files in cndi/cluster
@@ -123,11 +128,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   );
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
-  Object.keys(cluster).forEach(async (key) => {
-    const manifestObj = cluster[key] as KubernetesManifest;
+  Object.keys(cluster_manifests).forEach(async (key) => {
+    const manifestObj = cluster_manifests[key] as KubernetesManifest;
 
     if (manifestObj?.kind && manifestObj.kind === "Secret") {
-      const secret = cluster[key] as KubernetesSecret;
+      const secret = cluster_manifests[key] as KubernetesSecret;
       const secretName = `${key}.json`;
       const sealedSecretManifest = await getSealedSecretManifest(
         secret,

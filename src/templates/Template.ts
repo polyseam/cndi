@@ -1,24 +1,23 @@
-import { EnvObject, NodeKind } from "../types.ts";
+import { CNDIConfig, EnvObject, NodeKind } from "../types.ts";
+import { getPrettyJSONString } from "../utils.ts";
 
 export type GetTemplateFn = (
   kind: NodeKind,
-  input: Record<string, unknown>,
-) => string;
+  input: Record<string, unknown>
+) => CNDIConfig;
 
 export type GetConfigurationFn = (
-  interactive: boolean,
+  interactive: boolean
 ) => Promise<Record<string, unknown>>;
 
 export interface TemplateOptions {
   getConfiguration: (interactive: boolean) => Promise<Record<string, unknown>>;
   getEnv: (interactive: boolean) => Promise<EnvObject>;
-  getTemplate: (kind: NodeKind, input: Record<string, unknown>) => string;
+  getTemplate: (kind: NodeKind, input: Record<string, unknown>) => CNDIConfig;
   readmeBlock: string;
 }
 
 const readmeCore = `
-# my-cndi-project
-
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
 
 ## files and directories
@@ -91,7 +90,19 @@ export class Template {
     return await this.env;
   }
 
-  getTemplate(kind: NodeKind, configuration: Record<string, unknown>) {
-    return this.options.getTemplate(kind, configuration);
+  getTemplate(
+    kind: NodeKind,
+    configuration: Record<string, unknown>,
+    project_name: string
+  ) {
+
+    const template = this.options.getTemplate(kind, configuration);
+    const cndi_version = 'v1';
+
+    return getPrettyJSONString({
+      project_name,
+      cndi_version,
+      ...template,
+    });
   }
 }

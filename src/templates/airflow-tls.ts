@@ -1,8 +1,8 @@
-import { EnvObject, NodeKind } from "../types.ts";
+import { CNDIConfig, EnvObject, NodeKind, NodeRole } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
 import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
 
 interface AirflowTlsConfiguration {
@@ -49,7 +49,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
 // airflowTlsTemplate.getConfiguration()
 async function getAirflowTlsConfiguration(
-  interactive: boolean,
+  interactive: boolean
 ): Promise<AirflowTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let airflowDomainName = "airflow.example.com";
@@ -59,28 +59,28 @@ async function getAirflowTlsConfiguration(
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:",
+        "Please enter the url of the git repo containing your dags:"
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:",
+        "Please enter the domain name you want argocd to be accessible on:"
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:",
+        "Please enter the domain name you want airflow to be accessible on:"
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:",
+        "Please enter the email address you want to use for lets encrypt:"
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -97,8 +97,9 @@ async function getAirflowTlsConfiguration(
 // airflowTlsTemplate.getTemplate()
 function getAirflowTlsTemplate(
   kind: NodeKind,
-  input: AirflowTlsConfiguration,
-): string {
+  input: AirflowTlsConfiguration
+): CNDIConfig {
+
   const {
     argocdDomainName,
     airflowDomainName,
@@ -107,31 +108,34 @@ function getAirflowTlsTemplate(
   } = input;
 
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-  return getPrettyJSONString({
-    nodes: {
-      entries: [
-        {
-          name: "x-airflow-node",
-          kind,
-          role: "leader",
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "y-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "z-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-      ],
+  const volume_size = 128;//GiB
+  return {
+    infrastructure: {
+      cndi: {
+        nodes: [
+          {
+            name: "x-airflow-node",
+            kind: kind as NodeKind,
+            role: NodeRole.leader,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "y-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "z-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+        ],
+      },
     },
-    cluster: {
+    cluster_manifests: {
       "git-credentials-secret": {
         apiVersion: "v1",
         kind: "Secret",
@@ -273,7 +277,7 @@ function getAirflowTlsTemplate(
         },
       },
     },
-  });
+  };
 }
 
 const airflowTlsTemplate = new Template("airflow-tls", {
