@@ -10,13 +10,13 @@ echo "Installing nfs-common"
 sudo apt-get install nfs-common -y
 
 echo "Installing microk8s"
-sudo snap install microk8s --classic --channel=1.25/stable
+sudo snap install microk8s --classic --channel=1.26/stable
 
 echo "Adding user to group"
-sudo usermod -a -G microk8s ubuntu
+sudo usermod -a -G microk8s $USER
 
 echo "granting access to ~/.kube"
-sudo chown -f -R ubuntu ~/.kube
+sudo chown -f -R $USER ~/.kube
 
 echo "awaiting microk8s to be ready"
 sudo microk8s status --wait-ready
@@ -128,6 +128,5 @@ echo "argo configured"
 
 echo "leader bootstrap complete"
 
-sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify | base64 -d > $HOME/argo-password.txt
 `.trim();
 export default bootstrapShellScript;
