@@ -65,7 +65,7 @@ const getTerraformRootFile = async ({
         '"GOOGLE_CREDENTIALS"',
         brightRed(`is undefined\nPlease set`),
         '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
-        brightRed("and try again\n")
+        brightRed("and try again\n"),
       );
       Deno.exit(1);
     }
@@ -77,7 +77,7 @@ const getTerraformRootFile = async ({
     } catch {
       console.log(
         terraformRootFileLabel,
-        brightRed("failed to parse service account key json")
+        brightRed("failed to parse service account key json"),
       );
       Deno.exit(1);
     }
@@ -91,13 +91,14 @@ const getTerraformRootFile = async ({
     terraformDependencies.required_providers[0].google =
       googleTerraformProviderDependency;
 
-    gcpMainTerraformFileObject.locals[0].leader_node_ip = `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
+    gcpMainTerraformFileObject.locals[0].leader_node_ip =
+      `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
     gcpMainTerraformFileObject.locals[0].region = region;
 
-    gcpMainTerraformFileObject.resource[0].google_compute_instance_group.cndi_cluster.instances =
-      nodeEntryNames.map(
-        (name) => `\${google_compute_instance.${name}.self_link}`
+    gcpMainTerraformFileObject.resource[0].google_compute_instance_group
+      .cndi_cluster.instances = nodeEntryNames.map(
+        (name) => `\${google_compute_instance.${name}.self_link}`,
       );
 
     gcpMainTerraformFileObject.provider.google = [
@@ -136,7 +137,9 @@ const getTerraformRootFile = async ({
     awsNodeEntries.forEach((entry) => {
       const azKey = `available_az_for_${entry.name}_instance_type`;
 
-      availabilityZoneKeys.push(`data.aws_ec2_instance_type_offerings.${azKey}.locations`);
+      availabilityZoneKeys.push(
+        `data.aws_ec2_instance_type_offerings.${azKey}.locations`,
+      );
 
       awsMainTerraformFileObject.data[0].aws_ec2_instance_type_offerings[0][
         azKey
@@ -148,9 +151,11 @@ const getTerraformRootFile = async ({
       ];
     });
 
-    awsMainTerraformFileObject.locals[0].availability_zones = `\${sort(setintersection(${availabilityZoneKeys.join(',')}))}`
+    awsMainTerraformFileObject.locals[0].availability_zones =
+      `\${sort(setintersection(${availabilityZoneKeys.join(",")}))}`;
 
-    awsMainTerraformFileObject.locals[0].leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`;
+    awsMainTerraformFileObject.locals[0].leader_node_ip =
+      `\${aws_instance.${leaderName}.private_ip}`;
 
     // maybe this should be a string??
     awsMainTerraformFileObject.locals[0].node_count = `${nodeCount}`;
@@ -168,7 +173,7 @@ const getTerraformRootFile = async ({
 
   console.log(
     terraformRootFileLabel,
-    'required providers must contain either "gcp" or "aws"'
+    'required providers must contain either "gcp" or "aws"',
   );
   Deno.exit(1);
 };

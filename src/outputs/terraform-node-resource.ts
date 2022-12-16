@@ -31,7 +31,6 @@ const getTerraformNodeResource = (
         entry as AWSNodeEntrySpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
-        
       );
     case "gcp":
       return getGCPNodeResource(
@@ -169,7 +168,7 @@ const getAWSNodeResource = (
   const instance_type = entry?.instance_type || entry?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
-  
+
   const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
