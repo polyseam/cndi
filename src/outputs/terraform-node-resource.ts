@@ -22,8 +22,7 @@ const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 const getTerraformNodeResource = (
   node:  BaseNodeItemSpec,
   deploymentTargetConfiguration: DeploymentTargetConfiguration,
-  controllerName: string,
-  nodeIndex: number,
+  controllerName: string
 ): string => {
   const { kind } = node;
 
@@ -32,16 +31,14 @@ const getTerraformNodeResource = (
       return getAWSNodeResource(
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
-        controllerName,
-        nodeIndex
+        controllerName
       );
 
     case "gcp":
       return getGCPNodeResource(
         node as GCPNodeItemSpec,
         deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
-        controllerName,
-        nodeIndex
+        controllerName
       );
 
     default:
@@ -56,8 +53,7 @@ const getTerraformNodeResource = (
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
-  leaderName: string,
-  _: number, // nodeIndex
+  leaderName: string
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
@@ -162,8 +158,7 @@ const getGCPNodeResource = (
 const getAWSNodeResource = (
   node: AWSNodeItemSpec,
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
-  leaderName: string,
-  nodeIndex: number
+  leaderName: string
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
@@ -173,7 +168,7 @@ const getAWSNodeResource = (
   const instance_type = node?.instance_type || node?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
-  
+
   const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
@@ -190,9 +185,7 @@ const getAWSNodeResource = (
     },
   ];
 
-
-  const subnet_id = `\${aws_subnet.subnet[${nodeIndex}].id}`;
-
+  const subnet_id = `\${aws_subnet.subnet[0].id}`;
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
   const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
   const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";

@@ -68,14 +68,14 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table_association: {
         rt_sbn_asso: {
-          count: "${local.node_count}",
+          count: "1",
           route_table_id: "${aws_route_table.rt.id}",
           subnet_id: "${element(aws_subnet.subnet[*].id, count.index)}",
         },
       },
       aws_subnet: {
         subnet: {
-          count: "${local.node_count}",
+          count: "1",
           availability_zone:
             "${element(local.availability_zones, count.index)}",
           cidr_block: "${element(var.sbn_cidr_block, count.index)}",

@@ -112,19 +112,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   // write tftpl terraform template for the user_data bootstrap script
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "leader_bootstrap_cndi.sh.tftpl"),
-    leaderBootstrapTerraformTemplate
+    leaderBootstrapTerraformTemplate,
   );
 
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "controller_bootstrap_cndi.sh.tftpl"),
-    controllerBootstrapTerrformTemplate
+    controllerBootstrapTerrformTemplate,
   );
 
   const tempPublicKeyFilePath = await Deno.makeTempFile();
 
   await Deno.writeTextFile(
     tempPublicKeyFilePath,
-    sealedSecretsKeys.sealed_secrets_public_key
+    sealedSecretsKeys.sealed_secrets_public_key,
   );
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
@@ -137,13 +137,13 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       const sealedSecretManifest = await getSealedSecretManifest(
         secret,
         tempPublicKeyFilePath,
-        context
+        context,
       );
 
       if (sealedSecretManifest) {
         Deno.writeTextFileSync(
           path.join(pathToKubernetesManifests, secretName),
-          sealedSecretManifest
+          sealedSecretManifest,
         );
         console.log(`created encrypted secret:`, secretName);
       }
@@ -152,7 +152,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
     await Deno.writeTextFile(
       path.join(pathToKubernetesManifests, `${key}.json`),
-      getPrettyJSONString(manifestObj)
+      getPrettyJSONString(manifestObj),
     );
   });
 
@@ -178,12 +178,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   if (requiredProviders.size !== 1) {
     console.log(
-      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`)
+      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`),
     );
     console.log(
-      `your nodes have the following ${brightRed(
-        `${requiredProviders.size}`
-      )} "kind"s:`
+      `your nodes have the following ${
+        brightRed(
+          `${requiredProviders.size}`,
+        )
+      } "kind"s:`,
     );
     requiredProviders.forEach((kind) => {
       console.log(` - ${yellow(kind)}`);
@@ -207,7 +209,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   // write terraform root file
   await Deno.writeTextFile(
     path.join(pathToTerraformResources, "setup-cndi.tf.json"),
-    terraformRootFile
+    terraformRootFile,
   );
 
   // write terraform nodes files
@@ -215,8 +217,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const nodeFileContents: string = getTerraformNodeResource(
       node,
       deploymentTargetConfiguration,
-      leader.name,
-      nodeIndex,
+      leader.name
     );
     Deno.writeTextFile(
       path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),
@@ -227,7 +228,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   // write the cndi/cluster/Chart.yaml file
   await Deno.writeTextFile(
     path.join(pathToKubernetesManifests, "Chart.yaml"),
-    RootChartYaml
+    RootChartYaml,
   );
 
   const { applications } = config;
@@ -238,11 +239,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
-      applicationSpec
+      applicationSpec,
     );
     Deno.writeTextFileSync(
       path.join(pathToKubernetesManifests, "applications", filename),
-      manifestContent
+      manifestContent,
     );
     console.log("created application manifest:", filename);
   });
