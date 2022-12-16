@@ -213,9 +213,10 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   // write terraform nodes files
   nodes.forEach((node: BaseNodeItemSpec, nodeIndex) => {
     const nodeFileContents: string = getTerraformNodeResource(
-      {...node, nodeIndex},
+      node,
       deploymentTargetConfiguration,
       leader.name,
+      nodeIndex,
     );
     Deno.writeTextFile(
       path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),

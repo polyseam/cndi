@@ -19,14 +19,11 @@ NodeRole,
 import { getPrettyJSONString } from "../utils.ts";
 const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
-interface NodeSpecWithNodeIndex extends BaseNodeItemSpec {
-  nodeIndex: number;
-}
-
 const getTerraformNodeResource = (
-  node:  NodeSpecWithNodeIndex,
+  node:  BaseNodeItemSpec,
   deploymentTargetConfiguration: DeploymentTargetConfiguration,
   controllerName: string,
+  nodeIndex: number,
 ): string => {
   const { kind } = node;
 
@@ -36,6 +33,7 @@ const getTerraformNodeResource = (
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
+        nodeIndex
       );
 
     case "gcp":
@@ -43,6 +41,7 @@ const getTerraformNodeResource = (
         node as GCPNodeItemSpec,
         deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
+        nodeIndex
       );
 
     default:
@@ -58,6 +57,7 @@ const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
   leaderName: string,
+  _: number, // nodeIndex
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
@@ -163,12 +163,12 @@ const getAWSNodeResource = (
   node: AWSNodeItemSpec,
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
   leaderName: string,
+  nodeIndex: number
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
   const { name } = node;
   const role = node.role as NodeRole;
-  const nodeIndex = node.nodeIndex;
   const ami = node?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
   const instance_type = node?.instance_type || node?.machine_type ||
     deploymentTargetConfiguration?.instance_type ||
@@ -190,7 +190,9 @@ const getAWSNodeResource = (
     },
   ];
 
+
   const subnet_id = `\${aws_subnet.subnet[${nodeIndex}].id}`;
+
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
   const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
   const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";
