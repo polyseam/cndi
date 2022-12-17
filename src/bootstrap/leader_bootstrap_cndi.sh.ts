@@ -13,10 +13,10 @@ echo "Installing microk8s"
 sudo snap install microk8s --classic --channel=1.26/stable
 
 echo "Adding user to group"
-sudo usermod -a -G microk8s $USER
+sudo usermod -a -G microk8s ubuntu
 
 echo "granting access to ~/.kube"
-sudo chown -f -R $USER ~/.kube
+sudo chown -f -R ubuntu ~/.kube
 
 echo "awaiting microk8s to be ready"
 sudo microk8s status --wait-ready
