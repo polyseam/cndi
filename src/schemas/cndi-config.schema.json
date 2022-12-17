@@ -1,0 +1,48 @@
+{
+  "cndi-config": {
+    "type": "object",
+    "$comment": "The root of the cndi config schema",
+    "description": "An object used to configure the changelog generation for GitHub Releases",
+    "properties": {
+      "infrastructure": {
+        "type": "object",
+        "description": "An object which defines the infrastructure resources CNDI should deploy.",
+        "properties": {
+          "cndi": {
+            "type": "object",
+            "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy.",
+                  "required": ["name", "kind"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the node to deploy."
+                    },
+                    "kind": {
+                      "type": "string",
+                      "description": "The type of node to deploy."
+                    },
+                    "role": {},
+                    "instance_type": {},
+                    "volume_size": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "cluster_manifests": {
+          "type": "object",
+          "description": "An object that maps labels to categories in the changelog.",
+
+          "properties": {}
+        }
+      }
+    }
+  }
+}
