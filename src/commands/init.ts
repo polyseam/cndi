@@ -70,6 +70,23 @@ export default async function init(context: CNDIContext) {
         context.pathToConfig,
       )) as unknown as CNDIConfig;
 
+      if (!config?.project_name) {
+        console.log(
+          brightRed(
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan(
+                '"project_name"',
+              )
+            } key\n`,
+          ),
+        );
+        Deno.exit(1);
+      }
+
       if (!config.infrastructure) {
         console.log(
           initLabel,
@@ -79,13 +96,16 @@ export default async function init(context: CNDIContext) {
                 `"${context.pathToConfig}"`,
               )
             } but it does not have the required ${
-              cyan('"infrastructure"')
+              cyan(
+                '"infrastructure"',
+              )
             } key\n`,
           ),
         );
 
         // TODO: remove this warning, there are at most only a few people using the old syntax
         const badconfig = config as unknown as Record<string, unknown>;
+
         if (badconfig?.nodes) {
           console.log(
             initLabel,
@@ -96,18 +116,37 @@ export default async function init(context: CNDIContext) {
           console.log(
             initLabel,
             "please read more about the 1.x.x syntax at",
-            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes"),
+            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes\n"),
           );
         }
 
         Deno.exit(1);
+      } else if (!config.infrastructure.cndi.nodes[0]) {
+        console.log(
+          initLabel,
+          brightRed(
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have any ${
+              cyan(
+                '"cndi.infrastructure.nodes"',
+              )
+            } entries\n`,
+          ),
+        );
       }
 
       if (!config.cndi_version) {
         console.log(
           initLabel,
           yellow(
-            `You haven't specified a "cndi_version" in your config file, defaulting to "v1"`,
+            `You haven't specified a ${
+              cyan(
+                '"cndi_version"',
+              )
+            } in your config file, defaulting to "v1"\n`,
           ),
         );
       }
@@ -307,7 +346,9 @@ export default async function init(context: CNDIContext) {
     if (e instanceof Deno.errors.NotFound) {
       await Deno.writeTextFile(
         readmePath,
-        `# ${project_name}\n` + coreReadme + "\n" +
+        `# ${project_name}\n` +
+          coreReadme +
+          "\n" +
           (template?.readmeBlock || ""),
       );
     }
