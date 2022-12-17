@@ -3,11 +3,11 @@ import { getPrettyJSONString } from "../utils.ts";
 
 export type GetTemplateFn = (
   kind: NodeKind,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
 ) => CNDIConfig;
 
 export type GetConfigurationFn = (
-  interactive: boolean
+  interactive: boolean,
 ) => Promise<Record<string, unknown>>;
 
 export interface TemplateOptions {
@@ -93,11 +93,10 @@ export class Template {
   getTemplate(
     kind: NodeKind,
     configuration: Record<string, unknown>,
-    project_name: string
+    project_name: string,
   ) {
-
     const template = this.options.getTemplate(kind, configuration);
-    const cndi_version = 'v1';
+    const cndi_version = "v1";
 
     return getPrettyJSONString({
       project_name,

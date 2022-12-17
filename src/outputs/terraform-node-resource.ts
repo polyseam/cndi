@@ -13,16 +13,16 @@ import {
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   GCPTerraformNodeResource,
-NodeRole,
+  NodeRole,
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
 const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
 const getTerraformNodeResource = (
-  node:  BaseNodeItemSpec,
+  node: BaseNodeItemSpec,
   deploymentTargetConfiguration: DeploymentTargetConfiguration,
-  controllerName: string
+  controllerName: string,
 ): string => {
   const { kind } = node;
 
@@ -31,14 +31,14 @@ const getTerraformNodeResource = (
       return getAWSNodeResource(
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
-        controllerName
+        controllerName,
       );
 
     case "gcp":
       return getGCPNodeResource(
         node as GCPNodeItemSpec,
         deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
-        controllerName
+        controllerName,
       );
 
     default:
@@ -53,7 +53,7 @@ const getTerraformNodeResource = (
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
-  leaderName: string
+  leaderName: string,
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
@@ -158,7 +158,7 @@ const getGCPNodeResource = (
 const getAWSNodeResource = (
   node: AWSNodeItemSpec,
   deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
-  leaderName: string
+  leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";

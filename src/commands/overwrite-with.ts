@@ -74,8 +74,15 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
-  if(!config?.project_name){
-    console.log(owLabel, brightRed(`you need to specify a ${cyan('"project_name"')} for your CNDI cluster, it is used to tag resources we create`));
+  if (!config?.project_name) {
+    console.log(
+      owLabel,
+      brightRed(
+        `you need to specify a ${
+          cyan('"project_name"')
+        } for your CNDI cluster, it is used to tag resources we create`,
+      ),
+    );
     Deno.exit(1);
   }
 
@@ -158,7 +165,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const { nodes } = config.infrastructure.cndi;
 
-  const deploymentTargetConfiguration = config.infrastructure.cndi.deploymentTargetConfiguration ||
+  const deploymentTargetConfiguration =
+    config.infrastructure.cndi.deploymentTargetConfiguration ||
     ({} as DeploymentTargetConfiguration);
 
   const leaders = nodes.filter((node) => node.role === "leader");
@@ -213,11 +221,11 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   );
 
   // write terraform nodes files
-  nodes.forEach((node: BaseNodeItemSpec, nodeIndex) => {
+  nodes.forEach((node: BaseNodeItemSpec) => {
     const nodeFileContents: string = getTerraformNodeResource(
       node,
       deploymentTargetConfiguration,
-      leader.name
+      leader.name,
     );
     Deno.writeTextFile(
       path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),

@@ -49,7 +49,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
 // airflowTlsTemplate.getConfiguration()
 async function getAirflowTlsConfiguration(
-  interactive: boolean
+  interactive: boolean,
 ): Promise<AirflowTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let airflowDomainName = "airflow.example.com";
@@ -59,28 +59,28 @@ async function getAirflowTlsConfiguration(
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
       message: cyan(
-        "Please enter the url of the git repo containing your dags:"
+        "Please enter the url of the git repo containing your dags:",
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:"
+        "Please enter the domain name you want argocd to be accessible on:",
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:"
+        "Please enter the domain name you want airflow to be accessible on:",
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:"
+        "Please enter the email address you want to use for lets encrypt:",
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -97,9 +97,8 @@ async function getAirflowTlsConfiguration(
 // airflowTlsTemplate.getTemplate()
 function getAirflowTlsTemplate(
   kind: NodeKind,
-  input: AirflowTlsConfiguration
+  input: AirflowTlsConfiguration,
 ): CNDIConfig {
-
   const {
     argocdDomainName,
     airflowDomainName,
@@ -108,7 +107,7 @@ function getAirflowTlsTemplate(
   } = input;
 
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-  const volume_size = 128;//GiB
+  const volume_size = 128; //GiB
   return {
     infrastructure: {
       cndi: {

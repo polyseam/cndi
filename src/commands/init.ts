@@ -67,17 +67,21 @@ export default async function init(context: CNDIContext) {
     try {
       console.log(`cndi init --file "${context.pathToConfig}"\n`);
       const config = (await loadJSONC(
-        context.pathToConfig
+        context.pathToConfig,
       )) as unknown as CNDIConfig;
 
       if (!config.infrastructure) {
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file found was at ${white(
-              `"${context.pathToConfig}"`
-            )} but it does not have the required ${cyan('"infrastructure"')} key\n`
-          )
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan('"infrastructure"')
+            } key\n`,
+          ),
         );
 
         // TODO: remove this warning, there are at most only a few people using the old syntax
@@ -86,23 +90,25 @@ export default async function init(context: CNDIContext) {
           console.log(
             initLabel,
             yellow(
-              `You appear to be using the deprecated pre-release config syntax. Sorry!`
-            )
+              `You appear to be using the deprecated pre-release config syntax. Sorry!`,
+            ),
           );
           console.log(
             initLabel,
             "please read more about the 1.x.x syntax at",
-            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes")
+            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes"),
           );
         }
 
         Deno.exit(1);
       }
 
-      if(!config.cndi_version){
+      if (!config.cndi_version) {
         console.log(
           initLabel,
-          yellow(`You haven't specified a "cndi_version" in your config file, defaulting to "v1"`)
+          yellow(
+            `You haven't specified a "cndi_version" in your config file, defaulting to "v1"`,
+          ),
         );
       }
 
@@ -114,17 +120,21 @@ export default async function init(context: CNDIContext) {
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file not found at ${white(
-              `"${context.pathToConfig}"`
-            )}\n`
-          )
+            `cndi-config file not found at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            }\n`,
+          ),
         );
 
         // and suggest a solution
         console.log(
-          `if you don't have a cndi-config file try ${cyan(
-            "cndi init --interactive"
-          )}\n`
+          `if you don't have a cndi-config file try ${
+            cyan(
+              "cndi init --interactive",
+            )
+          }\n`,
         );
         Deno.exit(1);
       }
@@ -135,7 +145,7 @@ export default async function init(context: CNDIContext) {
         console.log(`cndi init --interactive --template\n`);
         console.error(
           initLabel,
-          brightRed(`--template (-t) flag requires a value`)
+          brightRed(`--template (-t) flag requires a value`),
         );
         Deno.exit(1);
       }
@@ -153,7 +163,7 @@ export default async function init(context: CNDIContext) {
       console.log(`cndi init --template\n`);
       console.error(
         initLabel,
-        brightRed(`--template (-t) flag requires a value`)
+        brightRed(`--template (-t) flag requires a value`),
       );
       Deno.exit(1);
     }
@@ -167,8 +177,8 @@ export default async function init(context: CNDIContext) {
 
   const shouldContinue = directoryContainsCNDIFiles
     ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
-      )
+      "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+    )
     : true;
 
   if (!shouldContinue) {
@@ -190,8 +200,8 @@ export default async function init(context: CNDIContext) {
       console.log(
         initLabel,
         brightRed(
-          `The template you selected "${context.template}" is not available.\n`
-        )
+          `The template you selected "${context.template}" is not available.\n`,
+        ),
       );
 
       console.log("Available templates are:\n");
@@ -236,7 +246,7 @@ export default async function init(context: CNDIContext) {
   }
 
   const template: Template = availableTemplates.find(
-    (t) => t.name === baseTemplateName
+    (t) => t.name === baseTemplateName,
   ) as Template; // we know this exists because we checked it above
 
   if (!kind) {
@@ -255,7 +265,7 @@ export default async function init(context: CNDIContext) {
 
   const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
-    kind
+    kind,
   );
 
   const templateEnvObject = template
@@ -276,7 +286,7 @@ export default async function init(context: CNDIContext) {
     } catch (githubCopyError) {
       console.log(
         initLabel,
-        brightRed("failed to copy github integration files")
+        brightRed("failed to copy github integration files"),
       );
       console.error(githubCopyError);
       Deno.exit(1);
@@ -291,13 +301,14 @@ export default async function init(context: CNDIContext) {
     await Deno.stat(readmePath);
     console.log(
       initLabel,
-      yellow(`"${readmePath}" already exists, skipping generation`)
+      yellow(`"${readmePath}" already exists, skipping generation`),
     );
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
       await Deno.writeTextFile(
         readmePath,
-        `# ${project_name}\n` + coreReadme + "\n" + (template?.readmeBlock || "")
+        `# ${project_name}\n` + coreReadme + "\n" +
+          (template?.readmeBlock || ""),
       );
     }
   }

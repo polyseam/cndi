@@ -615,7 +615,7 @@ interface TerraformRootFileData {
   data: [
     {
       aws_ec2_instance_type_offerings: [
-        AWSTerraformEC2InstanceTypeOfferingsDataSource
+        AWSTerraformEC2InstanceTypeOfferingsDataSource,
       ];
     },
   ];
@@ -932,5 +932,5 @@ export type {
   KubernetesSecretWithStringData,
   SealedSecretsKeys,
   TerraformDependencies,
-  TerraformRootFileData
+  TerraformRootFileData,
 };
