@@ -193,17 +193,18 @@ Lets see how we accomplish this here in this new and improved CNDI:
 
 ### cluster
 
-The third aspect of a `cndi-config` file is the `"cluster"` object. Any objects
-here will be used as Kubernetes Manifests and they'll be applied to your cluster
-through ArgoCD. This gives CNDI infinite flexibility, so you can deploy any
-Kubernetes resource you want. You only need to modify this object if you want to
-go beyond one of the templates we provide, otherwise you can ignore it!
+The third aspect of a `cndi-config` file is the `"cluster_manifests"` object.
+Any objects here will be used as Kubernetes Manifests and they'll be applied to
+your cluster through ArgoCD. This gives CNDI infinite flexibility, so you can
+deploy any Kubernetes resource you want. You only need to modify this object if
+you want to go beyond one of the templates we provide, otherwise you can ignore
+it!
 
 ```jsonc
 {
   "infrastructure": {...},
   "applications": {...},
-  "cluster": {// inside the "cluster" object you can put all of your custom Kubernetes manifests
+  "cluster_manifests": {// inside the "cluster_manifests" object you can put all of your custom Kubernetes manifests
     "ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",
@@ -234,7 +235,7 @@ and `"GIT_PASSWORD"`, into the destination secret key names
 {
   "infrastructure": {...},
   "applications": {...},
-  "cluster": {
+  "cluster_manifests": {
     "airflow-git-credentials-secret": {
       "apiVersion": "v1",
       "kind": "Secret",
@@ -276,7 +277,7 @@ what `cndi init` produced for us:
 
 3. a `cndi/cluster` folder, containing Kubernetes manifests that will be
    installed on your new cluster when it is up and running. This includes
-   manifests like `Ingress` from the `"cluster"` section of your
+   manifests like `Ingress` from the `"cluster_manifests"` section of your
    `cndi-config.jsonc`.
 
 4. a `cndi/cluster/applications` folder, which contains a folder for each

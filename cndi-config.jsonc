@@ -33,7 +33,7 @@
       ]
     }
   },
-  "cluster-manifests": {
+  "cluster_manifests": {
     "argo-ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",
