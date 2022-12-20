@@ -14,7 +14,7 @@ interface AirflowTlsTemplateAnswers {
 
 export const enum Command {
   init = "init",
-  "overwrite-with" = "overwrite-with",
+  overwrite = "overwrite",
   run = "run",
   help = "help",
   default = "default",

@@ -35,7 +35,7 @@ import {
 
 const owLabel = white("ow:");
 /**
- * COMMAND fn: cndi overwrite-with
+ * COMMAND fn: cndi overwrite
  * Overwrites ./cndi directory with the specified config file
  */
 const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
@@ -51,7 +51,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     terraformStatePassphrase = context.terraformStatePassphrase;
     argoUIReadOnlyPassword = context.argoUIReadOnlyPassword;
   } else {
-    console.log(`cndi overwrite-with --file "${pathToConfig}"\n`);
+    console.log(`cndi overwrite --file "${pathToConfig}"\n`);
     sealedSecretsKeys = loadSealedSecretsKeys();
     terraformStatePassphrase = loadTerraformStatePassphrase();
     argoUIReadOnlyPassword = loadArgoUIReadOnlyPassword();
@@ -106,7 +106,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     // folder did not exist
   }
 
-  // create 'cndi/' 'cndi/cluster' and 'cndi/cluster/applications'
+  // create 'cndi/' 'cndi/cluster' and 'cndi/cluster_manifests/applications'
   await Deno.mkdir(path.join(pathToKubernetesManifests, "applications"), {
     recursive: true,
   });
@@ -233,7 +233,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     );
   });
 
-  // write the cndi/cluster/Chart.yaml file
+  // write the cndi/cluster_manifests/Chart.yaml file
   await Deno.writeTextFile(
     path.join(pathToKubernetesManifests, "Chart.yaml"),
     RootChartYaml,
@@ -241,7 +241,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const { applications } = config;
 
-  // write the `cndi/cluster/applications/${applicationName}.application.json` file for each application
+  // write the `cndi/cluster_manifests/applications/${applicationName}.application.json` file for each application
 
   Object.keys(applications).forEach((releaseName) => {
     const applicationSpec = applications[releaseName];
