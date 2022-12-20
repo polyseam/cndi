@@ -32,9 +32,7 @@ It's perfect for deploying Data Products consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each stack.
 
-## usage
-
-### installation
+## installation
 
 To install CNDI we need to perform just 2 steps, the first is to download the
 `cndi` binary, and the second is to run `cndi install`.
@@ -50,71 +48,184 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 cndi install
 ```
 
-### interactive mode
+## usage
 
-CNDI is always ran inside of a git repository, for the sake of this example we
-are using GitHub. The first step is to create a new repository, and then clone
-it locally. This is made easy by using the [gh cli](https://github.com/cli/cli).
+CNDI is a tool with which to deploy GitOps enabled Kubernetes application
+clusters on any platform as quickly and easily as possible. The best way to
+understand this process is to look at it as a lifecycle.
+
+### lifecycle: init
+
+The first step in the lifecycle is to initialize the CNDI project. Because
+CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
+repository before we do anything else. The best way to do this as a GitHub user
+is to use the [gh cli](https://github.com/cli/cli).
 
 ```bash
-# create a repo and clone it locally
 gh repo create cndi-example --private --clone && cd cndi-example
-# initialize a new cndi project using CNDI's interactive mode
-cndi init -i
-# select a template, and fill out the interactive prompts
 ```
 
-After you've answered the prompts, you will have a new `cndi-config.jsonc` file
-and all other files described in the [cndi init](#cndi-init) section of this
-README.
+Now that we have a Git repository, we can initialize a new CNDI project.
+
+We can do this in 2 different ways, either by using the interactive cli, or by
+writing or forking a "cndi-config" file you got from someone else, often named
+`cndi-config.jsonc`.
+
+**interactive mode**
+
+The best way to get started if you are new to CNDI is to use the interactive
+cli, so let's look at that first.
 
 ```bash
-# let's now add all of the environment variables we require
-# for deployment from our `.env` file, to GitHub Actions Secrets
+# once cndi is in your "PATH" you can run it from anywhere
+cndi init --interactive
+```
+
+This will start an interactive cli that will ask you a series of questions, the
+first is to select a Template. Templates are a CNDI concept, and they can be
+thought of as a "blueprint" for a data stack. Once you select a Template, CNDI
+will ask you some general questions about your project and some
+template-specific questions. Then it will write out a few files inside your
+project repo.
+
+**non-interactive mode**
+
+The other way to initialize a CNDI project is to use a `cndi-config.jsonc` file.
+There are only 2 good reasons to use the non-interactive mode. The first is that
+you have a `cndi-config.jsonc` file you found somewhere online which meets your
+needs. The second reason to avoid interactive mode is the standard for CLIs: you
+are calling `cndi init` from a script, though we can't think of any good reason
+to do that.
+
+To use CNDI in non-interactive mode you need a `cndi-config` file and pass that
+into cndi. For more information about the structure of this file, checkout the
+[config section]() of this README.
+
+```bash
+# if you run `cndi init` without -f we will look for a file named `cndi-config.jsonc` in the current directory
+cndi init -f cndi-config.jsonc
+```
+
+---
+
+Whether you've chosen to use interactive mode or not, CNDI has generated a few
+files and folders for us based on our `cndi-config.jsonc` file. If you want to
+learn about what CNDI is really creating, this is the best file to look at.
+
+We break down all of these generated files later in this document in the
+[outputs]() section.
+
+The next step for our one-time project setup is to make sure that we have all
+the required envrionment variables for our project. Some of these values are
+required for every deployment. For example, you always need to have
+`GIT_USERNAME`, `GIT_PASSWORD` and `GIT_REPO`.
+
+Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
+and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
+some are only required for certain Templates, all `airflow-tls` templates
+require `GIT_SYNC_REPO`.
+
+These environment variables are saved to the `.env` file that CNDI has generated
+for us. If you didn't use interactive mode you may have some placeholders in
+that file to overwrite, and they should be easy to spot. CNDI should also tell
+you if it is missing expected values.
+
+When all of the values have been set, we want to use the
+[gh cli](https://github.com/cli/cli) again, this time to push our secret
+environment variables to github.
+
+```bash
 gh secret set -f .env
 ```
 
-Finally, let's deploy!
+Now we are ready for the next phase of the lifecycle!
+
+---
+
+### lifecycle: push
+
+Now that we have initialized our project, CNDI has given us files that describe
+our infrastructure resources and files that describe what to run on that
+infrastructure. CNDI has also created a GitHub Action for us which is
+responsible for calling `cndi run`. The `run` command provided in the cndi
+binary is responsible for calling `terraform apply` to deploy our
+infrastructure.
+
+After `cndi run` has exited successfully you should be able to see new resources
+spinning up in the deployment target you selected. When the nodes come online in
+that destination, they will join together to form a Kubernetes cluster.
+
+As the nodes join the cluster automatically, they are going to begin sharing
+workloads. Some workloads come bundled, we will call these CNDI platform
+services. There are a couple such services, one is
+[sealed-secrets](https://github.com/bitnami-labs/sealed-secrets), and another is
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/). Sealed Secrets enables
+storing Kubernetes Secrets within git securely, and ArgoCD is a GitOps tool
+which monitors a repo for Kubernetes manifests, and applies them.
+
+When ArgoCD comes online, it will begin reading files from the
+`cndi/cluster_manifests` directory in the GitHub repo we have been pushing to.
+Ultimately `cndi run` is only used within GitHub for infrastructure, and ArgoCD
+is solely responsible for what to run on the cluster.
+
+Your cluster will be online in no time!
+
+### lifecycle: overwrite
+
+The next phase of the lifecycle is about making changes to your cluster. These
+changes can be `cluster_manifests` oriented, if you are making changes to the
+software running on your infrastructure, or they can be infrastructure oriented
+if you are horizontally or vertically scaling your cluster.
+
+In either case, the approach is the same. Open your `cndi-config.jsonc` file in
+your editor and make changes to your `"applications"`, `"cluster_manifests"`, or
+`"infrastructure"` then run:
 
 ```bash
-git add .
-git status # make sure you are happy with the changes
-git commit -m "initial commit"
-git push # deployment starts now!
+# shorthand for cndi overwrite
+cndi ow
 ```
+
+Upon execution of the command you should see that some of the files cndi
+generated for us before have been modified or supplemented with new files. So
+far no changes have been made to our cluster. Just like before we need to push
+the changes up for them to take effect. This is what GitOps is all about, we
+don't login to our servers to make changes, we simply modify our config, and
+`git push`!
+
+With these 3 phases you have everything you need to deploy a data infrastructure
+cluster using CNDI and evolve it over time!
+
+### lifecycle: destroy
+
+All changes to a cluster with CNDI are made the same way, and teardown is no
+exception. To destroy your cluster you just need to delete all the files in your
+`cndi/terraform` directory, and add one called `destroy.tf`. This empty
+terraform file will signal to terraform that the desired state of the cluster is
+nullified, so all that's left is to push that file up to your repository.
+
+### Walkthroughs
+
+We've got a couple of walkthroughs you can follow if you'd like, currently we
+have one for our [aws/airflow-tls](/docs/walkthroughs/aws/airflow-tls) and
+[gcp/airflow-tls](/docs/walkthroughs/gcp/airflow-tls) templates. If you are
+interested in using CNDI, these walkthroughs will be entirely transferrable to
+other applications that aren't Airflow.
 
 ## configuration
 
-Let's run through the 3 parts of a `cndi-config.json` file.
+Let's run through the 3 parts of a `cndi-config.jsonc` file. This one file is
+the key to understanding CNDI, and it's really pretty simple.
 
 ### infrastructure and nodes
 
-For the first section of our config we specify an object called
-`"infrastructure"`, and within that we are going to define an object for
-`"cndi"` specifically. Currently `"cndi"` only manages our `"nodes"` which are
-defined as an Array of `NodeSpec`s.
+The `"infrastructure"` section is used to define the infrastructure that will
+power our cluster. Currently the only type of infrastructure CNDI uses are
+virtual machines that will run the cluster. We call these `"nodes"`, and
+ultimately they will be Kubernetes Nodes.
 
-These nodes will become nodes in your Kubernetes cluster, but you don't need to
-worry about that. You specify how many virtual machines to create in order to
-run your new data stack, where they will be deployed, and how powerful they are.
-
-Don't worry too much about getting the number of nodes or their size right the
-first time, you can adjust them later on the fly!
-
-These nodes must each be one of the following `kind`s:
-
-- [x] aws
-- [x] gcp
-- [ ] azure
-- [ ] local
-- [ ] remote
-- [ ] vmware
-
-We also specify the node `role`, this is `"controller"` by default, and exactly
-one node must be a `"leader"`.
-
-Here is an example `cndi-config.jsonc` object that contains a set of node
-entries to deploy:
+Declaring a node is simple, we give it a name, we give it some specs, and we add
+it to the array!
 
 ```jsonc
 {
@@ -136,7 +247,7 @@ entries to deploy:
           "kind": "gcp"
         }
       ],
-      "deploymentTargetConfiguration": {
+      "deployment_target_configuration": {
         "gcp": {
           "machine_type": "n2-standard-8" // this overrides the default machine_type
         }
@@ -144,11 +255,14 @@ entries to deploy:
     }
   }
   // tip: we parse this file as JSONC so you can add comments!
-}
 ```
 
-With `nodes` you specify your infrastructure, and we handle tying all your nodes
-together as a unified cluster.
+Currently we have support for `aws` nodes, and `gcp` nodes. More deployment
+targets are on the way!
+
+Just like every other component in CNDI, nodes can be updated in our
+`cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git
+remote to modify the cluster accordingly.
 
 ### applications
 
@@ -191,14 +305,15 @@ Lets see how we accomplish this here in this new and improved CNDI:
 }
 ```
 
-### cluster
+This is built on top of ArgoCD's Application CRDs and Helm Charts. If you have a
+Helm Chart, CNDI can deploy it!
+
+### cluster_manifests
 
 The third aspect of a `cndi-config` file is the `"cluster_manifests"` object.
 Any objects here will be used as Kubernetes Manifests and they'll be applied to
-your cluster through ArgoCD. This gives CNDI infinite flexibility, so you can
-deploy any Kubernetes resource you want. You only need to modify this object if
-you want to go beyond one of the templates we provide, otherwise you can ignore
-it!
+your cluster through ArgoCD. This gives you full access to all the Kubernetes
+systems and APIs.
 
 ```jsonc
 {
@@ -220,13 +335,19 @@ it!
 }
 ```
 
+If you are new to Kubernetes and are unsure what any of that meant, don't sweat
+it. CNDI is designed to help with that knowledge gap with templates, and you'll
+learn along the way too!
+
 Pro tip!
 
-If you want to add a new secret to use inside of your Kubernetes cluster, we
-make this possible by encrypting your secrets with
+If you want to add a new Kubernetes Secret to use inside of your Kubernetes
+cluster via GitOps, we make this possible by encrypting your secrets with
 [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) so they can
 live in your repo securely and be picked up by ArgoCD automatically. To add a
-secret to your cluster add the value to your `.env` file, and CNDI will seal it.
+secret to your cluster add the value to your `.env` file, and call `cndi ow` to
+seal it.
+
 The example below results in sealing the environment variables `"GIT_USERNAME"`
 and `"GIT_PASSWORD"`, into the destination secret key names
 `"GIT_SYNC_USERNAME"` and `"GIT_SYNC_PASSWORD"` respectively.
@@ -252,116 +373,68 @@ and `"GIT_PASSWORD"`, into the destination secret key names
 }
 ```
 
-There, we have a complete `my-cndi-config.jsonc` file. Let's see what happens
-when we run:
+## outputs
 
-## cndi init
+When `cndi init` is called there are a few files that it produces:
 
-```bash
-cndi init -f ./my-cndi-config.jsonc
-```
+1. a `cndi-config.jsonc` - autogenerated in interactive mode only, described in
+   the [configuration](#configuration) section above
+2. a `.github/workflows` folder, with a GitHub Action inside. The workflow is
+   mostly just wrapping the `cndi run` command in the CNDI binary executable. As
+   such, if you have a different CI system, you can execute the `cndi run`
+   command on the binary there instead.
 
-Wow!
-
-In the current directory we've created a few files and folders. Let's go through
-what `cndi init` produced for us:
-
-1. a `.github` folder, with a GitHub Action inside. The workflow is mostly just
-   wrapping the `cndi run` command in the CNDI binary executable. As such, if
-   you have a different CI system, you can execute the `cndi run` command on the
-   binary there instead.
-
-2. a `cndi/terraform` folder, containing the infrastructure resources cndi has
+3. a `cndi/terraform` folder, containing the infrastructure resources cndi has
    generated for terraform, which cndi will apply automatically every time
    `cndi run` is executed.
 
-3. a `cndi/cluster` folder, containing Kubernetes manifests that will be
-   installed on your new cluster when it is up and running. This includes
+4. a `cndi/cluster_manifests` folder, containing Kubernetes manifests that will
+   be installed on your new cluster when it is up and running. This includes
    manifests like `Ingress` from the `"cluster_manifests"` section of your
    `cndi-config.jsonc`.
 
-4. a `cndi/cluster/applications` folder, which contains a folder for each
-   application defined in the `"applications"` section of your
-   `cndi-config.jsonc`, and a generated Helm Chart inside that contains our
-   expertly chosen defaults, and the spefic parameters you've specified yourself
-   in the `"applications"` section of your `cndi-config.jsonc`.
+5. a `cndi/cluster_manifests/applications` folder, which contains a folder for
+   each application defined in the `"applications"` section of your
+   `cndi-config.jsonc`, and a generated ArgoCD Application CRD inside that
+   contains our expertly chosen defaults for that App, and the spefic parameters
+   you've specified yourself in the `"applications"` section of your
+   `cndi-config.jsonc`.
 
-5. a `.env` file which contains all of your environment variables that CNDI
+6. a `.env` file which contains all of your environment variables that CNDI
    relies on, these values must be environment variables that are defined and
    valid when `cndi run` is executed.
 
-6. a `.gitginore` file to ensure secret values never get published as source
+7. a `.gitginore` file to ensure secret values never get published as source
    files to your repo
 
-7. a `./README.md` file that explains how you can use and modify these files
+8. a `./README.md` file that explains how you can use and modify these files
    yourself for the lifetime of the cluster
 
-## first time setup
+## up and running
 
-Our next task is to bring this cluster to life. The first step is to set the
-environment variables from your `.env` file as GitHub Actions Secrets. This is
-made very easy with the [GitHub CLI](https://github.com/cli/cli).
+### logging into ArgoCD
+
+ArgoCD's web ui is a useful tool for visualizing and debugging your cluster
+resources. Logging into Argo requires running a command to get the default admin
+password. Some of our templates setup Ingress for ArgoCD automatically, if you
+don't have an Ingress you can still access it by following our
+[port-forwarding doc](docs/port-forwarding.md).
 
 ```bash
-gh secret set -f .env
+# run this on one of your nodes to get the initial password for the "admin" user
+microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
+# wLLoUS3493WlHKpc
 ```
 
-Now all we need to do is push up all of our source files that CNDI generated to
-GitHub.
+### dns
 
-Once we've done this, the GitHub Actions contained in the repo will begin
-execution, because they are triggered by changes being pushed to the `main`
-branch.
+Setting up DNS for your cluster is a critical step if your cluster will be
+served online. The solution depends on your "deployment target". We have a doc
+walking through this for [aws]() and [gcp]() but in short you just need to point
+DNS to the load balancer we provisioned for you. In AWS this means using a
+`CNAME` record for AWS, or an `A` record if your cluster is on GCP.
 
-Our first push will begin to create nodes, and it's important to remember that
-before these nodes are Kubernetes nodes, they must first be created as virtual
-machines. Every platform handles their compute engine a little bit differently
-in terms of inputs and APIs, but CNDI is going to abstract all of that away from
-you.
-
-## cndi run
-
-When changes are made to the `main` branch of our repo `cndi run` will check if
-there have been any changes to our `cndi/terraform`, and if the state of the
-desired cluster in these files is different than the actual cluster in the
-cloud, terraform will apply the necessary changes to the infrastructure to make
-the real-world state match the desired state in the repo.
-
-When a virtual machine is live, cndi will install `microk8s` on each machine.
-When microk8s is installed on the machines, we will use it to join all the
-machines together as nodes in a Kubernetes cluster. When a node joins the
-cluster, it becomes controlled by the Kubernetes control plane, which is running
-on the node(s) with the `role` `"controller"` or `"leader"`.
-
-Because `ArgoCD` has been configured to watch the `cndi/cluster` folder, changes
-to the manifests in that folder will automatically be applied with eventual
-consistency, including the first commit.
-
-## making changes to your cluster
-
-When you want to further update your cluster, the process is simple. You make a
-change to your `cndi-config.jsonc` file and run
-`cndi overwrite-with -f my-new-config.jsonc`. CNDI will delete the contents of
-`cndi/` and it will build up that directory from scratch based on your
-`my-new-config.jsonc`.
-
-CNDI does this instead of patching the files because it may be the case that
-your changes to `my-new-config.jsonc` are incompatible with the state of the
-directory if files in there were modified by hand. Of course when you make a new
-pull request though, you will be making a PR with the diff between the new state
-of `cndi/` and the old.
-
-Note: Your SealedSecret manifests will be updated any time `cndi overwrite-with`
-is called, but the underlying secrets themselves are not changing. This causes a
-git diff, but there is no material impact to the cluster.
-
-Alternatively to running `cndi ow` (`cndi overwrite-with`), you are also able to
-modify the manifests in `cndi/cluster` and make changes to `cndi/terraform`
-resources yourself, but be careful: if you then run
-`cndi ow -f my-new-config.jsonc` after manual changes, you will blast those
-changes away unless they are also present in `my-new-config.jsonc` .
-
-## building cndi (Contributor Guide)
+## building cndi (contributor guide)
 
 If you are hoping to contribute to this project and want to learn the ropes, you
 are in the right place. Let's start with setting up your environment:
@@ -392,205 +465,6 @@ source code as if it were the regular CLI, without colliding with the released
 alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
 ```
 
-### your first cluster
-
-You can now setup a new directory for the cluster you intend to create. Start
-with an empty folder and create a `my-cndi-config.jsonc` file. This will specify
-what you want in your cluster for applications, manifests, and nodes. To see an
-example checkout the file `cndi-config.jsonc` inside the `cndi` repo.
-
-```bash
-cndi init -f my-cndi-config.jsonc
-```
-
-This will scaffold out your project and you are almost ready to deploy.
-
-Let's make sure we have some environment variables set so that CNDI can
-provision your cluster using your cloud credentials, and setup argo to watch the
-cluster repo we will setup next. Create a file in the directory where you just
-saved `my-cndi-config.jsonc` called `.env`. Environment variables here will be
-read by `cndi run`.
-
-```bash
-# .env
-
-# AWS Credentials
-AWS_ACCESS_KEY_ID="your-access-key-id"
-AWS_SECRET_ACCESS_KEY="your-secret-access-key"
-AWS_REGION=us-east-1
-
-# Git Credentials
-GIT_USERNAME="your-username"
-GIT_PASSWORD="your-personal-access-token"
-GIT_REPO="https://github.com/example-org/example-repo"
-```
-
-Also, don't forget to create a `.gitignore` file there too so we can make sure
-the credentials we will save don't get uploaded to git.
-
-```bash
-echo ".env" >> .gitignore
-```
-
-You're all set to push this code up to GitHub, just create a repo and push up
-the contents of the folder.
-
-```bash
-git add .
-git commit -m 'first commit'
-git push
-```
-
-Now we just need to deploy the cluster:
-
-```
-cndi run
-```
-
-Your cluster will take a few minutes to deploy, in the meantime make sure you
-have `kubectl` installed, we will need that to connect to our node securely
-until we open it up using an `Ingress` declaration.
-
-### port-forward application
-
-When working with Kubernetes it is often required to connect to services running
-on your nodes without exposing those services to the internet. We accomplish
-this using Kubernetes Config files, and the `kubectl port-forward` command.
-
-Let's give that a try!
-
-**1. Login to node using cloud console:**
-
-Open the cloud console and visit the page that lists your running virtual
-machines, in AWS this is the
-[EC2 Instances page](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Instances:v=3)
-(the region parameter of this url must be updated if your instances are not in
-`us-east-1`).
-
-Click on the node id link in the UI for your leader, then click `Connect` in the
-top right. Copy the `"Public IP address"` value and paste it in a note for
-yourself. We will need it later to connect to our node remotely. Type `"ubuntu"`
-into the `User name` field, and click `Connect`.
-
-**2. Retrieve Kubernetes config:**
-
-When you have a prompt available to you, enter the following command to retrieve
-the Kubernetes config for your microk8s cluster:
-
-```bash
-microk8s config
-```
-
-This will give you a great big blob of yaml. Consider this your key to access
-the cluster from the outside of the cloud. With it on your machine you will be
-able to talk to the Kubernetes control plane.
-
-```yaml
-apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data:
-    dNPUHFObk9utNxN5cNI3T2bWF...PQotLS0tLLUVORCtLS0tCgBDRVJUSUZJQ0FURS0==
-    server: https://172.31.90.189:16443 # the IP address provided here is typically the private IP of the Kubernetes controller. We need to update this to the public IP of the controller so we can access it from outside of the node's network. The port should stay as "16443" and the scheme as "https://".
-  name: microk8s-cluster
-contexts:
-- context:
-    cluster: microk8s-cluster
-    user: admin
-  name: microk8s
-current-context: microk8s
-kind: Config
-preferences: {}
-users:
-- name: admin
-  user:
-    token: dnQmY3lJz...3Y4ODo3c2MwN0ltT1R
-```
-
-**3. Update IP Address in Kubernetes Config:**
-
-You want to take this yaml blob to a text editor and replace the IP address
-listed and replace it with the _public_ IP address of your leader node that you
-copied just before connecting. If you don't change the IP address it will be set
-to the Private IP of the node, and we can't connect to the private IP from
-outside of the cloud.
-
-**4. Add Kubernetes config to your work station:**
-
-Next you want to take that text with the newly set Public IP, and put it in your
-kubernetes config file, which is probably located at `~/.kube/config`. You can
-[merge](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#merging-kubeconfig-files)
-your configs, but if you are new to this you can just delete the contents of
-that default config file file and replace them with our yaml.
-
-**5. Port Forwarding a Service:**
-
-Port forwarding a service is the same process no matter which service you are
-forwarding, there are just a couple variables. Let's examine this process for
-ArgoCD, because it will be running on every CNDI cluster, but this applies
-equally to any other service.
-
-We need to know the `namespace` of the service, the `service name`, the
-`exposed port` and the `desired port`. Let's see what we can find out about the
-services argo is running now that we have setup control plane access in the last
-step.
-
-```bash
-# TODO: find a way to avoid this flag if possible without a custom domain name
-kubectl get svc --namespace argocd --insecure-skip-tls-verify
-```
-
-We can now see that in our Kubernetes cluster we have a number of Argo services
-running in the `argocd` namespace. The one we want is `argocd-server` running on
-ports `80` and `443`.
-
-Let's forward the application running on port `80` to our local machine.
-
-```bash
-kubectl port-forward svc/argocd-server --namespace argocd :80
-```
-
-You will see a message similar to:
-
-```
-Forwarding from 127.0.0.1:50445 -> 8080
-```
-
-Let's open the port displayed in the browser:
-
-eg: `http://127.0.0.1:50445`
-
-You should now see a login page for argo, and a place to enter a username and
-password. We know the username but not yet the password.
-
-**6. Logging into Argo:**
-
-Let's leave the service running and get the `password` from the cluster now in a
-separate shell:
-
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
-```
-
-You should now see a password displayed that looks something like:
-
-```
-wLLoUS3493WlHKpc
-```
-
-Let's once again go to the the argo web UI, and enter the credentials including
-the password you just got:
-
-Username: `admin`
-
-Password: `wLLoUS3493WlHKpc`
-
-That concludes the section on setting up CNDI for development, you should now
-have an operational CNDI Cluster! 🎉
-
 If you have any issues please message [Matt](https://github.com/johnstonmatt) or
 [Tamika](https://github.com/IamTamika) in the
 [Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).
-
-<!-- DMINR -->
-<!-- Pretending to add new target -->
