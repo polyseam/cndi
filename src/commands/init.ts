@@ -12,7 +12,7 @@ import {
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import overwriteWithFn from "./overwrite-with.ts";
+import overwriteWithFn from "./overwrite.ts";
 
 import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";

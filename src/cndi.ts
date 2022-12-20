@@ -110,7 +110,10 @@ export default async function main(args: string[]) {
   );
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
-  const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster_manifests");
+  const pathToKubernetesManifests = path.join(
+    projectCndiDirectory,
+    "cluster_manifests",
+  );
   const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
 

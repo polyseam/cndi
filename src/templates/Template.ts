@@ -22,9 +22,9 @@ This project was created with [CNDI](https://github.com/polyseam/cndi), and this
 
 ## files and directories
 
-### cndi/cluster
+### cndi/cluster_manifests
 
-All files in the [cndi/cluster](/cndi/cluster) folder are Kubernetes manifests. These are the files that will be applied to your Kubernetes cluster when it is deployed and ready using ArgoCD.
+All files in the [cndi/cluster_manifests](/cndi/cluster_manifests) folder are Kubernetes manifests. These are the files that will be applied to your Kubernetes cluster when it is deployed and ready using ArgoCD.
 
 ### cndi/terraform
 
