@@ -1,0 +1,136 @@
+{
+  "type": "object",
+  "title": "cndi-config",
+  "$comment": "The root of the cndi config schema",
+  "description": "An object used to configure the changelog generation for GitHub Releases",
+  "required": ["project_name", "infrastructure"],
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "description": "The name of the cndi project, should be unique in your personal ecosystem.",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "cndi_version": {
+      "type": "string",
+      "description": "The version of cndi config api to use.",
+      "pattern": "v1",
+      "default": "v1"
+    },
+    "infrastructure": {
+      "type": "object",
+      "description": "An object which defines the infrastructure resources CNDI should deploy.",
+      "required": ["cndi"],
+      "properties": {
+        "cndi": {
+          "type": "object",
+          "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
+          "required": ["nodes"],
+          "properties": {
+            "nodes": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy.",
+                "required": ["name", "kind"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the node to deploy."
+                  },
+                  "kind": {
+                    "type": "string",
+                    "description": "The type of node to deploy.",
+                    "enum": ["aws_ec2", "gcp_ce"]
+                  },
+                  "role": {
+                    "type": "string",
+                    "description": "Role of the node",
+                    "enum": ["leader", "controller"]
+                  },
+                  "instance_type": {},
+                  "volume_size": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cluster_manifests": {
+      "type": "object",
+      "description": "An object which contains all manifests that CNDI should apply to your cluster.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
+          "type": "object",
+          "description": "An object which represents a single manifest CNDI should apply to your cluster.",
+          "required": ["kind", "apiVersion", "metadata"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "description": "The kind of Kubernetes resource to deploy."
+            },
+            "apiVersion": {
+              "type": "string",
+              "description": "The API version of the Kubernetes resource to deploy."
+            },
+            "metadata": {
+              "type": "object",
+              "description": "The metadata of the Kubernetes resource to deploy.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the Kubernetes resource to deploy."
+                }
+              }
+            },
+            "spec": {
+              "type": "object",
+              "description": "The spec of the Kubernetes resource to deploy.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "applications": {
+      "type": "object",
+      "description": "An object that defines how to generate an ArgoCD Application CRD.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
+          "type": "object",
+          "required": ["targetRevision", "destinationNamespace", "repoURL"],
+          "properties": {
+            "targetRevision": {
+              "type": "string",
+              "description": "The version or revision of the Helm Chart to deploy."
+            },
+            "repoURL": {
+              "type": "string",
+              "description": "The URL of the git-hosted Helm Chart or Helm repository to deploy."
+            },
+            "destinationNamespace": {
+              "type": "string",
+              "description": "The namespace in your CNDI Kubernetes cluster to deploy the Helm Chart to."
+            },
+            "chart": {
+              "type": "string",
+              "description": "The name of the Helm Chart to deploy."
+            },
+            "path": {
+              "type": "string",
+              "description": "The path to the Helm Chart from the root of the git-hosted repository."
+            },
+            "values": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
