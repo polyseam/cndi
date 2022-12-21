@@ -18,7 +18,7 @@ import {
 
 import runFn from "./commands/run.ts";
 import initFn from "./commands/init.ts";
-import overwriteWithFn from "./commands/overwrite-with.ts";
+import overwriteFn from "./commands/overwrite.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
@@ -110,7 +110,10 @@ export default async function main(args: string[]) {
   );
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
-  const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster");
+  const pathToKubernetesManifests = path.join(
+    projectCndiDirectory,
+    "cluster_manifests",
+  );
   const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
 
@@ -141,8 +144,8 @@ export default async function main(args: string[]) {
   // map command to function
   const commands = {
     [Command.init]: initFn,
-    [Command["overwrite-with"]]: overwriteWithFn,
-    [Command.ow]: overwriteWithFn,
+    [Command.overwrite]: overwriteFn,
+    [Command.ow]: overwriteFn,
     [Command.run]: runFn,
     [Command.help]: helpFn,
     [Command.install]: installFn,
@@ -209,11 +212,11 @@ export default async function main(args: string[]) {
       case Command.run:
         commands[Command.run](context);
         break;
-      case Command["overwrite-with"]:
-        commands[Command["overwrite-with"]](context);
+      case Command.overwrite:
+        commands[Command.overwrite](context);
         break;
       case Command.ow:
-        commands[Command["overwrite-with"]](context);
+        commands[Command.overwrite](context);
         break;
       case Command.terraform:
         commands[Command.terraform](context, args.slice(1));

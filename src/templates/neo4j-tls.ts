@@ -109,7 +109,7 @@ function getNeo4jTlsTemplate(
         },
       ],
     },
-    cluster: {
+    cluster_manifests: {
       "cert-manager-cluster-issuer": {
         apiVersion: "cert-manager.io/v1",
         kind: "ClusterIssuer",

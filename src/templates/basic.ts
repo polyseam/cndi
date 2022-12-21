@@ -1,5 +1,6 @@
 import { Template } from "./Template.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
+import { CNDIConfig, NodeKind, NodeRole } from "../types.ts";
 
 const readmeBlock = `
 ### logging into argocd
@@ -24,34 +25,36 @@ Now that you have a cluster, you can update it by:
 If you've modified your nodes, the infrastructure should be updated with Terraform. If you've modified your Kubernetes manifests, the changes to the manifests will be applied to the cluster.
 `.trim();
 
-function getBasicTemplate(kind: string): string {
+function getBasicTemplate(kind: NodeKind): CNDIConfig {
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-
-  return getPrettyJSONString({
-    nodes: {
-      entries: [
-        {
-          name: "x-node",
-          kind,
-          role: "leader",
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128, // GiB
-        },
-        {
-          name: "y-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "z-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-      ],
+  const volume_size = 128;
+  return {
+    infrastructure: {
+      cndi: {
+        nodes: [
+          {
+            name: "x-node",
+            kind,
+            role: NodeRole.leader,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "y-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "z-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+        ],
+      },
     },
-    cluster: {
+    cluster_manifests: {
       "argo-ingress": {
         apiVersion: "networking.k8s.io/v1",
         kind: "Ingress",
@@ -88,7 +91,7 @@ function getBasicTemplate(kind: string): string {
       },
     },
     applications: {},
-  });
+  };
 }
 
 const basicTemplate = new Template("basic", {

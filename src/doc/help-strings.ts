@@ -2,7 +2,7 @@ type HelpStrings = {
   default: string;
   init: string;
   install: string;
-  "overwrite-with": string;
+  overwrite: string;
   terraform: string;
   ow: string;
   run: string;
@@ -11,9 +11,9 @@ type HelpStrings = {
 
 const owHelpString = `
 NAME
-        cndi-overwrite-with - reads a config file at the path supplied and uses it to overwrite the cndi project files in the ./cndi folder in your current working directory.
+        cndi-overwrite - reads a config file at the path supplied and uses it to overwrite the cndi project files in the ./cndi folder in your current working directory.
 SYNOPSIS
-        cndi overwrite-with [-f <config-file>] [-o <directory>]
+        cndi overwrite [-f <config-file>] [-o <directory>]
         cndi ow [-f <config-file>] [-o <directory>]
 
 DESCRIPTION
@@ -37,7 +37,7 @@ start a working area
     init              create a cndi project
 
 modify the cndi project
-    overwrite-with    overwrites the state of the cndi project using a cndi-config.json file
+    overwrite    overwrites the state of the cndi project using a cndi-config.json file
 
 deploy the cndi project
     run               deploys the cndi project based on the configuration in ./cndi
@@ -67,7 +67,7 @@ OPTIONS
             The directory in which to create the manifests and resources needed to deploy the cndi project. Defaults to the current directory.
  
 `.trim(),
-  "overwrite-with": owHelpString,
+  overwrite: owHelpString,
   ow: owHelpString,
   run: `
 NAME

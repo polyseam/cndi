@@ -16,7 +16,7 @@ const terraformRootFileData: TerraformRootFileData = {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
-      availability_zones: '',
+      availability_zones: "",
     },
   ],
   provider: {
@@ -24,28 +24,7 @@ const terraformRootFileData: TerraformRootFileData = {
   },
   data: [
     {
-      aws_ec2_instance_type_offerings: [
-        {
-          "available_az_for_controller-airflow-node-1_instance_type": [
-            {
-              filter: [{ name: "instance-type", values: ["t3.medium"] }],
-              location_type: "availability-zone",
-            },
-          ],
-          "available_az_for_controller-airflow-node-2_instance_type": [
-            {
-              filter: [{ name: "instance-type", values: ["t2.medium"] }],
-              location_type: "availability-zone",
-            },
-          ],
-          "available_az_for_leader-airflow-node_instance_type": [
-            {
-              filter: [{ name: "instance-type", values: ["m5a.xlarge"] }],
-              location_type: "availability-zone",
-            },
-          ],
-        },
-      ],
+      aws_ec2_instance_type_offerings: [{}],
     },
   ],
   resource: [
@@ -89,14 +68,14 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table_association: {
         rt_sbn_asso: {
-          count: "${local.node_count}",
+          count: "1",
           route_table_id: "${aws_route_table.rt.id}",
           subnet_id: "${element(aws_subnet.subnet[*].id, count.index)}",
         },
       },
       aws_subnet: {
         subnet: {
-          count: "${local.node_count}",
+          count: "1",
           availability_zone:
             "${element(local.availability_zones, count.index)}",
           cidr_block: "${element(var.sbn_cidr_block, count.index)}",

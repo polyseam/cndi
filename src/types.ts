@@ -1,8 +1,8 @@
 // list of all commands for the CLI
 
 export const enum NodeKind {
-  aws_ec2,
-  gcp_ce,
+  aws_ec2 = "aws_ec2",
+  gcp_ce = "gcp_ce",
 }
 
 interface AirflowTlsTemplateAnswers {
@@ -14,7 +14,7 @@ interface AirflowTlsTemplateAnswers {
 
 export const enum Command {
   init = "init",
-  "overwrite-with" = "overwrite-with",
+  overwrite = "overwrite",
   run = "run",
   help = "help",
   default = "default",
@@ -42,11 +42,11 @@ interface CNDINode {
 }
 
 interface CNDINodesSpec {
-  entries: Array<BaseNodeEntrySpec>;
+  entries: Array<BaseNodeItemSpec>;
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
-interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+interface GCPNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -54,7 +54,7 @@ interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
   instance_type?: string;
 }
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
-interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -190,7 +190,7 @@ interface GCPTerraformRouterResource {
   };
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
+interface AWSNodeItemSpec extends BaseNodeItemSpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
@@ -200,7 +200,7 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
 }
 
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
-interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -232,7 +232,7 @@ interface AWSTerraformNodeResource {
   };
 }
 
-interface AWSTerraformEc2InstanceTypeOfferingsDataSource {
+interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
   [ec2_inst_type: string]: Array<{
     filter: Array<{
       name: string;
@@ -311,10 +311,10 @@ interface AWSTerraformSecurityGroupResource {
       cidr_blocks: Array<string>;
       description: string;
       from_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
       protocol: string;
-      security_groups: Array<any>;
+      security_groups: [];
       self: boolean;
       to_port: string;
     }>;
@@ -324,9 +324,9 @@ interface AWSTerraformSecurityGroupResource {
       from_port: string;
       protocol: string;
       to_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
-      security_groups: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
+      security_groups: [];
       self: boolean;
     }>;
     tags: {
@@ -407,17 +407,24 @@ interface DeploymentTargetConfiguration {
 
 // incomplete type, config will have more options
 interface CNDIConfig {
-  nodes: CNDINodesSpec;
+  project_name?: string;
+  cndi_version?: string;
+  infrastructure: {
+    cndi: {
+      deploymentTargetConfiguration?: DeploymentTargetConfiguration;
+      nodes: Array<BaseNodeItemSpec>;
+    };
+  };
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster: {
+  cluster_manifests: {
     [key: string]: unknown;
   };
 }
 
 interface KubernetesManifest {
-  apiVersion: string;
+  cndiVersion: string;
   kind: string;
 }
 
@@ -484,12 +491,12 @@ interface CNDIContext {
   argoUIReadOnlyPassword?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][*]
-interface BaseNodeEntrySpec {
+// cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
+interface BaseNodeItemSpec {
   name: string;
-  role: NodeRole;
   kind: NodeKind;
-  nodeIndex: number;
+  role?: NodeRole; // default: controller
+  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
 }
 
 interface CNDIClients {
@@ -607,7 +614,7 @@ interface TerraformRootFileData {
   data: [
     {
       aws_ec2_instance_type_offerings: [
-        AWSTerraformEc2InstanceTypeOfferingsDataSource
+        AWSTerraformEC2InstanceTypeOfferingsDataSource
       ];
     }
   ];
@@ -899,10 +906,10 @@ interface SealedSecretsKeys {
 export type {
   AirflowTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
-  AWSNodeEntrySpec,
+  AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
@@ -912,7 +919,7 @@ export type {
   DeploymentTargetConfiguration,
   EnvObject,
   GCPDeploymentTargetConfiguration,
-  GCPNodeEntrySpec,
+  GCPNodeItemSpec,
   GCPTerraformInstanceGroupResource,
   GCPTerraformNodeResource,
   GCPTerraformRootFileData,
