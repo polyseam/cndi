@@ -1,8 +1,8 @@
 // list of all commands for the CLI
 
 export const enum NodeKind {
-  aws = "aws",
-  gcp = "gcp",
+  aws_ec2,
+  gcp_ce,
 }
 
 interface AirflowTlsTemplateAnswers {

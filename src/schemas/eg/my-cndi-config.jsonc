@@ -1,0 +1,173 @@
+{
+  "project_name": "my-cndi-cluster",
+
+  "infrastructure": {
+    "cndi": {
+      "nodes": [
+        {
+          "name": "x-airflow-node",
+          "kind": "aws",
+          "role": "leader",
+          "instance_type": "m5a.xlarge",
+          "volume_size": 128
+        },
+        {
+          "name": "y-airflow-node",
+          "kind": "aws",
+          "instance_type": "m5a.xlarge",
+          "volume_size": 128
+        },
+        {
+          "name": "z-airflow-node",
+          "kind": "aws",
+          "instance_type": "m5a.xlarge",
+          "volume_size": 128
+        }
+      ]
+    }
+  },
+  "cluster_manifests": {
+    "git-credentials-secret": {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "metadata": {
+        "name": "airflow-git-credentials",
+        "namespace": "airflow"
+      },
+      "stringData": {
+        "GIT_SYNC_USERNAME": "$.cndi.secrets.GIT_SYNC_USERNAME",
+        "GIT_SYNC_PASSWORD": "$.cndi.secrets.GIT_SYNC_PASSWORD"
+      }
+    },
+    "cert-manager-cluster-issuer": {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "ClusterIssuer",
+      "metadata": {
+        "name": "lets-encrypt"
+      },
+      "spec": {
+        "acme": {
+          "email": "tamika.taylor@untribe.com",
+          "server": "https://acme-v02.api.letsencrypt.org/directory",
+          "privateKeySecretRef": {
+            "name": "lets-encrypt-private-key"
+          },
+          "solvers": [
+            {
+              "http01": {
+                "ingress": {
+                  "class": "public"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "argo-ingress": {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "name": "argocd-server-ingress",
+        "namespace": "argocd",
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "lets-encrypt",
+          "kubernetes.io/tls-acme": "true",
+          "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+          "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+        }
+      },
+      "spec": {
+        "tls": [
+          {
+            "hosts": [
+              "argocd.untribe.app"
+            ],
+            "secretName": "lets-encrypt-private-key"
+          }
+        ],
+        "rules": [
+          {
+            "host": "argocd.untribe.app",
+            "http": {
+              "paths": [
+                {
+                  "path": "/",
+                  "pathType": "Prefix",
+                  "backend": {
+                    "service": {
+                      "name": "argocd-server",
+                      "port": {
+                        "name": "https"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "applications": {
+    "airflow": {
+      "targetRevision": "1.7.0",
+      "destinationNamespace": "airflow",
+      "repoURL": "https://airflow.apache.org",
+      "chart": "airflow",
+      "values": {
+        "dags": {
+          "gitSync": {
+            "enabled": true,
+            "repo": "https://github.com/polyseam/demo-dag-bag",
+            "credentialsSecret": "airflow-git-credentials",
+            "branch": "main",
+            "wait": 40,
+            "subPath": "dags"
+          }
+        },
+        "config": {
+          "webserver": {
+            "expose_config": "True",
+            "instance_name": "Polyseam",
+            "enable_proxy_fix": "True",
+            "base_url": "https://airflow.untribe.app"
+          },
+          "operators": {
+            "default_owner": "Polyseam"
+          }
+        },
+        "ingress": {
+          "web": {
+            "enabled": true,
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt"
+            },
+            "hosts": [
+              {
+                "name": "airflow.untribe.app",
+                "tls": {
+                  "secretName": "lets-encrypt-private-key",
+                  "enabled": true
+                }
+              }
+            ]
+          }
+        },
+        "logs": {
+          "persistence": {
+            "enabled": true,
+            "size": "15Gi"
+          }
+        },
+        "createUserJob": {
+          "useHelmHooks": false
+        },
+        "migrateDatabaseJob": {
+          "useHelmHooks": false
+        }
+      }
+    }
+  }
+}
