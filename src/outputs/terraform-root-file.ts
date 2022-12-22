@@ -127,10 +127,10 @@ const getTerraformRootFile = async ({
       const azKey = `available_az_for_${entry.name}_instance_type`;
 
       availabilityZoneKeys.push(
-        `data.aws_instance_type_offerings.${azKey}.locations`,
+        `data.aws_ec2_instance_type_offerings.${azKey}.locations`,
       );
 
-      awsMainTerraformFileObject.data[0].aws_instance_type_offerings[0][
+      awsMainTerraformFileObject.data[0].aws_ec2_instance_type_offerings[0][
         azKey
       ] = [
         {
