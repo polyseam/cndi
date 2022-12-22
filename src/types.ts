@@ -60,7 +60,7 @@ interface CNDINode {
 
 interface CNDINodesSpec {
   entries: Array<BaseNodeItemSpec>;
-  deploymentTargetConfiguration: DeploymentTargetConfiguration;
+  deployment_target_configuration: DeploymentTargetConfiguration;
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="_ce"]
 interface GCPNodeItemSpec extends BaseNodeItemSpec {
@@ -70,7 +70,7 @@ interface GCPNodeItemSpec extends BaseNodeItemSpec {
   volume_size?: number;
   instance_type?: string;
 }
-// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
+// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
 interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
@@ -216,7 +216,7 @@ interface AWSNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
 }
 
-// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
+// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
 interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
@@ -428,7 +428,7 @@ interface CNDIConfig {
   cndi_version?: string;
   infrastructure: {
     cndi: {
-      deploymentTargetConfiguration?: DeploymentTargetConfiguration;
+      deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
     };
   };
