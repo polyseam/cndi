@@ -1,5 +1,5 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { getPrettyJSONString, loadJSONC } from "../utils.ts";
+import { getDeploymentTargetFromKind, getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeItemSpec,
   CNDIConfig,
@@ -181,7 +181,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const requiredProviders = new Set(
     nodes.map((node: BaseNodeItemSpec) => {
       // eg: aws_ec2 -> aws
-      const provider = (node.kind as NodeKind).split("_")[0];
+      const provider = getDeploymentTargetFromKind(node.kind);
       return provider;
     }),
   );
@@ -244,7 +244,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const { applications } = config;
 
   // write the `cndi/cluster_manifests/applications/${applicationName}.application.json` file for each application
-
   Object.keys(applications).forEach((releaseName) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(

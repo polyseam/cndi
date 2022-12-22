@@ -8,7 +8,7 @@ import {
   getPathToOpenSSLForPlatform,
   loadJSONC,
 } from "./utils.ts";
-import { Command } from "./types.ts";
+import { COMMAND } from "./types.ts";
 import {
   brightRed,
   cyan,
@@ -40,13 +40,13 @@ export default async function main(args: string[]) {
   const CNDI_SRC = path.join(CNDI_HOME, "src");
   const pathToKubeseal = path.join(
     CNDI_HOME,
-    `kubeseal-${fileSuffixForPlatform}`,
+    `kubeseal-${fileSuffixForPlatform}`
   );
 
   // default paths to the user's config file
   const DEFAULT_CNDI_CONFIG_PATH = path.join(
     executionDirectory,
-    "cndi-config.json",
+    "cndi-config.json"
   );
 
   const DEFAULT_CNDI_CONFIG_PATH_JSONC = `${DEFAULT_CNDI_CONFIG_PATH}c`;
@@ -62,14 +62,12 @@ export default async function main(args: string[]) {
 
     console.log(
       cndiLabel,
-      `${
-        brightRed(
-          `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
-        )
-      }\n`,
+      `${brightRed(
+        `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`
+      )}\n`
     );
     console.log(
-      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`),
+      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`)
     );
     Deno.exit(1);
   }
@@ -78,14 +76,16 @@ export default async function main(args: string[]) {
   const interactive = cndiArguments.i || cndiArguments.interactive || false;
 
   // if the user has specified a config file, use that, otherwise use the default config file
-  const pathToConfig = template ? null : cndiArguments.f ||
-    cndiArguments.file ||
-    DEFAULT_CNDI_CONFIG_PATH_JSONC ||
-    DEFAULT_CNDI_CONFIG_PATH;
+  const pathToConfig = template
+    ? null
+    : cndiArguments.f ||
+      cndiArguments.file ||
+      DEFAULT_CNDI_CONFIG_PATH_JSONC ||
+      DEFAULT_CNDI_CONFIG_PATH;
 
   // the directory in which to create the cndi folder
-  const outputOption = cndiArguments.o || cndiArguments.output ||
-    executionDirectory;
+  const outputOption =
+    cndiArguments.o || cndiArguments.output || executionDirectory;
 
   const projectDirectory = path.join(outputOption);
 
@@ -93,7 +93,9 @@ export default async function main(args: string[]) {
 
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
+
   const dotEnvPath = path.join(outputOption, ".env");
+  const dotVSCodeDirectory = path.join(outputOption, ".vscode");
 
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
@@ -101,18 +103,18 @@ export default async function main(args: string[]) {
 
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
-    `terraform-${fileSuffixForPlatform}`,
+    `terraform-${fileSuffixForPlatform}`
   );
 
   const pathToCNDIBinary = path.join(
     CNDI_HOME,
-    `cndi-${fileSuffixForPlatform}`,
+    `cndi-${fileSuffixForPlatform}`
   );
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
   const pathToKubernetesManifests = path.join(
     projectCndiDirectory,
-    "cluster_manifests",
+    "cluster_manifests"
   );
   const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
@@ -125,6 +127,7 @@ export default async function main(args: string[]) {
     projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)
     dotEnvPath, // Deno.cwd()/.env (default)
+    dotVSCodeDirectory, // Deno.cwd()/.vscode (default)
     noGitHub,
     noDotEnv,
     pathToConfig,
@@ -143,16 +146,16 @@ export default async function main(args: string[]) {
 
   // map command to function
   const commands = {
-    [Command.init]: initFn,
-    [Command.overwrite]: overwriteFn,
-    [Command.ow]: overwriteFn,
-    [Command.run]: runFn,
-    [Command.help]: helpFn,
-    [Command.install]: installFn,
-    [Command.terraform]: terraformFn,
-    [Command.default]: (c: string) => {
+    [COMMAND.init]: initFn,
+    [COMMAND.overwrite]: overwriteFn,
+    [COMMAND.ow]: overwriteFn,
+    [COMMAND.run]: runFn,
+    [COMMAND.help]: helpFn,
+    [COMMAND.install]: installFn,
+    [COMMAND.terraform]: terraformFn,
+    [COMMAND.default]: (c: string) => {
       console.log(
-        `Command "${c}" not found. Use "cndi --help" for more information.`,
+        `Command "${c}" not found. Use "cndi --help" for more information.`
       );
     },
   };
@@ -161,14 +164,13 @@ export default async function main(args: string[]) {
 
   // if the user uses --help we will show help text
   if (cndiArguments.help) {
-    const key = typeof cndiArguments.help === "boolean"
-      ? "default"
-      : cndiArguments.help;
+    const key =
+      typeof cndiArguments.help === "boolean" ? "default" : cndiArguments.help;
     commands.help(key);
 
     // if the user tries to run "help" instead of --help we will say that it's not a valid command
   } else if (commandsInArgs.includes("help")) {
-    commands.help(Command.help);
+    commands.help(COMMAND.help);
   } else {
     // in any other case we will try to run the command
     const operation = `${commandsInArgs[0] ?? ""}`;
@@ -176,7 +178,7 @@ export default async function main(args: string[]) {
     if (!operation) {
       if (cndiArguments.version) {
         const { version } = (await loadJSONC(
-          path.join(CNDI_HOME, "deno.jsonc"),
+          path.join(CNDI_HOME, "deno.jsonc")
         )) as { version: string };
         console.log("cndi version:", version);
         console.log("kubeseal version:", KUBESEAL_VERSION);
@@ -184,7 +186,7 @@ export default async function main(args: string[]) {
         Deno.exit(0);
       }
       console.log(
-        `"cndi" must be called with a subcommand. Use "cndi --help" for more information.`,
+        `"cndi" must be called with a subcommand. Use "cndi --help" for more information.`
       );
       Deno.exit(1);
     }
@@ -196,33 +198,33 @@ export default async function main(args: string[]) {
           cndiLabel,
           brightRed("\ncndi is not installed!\nrun"),
           cyan("cndi install"),
-          brightRed("and try again.\n"),
+          brightRed("and try again.\n")
         );
         Deno.exit(1);
       }
     }
 
     switch (operation) {
-      case Command.install:
-        commands[Command.install](context);
+      case COMMAND.install:
+        commands[COMMAND.install](context);
         break;
-      case Command.init:
-        commands[Command.init](context);
+      case COMMAND.init:
+        commands[COMMAND.init](context);
         break;
-      case Command.run:
-        commands[Command.run](context);
+      case COMMAND.run:
+        commands[COMMAND.run](context);
         break;
-      case Command.overwrite:
-        commands[Command.overwrite](context);
+      case COMMAND.overwrite:
+        commands[COMMAND.overwrite](context);
         break;
-      case Command.ow:
-        commands[Command.overwrite](context);
+      case COMMAND.ow:
+        commands[COMMAND.overwrite](context);
         break;
-      case Command.terraform:
-        commands[Command.terraform](context, args.slice(1));
+      case COMMAND.terraform:
+        commands[COMMAND.terraform](context, args.slice(1));
         break;
       default:
-        commands[Command.default](operation);
+        commands[COMMAND.default](operation);
         break;
     }
   }

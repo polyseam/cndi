@@ -1,6 +1,6 @@
 import { Template } from "./Template.ts";
 import { getDefaultVmTypeForKind } from "../utils.ts";
-import { CNDIConfig, NodeKind, NodeRole } from "../types.ts";
+import { CNDIConfig, NodeKind, NODE_ROLE } from "../types.ts";
 
 const readmeBlock = `
 ### logging into argocd
@@ -35,7 +35,7 @@ function getBasicTemplate(kind: NodeKind): CNDIConfig {
           {
             name: "x-node",
             kind,
-            role: NodeRole.leader,
+            role: NODE_ROLE.leader,
             [vmTypeKey]: vmTypeValue,
             volume_size,
           },
