@@ -20,7 +20,7 @@ const writeEnvObject = async (
     })
     .join("\n").trim();
 
-  await Deno.writeTextFile(pathToDotEnv, dotEnvString+'\n');
+  await Deno.writeTextFile(pathToDotEnv, dotEnvString + "\n");
 };
 
 export default writeEnvObject;

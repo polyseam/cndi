@@ -21,7 +21,7 @@ const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
 const getTerraformNodeResource = (
   node: BaseNodeItemSpec,
-  deploymentTargetConfiguration: DeploymentTargetConfiguration,
+  deployment_target_configuration: DeploymentTargetConfiguration,
   controllerName: string,
 ): string => {
   const { kind } = node;
@@ -30,14 +30,14 @@ const getTerraformNodeResource = (
     case "aws":
       return getAWSNodeResource(
         node as AWSNodeItemSpec,
-        deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
+        deployment_target_configuration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
       );
 
     case "gcp":
       return getGCPNodeResource(
         node as GCPNodeItemSpec,
-        deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
+        deployment_target_configuration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
       );
 
@@ -52,16 +52,16 @@ const getTerraformNodeResource = (
 
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
-  deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
+  deployment_target_configuration: GCPDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
   const { name, role } = node;
-  const image = node?.image || deploymentTargetConfiguration?.image ||
+  const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
   const machine_type = node?.machine_type || node?.instance_type ||
-    deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
+    deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
   const DEFAULT_SIZE = 100; // The size of the image in gigabytes
   const size = node?.size || node?.volume_size || DEFAULT_SIZE;
@@ -157,16 +157,16 @@ const getGCPNodeResource = (
 
 const getAWSNodeResource = (
   node: AWSNodeItemSpec,
-  deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
+  deployment_target_configuration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
   const { name } = node;
   const role = node.role as NodeRole;
-  const ami = node?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
+  const ami = node?.ami || deployment_target_configuration?.ami || DEFAULT_AMI;
   const instance_type = node?.instance_type || node?.machine_type ||
-    deploymentTargetConfiguration?.instance_type ||
+    deployment_target_configuration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 
   const DEFAULT_VOLUME_SIZE = 100;

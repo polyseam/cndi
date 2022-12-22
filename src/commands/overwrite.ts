@@ -164,8 +164,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const { nodes } = config.infrastructure.cndi;
 
-  const deploymentTargetConfiguration =
-    config.infrastructure.cndi.deploymentTargetConfiguration ||
+  const deployment_target_configuration =
+    config.infrastructure.cndi.deployment_target_configuration ||
     ({} as DeploymentTargetConfiguration);
 
   const leaders = nodes.filter((node) => node.role === "leader");
@@ -225,7 +225,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   nodes.forEach((node: BaseNodeItemSpec) => {
     const nodeFileContents: string = getTerraformNodeResource(
       node,
-      deploymentTargetConfiguration,
+      deployment_target_configuration,
       leader.name,
     );
     Deno.writeTextFile(
