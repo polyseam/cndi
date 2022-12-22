@@ -1,25 +1,24 @@
 {
   "project_name": "my-cndi-cluster",
-
   "infrastructure": {
     "cndi": {
       "nodes": [
         {
-          "name": "x-airflow-node",
-          "kind": "aws",
+          "name": "y-airflow-node",
           "role": "leader",
+          "kind": "aws_ec2",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         },
         {
-          "name": "y-airflow-node",
-          "kind": "aws",
+          "name": "x-airflow-node",
+          "kind": "aws_ec2",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         },
         {
           "name": "z-airflow-node",
-          "kind": "aws",
+          "kind": "aws_ec2",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         }
