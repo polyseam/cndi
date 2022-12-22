@@ -1,4 +1,4 @@
-import { CNDIConfig, EnvObject, NodeKind, NodeRole, NODE_ROLE } from "../types.ts";
+import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";

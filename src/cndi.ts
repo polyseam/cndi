@@ -40,13 +40,13 @@ export default async function main(args: string[]) {
   const CNDI_SRC = path.join(CNDI_HOME, "src");
   const pathToKubeseal = path.join(
     CNDI_HOME,
-    `kubeseal-${fileSuffixForPlatform}`
+    `kubeseal-${fileSuffixForPlatform}`,
   );
 
   // default paths to the user's config file
   const DEFAULT_CNDI_CONFIG_PATH = path.join(
     executionDirectory,
-    "cndi-config.json"
+    "cndi-config.json",
   );
 
   const DEFAULT_CNDI_CONFIG_PATH_JSONC = `${DEFAULT_CNDI_CONFIG_PATH}c`;
@@ -62,12 +62,14 @@ export default async function main(args: string[]) {
 
     console.log(
       cndiLabel,
-      `${brightRed(
-        `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`
-      )}\n`
+      `${
+        brightRed(
+          `You used "${fileArg}" and "${templateArg}", you need to choose one or the other.`,
+        )
+      }\n`,
     );
     console.log(
-      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`)
+      yellow(`did you mean to use "--output" instead of "${fileArg}"?\n`),
     );
     Deno.exit(1);
   }
@@ -76,16 +78,14 @@ export default async function main(args: string[]) {
   const interactive = cndiArguments.i || cndiArguments.interactive || false;
 
   // if the user has specified a config file, use that, otherwise use the default config file
-  const pathToConfig = template
-    ? null
-    : cndiArguments.f ||
-      cndiArguments.file ||
-      DEFAULT_CNDI_CONFIG_PATH_JSONC ||
-      DEFAULT_CNDI_CONFIG_PATH;
+  const pathToConfig = template ? null : cndiArguments.f ||
+    cndiArguments.file ||
+    DEFAULT_CNDI_CONFIG_PATH_JSONC ||
+    DEFAULT_CNDI_CONFIG_PATH;
 
   // the directory in which to create the cndi folder
-  const outputOption =
-    cndiArguments.o || cndiArguments.output || executionDirectory;
+  const outputOption = cndiArguments.o || cndiArguments.output ||
+    executionDirectory;
 
   const projectDirectory = path.join(outputOption);
 
@@ -103,18 +103,18 @@ export default async function main(args: string[]) {
 
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
-    `terraform-${fileSuffixForPlatform}`
+    `terraform-${fileSuffixForPlatform}`,
   );
 
   const pathToCNDIBinary = path.join(
     CNDI_HOME,
-    `cndi-${fileSuffixForPlatform}`
+    `cndi-${fileSuffixForPlatform}`,
   );
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
   const pathToKubernetesManifests = path.join(
     projectCndiDirectory,
-    "cluster_manifests"
+    "cluster_manifests",
   );
   const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
@@ -155,7 +155,7 @@ export default async function main(args: string[]) {
     [COMMAND.terraform]: terraformFn,
     [COMMAND.default]: (c: string) => {
       console.log(
-        `Command "${c}" not found. Use "cndi --help" for more information.`
+        `Command "${c}" not found. Use "cndi --help" for more information.`,
       );
     },
   };
@@ -164,8 +164,9 @@ export default async function main(args: string[]) {
 
   // if the user uses --help we will show help text
   if (cndiArguments.help) {
-    const key =
-      typeof cndiArguments.help === "boolean" ? "default" : cndiArguments.help;
+    const key = typeof cndiArguments.help === "boolean"
+      ? "default"
+      : cndiArguments.help;
     commands.help(key);
 
     // if the user tries to run "help" instead of --help we will say that it's not a valid command
@@ -178,7 +179,7 @@ export default async function main(args: string[]) {
     if (!operation) {
       if (cndiArguments.version) {
         const { version } = (await loadJSONC(
-          path.join(CNDI_HOME, "deno.jsonc")
+          path.join(CNDI_HOME, "deno.jsonc"),
         )) as { version: string };
         console.log("cndi version:", version);
         console.log("kubeseal version:", KUBESEAL_VERSION);
@@ -186,7 +187,7 @@ export default async function main(args: string[]) {
         Deno.exit(0);
       }
       console.log(
-        `"cndi" must be called with a subcommand. Use "cndi --help" for more information.`
+        `"cndi" must be called with a subcommand. Use "cndi --help" for more information.`,
       );
       Deno.exit(1);
     }
@@ -198,7 +199,7 @@ export default async function main(args: string[]) {
           cndiLabel,
           brightRed("\ncndi is not installed!\nrun"),
           cyan("cndi install"),
-          brightRed("and try again.\n")
+          brightRed("and try again.\n"),
         );
         Deno.exit(1);
       }

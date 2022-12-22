@@ -27,14 +27,14 @@ const getTerraformNodeResource = (
   const { kind } = node;
 
   switch (kind) {
-    case "aws_ec2":
+    case "aws":
       return getAWSNodeResource(
         node as AWSNodeItemSpec,
         deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
       );
 
-    case "gcp_ce":
+    case "gcp":
       return getGCPNodeResource(
         node as GCPNodeItemSpec,
         deploymentTargetConfiguration.gcp as GCPDeploymentTargetConfiguration,
@@ -175,7 +175,7 @@ const getAWSNodeResource = (
   const volume_size = node?.volume_size || node?.size || DEFAULT_VOLUME_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
 
-  // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws_ec2"]
+  // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
   const ebs_block_device = [
     {
       device_name,

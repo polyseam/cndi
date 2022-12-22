@@ -1,5 +1,5 @@
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { getDeploymentTargetFromKind, getPrettyJSONString, loadJSONC } from "../utils.ts";
+import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 import {
   BaseNodeItemSpec,
   CNDIConfig,
@@ -7,7 +7,6 @@ import {
   DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
-  NodeKind,
 } from "../types.ts";
 import getApplicationManifest from "../outputs/application-manifest.ts";
 import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
@@ -180,8 +179,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const requiredProviders = new Set(
     nodes.map((node: BaseNodeItemSpec) => {
-      // eg: aws_ec2 -> aws
-      const provider = getDeploymentTargetFromKind(node.kind);
+      // eg: aws -> aws
+      const provider = node.kind;
       return provider;
     }),
   );

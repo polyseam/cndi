@@ -2,7 +2,7 @@ import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 
-import { CNDIContext, DeploymentTarget, NODE_KIND, NodeKind } from "./types.ts";
+import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
 
 const CERT_TOP = "-----BEGIN CERTIFICATE-----\n";
@@ -98,18 +98,14 @@ const getPathToOpenSSLForPlatform = () => {
 function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
-    case NODE_KIND.aws_ec2:
+    case NODE_KIND.aws:
       return ["instance_type", "m5a.xlarge"];
-    case NODE_KIND.gcp_ce:
+    case NODE_KIND.gcp:
       return ["machine_type", "n2-standard-4"];
     default:
       console.log("Unknown kind: " + kind);
       Deno.exit(1);
   }
-}
-
-export function getDeploymentTargetFromKind(kind: NodeKind): DeploymentTarget {
-  return kind.split("_")[0] as DeploymentTarget;
 }
 
 function base10intToHex(decimal: number): string {

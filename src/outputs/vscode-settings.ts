@@ -5,7 +5,8 @@ const settings = {
   "json.schemas": [
     {
       fileMatch: ["*cndi-config.json*"],
-      url: "https://github.com/polyseam/cndi/blob/main/src/schemas/cndi-config.schema.json",
+      url:
+        "https://github.com/polyseam/cndi/blob/main/src/schemas/cndi-config.schema.json",
     },
   ],
 };

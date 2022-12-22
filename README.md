@@ -234,17 +234,17 @@ it to the array!
       "nodes": [
         {
           "name": "gcp-alpha",
-          "kind": "gcp_ce",
+          "kind": "gcp",
           "role": "leader",
           "machine_type": "n2-standard-16"
         },
         {
           "name": "gcp-beta",
-          "kind": "gcp_ce"
+          "kind": "gcp"
         },
         {
           "name": "gcp-charlie",
-          "kind": "gcp_ce"
+          "kind": "gcp"
         }
       ],
       "deployment_target_configuration": {
@@ -257,8 +257,8 @@ it to the array!
   // tip: we parse this file as JSONC so you can add comments!
 ```
 
-Currently we have support for `aws_ec2` nodes, and `gcp_ce` nodes. More
-deployment targets are on the way!
+Currently we have support for `aws` nodes, and `gcp` nodes. More deployment
+targets are on the way!
 
 Just like every other component in CNDI, nodes can be updated in our
 `cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git

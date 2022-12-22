@@ -54,13 +54,12 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws_ec2", "gcp_ce"]
+                    "enum": ["aws", "gcp"]
                   },
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
                     "enum": ["leader", "controller"]
-              
                   },
                   "instance_type": {},
                   "volume_size": {}

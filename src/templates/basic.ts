@@ -1,6 +1,6 @@
 import { Template } from "./Template.ts";
 import { getDefaultVmTypeForKind } from "../utils.ts";
-import { CNDIConfig, NodeKind, NODE_ROLE } from "../types.ts";
+import { CNDIConfig, NODE_ROLE, NodeKind } from "../types.ts";
 
 const readmeBlock = `
 ### logging into argocd

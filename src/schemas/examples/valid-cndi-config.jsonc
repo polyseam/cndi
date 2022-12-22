@@ -6,19 +6,19 @@
         {
           "name": "y-airflow-node",
           "role": "leader",
-          "kind": "aws_ec2",
+          "kind": "aws",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         },
         {
           "name": "x-airflow-node",
-          "kind": "aws_ec2",
+          "kind": "aws",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         },
         {
           "name": "z-airflow-node",
-          "kind": "aws_ec2",
+          "kind": "aws",
           "instance_type": "m5a.xlarge",
           "volume_size": 128
         }

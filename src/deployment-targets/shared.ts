@@ -1,9 +1,8 @@
 import {
   CNDIContext,
-  DeploymentTarget,
   DEPLOYMENT_TARGET,
+  DeploymentTarget,
   EnvObject,
-  NodeKind,
   SealedSecretsKeys,
 } from "../types.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";

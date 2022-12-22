@@ -1,18 +1,8 @@
-import {
-  CNDIConfig,
-  CNDIContext,
-  NodeKind,
-  DeploymentTarget,
-  NODE_PLATFORM_ALIASES,
-} from "../types.ts";
+import { CNDIConfig, CNDIContext, NodeKind } from "../types.ts";
 
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 
-import {
-  getDeploymentTargetFromKind,
-  getPrettyJSONString,
-  loadJSONC,
-} from "../utils.ts";
+import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 
 import {
   brightRed,
@@ -66,11 +56,9 @@ export default async function init(context: CNDIContext) {
   const CNDI_CONFIG_FILENAME = "cndi-config.jsonc"; // this is used for writing a cndi-config.jsonc file when using templates
 
   // kind comes in from one of 2 places
-  // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp" and concat it with the _ec2
+  // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
   // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
   let kind: NodeKind | undefined;
-
-  let deploymentTarget: DeploymentTarget | undefined;
 
   let project_name = Deno.cwd().split("/").pop() || "my-cndi-project";
 
@@ -81,18 +69,22 @@ export default async function init(context: CNDIContext) {
     try {
       console.log(`cndi init --file "${context.pathToConfig}"\n`);
       const config = (await loadJSONC(
-        context.pathToConfig
+        context.pathToConfig,
       )) as unknown as CNDIConfig;
 
       if (!config?.project_name) {
         console.log(
           brightRed(
-            `cndi-config file found was at ${white(
-              `"${context.pathToConfig}"`
-            )} but it does not have the required ${cyan(
-              '"project_name"'
-            )} key\n`
-          )
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan(
+                '"project_name"',
+              )
+            } key\n`,
+          ),
         );
         Deno.exit(1);
       }
@@ -101,12 +93,16 @@ export default async function init(context: CNDIContext) {
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file found was at ${white(
-              `"${context.pathToConfig}"`
-            )} but it does not have the required ${cyan(
-              '"infrastructure"'
-            )} key\n`
-          )
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan(
+                '"infrastructure"',
+              )
+            } key\n`,
+          ),
         );
 
         // TODO: remove this warning, there are at most only a few people using the old syntax
@@ -116,13 +112,13 @@ export default async function init(context: CNDIContext) {
           console.log(
             initLabel,
             yellow(
-              `You appear to be using the deprecated pre-release config syntax. Sorry!`
-            )
+              `You appear to be using the deprecated pre-release config syntax. Sorry!`,
+            ),
           );
           console.log(
             initLabel,
             "please read more about the 1.x.x syntax at",
-            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes\n")
+            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes\n"),
           );
         }
 
@@ -131,12 +127,16 @@ export default async function init(context: CNDIContext) {
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file found was at ${white(
-              `"${context.pathToConfig}"`
-            )} but it does not have any ${cyan(
-              '"cndi.infrastructure.nodes"'
-            )} entries\n`
-          )
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have any ${
+              cyan(
+                '"cndi.infrastructure.nodes"',
+              )
+            } entries\n`,
+          ),
         );
       }
 
@@ -144,10 +144,12 @@ export default async function init(context: CNDIContext) {
         console.log(
           initLabel,
           yellow(
-            `You haven't specified a ${cyan(
-              '"cndi_version"'
-            )} in your config file, defaulting to "v1"\n`
-          )
+            `You haven't specified a ${
+              cyan(
+                '"cndi_version"',
+              )
+            } in your config file, defaulting to "v1"\n`,
+          ),
         );
       }
 
@@ -159,17 +161,21 @@ export default async function init(context: CNDIContext) {
         console.log(
           initLabel,
           brightRed(
-            `cndi-config file not found at ${white(
-              `"${context.pathToConfig}"`
-            )}\n`
-          )
+            `cndi-config file not found at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            }\n`,
+          ),
         );
 
         // and suggest a solution
         console.log(
-          `if you don't have a cndi-config file try ${cyan(
-            "cndi init --interactive"
-          )}\n`
+          `if you don't have a cndi-config file try ${
+            cyan(
+              "cndi init --interactive",
+            )
+          }\n`,
         );
         Deno.exit(1);
       }
@@ -180,13 +186,12 @@ export default async function init(context: CNDIContext) {
         console.log(`cndi init --interactive --template\n`);
         console.error(
           initLabel,
-          brightRed(`--template (-t) flag requires a value`)
+          brightRed(`--template (-t) flag requires a value`),
         );
         Deno.exit(1);
       }
       // 2a. the user used a template name, we pull the 'kind' out of it
-      deploymentTarget = context.template?.split("/")[0] as DeploymentTarget;
-      kind = NODE_PLATFORM_ALIASES[deploymentTarget] as NodeKind;
+      kind = context.template?.split("/")[0] as NodeKind;
       console.log(`cndi init --interactive --template ${context.template}\n`);
     } else {
       // we don't know the kind so we need to get it when the user chooses a template (see 2c)
@@ -199,24 +204,23 @@ export default async function init(context: CNDIContext) {
       console.log(`cndi init --template\n`);
       console.error(
         initLabel,
-        brightRed(`--template (-t) flag requires a value`)
+        brightRed(`--template (-t) flag requires a value`),
       );
       Deno.exit(1);
     }
 
     console.log(`cndi init --template ${context.template}\n`);
     // 2b. the user has passed a template name, we pull the 'deploymentTarget' out of it then select the default kind for that platform
-    // eg. aws -> aws_ec2
-    deploymentTarget = context.template?.split("/")[0] as DeploymentTarget;
-    kind = NODE_PLATFORM_ALIASES[deploymentTarget] as NodeKind;
+    // eg. aws -> aws
+    kind = context.template?.split("/")[0] as NodeKind;
   }
 
   const directoryContainsCNDIFiles = await checkInitialized(context);
 
   const shouldContinue = directoryContainsCNDIFiles
     ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?"
-      )
+      "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+    )
     : true;
 
   if (!shouldContinue) {
@@ -226,8 +230,8 @@ export default async function init(context: CNDIContext) {
   const templateNamesList: string[] = [];
 
   availableTemplates.forEach((tpl) => {
-    availableDeploymentTargets.forEach((deploymentTarget: DeploymentTarget) => {
-      templateNamesList.push(`${deploymentTarget}/${tpl.name}`);
+    availableDeploymentTargets.forEach((kind: NodeKind) => {
+      templateNamesList.push(`${kind}/${tpl.name}`);
     });
   });
 
@@ -238,8 +242,8 @@ export default async function init(context: CNDIContext) {
       console.log(
         initLabel,
         brightRed(
-          `The template you selected "${context.template}" is not available.\n`
-        )
+          `The template you selected "${context.template}" is not available.\n`,
+        ),
       );
 
       console.log("Available templates are:\n");
@@ -275,21 +279,11 @@ export default async function init(context: CNDIContext) {
   if (interactive && !context.template) {
     const selectedTemplate = await Select.prompt({
       message: cyan("Pick a template"),
-      options: templateNamesList.map((tplName: string) => {
-        baseTemplateName = tplName.split("/")[1]; // eg. "airflow-tls"
-        const deploymentTarget = tplName.split("/")[0] as DeploymentTarget;
-        // templates are aws/airflow-tls, gcp/airflow-tls, etc.
-        // NOT aws_ec2/aiflow-tls, gcp_ce/airflow-tls
-        // so we need to convert the former to the latter
-        const nodePlatform = NODE_PLATFORM_ALIASES[deploymentTarget];
-        return {
-          name: tplName,
-          value: `${nodePlatform}/${baseTemplateName}`,
-        };
-      }),
+      options: templateNamesList,
     });
     // 2c. the user finally selected a template, we pull the 'kind' out of it
     kind = selectedTemplate.split("/")[0] as NodeKind;
+    baseTemplateName = selectedTemplate.split("/")[1]; // eg. "airflow-tls"
   }
 
   if (!kind) {
@@ -297,11 +291,8 @@ export default async function init(context: CNDIContext) {
     Deno.exit(1);
   }
 
-  // kind _must_ be defined at this point, it is a dependency
-  deploymentTarget = getDeploymentTargetFromKind(kind);
-
   const template: Template = availableTemplates.find(
-    (t) => t.name === baseTemplateName
+    (t) => t.name === baseTemplateName,
   ) as Template; // we know this exists because we checked it above
 
   const cndiContextWithGeneratedValues = {
@@ -315,7 +306,7 @@ export default async function init(context: CNDIContext) {
 
   const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
-    deploymentTarget
+    kind,
   );
 
   const templateEnvObject = template
@@ -329,19 +320,19 @@ export default async function init(context: CNDIContext) {
 
   const pathToVSCodeSettings = path.join(
     context.dotVSCodeDirectory,
-    "settings.json"
+    "settings.json",
   );
 
   try {
     await Deno.mkdir(context.dotVSCodeDirectory, {});
     await Deno.writeTextFile(
       pathToVSCodeSettings,
-      getPrettyJSONString(vscodeSettings)
+      getPrettyJSONString(vscodeSettings),
     );
   } catch {
     console.log(
       initLabel,
-      yellow(`failed to write ${cyan(`"${pathToVSCodeSettings}"`)}`)
+      yellow(`failed to write ${cyan(`"${pathToVSCodeSettings}"`)}`),
     );
     console.log(initLabel, "continuing without editor integration...");
   }
@@ -355,7 +346,7 @@ export default async function init(context: CNDIContext) {
     } catch (githubCopyError) {
       console.log(
         initLabel,
-        brightRed("failed to copy github integration files")
+        brightRed("failed to copy github integration files"),
       );
       console.error(githubCopyError);
       Deno.exit(1);
@@ -370,7 +361,7 @@ export default async function init(context: CNDIContext) {
     await Deno.stat(readmePath);
     console.log(
       initLabel,
-      yellow(`"${readmePath}" already exists, skipping generation`)
+      yellow(`"${readmePath}" already exists, skipping generation`),
     );
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
@@ -379,7 +370,7 @@ export default async function init(context: CNDIContext) {
         `# ${project_name}\n` +
           coreReadme +
           "\n" +
-          (template?.readmeBlock || "")
+          (template?.readmeBlock || ""),
       );
     }
   }
