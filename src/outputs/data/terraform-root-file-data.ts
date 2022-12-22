@@ -24,7 +24,7 @@ const terraformRootFileData: TerraformRootFileData = {
   },
   data: [
     {
-      aws_instance_type_offerings: [{}],
+      aws_ec2_instance_type_offerings: [{}],
     },
   ],
   resource: [
