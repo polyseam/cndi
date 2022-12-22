@@ -18,9 +18,9 @@ const writeEnvObject = async (
 
       return `${comment}\n${key}=${val}`;
     })
-    .join("\n");
+    .join("\n").trim();
 
-  await Deno.writeTextFile(pathToDotEnv, dotEnvString);
+  await Deno.writeTextFile(pathToDotEnv, dotEnvString+'\n');
 };
 
 export default writeEnvObject;

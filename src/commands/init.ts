@@ -2,18 +2,20 @@ import { CNDIConfig, CNDIContext, NodeKind } from "../types.ts";
 
 import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
 
-import { loadJSONC } from "../utils.ts";
+import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 
 import {
   brightRed,
   cyan,
   white,
+  yellow,
 } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import overwriteWithFn from "./overwrite-with.ts";
+import overwriteWithFn from "./overwrite.ts";
 
 import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
 import {
   availableDeploymentTargets,
@@ -32,6 +34,8 @@ import { checkInitialized } from "../utils.ts";
 
 import writeEnvObject from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
+import vscodeSettings from "../outputs/vscode-settings.ts";
+
 import coreReadme from "../doc/core.ts";
 
 import { Template } from "../templates/Template.ts";
@@ -53,8 +57,10 @@ export default async function init(context: CNDIContext) {
 
   // kind comes in from one of 2 places
   // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
-  // 2. if the user brings their own config file, we read it from the first node entry in the config file
+  // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
   let kind: NodeKind | undefined;
+
+  let project_name = Deno.cwd().split("/").pop() || "my-cndi-project";
 
   // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
   const useCNDIConfigFile = !context.interactive && !context.template;
@@ -66,8 +72,89 @@ export default async function init(context: CNDIContext) {
         context.pathToConfig,
       )) as unknown as CNDIConfig;
 
+      if (!config?.project_name) {
+        console.log(
+          brightRed(
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan(
+                '"project_name"',
+              )
+            } key\n`,
+          ),
+        );
+        Deno.exit(1);
+      }
+
+      if (!config.infrastructure) {
+        console.log(
+          initLabel,
+          brightRed(
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have the required ${
+              cyan(
+                '"infrastructure"',
+              )
+            } key\n`,
+          ),
+        );
+
+        // TODO: remove this warning, there are at most only a few people using the old syntax
+        const badconfig = config as unknown as Record<string, unknown>;
+
+        if (badconfig?.nodes) {
+          console.log(
+            initLabel,
+            yellow(
+              `You appear to be using the deprecated pre-release config syntax. Sorry!`,
+            ),
+          );
+          console.log(
+            initLabel,
+            "please read more about the 1.x.x syntax at",
+            cyan("https://github.com/polyseam/cndi#infrastructure-and-nodes\n"),
+          );
+        }
+
+        Deno.exit(1);
+      } else if (!config.infrastructure.cndi.nodes[0]) {
+        console.log(
+          initLabel,
+          brightRed(
+            `cndi-config file found was at ${
+              white(
+                `"${context.pathToConfig}"`,
+              )
+            } but it does not have any ${
+              cyan(
+                '"cndi.infrastructure.nodes"',
+              )
+            } entries\n`,
+          ),
+        );
+      }
+
+      if (!config.cndi_version) {
+        console.log(
+          initLabel,
+          yellow(
+            `You haven't specified a ${
+              cyan(
+                '"cndi_version"',
+              )
+            } in your config file, defaulting to "v1"\n`,
+          ),
+        );
+      }
+
       // 1. the user brought their own config file, we use the kind of the first node
-      kind = config.nodes.entries[0].kind as NodeKind; // only works when all nodes are the same kind
+      kind = config.infrastructure.cndi.nodes[0].kind as NodeKind; // only works when all nodes are the same kind
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
         // if config is not found at 'pathToConfig' we want to throw an error
@@ -95,8 +182,16 @@ export default async function init(context: CNDIContext) {
     }
   } else if (context.interactive) {
     if (context.template) {
+      if (`${context.template}` === "true") {
+        console.log(`cndi init --interactive --template\n`);
+        console.error(
+          initLabel,
+          brightRed(`--template (-t) flag requires a value`),
+        );
+        Deno.exit(1);
+      }
       // 2a. the user used a template name, we pull the 'kind' out of it
-      kind = context.template.split("/")[0] as NodeKind;
+      kind = context.template?.split("/")[0] as NodeKind;
       console.log(`cndi init --interactive --template ${context.template}\n`);
     } else {
       // we don't know the kind so we need to get it when the user chooses a template (see 2c)
@@ -115,7 +210,8 @@ export default async function init(context: CNDIContext) {
     }
 
     console.log(`cndi init --template ${context.template}\n`);
-    // 2b.the user has passed a template name, we pull the 'kind'out of it
+    // 2b. the user has passed a template name, we pull the 'deploymentTarget' out of it then select the default kind for that platform
+    // eg. aws -> aws
     kind = context.template?.split("/")[0] as NodeKind;
   }
 
@@ -134,8 +230,8 @@ export default async function init(context: CNDIContext) {
   const templateNamesList: string[] = [];
 
   availableTemplates.forEach((tpl) => {
-    availableDeploymentTargets.forEach((k) => {
-      templateNamesList.push(`${k}/${tpl.name}`);
+    availableDeploymentTargets.forEach((kind: NodeKind) => {
+      templateNamesList.push(`${kind}/${tpl.name}`);
     });
   });
 
@@ -156,6 +252,13 @@ export default async function init(context: CNDIContext) {
     }
   }
 
+  if (context.interactive) {
+    project_name = (await Input.prompt({
+      message: cyan("Please enter a name for your CNDI project:"),
+      default: project_name,
+    })) as string;
+  }
+
   // GENERATE ENV VARS
   const sealedSecretsKeys = await createSealedSecretsKeys(context);
   const terraformStatePassphrase = createTerraformStatePassphrase();
@@ -174,24 +277,23 @@ export default async function init(context: CNDIContext) {
   let baseTemplateName = context.template?.split("/")[1]; // eg. "airflow-tls"
 
   if (interactive && !context.template) {
-    const selectedTemplateName = await Select.prompt({
+    const selectedTemplate = await Select.prompt({
       message: cyan("Pick a template"),
       options: templateNamesList,
     });
-
-    baseTemplateName = selectedTemplateName.split("/")[1]; // eg. "airflow-tls"
     // 2c. the user finally selected a template, we pull the 'kind' out of it
-    kind = selectedTemplateName.split("/")[0] as NodeKind;
+    kind = selectedTemplate.split("/")[0] as NodeKind;
+    baseTemplateName = selectedTemplate.split("/")[1]; // eg. "airflow-tls"
   }
-
-  const template: Template = availableTemplates.find(
-    (t) => t.name === baseTemplateName,
-  ) as Template; // we know this exists because we checked it above
 
   if (!kind) {
     console.log(initLabel, brightRed(`"kind" cannot be inferred`));
     Deno.exit(1);
   }
+
+  const template: Template = availableTemplates.find(
+    (t) => t.name === baseTemplateName,
+  ) as Template; // we know this exists because we checked it above
 
   const cndiContextWithGeneratedValues = {
     ...context,
@@ -216,6 +318,25 @@ export default async function init(context: CNDIContext) {
     ...templateEnvObject,
   });
 
+  const pathToVSCodeSettings = path.join(
+    context.dotVSCodeDirectory,
+    "settings.json",
+  );
+
+  try {
+    await Deno.mkdir(context.dotVSCodeDirectory, {});
+    await Deno.writeTextFile(
+      pathToVSCodeSettings,
+      getPrettyJSONString(vscodeSettings),
+    );
+  } catch {
+    console.log(
+      initLabel,
+      yellow(`failed to write ${cyan(`"${pathToVSCodeSettings}"`)}`),
+    );
+    console.log(initLabel, "continuing without editor integration...");
+  }
+
   if (!noGitHub) {
     try {
       // overwrite the github workflows and readme, do not clobber other files
@@ -233,16 +354,32 @@ export default async function init(context: CNDIContext) {
   }
 
   // write a readme, extend via Template.readmeBlock if it exists
-  await Deno.writeTextFile(
-    path.join(projectDirectory, "README.md"),
-    coreReadme + (template?.readmeBlock || ""),
-  );
+
+  const readmePath = path.join(projectDirectory, "README.md");
+
+  try {
+    await Deno.stat(readmePath);
+    console.log(
+      initLabel,
+      yellow(`"${readmePath}" already exists, skipping generation`),
+    );
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      await Deno.writeTextFile(
+        readmePath,
+        `# ${project_name}\n` +
+          coreReadme +
+          "\n" +
+          (template?.readmeBlock || ""),
+      );
+    }
+  }
 
   // if the user has specified a template, use that
   if (template) {
     const configOutputPath = path.join(projectDirectory, CNDI_CONFIG_FILENAME);
     const conf = await template.getConfiguration(context.interactive);
-    const templateString = await template.getTemplate(kind, conf);
+    const templateString = template.getTemplate(kind, conf, project_name);
 
     await Deno.writeTextFile(configOutputPath, templateString);
 

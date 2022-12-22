@@ -1,32 +1,49 @@
-// list of all commands for the CLI
+// https://youtu.be/jjMbPt_H3RQ?t=303 Pocock Wizardry
+type ObjectValues<T> = T[keyof T];
 
-export const enum NodeKind {
-  aws = "aws",
-  gcp = "gcp",
-}
+export const NODE_KIND = {
+  aws: "aws",
+  gcp: "gcp",
+} as const;
+
+export const DEPLOYMENT_TARGET = {
+  aws: "aws",
+  gcp: "gcp",
+} as const;
+
+export const COMMAND = {
+  init: "init",
+  overwrite: "overwrite",
+  run: "run",
+  help: "help",
+  default: "default",
+  install: "install",
+  terraform: "terraform",
+  ow: "ow",
+} as const;
+
+export const NODE_ROLE = {
+  leader: "leader",
+  controller: "controller",
+} as const;
+
+// NodeRole refers to the role of the node, e.g. leader, controller.. worker in the future?
+export type NodeRole = ObjectValues<typeof NODE_ROLE>;
+
+// NodeKind refers to the type of node, e.g. AWS EC2, GCP CE, etc.
+export type NodeKind = ObjectValues<typeof NODE_KIND>;
+
+// DeploymentTarget refers to the type of deployment target, e.g. AWS, GCP, etc.
+export type DeploymentTarget = ObjectValues<typeof DEPLOYMENT_TARGET>;
+
+// a map of all available commands in the cndi binary
+export type Command = ObjectValues<typeof COMMAND>;
 
 interface AirflowTlsTemplateAnswers {
   argocdDomainName: string;
   airflowDomainName: string;
   dagRepoUrl: string;
   letsEncryptClusterIssuerEmailAddress: string;
-}
-
-export const enum Command {
-  init = "init",
-  "overwrite-with" = "overwrite-with",
-  run = "run",
-  help = "help",
-  default = "default",
-  install = "install",
-  terraform = "terraform",
-  ow = "ow",
-}
-
-// node.role is either "leader" or "controller"
-export const enum NodeRole {
-  leader = "leader",
-  controller = "controller",
 }
 
 // incomplete type, nodes will have more options
@@ -42,11 +59,11 @@ interface CNDINode {
 }
 
 interface CNDINodesSpec {
-  entries: Array<BaseNodeEntrySpec>;
+  entries: Array<BaseNodeItemSpec>;
   deploymentTargetConfiguration: DeploymentTargetConfiguration;
 }
-// cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
-interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+// cndi-config.jsonc["nodes"]["entries"][kind==="_ce"]
+interface GCPNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -54,7 +71,7 @@ interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
   instance_type?: string;
 }
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
-interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -190,7 +207,7 @@ interface GCPTerraformRouterResource {
   };
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
+interface AWSNodeItemSpec extends BaseNodeItemSpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
@@ -200,7 +217,7 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
 }
 
 // cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
-interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -232,7 +249,7 @@ interface AWSTerraformNodeResource {
   };
 }
 
-interface AWSTerraformEc2InstanceTypeOfferingsDataSource {
+interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
   [ec2_inst_type: string]: Array<{
     filter: Array<{
       name: string;
@@ -311,10 +328,10 @@ interface AWSTerraformSecurityGroupResource {
       cidr_blocks: Array<string>;
       description: string;
       from_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
       protocol: string;
-      security_groups: Array<any>;
+      security_groups: [];
       self: boolean;
       to_port: string;
     }>;
@@ -324,9 +341,9 @@ interface AWSTerraformSecurityGroupResource {
       from_port: string;
       protocol: string;
       to_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
-      security_groups: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
+      security_groups: [];
       self: boolean;
     }>;
     tags: {
@@ -407,17 +424,24 @@ interface DeploymentTargetConfiguration {
 
 // incomplete type, config will have more options
 interface CNDIConfig {
-  nodes: CNDINodesSpec;
+  project_name?: string;
+  cndi_version?: string;
+  infrastructure: {
+    cndi: {
+      deploymentTargetConfiguration?: DeploymentTargetConfiguration;
+      nodes: Array<BaseNodeItemSpec>;
+    };
+  };
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster: {
+  cluster_manifests: {
     [key: string]: unknown;
   };
 }
 
 interface KubernetesManifest {
-  apiVersion: string;
+  cndiVersion: string;
   kind: string;
 }
 
@@ -464,6 +488,7 @@ interface CNDIContext {
   projectCndiDirectory: string;
   githubDirectory: string;
   dotEnvPath: string;
+  dotVSCodeDirectory: string;
   pathToConfig: string;
   pathToTerraformResources: string;
   pathToKubernetesManifests: string;
@@ -484,12 +509,12 @@ interface CNDIContext {
   argoUIReadOnlyPassword?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][*]
-interface BaseNodeEntrySpec {
+// cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
+interface BaseNodeItemSpec {
   name: string;
-  role: NodeRole;
   kind: NodeKind;
-  nodeIndex: number;
+  role?: NodeRole; // default: controller
+  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
 }
 
 interface CNDIClients {
@@ -519,7 +544,7 @@ interface GCPTerraformRootFileData {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
-    }
+    },
   ];
   provider: {
     random: [Record<never, never>]; // equal to [{}]
@@ -538,9 +563,10 @@ interface GCPTerraformRootFileData {
       google_compute_router_nat: GCPTerraformNATResource;
       google_compute_forwarding_rule: GCPTerraformHTTPpForwardingRuleResource;
       google_compute_region_health_check: GCPTerraformRegionHealthcheckResource;
-      google_compute_region_backend_service: GCPTerraformRegionBackendServiceResource;
+      google_compute_region_backend_service:
+        GCPTerraformRegionBackendServiceResource;
       google_project_service: GCPTerraformProjectServiceResource;
-    }
+    },
   ];
 
   terraform: [TerraformDependencies];
@@ -549,37 +575,37 @@ interface GCPTerraformRootFileData {
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_username: [
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_repo: [
       {
         description: "repository URL to access";
         type: "string";
-      }
+      },
     ];
     sealed_secrets_private_key: [
       {
         description: "private key for decrypting sealed secrets";
         type: "string";
-      }
+      },
     ];
     sealed_secrets_public_key: [
       {
         description: "public key for encrypting sealed secrets";
         type: "string";
-      }
+      },
     ];
     argo_ui_readonly_password: [
       {
         description: "password for accessing the argo ui";
         type: "string";
-      }
+      },
     ];
   };
 }
@@ -597,7 +623,7 @@ interface TerraformRootFileData {
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
       availability_zones: string;
-    }
+    },
   ];
   provider: {
     random: [Record<never, never>]; // equal to [{}]
@@ -607,9 +633,9 @@ interface TerraformRootFileData {
   data: [
     {
       aws_ec2_instance_type_offerings: [
-        AWSTerraformEc2InstanceTypeOfferingsDataSource
+        AWSTerraformEC2InstanceTypeOfferingsDataSource,
       ];
-    }
+    },
   ];
   resource: [
     {
@@ -624,7 +650,7 @@ interface TerraformRootFileData {
       aws_lb_target_group: AWSTerraformTargetGroupResource;
       aws_lb_listener: AWSTerraformTargetGroupListenerResource;
       aws_vpc: AWSTerraformVPCResource;
-    }
+    },
   ];
 
   terraform: [TerraformDependencies];
@@ -634,7 +660,7 @@ interface TerraformRootFileData {
         default: "polyseam";
         description: "Org Name";
         type: "string";
-      }
+      },
     ];
 
     vpc_cidr_block: [
@@ -642,7 +668,7 @@ interface TerraformRootFileData {
         default: "10.0.0.0/16";
         description: "CIDR block for the VPC";
         type: "string";
-      }
+      },
     ];
 
     vpc_dns_support: [
@@ -650,7 +676,7 @@ interface TerraformRootFileData {
         default: true;
         description: "Enable DNS support in the VPC";
         type: "bool";
-      }
+      },
     ];
 
     vpc_dns_hostnames: [
@@ -658,7 +684,7 @@ interface TerraformRootFileData {
         default: true;
         description: "Enable DNS hostnames in the VPC";
         type: "bool";
-      }
+      },
     ];
 
     sg_ingress_proto: [
@@ -666,7 +692,7 @@ interface TerraformRootFileData {
         default: "tcp";
         description: "Protocol used for the ingress rule";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_http: [
@@ -674,7 +700,7 @@ interface TerraformRootFileData {
         default: "80";
         description: "Port for HTTP traffic";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_https: [
@@ -682,7 +708,7 @@ interface TerraformRootFileData {
         default: "443";
         description: "Port for HTTPS traffic";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_ssh: [
@@ -690,7 +716,7 @@ interface TerraformRootFileData {
         default: "22";
         description: "Port used SSL traffic";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_proto_all: [
@@ -698,7 +724,7 @@ interface TerraformRootFileData {
         default: "-1";
         description: "Protocol used for the egress rule";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_all: [
@@ -706,7 +732,7 @@ interface TerraformRootFileData {
         default: "0";
         description: "Port used for the All ingress rule";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_k8s_API: [
@@ -714,23 +740,25 @@ interface TerraformRootFileData {
         default: "16443";
         description: "Port used for Kubernetes API server";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_nodeport_range_start: [
       {
         default: "30000";
-        description: "Nodeport start range port to quickly access applications INSECURE";
+        description:
+          "Nodeport start range port to quickly access applications INSECURE";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_nodeport_range_end: [
       {
         default: "33000";
-        description: "Nodeport end range port to quickly access applications INSECURE";
+        description:
+          "Nodeport end range port to quickly access applications INSECURE";
         type: "string";
-      }
+      },
     ];
 
     sg_egress_proto: [
@@ -738,7 +766,7 @@ interface TerraformRootFileData {
         default: "-1";
         description: "Protocol used for the egress rule";
         type: "string";
-      }
+      },
     ];
 
     sg_egress_all: [
@@ -746,7 +774,7 @@ interface TerraformRootFileData {
         default: "0";
         description: "Port used for the egress rule";
         type: "string";
-      }
+      },
     ];
 
     sg_ingress_cidr_block: [
@@ -754,7 +782,7 @@ interface TerraformRootFileData {
         default: "0.0.0.0/0";
         description: "CIDR block for the ingres rule";
         type: "string";
-      }
+      },
     ];
 
     sg_egress_cidr_block: [
@@ -762,7 +790,7 @@ interface TerraformRootFileData {
         default: "0.0.0.0/0";
         description: "CIDR block for the egress rule";
         type: "string";
-      }
+      },
     ];
 
     tg_http: [
@@ -770,7 +798,7 @@ interface TerraformRootFileData {
         default: "80";
         description: "Target Group Port for HTTP traffic";
         type: "string";
-      }
+      },
     ];
 
     tg_http_proto: [
@@ -778,7 +806,7 @@ interface TerraformRootFileData {
         default: "TCP";
         description: "Protocol used for the HTTP Target Group";
         type: "string";
-      }
+      },
     ];
 
     tg_https: [
@@ -786,7 +814,7 @@ interface TerraformRootFileData {
         default: "443";
         description: "Target Group Port for HTTP traffic";
         type: "string";
-      }
+      },
     ];
 
     tg_https_proto: [
@@ -794,15 +822,16 @@ interface TerraformRootFileData {
         default: "TCP";
         description: "Protocol used for the HTTP Target Group";
         type: "string";
-      }
+      },
     ];
 
     sbn_public_ip: [
       {
         default: true;
-        description: "Assign public IP to the instance launched into the subnet";
+        description:
+          "Assign public IP to the instance launched into the subnet";
         type: "bool";
-      }
+      },
     ];
 
     sbn_cidr_block: [
@@ -813,11 +842,11 @@ interface TerraformRootFileData {
           "10.0.3.0/24",
           "10.0.4.0/24",
           "10.0.5.0/24",
-          "10.0.6.0/24"
+          "10.0.6.0/24",
         ];
         description: "CIDR block for the subnet";
         type: "list(string)";
-      }
+      },
     ];
 
     destination_cidr_block: [
@@ -825,7 +854,7 @@ interface TerraformRootFileData {
         default: "0.0.0.0/0";
         description: "CIDR block for the route";
         type: "string";
-      }
+      },
     ];
 
     ebs_block_device_name: [
@@ -833,7 +862,7 @@ interface TerraformRootFileData {
         default: "/dev/sda1";
         description: "name of the ebs block device";
         type: "string";
-      }
+      },
     ];
 
     ebs_block_device_size: [
@@ -841,7 +870,7 @@ interface TerraformRootFileData {
         default: "80";
         description: "name of the ebs block device";
         type: "string";
-      }
+      },
     ];
 
     ebs_block_device_volume_type: [
@@ -849,44 +878,44 @@ interface TerraformRootFileData {
         default: "gp3";
         description: "volume_type of the ebs block device";
         type: "string";
-      }
+      },
     ];
 
     git_password: [
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_username: [
       {
         description: "password for accessing the repositories";
         type: "string";
-      }
+      },
     ];
     git_repo: [
       {
         description: "repository URL to access";
         type: "string";
-      }
+      },
     ];
     sealed_secrets_private_key: [
       {
         description: "private key for decrypting sealed secrets";
         type: "string";
-      }
+      },
     ];
     sealed_secrets_public_key: [
       {
         description: "public key for encrypting sealed secrets";
         type: "string";
-      }
+      },
     ];
     argo_ui_readonly_password: [
       {
         description: "password for accessing the argo ui";
         type: "string";
-      }
+      },
     ];
   };
 }
@@ -899,10 +928,10 @@ interface SealedSecretsKeys {
 export type {
   AirflowTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
-  AWSNodeEntrySpec,
+  AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
@@ -912,7 +941,7 @@ export type {
   DeploymentTargetConfiguration,
   EnvObject,
   GCPDeploymentTargetConfiguration,
-  GCPNodeEntrySpec,
+  GCPNodeItemSpec,
   GCPTerraformInstanceGroupResource,
   GCPTerraformNodeResource,
   GCPTerraformRootFileData,

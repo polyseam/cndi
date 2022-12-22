@@ -1,35 +1,39 @@
 {
-  "nodes": {
-    "entries": [
-      {
-        "name": "x-node",
-        "kind": "aws",
-        "role": "leader",
-        "instance_type": "m5a.2xlarge",
-        "volume_size": 128
-      },
-      {
-        "name": "y-node",
-        "kind": "aws",
-        "role": "controller", // default role
-        "instance_type": "m5a.large",
-        "volume_size": 128
-      },
-      {
-        "name": "z-node",
-        "kind": "aws",
-        "instance_type": "m5a.large",
-        "volume_size": 128
-      },
-      {
-        "name": "z-node",
-        "kind": "aws",
-        "instance_type": "m5a.large",
-        "volume_size": 128
-      }
-    ]
+  "cndi_version": "v1",
+  "project_name": "my-cndi-project",
+  "infrastructure": {
+    "cndi": {
+      "nodes": [
+        {
+          "name": "x-node",
+          "kind": "aws",
+          "role": "leader",
+          "instance_type": "m5a.2xlarge",
+          "volume_size": 128
+        },
+        {
+          "name": "y-node",
+          "kind": "aws",
+          "role": "controller", // default role
+          "instance_type": "m5a.large",
+          "volume_size": 128
+        },
+        {
+          "name": "z-node",
+          "kind": "aws",
+          "instance_type": "m5a.large",
+          "volume_size": 128
+        },
+        {
+          "name": "z-node",
+          "kind": "aws",
+          "instance_type": "m5a.large",
+          "volume_size": 128
+        }
+      ]
+    }
   },
-  "cluster": {
+  "cluster_manifests": {
     "argo-ingress": {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "Ingress",
@@ -65,5 +69,6 @@
       }
     }
   },
-  "applications": {}
+  "applications": {
+  }
 }

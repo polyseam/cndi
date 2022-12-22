@@ -1,8 +1,8 @@
-import { EnvObject, NodeKind } from "../types.ts";
+import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
 import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
 
 interface AirflowTlsConfiguration {
@@ -98,7 +98,7 @@ async function getAirflowTlsConfiguration(
 function getAirflowTlsTemplate(
   kind: NodeKind,
   input: AirflowTlsConfiguration,
-): string {
+): CNDIConfig {
   const {
     argocdDomainName,
     airflowDomainName,
@@ -107,31 +107,34 @@ function getAirflowTlsTemplate(
   } = input;
 
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-  return getPrettyJSONString({
-    nodes: {
-      entries: [
-        {
-          name: "x-airflow-node",
-          kind,
-          role: "leader",
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "y-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "z-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-      ],
+  const volume_size = 128; //GiB
+  return {
+    infrastructure: {
+      cndi: {
+        nodes: [
+          {
+            name: "x-airflow-node",
+            kind,
+            role: NODE_ROLE.leader,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "y-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "z-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+        ],
+      },
     },
-    cluster: {
+    cluster_manifests: {
       "git-credentials-secret": {
         apiVersion: "v1",
         kind: "Secret",
@@ -273,7 +276,7 @@ function getAirflowTlsTemplate(
         },
       },
     },
-  });
+  };
 }
 
 const airflowTlsTemplate = new Template("airflow-tls", {
