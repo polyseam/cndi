@@ -1,6 +1,6 @@
 {
-  "cndiVersion": "v1",
-  "name": "my-cndi-project",
+  "cndi_version": "v1",
+  "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
       "nodes": [

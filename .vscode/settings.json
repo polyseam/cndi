@@ -14,7 +14,7 @@
       "fileMatch": [
         "*cndi-config.json*"
       ],
-      "url": "file:/../src/schemas/cndi-config.schema.json"
+      "url": "/src/schemas/cndi-config.schema.json"
     }
   ]
 }
