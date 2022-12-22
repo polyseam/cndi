@@ -180,7 +180,9 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   const requiredProviders = new Set(
     nodes.map((node: BaseNodeItemSpec) => {
-      return node.kind as NodeKind;
+      // eg: aws_ec2 -> aws
+      const provider = (node.kind as NodeKind).split("_")[0];
+      return provider;
     }),
   );
 
@@ -201,7 +203,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     console.log();
   }
 
-  if (requiredProviders.has(NodeKind.gcp)) {
+  if (requiredProviders.has("gcp")) {
     // if there is a service account key path, read the contents and write them to .env and this runtime env
     // caution: this needs to run before the terraform root file is created
     await getGoogleCredentials(context.dotEnvPath);

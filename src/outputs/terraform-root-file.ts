@@ -2,7 +2,6 @@ import { getPrettyJSONString } from "../utils.ts";
 import {
   AWSNodeItemSpec,
   BaseNodeItemSpec,
-  NodeKind,
   TerraformDependencies,
 } from "../types.ts";
 
@@ -115,7 +114,7 @@ const getTerraformRootFile = async ({
   }
 
   // add parts of setup-cndi.tf file that are required if kind===aws
-  if (requiredProviders.has(NodeKind.aws)) {
+  if (requiredProviders.has("aws")) {
     const awsMainTerraformFileObject = { ...terraformRootFileData };
     const region = Deno.env.get("AWS_REGION") || DEFAULT_AWS_REGION;
 

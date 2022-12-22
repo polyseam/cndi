@@ -122,12 +122,12 @@ const getCoreEnvObject = async (
   };
 
   switch (kind) {
-    case "aws":
+    case NodeKind.aws_ec2:
       return {
         ...coreEnvObject,
         ...(await prepareAWSEnv(context.interactive)),
       };
-    case "gcp":
+    case NodeKind.gcp_ce:
       return {
         ...coreEnvObject,
         ...(await prepareGCPEnv(context.interactive)),

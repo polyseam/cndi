@@ -54,7 +54,7 @@ export default async function init(context: CNDIContext) {
   const CNDI_CONFIG_FILENAME = "cndi-config.jsonc"; // this is used for writing a cndi-config.jsonc file when using templates
 
   // kind comes in from one of 2 places
-  // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
+  // 1. if the user chooses a template, we use the first part of the template name, eg. "aws_ec2" or "gcp_ce"
   // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
   let kind: NodeKind | undefined;
 

@@ -2,7 +2,7 @@ import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
 
-import { CNDIContext } from "./types.ts";
+import { CNDIContext, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
 
 const CERT_TOP = "-----BEGIN CERTIFICATE-----\n";
@@ -98,9 +98,9 @@ const getPathToOpenSSLForPlatform = () => {
 function getDefaultVmTypeForKind(kind: string): [string, string] {
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
-    case "aws":
+    case NodeKind.aws_ec2:
       return ["instance_type", "m5a.xlarge"];
-    case "gcp":
+    case NodeKind.gcp_ce:
       return ["machine_type", "n2-standard-4"];
     default:
       console.log("Unknown kind: " + kind);
