@@ -3,7 +3,7 @@
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
 in Amazon Web Services
 
-## 🧐 overview
+## overview 🔭
 
 This walkthough uses the cndi CLI to create an pre-generated `aws/airflow-tls`
 template that represents a TLS-enabled Airflow application in a kubernetes
@@ -15,7 +15,7 @@ create a 3-node cluster running TLS-enabled Airflow within minutes
 
 ![cndi cluster](/docs/walkthroughs/aws/img/cndi-cluster-0.png)
 
-## ✅ prerequisites
+## prerequisites ✅
 
 **You will need the following things to get up and running with cndi
 successfully:**
@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-## ⬇️ download cndi
+## download cndi ⬇️
 
 Run the following command within your terminal to download cndi:
 
@@ -49,13 +49,13 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 >
 > _If you are on Windows, you should run this command in a Git Bash terminal._
 
-## ⚙️ install cndi cli
+## install cndi cli ⚙️ 
 
 ```shell
 cndi install
 ```
 
-## 📂 create your cndi repository
+## create your cndi repository 📂
 
 cndi stores all your cndi cluster configurations within a Git repository.
 
@@ -66,7 +66,7 @@ in:
 gh repo create my-cndi-cluster --private --clone && cd my-cndi-cluster
 ```
 
-## 🛠️ creating cluster config with cndi templates using the interactive cli
+## creating cluster config with cndi templates using the interactive cli 🛠️
 
 Run this command within the directory that you want to store your configuration
 in:
@@ -137,7 +137,7 @@ The structure of the generated templated project will be as follows:
 └── README.md
 ```
 
-## ⬆️ upload environment variables to GitHub
+## upload environment variables to GitHub ⬆️
 
 Upload your environment variables in the .env file to the GitHub Actions
 workflow This ensures that the workflow will have access to the necessary
@@ -149,7 +149,7 @@ gh secret set -f .env
 
 ![GitHub secrets](/docs/walkthroughs/aws/img/upload-git-secrets.png)
 
-## 🚀 deploy your templated cluster configration
+## deploy your templated cluster configration 🚀
 
 Once all the config is created and environment variables are uploaded to GitHub,
 add, commit and push the config to your GitHub repository:
@@ -180,7 +180,7 @@ Once `cndi-run` has been completed, you should be ready to log into AWS to
 connect your application through the load balancer at the domain you specified
 in the interactive prompt.
 
-## 🤝 attach the load balancer to your domain
+## attach the load balancer to your domain 🌐
 
 - Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/)
 - In the navigation pane, choose **Load Balancers**
@@ -194,7 +194,7 @@ and add the DNS Name of your load balancer to it
 
 ![google domains](/docs/walkthroughs/aws/img/google-domains-cname.png)
 
-## 🤝 Connect to an node in your cluster
+## Connect to an node in your cluster 🤝
 
 - Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/).
 - In the navigation pane, choose Instances.
@@ -242,7 +242,7 @@ their status is healthy in the Argocd UI
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-2.png)
 
-## 🧐 Verify that Airflow is accessible on the chosen domain
+## verify that Airflow is accessible on the chosen domain 🧐
 
 After setting up your Airflow application on the chosen domain, it is necessary
 to verify that Airflow is accessible. To do this, the user can simply go to the
@@ -253,7 +253,7 @@ make sure the previous steps were was done correctly.
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-0.png)
 
-## 🧐 Verify Airflow is connected to the private dag repository
+## verify Airflow is connected to the private DAG repository 🧐
 
 Verify that Airflow is connected to the private dag repository. If correct, the
 private dags should be visible on the Airflow UI. If not,you should go back and
@@ -262,23 +262,23 @@ the correct credentials
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-1.png)
 
-## ⚡️ and you are done!
+## and you are done! ⚡️
 
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
 Airflow and Argocd
 
-## 💣 destroying resources in the cluster!
+## destroying resources in the cluster! 💣
 
 **If you just want to take down any of your individual applications:**
 
-- Delete that application or manifest from your cndi-config.jsonc
-- Run cndi ow
+- Delete that application or manifest from your `cndi-config.jsonc`
+- Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
 
 **If you want to take down the entire cluster:**
 
-- Delete all the files in your cndi/terraform directory
-- Create an empty called destroy.tf in the cndi/terraform directory
+- Delete all the files in your `cndi/terraform` directory
+- Create an empty called `destroy.tf` in the `cndi/terraform` directory
 - Commit changes
-- Push your code changes to the repositorysitory
+- Push your code changes to the repository
