@@ -80,8 +80,8 @@ Below is the Interactive prompt values are used to customize the user's cluster 
 * **AWS Region**: *region where the infastructure is being created*
 * **Git Username for Airflow DAG Storage**:*a user's handle on GitHub.*
 * **Git Password for Airflow DAG Storage**:*place where your code is stored: a repository on GitHub*
-* **Domain name you want argocd to be accessible on**: *domain where argocd will be hosted*
-* **Domain name you want airflow to be accessible on**: *domain where airflow will be hosted*
+* **Domain name you want Argocd to be accessible on**: *domain where argocd will be hosted*
+* **Domain name you want Airflow to be accessible on**: *domain where airflow will be hosted*
 * **Email address you want to use for lets encrypt:**
 
 ![Aws instances dashboard](/docs/walkthroughs/aws/img/cndi-init-interactive.png)
@@ -186,7 +186,7 @@ You should now see a login page for Argocd, and a place to enter a username and 
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-1.png)
 
-Verify all applications and manifests in the GitHub repository are present and their status is healthy in the argocd UI
+Notice that the cluster_manifests in the GitHub repository matches config in the Argocd UI
 
 ```shell
 
@@ -199,11 +199,13 @@ Verify all applications and manifests in the GitHub repository are present and t
        └────── argo-ingress.json
 ```
 
+Verify all applications and manifests in the GitHub repository are present and their status is healthy in the Argocd UI
+
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-2.png)
 
 ## 🧐 Verify that Airflow is accessible on the chosen domain
 
-After setting up your airflow application on the chosen domain, it is necessary to verify that Airflow is accessible. To do this, the user can simply go to the chosen domain and see if they can see Airflow's login page. The default username is `admin` and the password is `admin`. If the page is accessible, then the user can log in and begin using Airflow. If not, the user wait, should go back and make sure the previous steps were was done correctly.
+After setting up your Airflow application on the chosen domain, it is necessary to verify that Airflow is accessible. To do this, the user can simply go to the chosen domain and see if they can see Airflow's login page. The default username is `admin` and the password is `admin`. If the page is accessible, then the user can log in and begin using Airflow. If not, the user wait, should go back and make sure the previous steps were was done correctly.
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-0.png)
 
