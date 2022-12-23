@@ -347,7 +347,7 @@ If you are new to Kubernetes and are unsure what any of that meant, don't sweat
 it. CNDI is designed to help with that knowledge gap with templates, and you'll
 learn along the way too!
 
-Pro tip!
+Pro tip! 🤫
 
 If you want to add a new Kubernetes Secret to use inside of your Kubernetes
 cluster via GitOps, we make this possible by encrypting your secrets with
