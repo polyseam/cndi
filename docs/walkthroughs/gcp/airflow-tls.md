@@ -1,8 +1,6 @@
----
-title: gcp/airflow-tls walkthrough
-description: >-
-  A guide to getting up and running with cndi using our cli 
----
+# gcp/airflow-tls walkthrough
+
+A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes in Google Cloud Platform
 
 ## 🧐 overview
 
