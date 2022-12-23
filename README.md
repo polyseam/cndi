@@ -123,7 +123,7 @@ required for every deployment. For example, you always need to have
 Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
 some are only required for certain Templates, all `airflow-tls` templates
-require `GIT_SYNC_REPO`.
+require `GIT_SYNC_PASSWORD` for accessing repos that hold Airflow DAGs.
 
 These environment variables are saved to the `.env` file that CNDI has generated
 for us. If you didn't use interactive mode you may have some placeholders in
