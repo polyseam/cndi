@@ -32,7 +32,7 @@ It's perfect for deploying Data Products consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each stack.
 
-## installation
+## installation 🥁
 
 To install CNDI we need to perform just 2 steps, the first is to download the
 `cndi` binary, and the second is to run `cndi install`.
@@ -48,13 +48,13 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 cndi install
 ```
 
-## usage
+## usage 
 
 CNDI is a tool with which to deploy GitOps enabled Kubernetes application
 clusters on any platform as quickly and easily as possible. The best way to
 understand this process is to look at it as a lifecycle.
 
-### lifecycle: init
+### lifecycle: init 🌱
 
 The first step in the lifecycle is to initialize the CNDI project. Because
 CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
@@ -142,7 +142,7 @@ Now we are ready for the next phase of the lifecycle!
 
 ---
 
-### lifecycle: push
+### lifecycle: push 🚀
 
 Now that we have initialized our project, CNDI has given us files that describe
 our infrastructure resources and files that describe what to run on that
@@ -170,7 +170,9 @@ is solely responsible for what to run on the cluster.
 
 Your cluster will be online in no time!
 
-### lifecycle: overwrite
+---
+
+### lifecycle: overwrite ♻️
 
 The next phase of the lifecycle is about making changes to your cluster. These
 changes can be `cluster_manifests` oriented, if you are making changes to the
@@ -196,7 +198,9 @@ don't login to our servers to make changes, we simply modify our config, and
 With these 3 phases you have everything you need to deploy a data infrastructure
 cluster using CNDI and evolve it over time!
 
-### lifecycle: destroy
+---
+
+### lifecycle: destroy 🗑️
 
 All changes to a cluster with CNDI are made the same way, and teardown is no
 exception. To destroy your cluster you just need to delete all the files in your
@@ -204,7 +208,9 @@ exception. To destroy your cluster you just need to delete all the files in your
 terraform file will signal to terraform that the desired state of the cluster is
 nullified, so all that's left is to push that file up to your repository.
 
-### Walkthroughs
+---
+
+### Walkthroughs 🥾
 
 We've got a couple of walkthroughs you can follow if you'd like, currently we
 have one for our [aws/airflow-tls](/docs/walkthroughs/aws/airflow-tls) and
@@ -212,12 +218,14 @@ have one for our [aws/airflow-tls](/docs/walkthroughs/aws/airflow-tls) and
 interested in using CNDI, these walkthroughs will be entirely transferrable to
 other applications that aren't Airflow.
 
-## configuration
+---
+
+## configuration 📝
 
 Let's run through the 3 parts of a `cndi-config.jsonc` file. This one file is
 the key to understanding CNDI, and it's really pretty simple.
 
-### infrastructure and nodes
+### infrastructure and nodes 🏗️ 
 
 The `"infrastructure"` section is used to define the infrastructure that will
 power our cluster. Currently the only type of infrastructure CNDI uses are
@@ -264,7 +272,7 @@ Just like every other component in CNDI, nodes can be updated in our
 `cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git
 remote to modify the cluster accordingly.
 
-### applications
+### applications 💽
 
 The next thing we need to configure is the applications that will actually run
 on the cluster. With CNDIv1 we focused on making it a breeze to deploy
@@ -308,7 +316,7 @@ Lets see how we accomplish this here in this new and improved CNDI:
 This is built on top of ArgoCD's Application CRDs and Helm Charts. If you have a
 Helm Chart, CNDI can deploy it!
 
-### cluster_manifests
+### cluster_manifests 📑
 
 The third aspect of a `cndi-config` file is the `"cluster_manifests"` object.
 Any objects here will be used as Kubernetes Manifests and they'll be applied to
@@ -373,7 +381,9 @@ and `"GIT_PASSWORD"`, into the destination secret key names
 }
 ```
 
-## outputs
+---
+
+## outputs 📂
 
 When `cndi init` is called there are a few files that it produces:
 
@@ -412,7 +422,7 @@ When `cndi init` is called there are a few files that it produces:
 
 ## up and running
 
-### logging into ArgoCD
+### logging into ArgoCD 🔐
 
 ArgoCD's web ui is a useful tool for visualizing and debugging your cluster
 resources. Logging into Argo requires running a command to get the default admin
@@ -426,7 +436,7 @@ microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{
 # wLLoUS3493WlHKpc
 ```
 
-### dns
+### dns 🌐
 
 Setting up DNS for your cluster is a critical step if your cluster will be
 served online. The solution depends on your "deployment target". We have a doc
@@ -434,12 +444,14 @@ walking through this for [aws]() and [gcp]() but in short you just need to point
 DNS to the load balancer we provisioned for you. In AWS this means using a
 `CNAME` record for AWS, or an `A` record if your cluster is on GCP.
 
-## building cndi (contributor guide)
+---
+
+## building cndi (contributor guide) 🛠️
 
 If you are hoping to contribute to this project and want to learn the ropes, you
 are in the right place. Let's start with setting up your environment:
 
-### setup
+### setup 🦕
 
 The first step as you might expect is to clone the repo. Take note of where you
 clone to, it will matter later when we setup some convenience aliases.
