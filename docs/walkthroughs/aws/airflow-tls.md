@@ -1,95 +1,129 @@
----
-title: aws/airflow-tls walkthrough
-description: >-
-  A guide to getting up and running with cndi using our cli 
----
+# aws/airflow-tls walkthrough
 
-## 🧐 overview
+A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
+in Amazon Web Services
 
-This walkthough uses the cndi CLI to create an pre-generated `aws/airflow-tls` template that represents a TLS-enabled Airflow application in a kubernetes cluster. This template quickly and easily create  all of the necessary components for a complete cluster, such as a nodes, loadbalancer,and applications. Additionally, it can be easily extended to include custom applications or manifests. By choosing the `aws/airflow-tls` template in the cndi cli you will create a 3-node cluster running TLS-enabled Airflow within minutes
+## overview 🔭
+
+This walkthough uses `cndi` to customize and deploy our `gcp/airflow-tls`
+Template. In just a few minutes we will be able to deploy a new Kubernetes
+cluster to AWS that has been optimally configured for Airflow, including GitOps
+with Secrets management, TLS and High Availibility right out-of-the-box. This
+framework will enable quick iteration of infrastructure, applications and
+manifests in a GitHub workflow you are already comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/aws/img/cndi-cluster-0.png)
 
-## ✅ prerequisites
+## prerequisites ✅
 
-**You will need the following things to get up and running with cndi successfully:**
+**You will need the following things to get up and running with cndi
+successfully:**
 
-* **A AWS cloud account**: cndi will deploy infrastructure within AWS
+- **An AWS cloud account**: cndi will deploy infrastructure within AWS
 
-* **Your cloud credentials**: cndi will leverage your amazon web services's **AWS ACCESS KEY ID** and **AWS_SECRET_ACCESS_KEY**  [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey) to deploy resources.
+- **Your cloud credentials**: cndi will leverage your amazon web services's
+  **AWS ACCESS KEY ID** and **AWS_SECRET_ACCESS_KEY**
+  [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
+  to deploy resources.
 
-* **A DNS registrar**: cndi creates a load balancer with the tls templates, so you'll need an attach the dns of the load balancer to the CNAME record of your domain
+- **A Domain Name**: Because the `aws/airflow-tls` template sets up TLS
+  certificates, we need to have a domain on which to apply them. We also need
+  access to the domain registrar so we can add a couple `CNAME` records there
+  for our cluster Ingresses.
 
-* **A GitHub account**: cndi manages the state of your infrastructure using a git-ops workflow, so you'll need an [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account) with a valid [GitHub token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+- **A GitHub account**: cndi helps you manage the state of your infrastructure
+  using a GitOps workflow, so you'll need a
+  [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
+  with a valid
+  [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-## ⬇️ download cndi
+
+## download cndi ⬇️
 
 Run the following command within your terminal to download cndi:
 
 ```shell
+# this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
 > #### **Note** 💡
->  *If you are on Windows, you should run this command in a Git Bash terminal.*
+>
+> _If you are on Windows, you should run this command in a Git Bash terminal._
 
-## ⚙️ install cndi cli
+## install cndi cli ⚙️
 
 ```shell
+# This will setup CNDI locally by installing it's 2 dependencies and unpacking a couple assets
 cndi install
 ```
 
-## 📂 create your cndi repository
+## create your cndi repository 📂
 
-cndi stores all your cndi cluster configurations within a Git repository.
-
-Run this command within the directory that you want to store your configuration in:
+CNDI is designed around a GitOps workflow, so all of your cluster configuration
+and infrastructure will be stored as code within a git repo, let's create that
+now!
 
 ```bash
 gh repo create my-cndi-cluster --private --clone && cd my-cndi-cluster
 ```
 
-## 🛠️ creating cluster config with cndi templates using the interactive cli
+## creating cluster config with cndi templates using the interactive cli 🛠️
 
-Run this command within the directory that you want to store your configuration in:
+Now that we have a repo, let's use `cndi` to generate all of our Infrastructure
+as Code and Cluster Configuration:
 
 ```shell
 cndi init -i
 ```
 
-You will get an interactive prompt where you'll specify the template you want.
-The template specified in this project is the `aws/airflow-tls`. 
+You will get an interactive prompt where you'll name your project, then one to
+specify the CNDI template you want.
+
+For this project select the `gcp/airflow-tls` Template.
 
 ```shell
- ? Pick a template
-    aws/basic
-    gcp/basic
-  ❯ aws/airflow-tls
-    gcp/airflow-tls
- ```
+? Pick a template
+   aws/basic
+   gcp/basic
+ ❯ aws/airflow-tls
+   gcp/airflow-tls
+```
 
-Below is the Interactive prompt values are used to customize the user's cluster configurations with the application.
 
-* **Cndi Project Name**: name of project
-* **Template**: *list of templates to choose from*
-* **GitHub Username**: *a user's handle on GitHub.*
-* **GitHub Repository URL**: *place where your code is stored: a repository on GitHub*
-* **GitHub Personal Access Token**: *alternative to using passwords for authentication to GitHub*
-* **AWS Access key ID**: *access keys are long-term credentials for an IAM user*
-* **AWS Secret Access key**: *access keys are long-term credentials for an IAM user*
-* **AWS Region**: *region where the infastructure is being created*
-* **Git Username for Airflow DAG Storage**:*a user's handle on GitHub.*
-* **Git Password for Airflow DAG Storage**:*place where your code is stored: a repository on GitHub*
-* **Domain name you want Argocd to be accessible on**: *domain where argocd will be hosted*
-* **Domain name you want Airflow to be accessible on**: *domain where airflow will be hosted*
-* **Email address you want to use for lets encrypt:**
+Below is the list of all of the interactive prompt values that should be
+supplied for this project:
 
-![Aws instances dashboard](/docs/walkthroughs/aws/img/cndi-init-interactive.png)
+- **Cndi Project Name**: _name of project_
+- **Template**: _list of templates to choose from_
+- **GitHub Username**: _a user's handle on GitHub._
+- **GitHub Repository URL**: _the url for the GitHub repository that will hold
+  all cluster configuration_
+- **GitHub Personal Access Token**: _the access token CNDI will use to access
+  your repo for cluster creation and synchronization_
+- **AWS Access key ID**: _access keys are long-term credentials for an IAM user_
+- **AWS Secret Access key**: _access keys are long-term credentials for an IAM
+  user_
+- **AWS Region**: _region where the infastructure is being created_
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow
+  DAGs will be stored_
+- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
+  be hosted_
+- **Domain name you want Airflow to be accessible on**: _domain where Airflow
+  will be hosted_
+- **Email address you want to use for lets encrypt:** _an email for lets encrypt
+  to use when generating certificates_
 
-This process will generate a `cndi-config.json` file, and `cndi` directory at the root of your repository containing all the necessary files for the configuration
-It will also store all the values in a file called `.env` at the root of your repository.
+![AWS instances dashboard](/docs/walkthroughs/aws/img/cndi-init-interactive.png)
 
-The structure of the generated templated project will be as follows:
+This process will generate a `cndi-config.json` file, and `cndi` directory at
+the root of your repository containing all the necessary files for the
+configuration It will also store all the values in a file called `.env` at the
+root of your repository.
+
+The structure of the generated CNDI project will be as follows:
 
 ```shell
 ├── 📁 cndi
@@ -110,88 +144,107 @@ The structure of the generated templated project will be as follows:
 └── README.md
 ```
 
-## ⬆️ upload environment variables to GitHub
+For a breakdown of all of these files, checkout the
+[outputs](/README.md#outputs-📂) section of the repo's main README.
 
-Upload your environment variables in the .env file to the GitHub Actions workflow
-This ensures that the workflow will have access to the necessary environment variables when it is triggered.
+## upload environment variables to GitHub ⬆️
+
+GitHub actions is responsible for calling the `cndi run` command to deploy our
+cluster, so it is important that our secrets are available in the actions
+runtime. However we don't want these to be visible in our source code, so we
+will use GitHub secrets to store them. The [gh](https://github.com/cli/cli) CLI
+makes this very easy.
 
 ```shell
 gh secret set -f .env
 ```
 
-![GitHub secrets](/docs/walkthroughs/aws/img/upload-git-secrets.png)
+![GitHub secrets](/docs/walkthroughs/gcp/img/upload-git-secrets.png)
 
-## 🚀 deploy your templated cluster configration
+---
 
-Once all the config is created and environment variables are uploaded to GitHub, add, commit and push the config to your GitHub repository:
+## deploy your templated cluster configration 🚀
+
+Once all the config is created and environment variables are uploaded to GitHub,
+add, commit and push the config to your GitHub repository:
 
 ```shell
 git add .
-git status 
+git status # take a quick look and make sure these are all files you want to push
 git commit -m "initial commit"
-git push
+git push --set-upstream origin main
 ```
 
 You should now see the cluster configuration has loaded to GitHub:
 
-![GitHub repo](/docs/walkthroughs/aws/img/github-repo.png)
+![GitHub repo](/docs/walkthroughs/gcp/img/github-repo.png)
 
-Now, open your web browser and navigate to your project on GitHub. Click on the Actions tab, then click on your current commit.
+Now, open your web browser and navigate to your project on GitHub. Click on the
+Actions tab, then click on the job that was triggered from your latest commit.
 
-You will see something like the image below, which shows that GitHub has successfully run the workflow.
+You will see something like the image below, which shows that GitHub has
+successfully run the workflow.
 
-![GitHub action](/docs/walkthroughs/aws/img/github-action.png)
+![GitHub action](/docs/walkthroughs/gcp/img/github-action.png)
 
-It is common for `cndi-run` to take a fair amount of time, as is the case with most Terraform and cloud infrastructure deployments. 
+It is common for `cndi-run` to take a fair amount of time, as is the case with
+most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into AWS to connect your application through the load balancer at the domain you specified in the interactive prompt.
+Once `cndi-run` has been completed, you should be ready to log into GCP to find
+the IP address of the load balancer that we created for you in the Network tab.
 
-## 🤝 attach the load balancer to your domain
+---
 
-* Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/)
-* In the navigation pane, choose **Load Balancers**
-* Select the **Load Balancer** thats attached to your EC2 instances
-* Copy that Load Balancer's **DNS Name** (CNAME record)
+## attach the load balancer to your domain 🌐
 
-![Aws nlb](/docs/walkthroughs/aws/img/aws-nlb.png)
+- Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/)
+- In the navigation pane, choose **Load Balancers**
+- Select the **Load Balancer** thats attached to your EC2 instances
+- Copy that Load Balancer's **DNS Name** (CNAME record)
 
-Go to your custom domain, you will need to add a CNAME record for your domain and add the DNS Name of your load balancer to it
+![AWS nlb](/docs/walkthroughs/aws/img/aws-nlb.png)
+
+Go to your custom domain, you will need to add a CNAME record for your domain
+and add the DNS Name of your load balancer to it
 
 ![google domains](/docs/walkthroughs/aws/img/google-domains-cname.png)
 
-## 🤝 Connect to an node in your cluster
+## Connect to an node in your cluster 🤝
 
-* Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/). 
-* In the navigation pane, choose Instances.
-* Select a instance and choose Connect.
-* Choose EC2 Instance Connect.
-* Verify the user name and choose Connect to open a terminal window
+- Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/).
+- In the navigation pane, choose Instances.
+- Select a instance and choose Connect.
+- Choose EC2 Instance Connect.
+- Verify the user name and choose Connect to open a terminal window
 
 ![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-instances-ui.png)
 
 ![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-connect.png)
 
-In order to login to Argocd, we have to get the password from within the cluster. 
-Run the command below in the terminal of one of the cluster nodes:
+In order to login to Argocd, we have to get the password from within the
+cluster. Run the command below in the terminal of one of the cluster nodes:
 
 ```shell
 sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
-save that password and then go to the Argocd domain URL that you specified in the interactive prompt
+save that password and then go to the Argocd domain URL that you specified in
+the interactive prompt
 
-You should now see a login page for Argocd, and a place to enter a username and password. The username is `admin` and the password is the text you copied in the previous step.
+You should now see a login page for Argocd, and a place to enter a username and
+password. The username is `admin` and the password is the text you copied in the
+previous step.
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-1.png)
 
-Notice that the cluster_manifests in the GitHub repository matches config in the Argocd UI
+Notice that the cluster_manifests in the GitHub repository matches config in the
+Argocd UI
 
 ```shell
-
-├── 📁 cndi
-   ├── 📁 cluster_manifests
+└── 📁 cndi
+   └── 📁 cluster_manifests
        ├── 📁 applications
        │   └── airflow.application.json
        ├────── git-credentials-secret.json
@@ -199,38 +252,48 @@ Notice that the cluster_manifests in the GitHub repository matches config in the
        └────── argo-ingress.json
 ```
 
-Verify all applications and manifests in the GitHub repository are present and their status is healthy in the Argocd UI
+Verify all applications and manifests in the GitHub repository are present and
+their status is healthy in the Argocd UI
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-2.png)
 
-## 🧐 Verify that Airflow is accessible on the chosen domain
+## verify that Airflow is accessible on the chosen domain 🧐
 
-After setting up your Airflow application on the chosen domain, it is necessary to verify that Airflow is accessible. To do this, the user can simply go to the chosen domain and see if they can see Airflow's login page. The default username is `admin` and the password is `admin`. If the page is accessible, then the user can log in and begin using Airflow. If not, the user wait, should go back and make sure the previous steps were was done correctly.
+After setting up your Airflow application on the chosen domain, it is necessary
+to verify that Airflow is accessible. To do this, the user can simply go to the
+chosen domain and see if they can see Airflow's login page. The default username
+is `admin` and the password is `admin`. If the page is accessible, then the user
+can log in and begin using Airflow. If not, the user wait, should go back and
+make sure the previous steps were was done correctly.
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-0.png)
 
-## 🧐 Verify Airflow is connected to the private dag repository
+## verify Airflow is connected to the private DAG repository 🧐
 
-Verify that Airflow is connected to the private dag repository. If correct, the private dags should be visible on the Airflow UI. If not,you should go back and make sure that the private dag repository is properly connected to Airflow with the correct credentials
+Verify that Airflow is connected to the private dag repository. If correct, the
+private dags should be visible on the Airflow UI. If not,you should go back and
+make sure that the private dag repository is properly connected to Airflow with
+the correct credentials
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-1.png)
 
-## ⚡️ and you are done!
+## and you are done! ⚡️
 
-You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled Airflow and Argocd
+You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
+Airflow and Argocd
 
-## 💣 destroying resources in the cluster!
+## destroying resources in the cluster! 💣
 
 **If you just want to take down any of your individual applications:**
 
-* Delete that application or manifest from your cndi-config.jsonc
-* Run cndi ow
-* Commit changes
-* Push your code changes to the repository
+- Delete that application or manifest from your `cndi-config.jsonc`
+- Run `cndi ow`
+- Commit changes
+- Push your code changes to the repository
 
 **If you want to take down the entire cluster:**
 
-* Delete all the files in your cndi/terraform directory
-* Create an empty called destroy.tf in the cndi/terraform directory
-* Commit changes
-* Push your code changes to the repositorysitory
+- Delete all the files in your `cndi/terraform` directory
+- Create an empty called `destroy.tf` in the `cndi/terraform` directory
+- Commit changes
+- Push your code changes to the repository
