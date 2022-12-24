@@ -214,7 +214,7 @@ nullified, so all that's left is to push that file up to your repository.
 ### Walkthroughs 🥾
 
 We've got a couple of walkthroughs you can follow if you'd like, currently we
-have one for our [aws/airflow-tls](docs/walkthroughs/gcp/airflow-tls.md) and
+have one for our [aws/airflow-tls](docs/walkthroughs/aws/airflow-tls.md) and
 [gcp/airflow-tls](docs/walkthroughs/gcp/airflow-tls.md) Templates. If you are
 interested in using CNDI, these walkthroughs will be entirely transferrable to
 other applications that aren't Airflow.
@@ -442,8 +442,8 @@ microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{
 ### dns 🌐
 
 Setting up DNS for your cluster is a critical step if your cluster will be
-served online. The solution depends on your "deployment target". We have a doc
-walking through this for [aws]() and [gcp]() but in short you just need to point
+served online. The solution depends on your "deployment target". We have a doc coming soon
+walking through setting up DNS for AWS and GCP coming soon, but in short you just need to point
 DNS to the load balancer we provisioned for you. In AWS this means using a
 `CNAME` record, or an `A` record for a cluster running on GCP.
 
