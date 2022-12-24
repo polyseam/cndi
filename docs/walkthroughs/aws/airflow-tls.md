@@ -5,7 +5,7 @@ in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `gcp/airflow-tls`
+This walkthough uses `cndi` to customize and deploy our `aws/airflow-tls`
 Template. In just a few minutes we will be able to deploy a new Kubernetes
 cluster to AWS that has been optimally configured for Airflow, including GitOps
 with Secrets management, TLS and High Availibility right out-of-the-box. This
@@ -80,7 +80,7 @@ cndi init -i
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `gcp/airflow-tls` Template.
+For this project select the `aws/airflow-tls` Template.
 
 ```shell
 ? Pick a template
@@ -159,7 +159,7 @@ makes this very easy.
 gh secret set -f .env
 ```
 
-![GitHub secrets](/docs/walkthroughs/gcp/img/upload-git-secrets.png)
+![GitHub secrets](/docs/walkthroughs/aws/img/upload-git-secrets.png)
 
 ---
 
@@ -177,7 +177,7 @@ git push --set-upstream origin main
 
 You should now see the cluster configuration has loaded to GitHub:
 
-![GitHub repo](/docs/walkthroughs/gcp/img/github-repo.png)
+![GitHub repo](/docs/walkthroughs/aws/img/github-repo.png)
 
 Now, open your web browser and navigate to your project on GitHub. Click on the
 Actions tab, then click on the job that was triggered from your latest commit.
@@ -185,12 +185,12 @@ Actions tab, then click on the job that was triggered from your latest commit.
 You will see something like the image below, which shows that GitHub has
 successfully run the workflow.
 
-![GitHub action](/docs/walkthroughs/gcp/img/github-action.png)
+![GitHub action](/docs/walkthroughs/aws/img/github-action.png)
 
 It is common for `cndi-run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into GCP to find
+Once `cndi-run` has been completed, you should be ready to log into AWS to find
 the IP address of the load balancer that we created for you in the Network tab.
 
 ---
