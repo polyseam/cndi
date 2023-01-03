@@ -37,7 +37,6 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-
 ## download cndi ⬇️
 
 Run the following command within your terminal to download cndi:
@@ -90,7 +89,6 @@ For this project select the `aws/airflow-tls` Template.
    gcp/airflow-tls
 ```
 
-
 Below is the list of all of the interactive prompt values that should be
 supplied for this project:
 
@@ -105,10 +103,12 @@ supplied for this project:
 - **AWS Secret Access key**: _access keys are long-term credentials for an IAM
   user_
 - **AWS Region**: _region where the infastructure is being created_
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow
-  DAGs will be stored_
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
+  synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to
+  synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
+  will be stored_
 - **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
   be hosted_
 - **Domain name you want Airflow to be accessible on**: _domain where Airflow

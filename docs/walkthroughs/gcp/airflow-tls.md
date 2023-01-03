@@ -104,10 +104,12 @@ supplied for this project:
 - **GCP Region**: _region where the infastructure is being created_
 - **Path to GCP service account key json**: _path to JSON credentials file for
   GCP Service Account_
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow
-  DAGs will be stored_
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
+  synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to
+  synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
+  will be stored_
 - **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
   be hosted_
 - **Domain name you want Airflow to be accessible on**: _domain where Airflow

@@ -59,7 +59,7 @@ understand this process is to look at it as a lifecycle.
 The first step in the lifecycle is to initialize the CNDI project. Because
 CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
 repository before we do anything else. The best way to do this as a GitHub user
-is to use the [gh cli](https://github.com/cli/cli).
+is to use the [gh cli](https://cli.github.com).
 
 ```bash
 gh repo create cndi-example --private --clone && cd cndi-example
@@ -442,10 +442,11 @@ microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{
 ### dns 🌐
 
 Setting up DNS for your cluster is a critical step if your cluster will be
-served online. The solution depends on your "deployment target". We have a doc coming soon
-walking through setting up DNS for AWS and GCP coming soon, but in short you just need to point
-DNS to the load balancer we provisioned for you. In AWS this means using a
-`CNAME` record, or an `A` record for a cluster running on GCP.
+served online. The solution depends on your "deployment target". We have a doc
+coming soon walking through setting up DNS for AWS and GCP coming soon, but in
+short you just need to point DNS to the load balancer we provisioned for you. In
+AWS this means using a `CNAME` record, or an `A` record for a cluster running on
+GCP.
 
 ---
 
