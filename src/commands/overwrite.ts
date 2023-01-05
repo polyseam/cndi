@@ -133,7 +133,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  // write each manifest in the "cluster" section of the config to `cndi/cluster`
+  // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   Object.keys(cluster_manifests).forEach(async (key) => {
     const manifestObj = cluster_manifests[key] as KubernetesManifest;
 
