@@ -3,7 +3,6 @@ import { getDefaultVmTypeForKind } from "../utils.ts";
 import { CNDIConfig, NODE_ROLE, NodeKind } from "../types.ts";
 import getReadmeForProject from "../doc/readme-for-project.ts";
 
-
 function getBasicTemplate(kind: NodeKind): CNDIConfig {
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
   const volume_size = 128;

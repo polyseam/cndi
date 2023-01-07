@@ -8,7 +8,12 @@ import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
-import { GetConfigurationFn, GetTemplateFn, Template, GetReadmeStringArgs } from "./Template.ts";
+import {
+  GetConfigurationFn,
+  GetReadmeStringArgs,
+  GetTemplateFn,
+  Template,
+} from "./Template.ts";
 import getReadmeForProject from "../doc/readme-for-project.ts";
 
 interface Neo4jTlsConfiguration {
