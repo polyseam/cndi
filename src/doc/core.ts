@@ -1,4 +1,4 @@
-const coreReadmeBlock = `
+const coreReadmeSection = `
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
 
 ## files and directories
@@ -47,4 +47,4 @@ git push
 Now that you have pushed to the \`"main"\` branch, the [/.github/workflows/cndi-run.yaml](/.github/workflows/cndi-run.yaml) workflow will run, and call the \`cndi run\` command. This will deploy your cluster to the cloud, and then apply the Kubernetes manifests to it.
 `;
 
-export default coreReadmeBlock;
+export default coreReadmeSection;

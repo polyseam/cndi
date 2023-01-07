@@ -3,7 +3,14 @@ import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind } from "../utils.ts";
-import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
+import {
+  GetConfigurationFn,
+  GetReadmeStringArgs,
+  GetTemplateFn,
+  Template,
+} from "./Template.ts";
+
+import getReadmeForProject from "../doc/readme-for-project.ts";
 
 interface AirflowTlsConfiguration {
   argocdDomainName: string;
@@ -12,11 +19,23 @@ interface AirflowTlsConfiguration {
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
-const readmeBlock = `
-### dns setup
+function getAirflowTlsReadmeString({
+  project_name,
+  kind,
+}: GetReadmeStringArgs): string {
+  return `
+${getReadmeForProject({ project_name, kind })}
 
-To set up DNS and TLS you just need to login to your registrar and set 2 A records that point from your 2 application subdomains to the public IP address of your controller node.
+## airflow-tls
+
+This template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). 
+
+The default credentials for Airflow are:
+
+username: \`admin\`
+password: \`admin\`
 `.trim();
+}
 
 // airflowTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
@@ -283,7 +302,7 @@ const airflowTlsTemplate = new Template("airflow-tls", {
   getEnv,
   getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
-  readmeBlock,
+  getReadmeString: getAirflowTlsReadmeString,
 });
 
 export default airflowTlsTemplate;

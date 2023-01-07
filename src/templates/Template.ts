@@ -11,13 +11,22 @@ export type GetConfigurationFn = (
   interactive: boolean,
 ) => Promise<Record<string, unknown>>;
 
+export type GetReadmeStringArgs = {
+  project_name: string;
+  kind: NodeKind;
+};
+
+export type GetReadmeStringFn = ({
+  project_name,
+  kind,
+}: GetReadmeStringArgs) => string;
+
 export interface TemplateOptions {
   getConfiguration: (interactive: boolean) => Promise<Record<string, unknown>>;
   getEnv: (interactive: boolean) => Promise<EnvObject>;
   getTemplate: (kind: NodeKind, input: Record<string, unknown>) => CNDIConfig;
-  readmeBlock: string;
+  getReadmeString: GetReadmeStringFn;
 }
-
 
 export class Template {
   name: string;
@@ -25,12 +34,11 @@ export class Template {
   env: EnvObject = {};
   configuration = {};
   readmeCore = coreReadmeBlock;
-  readmeBlock: string;
 
   constructor(name: string, options: TemplateOptions) {
     this.name = name;
     this.options = options;
-    this.readmeBlock = options.readmeBlock;
+    this.getReadmeString = options.getReadmeString;
   }
 
   async getConfiguration(interactive: boolean) {
@@ -41,6 +49,10 @@ export class Template {
   async getEnv(interactive: boolean) {
     this.env = await this.options.getEnv(interactive);
     return await this.env;
+  }
+
+  getReadmeString({ project_name, kind }: GetReadmeStringArgs) {
+    return this.options.getReadmeString({ project_name, kind });
   }
 
   getTemplate(
