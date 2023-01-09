@@ -41,7 +41,7 @@ jobs:
       - name: setup cndi
         uses: polyseam/setup-cndi@1.0.3
         with:
-          version: main
+          version: fallible
 
       - name: cndi chmod
         run: chmod +x bin/cndi # make cndi cli executable
@@ -86,6 +86,11 @@ jobs:
           push: origin _state --set-upstream --force
           add: terraform.tfstate.gpg
           commiter_name: CNDI Bot
+
       - name: report terraform failure if necessary
         run: |
-          test -e apply-did-fail && echo "terraform apply failed!" | exit 1
+          if [[ -f ./apply-did-fail ]] ; then
+              echo terraform apply failed.
+              echo for more info see the \"cndi run\" step output
+              exit 1
+          fi
