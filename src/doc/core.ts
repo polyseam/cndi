@@ -45,6 +45,17 @@ git push
 \`\`\`
 
 Now that you have pushed to the \`"main"\` branch, the [/.github/workflows/cndi-run.yaml](/.github/workflows/cndi-run.yaml) workflow will run, and call the \`cndi run\` command. This will deploy your cluster to the cloud, and then apply the Kubernetes manifests to it.
+
+### updating your cluster
+
+Now that you have a cluster, you can update it by:
+
+1. modifying your [cndi-config.jsonc](/cndi-config.jsonc) file
+2. running \`cndi ow\` 
+3. pushing all files to the \`"main"\` branch again
+
+If you've modified your nodes, the infrastructure should be updated with Terraform. If you've modified your Kubernetes manifests, the changes to the manifests will be applied to the cluster.
+
 `.trim();
 
 export default coreReadmeSection;
