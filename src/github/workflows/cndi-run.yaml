@@ -86,3 +86,6 @@ jobs:
           push: origin _state --set-upstream --force
           add: terraform.tfstate.gpg
           commiter_name: CNDI Bot
+      - name: report terraform failure if necessary
+        run: |
+          test -e apply-did-fail && echo "terraform apply failed!" | exit 1

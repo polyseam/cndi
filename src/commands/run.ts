@@ -1,5 +1,6 @@
 import "https://deno.land/std@0.157.0/dotenv/load.ts";
 import { copy } from "https://deno.land/std@0.166.0/streams/conversion.ts";
+import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 
 import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import setTF_VARs from "../setTF_VARs.ts";
@@ -60,7 +61,13 @@ const runFn = async ({
 
     // if `terraform apply` fails, exit the process and swallow the error
     if (applyStatus.code !== 0) {
-      console.log(runLabel, brightRed("terraform apply failed"));
+      // this is all done so we can persist state to "_state" branch even when TF fails to apply
+      const failureFilePath = path.join(Deno.cwd(), "apply-did-fail");
+      console.log(
+        runLabel,
+        brightRed(`terraform apply failed, writing to "${failureFilePath}"`),
+      );
+      Deno.writeTextFileSync(failureFilePath, "true");
       Deno.exit(0);
     }
 
