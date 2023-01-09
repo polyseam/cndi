@@ -22,6 +22,8 @@ import {
   getCoreEnvObject,
 } from "../deployment-targets/shared.ts";
 
+import getReadmeForProject from "../doc/readme-for-project.ts";
+
 import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 
 import { createTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
@@ -367,10 +369,8 @@ export default async function init(context: CNDIContext) {
     if (e instanceof Deno.errors.NotFound) {
       await Deno.writeTextFile(
         readmePath,
-        `# ${project_name}\n` +
-          coreReadme +
-          "\n" +
-          (template?.readmeBlock || ""),
+        template?.getReadmeString({ project_name, kind }) ||
+          getReadmeForProject({ project_name, kind }),
       );
     }
   }
