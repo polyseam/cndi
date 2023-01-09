@@ -7,7 +7,7 @@ import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
 import {
   GetConfigurationFn,
   GetReadmeStringArgs,
@@ -56,7 +56,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
 // neo4jTlsTemplate.getConfiguration()
 async function getNeo4jTlsConfiguration(
-  interactive: boolean
+  interactive: boolean,
 ): Promise<Neo4jTlsConfiguration> {
   let argocdDomainName = "argocd.example.com";
   let neo4jDomainName = "neo4j.example.com";
@@ -65,21 +65,21 @@ async function getNeo4jTlsConfiguration(
   if (interactive) {
     argocdDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want argocd to be accessible on:"
+        "Please enter the domain name you want argocd to be accessible on:",
       ),
       default: argocdDomainName,
     })) as string;
 
     neo4jDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want neo4j to be accessible on:"
+        "Please enter the domain name you want neo4j to be accessible on:",
       ),
       default: neo4jDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
       message: cyan(
-        "Please enter the email address you want to use for lets encrypt:"
+        "Please enter the email address you want to use for lets encrypt:",
       ),
       default: letsEncryptClusterIssuerEmailAddress,
     })) as string;
@@ -95,7 +95,7 @@ async function getNeo4jTlsConfiguration(
 // neo4jTlsTemplate.getTemplate()
 function getNeo4jTlsTemplate(
   kind: NodeKind,
-  input: Neo4jTlsConfiguration
+  input: Neo4jTlsConfiguration,
 ): CNDIConfig {
   const {
     argocdDomainName,
@@ -107,7 +107,7 @@ function getNeo4jTlsTemplate(
   const volume_size = 128; //GiB
 
   const annotations = {
-    /* for ingresses */ 
+    /* for ingresses */
     "cert-manager.io/cluster-issuer": "lets-encrypt",
     "kubernetes.io/tls-acme": "true",
     "nginx.ingress.kubernetes.io/ssl-passthrough": "true",

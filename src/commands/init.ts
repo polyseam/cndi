@@ -38,8 +38,6 @@ import writeEnvObject from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
 import vscodeSettings from "../outputs/vscode-settings.ts";
 
-import coreReadme from "../doc/core.ts";
-
 import { Template } from "../templates/Template.ts";
 
 const initLabel = white("init:");
