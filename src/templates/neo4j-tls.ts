@@ -8,7 +8,13 @@ import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
-import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
+import {
+  GetConfigurationFn,
+  GetReadmeStringArgs,
+  GetTemplateFn,
+  Template,
+} from "./Template.ts";
+import getReadmeForProject from "../doc/readme-for-project.ts";
 
 interface Neo4jTlsConfiguration {
   argocdDomainName: string;
@@ -16,10 +22,18 @@ interface Neo4jTlsConfiguration {
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
-const readmeBlock = `
-### dns setup for neo4j
-...
+function getNeo4jTlsReadmeString({
+  project_name,
+  kind,
+}: GetReadmeStringArgs): string {
+  return `
+${getReadmeForProject({ project_name, kind })}
+
+## neo4j-tls
+
+This template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the neo4j Helm Chart.
 `.trim();
+}
 
 // neo4jTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
@@ -269,7 +283,7 @@ const neo4jTlsTemplate = new Template("neo4j-tls", {
   getEnv,
   getTemplate: getNeo4jTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getNeo4jTlsConfiguration as unknown as GetConfigurationFn,
-  readmeBlock,
+  getReadmeString: getNeo4jTlsReadmeString,
 });
 
 export default neo4jTlsTemplate;
