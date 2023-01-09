@@ -28,7 +28,6 @@ function getNeo4jTlsReadmeString({
 }: GetReadmeStringArgs): string {
   return `
 ${getReadmeForProject({ project_name, kind })}
-
 ## neo4j-tls
 
 This template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the neo4j Helm Chart.

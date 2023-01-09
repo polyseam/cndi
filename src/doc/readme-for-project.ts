@@ -44,14 +44,14 @@ If you've modified your nodes, the infrastructure should be updated with Terrafo
 This cluster will be deployed on [Amazon Web Services](https://aws.com).
 When your cluster is initialized the next step is to go to your domain registrar and create an CNAME record for your Airflow instance, and another for ArgoCD.
 Both entries should point to the single load balancer that was created for your cluster.
-`,
+`.trim(),
     gcp: `
 ## gcp
 
 This cluster will be deployed on [Google Cloud Platform](https://cloud.google.com/gcp).
 When your cluster is initialized the next step is to go to your domain registrar and create an A record for your Airflow instance, and another for ArgoCD.
 Both entries should point to the single load balancer that was created for your cluster.
-`,
+`.trim(),
   };
 
   return [
@@ -59,6 +59,6 @@ Both entries should point to the single load balancer that was created for your 
     coreReadmeSection,
     readmeSectionsForKind[kind],
     loggingIntoArgoCDSection,
-    "\n",
+    "",
   ].join("\n");
 }
