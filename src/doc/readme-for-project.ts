@@ -59,6 +59,5 @@ Both entries should point to the single load balancer that was created for your 
     coreReadmeSection,
     readmeSectionsForKind[kind],
     loggingIntoArgoCDSection,
-    "",
-  ].join("\n");
+  ].join("\n\n");
 }
