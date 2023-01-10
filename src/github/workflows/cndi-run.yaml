@@ -91,6 +91,6 @@ jobs:
         run: |
           if [[ -f ./apply-did-fail ]] ; then
               echo terraform apply failed.
-              echo for more info see the \"cndi run\" step output
+              echo for more info see the \"cndi run\" step output above
               exit 1
           fi
