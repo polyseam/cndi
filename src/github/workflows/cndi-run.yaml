@@ -3,40 +3,13 @@ on:
   push:
     branches:
       - main
-      - 'releases/**'
+      - "releases/**"
 jobs:
   cndi-run:
     runs-on: ubuntu-20.04
     steps:
       - name: welcome
         run: echo "welcome to cndi!"
-
-      - name: checkout state
-        uses: actions/checkout@v3
-        continue-on-error: true # first run has no state branch
-        with:
-          fetch-depth: 0
-          ref: '_state'
-
-      - name: save state
-        run: mv ./terraform.tfstate.gpg ~/terraform.tfstate.gpg
-        continue-on-error: true # first run has no state
-      
-      - name: echo state
-        run: stat ~/terraform.tfstate.gpg
-        continue-on-error: true # first run has no state
-
-      - name: checkout repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: decrypt terraform state
-        run: gpg --batch --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }} -d ~/terraform.tfstate.gpg > cndi/terraform/terraform.tfstate
-        continue-on-error: true # if we try to encrypt a non-existent tfstate file, that's fine
-
-      - name: show decrypted state
-        run: cat cndi/terraform/terraform.tfstate
 
       - name: setup cndi
         uses: polyseam/setup-cndi@1.0.3
@@ -52,7 +25,7 @@ jobs:
       # this next step is the core of the workflow
       - name: cndi run
         env:
-          GIT_REPO:  https://github.com/${{ github.repository}}
+          GIT_REPO: https://github.com/${{ github.repository}}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
           ARGO_UI_READONLY_PASSWORD: ${{ secrets.ARGO_UI_READONLY_PASSWORD }}
@@ -62,27 +35,4 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SEALED_SECRETS_PRIVATE_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PRIVATE_KEY_MATERIAL }}
           SEALED_SECRETS_PUBLIC_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PUBLIC_KEY_MATERIAL }}
-        run: bin/cndi run  # run 'cndi run'
-
-      - name: move state out of repo
-        run: mv cndi/terraform/terraform.tfstate ~/
-      
-      - name: encrypt terraform state
-        run: gpg --symmetric --batch --yes --passphrase ${{ secrets.TERRAFORM_STATE_PASSPHRASE }}  ~/terraform.tfstate
-
-      - name: remove repo contents
-        run: git rm -r .
-
-      - name: assess damages
-        run: git status
-
-      - name: copy encrypted state back into repo
-        run: 'mv ~/terraform.tfstate.gpg .'
-
-      - name: persist terraform state
-        uses: EndBug/add-and-commit@v9
-        with:
-          new_branch: _state
-          push: origin _state --set-upstream --force
-          add: terraform.tfstate.gpg
-          commiter_name: CNDI Bot
+        run: bin/cndi run # run 'cndi run'
