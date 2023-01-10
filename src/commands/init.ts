@@ -253,7 +253,6 @@ export default async function init(context: CNDIContext) {
   }
 
   if (context.interactive) {
-    // 0
     project_name = (await Input.prompt({
       message: cyan("Please enter a name for your CNDI project:"),
       default: project_name,
@@ -278,7 +277,6 @@ export default async function init(context: CNDIContext) {
   let baseTemplateName = context.template?.split("/")[1]; // eg. "airflow-tls"
 
   if (interactive && !context.template) {
-    // 1
     const selectedTemplate = await Select.prompt({
       message: cyan("Pick a template"),
       options: templateNamesList,
