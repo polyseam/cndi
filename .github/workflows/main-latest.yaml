@@ -7,18 +7,23 @@ jobs:
   build-cndi-binaries: # cndi
     runs-on: ubuntu-20.04
     steps:
+
       - name: checkout
         uses: actions/checkout@v3
+
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
+
       - run: deno task build
+
       - name: Get Version from package.json
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-deno-json-step
         with:
           path-to-package-json: './deno.jsonc'
+          
       - id: upload-source-code
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:

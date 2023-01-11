@@ -1,6 +1,5 @@
 name: Build and Release for GitHub
 
-
 on:
   push:
     tags:
@@ -17,9 +16,12 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+      
+      - name: install cndi
+        run: deno run -A --unstable ./main.ts install # cndi install
 
       - name: Test
-        run: deno test
+        run: deno task test
 
       - name: Build
         run: deno task build
