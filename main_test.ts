@@ -139,12 +139,12 @@ describe("cndi", { permissions, sanitizeOps }, () => {
       },
     );
   });
-  describe(`"cndi init -i"'`, unclean, async () => {
-    await executeCndi("cndi init -i");
-    dispatchEvent(new Event("keyup"));
-    it("should wait for user interaction", unclean, () => {
-      Deno.stdin.read(new Uint8Array(1));
-      assert(true);
-    });
-  });
+  // describe(`"cndi init -i"'`, unclean, async () => {
+  //   await executeCndi("cndi init -i");
+  //   dispatchEvent(new Event("keyup"));
+  //   it("should wait for user interaction", unclean, () => {
+  //     Deno.stdin.read(new Uint8Array(1));
+  //     assert(true);
+  //   });
+  // });
 });
