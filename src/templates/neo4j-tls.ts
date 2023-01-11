@@ -3,11 +3,11 @@
  * it is not ready and shouldn't yet be added to available-templates.ts.
  */
 
-import { EnvObject, NodeKind } from "../types.ts";
+import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
 import {
   GetConfigurationFn,
   GetReadmeStringArgs,
@@ -54,7 +54,7 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
   return neo4jTlsTemplateEnvObject;
 };
 
-// airflowTlsTemplate.getConfiguration()
+// neo4jTlsTemplate.getConfiguration()
 async function getNeo4jTlsConfiguration(
   interactive: boolean,
 ): Promise<Neo4jTlsConfiguration> {
@@ -72,7 +72,7 @@ async function getNeo4jTlsConfiguration(
 
     neo4jDomainName = (await Input.prompt({
       message: cyan(
-        "Please enter the domain name you want airflow to be accessible on:",
+        "Please enter the domain name you want neo4j to be accessible on:",
       ),
       default: neo4jDomainName,
     })) as string;
@@ -96,7 +96,7 @@ async function getNeo4jTlsConfiguration(
 function getNeo4jTlsTemplate(
   kind: NodeKind,
   input: Neo4jTlsConfiguration,
-): string {
+): CNDIConfig {
   const {
     argocdDomainName,
     neo4jDomainName,
@@ -104,29 +104,41 @@ function getNeo4jTlsTemplate(
   } = input;
 
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-  return getPrettyJSONString({
-    nodes: {
-      entries: [
-        {
-          name: "x-neo4j-node",
-          kind,
-          role: "leader",
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "y-neo4j-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "z-neo4j-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-      ],
+  const volume_size = 128; //GiB
+
+  const annotations = {
+    /* for ingresses */
+    "cert-manager.io/cluster-issuer": "lets-encrypt",
+    "kubernetes.io/tls-acme": "true",
+    "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+    "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+  };
+
+  return {
+    infrastructure: {
+      cndi: {
+        nodes: [
+          {
+            name: "x-neo4j-node",
+            kind,
+            role: NODE_ROLE.leader,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "y-neo4j-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "z-neo4j-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+        ],
+      },
     },
     cluster_manifests: {
       "cert-manager-cluster-issuer": {
@@ -154,18 +166,51 @@ function getNeo4jTlsTemplate(
           },
         },
       },
+      "neo4j-ingress": {
+        apiVersion: "networking.k8s.io/v1",
+        kind: "Ingress",
+        metadata: {
+          name: "neo4j-ingress",
+          namespace: "neo4j",
+          annotations,
+        },
+        spec: {
+          tls: [
+            {
+              hosts: [neo4jDomainName],
+              secretName: "lets-encrypt-private-key",
+            },
+          ],
+          rules: [
+            {
+              host: neo4jDomainName,
+              http: {
+                paths: [
+                  {
+                    path: "/",
+                    pathType: "Prefix",
+                    backend: {
+                      service: {
+                        name: "neo4j",
+                        port: {
+                          number: 7473,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
       "argo-ingress": {
         apiVersion: "networking.k8s.io/v1",
         kind: "Ingress",
         metadata: {
           name: "argocd-server-ingress",
           namespace: "argocd",
-          annotations: {
-            "cert-manager.io/cluster-issuer": "lets-encrypt",
-            "kubernetes.io/tls-acme": "true",
-            "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
-            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-          },
+          annotations,
         },
         spec: {
           tls: [
@@ -200,55 +245,38 @@ function getNeo4jTlsTemplate(
     },
     applications: {
       neo4j: {
-        name: "neo4j",
-        edition: "community",
-
-        resources: {
-          cpu: "3",
-          memory: "3Gi",
-        },
-        "password-from-secret": "neo4j-password-secret",
-      },
-      ssl: {
-        https: {
-          privateKey: {
-            secretName: "lets-encrypt-private-key",
-            subPath: "tls.key",
+        destinationNamespace: "neo4j",
+        targetRevision: "5.3.0",
+        repoURL: "https://helm.neo4j.com/neo4j",
+        chart: "neo4j",
+        values: {
+          neo4j: {
+            name: "neo4j",
+            edition: "community",
+            resources: {
+              cpu: "3",
+              memory: "3Gi",
+            },
+            password: "FollowTheWhiteRabbit",
+            acceptLicenseAgreement: "yes",
           },
-          publicCertificate: {
-            secretName: "https-cert",
-            subPath: "tls.crt",
-          },
-        },
-        bolt: {
-          privateKey: {
-            secretName: "https-cert",
-            subPath: "tls.key",
-          },
-          publicCertificate: {
-            secretName: "https-cert",
-            subPath: "tls.crt",
-          },
-        },
-      },
-      env: {
-        NEO4JLABS_PLUGINS: '["apoc"]',
-      },
-      volumes: {
-        data: {
-          mode: "volume",
-          volume: {
-            gcePersistentDisk: {
-              pdName: "untribe-neo4j-disk",
+          volumes: {
+            data: {
+              mode: "defaultStorageClass",
+              defaultStorageClass: {
+                requests: {
+                  storage: "10Gi",
+                },
+              },
             },
           },
+          config: {
+            "dbms.default_advertised_address": neo4jDomainName,
+          },
         },
       },
-      config: {
-        "dbms.default_advertised_address": neo4jDomainName,
-      },
     },
-  });
+  };
 }
 
 const neo4jTlsTemplate = new Template("neo4j-tls", {
