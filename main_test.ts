@@ -69,7 +69,6 @@ describe("cndi", { permissions, sanitizeOps }, () => {
 
     describe("generated README.md", unclean, () => {
       it("should be generated for the user", unclean, async () => {
-        console.log("me file", path.join(workingDir, "README.md"));
         const readme = await Deno.readTextFile(
           path.join(workingDir, "README.md"),
         );

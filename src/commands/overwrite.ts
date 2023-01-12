@@ -228,7 +228,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       deployment_target_configuration,
       leader.name,
     );
-    Deno.writeTextFile(
+    Deno.writeTextFileSync(
       path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),
       nodeFileContents,
     );
