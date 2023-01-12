@@ -1,18 +1,10 @@
 import { assert } from "https://deno.land/std@0.167.0/testing/asserts.ts";
 import { crypto } from "https://deno.land/std@0.171.0/crypto/mod.ts";
-import {
-  beforeAll,
-  beforeEach,
-  describe,
-  it,
-} from "https://deno.land/std@0.171.0/testing/bdd.ts";
+import { describe, it } from "https://deno.land/std@0.171.0/testing/bdd.ts";
 
 import cndi from "./src/cndi.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { homedir } from "https://deno.land/std@0.171.0/node/os.ts";
-import { delay } from "https://deno.land/std@0.171.0/async/mod.ts";
-
-const previouswd = Deno.cwd();
 
 function digestMessage(message: string) {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
@@ -72,21 +64,21 @@ describe("cndi", { permissions, sanitizeOps }, () => {
     Deno.mkdirSync(workingDir);
     Deno.chdir(workingDir);
     console.log("Deno.cwd", Deno.cwd());
-    
+
     await executeCndi(command);
 
     describe("generated README.md", unclean, () => {
       it("should be generated for the user", unclean, async () => {
         console.log("me file", path.join(workingDir, "README.md"));
         const readme = await Deno.readTextFile(
-          path.join(workingDir, "README.md")
+          path.join(workingDir, "README.md"),
         );
         assert(readme);
       });
 
       it('should contain the "deployment_target" name', unclean, async () => {
         const readme = await Deno.readTextFile(
-          path.join(workingDir, "README.md")
+          path.join(workingDir, "README.md"),
         );
         assert(readme.includes("aws"));
       });
@@ -94,14 +86,14 @@ describe("cndi", { permissions, sanitizeOps }, () => {
 
     it("should create a .gitignore file", unclean, async () => {
       const gitignore = await Deno.readTextFile(
-        path.join(workingDir, ".gitignore")
+        path.join(workingDir, ".gitignore"),
       );
       assert(gitignore);
     });
 
     it('should create a "cndi/terraform" directory', unclean, async () => {
       const terraformDir = await Deno.readDir(
-        path.join(workingDir, "cndi", "terraform")
+        path.join(workingDir, "cndi", "terraform"),
       );
       assert(terraformDir);
     });
@@ -111,10 +103,10 @@ describe("cndi", { permissions, sanitizeOps }, () => {
       unclean,
       async () => {
         const clusterManifestsDir = await Deno.readDir(
-          path.join(workingDir, "cndi", "cluster_manifests")
+          path.join(workingDir, "cndi", "cluster_manifests"),
         );
         assert(clusterManifestsDir);
-      }
+      },
     );
   });
 });
