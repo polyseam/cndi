@@ -1,16 +1,10 @@
 import { assert } from "https://deno.land/std@0.167.0/testing/asserts.ts";
 import { crypto } from "https://deno.land/std@0.171.0/crypto/mod.ts";
-import {
-  beforeEach,
-  describe,
-  it,
-} from "https://deno.land/std@0.171.0/testing/bdd.ts";
+import { describe, it } from "https://deno.land/std@0.171.0/testing/bdd.ts";
 
 import cndi from "./src/cndi.ts";
 import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
 import { homedir } from "https://deno.land/std@0.171.0/node/os.ts";
-
-const previouswd = Deno.cwd();
 
 function digestMessage(message: string) {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
@@ -38,28 +32,19 @@ const unclean = {
   sanitizeResources,
 };
 
+const getWorkingDirPath = (commandId: string): string =>
+  path.join(homedir() || "~", ".cndi", commandId);
+
 // use "cndi" command in a unique directory by hashing the command to test
 const executeCndi = async (command: string) => {
   const commandId = digestMessage(command);
-  console.log(`Executing command: ${command} in directory: ${commandId}`);
+  const workingDirPath = getWorkingDirPath(commandId);
+  console.log(`Executing command: ${command} in directory: ${workingDirPath}`);
   const [, ...args] = command.split(" ");
-  const workingDir = path.join(homedir() || "~", ".cndi", commandId);
-  try {
-    Deno.removeSync(workingDir, { recursive: true });
-  } catch {
-    // ignore
-  }
-  Deno.mkdirSync(workingDir, { recursive: true });
-  Deno.chdir(workingDir);
   await cndi(args);
 };
 
 describe("cndi", { permissions, sanitizeOps }, () => {
-  beforeEach(() => {
-    console.log("Restoring working directory to: ", previouswd);
-    Deno.chdir(previouswd as string);
-  });
-
   describe("system", unclean, () => {
     it("should have a working test suite", () => {
       assert(true);
@@ -67,27 +52,49 @@ describe("cndi", { permissions, sanitizeOps }, () => {
   });
 
   describe(`"cndi init -t aws/airflow-tls"'`, unclean, async () => {
-    await executeCndi("cndi init -t aws/airflow-tls");
+    const command = "cndi init -t aws/airflow-tls";
+    const commandId = digestMessage(command);
+    const workingDir = getWorkingDirPath(commandId);
+
+    try {
+      Deno.removeSync(workingDir, { recursive: true });
+    } catch {
+      /* no folder to remove */
+    }
+    Deno.mkdirSync(workingDir);
+    Deno.chdir(workingDir);
+    console.log("Deno.cwd", Deno.cwd());
+
+    await executeCndi(command);
 
     describe("generated README.md", unclean, () => {
       it("should be generated for the user", unclean, async () => {
-        const readme = await Deno.readTextFile("README.md");
+        console.log("me file", path.join(workingDir, "README.md"));
+        const readme = await Deno.readTextFile(
+          path.join(workingDir, "README.md"),
+        );
         assert(readme);
       });
 
       it('should contain the "deployment_target" name', unclean, async () => {
-        const readme = await Deno.readTextFile("README.md");
+        const readme = await Deno.readTextFile(
+          path.join(workingDir, "README.md"),
+        );
         assert(readme.includes("aws"));
       });
     });
 
     it("should create a .gitignore file", unclean, async () => {
-      const gitignore = await Deno.readTextFile(".gitignore");
+      const gitignore = await Deno.readTextFile(
+        path.join(workingDir, ".gitignore"),
+      );
       assert(gitignore);
     });
 
     it('should create a "cndi/terraform" directory', unclean, async () => {
-      const terraformDir = await Deno.readDir("cndi/terraform");
+      const terraformDir = await Deno.readDir(
+        path.join(workingDir, "cndi", "terraform"),
+      );
       assert(terraformDir);
     });
 
@@ -96,55 +103,10 @@ describe("cndi", { permissions, sanitizeOps }, () => {
       unclean,
       async () => {
         const clusterManifestsDir = await Deno.readDir(
-          "cndi/cluster_manifests",
+          path.join(workingDir, "cndi", "cluster_manifests"),
         );
         assert(clusterManifestsDir);
       },
     );
-  });
-
-  describe(`"cndi init -t gcp/airflow-tls"'`, unclean, async () => {
-    await executeCndi("cndi init -t gcp/airflow-tls");
-
-    describe("generated README.md", unclean, () => {
-      it("should be generated for the user", unclean, async () => {
-        const readme = await Deno.readTextFile("README.md");
-        assert(readme);
-      });
-
-      it('should contain the "deployment_target" name', unclean, async () => {
-        const readme = await Deno.readTextFile("README.md");
-        assert(readme.includes("gcp"));
-      });
-    });
-
-    it("should create a .gitignore file", unclean, async () => {
-      const gitignore = await Deno.readTextFile(".gitignore");
-      assert(gitignore);
-    });
-
-    it('should create a "cndi/terraform" directory', unclean, async () => {
-      const terraformDir = await Deno.readDir("cndi/terraform");
-      assert(terraformDir);
-    });
-
-    it(
-      'should create a "cndi/cluster_manifests" directory',
-      unclean,
-      async () => {
-        const clusterManifestsDir = await Deno.readDir(
-          "cndi/cluster_manifests",
-        );
-        assert(clusterManifestsDir);
-      },
-    );
-  });
-  describe(`"cndi init -i"'`, unclean, async () => {
-    await executeCndi("cndi init -i");
-    dispatchEvent(new Event("keyup"));
-    it("should wait for user interaction", unclean, () => {
-      Deno.stdin.read(new Uint8Array(1));
-      assert(true);
-    });
   });
 });

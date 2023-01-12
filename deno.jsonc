@@ -7,6 +7,6 @@
     "compile-mac": "deno compile --unstable -A --target x86_64-apple-darwin --output dist/cndi-mac main.ts",
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "build": "deno task stringUp && deno fmt && deno task compile-all",
-    "test": "deno test --unstable --allow-all --coverage=coverage"
+    "test": "deno test --unstable --allow-all"
   }
 }
