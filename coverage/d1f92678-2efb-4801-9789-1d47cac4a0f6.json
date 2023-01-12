@@ -1,0 +1,11 @@
+{
+  "scriptId": "277",
+  "url": "https://deno.land/std@0.171.0/node/internal/error_codes.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 300, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

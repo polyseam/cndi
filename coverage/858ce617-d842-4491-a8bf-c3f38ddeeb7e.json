@@ -1,0 +1,21 @@
+{
+  "scriptId": "255",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/initialize/sealedSecretsKeys.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2416, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "createSealedSecretsKeys",
+      "ranges": [{ "startOffset": 158, "endOffset": 1674, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "loadSealedSecretsKeys",
+      "ranges": [{ "startOffset": 1706, "endOffset": 2355, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

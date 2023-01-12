@@ -1,0 +1,11 @@
+{
+  "scriptId": "278",
+  "url": "https://deno.land/std@0.171.0/node/events.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 282, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

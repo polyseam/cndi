@@ -1,0 +1,11 @@
+{
+  "scriptId": "456",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/symbols.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1402, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

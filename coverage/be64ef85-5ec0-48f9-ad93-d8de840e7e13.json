@@ -1,0 +1,11 @@
+{
+  "scriptId": "441",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/messaging.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 75, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

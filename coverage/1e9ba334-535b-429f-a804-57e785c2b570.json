@@ -1,0 +1,16 @@
+{
+  "scriptId": "315",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/_generic_input.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3699, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 167, "endOffset": 3698, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

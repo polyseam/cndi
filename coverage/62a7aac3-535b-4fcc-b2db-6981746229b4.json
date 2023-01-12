@@ -1,0 +1,186 @@
+{
+  "scriptId": "231",
+  "url": "https://deno.land/std@0.171.0/node/process.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 18483, "count": 1 },
+        { "startOffset": 1661, "endOffset": 1676, "count": 0 },
+        { "startOffset": 17802, "endOffset": 17879, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "get",
+      "ranges": [{ "startOffset": 2152, "endOffset": 2344, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "exit",
+      "ranges": [{ "startOffset": 2438, "endOffset": 3067, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addReadOnlyProcessAlias",
+      "ranges": [
+        { "startOffset": 3069, "endOffset": 3365, "count": 2 },
+        { "startOffset": 3194, "endOffset": 3363, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "createWarningObject",
+      "ranges": [{ "startOffset": 3366, "endOffset": 3936, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "doEmitWarning",
+      "ranges": [{ "startOffset": 3937, "endOffset": 4010, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitWarning",
+      "ranges": [{ "startOffset": 4105, "endOffset": 5615, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hrtime",
+      "ranges": [{ "startOffset": 5623, "endOffset": 5987, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hrtime.bigint",
+      "ranges": [{ "startOffset": 6004, "endOffset": 6108, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "memoryUsage",
+      "ranges": [{ "startOffset": 6117, "endOffset": 6218, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "memoryUsage.rss",
+      "ranges": [{ "startOffset": 6237, "endOffset": 6281, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "_kill",
+      "ranges": [{ "startOffset": 6357, "endOffset": 7618, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "kill",
+      "ranges": [{ "startOffset": 7626, "endOffset": 8181, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uncaughtExceptionHandler",
+      "ranges": [{ "startOffset": 8218, "endOffset": 8890, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 8912, "endOffset": 17768, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "Process",
+      "ranges": [{ "startOffset": 8953, "endOffset": 10484, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 9043, "endOffset": 9731, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 9779, "endOffset": 9991, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 10046, "endOffset": 10261, "count": 1 },
+        { "startOffset": 10200, "endOffset": 10251, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 10310, "endOffset": 10476, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "on",
+      "ranges": [{ "startOffset": 11715, "endOffset": 12371, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "off",
+      "ranges": [{ "startOffset": 12416, "endOffset": 13079, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emit",
+      "ranges": [{ "startOffset": 13124, "endOffset": 13500, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "prependListener",
+      "ranges": [{ "startOffset": 13505, "endOffset": 14133, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addListener",
+      "ranges": [{ "startOffset": 14309, "endOffset": 14555, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "removeListener",
+      "ranges": [{ "startOffset": 14560, "endOffset": 14813, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "binding",
+      "ranges": [{ "startOffset": 16335, "endOffset": 16389, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "umask",
+      "ranges": [{ "startOffset": 16454, "endOffset": 16723, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getgid",
+      "ranges": [{ "startOffset": 16769, "endOffset": 16812, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getuid",
+      "ranges": [{ "startOffset": 16858, "endOffset": 16901, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "get execPath",
+      "ranges": [{ "startOffset": 17066, "endOffset": 17212, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "set execPath",
+      "ranges": [{ "startOffset": 17217, "endOffset": 17268, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uptime",
+      "ranges": [{ "startOffset": 17359, "endOffset": 17429, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "get allowedNodeEnvironmentFlags",
+      "ranges": [{ "startOffset": 17553, "endOffset": 17629, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

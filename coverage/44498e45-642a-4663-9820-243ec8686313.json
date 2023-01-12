@@ -1,0 +1,272 @@
+{
+  "scriptId": "328",
+  "url": "https://deno.land/std@0.161.0/fmt/colors.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 11556, "count": 1 },
+        { "startOffset": 699, "endOffset": 705, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "setColorEnabled",
+      "ranges": [{ "startOffset": 812, "endOffset": 909, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getColorEnabled",
+      "ranges": [{ "startOffset": 978, "endOffset": 1028, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "code",
+      "ranges": [{ "startOffset": 1089, "endOffset": 1266, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "run",
+      "ranges": [
+        { "startOffset": 1432, "endOffset": 1553, "count": 1 },
+        { "startOffset": 1545, "endOffset": 1550, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "reset",
+      "ranges": [{ "startOffset": 1624, "endOffset": 1696, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bold",
+      "ranges": [{ "startOffset": 1767, "endOffset": 1839, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "dim",
+      "ranges": [{ "startOffset": 1929, "endOffset": 2000, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "italic",
+      "ranges": [{ "startOffset": 2075, "endOffset": 2149, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "underline",
+      "ranges": [{ "startOffset": 2225, "endOffset": 2302, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "inverse",
+      "ranges": [{ "startOffset": 2400, "endOffset": 2475, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hidden",
+      "ranges": [{ "startOffset": 2543, "endOffset": 2617, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "strikethrough",
+      "ranges": [{ "startOffset": 2725, "endOffset": 2806, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "black",
+      "ranges": [{ "startOffset": 2883, "endOffset": 2957, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "red",
+      "ranges": [{ "startOffset": 3030, "endOffset": 3102, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "green",
+      "ranges": [{ "startOffset": 3179, "endOffset": 3253, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "yellow",
+      "ranges": [{ "startOffset": 3332, "endOffset": 3407, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "blue",
+      "ranges": [{ "startOffset": 3482, "endOffset": 3555, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "magenta",
+      "ranges": [{ "startOffset": 3636, "endOffset": 3712, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cyan",
+      "ranges": [{ "startOffset": 3787, "endOffset": 3860, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "white",
+      "ranges": [{ "startOffset": 3937, "endOffset": 4011, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "gray",
+      "ranges": [{ "startOffset": 4086, "endOffset": 4137, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightBlack",
+      "ranges": [{ "startOffset": 4228, "endOffset": 4308, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightRed",
+      "ranges": [{ "startOffset": 4395, "endOffset": 4473, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightGreen",
+      "ranges": [{ "startOffset": 4564, "endOffset": 4644, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightYellow",
+      "ranges": [{ "startOffset": 4737, "endOffset": 4818, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightBlue",
+      "ranges": [{ "startOffset": 4907, "endOffset": 4986, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightMagenta",
+      "ranges": [{ "startOffset": 5081, "endOffset": 5163, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightCyan",
+      "ranges": [{ "startOffset": 5252, "endOffset": 5331, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "brightWhite",
+      "ranges": [{ "startOffset": 5422, "endOffset": 5502, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBlack",
+      "ranges": [{ "startOffset": 5600, "endOffset": 5676, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgRed",
+      "ranges": [{ "startOffset": 5770, "endOffset": 5844, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgGreen",
+      "ranges": [{ "startOffset": 5942, "endOffset": 6018, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgYellow",
+      "ranges": [{ "startOffset": 6118, "endOffset": 6195, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBlue",
+      "ranges": [{ "startOffset": 6291, "endOffset": 6366, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgMagenta",
+      "ranges": [{ "startOffset": 6469, "endOffset": 6547, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgCyan",
+      "ranges": [{ "startOffset": 6643, "endOffset": 6718, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgWhite",
+      "ranges": [{ "startOffset": 6816, "endOffset": 6892, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightBlack",
+      "ranges": [{ "startOffset": 7004, "endOffset": 7087, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightRed",
+      "ranges": [{ "startOffset": 7195, "endOffset": 7276, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightGreen",
+      "ranges": [{ "startOffset": 7388, "endOffset": 7471, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightYellow",
+      "ranges": [{ "startOffset": 7585, "endOffset": 7669, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightBlue",
+      "ranges": [{ "startOffset": 7779, "endOffset": 7861, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightMagenta",
+      "ranges": [{ "startOffset": 7977, "endOffset": 8062, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightCyan",
+      "ranges": [{ "startOffset": 8172, "endOffset": 8254, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgBrightWhite",
+      "ranges": [{ "startOffset": 8366, "endOffset": 8449, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "clampAndTruncate",
+      "ranges": [{ "startOffset": 8607, "endOffset": 8715, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "rgb8",
+      "ranges": [{ "startOffset": 8912, "endOffset": 9036, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgRgb8",
+      "ranges": [{ "startOffset": 9250, "endOffset": 9376, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "rgb24",
+      "ranges": [{ "startOffset": 9787, "endOffset": 10194, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "bgRgb24",
+      "ranges": [{ "startOffset": 10617, "endOffset": 11026, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "stripColor",
+      "ranges": [{ "startOffset": 11479, "endOffset": 11555, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

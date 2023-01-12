@@ -1,0 +1,11 @@
+{
+  "scriptId": "325",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/doc/core.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3020, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scriptId": "219",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/commands/help.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 409, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "helpFn",
+      "ranges": [{ "startOffset": 170, "endOffset": 408, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

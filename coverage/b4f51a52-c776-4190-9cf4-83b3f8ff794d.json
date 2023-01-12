@@ -1,0 +1,31 @@
+{
+  "scriptId": "375",
+  "url": "https://deno.land/std@0.171.0/node/internal_binding/pipe_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 11231, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1965, "endOffset": 2142, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 2185, "endOffset": 10686, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 10694, "endOffset": 10836, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 10860, "endOffset": 11197, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

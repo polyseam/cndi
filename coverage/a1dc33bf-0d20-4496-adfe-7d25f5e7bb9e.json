@@ -1,0 +1,177 @@
+{
+  "scriptId": "201",
+  "url": "https://deno.land/std@0.171.0/node/os.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 9001, "count": 1 },
+        { "startOffset": 1726, "endOffset": 1742, "count": 0 },
+        { "startOffset": 8609, "endOffset": 8621, "count": 0 },
+        { "startOffset": 8667, "endOffset": 8681, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "arch",
+      "ranges": [{ "startOffset": 1751, "endOffset": 1795, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "arch.<computed>",
+      "ranges": [{ "startOffset": 1859, "endOffset": 1875, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "endianness.<computed>",
+      "ranges": [{ "startOffset": 1946, "endOffset": 1962, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "freemem.<computed>",
+      "ranges": [{ "startOffset": 2030, "endOffset": 2043, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "homedir.<computed>",
+      "ranges": [{ "startOffset": 2111, "endOffset": 2124, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hostname.<computed>",
+      "ranges": [{ "startOffset": 2193, "endOffset": 2207, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "platform.<computed>",
+      "ranges": [{ "startOffset": 2276, "endOffset": 2290, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "release.<computed>",
+      "ranges": [{ "startOffset": 2358, "endOffset": 2371, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "version.<computed>",
+      "ranges": [{ "startOffset": 2439, "endOffset": 2452, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "totalmem.<computed>",
+      "ranges": [{ "startOffset": 2521, "endOffset": 2535, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "type.<computed>",
+      "ranges": [{ "startOffset": 2600, "endOffset": 2610, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uptime.<computed>",
+      "ranges": [{ "startOffset": 2677, "endOffset": 2689, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cpus",
+      "ranges": [{ "startOffset": 2698, "endOffset": 3025, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "endianness",
+      "ranges": [{ "startOffset": 3213, "endOffset": 3552, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "freemem",
+      "ranges": [{ "startOffset": 3593, "endOffset": 3656, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getPriority",
+      "ranges": [{ "startOffset": 3691, "endOffset": 3800, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "homedir",
+      "ranges": [
+        { "startOffset": 3877, "endOffset": 4389, "count": 1 },
+        { "startOffset": 4135, "endOffset": 4206, "count": 0 },
+        { "startOffset": 4215, "endOffset": 4228, "count": 0 },
+        { "startOffset": 4316, "endOffset": 4323, "count": 0 },
+        { "startOffset": 4333, "endOffset": 4381, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "hostname",
+      "ranges": [{ "startOffset": 4463, "endOffset": 4514, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "loadavg",
+      "ranges": [{ "startOffset": 4595, "endOffset": 4743, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "networkInterfaces",
+      "ranges": [{ "startOffset": 5008, "endOffset": 5647, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isIPv4LoopbackAddr",
+      "ranges": [{ "startOffset": 5648, "endOffset": 5720, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isIPv6LoopbackAddr",
+      "ranges": [{ "startOffset": 5721, "endOffset": 5807, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "platform",
+      "ranges": [{ "startOffset": 5972, "endOffset": 6024, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "release",
+      "ranges": [{ "startOffset": 6080, "endOffset": 6131, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "version",
+      "ranges": [{ "startOffset": 6194, "endOffset": 6377, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setPriority",
+      "ranges": [{ "startOffset": 6412, "endOffset": 6804, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "tmpdir",
+      "ranges": [{ "startOffset": 6901, "endOffset": 7770, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "totalmem",
+      "ranges": [{ "startOffset": 7821, "endOffset": 7886, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "type",
+      "ranges": [{ "startOffset": 7970, "endOffset": 8292, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uptime",
+      "ranges": [{ "startOffset": 8365, "endOffset": 8413, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "userInfo",
+      "ranges": [{ "startOffset": 8448, "endOffset": 8579, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

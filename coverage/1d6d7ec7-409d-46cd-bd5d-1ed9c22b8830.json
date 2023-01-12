@@ -1,0 +1,16 @@
+{
+  "scriptId": "474",
+  "url": "https://deno.land/x/cliffy@v0.25.4/_utils/distance.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 757, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "distance",
+      "ranges": [{ "startOffset": 7, "endOffset": 756, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "scriptId": "301",
+  "url": "https://deno.land/std@0.157.0/node/_process/process.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 3719, "count": 1 },
+        { "startOffset": 2684, "endOffset": 2693, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "_arch",
+      "ranges": [
+        { "startOffset": 506, "endOffset": 713, "count": 1 },
+        { "startOffset": 562, "endOffset": 591, "count": 0 },
+        { "startOffset": 662, "endOffset": 711, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "denoEnvGet",
+      "ranges": [{ "startOffset": 1231, "endOffset": 1424, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "get",
+      "ranges": [{ "startOffset": 1648, "endOffset": 1982, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ownKeys",
+      "ranges": [{ "startOffset": 1997, "endOffset": 2037, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getOwnPropertyDescriptor",
+      "ranges": [{ "startOffset": 2069, "endOffset": 2300, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "set",
+      "ranges": [{ "startOffset": 2306, "endOffset": 2413, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "has",
+      "ranges": [{ "startOffset": 2424, "endOffset": 2485, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

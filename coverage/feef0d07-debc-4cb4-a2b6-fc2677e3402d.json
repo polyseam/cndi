@@ -1,0 +1,11 @@
+{
+  "scriptId": "568",
+  "url": "[deno:cli/worker.rs:210:39]",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 63, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

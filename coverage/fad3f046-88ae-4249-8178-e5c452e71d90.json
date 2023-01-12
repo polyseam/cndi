@@ -1,0 +1,34 @@
+{
+  "scriptId": "477",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/_generic_suggestions.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 12842, "count": 1 },
+        { "startOffset": 294, "endOffset": 300, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 359, "endOffset": 12056, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "uniqueSuggestions",
+      "ranges": [{ "startOffset": 12057, "endOffset": 12197, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isDirectory",
+      "ranges": [{ "startOffset": 12198, "endOffset": 12304, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "listDir",
+      "ranges": [{ "startOffset": 12305, "endOffset": 12841, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

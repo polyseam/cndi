@@ -1,0 +1,36 @@
+{
+  "scriptId": "518",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/handle_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1794, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "HandleWrap",
+      "ranges": [{ "startOffset": 1512, "endOffset": 1565, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "close",
+      "ranges": [{ "startOffset": 1570, "endOffset": 1649, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ref",
+      "ranges": [{ "startOffset": 1654, "endOffset": 1690, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "unref",
+      "ranges": [{ "startOffset": 1695, "endOffset": 1733, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "_onClose",
+      "ranges": [{ "startOffset": 1778, "endOffset": 1791, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

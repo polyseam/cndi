@@ -1,0 +1,16 @@
+{
+  "scriptId": "559",
+  "url": "https://deno.land/std@0.157.0/crypto/timing_safe_equal.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 809, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "timingSafeEqual",
+      "ranges": [{ "startOffset": 258, "endOffset": 808, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

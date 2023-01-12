@@ -1,0 +1,31 @@
+{
+  "scriptId": "458",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/tcp_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 13220, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1992, "endOffset": 2122, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 2165, "endOffset": 2348, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2372, "endOffset": 2598, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 2639, "endOffset": 13219, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

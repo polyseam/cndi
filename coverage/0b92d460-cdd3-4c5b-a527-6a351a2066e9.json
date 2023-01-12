@@ -1,0 +1,36 @@
+{
+  "scriptId": "482",
+  "url": "https://deno.land/x/spinners@v1.1.2/util.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1150, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "colorise",
+      "ranges": [{ "startOffset": 240, "endOffset": 294, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "writeLine",
+      "ranges": [{ "startOffset": 426, "endOffset": 574, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "clearLine",
+      "ranges": [{ "startOffset": 679, "endOffset": 779, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hideCursor",
+      "ranges": [{ "startOffset": 863, "endOffset": 964, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "showCursor",
+      "ranges": [{ "startOffset": 1048, "endOffset": 1149, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

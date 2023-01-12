@@ -1,0 +1,236 @@
+{
+  "scriptId": "290",
+  "url": "https://deno.land/std@0.171.0/crypto/_wasm/lib/deno_std_wasm_crypto.generated.mjs",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 244531, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getObject",
+      "ranges": [{ "startOffset": 328, "endOffset": 375, "count": 14 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "dropObject",
+      "ranges": [
+        { "startOffset": 407, "endOffset": 503, "count": 5 },
+        { "startOffset": 450, "endOffset": 457, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "takeObject",
+      "ranges": [{ "startOffset": 505, "endOffset": 596, "count": 5 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "addHeapObject",
+      "ranges": [{ "startOffset": 598, "endOffset": 774, "count": 5 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getUint8Memory0",
+      "ranges": [
+        { "startOffset": 941, "endOffset": 1110, "count": 2 },
+        { "startOffset": 1013, "endOffset": 1079, "count": 1 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getStringFromWasm0",
+      "ranges": [{ "startOffset": 1112, "endOffset": 1232, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "encodeString",
+      "ranges": [{ "startOffset": 1334, "endOffset": 1408, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "passStringToWasm0",
+      "ranges": [
+        { "startOffset": 1411, "endOffset": 2269, "count": 1 },
+        { "startOffset": 1491, "endOffset": 1693, "count": 0 },
+        { "startOffset": 1831, "endOffset": 1935, "count": 7 },
+        { "startOffset": 1895, "endOffset": 1901, "count": 0 },
+        { "startOffset": 1959, "endOffset": 2224, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "isLikeNone",
+      "ranges": [
+        { "startOffset": 2271, "endOffset": 2337, "count": 2 },
+        { "startOffset": 2321, "endOffset": 2334, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getInt32Memory0",
+      "ranges": [
+        { "startOffset": 2383, "endOffset": 2552, "count": 4 },
+        { "startOffset": 2455, "endOffset": 2521, "count": 1 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getArrayU8FromWasm0",
+      "ranges": [{ "startOffset": 2554, "endOffset": 2657, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "digest",
+      "ranges": [
+        { "startOffset": 3217, "endOffset": 4048, "count": 1 },
+        { "startOffset": 3623, "endOffset": 3631, "count": 0 },
+        { "startOffset": 3844, "endOffset": 3879, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 4109, "endOffset": 4154, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__wrap",
+      "ranges": [{ "startOffset": 4284, "endOffset": 4451, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__destroy_into_raw",
+      "ranges": [{ "startOffset": 4455, "endOffset": 4589, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "free",
+      "ranges": [{ "startOffset": 4593, "endOffset": 4688, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "DigestContext",
+      "ranges": [{ "startOffset": 4915, "endOffset": 5547, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "update",
+      "ranges": [{ "startOffset": 5900, "endOffset": 6288, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "digest",
+      "ranges": [{ "startOffset": 6839, "endOffset": 7512, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "digestAndReset",
+      "ranges": [{ "startOffset": 8162, "endOffset": 8851, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "digestAndDrop",
+      "ranges": [{ "startOffset": 9622, "endOffset": 10349, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "reset",
+      "ranges": [{ "startOffset": 10516, "endOffset": 10877, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "clone",
+      "ranges": [{ "startOffset": 11180, "endOffset": 11283, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__wbg_new_db254ae0a1bb0ff5",
+      "ranges": [{ "startOffset": 11367, "endOffset": 11494, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__wbindgen_object_drop_ref",
+      "ranges": [{ "startOffset": 11528, "endOffset": 11575, "count": 5 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_byteLength_87a0436a74adc26c",
+      "ranges": [{ "startOffset": 11616, "endOffset": 11703, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_byteOffset_4477d54710af6f9b",
+      "ranges": [{ "startOffset": 11744, "endOffset": 11831, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_buffer_21310ea17257b0b4",
+      "ranges": [{ "startOffset": 11868, "endOffset": 11966, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_newwithbyteoffsetandlength_d9aa266703cb98be",
+      "ranges": [{ "startOffset": 12023, "endOffset": 12191, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__wbg_length_9e1ae1900cb0fbd5",
+      "ranges": [{ "startOffset": 12228, "endOffset": 12311, "count": 2 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbindgen_memory",
+      "ranges": [{ "startOffset": 12336, "endOffset": 12419, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_buffer_3f3d764d4747d564",
+      "ranges": [{ "startOffset": 12456, "endOffset": 12554, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_new_8c3f0052272a457a",
+      "ranges": [{ "startOffset": 12588, "endOffset": 12695, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbg_set_83db9690f9353e79",
+      "ranges": [{ "startOffset": 12729, "endOffset": 12820, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__wbindgen_throw",
+      "ranges": [{ "startOffset": 12844, "endOffset": 12928, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "instantiate",
+      "ranges": [{ "startOffset": 13160, "endOffset": 13230, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "instantiateWithInstance",
+      "ranges": [{ "startOffset": 13615, "endOffset": 14012, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "isInstantiated",
+      "ranges": [{ "startOffset": 14075, "endOffset": 14142, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "instantiateInstance",
+      "ranges": [{ "startOffset": 14144, "endOffset": 244301, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "base64decode",
+      "ranges": [
+        { "startOffset": 244303, "endOffset": 244530, "count": 1 },
+        { "startOffset": 244467, "endOffset": 244512, "count": 168160 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "scriptId": "332",
+  "url": "https://deno.land/std@0.157.0/streams/merge.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3269, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "mergeReadableStreams",
+      "ranges": [{ "startOffset": 343, "endOffset": 1065, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "zipReadableStreams",
+      "ranges": [{ "startOffset": 1392, "endOffset": 2218, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "earlyZipReadableStreams",
+      "ranges": [{ "startOffset": 2476, "endOffset": 3268, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

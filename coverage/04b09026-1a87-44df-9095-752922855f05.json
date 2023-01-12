@@ -1,0 +1,45 @@
+{
+  "scriptId": "287",
+  "url": "https://deno.land/std@0.171.0/node/_next_tick.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 5081, "count": 1 },
+        { "startOffset": 4735, "endOffset": 4998, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "processTicksAndRejections",
+      "ranges": [
+        { "startOffset": 470, "endOffset": 2343, "count": 1 },
+        { "startOffset": 610, "endOffset": 2008, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "runNextTicks",
+      "ranges": [
+        { "startOffset": 2403, "endOffset": 2899, "count": 2 },
+        { "startOffset": 2835, "endOffset": 2898, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "__nextTickNative",
+      "ranges": [{ "startOffset": 3006, "endOffset": 4699, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "__nextTickQueueMicrotask",
+      "ranges": [{ "startOffset": 4747, "endOffset": 4954, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "nextTick",
+      "ranges": [{ "startOffset": 5006, "endOffset": 5080, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

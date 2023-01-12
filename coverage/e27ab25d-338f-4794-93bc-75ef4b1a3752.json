@@ -1,0 +1,92 @@
+{
+  "scriptId": "195",
+  "url": "file:///Users/m/dev/polyseam/cndi/main_test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3786, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "digestMessage",
+      "ranges": [{ "startOffset": 433, "endOffset": 873, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 773, "endOffset": 809, "count": 32 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getWorkingDirPath",
+      "ranges": [
+        { "startOffset": 1358, "endOffset": 1418, "count": 1 },
+        { "startOffset": 1391, "endOffset": 1397, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "executeCndi",
+      "ranges": [{ "startOffset": 1515, "endOffset": 1786, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1843, "endOffset": 3783, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1881, "endOffset": 1983, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1934, "endOffset": 1975, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2043, "endOffset": 3779, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 2230, "endOffset": 2503, "count": 1 },
+        { "startOffset": 2493, "endOffset": 2502, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2555, "endOffset": 3097, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2621, "endOffset": 2846, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2920, "endOffset": 3085, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3155, "endOffset": 3299, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3368, "endOffset": 3520, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3597, "endOffset": 3771, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

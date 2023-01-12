@@ -1,0 +1,16 @@
+{
+  "scriptId": "225",
+  "url": "https://deno.land/std@0.157.0/path/common.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1235, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "common",
+      "ranges": [{ "startOffset": 546, "endOffset": 1234, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

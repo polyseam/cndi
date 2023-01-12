@@ -1,0 +1,31 @@
+{
+  "scriptId": "326",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/templates/airflow-tls.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 9973, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getAirflowTlsReadmeString",
+      "ranges": [{ "startOffset": 422, "endOffset": 856, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getEnv",
+      "ranges": [{ "startOffset": 903, "endOffset": 1713, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getAirflowTlsConfiguration",
+      "ranges": [{ "startOffset": 1756, "endOffset": 3013, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getAirflowTlsTemplate",
+      "ranges": [{ "startOffset": 3050, "endOffset": 9727, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

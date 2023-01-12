@@ -1,0 +1,30 @@
+{
+  "scriptId": "281",
+  "url": "https://deno.land/std@0.171.0/node/internal/options.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1717, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getOptionsFromBinding",
+      "ranges": [
+        { "startOffset": 1290, "endOffset": 1429, "count": 2 },
+        { "startOffset": 1346, "endOffset": 1404, "count": 1 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getOptionValue",
+      "ranges": [
+        { "startOffset": 1437, "endOffset": 1716, "count": 2 },
+        { "startOffset": 1560, "endOffset": 1671, "count": 1 },
+        { "startOffset": 1648, "endOffset": 1664, "count": 0 },
+        { "startOffset": 1671, "endOffset": 1706, "count": 1 },
+        { "startOffset": 1706, "endOffset": 1713, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

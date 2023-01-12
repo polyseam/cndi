@@ -1,0 +1,16 @@
+{
+  "scriptId": "497",
+  "url": "https://deno.land/std@0.171.0/node/internal_binding/connection_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2165, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1430, "endOffset": 2164, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

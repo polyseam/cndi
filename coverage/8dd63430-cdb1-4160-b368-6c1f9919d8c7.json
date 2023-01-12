@@ -1,0 +1,23 @@
+{
+  "scriptId": "60",
+  "url": "deno:runtime/js/10_permissions.js",
+  "functions": [
+    {
+      "functionName": "serializePermissions",
+      "ranges": [
+        { "startOffset": 5995, "endOffset": 6906, "count": 1 },
+        { "startOffset": 6241, "endOffset": 6522, "count": 4 },
+        { "startOffset": 6287, "endOffset": 6440, "count": 0 },
+        { "startOffset": 6619, "endOffset": 6836, "count": 4 },
+        { "startOffset": 6665, "endOffset": 6754, "count": 0 },
+        { "startOffset": 6878, "endOffset": 6905, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 6389, "endOffset": 6416, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

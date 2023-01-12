@@ -1,0 +1,26 @@
+{
+  "scriptId": "327",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/templates/basic.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2858, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getBasicTemplate",
+      "ranges": [{ "startOffset": 202, "endOffset": 2577, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getConfiguration",
+      "ranges": [{ "startOffset": 2646, "endOffset": 2689, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getEnv",
+      "ranges": [{ "startOffset": 2703, "endOffset": 2746, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

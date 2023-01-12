@@ -1,0 +1,16 @@
+{
+  "scriptId": "216",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/commands/run.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2631, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "runFn",
+      "ranges": [{ "startOffset": 459, "endOffset": 2607, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

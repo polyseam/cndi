@@ -1,0 +1,11 @@
+{
+  "scriptId": "550",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/_winerror.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 352496, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

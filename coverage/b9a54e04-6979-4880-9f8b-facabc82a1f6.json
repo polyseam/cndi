@@ -1,0 +1,11 @@
+{
+  "scriptId": "452",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/signal_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 75, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scriptId": "481",
+  "url": "https://deno.land/std@0.157.0/bytes/bytes_list.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 4248, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 170, "endOffset": 4083, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "checkRange",
+      "ranges": [{ "startOffset": 4084, "endOffset": 4247, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

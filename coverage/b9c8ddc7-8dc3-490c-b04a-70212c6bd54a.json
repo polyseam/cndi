@@ -1,0 +1,36 @@
+{
+  "scriptId": "238",
+  "url": "https://deno.land/std@0.171.0/encoding/hex.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2269, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "errInvalidByte",
+      "ranges": [{ "startOffset": 792, "endOffset": 898, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "errLength",
+      "ranges": [{ "startOffset": 899, "endOffset": 975, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "fromHexChar",
+      "ranges": [{ "startOffset": 1024, "endOffset": 1355, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "encode",
+      "ranges": [{ "startOffset": 1413, "endOffset": 1658, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "decode",
+      "ranges": [{ "startOffset": 1775, "endOffset": 2268, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

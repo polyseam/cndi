@@ -1,0 +1,21 @@
+{
+  "scriptId": "257",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/initialize/argoUIReadOnlyPassword.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 434, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "loadArgoUIReadOnlyPassword",
+      "ranges": [{ "startOffset": 84, "endOffset": 283, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "createArgoUIReadOnlyPassword",
+      "ranges": [{ "startOffset": 322, "endOffset": 363, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

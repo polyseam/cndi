@@ -1,0 +1,21 @@
+{
+  "scriptId": "558",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/node_file.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2832, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "writeBuffer",
+      "ranges": [{ "startOffset": 2011, "endOffset": 2610, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "extractOsErrorNumberFromErrorMessage",
+      "ranges": [{ "startOffset": 2611, "endOffset": 2831, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

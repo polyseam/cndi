@@ -1,0 +1,26 @@
+{
+  "scriptId": "323",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/prompt.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 4419, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "prompt",
+      "ranges": [{ "startOffset": 150, "endOffset": 254, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "inject",
+      "ranges": [{ "startOffset": 398, "endOffset": 448, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 449, "endOffset": 4418, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

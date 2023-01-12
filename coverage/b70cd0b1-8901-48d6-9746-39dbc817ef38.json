@@ -1,0 +1,52 @@
+{
+  "scriptId": "505",
+  "url": "https://deno.land/std@0.157.0/node/internal/util/debuglog.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 3081, "count": 1 },
+        { "startOffset": 2880, "endOffset": 3017, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "initializeDebugEnv",
+      "ranges": [
+        { "startOffset": 483, "endOffset": 950, "count": 1 },
+        { "startOffset": 579, "endOffset": 902, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "testEnabled",
+      "ranges": [{ "startOffset": 856, "endOffset": 895, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "testEnabled",
+      "ranges": [{ "startOffset": 932, "endOffset": 941, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitWarningIfNeeded",
+      "ranges": [{ "startOffset": 1023, "endOffset": 1329, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "noop",
+      "ranges": [{ "startOffset": 1343, "endOffset": 1349, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "debuglogImpl",
+      "ranges": [{ "startOffset": 1351, "endOffset": 1810, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "debuglog",
+      "ranges": [{ "startOffset": 2036, "endOffset": 2808, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

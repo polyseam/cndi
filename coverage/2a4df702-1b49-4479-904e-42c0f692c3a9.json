@@ -1,0 +1,21 @@
+{
+  "scriptId": "293",
+  "url": "https://deno.land/std@0.157.0/dotenv/util.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 480, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "removeEmptyValues",
+      "ranges": [{ "startOffset": 120, "endOffset": 386, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "difference",
+      "ranges": [{ "startOffset": 394, "endOffset": 479, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

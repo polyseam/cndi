@@ -1,0 +1,14 @@
+{
+  "scriptId": "59",
+  "url": "deno:runtime/js/06_util.js",
+  "functions": [
+    {
+      "functionName": "pathFromURL",
+      "ranges": [
+        { "startOffset": 2139, "endOffset": 2485, "count": 4 },
+        { "startOffset": 2236, "endOffset": 2459, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

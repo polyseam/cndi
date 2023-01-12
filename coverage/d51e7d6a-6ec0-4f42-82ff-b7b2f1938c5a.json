@@ -1,0 +1,11 @@
+{
+  "scriptId": "390",
+  "url": "https://deno.land/std@0.171.0/node/internal_binding/tty_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 75, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

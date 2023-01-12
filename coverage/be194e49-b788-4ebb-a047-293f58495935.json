@@ -1,0 +1,21 @@
+{
+  "scriptId": "292",
+  "url": "https://deno.land/std@0.171.0/crypto/_fnv/fnv64.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1193, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "fnv64",
+      "ranges": [{ "startOffset": 429, "endOffset": 798, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "fnv64a",
+      "ranges": [{ "startOffset": 822, "endOffset": 1191, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

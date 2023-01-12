@@ -1,0 +1,76 @@
+{
+  "scriptId": "342",
+  "url": "https://deno.land/std@0.171.0/path/win32.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 33613, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "resolve",
+      "ranges": [{ "startOffset": 643, "endOffset": 5739, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "normalize",
+      "ranges": [{ "startOffset": 5806, "endOffset": 9567, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isAbsolute",
+      "ranges": [{ "startOffset": 9645, "endOffset": 10085, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "join",
+      "ranges": [{ "startOffset": 10221, "endOffset": 12431, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "relative",
+      "ranges": [{ "startOffset": 12704, "endOffset": 16411, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "toNamespacedPath",
+      "ranges": [{ "startOffset": 16503, "endOffset": 17626, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "dirname",
+      "ranges": [{ "startOffset": 17735, "endOffset": 20611, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "basename",
+      "ranges": [{ "startOffset": 20768, "endOffset": 23904, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "extname",
+      "ranges": [{ "startOffset": 24065, "endOffset": 26067, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "format",
+      "ranges": [{ "startOffset": 26170, "endOffset": 26427, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "parse",
+      "ranges": [{ "startOffset": 26516, "endOffset": 31628, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "fromFileUrl",
+      "ranges": [{ "startOffset": 32023, "endOffset": 32660, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "toFileUrl",
+      "ranges": [{ "startOffset": 33084, "endOffset": 33612, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

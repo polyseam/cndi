@@ -1,0 +1,76 @@
+{
+  "scriptId": "535",
+  "url": "https://deno.land/std@0.171.0/node/internal/streams/destroy.mjs",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 6879, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "checkError",
+      "ranges": [{ "startOffset": 386, "endOffset": 697, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "destroy",
+      "ranges": [{ "startOffset": 807, "endOffset": 1606, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "_destroy",
+      "ranges": [{ "startOffset": 1608, "endOffset": 2567, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitErrorCloseNT",
+      "ranges": [{ "startOffset": 2569, "endOffset": 2656, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitCloseNT",
+      "ranges": [{ "startOffset": 2658, "endOffset": 2918, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitErrorNT",
+      "ranges": [{ "startOffset": 2920, "endOffset": 3207, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "undestroy",
+      "ranges": [{ "startOffset": 3209, "endOffset": 3824, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "errorOrDestroy",
+      "ranges": [{ "startOffset": 3826, "endOffset": 4773, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "construct",
+      "ranges": [{ "startOffset": 4775, "endOffset": 5181, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "constructNT",
+      "ranges": [{ "startOffset": 5183, "endOffset": 6214, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "emitConstructNT",
+      "ranges": [{ "startOffset": 6216, "endOffset": 6279, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isRequest",
+      "ranges": [{ "startOffset": 6281, "endOffset": 6386, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "destroyer",
+      "ranges": [{ "startOffset": 6421, "endOffset": 6720, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

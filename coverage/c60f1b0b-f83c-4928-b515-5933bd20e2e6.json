@@ -1,0 +1,36 @@
+{
+  "scriptId": "553",
+  "url": "https://deno.land/std@0.157.0/encoding/base64url.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1558, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "addPaddingToBase64url",
+      "ranges": [{ "startOffset": 466, "endOffset": 756, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "convertBase64urlToBase64",
+      "ranges": [{ "startOffset": 757, "endOffset": 1075, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "convertBase64ToBase64url",
+      "ranges": [{ "startOffset": 1076, "endOffset": 1192, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "encode",
+      "ranges": [{ "startOffset": 1296, "endOffset": 1379, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "decode",
+      "ranges": [{ "startOffset": 1470, "endOffset": 1557, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

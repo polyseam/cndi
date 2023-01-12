@@ -1,0 +1,46 @@
+{
+  "scriptId": "549",
+  "url": "https://deno.land/std@0.157.0/fmt/printf.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 24483, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 300, "endOffset": 558, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 595, "endOffset": 699, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 723, "endOffset": 840, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1001, "endOffset": 1201, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1219, "endOffset": 23873, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "sprintf",
+      "ranges": [{ "startOffset": 24047, "endOffset": 24162, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "printf",
+      "ranges": [{ "startOffset": 24350, "endOffset": 24482, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

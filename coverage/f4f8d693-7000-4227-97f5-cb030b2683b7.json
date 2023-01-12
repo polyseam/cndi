@@ -1,0 +1,16 @@
+{
+  "scriptId": "306",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/mod.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3177, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getBinding",
+      "ranges": [{ "startOffset": 3026, "endOffset": 3176, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

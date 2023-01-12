@@ -1,0 +1,21 @@
+{
+  "scriptId": "256",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/initialize/terraformStatePassphrase.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 446, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "loadTerraformStatePassphrase",
+      "ranges": [{ "startOffset": 86, "endOffset": 289, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "createTerraformStatePassphrase",
+      "ranges": [{ "startOffset": 330, "endOffset": 371, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

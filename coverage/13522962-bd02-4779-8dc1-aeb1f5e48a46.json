@@ -1,0 +1,16 @@
+{
+  "scriptId": "517",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/_listen.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 552, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ceilPowOf2",
+      "ranges": [{ "startOffset": 180, "endOffset": 315, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

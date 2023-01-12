@@ -1,0 +1,26 @@
+{
+  "scriptId": "314",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/_generic_prompt.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 8313, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 248, "endOffset": 7975, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<static_initializer>",
+      "ranges": [{ "startOffset": 274, "endOffset": 294, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getColumns",
+      "ranges": [{ "startOffset": 7976, "endOffset": 8312, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

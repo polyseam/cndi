@@ -1,0 +1,14 @@
+{
+  "scriptId": "211",
+  "url": "https://deno.land/std@0.157.0/dotenv/load.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 404, "count": 1 },
+        { "startOffset": 164, "endOffset": 348, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "scriptId": "261",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/outputs/vscode-settings.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 351, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

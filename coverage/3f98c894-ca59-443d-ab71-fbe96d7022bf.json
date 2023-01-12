@@ -1,0 +1,49 @@
+{
+  "scriptId": "6",
+  "url": "deno:ext/webidl/00_webidl.js",
+  "functions": [
+    {
+      "functionName": "type",
+      "ranges": [{ "startOffset": 2254, "endOffset": 3057, "count": 24 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "converters.boolean",
+      "ranges": [{ "startOffset": 7726, "endOffset": 7764, "count": 13 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "converters.DOMString",
+      "ranges": [{ "startOffset": 9464, "endOffset": 9819, "count": 11 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "converters.BufferSource",
+      "ranges": [
+        { "startOffset": 14190, "endOffset": 14939, "count": 2 },
+        { "startOffset": 14270, "endOffset": 14302, "count": 0 },
+        { "startOffset": 14304, "endOffset": 14458, "count": 0 },
+        { "startOffset": 14481, "endOffset": 14538, "count": 0 },
+        { "startOffset": 14540, "endOffset": 14731, "count": 0 },
+        { "startOffset": 14732, "endOffset": 14767, "count": 0 },
+        { "startOffset": 14774, "endOffset": 14938, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "requiredArguments",
+      "ranges": [{ "startOffset": 16288, "endOffset": 16602, "count": 15 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 18028, "endOffset": 19453, "count": 16 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "assertBranded",
+      "ranges": [{ "startOffset": 23714, "endOffset": 23909, "count": 39 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

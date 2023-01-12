@@ -1,0 +1,66 @@
+{
+  "scriptId": "316",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/checkbox.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 4666, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "inject",
+      "ranges": [{ "startOffset": 420, "endOffset": 478, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "prompt",
+      "ranges": [{ "startOffset": 540, "endOffset": 1200, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "separator",
+      "ranges": [{ "startOffset": 1285, "endOffset": 1400, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "mapOptions",
+      "ranges": [{ "startOffset": 1526, "endOffset": 1973, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getListItem",
+      "ranges": [{ "startOffset": 2126, "endOffset": 2749, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getValue",
+      "ranges": [{ "startOffset": 2791, "endOffset": 2900, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "handleEvent",
+      "ranges": [{ "startOffset": 2974, "endOffset": 3230, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "checkValue",
+      "ranges": [{ "startOffset": 3265, "endOffset": 3518, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "validate",
+      "ranges": [{ "startOffset": 3659, "endOffset": 4304, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "transform",
+      "ranges": [{ "startOffset": 4415, "endOffset": 4484, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "format",
+      "ranges": [{ "startOffset": 4557, "endOffset": 4663, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

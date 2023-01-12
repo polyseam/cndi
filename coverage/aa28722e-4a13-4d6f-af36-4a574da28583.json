@@ -1,0 +1,26 @@
+{
+  "scriptId": "266",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/outputs/sealed-secret-manifest.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 7033, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "parseCndiSecret",
+      "ranges": [{ "startOffset": 344, "endOffset": 4803, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addSecretPlaceholder",
+      "ranges": [{ "startOffset": 4952, "endOffset": 5679, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getSealedSecretManifest",
+      "ranges": [{ "startOffset": 5712, "endOffset": 6991, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "scriptId": "250",
+  "url": "https://deno.land/std@0.157.0/fs/copy.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 8444, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ensureValidCopy",
+      "ranges": [{ "startOffset": 394, "endOffset": 929, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ensureValidCopySync",
+      "ranges": [{ "startOffset": 930, "endOffset": 1461, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copyFile",
+      "ranges": [{ "startOffset": 1486, "endOffset": 1933, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copyFileSync",
+      "ranges": [{ "startOffset": 1972, "endOffset": 2409, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copySymLink",
+      "ranges": [{ "startOffset": 2437, "endOffset": 3174, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copySymlinkSync",
+      "ranges": [{ "startOffset": 3216, "endOffset": 3937, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copyDir",
+      "ranges": [{ "startOffset": 3974, "endOffset": 5037, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copyDirSync",
+      "ranges": [{ "startOffset": 5087, "endOffset": 6193, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copy",
+      "ranges": [{ "startOffset": 6654, "endOffset": 7323, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copySync",
+      "ranges": [{ "startOffset": 7784, "endOffset": 8443, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

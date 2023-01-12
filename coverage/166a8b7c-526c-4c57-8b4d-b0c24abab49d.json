@@ -1,0 +1,16 @@
+{
+  "scriptId": "495",
+  "url": "https://deno.land/std@0.171.0/node/internal_binding/ares.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2520, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ares_strerror",
+      "ranges": [{ "startOffset": 1300, "endOffset": 2519, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

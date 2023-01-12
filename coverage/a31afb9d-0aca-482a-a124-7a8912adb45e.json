@@ -1,0 +1,83 @@
+{
+  "scriptId": "486",
+  "url": "https://deno.land/std@0.171.0/flags/mod.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 11922, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "get",
+      "ranges": [{ "startOffset": 821, "endOffset": 906, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getForce",
+      "ranges": [{ "startOffset": 907, "endOffset": 1004, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isNumber",
+      "ranges": [{ "startOffset": 1005, "endOffset": 1201, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "hasKey",
+      "ranges": [{ "startOffset": 1202, "endOffset": 1393, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "parse",
+      "ranges": [
+        { "startOffset": 2884, "endOffset": 11921, "count": 1 },
+        { "startOffset": 3326, "endOffset": 3771, "count": 0 },
+        { "startOffset": 3904, "endOffset": 4366, "count": 0 },
+        { "startOffset": 4459, "endOffset": 4491, "count": 0 },
+        { "startOffset": 4556, "endOffset": 4802, "count": 0 },
+        { "startOffset": 4898, "endOffset": 4931, "count": 0 },
+        { "startOffset": 4998, "endOffset": 5244, "count": 0 },
+        { "startOffset": 5346, "endOffset": 5381, "count": 0 },
+        { "startOffset": 5452, "endOffset": 5702, "count": 0 },
+        { "startOffset": 7423, "endOffset": 7535, "count": 0 },
+        { "startOffset": 7576, "endOffset": 10936, "count": 0 },
+        { "startOffset": 10995, "endOffset": 11256, "count": 0 },
+        { "startOffset": 11305, "endOffset": 11481, "count": 0 },
+        { "startOffset": 11533, "endOffset": 11670, "count": 0 },
+        { "startOffset": 11691, "endOffset": 11808, "count": 0 },
+        { "startOffset": 11853, "endOffset": 11896, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "unknown",
+      "ranges": [{ "startOffset": 3059, "endOffset": 3065, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3727, "endOffset": 3744, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "argDefined",
+      "ranges": [{ "startOffset": 5753, "endOffset": 5923, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setKey",
+      "ranges": [{ "startOffset": 5928, "endOffset": 6694, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setArg",
+      "ranges": [{ "startOffset": 6699, "endOffset": 7196, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "aliasIsBoolean",
+      "ranges": [{ "startOffset": 7201, "endOffset": 7328, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "scriptId": "347",
+  "url": "https://deno.land/std@0.171.0/path/glob.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 13494, "count": 1 },
+        { "startOffset": 315, "endOffset": 323, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "globToRegExp",
+      "ranges": [{ "startOffset": 3445, "endOffset": 11534, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isGlob",
+      "ranges": [{ "startOffset": 11589, "endOffset": 12389, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "normalizeGlob",
+      "ranges": [{ "startOffset": 12477, "endOffset": 12906, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "joinGlobs",
+      "ranges": [{ "startOffset": 12989, "endOffset": 13493, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

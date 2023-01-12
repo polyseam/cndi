@@ -1,0 +1,76 @@
+{
+  "scriptId": "320",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/number.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 5715, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "prompt",
+      "ranges": [{ "startOffset": 390, "endOffset": 1247, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "inject",
+      "ranges": [{ "startOffset": 1372, "endOffset": 1430, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "success",
+      "ranges": [{ "startOffset": 1435, "endOffset": 1531, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "handleEvent",
+      "ranges": [{ "startOffset": 1605, "endOffset": 2616, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "increaseValue",
+      "ranges": [{ "startOffset": 2651, "endOffset": 2711, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "decreaseValue",
+      "ranges": [{ "startOffset": 2746, "endOffset": 2805, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "manipulateIndex",
+      "ranges": [{ "startOffset": 2849, "endOffset": 4183, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addChar",
+      "ranges": [{ "startOffset": 4245, "endOffset": 4546, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "validate",
+      "ranges": [{ "startOffset": 4687, "endOffset": 5093, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "transform",
+      "ranges": [{ "startOffset": 5204, "endOffset": 5397, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "format",
+      "ranges": [{ "startOffset": 5470, "endOffset": 5524, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getValue",
+      "ranges": [{ "startOffset": 5553, "endOffset": 5603, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isNumeric",
+      "ranges": [{ "startOffset": 5606, "endOffset": 5714, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

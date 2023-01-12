@@ -1,0 +1,11 @@
+{
+  "scriptId": "563",
+  "url": "https://deno.land/x/cliffy@v0.25.4/ansi/deps.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 91, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scriptId": "339",
+  "url": "https://deno.land/std@0.171.0/node/internal/normalize_encoding.mjs",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2073, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "normalizeEncoding",
+      "ranges": [{ "startOffset": 83, "endOffset": 214, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "slowCases",
+      "ranges": [{ "startOffset": 223, "endOffset": 2072, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

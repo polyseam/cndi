@@ -1,0 +1,71 @@
+{
+  "scriptId": "242",
+  "url": "https://deno.land/std@0.157.0/node/_utils.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 6537, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "notImplemented",
+      "ranges": [{ "startOffset": 254, "endOffset": 389, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "warnNotImplemented",
+      "ranges": [{ "startOffset": 397, "endOffset": 533, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "intoCallbackAPI",
+      "ranges": [{ "startOffset": 623, "endOffset": 820, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "intoCallbackAPIWithIntercept",
+      "ranges": [{ "startOffset": 828, "endOffset": 1064, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "spliceOne",
+      "ranges": [{ "startOffset": 1072, "endOffset": 1197, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "normalizeEncoding",
+      "ranges": [{ "startOffset": 1500, "endOffset": 1635, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "slowCases",
+      "ranges": [{ "startOffset": 1742, "endOffset": 3594, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "validateIntegerRange",
+      "ranges": [{ "startOffset": 3602, "endOffset": 4013, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "once",
+      "ranges": [{ "startOffset": 4021, "endOffset": 4197, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "mustCall",
+      "ranges": [{ "startOffset": 4335, "endOffset": 5053, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "assertCallbackErrorUncaught",
+      "ranges": [{ "startOffset": 5139, "endOffset": 6095, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "makeMethodsEnumerable",
+      "ranges": [{ "startOffset": 6103, "endOffset": 6536, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

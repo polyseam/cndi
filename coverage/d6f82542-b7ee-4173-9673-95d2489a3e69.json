@@ -1,0 +1,20 @@
+{
+  "scriptId": "222",
+  "url": "https://deno.land/std@0.157.0/_util/os.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 578, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 136, "endOffset": 483, "count": 1 },
+        { "startOffset": 298, "endOffset": 426, "count": 0 },
+        { "startOffset": 428, "endOffset": 482, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

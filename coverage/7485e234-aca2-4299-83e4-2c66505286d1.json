@@ -1,0 +1,16 @@
+{
+  "scriptId": "478",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/_utils.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 145, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "parseNumber",
+      "ranges": [{ "startOffset": 87, "endOffset": 144, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

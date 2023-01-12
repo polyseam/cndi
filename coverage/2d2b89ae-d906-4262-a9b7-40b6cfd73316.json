@@ -1,0 +1,31 @@
+{
+  "scriptId": "206",
+  "url": "https://deno.land/std@0.171.0/crypto/keystack.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 5137, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "importKey",
+      "ranges": [{ "startOffset": 409, "endOffset": 765, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "sign",
+      "ranges": [{ "startOffset": 766, "endOffset": 999, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "compare",
+      "ranges": [{ "startOffset": 1456, "endOffset": 1730, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 2379, "endOffset": 5136, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

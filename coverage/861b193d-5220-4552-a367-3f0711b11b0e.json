@@ -1,0 +1,46 @@
+{
+  "scriptId": "318",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/input.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2126, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "prompt",
+      "ranges": [{ "startOffset": 356, "endOffset": 814, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "inject",
+      "ranges": [{ "startOffset": 939, "endOffset": 997, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "success",
+      "ranges": [{ "startOffset": 1002, "endOffset": 1098, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getValue",
+      "ranges": [{ "startOffset": 1127, "endOffset": 1228, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "validate",
+      "ranges": [{ "startOffset": 1369, "endOffset": 1843, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "transform",
+      "ranges": [{ "startOffset": 1954, "endOffset": 2007, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "format",
+      "ranges": [{ "startOffset": 2080, "endOffset": 2123, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

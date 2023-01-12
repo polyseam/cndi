@@ -1,0 +1,16 @@
+{
+  "scriptId": "262",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/outputs/application-manifest.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3295, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getApplicationManifest",
+      "ranges": [{ "startOffset": 1560, "endOffset": 3254, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

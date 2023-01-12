@@ -1,0 +1,89 @@
+{
+  "scriptId": "527",
+  "url": "https://deno.land/x/cliffy@v0.25.4/ansi/ansi_escapes.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 0, "endOffset": 4856, "count": 1 },
+        { "startOffset": 3726, "endOffset": 3752, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "cursorTo",
+      "ranges": [{ "startOffset": 517, "endOffset": 644, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorMove",
+      "ranges": [{ "startOffset": 735, "endOffset": 1014, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorUp",
+      "ranges": [{ "startOffset": 1093, "endOffset": 1155, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorDown",
+      "ranges": [{ "startOffset": 1236, "endOffset": 1300, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorForward",
+      "ranges": [{ "startOffset": 1384, "endOffset": 1451, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorBackward",
+      "ranges": [{ "startOffset": 1536, "endOffset": 1604, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorNextLine",
+      "ranges": [{ "startOffset": 1711, "endOffset": 1785, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "cursorPrevLine",
+      "ranges": [{ "startOffset": 1890, "endOffset": 1964, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "scrollUp",
+      "ranges": [{ "startOffset": 2373, "endOffset": 2441, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "scrollDown",
+      "ranges": [{ "startOffset": 2524, "endOffset": 2594, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "eraseUp",
+      "ranges": [{ "startOffset": 2734, "endOffset": 2802, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "eraseDown",
+      "ranges": [{ "startOffset": 2884, "endOffset": 2954, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "eraseLines",
+      "ranges": [{ "startOffset": 3282, "endOffset": 3481, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "link",
+      "ranges": [{ "startOffset": 3955, "endOffset": 4168, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "image",
+      "ranges": [{ "startOffset": 4479, "endOffset": 4855, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

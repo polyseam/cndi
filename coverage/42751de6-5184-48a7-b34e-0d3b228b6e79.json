@@ -1,0 +1,21 @@
+{
+  "scriptId": "291",
+  "url": "https://deno.land/std@0.171.0/crypto/_fnv/fnv32.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 819, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "fnv32",
+      "ranges": [{ "startOffset": 409, "endOffset": 601, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "fnv32a",
+      "ranges": [{ "startOffset": 625, "endOffset": 817, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

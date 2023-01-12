@@ -1,0 +1,1376 @@
+{
+  "scriptId": "280",
+  "url": "https://deno.land/std@0.171.0/node/internal/errors.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 77030, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1871, "endOffset": 2244, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "isStackOverflowError",
+      "ranges": [{ "startOffset": 2493, "endOffset": 3032, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addNumericalSeparator",
+      "ranges": [{ "startOffset": 3033, "endOffset": 3283, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "captureLargerStackTrace",
+      "ranges": [{ "startOffset": 3332, "endOffset": 3488, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uvExceptionWithHostPort",
+      "ranges": [{ "startOffset": 3819, "endOffset": 4433, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "errnoException",
+      "ranges": [{ "startOffset": 4640, "endOffset": 5002, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uvErrmapGet",
+      "ranges": [{ "startOffset": 5005, "endOffset": 5066, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "uvException",
+      "ranges": [{ "startOffset": 5457, "endOffset": 6271, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "exceptionWithHostPort",
+      "ranges": [{ "startOffset": 6607, "endOffset": 7231, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 7382, "endOffset": 8279, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 8469, "endOffset": 8913, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "NodeError",
+      "ranges": [{ "startOffset": 8972, "endOffset": 9057, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "NodeSyntaxError",
+      "ranges": [{ "startOffset": 9124, "endOffset": 9390, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "NodeRangeError",
+      "ranges": [{ "startOffset": 9456, "endOffset": 9720, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "NodeTypeError",
+      "ranges": [{ "startOffset": 9785, "endOffset": 10047, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "NodeURIError",
+      "ranges": [{ "startOffset": 10111, "endOffset": 10371, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "NodeSystemError",
+      "ranges": [{ "startOffset": 10895, "endOffset": 13026, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "toString",
+      "ranges": [{ "startOffset": 13031, "endOffset": 13112, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "makeSystemErrorWithCode",
+      "ranges": [{ "startOffset": 13115, "endOffset": 13301, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "NodeError",
+      "ranges": [{ "startOffset": 13226, "endOffset": 13292, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "createInvalidArgType",
+      "ranges": [{ "startOffset": 13396, "endOffset": 15852, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_ARG_TYPE_RANGE",
+      "ranges": [{ "startOffset": 15922, "endOffset": 16103, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_ARG_TYPE",
+      "ranges": [{ "startOffset": 16168, "endOffset": 16349, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<static_initializer>",
+      "ranges": [{ "startOffset": 16354, "endOffset": 16400, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_INVALID_ARG_VALUE_RANGE",
+      "ranges": [{ "startOffset": 16474, "endOffset": 16735, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_ARG_VALUE",
+      "ranges": [{ "startOffset": 16801, "endOffset": 17062, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<static_initializer>",
+      "ranges": [{ "startOffset": 17067, "endOffset": 17114, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "invalidArgTypeHelper",
+      "ranges": [{ "startOffset": 17229, "endOffset": 17931, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 17939, "endOffset": 19121, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_AMBIGUOUS_ARGUMENT",
+      "ranges": [{ "startOffset": 19186, "endOffset": 19293, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_ARG_NOT_ITERABLE",
+      "ranges": [{ "startOffset": 19358, "endOffset": 19443, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_ASSERTION",
+      "ranges": [{ "startOffset": 19497, "endOffset": 19558, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_ASYNC_CALLBACK",
+      "ranges": [{ "startOffset": 19621, "endOffset": 19706, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_ASYNC_TYPE",
+      "ranges": [{ "startOffset": 19765, "endOffset": 19858, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_BROTLI_INVALID_PARAM",
+      "ranges": [{ "startOffset": 19928, "endOffset": 20032, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_BUFFER_OUT_OF_BOUNDS",
+      "ranges": [{ "startOffset": 20102, "endOffset": 20268, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_BUFFER_TOO_LARGE",
+      "ranges": [{ "startOffset": 20334, "endOffset": 20443, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CANNOT_WATCH_SIGINT",
+      "ranges": [{ "startOffset": 20507, "endOffset": 20604, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CHILD_CLOSED_BEFORE_REPLY",
+      "ranges": [{ "startOffset": 20674, "endOffset": 20780, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CHILD_PROCESS_IPC_REQUIRED",
+      "ranges": [{ "startOffset": 20851, "endOffset": 20995, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CHILD_PROCESS_STDIO_MAXBUFFER",
+      "ranges": [{ "startOffset": 21074, "endOffset": 21181, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CONSOLE_WRITABLE_STREAM",
+      "ranges": [{ "startOffset": 21253, "endOffset": 21375, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CONTEXT_NOT_INITIALIZED",
+      "ranges": [{ "startOffset": 21443, "endOffset": 21544, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CPU_USAGE",
+      "ranges": [{ "startOffset": 21598, "endOffset": 21686, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_CUSTOM_ENGINE_NOT_SUPPORTED",
+      "ranges": [{ "startOffset": 21765, "endOffset": 21890, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_ECDH_INVALID_FORMAT",
+      "ranges": [{ "startOffset": 21965, "endOffset": 22064, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_ECDH_INVALID_PUBLIC_KEY",
+      "ranges": [{ "startOffset": 22139, "endOffset": 22259, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_ENGINE_UNKNOWN",
+      "ranges": [{ "startOffset": 22325, "endOffset": 22421, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_FIPS_FORCED",
+      "ranges": [{ "startOffset": 22484, "endOffset": 22614, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_FIPS_UNAVAILABLE",
+      "ranges": [{ "startOffset": 22682, "endOffset": 22793, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_HASH_FINALIZED",
+      "ranges": [{ "startOffset": 22859, "endOffset": 22948, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_HASH_UPDATE_FAILED",
+      "ranges": [{ "startOffset": 23018, "endOffset": 23108, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_INCOMPATIBLE_KEY",
+      "ranges": [{ "startOffset": 23176, "endOffset": 23273, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_INCOMPATIBLE_KEY_OPTIONS",
+      "ranges": [{ "startOffset": 23349, "endOffset": 23467, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_INVALID_DIGEST",
+      "ranges": [{ "startOffset": 23537, "endOffset": 23626, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE",
+      "ranges": [{ "startOffset": 23705, "endOffset": 23830, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_INVALID_STATE",
+      "ranges": [{ "startOffset": 23895, "endOffset": 23995, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_PBKDF2_ERROR",
+      "ranges": [{ "startOffset": 24059, "endOffset": 24137, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_SCRYPT_INVALID_PARAMETER",
+      "ranges": [{ "startOffset": 24213, "endOffset": 24315, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_SCRYPT_NOT_SUPPORTED",
+      "ranges": [{ "startOffset": 24387, "endOffset": 24491, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_CRYPTO_SIGN_KEY_REQUIRED",
+      "ranges": [{ "startOffset": 24560, "endOffset": 24654, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_DIR_CLOSED",
+      "ranges": [{ "startOffset": 24709, "endOffset": 24793, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_DIR_CONCURRENT_OPERATION",
+      "ranges": [{ "startOffset": 24862, "endOffset": 25019, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_DNS_SET_SERVERS_FAILED",
+      "ranges": [{ "startOffset": 25086, "endOffset": 25202, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_DOMAIN_CALLBACK_NOT_AVAILABLE",
+      "ranges": [{ "startOffset": 25276, "endOffset": 25501, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_DOMAIN_CANNOT_SET_UNCAUGHT_EXCEPTION_CAPTURE",
+      "ranges": [{ "startOffset": 25590, "endOffset": 25803, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 25813, "endOffset": 26155, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_ENCODING_NOT_SUPPORTED",
+      "ranges": [{ "startOffset": 26225, "endOffset": 26331, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_EVAL_ESM_CANNOT_PRINT",
+      "ranges": [{ "startOffset": 26397, "endOffset": 26502, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_EVENT_RECURSION",
+      "ranges": [{ "startOffset": 26562, "endOffset": 26669, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_FEATURE_UNAVAILABLE_ON_PLATFORM",
+      "ranges": [{ "startOffset": 26749, "endOffset": 26919, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_FS_FILE_TOO_LARGE",
+      "ranges": [{ "startOffset": 26986, "endOffset": 27088, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_FS_INVALID_SYMLINK_TYPE",
+      "ranges": [{ "startOffset": 27156, "endOffset": 27300, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_ALTSVC_INVALID_ORIGIN",
+      "ranges": [{ "startOffset": 27376, "endOffset": 27493, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_ALTSVC_LENGTH",
+      "ranges": [{ "startOffset": 27561, "endOffset": 27674, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_CONNECT_AUTHORITY",
+      "ranges": [{ "startOffset": 27742, "endOffset": 27862, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_CONNECT_PATH",
+      "ranges": [{ "startOffset": 27925, "endOffset": 28040, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_CONNECT_SCHEME",
+      "ranges": [{ "startOffset": 28105, "endOffset": 28224, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_GOAWAY_SESSION",
+      "ranges": [{ "startOffset": 28289, "endOffset": 28410, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_HEADERS_AFTER_RESPOND",
+      "ranges": [{ "startOffset": 28482, "endOffset": 28614, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_HEADERS_SENT",
+      "ranges": [{ "startOffset": 28677, "endOffset": 28778, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_HEADER_SINGLE_VALUE",
+      "ranges": [{ "startOffset": 28852, "endOffset": 28974, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INFO_STATUS_NOT_ALLOWED",
+      "ranges": [{ "startOffset": 29053, "endOffset": 29170, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_CONNECTION_HEADERS",
+      "ranges": [{ "startOffset": 29251, "endOffset": 29387, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_HEADER_VALUE",
+      "ranges": [{ "startOffset": 29462, "endOffset": 29577, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_INFO_STATUS",
+      "ranges": [{ "startOffset": 29652, "endOffset": 29764, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_ORIGIN",
+      "ranges": [{ "startOffset": 29833, "endOffset": 29943, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_PACKED_SETTINGS_LENGTH",
+      "ranges": [{ "startOffset": 30029, "endOffset": 30160, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_PSEUDOHEADER",
+      "ranges": [{ "startOffset": 30235, "endOffset": 30365, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_SESSION",
+      "ranges": [{ "startOffset": 30431, "endOffset": 30529, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_INVALID_STREAM",
+      "ranges": [{ "startOffset": 30594, "endOffset": 30690, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_MAX_PENDING_SETTINGS_ACK",
+      "ranges": [{ "startOffset": 30765, "endOffset": 30893, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_NESTED_PUSH",
+      "ranges": [{ "startOffset": 30955, "endOffset": 31069, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_NO_SOCKET_MANIPULATION",
+      "ranges": [{ "startOffset": 31142, "endOffset": 31290, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_ORIGIN_LENGTH",
+      "ranges": [{ "startOffset": 31358, "endOffset": 31471, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_OUT_OF_STREAMS",
+      "ranges": [{ "startOffset": 31536, "endOffset": 31671, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_PAYLOAD_FORBIDDEN",
+      "ranges": [{ "startOffset": 31739, "endOffset": 31860, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_PING_CANCEL",
+      "ranges": [{ "startOffset": 31922, "endOffset": 32006, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_PING_LENGTH",
+      "ranges": [{ "startOffset": 32073, "endOffset": 32171, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_PSEUDOHEADER_NOT_ALLOWED",
+      "ranges": [{ "startOffset": 32250, "endOffset": 32359, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_PUSH_DISABLED",
+      "ranges": [{ "startOffset": 32423, "endOffset": 32528, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SEND_FILE",
+      "ranges": [{ "startOffset": 32588, "endOffset": 32676, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SEND_FILE_NOSEEK",
+      "ranges": [{ "startOffset": 32743, "endOffset": 32868, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SESSION_ERROR",
+      "ranges": [{ "startOffset": 32932, "endOffset": 33034, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SETTINGS_CANCEL",
+      "ranges": [{ "startOffset": 33100, "endOffset": 33199, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SOCKET_BOUND",
+      "ranges": [{ "startOffset": 33262, "endOffset": 33373, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_SOCKET_UNBOUND",
+      "ranges": [{ "startOffset": 33438, "endOffset": 33559, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_STATUS_101",
+      "ranges": [{ "startOffset": 33620, "endOffset": 33748, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_STATUS_INVALID",
+      "ranges": [{ "startOffset": 33818, "endOffset": 33911, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_STREAM_ERROR",
+      "ranges": [{ "startOffset": 33974, "endOffset": 34074, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_STREAM_SELF_DEPENDENCY",
+      "ranges": [{ "startOffset": 34147, "endOffset": 34254, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_TRAILERS_ALREADY_SENT",
+      "ranges": [{ "startOffset": 34326, "endOffset": 34439, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_TRAILERS_NOT_READY",
+      "ranges": [{ "startOffset": 34508, "endOffset": 34656, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP2_UNSUPPORTED_PROTOCOL",
+      "ranges": [{ "startOffset": 34727, "endOffset": 34832, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP_HEADERS_SENT",
+      "ranges": [{ "startOffset": 34894, "endOffset": 35012, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP_INVALID_HEADER_VALUE",
+      "ranges": [{ "startOffset": 35086, "endOffset": 35200, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP_INVALID_STATUS_CODE",
+      "ranges": [{ "startOffset": 35274, "endOffset": 35371, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP_SOCKET_ENCODING",
+      "ranges": [{ "startOffset": 35436, "endOffset": 35569, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_HTTP_TRAILER_INVALID",
+      "ranges": [{ "startOffset": 35634, "endOffset": 35749, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INCOMPATIBLE_OPTION_PAIR",
+      "ranges": [{ "startOffset": 35822, "endOffset": 35959, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INPUT_TYPE_NOT_ALLOWED",
+      "ranges": [{ "startOffset": 36026, "endOffset": 36172, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_ALREADY_ACTIVATED",
+      "ranges": [{ "startOffset": 36244, "endOffset": 36409, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_ALREADY_CONNECTED",
+      "ranges": [{ "startOffset": 36481, "endOffset": 36581, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_CLOSED",
+      "ranges": [{ "startOffset": 36642, "endOffset": 36723, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_COMMAND",
+      "ranges": [{ "startOffset": 36785, "endOffset": 36879, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_NOT_ACTIVE",
+      "ranges": [{ "startOffset": 36944, "endOffset": 37034, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_NOT_AVAILABLE",
+      "ranges": [{ "startOffset": 37102, "endOffset": 37198, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_NOT_CONNECTED",
+      "ranges": [{ "startOffset": 37266, "endOffset": 37360, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INSPECTOR_NOT_WORKER",
+      "ranges": [{ "startOffset": 37425, "endOffset": 37522, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_ASYNC_ID",
+      "ranges": [{ "startOffset": 37588, "endOffset": 37679, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_BUFFER_SIZE",
+      "ranges": [{ "startOffset": 37748, "endOffset": 37853, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_CURSOR_POS",
+      "ranges": [{ "startOffset": 37920, "endOffset": 38033, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_FD",
+      "ranges": [{ "startOffset": 38093, "endOffset": 38188, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_FD_TYPE",
+      "ranges": [{ "startOffset": 38252, "endOffset": 38340, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_FILE_URL_HOST",
+      "ranges": [{ "startOffset": 38410, "endOffset": 38529, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_FILE_URL_PATH",
+      "ranges": [{ "startOffset": 38599, "endOffset": 38686, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_HANDLE_TYPE",
+      "ranges": [{ "startOffset": 38754, "endOffset": 38851, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_HTTP_TOKEN",
+      "ranges": [{ "startOffset": 38918, "endOffset": 39027, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_IP_ADDRESS",
+      "ranges": [{ "startOffset": 39094, "endOffset": 39184, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_OPT_VALUE_ENCODING",
+      "ranges": [{ "startOffset": 39259, "endOffset": 39382, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_PERFORMANCE_MARK",
+      "ranges": [{ "startOffset": 39451, "endOffset": 39567, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_PROTOCOL",
+      "ranges": [{ "startOffset": 39632, "endOffset": 39745, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_REPL_EVAL_CONFIG",
+      "ranges": [{ "startOffset": 39818, "endOffset": 39948, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_REPL_INPUT",
+      "ranges": [{ "startOffset": 40015, "endOffset": 40085, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_SYNC_FORK_INPUT",
+      "ranges": [{ "startOffset": 40157, "endOffset": 40312, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_THIS",
+      "ranges": [{ "startOffset": 40373, "endOffset": 40469, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_TUPLE",
+      "ranges": [{ "startOffset": 40531, "endOffset": 40630, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_URI",
+      "ranges": [{ "startOffset": 40689, "endOffset": 40760, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_IPC_CHANNEL_CLOSED",
+      "ranges": [{ "startOffset": 40823, "endOffset": 40902, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_IPC_DISCONNECTED",
+      "ranges": [{ "startOffset": 40963, "endOffset": 41061, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_IPC_ONE_PIPE",
+      "ranges": [{ "startOffset": 41118, "endOffset": 41217, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_IPC_SYNC_FORK",
+      "ranges": [{ "startOffset": 41275, "endOffset": 41376, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MANIFEST_DEPENDENCY_MISSING",
+      "ranges": [{ "startOffset": 41448, "endOffset": 41593, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MANIFEST_INTEGRITY_MISMATCH",
+      "ranges": [{ "startOffset": 41671, "endOffset": 41822, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MANIFEST_INVALID_RESOURCE_FIELD",
+      "ranges": [{ "startOffset": 41902, "endOffset": 42042, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MANIFEST_TDZ",
+      "ranges": [{ "startOffset": 42099, "endOffset": 42197, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MANIFEST_UNKNOWN_ONERROR",
+      "ranges": [{ "startOffset": 42272, "endOffset": 42393, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_METHOD_NOT_IMPLEMENTED",
+      "ranges": [{ "startOffset": 42460, "endOffset": 42564, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MISSING_ARGS",
+      "ranges": [{ "startOffset": 42625, "endOffset": 43281, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MISSING_OPTION",
+      "ranges": [{ "startOffset": 43344, "endOffset": 43422, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MULTIPLE_CALLBACK",
+      "ranges": [{ "startOffset": 43484, "endOffset": 43578, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NAPI_CONS_FUNCTION",
+      "ranges": [{ "startOffset": 43645, "endOffset": 43740, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NAPI_INVALID_DATAVIEW_ARGS",
+      "ranges": [{ "startOffset": 43816, "endOffset": 43987, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NAPI_INVALID_TYPEDARRAY_ALIGNMENT",
+      "ranges": [{ "startOffset": 44070, "endOffset": 44203, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NAPI_INVALID_TYPEDARRAY_LENGTH",
+      "ranges": [{ "startOffset": 44283, "endOffset": 44386, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NO_CRYPTO",
+      "ranges": [{ "startOffset": 44440, "endOffset": 44547, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_NO_ICU",
+      "ranges": [{ "startOffset": 44602, "endOffset": 44709, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICCLIENTSESSION_FAILED",
+      "ranges": [{ "startOffset": 44778, "endOffset": 44896, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICCLIENTSESSION_FAILED_SETSOCKET",
+      "ranges": [{ "startOffset": 44975, "endOffset": 45084, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSESSION_DESTROYED",
+      "ranges": [{ "startOffset": 45150, "endOffset": 45274, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSESSION_INVALID_DCID",
+      "ranges": [{ "startOffset": 45343, "endOffset": 45439, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSESSION_UPDATEKEY",
+      "ranges": [{ "startOffset": 45505, "endOffset": 45606, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSOCKET_DESTROYED",
+      "ranges": [{ "startOffset": 45671, "endOffset": 45793, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSOCKET_INVALID_STATELESS_RESET_SECRET_LENGTH",
+      "ranges": [{ "startOffset": 45886, "endOffset": 46035, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSOCKET_LISTENING",
+      "ranges": [{ "startOffset": 46100, "endOffset": 46203, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSOCKET_UNBOUND",
+      "ranges": [{ "startOffset": 46266, "endOffset": 46383, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSTREAM_DESTROYED",
+      "ranges": [{ "startOffset": 46448, "endOffset": 46570, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSTREAM_INVALID_PUSH",
+      "ranges": [{ "startOffset": 46638, "endOffset": 46782, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSTREAM_OPEN_FAILED",
+      "ranges": [{ "startOffset": 46849, "endOffset": 46949, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUICSTREAM_UNSUPPORTED_PUSH",
+      "ranges": [{ "startOffset": 47021, "endOffset": 47145, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_QUIC_TLS13_REQUIRED",
+      "ranges": [{ "startOffset": 47209, "endOffset": 47304, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SCRIPT_EXECUTION_INTERRUPTED",
+      "ranges": [{ "startOffset": 47377, "endOffset": 47496, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SERVER_ALREADY_LISTEN",
+      "ranges": [{ "startOffset": 47562, "endOffset": 47691, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SERVER_NOT_RUNNING",
+      "ranges": [{ "startOffset": 47754, "endOffset": 47841, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_ALREADY_BOUND",
+      "ranges": [{ "startOffset": 47906, "endOffset": 47996, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_BAD_BUFFER_SIZE",
+      "ranges": [{ "startOffset": 48067, "endOffset": 48174, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_BAD_PORT",
+      "ranges": [{ "startOffset": 48239, "endOffset": 48541, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_BAD_TYPE",
+      "ranges": [{ "startOffset": 48605, "endOffset": 48721, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_BUFFER_SIZE",
+      "ranges": [{ "startOffset": 48790, "endOffset": 48895, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_CLOSED",
+      "ranges": [{ "startOffset": 48953, "endOffset": 49029, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_DGRAM_IS_CONNECTED",
+      "ranges": [{ "startOffset": 49099, "endOffset": 49188, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_DGRAM_NOT_CONNECTED",
+      "ranges": [{ "startOffset": 49259, "endOffset": 49345, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SOCKET_DGRAM_NOT_RUNNING",
+      "ranges": [{ "startOffset": 49414, "endOffset": 49496, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SRI_PARSE",
+      "ranges": [{ "startOffset": 49556, "endOffset": 49718, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_ALREADY_FINISHED",
+      "ranges": [{ "startOffset": 49786, "endOffset": 49901, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_CANNOT_PIPE",
+      "ranges": [{ "startOffset": 49964, "endOffset": 50054, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_DESTROYED",
+      "ranges": [{ "startOffset": 50115, "endOffset": 50224, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_NULL_VALUES",
+      "ranges": [{ "startOffset": 50291, "endOffset": 50391, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_PREMATURE_CLOSE",
+      "ranges": [{ "startOffset": 50458, "endOffset": 50542, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_PUSH_AFTER_EOF",
+      "ranges": [{ "startOffset": 50608, "endOffset": 50699, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_UNSHIFT_AFTER_END_EVENT",
+      "ranges": [{ "startOffset": 50774, "endOffset": 50883, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_WRAP",
+      "ranges": [{ "startOffset": 50939, "endOffset": 51045, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_STREAM_WRITE_AFTER_END",
+      "ranges": [{ "startOffset": 51112, "endOffset": 51196, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_SYNTHETIC",
+      "ranges": [{ "startOffset": 51250, "endOffset": 51326, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 51336, "endOffset": 51660, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_TLS_DH_PARAM_SIZE",
+      "ranges": [{ "startOffset": 51720, "endOffset": 51825, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_HANDSHAKE_TIMEOUT",
+      "ranges": [{ "startOffset": 51891, "endOffset": 51980, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_INVALID_CONTEXT",
+      "ranges": [{ "startOffset": 52048, "endOffset": 52143, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_INVALID_STATE",
+      "ranges": [{ "startOffset": 52205, "endOffset": 52319, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_INVALID_PROTOCOL_VERSION",
+      "ranges": [{ "startOffset": 52396, "endOffset": 52534, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_PROTOCOL_VERSION_CONFLICT",
+      "ranges": [{ "startOffset": 52612, "endOffset": 52788, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_RENEGOTIATION_DISABLED",
+      "ranges": [{ "startOffset": 52859, "endOffset": 52982, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_REQUIRED_SERVER_NAME",
+      "ranges": [{ "startOffset": 53051, "endOffset": 53178, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_SESSION_ATTACK",
+      "ranges": [{ "startOffset": 53241, "endOffset": 53347, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TLS_SNI_FROM_SERVER",
+      "ranges": [{ "startOffset": 53411, "endOffset": 53523, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TRACE_EVENTS_CATEGORY_REQUIRED",
+      "ranges": [{ "startOffset": 53602, "endOffset": 53712, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_TRACE_EVENTS_UNAVAILABLE",
+      "ranges": [{ "startOffset": 53781, "endOffset": 53880, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNAVAILABLE_DURING_EXIT",
+      "ranges": [{ "startOffset": 53948, "endOffset": 54062, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNCAUGHT_EXCEPTION_CAPTURE_ALREADY_SET",
+      "ranges": [{ "startOffset": 54145, "endOffset": 54326, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNESCAPED_CHARACTERS",
+      "ranges": [{ "startOffset": 54395, "endOffset": 54497, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNHANDLED_ERROR",
+      "ranges": [{ "startOffset": 54557, "endOffset": 54643, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_BUILTIN_MODULE",
+      "ranges": [{ "startOffset": 54710, "endOffset": 54809, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_CREDENTIAL",
+      "ranges": [{ "startOffset": 54872, "endOffset": 54977, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_ENCODING",
+      "ranges": [{ "startOffset": 55042, "endOffset": 55128, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_FILE_EXTENSION",
+      "ranges": [{ "startOffset": 55199, "endOffset": 55310, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_MODULE_FORMAT",
+      "ranges": [{ "startOffset": 55381, "endOffset": 55477, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNKNOWN_SIGNAL",
+      "ranges": [{ "startOffset": 55540, "endOffset": 55622, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNSUPPORTED_DIR_IMPORT",
+      "ranges": [{ "startOffset": 55689, "endOffset": 55843, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_UNSUPPORTED_ESM_URL_SCHEME",
+      "ranges": [{ "startOffset": 55914, "endOffset": 56050, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_USE_AFTER_CLOSE",
+      "ranges": [{ "startOffset": 56110, "endOffset": 56188, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_V8BREAKITERATOR",
+      "ranges": [{ "startOffset": 56248, "endOffset": 56383, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VALID_PERFORMANCE_ENTRY_TYPE",
+      "ranges": [{ "startOffset": 56456, "endOffset": 56584, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING",
+      "ranges": [{ "startOffset": 56667, "endOffset": 56792, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_ALREADY_LINKED",
+      "ranges": [{ "startOffset": 56861, "endOffset": 56962, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_CANNOT_CREATE_CACHED_DATA",
+      "ranges": [{ "startOffset": 57042, "endOffset": 57191, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_DIFFERENT_CONTEXT",
+      "ranges": [{ "startOffset": 57263, "endOffset": 57377, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_LINKING_ERRORED",
+      "ranges": [{ "startOffset": 57447, "endOffset": 57569, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_NOT_MODULE",
+      "ranges": [{ "startOffset": 57634, "endOffset": 57745, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_VM_MODULE_STATUS",
+      "ranges": [{ "startOffset": 57806, "endOffset": 57888, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WASI_ALREADY_STARTED",
+      "ranges": [{ "startOffset": 57953, "endOffset": 58053, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_INIT_FAILED",
+      "ranges": [{ "startOffset": 58116, "endOffset": 58217, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_NOT_RUNNING",
+      "ranges": [{ "startOffset": 58280, "endOffset": 58372, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_OUT_OF_MEMORY",
+      "ranges": [{ "startOffset": 58437, "endOffset": 58557, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_UNSERIALIZABLE_ERROR",
+      "ranges": [{ "startOffset": 58629, "endOffset": 58743, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_UNSUPPORTED_EXTENSION",
+      "ranges": [{ "startOffset": 58820, "endOffset": 58973, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_WORKER_UNSUPPORTED_OPERATION",
+      "ranges": [{ "startOffset": 59050, "endOffset": 59158, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_ZLIB_INITIALIZATION_FAILED",
+      "ranges": [{ "startOffset": 59229, "endOffset": 59323, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 59333, "endOffset": 59544, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 59552, "endOffset": 59922, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 59930, "endOffset": 60274, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 60282, "endOffset": 60564, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_INVALID_CHAR",
+      "ranges": [{ "startOffset": 60623, "endOffset": 60775, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_OPT_VALUE",
+      "ranges": [{ "startOffset": 60841, "endOffset": 60968, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_RETURN_PROPERTY",
+      "ranges": [{ "startOffset": 61040, "endOffset": 61238, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "buildReturnPropertyType",
+      "ranges": [{ "startOffset": 61277, "endOffset": 61498, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_RETURN_PROPERTY_VALUE",
+      "ranges": [{ "startOffset": 61574, "endOffset": 61795, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_RETURN_VALUE",
+      "ranges": [{ "startOffset": 61864, "endOffset": 62050, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 62060, "endOffset": 62235, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "ERR_INVALID_URL_SCHEME",
+      "ranges": [{ "startOffset": 62300, "endOffset": 62608, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_MODULE_NOT_FOUND",
+      "ranges": [{ "startOffset": 62669, "endOffset": 62811, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_PACKAGE_CONFIG",
+      "ranges": [{ "startOffset": 62878, "endOffset": 63094, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_MODULE_SPECIFIER",
+      "ranges": [{ "startOffset": 63167, "endOffset": 63335, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INVALID_PACKAGE_TARGET",
+      "ranges": [{ "startOffset": 63402, "endOffset": 64251, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_PACKAGE_IMPORT_NOT_DEFINED",
+      "ranges": [{ "startOffset": 64326, "endOffset": 64590, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_PACKAGE_PATH_NOT_EXPORTED",
+      "ranges": [{ "startOffset": 64660, "endOffset": 65105, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_INTERNAL_ASSERTION",
+      "ranges": [{ "startOffset": 65168, "endOffset": 65505, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "ERR_FS_RMDIR_ENOTDIR",
+      "ranges": [{ "startOffset": 65686, "endOffset": 66005, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "denoErrorToNodeError",
+      "ranges": [{ "startOffset": 66015, "endOffset": 66290, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "extractOsErrorNumberFromErrorMessage",
+      "ranges": [{ "startOffset": 66291, "endOffset": 66500, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "connResetException",
+      "ranges": [{ "startOffset": 66508, "endOffset": 66658, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "aggregateTwoErrors",
+      "ranges": [{ "startOffset": 66666, "endOffset": 67306, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "genericNodeError",
+      "ranges": [{ "startOffset": 67942, "endOffset": 68143, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "determineSpecificType",
+      "ranges": [{ "startOffset": 68299, "endOffset": 68916, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

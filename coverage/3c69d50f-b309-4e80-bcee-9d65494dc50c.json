@@ -1,0 +1,81 @@
+{
+  "scriptId": "319",
+  "url": "https://deno.land/x/cliffy@v0.25.4/prompt/list.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 4591, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "prompt",
+      "ranges": [{ "startOffset": 370, "endOffset": 911, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "inject",
+      "ranges": [{ "startOffset": 1036, "endOffset": 1094, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "input",
+      "ranges": [{ "startOffset": 1099, "endOffset": 1659, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getTags",
+      "ranges": [{ "startOffset": 1664, "endOffset": 1754, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "regexp",
+      "ranges": [{ "startOffset": 1784, "endOffset": 1902, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "success",
+      "ranges": [{ "startOffset": 1907, "endOffset": 2006, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getValue",
+      "ranges": [{ "startOffset": 2035, "endOffset": 2318, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getCurrentInputValue",
+      "ranges": [{ "startOffset": 2323, "endOffset": 2396, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "addChar",
+      "ranges": [{ "startOffset": 2418, "endOffset": 2851, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "deleteChar",
+      "ranges": [{ "startOffset": 2881, "endOffset": 3031, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "complete",
+      "ranges": [{ "startOffset": 3036, "endOffset": 3210, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "validate",
+      "ranges": [{ "startOffset": 3351, "endOffset": 4264, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "transform",
+      "ranges": [{ "startOffset": 4375, "endOffset": 4461, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "format",
+      "ranges": [{ "startOffset": 4534, "endOffset": 4588, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

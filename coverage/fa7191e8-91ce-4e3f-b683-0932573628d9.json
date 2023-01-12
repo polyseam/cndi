@@ -1,0 +1,146 @@
+{
+  "scriptId": "463",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/types.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 5079, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "_isObjectLike",
+      "ranges": [{ "startOffset": 1300, "endOffset": 1352, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "_isFunctionLike",
+      "ranges": [{ "startOffset": 1378, "endOffset": 1432, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isAnyArrayBuffer",
+      "ranges": [{ "startOffset": 1441, "endOffset": 1622, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isArgumentsObject",
+      "ranges": [{ "startOffset": 1630, "endOffset": 1750, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isArrayBuffer",
+      "ranges": [{ "startOffset": 1758, "endOffset": 1876, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isAsyncFunction",
+      "ranges": [{ "startOffset": 1884, "endOffset": 2008, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isBooleanObject",
+      "ranges": [{ "startOffset": 2016, "endOffset": 2132, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isBoxedPrimitive",
+      "ranges": [{ "startOffset": 2140, "endOffset": 2311, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isDataView",
+      "ranges": [{ "startOffset": 2319, "endOffset": 2431, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isDate",
+      "ranges": [{ "startOffset": 2439, "endOffset": 2543, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isGeneratorFunction",
+      "ranges": [{ "startOffset": 2551, "endOffset": 2683, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isGeneratorObject",
+      "ranges": [{ "startOffset": 2691, "endOffset": 2811, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isMap",
+      "ranges": [{ "startOffset": 2819, "endOffset": 2921, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isMapIterator",
+      "ranges": [{ "startOffset": 2929, "endOffset": 3048, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isModuleNamespaceObject",
+      "ranges": [{ "startOffset": 3056, "endOffset": 3179, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isNativeError",
+      "ranges": [{ "startOffset": 3187, "endOffset": 3299, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isNumberObject",
+      "ranges": [{ "startOffset": 3307, "endOffset": 3421, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isBigIntObject",
+      "ranges": [{ "startOffset": 3429, "endOffset": 3543, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isPromise",
+      "ranges": [{ "startOffset": 3551, "endOffset": 3661, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isRegExp",
+      "ranges": [{ "startOffset": 3669, "endOffset": 3777, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isSet",
+      "ranges": [{ "startOffset": 3785, "endOffset": 3887, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isSetIterator",
+      "ranges": [{ "startOffset": 3895, "endOffset": 4014, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isSharedArrayBuffer",
+      "ranges": [{ "startOffset": 4022, "endOffset": 4152, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isStringObject",
+      "ranges": [{ "startOffset": 4160, "endOffset": 4274, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isSymbolObject",
+      "ranges": [{ "startOffset": 4282, "endOffset": 4396, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isWeakMap",
+      "ranges": [{ "startOffset": 4404, "endOffset": 4514, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isWeakSet",
+      "ranges": [{ "startOffset": 4522, "endOffset": 4632, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scriptId": "430",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/crypto.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 430, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getFipsCrypto",
+      "ranges": [{ "startOffset": 272, "endOffset": 344, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setFipsCrypto",
+      "ranges": [{ "startOffset": 352, "endOffset": 429, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

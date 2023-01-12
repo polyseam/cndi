@@ -1,0 +1,31 @@
+{
+  "scriptId": "513",
+  "url": "https://deno.land/std@0.157.0/node/internal/net.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2990, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "isIPv4",
+      "ranges": [{ "startOffset": 2124, "endOffset": 2199, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isIPv6",
+      "ranges": [{ "startOffset": 2207, "endOffset": 2282, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isIP",
+      "ranges": [{ "startOffset": 2290, "endOffset": 2417, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "makeSyncWrite",
+      "ranges": [{ "startOffset": 2425, "endOffset": 2927, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

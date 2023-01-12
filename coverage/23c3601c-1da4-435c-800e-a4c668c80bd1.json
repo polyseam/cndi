@@ -1,0 +1,11 @@
+{
+  "scriptId": "41",
+  "url": "deno:ext/crypto/00_crypto.js",
+  "functions": [
+    {
+      "functionName": "get subtle",
+      "ranges": [{ "startOffset": 125794, "endOffset": 125886, "count": 24 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

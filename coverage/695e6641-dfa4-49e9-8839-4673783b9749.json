@@ -1,0 +1,51 @@
+{
+  "scriptId": "480",
+  "url": "https://deno.land/std@0.157.0/bytes/mod.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 7516, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "indexOfNeedle",
+      "ranges": [{ "startOffset": 893, "endOffset": 1535, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "lastIndexOfNeedle",
+      "ranges": [{ "startOffset": 2179, "endOffset": 2871, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "startsWith",
+      "ranges": [{ "startOffset": 3259, "endOffset": 3427, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "endsWith",
+      "ranges": [{ "startOffset": 3809, "endOffset": 4018, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "repeat",
+      "ranges": [{ "startOffset": 4432, "endOffset": 5061, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "concat",
+      "ranges": [{ "startOffset": 5311, "endOffset": 5591, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "includesNeedle",
+      "ranges": [{ "startOffset": 6204, "endOffset": 6314, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "copy",
+      "ranges": [{ "startOffset": 7183, "endOffset": 7477, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

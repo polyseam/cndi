@@ -1,0 +1,21 @@
+{
+  "scriptId": "269",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/deployment-targets/gcp.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 5201, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getGoogleCredentials",
+      "ranges": [{ "startOffset": 575, "endOffset": 4450, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "prepareGCPEnv",
+      "ranges": [{ "startOffset": 4474, "endOffset": 5151, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

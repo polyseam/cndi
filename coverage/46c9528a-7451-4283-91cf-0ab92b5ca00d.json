@@ -1,0 +1,11 @@
+{
+  "scriptId": "270",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/doc/help-strings.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3509, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

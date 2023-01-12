@@ -1,0 +1,31 @@
+{
+  "scriptId": "245",
+  "url": "https://deno.land/std@0.157.0/encoding/jsonc.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 12518, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "parse",
+      "ranges": [{ "startOffset": 884, "endOffset": 1109, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1126, "endOffset": 1653, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1780, "endOffset": 11535, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "buildErrorMessage",
+      "ranges": [{ "startOffset": 11536, "endOffset": 12517, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

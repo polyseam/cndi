@@ -1,0 +1,16 @@
+{
+  "scriptId": "260",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/outputs/gitignore.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 224, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getGitignore",
+      "ranges": [{ "startOffset": 15, "endOffset": 223, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

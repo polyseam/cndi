@@ -1,0 +1,16 @@
+{
+  "scriptId": "218",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/commands/overwrite.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 7604, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "overwriteWithFn",
+      "ranges": [{ "startOffset": 1234, "endOffset": 7570, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "scriptId": "382",
+  "url": "https://deno.land/std@0.171.0/node/internal_binding/stream_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 9240, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1876, "endOffset": 2408, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 2988, "endOffset": 3178, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 3186, "endOffset": 3335, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 3437, "endOffset": 9239, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

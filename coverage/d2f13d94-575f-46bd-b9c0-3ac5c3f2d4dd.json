@@ -1,0 +1,106 @@
+{
+  "scriptId": "507",
+  "url": "https://deno.land/std@0.157.0/node/internal/util/comparisons.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 16466, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 599, "endOffset": 832, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "isDeepStrictEqual",
+      "ranges": [{ "startOffset": 883, "endOffset": 970, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isDeepEqual",
+      "ranges": [{ "startOffset": 978, "endOffset": 1060, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "innerDeepEqual",
+      "ranges": [{ "startOffset": 1061, "endOffset": 5838, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "keyCheck",
+      "ranges": [{ "startOffset": 5839, "endOffset": 8362, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "areSimilarRegExps",
+      "ranges": [{ "startOffset": 8363, "endOffset": 8487, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "areSimilarFloatArrays",
+      "ranges": [{ "startOffset": 8532, "endOffset": 8793, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "areSimilarTypedArrays",
+      "ranges": [{ "startOffset": 8838, "endOffset": 9118, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "areEqualArrayBuffers",
+      "ranges": [{ "startOffset": 9163, "endOffset": 9324, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "isEqualBoxedPrimitive",
+      "ranges": [{ "startOffset": 9640, "endOffset": 10750, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "getEnumerables",
+      "ranges": [{ "startOffset": 10751, "endOffset": 10851, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "objEquiv",
+      "ranges": [{ "startOffset": 10852, "endOffset": 12429, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "findLooseMatchingPrimitives",
+      "ranges": [{ "startOffset": 12430, "endOffset": 12856, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setMightHaveLoosePrim",
+      "ranges": [{ "startOffset": 12857, "endOffset": 13072, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setHasEqualElement",
+      "ranges": [{ "startOffset": 13073, "endOffset": 13305, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setEquiv",
+      "ranges": [{ "startOffset": 13306, "endOffset": 14378, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "mapMightHaveLoosePrimitive",
+      "ranges": [{ "startOffset": 14423, "endOffset": 14856, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "mapEquiv",
+      "ranges": [{ "startOffset": 14857, "endOffset": 16167, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "mapHasEqualEntry",
+      "ranges": [{ "startOffset": 16168, "endOffset": 16465, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

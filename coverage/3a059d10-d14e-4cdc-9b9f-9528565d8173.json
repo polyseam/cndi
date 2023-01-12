@@ -1,0 +1,31 @@
+{
+  "scriptId": "503",
+  "url": "https://deno.land/std@0.157.0/node/internal/util.mjs",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 4492, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "once",
+      "ranges": [{ "startOffset": 504, "endOffset": 672, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "createDeferredPromise",
+      "ranges": [{ "startOffset": 681, "endOffset": 875, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "deprecate",
+      "ranges": [{ "startOffset": 1167, "endOffset": 2267, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "promisify",
+      "ranges": [{ "startOffset": 2829, "endOffset": 4246, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scriptId": "464",
+  "url": "https://deno.land/std@0.157.0/node/internal_binding/udp_wrap.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 10978, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1672, "endOffset": 1837, "count": 0 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "<instance_members_initializer>",
+      "ranges": [{ "startOffset": 1845, "endOffset": 10977, "count": 0 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "scriptId": "267",
+  "url": "file:///Users/m/dev/polyseam/cndi/src/bootstrap/controller_bootstrap_cndi.sh.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 818, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

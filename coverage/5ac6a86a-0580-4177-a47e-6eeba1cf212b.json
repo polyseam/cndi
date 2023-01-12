@@ -1,0 +1,11 @@
+{
+  "scriptId": "75",
+  "url": "deno:runtime/js/40_tty.js",
+  "functions": [
+    {
+      "functionName": "isatty",
+      "ranges": [{ "startOffset": 434, "endOffset": 528, "count": 4 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

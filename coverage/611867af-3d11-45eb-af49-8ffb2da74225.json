@@ -1,0 +1,65 @@
+{
+  "scriptId": "4",
+  "url": "deno:core/01_core.js",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3427, "endOffset": 3455, "count": 3 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "buildCustomError",
+      "ranges": [
+        { "startOffset": 3709, "endOffset": 4192, "count": 3 },
+        { "startOffset": 3840, "endOffset": 3965, "count": 0 },
+        { "startOffset": 4128, "endOffset": 4164, "count": 2 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "resources",
+      "ranges": [{ "startOffset": 7141, "endOffset": 7217, "count": 2 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "setMacrotaskCallback",
+      "ranges": [{ "startOffset": 10946, "endOffset": 10987, "count": 3 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "setNextTickCallback",
+      "ranges": [{ "startOffset": 11014, "endOffset": 11055, "count": 2 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "runMicrotasks",
+      "ranges": [{ "startOffset": 11076, "endOffset": 11105, "count": 6 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "hasTickScheduled",
+      "ranges": [{ "startOffset": 11129, "endOffset": 11162, "count": 8 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "setHasTickScheduled",
+      "ranges": [{ "startOffset": 11189, "endOffset": 11234, "count": 2 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "encode",
+      "ranges": [{ "startOffset": 11404, "endOffset": 11433, "count": 2 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "destructureError",
+      "ranges": [{ "startOffset": 12113, "endOffset": 12155, "count": 6 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "eventLoopHasMoreWork",
+      "ranges": [{ "startOffset": 12221, "endOffset": 12260, "count": 2 }],
+      "isBlockCoverage": true
+    }
+  ]
+}
