@@ -6,9 +6,9 @@ import {
 } from "../types.ts";
 
 import {
+  azureTerraformRootFileData,
   gcpTerraformRootFileData,
   terraformRootFileData,
-  azureTerraformRootFileData
 } from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
@@ -169,10 +169,10 @@ const getTerraformRootFile = async ({
 
     azureMainTerraformFileObject.locals[0].leader_node_ip =
       `\${azurerm_linux_virtual_machine.${leaderName}.private_ip}`;
-  
+
     azureMainTerraformFileObject.locals[0].location = region;
-    azureMainTerraformFileObject.output.leader_node_public_ip_address.value = 
-     `\${azurerm_linux_virtual_machine.${leaderName}.public_ip_address}`;
+    azureMainTerraformFileObject.output.leader_node_public_ip_address.value =
+      `\${azurerm_linux_virtual_machine.${leaderName}.public_ip_address}`;
     // add azure provider dependency
     terraformDependencies.required_providers[0].azurerm =
       azureTerraformProviderDependency;

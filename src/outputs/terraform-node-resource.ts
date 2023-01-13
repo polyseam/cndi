@@ -8,14 +8,14 @@ import {
   AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
+  AzureDeploymentTargetConfiguration,
+  AzureNodeItemSpec,
+  AzureTerraformNodeResource,
   BaseNodeItemSpec,
   DeploymentTargetConfiguration,
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   GCPTerraformNodeResource,
-  AzureTerraformNodeResource,
-  AzureNodeItemSpec,
-  AzureDeploymentTargetConfiguration,
   NodeRole,
 } from "../types.ts";
 
@@ -46,7 +46,8 @@ const getTerraformNodeResource = (
     case "azure":
       return getAzureNodeResource(
         node as AzureNodeItemSpec,
-        deployment_target_configuration.azure as AzureDeploymentTargetConfiguration,
+        deployment_target_configuration
+          .azure as AzureDeploymentTargetConfiguration,
         controllerName,
       );
 
@@ -70,60 +71,68 @@ const getAzureNodeResource = (
 
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
-  const machine_type = node?.machine_type || node?.instance_type || node?.instance_type
+  const machine_type = node?.machine_type || node?.instance_type ||
+    node?.instance_type;
   deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
-  const size = node?.size || node?.volume_size || node?.disk_size_gb || DEFAULT_SIZE;
+  const size = node?.size || node?.volume_size || node?.disk_size_gb ||
+    DEFAULT_SIZE;
 
-  const resource_group_name = "${azurerm_resource_group.cndi_resource_group.name}"
-  const location = "${azurerm_resource_group.cndi_resource_group.location}"
+  const resource_group_name =
+    "${azurerm_resource_group.cndi_resource_group.name}";
+  const location = "${azurerm_resource_group.cndi_resource_group.location}";
 
-  const admin_username = "ubuntu"
-  const network_interface_ids = ["${azurerm_network_interface.cndi_leader_node_network_interface.id}"]
-  const availability_set_id = "${azurerm_availability_set.cndi_availability_set.id}"
+  const admin_username = "ubuntu";
+  const network_interface_ids = [
+    "${azurerm_network_interface.cndi_leader_node_network_interface.id}",
+  ];
+  const availability_set_id =
+    "${azurerm_availability_set.cndi_availability_set.id}";
 
   const admin_ssh_key = [{
     username: "ubuntu",
-    public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}"
-  }]
+    public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}",
+  }];
 
   const os_disk = [{
     name: `\${cndi_${name}_disk}`,
     caching: "ReadWrite",
     storage_account_type: "StandardSSD_LRS",
-    disk_size_gb: size
-  }]
+    disk_size_gb: size,
+  }];
   const source_image_reference = [{
     publisher: "canonical",
     offer: image,
     sku: "20_04-lts-gen2",
-    version: "latest"
-  }]
+    version: "latest",
+  }];
   const tags = {
-    cndi_project_name: "${local.cndi_project_name}"
-  }
+    cndi_project_name: "${local.cndi_project_name}",
+  };
   const azurerm_network_interface_security_group_association = {
-    [`\${cndi_${name}_network_interface_security_group_association}`]:
-    {
-      network_interface_id: `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
-      network_security_group_id: "${azurerm_network_security_group.cndi_network_security_group.id}",
+    [`\${cndi_${name}_network_interface_security_group_association}`]: {
+      network_interface_id:
+        `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+      network_security_group_id:
+        "${azurerm_network_security_group.cndi_network_security_group.id}",
     },
-  }
+  };
   const azurerm_network_interface_backend_address_pool_association = {
-    [`\${cndi_${name}_load_balancer_address_pool_association}`]:
-    {
-      backend_address_pool_id: "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+    [`\${cndi_${name}_load_balancer_address_pool_association}`]: {
+      backend_address_pool_id:
+        "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
       ip_configuration_name: `\${cndi_${name}_network_interface_ip_config}`,
-      network_interface_id: `\${azurerm_network_interface.cndi_${name}_network_interface.id}`
-    }
-  }
+      network_interface_id:
+        `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+    },
+  };
   const azurerm_network_interface = {
-    [`\${cndi_${name}_network_interface}`]:
-    {
+    [`\${cndi_${name}_network_interface}`]: {
       ip_configuration: [
         {
           name: `\${cndi_${name}_network_interface_ip_config}`,
           private_ip_address_allocation: "Dynamic",
-          public_ip_address_id: `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
+          public_ip_address_id:
+            `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
           subnet_id: "${azurerm_subnet.cndi_subnet.id}",
         },
       ],
@@ -132,12 +141,9 @@ const getAzureNodeResource = (
       resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
-
-  }
-  const azurerm_public_ip =
-  {
-    [`\${cndi_${name}_public_ip}`]:
-    {
+  };
+  const azurerm_public_ip = {
+    [`\${cndi_${name}_public_ip}`]: {
       allocation_method: "Static",
       location: "${azurerm_resource_group.cndi_resource_group.location}",
       name: `\${cndi_${name}_public_ip}`,
@@ -145,8 +151,7 @@ const getAzureNodeResource = (
       sku: "Standard",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
-
-  }
+  };
 
   const nodeResource: AzureTerraformNodeResource = {
     resource: {
@@ -168,7 +173,7 @@ const getAzureNodeResource = (
       azurerm_network_interface_security_group_association,
       azurerm_network_interface_backend_address_pool_association,
       azurerm_network_interface,
-      azurerm_public_ip
+      azurerm_public_ip,
     },
   };
 
@@ -178,7 +183,8 @@ const getAzureNodeResource = (
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[name].user_data = user_data;
+    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
+      .user_data = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -198,11 +204,12 @@ const getAzureNodeResource = (
 
     const controllerNodeResourceObj = { ...nodeResource };
     controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
-    .depends_on = [
-      `azurerm_linux_virtual_machine.${leaderName}`,
-    ];
+      .depends_on = [
+        `azurerm_linux_virtual_machine.${leaderName}`,
+      ];
 
-    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name].user_data = user_data;
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
+      .user_data = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
@@ -353,19 +360,19 @@ const getAWSNodeResource = (
   const target_id = `\${aws_instance.${name}.id}`;
   const aws_lb_target_group_attachment:
     AWSTerraformTargetGroupAttachmentResource = {
-    [`tg-https-target-${name}`]: [
-      {
-        target_group_arn: target_group_arn_https,
-        target_id,
-      },
-    ],
-    [`tg-http-target-${name}`]: [
-      {
-        target_group_arn: target_group_arn_http,
-        target_id,
-      },
-    ],
-  };
+      [`tg-https-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_https,
+          target_id,
+        },
+      ],
+      [`tg-http-target-${name}`]: [
+        {
+          target_group_arn: target_group_arn_http,
+          target_id,
+        },
+      ],
+    };
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
@@ -428,7 +435,5 @@ const getAWSNodeResource = (
     return controllerNodeResourceString;
   }
 };
-
-
 
 export default getTerraformNodeResource;

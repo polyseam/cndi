@@ -1,7 +1,7 @@
 import {
+  AzureTerraformRootFileData,
   GCPTerraformRootFileData,
   TerraformRootFileData,
-  AzureTerraformRootFileData
 } from "../../types.ts";
 
 const terraformRootFileData: TerraformRootFileData = {
@@ -738,19 +738,16 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
   provider: {
     random: [{}],
   },
-  output:
-  {
-    leader_node_public_ip_address:
-    {
-      value: "${azurerm_linux_virtual_machine.cndi_leader_node.public_ip_address}",
+  output: {
+    leader_node_public_ip_address: {
+      value:
+        "${azurerm_linux_virtual_machine.cndi_leader_node.public_ip_address}",
     },
 
-    tls_private_key:
-    {
+    tls_private_key: {
       sensitive: true,
       value: "${tls_private_key.cndi_node_ssh_key.private_key_pem}",
     },
-
   },
 
   terraform: [
@@ -806,99 +803,98 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
   },
   resource: [
     {
-      azurerm_resource_group:
-      {
-        cndi_resource_group:
-          { location: "${local.location}", name: "${local.cndi_project_name}", tags: { cndi_project_name: "${local.cndi_project_name}" } },
-      },
-      azurerm_availability_set:
-      {
-        cndi_availability_set:
-        {
-          location: "${azurerm_resource_group.cndi_resource_group.location}",
-          name: "cndi_availability_set",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" }
+      azurerm_resource_group: {
+        cndi_resource_group: {
+          location: "${local.location}",
+          name: "${local.cndi_project_name}",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      azurerm_virtual_network:
-      {
-        cndi_virtual_network:
-        {
+      azurerm_availability_set: {
+        cndi_availability_set: {
+          location: "${azurerm_resource_group.cndi_resource_group.location}",
+          name: "cndi_availability_set",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      azurerm_virtual_network: {
+        cndi_virtual_network: {
           address_space: ["10.0.0.0/16"],
           location: "${azurerm_resource_group.cndi_resource_group.location}",
           name: "cndi_virtual_network",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" }
-        }
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
       },
       azurerm_subnet: {
-        cndi_subnet:
-        {
+        cndi_subnet: {
           address_prefixes: ["10.0.0.0/24"],
           name: "cndi_subnet",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-          virtual_network_name: "${azurerm_virtual_network.cndi_virtual_network.name}",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          virtual_network_name:
+            "${azurerm_virtual_network.cndi_virtual_network.name}",
         },
       },
       azurerm_public_ip: {
-        cndi_load_balancer_public_ip:
-        {
+        cndi_load_balancer_public_ip: {
           allocation_method: "Static",
           location: "${azurerm_resource_group.cndi_resource_group.location}",
           name: "cndi_load_balancer_public_ip",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
           sku: "Standard",
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      azurerm_lb:
-      {
-        cndi_load_balancer:
-        {
+      azurerm_lb: {
+        cndi_load_balancer: {
           frontend_ip_configuration: [
             {
               name: "cndi_load_balancer_public_ip_address",
-              public_ip_address_id: "${azurerm_public_ip.cndi_load_balancer_public_ip.id}",
+              public_ip_address_id:
+                "${azurerm_public_ip.cndi_load_balancer_public_ip.id}",
             },
           ],
           location: "${azurerm_resource_group.cndi_resource_group.location}",
           name: "cndi_load_balancer",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
           sku: "Standard",
           sku_tier: "Regional",
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      azurerm_lb_probe:
-      {
-        cndi_load_balancer_http_health_probe:
-        {
+      azurerm_lb_probe: {
+        cndi_load_balancer_http_health_probe: {
           loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
           name: "cndi_load_balancer_http_health_probe",
           port: 80,
           protocol: "Tcp",
         },
-        cndi_load_balancer_https_health_probe:
-        {
+        cndi_load_balancer_https_health_probe: {
           loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
           name: "cndi_load_balancer_https_health_probe",
           port: 443,
         },
       },
-      azurerm_lb_rule:
-      {
+      azurerm_lb_rule: {
         HTTP: [
           {
             backend_address_pool_ids: [
               "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
             ],
             backend_port: 80,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 80,
             loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
             name: "HTTP",
-            probe_id: "${azurerm_lb_probe.cndi_load_balancer_http_health_probe.id}",
+            probe_id:
+              "${azurerm_lb_probe.cndi_load_balancer_http_health_probe.id}",
             protocol: "Tcp",
           },
         ],
@@ -908,11 +904,13 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
               "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
             ],
             backend_port: 443,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 443,
             loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
             name: "HTTPS",
-            probe_id: "${azurerm_lb_probe.cndi_load_balancer_https_health_probe.id}",
+            probe_id:
+              "${azurerm_lb_probe.cndi_load_balancer_https_health_probe.id}",
             protocol: "Tcp",
           },
         ],
@@ -922,7 +920,8 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
               "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
             ],
             backend_port: 22,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 22,
             loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
             name: "SSH",
@@ -930,21 +929,18 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           },
         ],
       },
-      azurerm_lb_backend_address_pool:
-      {
-        cndi_load_balancer_address_pool:
-        {
+      azurerm_lb_backend_address_pool: {
+        cndi_load_balancer_address_pool: {
           loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
           name: "cndi_load_balancer_address_pool",
         },
       },
-      azurerm_network_security_group:
-      {
-        cndi_network_security_group:
-        {
+      azurerm_network_security_group: {
+        cndi_network_security_group: {
           location: "${azurerm_resource_group.cndi_resource_group.location}",
           name: "cndi_network_security_group",
-          resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
           security_rule: [
             {
               access: "Allow",
@@ -1004,11 +1000,17 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      random_password:
-        { generated_token: [{ length: 32, special: false, upper: false }] },
-      tls_private_key:
-        { cndi_node_ssh_key: { algorithm: "RSA", rsa_bits: 4096 } },
-    }
+      random_password: {
+        generated_token: [{ length: 32, special: false, upper: false }],
+      },
+      tls_private_key: {
+        cndi_node_ssh_key: { algorithm: "RSA", rsa_bits: 4096 },
+      },
+    },
   ],
 };
-export { gcpTerraformRootFileData, terraformRootFileData, azureTerraformRootFileData };
+export {
+  azureTerraformRootFileData,
+  gcpTerraformRootFileData,
+  terraformRootFileData,
+};
