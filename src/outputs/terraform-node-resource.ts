@@ -95,8 +95,9 @@ const getAzureNodeResource = (
   const location = "${azurerm_resource_group.cndi_resource_group.location}";
 
   const admin_username = "ubuntu";
+
   const network_interface_ids = [
-    "${azurerm_network_interface.cndi_leader_node_network_interface.id}",
+    `\${azurerm_network_interface.${name}_network_interface.id}`,
   ];
 
   const availability_set_id =
