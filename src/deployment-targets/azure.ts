@@ -4,7 +4,7 @@ import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
 const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
-  const AZURE_REGION = "useast";
+  const AZURE_REGION = "eastus";
   const AZURE_CLIENT_SECRET = "";
   const AZURE_CLIENT_ID = "";
   const AZURE_TENANT_ID = "";
