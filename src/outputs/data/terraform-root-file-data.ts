@@ -723,7 +723,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
 const azureTerraformRootFileData: AzureTerraformRootFileData = {
   locals: [
     {
-      location: "eastus",
+      location: "",
       cndi_project_name: "",
       leader_node_ip: "",
       bootstrap_token: "${random_password.generated_token.result}",
