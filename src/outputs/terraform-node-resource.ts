@@ -67,7 +67,7 @@ const getAzureNodeResource = (
 ) => {
   const { name, role } = node;
   const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
-  const DEFAULT_MACHINE_TYPE = "Standard_D2s_v3"; // The machine type to create.
+  const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
   const DEFAULT_SIZE = 130; // The size of the image in gigabytes\
 
   const image = node?.image || deployment_target_configuration?.image ||
