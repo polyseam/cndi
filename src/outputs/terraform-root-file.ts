@@ -240,8 +240,6 @@ const getTerraformRootFile = async ({
       `\${azurerm_linux_virtual_machine.${leaderName}.private_ip_address}`;
 
     azureMainTerraformFileObject.locals[0].location = region;
-    azureMainTerraformFileObject.output.leader_node_public_ip_address.value =
-      `\${azurerm_linux_virtual_machine.${leaderName}.public_ip_address}`;
     // add azure provider dependency
     terraformDependencies.required_providers[0].azurerm =
       azureTerraformProviderDependency;
