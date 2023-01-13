@@ -421,7 +421,7 @@ interface AWSTerraformVPCResource {
 interface DeploymentTargetConfiguration {
   aws: AWSDeploymentTargetConfiguration;
   gcp: unknown;
-  azure: unknown;
+  azure: AzureDeploymentTargetConfiguration;
 }
 
 // incomplete type, config will have more options
@@ -612,7 +612,6 @@ interface GCPTerraformRootFileData {
   };
 }
 
-
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
@@ -645,7 +644,7 @@ interface AzureTerraformNodeResource {
           storage_account_type: string
         }>
         resource_group_name: string
-        size: string
+        size: any
         source_image_reference: Array<{
           offer: string
           publisher: string
@@ -655,7 +654,8 @@ interface AzureTerraformNodeResource {
         tags: {
           cndi_project_name: string
         }
-        user_data: string
+        depends_on?: [string]
+        user_data?: string
       };
     }
     azurerm_network_interface_security_group_association: AzureTerraformNetworkInterfaceSecurityGroupAssociationResource
@@ -1280,5 +1280,8 @@ export type {
   SealedSecretsKeys,
   TerraformDependencies,
   TerraformRootFileData,
-  AzureTerraformRootFileData
+  AzureTerraformRootFileData,
+  AzureTerraformNodeResource,
+  AzureNodeItemSpec,
+  AzureDeploymentTargetConfiguration,
 };

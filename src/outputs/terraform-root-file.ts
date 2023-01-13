@@ -8,13 +8,14 @@ import {
 import {
   gcpTerraformRootFileData,
   terraformRootFileData,
+  azureTerraformRootFileData
 } from "./data/terraform-root-file-data.ts";
 import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
-
+const DEFAULT_AZURE_REGION = "eastus";
 const terraformDependencies: TerraformDependencies = {
   required_providers: [
     {
@@ -31,12 +32,14 @@ const awsTerraformProviderDependency = {
   source: "hashicorp/aws",
   version: "~> 4.16",
 };
-
 const googleTerraformProviderDependency = {
   source: "hashicorp/google",
   version: "~> 4.44",
 };
-
+const azureTerraformProviderDependency = {
+  source: "hashicorp/azurerm",
+  version: "~> 3.0.2",
+};
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
@@ -159,10 +162,28 @@ const getTerraformRootFile = async ({
     awsMainTerraformFileObject.terraform = [terraformDependencies];
     return getPrettyJSONString(awsMainTerraformFileObject);
   }
+  // add parts of setup-cndi.tf file that are required if kind===azure
+  if (requiredProviders.has("azure")) {
+    const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
+    const region = Deno.env.get("AZURE_REGION") || DEFAULT_AZURE_REGION;
+
+    azureMainTerraformFileObject.locals[0].leader_node_ip =
+      `\${azurerm_linux_virtual_machine.${leaderName}.private_ip}`;
+  
+    azureMainTerraformFileObject.locals[0].location = region;
+    azureMainTerraformFileObject.output.leader_node_public_ip_address.value = 
+     `\${azurerm_linux_virtual_machine.${leaderName}.public_ip_address}`;
+    // add azure provider dependency
+    terraformDependencies.required_providers[0].azurerm =
+      azureTerraformProviderDependency;
+
+    azureMainTerraformFileObject.terraform = [terraformDependencies];
+    return getPrettyJSONString(azureMainTerraformFileObject);
+  }
 
   console.log(
     terraformRootFileLabel,
-    'required providers must contain either "gcp" or "aws"',
+    'required providers must contain either "gcp", "aws" or azure',
   );
   Deno.exit(1);
 };
