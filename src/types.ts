@@ -869,7 +869,7 @@ interface AzureTerraformRootFileData {
     azurerm?: Array<{
       client_id: string;
       client_secret: string;
-      features: [Record<string | number | symbol, never>];
+      features: Record<string | number | symbol, never>;
       subscription_id: string;
       tenant_id: string;
     }>;

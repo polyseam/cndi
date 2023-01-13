@@ -59,6 +59,7 @@ const getTerraformNodeResource = (
       Deno.exit(1);
   }
 };
+
 const getAzureNodeResource = (
   node: AzureNodeItemSpec,
   deployment_target_configuration: AzureDeploymentTargetConfiguration,
@@ -72,43 +73,64 @@ const getAzureNodeResource = (
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
 
-  const machine_type = node?.machine_type || node?.instance_type ||
-    node?.instance_type || DEFAULT_MACHINE_TYPE;
+  let machine_type = node?.machine_type ||
+    node?.instance_type ||
+    DEFAULT_MACHINE_TYPE;
+
+  let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
+
+  if (node?.size && typeof node.size === "string") {
+    machine_type = node.size;
+  }
+
+  if (node?.size && typeof node.size === "number") {
+    disk_size_gb = node.size;
+  }
+
   deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
-  const size = node?.size || node?.volume_size || node?.disk_size_gb ||
-    DEFAULT_SIZE;
 
   const resource_group_name =
     "${azurerm_resource_group.cndi_resource_group.name}";
+
   const location = "${azurerm_resource_group.cndi_resource_group.location}";
 
   const admin_username = "ubuntu";
   const network_interface_ids = [
     "${azurerm_network_interface.cndi_leader_node_network_interface.id}",
   ];
+
   const availability_set_id =
     "${azurerm_availability_set.cndi_availability_set.id}";
 
-  const admin_ssh_key = [{
-    username: "ubuntu",
-    public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}",
-  }];
+  const admin_ssh_key = [
+    {
+      username: "ubuntu",
+      public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}",
+    },
+  ];
 
-  const os_disk = [{
-    name: `\${cndi_${name}_disk}`,
-    caching: "ReadWrite",
-    storage_account_type: "StandardSSD_LRS",
-    disk_size_gb: size,
-  }];
-  const source_image_reference = [{
-    publisher: "canonical",
-    offer: image,
-    sku: "20_04-lts-gen2",
-    version: "latest",
-  }];
+  const os_disk = [
+    {
+      name: `\${cndi_${name}_disk}`,
+      caching: "ReadWrite",
+      storage_account_type: "StandardSSD_LRS",
+      disk_size_gb,
+    },
+  ];
+
+  const source_image_reference = [
+    {
+      publisher: "canonical",
+      offer: image,
+      sku: "20_04-lts-gen2",
+      version: "latest",
+    },
+  ];
+
   const tags = {
     cndi_project_name: "${local.cndi_project_name}",
   };
+
   const azurerm_network_interface_security_group_association = {
     [`\${cndi_${name}_network_interface_security_group_association}`]: {
       network_interface_id:
@@ -117,6 +139,7 @@ const getAzureNodeResource = (
         "${azurerm_network_security_group.cndi_network_security_group.id}",
     },
   };
+
   const azurerm_network_interface_backend_address_pool_association = {
     [`\${cndi_${name}_load_balancer_address_pool_association}`]: {
       backend_address_pool_id:
@@ -126,6 +149,7 @@ const getAzureNodeResource = (
         `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
     },
   };
+
   const azurerm_network_interface = {
     [`\${cndi_${name}_network_interface}`]: {
       ip_configuration: [
@@ -143,6 +167,7 @@ const getAzureNodeResource = (
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
   };
+
   const azurerm_public_ip = {
     [`\${cndi_${name}_public_ip}`]: {
       allocation_method: "Static",
@@ -184,8 +209,9 @@ const getAzureNodeResource = (
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
-      .user_data = user_data;
+    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].user_data = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -204,13 +230,13 @@ const getAzureNodeResource = (
       '${base64encode(templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"}))}';
 
     const controllerNodeResourceObj = { ...nodeResource };
-    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
-      .depends_on = [
-        `azurerm_linux_virtual_machine.${leaderName}`,
-      ];
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].depends_on = [`azurerm_linux_virtual_machine.${leaderName}`];
 
-    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
-      .user_data = user_data;
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].user_data = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
@@ -229,8 +255,10 @@ const getGCPNodeResource = (
   const { name, role } = node;
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
-  const machine_type = node?.machine_type || node?.instance_type ||
-    deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
+  const machine_type = node?.machine_type ||
+    node?.instance_type ||
+    deployment_target_configuration?.machine_type ||
+    DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
   const DEFAULT_SIZE = 100; // The size of the image in gigabytes
   const size = node?.size || node?.volume_size || DEFAULT_SIZE;
@@ -287,8 +315,9 @@ const getGCPNodeResource = (
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.google_compute_instance[name]
-      .metadata["user-data"] = user_data;
+    leaderNodeResourceObj.resource.google_compute_instance[name].metadata[
+      "user-data"
+    ] = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -308,13 +337,13 @@ const getGCPNodeResource = (
 
     const controllerNodeResourceObj = { ...nodeResource };
 
-    controllerNodeResourceObj.resource.google_compute_instance[name]
-      .depends_on = [
-        `google_compute_instance.${leaderName}`,
-      ];
+    controllerNodeResourceObj.resource.google_compute_instance[
+      name
+    ].depends_on = [`google_compute_instance.${leaderName}`];
 
-    controllerNodeResourceObj.resource.google_compute_instance[name]
-      .metadata["user-data"] = user_data;
+    controllerNodeResourceObj.resource.google_compute_instance[name].metadata[
+      "user-data"
+    ] = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
@@ -334,7 +363,8 @@ const getAWSNodeResource = (
   const { name } = node;
   const role = node.role as NodeRole;
   const ami = node?.ami || deployment_target_configuration?.ami || DEFAULT_AMI;
-  const instance_type = node?.instance_type || node?.machine_type ||
+  const instance_type = node?.instance_type ||
+    node?.machine_type ||
     deployment_target_configuration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 

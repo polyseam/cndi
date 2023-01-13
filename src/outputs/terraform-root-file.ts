@@ -99,8 +99,8 @@ const getTerraformRootFile = async ({
     gcpMainTerraformFileObject.locals[0].region = region;
 
     gcpMainTerraformFileObject.resource[0].google_compute_instance_group
-      .cndi_cluster.instances = nodeNames.map(
-        (name) => `\${google_compute_instance.${name}.self_link}`,
+      .cndi_cluster.instances = nodeNames.map((name) =>
+        `\${google_compute_instance.${name}.self_link}`
       );
 
     gcpMainTerraformFileObject.provider.google = [
@@ -144,7 +144,11 @@ const getTerraformRootFile = async ({
     });
 
     awsMainTerraformFileObject.locals[0].availability_zones =
-      `\${sort(setintersection(${availabilityZoneKeys.join(",")}))}`;
+      `\${sort(setintersection(${
+        availabilityZoneKeys.join(
+          ",",
+        )
+      }))}`;
 
     awsMainTerraformFileObject.locals[0].leader_node_ip =
       `\${aws_instance.${leaderName}.private_ip}`;
@@ -164,7 +168,67 @@ const getTerraformRootFile = async ({
   }
   // add parts of setup-cndi.tf file that are required if kind===azure
   if (requiredProviders.has("azure")) {
+    const client_id = Deno.env.get("AZURE_CLIENT_ID");
+    const client_secret = Deno.env.get("AZURE_CLIENT_SECRET");
+    const subscription_id = Deno.env.get("AZURE_SUBSCRIPTION_ID");
+    const tenant_id = Deno.env.get("AZURE_TENANT_ID");
+
+    if (!client_id) {
+      console.log(
+        terraformRootFileLabel,
+        '"AZURE_CLIENT_ID"',
+        brightRed(`is undefined\nPlease set`),
+        '"AZURE_CLIENT_ID"',
+        brightRed("and try again\n"),
+      );
+      Deno.exit(1);
+    }
+
+    if (!client_secret) {
+      console.log(
+        terraformRootFileLabel,
+        '"AZURE_CLIENT_SECRET"',
+        brightRed(`is undefined\nPlease set`),
+        '"AZURE_CLIENT_SECRET"',
+        brightRed("and try again\n"),
+      );
+      Deno.exit(1);
+    }
+
+    if (!subscription_id) {
+      console.log(
+        terraformRootFileLabel,
+        '"AZURE_SUBSCRIPTION_ID"',
+        brightRed(`is undefined\nPlease set`),
+        '"AZURE_SUBSCRIPTION_ID"',
+        brightRed("and try again\n"),
+      );
+      Deno.exit(1);
+    }
+
+    if (!tenant_id) {
+      console.log(
+        terraformRootFileLabel,
+        '"AZURE_TENANT_ID"',
+        brightRed(`is undefined\nPlease set`),
+        '"AZURE_TENANT_ID"',
+        brightRed("and try again\n"),
+      );
+      Deno.exit(1);
+    }
+
     const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
+
+    azureMainTerraformFileObject.provider.azurerm = [
+      {
+        features: {},
+        client_id,
+        client_secret,
+        subscription_id,
+        tenant_id,
+      },
+    ];
+
     const region = Deno.env.get("AZURE_REGION") || DEFAULT_AZURE_REGION;
 
     azureMainTerraformFileObject.locals[0].leader_node_ip =
