@@ -13,6 +13,9 @@ import {
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   GCPTerraformNodeResource,
+  AzureTerraformNodeResource,
+  AzureNodeItemSpec,
+  AzureDeploymentTargetConfiguration,
   NodeRole,
 } from "../types.ts";
 
@@ -40,6 +43,12 @@ const getTerraformNodeResource = (
         deployment_target_configuration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
       );
+    case "azure":
+      return getAzureNodeResource(
+        node as AzureNodeItemSpec,
+        deployment_target_configuration.azure as AzureDeploymentTargetConfiguration,
+        controllerName,
+      );
 
     default:
       console.log(
@@ -49,7 +58,159 @@ const getTerraformNodeResource = (
       Deno.exit(1);
   }
 };
+const getAzureNodeResource = (
+  node: AzureNodeItemSpec,
+  deployment_target_configuration: AzureDeploymentTargetConfiguration,
+  leaderName: string,
+) => {
+  const { name, role } = node;
+  const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
+  const DEFAULT_MACHINE_TYPE = "Standard_D2s_v3"; // The machine type to create.
+  const DEFAULT_SIZE = 130; // The size of the image in gigabytes\
 
+  const image = node?.image || deployment_target_configuration?.image ||
+    DEFAULT_IMAGE;
+  const machine_type = node?.machine_type || node?.instance_type || node?.instance_type
+  deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
+  const size = node?.size || node?.volume_size || node?.disk_size_gb || DEFAULT_SIZE;
+
+  const resource_group_name = "${azurerm_resource_group.cndi_resource_group.name}"
+  const location = "${azurerm_resource_group.cndi_resource_group.location}"
+
+  const admin_username = "ubuntu"
+  const network_interface_ids = ["${azurerm_network_interface.cndi_leader_node_network_interface.id}"]
+  const availability_set_id = "${azurerm_availability_set.cndi_availability_set.id}"
+
+  const admin_ssh_key = [{
+    username: "ubuntu",
+    public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}"
+  }]
+
+  const os_disk = [{
+    name: `\${cndi_${name}_disk}`,
+    caching: "ReadWrite",
+    storage_account_type: "StandardSSD_LRS",
+    disk_size_gb: size
+  }]
+  const source_image_reference = [{
+    publisher: "canonical",
+    offer: image,
+    sku: "20_04-lts-gen2",
+    version: "latest"
+  }]
+  const tags = {
+    cndi_project_name: "${local.cndi_project_name}"
+  }
+  const azurerm_network_interface_security_group_association = {
+    [`\${cndi_${name}_network_interface_security_group_association}`]:
+    {
+      network_interface_id: `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+      network_security_group_id: "${azurerm_network_security_group.cndi_network_security_group.id}",
+    },
+  }
+  const azurerm_network_interface_backend_address_pool_association = {
+    [`\${cndi_${name}_load_balancer_address_pool_association}`]:
+    {
+      backend_address_pool_id: "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+      ip_configuration_name: `\${cndi_${name}_network_interface_ip_config}`,
+      network_interface_id: `\${azurerm_network_interface.cndi_${name}_network_interface.id}`
+    }
+  }
+  const azurerm_network_interface = {
+    [`\${cndi_${name}_network_interface}`]:
+    {
+      ip_configuration: [
+        {
+          name: `\${cndi_${name}_network_interface_ip_config}`,
+          private_ip_address_allocation: "Dynamic",
+          public_ip_address_id: `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
+          subnet_id: "${azurerm_subnet.cndi_subnet.id}",
+        },
+      ],
+      location: "${azurerm_resource_group.cndi_resource_group.location}",
+      name: `\${cndi_${name}_network_interface}`,
+      resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+      tags: { cndi_project_name: "${local.cndi_project_name}" },
+    },
+
+  }
+  const azurerm_public_ip =
+  {
+    [`\${cndi_${name}_public_ip}`]:
+    {
+      allocation_method: "Static",
+      location: "${azurerm_resource_group.cndi_resource_group.location}",
+      name: `\${cndi_${name}_public_ip}`,
+      resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+      sku: "Standard",
+      tags: { cndi_project_name: "${local.cndi_project_name}" },
+    },
+
+  }
+
+  const nodeResource: AzureTerraformNodeResource = {
+    resource: {
+      azurerm_linux_virtual_machine: {
+        [name]: {
+          admin_ssh_key,
+          admin_username,
+          availability_set_id,
+          location,
+          name,
+          network_interface_ids,
+          os_disk,
+          resource_group_name,
+          size: machine_type,
+          source_image_reference,
+          tags,
+        },
+      },
+      azurerm_network_interface_security_group_association,
+      azurerm_network_interface_backend_address_pool_association,
+      azurerm_network_interface,
+      azurerm_public_ip
+    },
+  };
+
+  if (role === "leader") {
+    const user_data =
+      '${base64encode(templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" }))}';
+
+    const leaderNodeResourceObj = { ...nodeResource };
+
+    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[name].user_data = user_data;
+
+    const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
+
+    return leaderNodeResourceString;
+  } else {
+    // if the role is non-null and also not controller, warn the user and run default
+    if (role?.length && role !== "controller") {
+      console.log(
+        terraformNodeResourceLabel,
+        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+      );
+      console.log(yellow("defaulting node role to"), '"controller"\n');
+    }
+
+    const user_data =
+      '${base64encode(templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"}))}';
+
+    const controllerNodeResourceObj = { ...nodeResource };
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name]
+    .depends_on = [
+      `azurerm_linux_virtual_machine.${leaderName}`,
+    ];
+
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[name].user_data = user_data;
+
+    const controllerNodeResourceString = getPrettyJSONString(
+      controllerNodeResourceObj,
+    );
+
+    return controllerNodeResourceString;
+  }
+};
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deployment_target_configuration: GCPDeploymentTargetConfiguration,
@@ -192,19 +353,19 @@ const getAWSNodeResource = (
   const target_id = `\${aws_instance.${name}.id}`;
   const aws_lb_target_group_attachment:
     AWSTerraformTargetGroupAttachmentResource = {
-      [`tg-https-target-${name}`]: [
-        {
-          target_group_arn: target_group_arn_https,
-          target_id,
-        },
-      ],
-      [`tg-http-target-${name}`]: [
-        {
-          target_group_arn: target_group_arn_http,
-          target_id,
-        },
-      ],
-    };
+    [`tg-https-target-${name}`]: [
+      {
+        target_group_arn: target_group_arn_https,
+        target_id,
+      },
+    ],
+    [`tg-http-target-${name}`]: [
+      {
+        target_group_arn: target_group_arn_http,
+        target_id,
+      },
+    ],
+  };
 
   const nodeResource: AWSTerraformNodeResource = {
     resource: {
@@ -267,5 +428,7 @@ const getAWSNodeResource = (
     return controllerNodeResourceString;
   }
 };
+
+
 
 export default getTerraformNodeResource;
