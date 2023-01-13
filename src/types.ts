@@ -630,11 +630,9 @@ interface AzureTerraformNodeResource {
   resource: {
     azurerm_linux_virtual_machine: {
       [name: string]: {
-        admin_ssh_key: Array<{
-          public_key: string;
-          username: string;
-        }>;
         admin_username: string;
+        admin_password: string;
+        disable_password_authentication: boolean;
         availability_set_id: string;
         location: string;
         name: string;
