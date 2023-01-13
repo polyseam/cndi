@@ -105,13 +105,6 @@ const getAzureNodeResource = (
   const availability_set_id =
     "${azurerm_availability_set.cndi_availability_set.id}";
 
-  const admin_ssh_key = [
-    {
-      username: "ubuntu",
-      public_key: "${tls_private_key.cndi_node_ssh_key.public_key_openssh}",
-    },
-  ];
-
   const os_disk = [
     {
       name: `cndi_${name}_disk`,
