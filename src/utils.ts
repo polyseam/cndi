@@ -99,9 +99,11 @@ function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
     case NODE_KIND.aws:
-      return ["instance_type", "m5a.xlarge"];
+      return ["instance_type", "m5a.large"];
     case NODE_KIND.gcp:
-      return ["machine_type", "n2-standard-4"];
+      return ["machine_type", "n2-standard-2"];
+    case NODE_KIND.azure:
+      return ["machine_type", "Standard_D4s_v3"];
     default:
       console.log("Unknown kind: " + kind);
       Deno.exit(1);

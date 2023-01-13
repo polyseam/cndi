@@ -251,7 +251,7 @@ const getGCPNodeResource = (
   leaderName: string,
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
-  const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
+  const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const { name, role } = node;
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
@@ -359,7 +359,7 @@ const getAWSNodeResource = (
   leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
-  const DEFAULT_INSTANCE_TYPE = "t3.medium";
+  const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const { name } = node;
   const role = node.role as NodeRole;
   const ami = node?.ami || deployment_target_configuration?.ami || DEFAULT_AMI;
