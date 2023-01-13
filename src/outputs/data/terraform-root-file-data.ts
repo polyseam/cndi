@@ -514,7 +514,6 @@ const terraformRootFileData: TerraformRootFileData = {
     ],
   },
 };
-
 const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   locals: [
     {
@@ -737,17 +736,6 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
   ],
   provider: {
     random: [{}],
-  },
-  output: {
-    leader_node_public_ip_address: {
-      value:
-        "${azurerm_linux_virtual_machine.cndi_leader_node.public_ip_address}",
-    },
-
-    tls_private_key: {
-      sensitive: true,
-      value: "${tls_private_key.cndi_node_ssh_key.private_key_pem}",
-    },
   },
 
   terraform: [
@@ -1002,9 +990,6 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
       },
       random_password: {
         generated_token: [{ length: 32, special: false, upper: false }],
-      },
-      tls_private_key: {
-        cndi_node_ssh_key: { algorithm: "RSA", rsa_bits: 4096 },
       },
     },
   ],
