@@ -133,7 +133,7 @@ const getAzureNodeResource = (
   };
 
   const azurerm_network_interface_security_group_association = {
-    [`\${cndi_${name}_network_interface_security_group_association}`]: {
+    [`cndi_${name}_network_interface_security_group_association`]: {
       network_interface_id:
         `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
       network_security_group_id:
@@ -142,7 +142,7 @@ const getAzureNodeResource = (
   };
 
   const azurerm_network_interface_backend_address_pool_association = {
-    [`\${cndi_${name}_load_balancer_address_pool_association}`]: {
+    [`cndi_${name}_load_balancer_address_pool_association`]: {
       backend_address_pool_id:
         "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
       ip_configuration_name: `cndi_${name}_network_interface_ip_config`,
@@ -152,7 +152,7 @@ const getAzureNodeResource = (
   };
 
   const azurerm_network_interface = {
-    [`\${cndi_${name}_network_interface}`]: {
+    [`cndi_${name}_network_interface`]: {
       ip_configuration: [
         {
           name: `cndi_${name}_network_interface_ip_config`,
@@ -170,7 +170,7 @@ const getAzureNodeResource = (
   };
 
   const azurerm_public_ip = {
-    [`\${cndi_${name}_public_ip}`]: {
+    [`cndi_${name}_public_ip`]: {
       allocation_method: "Static",
       location: "${azurerm_resource_group.cndi_resource_group.location}",
       name: `cndi_${name}_public_ip`,
