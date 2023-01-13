@@ -112,7 +112,7 @@ const getAzureNodeResource = (
 
   const os_disk = [
     {
-      name: `\${cndi_${name}_disk}`,
+      name: `cndi_${name}_disk`,
       caching: "ReadWrite",
       storage_account_type: "StandardSSD_LRS",
       disk_size_gb,
@@ -145,7 +145,7 @@ const getAzureNodeResource = (
     [`\${cndi_${name}_load_balancer_address_pool_association}`]: {
       backend_address_pool_id:
         "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
-      ip_configuration_name: `\${cndi_${name}_network_interface_ip_config}`,
+      ip_configuration_name: `cndi_${name}_network_interface_ip_config`,
       network_interface_id:
         `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
     },
@@ -155,7 +155,7 @@ const getAzureNodeResource = (
     [`\${cndi_${name}_network_interface}`]: {
       ip_configuration: [
         {
-          name: `\${cndi_${name}_network_interface_ip_config}`,
+          name: `cndi_${name}_network_interface_ip_config`,
           private_ip_address_allocation: "Dynamic",
           public_ip_address_id:
             `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
@@ -163,7 +163,7 @@ const getAzureNodeResource = (
         },
       ],
       location: "${azurerm_resource_group.cndi_resource_group.location}",
-      name: `\${cndi_${name}_network_interface}`,
+      name: `cndi_${name}_network_interface`,
       resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
@@ -173,7 +173,7 @@ const getAzureNodeResource = (
     [`\${cndi_${name}_public_ip}`]: {
       allocation_method: "Static",
       location: "${azurerm_resource_group.cndi_resource_group.location}",
-      name: `\${cndi_${name}_public_ip}`,
+      name: `cndi_${name}_public_ip`,
       resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
       sku: "Standard",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
