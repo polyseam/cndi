@@ -52,6 +52,7 @@ const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
   nodes,
+  cndi_project_name
 }: GetTerraformRootFileArgs): Promise<string> => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -219,6 +220,7 @@ const getTerraformRootFile = async ({
 
     const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
 
+    azureMainTerraformFileObject.locals[0].cndi_project_name = cndi_project_name;
     azureMainTerraformFileObject.provider.azurerm = [
       {
         features: {},

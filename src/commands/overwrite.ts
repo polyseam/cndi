@@ -210,6 +210,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
   const terraformRootFile = await getTerraformRootFile({
+    cndi_project_name: config.project_name,
     leaderName: leader.name,
     requiredProviders,
     nodes,
