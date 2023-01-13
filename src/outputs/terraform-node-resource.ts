@@ -179,8 +179,9 @@ const getAzureNodeResource = (
     resource: {
       azurerm_linux_virtual_machine: {
         [name]: {
-          admin_ssh_key,
           admin_username,
+          admin_password,
+          disable_password_authentication,
           availability_set_id,
           location,
           name,
