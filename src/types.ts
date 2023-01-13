@@ -839,12 +839,7 @@ interface AzureTerraformNetworkInterfaceSecurityGroupResource {
     };
   };
 }
-interface AzureTerraformTlsPrivateKeyResource {
-  cndi_node_ssh_key: {
-    algorithm: string;
-    rsa_bits: number;
-  };
-}
+
 interface AzureTerraformRootFileData {
   locals: [
     {
@@ -872,18 +867,9 @@ interface AzureTerraformRootFileData {
       tenant_id: string;
     }>;
   };
-  output: {
-    leader_node_public_ip_address: {
-      value: string;
-    };
-    tls_private_key: {
-      sensitive: boolean;
-      value: string;
-    };
-  };
+
   resource: [
     {
-      tls_private_key: AzureTerraformTlsPrivateKeyResource;
       random_password: RandomTerraformRandomPasswordResource;
       azurerm_availability_set: AzureTerraformAvailabilitySetResource;
       azurerm_resource_group: AzureTerraformResourceGroupResource;
