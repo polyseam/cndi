@@ -1,9 +1,16 @@
-import { EnvObject, NodeKind } from "../types.ts";
+import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
-import { GetConfigurationFn, GetTemplateFn, Template } from "./Template.ts";
+import { getDefaultVmTypeForKind } from "../utils.ts";
+import {
+  GetConfigurationFn,
+  GetReadmeStringArgs,
+  GetTemplateFn,
+  Template,
+} from "./Template.ts";
+
+import getReadmeForProject from "../doc/readme-for-project.ts";
 
 interface AirflowTlsConfiguration {
   argocdDomainName: string;
@@ -12,11 +19,23 @@ interface AirflowTlsConfiguration {
   letsEncryptClusterIssuerEmailAddress: string;
 }
 
-const readmeBlock = `
-### dns setup
+function getAirflowTlsReadmeString({
+  project_name,
+  kind,
+}: GetReadmeStringArgs): string {
+  return `
+${getReadmeForProject({ project_name, kind })}
 
-To set up DNS and TLS you just need to login to your registrar and set 2 A records that point from your 2 application subdomains to the public IP address of your controller node.
+## airflow-tls
+
+This template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). 
+
+The default credentials for Airflow are:
+
+username: \`admin\`
+password: \`admin\`
 `.trim();
+}
 
 // airflowTlsTemplate.getEnv()
 const getEnv = async (interactive: boolean): Promise<EnvObject> => {
@@ -98,7 +117,7 @@ async function getAirflowTlsConfiguration(
 function getAirflowTlsTemplate(
   kind: NodeKind,
   input: AirflowTlsConfiguration,
-): string {
+): CNDIConfig {
   const {
     argocdDomainName,
     airflowDomainName,
@@ -107,31 +126,34 @@ function getAirflowTlsTemplate(
   } = input;
 
   const [vmTypeKey, vmTypeValue] = getDefaultVmTypeForKind(kind);
-  return getPrettyJSONString({
-    nodes: {
-      entries: [
-        {
-          name: "x-airflow-node",
-          kind,
-          role: "leader",
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "y-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-        {
-          name: "z-airflow-node",
-          kind,
-          [vmTypeKey]: vmTypeValue,
-          volume_size: 128,
-        },
-      ],
+  const volume_size = 128; //GiB
+  return {
+    infrastructure: {
+      cndi: {
+        nodes: [
+          {
+            name: "x-airflow-node",
+            kind,
+            role: NODE_ROLE.leader,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "y-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+          {
+            name: "z-airflow-node",
+            kind,
+            [vmTypeKey]: vmTypeValue,
+            volume_size,
+          },
+        ],
+      },
     },
-    cluster: {
+    cluster_manifests: {
       "git-credentials-secret": {
         apiVersion: "v1",
         kind: "Secret",
@@ -273,14 +295,14 @@ function getAirflowTlsTemplate(
         },
       },
     },
-  });
+  };
 }
 
 const airflowTlsTemplate = new Template("airflow-tls", {
   getEnv,
   getTemplate: getAirflowTlsTemplate as unknown as GetTemplateFn,
   getConfiguration: getAirflowTlsConfiguration as unknown as GetConfigurationFn,
-  readmeBlock,
+  getReadmeString: getAirflowTlsReadmeString,
 });
 
 export default airflowTlsTemplate;

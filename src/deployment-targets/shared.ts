@@ -1,7 +1,8 @@
 import {
   CNDIContext,
+  DEPLOYMENT_TARGET,
+  DeploymentTarget,
   EnvObject,
-  NodeKind,
   SealedSecretsKeys,
 } from "../types.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
@@ -27,7 +28,7 @@ interface CNDIContextWithGeneratedValues extends CNDIContext {
 
 const getCoreEnvObject = async (
   context: CNDIContextWithGeneratedValues,
-  kind: NodeKind,
+  deploymentTarget: DeploymentTarget,
 ): Promise<EnvObject> => {
   const {
     sealedSecretsKeys,
@@ -121,23 +122,23 @@ const getCoreEnvObject = async (
       : GIT_REPO,
   };
 
-  switch (kind) {
-    case "aws":
+  switch (deploymentTarget) {
+    case DEPLOYMENT_TARGET.aws:
       return {
         ...coreEnvObject,
         ...(await prepareAWSEnv(context.interactive)),
       };
-    case "gcp":
+    case DEPLOYMENT_TARGET.gcp:
       return {
         ...coreEnvObject,
         ...(await prepareGCPEnv(context.interactive)),
       };
     default:
-      console.log(brightRed(`kind "${kind}" is not yet supported`));
+      console.log(brightRed(`kind "${deploymentTarget}" is not yet supported`));
       Deno.exit(1);
   }
 };
 
-const availableDeploymentTargets = ["aws", "gcp"];
+const availableDeploymentTargets = Object.values(DEPLOYMENT_TARGET);
 
 export { availableDeploymentTargets, getCoreEnvObject };

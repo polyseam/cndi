@@ -5,36 +5,39 @@ import {
 } from "https://deno.land/std@0.157.0/fmt/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
-  AWSNodeEntrySpec,
+  AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   DeploymentTargetConfiguration,
   GCPDeploymentTargetConfiguration,
-  GCPNodeEntrySpec,
+  GCPNodeItemSpec,
   GCPTerraformNodeResource,
+  NodeRole,
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
 const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
 
 const getTerraformNodeResource = (
-  entry: BaseNodeEntrySpec,
-  deploymentTargetConfiguration: DeploymentTargetConfiguration,
+  node: BaseNodeItemSpec,
+  deployment_target_configuration: DeploymentTargetConfiguration,
   controllerName: string,
 ): string => {
-  const { kind } = entry;
+  const { kind } = node;
+
   switch (kind) {
     case "aws":
       return getAWSNodeResource(
-        entry as AWSNodeEntrySpec,
-        deploymentTargetConfiguration.aws as AWSDeploymentTargetConfiguration,
+        node as AWSNodeItemSpec,
+        deployment_target_configuration.aws as AWSDeploymentTargetConfiguration,
         controllerName,
       );
+
     case "gcp":
       return getGCPNodeResource(
-        entry as GCPNodeEntrySpec,
-        deploymentTargetConfiguration.aws as GCPDeploymentTargetConfiguration,
+        node as GCPNodeItemSpec,
+        deployment_target_configuration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
       );
 
@@ -46,21 +49,22 @@ const getTerraformNodeResource = (
       Deno.exit(1);
   }
 };
+
 const getGCPNodeResource = (
-  entry: GCPNodeEntrySpec,
-  deploymentTargetConfiguration: GCPDeploymentTargetConfiguration,
+  node: GCPNodeItemSpec,
+  deployment_target_configuration: GCPDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
-  const { name, role } = entry;
-  const image = entry?.image || deploymentTargetConfiguration?.image ||
+  const { name, role } = node;
+  const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
-  const machine_type = entry?.machine_type || entry?.instance_type ||
-    deploymentTargetConfiguration?.machine_type || DEFAULT_MACHINE_TYPE;
+  const machine_type = node?.machine_type || node?.instance_type ||
+    deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
   const DEFAULT_SIZE = 100; // The size of the image in gigabytes
-  const size = entry?.size || entry?.volume_size || DEFAULT_SIZE;
+  const size = node?.size || node?.volume_size || DEFAULT_SIZE;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
   const network_tier = "STANDARD";
   const network = "${google_compute_network.cndi_vpc_network.self_link}"; //The name of the network to attach this interface to.
@@ -152,22 +156,23 @@ const getGCPNodeResource = (
 };
 
 const getAWSNodeResource = (
-  entry: AWSNodeEntrySpec,
-  deploymentTargetConfiguration: AWSDeploymentTargetConfiguration,
+  node: AWSNodeItemSpec,
+  deployment_target_configuration: AWSDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "t3.medium";
-  const { name, role } = entry;
-  const ami = entry?.ami || deploymentTargetConfiguration?.ami || DEFAULT_AMI;
-  const instance_type = entry?.instance_type || entry?.machine_type ||
-    deploymentTargetConfiguration?.instance_type ||
+  const { name } = node;
+  const role = node.role as NodeRole;
+  const ami = node?.ami || deployment_target_configuration?.ami || DEFAULT_AMI;
+  const instance_type = node?.instance_type || node?.machine_type ||
+    deployment_target_configuration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 
   const DEFAULT_VOLUME_SIZE = 100;
   const delete_on_termination = false; // TODO: prove this is good
   const device_name = "/dev/sda1";
-  const volume_size = entry?.volume_size || entry?.size || DEFAULT_VOLUME_SIZE; //GiB
+  const volume_size = node?.volume_size || node?.size || DEFAULT_VOLUME_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
 
   // TODO: expose to user in cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
@@ -179,7 +184,8 @@ const getAWSNodeResource = (
       delete_on_termination,
     },
   ];
-  const subnet_id = "${aws_subnet.subnet.id}";
+
+  const subnet_id = `\${aws_subnet.subnet[0].id}`;
   const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
   const target_group_arn_https = "${aws_lb_target_group.tg-https.arn}";
   const target_group_arn_http = "${aws_lb_target_group.tg-http.arn}";

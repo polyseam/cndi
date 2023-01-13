@@ -1,13 +1,11 @@
-const coreReadmeBlock = `
-# my-cndi-project
-
+const coreReadmeSection = `
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
 
 ## files and directories
 
-### cndi/cluster
+### cndi/cluster_manifests
 
-All files in the [cndi/cluster](/cndi/cluster) folder are Kubernetes manifests. These are the files that will be applied to your Kubernetes cluster when it is deployed and ready using ArgoCD.
+All files in the [cndi/cluster_manifests](/cndi/cluster_manifests) folder are Kubernetes manifests. These are the files that will be applied to your Kubernetes cluster when it is deployed and ready using ArgoCD.
 
 ### cndi/terraform
 
@@ -19,7 +17,7 @@ The files within the [.github](/.github) folder are the workflows that run withi
 
 ### .env
 
-The [.env](/.env) file is where you can set environment variables that will be used by the \`cndi\` commands. These variables are used to configure the Terraform resources and Kubernetes manifests. This file can contain secrets, because it will not be committed to your repository. It comes pre-populated with a few generated values, but there are a couple you must set yourself too.
+The [.env](/.env) file is where you can set environment variables that will be used by the \`cndi\` commands. These variables are used to configure the Terraform resources and Kubernetes manifests. This file can contain secrets, because it will not be committed to your repository. It comes pre-populated with a few generated values, but there are a couple you must set yourself too. This file is present in the [.gitignore](/.gitignore) file, so it will not be committed to your repository.
 
 ### .gitignore
 
@@ -47,6 +45,17 @@ git push
 \`\`\`
 
 Now that you have pushed to the \`"main"\` branch, the [/.github/workflows/cndi-run.yaml](/.github/workflows/cndi-run.yaml) workflow will run, and call the \`cndi run\` command. This will deploy your cluster to the cloud, and then apply the Kubernetes manifests to it.
-`;
 
-export default coreReadmeBlock;
+### updating your cluster
+
+Now that you have a cluster, you can update it by:
+
+1. modifying your [cndi-config.jsonc](/cndi-config.jsonc) file
+2. running \`cndi ow\` 
+3. pushing all files to the \`"main"\` branch again
+
+If you've modified your nodes, the infrastructure should be updated with Terraform. If you've modified your Kubernetes manifests, the changes to the manifests will be applied to the cluster.
+
+`.trim();
+
+export default coreReadmeSection;

@@ -44,8 +44,7 @@ const parseCndiSecret = (
 
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
-        // if the secret is a placeholder or undefined we need to tell the user to update their .env file
-        if (secretValueIsPlaceholder) {
+        if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
             yellow(
               `\n\n${
@@ -59,27 +58,15 @@ const parseCndiSecret = (
             `You need to replace `,
             cyan(placeholder),
             `with the desired value in "${dotEnvPath}"\nthen run ${
-              green("cndi ow")
+              green(
+                "cndi ow",
+              )
             }\n`,
           );
-          outputSecret.isPlaceholder = true;
-        } else if (!secretEnvVal) {
-          console.log(
-            yellow(
-              `\n\n${
-                brightRed(
-                  "ERROR",
-                )
-              }: ${secretEnvName} not found in environment`,
-            ),
-          );
-          console.log(
-            `You need to add a value for ${
-              cyan(
-                secretEnvName,
-              )
-            } in "${dotEnvPath}"\nthen run ${green("cndi ow")}\n`,
-          );
+
+          if (!secretEnvVal) {
+            addSecretPlaceholder(secretEnvName, dotEnvPath);
+          }
           outputSecret.isPlaceholder = true;
         } else {
           const decodedSecretEnvVal = atob(secretEnvVal);
@@ -111,6 +98,7 @@ const parseCndiSecret = (
   } else if (inputSecret.stringData) {
     Object.entries(inputSecret.stringData).forEach((dataEntry) => {
       const [dataEntryKey, dataEntryValue] = dataEntry;
+
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
         const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "");
         const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
@@ -118,7 +106,7 @@ const parseCndiSecret = (
 
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
-        if (secretValueIsPlaceholder) {
+        if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
             yellow(
               `\n\n${
@@ -132,27 +120,14 @@ const parseCndiSecret = (
             `You need to replace `,
             cyan(placeholder),
             `with the desired value in "${dotEnvPath}"\nthen run ${
-              green("cndi ow")
+              green(
+                "cndi ow",
+              )
             }\n`,
           );
-          outputSecret.isPlaceholder = true;
-        } else if (!secretEnvVal) {
-          console.log(
-            yellow(
-              `\n\n${
-                brightRed(
-                  "ERROR",
-                )
-              }: ${secretEnvName} not found in environment`,
-            ),
-          );
-          console.log(
-            `You need to add a value for ${
-              cyan(
-                secretEnvName,
-              )
-            } in "${dotEnvPath}"\nthen run ${green("cndi ow")}\n`,
-          );
+          if (!secretEnvVal) {
+            addSecretPlaceholder(secretEnvName, dotEnvPath);
+          }
           outputSecret.isPlaceholder = true;
         } else {
           outputSecret.stringData[dataEntryKey] = secretEnvVal;
@@ -188,6 +163,30 @@ const parseCndiSecret = (
   delete outputSecret.data;
   return outputSecret;
 };
+
+// if a user passes in a cndi-config file in non-interactive mode
+// we want to write placeholders for the $.cndi.secrets entries to the .env file
+function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
+  const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
+  const dotEnv = Deno.readTextFileSync(dotEnvPath);
+  const dotEnvLines = dotEnv.split("\n");
+
+  if (dotEnvLines.some((line) => line.indexOf(secretEnvName) === 0)) {
+    return;
+  } else {
+    const secretHeading = "# Secrets";
+
+    const needsHeading = !dotEnvLines.some((line) => line === secretHeading);
+
+    if (needsHeading) {
+      dotEnvLines.push(`\n${secretHeading}\n${secretEnvName}=${placeholder}`);
+    } else {
+      dotEnvLines.push(`\n${secretEnvName}=${placeholder}`);
+    }
+
+    Deno.writeTextFileSync(dotEnvPath, dotEnvLines.join("\n"));
+  }
+}
 
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,

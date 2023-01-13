@@ -1,0 +1,30 @@
+# TODO: this isn't generating a changelog with release notes
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+
+    - title: Breaking Changes 🛠
+      labels:
+        - Semver-Major
+        - breaking-change
+
+    - title: Exciting New Features 🎉
+      labels:
+        - Semver-Minor
+        - enhancement
+      exclude:
+        labels:
+          - deployment target
+
+    - title: Bug Fixes 🐛
+      labels:
+        - Semver-Patch
+        - bug
+
+    - title: New Deployment Target 🎯
+      labels:
+        - deployment target

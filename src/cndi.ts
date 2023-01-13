@@ -8,7 +8,7 @@ import {
   getPathToOpenSSLForPlatform,
   loadJSONC,
 } from "./utils.ts";
-import { Command } from "./types.ts";
+import { COMMAND } from "./types.ts";
 import {
   brightRed,
   cyan,
@@ -18,7 +18,7 @@ import {
 
 import runFn from "./commands/run.ts";
 import initFn from "./commands/init.ts";
-import overwriteWithFn from "./commands/overwrite-with.ts";
+import overwriteFn from "./commands/overwrite.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
@@ -93,7 +93,9 @@ export default async function main(args: string[]) {
 
   // github actions setup
   const githubDirectory = path.join(outputOption, ".github");
+
   const dotEnvPath = path.join(outputOption, ".env");
+  const dotVSCodeDirectory = path.join(outputOption, ".vscode");
 
   const noGitHub = cndiArguments["no-github"] || false;
   const noDotEnv = cndiArguments["no-dotenv"] || false;
@@ -110,7 +112,10 @@ export default async function main(args: string[]) {
   );
 
   const pathToTerraformResources = path.join(projectCndiDirectory, "terraform");
-  const pathToKubernetesManifests = path.join(projectCndiDirectory, "cluster");
+  const pathToKubernetesManifests = path.join(
+    projectCndiDirectory,
+    "cluster_manifests",
+  );
   const gitignorePath = path.join(projectDirectory, ".gitignore");
   const pathToKeys = path.join(outputOption, ".keys");
 
@@ -122,6 +127,7 @@ export default async function main(args: string[]) {
     projectCndiDirectory,
     githubDirectory, // Deno.cwd()/.github (default)
     dotEnvPath, // Deno.cwd()/.env (default)
+    dotVSCodeDirectory, // Deno.cwd()/.vscode (default)
     noGitHub,
     noDotEnv,
     pathToConfig,
@@ -140,14 +146,14 @@ export default async function main(args: string[]) {
 
   // map command to function
   const commands = {
-    [Command.init]: initFn,
-    [Command["overwrite-with"]]: overwriteWithFn,
-    [Command.ow]: overwriteWithFn,
-    [Command.run]: runFn,
-    [Command.help]: helpFn,
-    [Command.install]: installFn,
-    [Command.terraform]: terraformFn,
-    [Command.default]: (c: string) => {
+    [COMMAND.init]: initFn,
+    [COMMAND.overwrite]: overwriteFn,
+    [COMMAND.ow]: overwriteFn,
+    [COMMAND.run]: runFn,
+    [COMMAND.help]: helpFn,
+    [COMMAND.install]: installFn,
+    [COMMAND.terraform]: terraformFn,
+    [COMMAND.default]: (c: string) => {
       console.log(
         `Command "${c}" not found. Use "cndi --help" for more information.`,
       );
@@ -165,7 +171,7 @@ export default async function main(args: string[]) {
 
     // if the user tries to run "help" instead of --help we will say that it's not a valid command
   } else if (commandsInArgs.includes("help")) {
-    commands.help(Command.help);
+    commands.help(COMMAND.help);
   } else {
     // in any other case we will try to run the command
     const operation = `${commandsInArgs[0] ?? ""}`;
@@ -200,26 +206,26 @@ export default async function main(args: string[]) {
     }
 
     switch (operation) {
-      case Command.install:
-        commands[Command.install](context);
+      case COMMAND.install:
+        await commands[COMMAND.install](context);
         break;
-      case Command.init:
-        commands[Command.init](context);
+      case COMMAND.init:
+        await commands[COMMAND.init](context);
         break;
-      case Command.run:
-        commands[Command.run](context);
+      case COMMAND.run:
+        await commands[COMMAND.run](context);
         break;
-      case Command["overwrite-with"]:
-        commands[Command["overwrite-with"]](context);
+      case COMMAND.overwrite:
+        await commands[COMMAND.overwrite](context);
         break;
-      case Command.ow:
-        commands[Command["overwrite-with"]](context);
+      case COMMAND.ow:
+        await commands[COMMAND.overwrite](context);
         break;
-      case Command.terraform:
-        commands[Command.terraform](context, args.slice(1));
+      case COMMAND.terraform:
+        await commands[COMMAND.terraform](context, args.slice(1));
         break;
       default:
-        commands[Command.default](operation);
+        commands[COMMAND.default](operation);
         break;
     }
   }

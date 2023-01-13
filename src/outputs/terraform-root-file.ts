@@ -1,5 +1,9 @@
 import { getPrettyJSONString } from "../utils.ts";
-import { NodeKind, TerraformDependencies } from "../types.ts";
+import {
+  AWSNodeItemSpec,
+  BaseNodeItemSpec,
+  TerraformDependencies,
+} from "../types.ts";
 
 import {
   gcpTerraformRootFileData,
@@ -36,7 +40,7 @@ const googleTerraformProviderDependency = {
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
-  nodeEntryNames: Array<string>;
+  nodes: Array<BaseNodeItemSpec>;
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -44,8 +48,11 @@ const terraformRootFileLabel = white("outputs/terraform-root-file:");
 const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
-  nodeEntryNames,
+  nodes,
 }: GetTerraformRootFileArgs): Promise<string> => {
+  const nodeNames = nodes.map((entry) => entry.name);
+
+  const nodeCount = nodes.length;
   // copy original terraformRootFileData to working copy for GCP using js spread operator
 
   if (requiredProviders.has("gcp")) {
@@ -89,8 +96,8 @@ const getTerraformRootFile = async ({
     gcpMainTerraformFileObject.locals[0].region = region;
 
     gcpMainTerraformFileObject.resource[0].google_compute_instance_group
-      .cndi_cluster.instances = nodeEntryNames.map((name) =>
-        `\${google_compute_instance.${name}.self_link}`
+      .cndi_cluster.instances = nodeNames.map(
+        (name) => `\${google_compute_instance.${name}.self_link}`,
       );
 
     gcpMainTerraformFileObject.provider.google = [
@@ -107,12 +114,40 @@ const getTerraformRootFile = async ({
   }
 
   // add parts of setup-cndi.tf file that are required if kind===aws
-  if (requiredProviders.has(NodeKind.aws)) {
+  if (requiredProviders.has("aws")) {
     const awsMainTerraformFileObject = { ...terraformRootFileData };
     const region = Deno.env.get("AWS_REGION") || DEFAULT_AWS_REGION;
 
+    const awsNodeEntries = nodes as Array<AWSNodeItemSpec>;
+
+    // this block is to ensure we only deploy nodes to compatible AWS Availability Zones
+    const availabilityZoneKeys: string[] = [];
+
+    awsNodeEntries.forEach((entry) => {
+      const azKey = `available_az_for_${entry.name}_instance_type`;
+
+      availabilityZoneKeys.push(
+        `data.aws_ec2_instance_type_offerings.${azKey}.locations`,
+      );
+
+      awsMainTerraformFileObject.data[0].aws_ec2_instance_type_offerings[0][
+        azKey
+      ] = [
+        {
+          filter: [{ name: "instance-type", values: [entry.instance_type] }],
+          location_type: "availability-zone",
+        },
+      ];
+    });
+
+    awsMainTerraformFileObject.locals[0].availability_zones =
+      `\${sort(setintersection(${availabilityZoneKeys.join(",")}))}`;
+
     awsMainTerraformFileObject.locals[0].leader_node_ip =
       `\${aws_instance.${leaderName}.private_ip}`;
+
+    // maybe this should be a string??
+    awsMainTerraformFileObject.locals[0].node_count = `${nodeCount}`;
 
     // TODO: verify that this provider configuration is being consumed instead of the environment variable
     awsMainTerraformFileObject.provider.aws = [{ region }];

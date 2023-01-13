@@ -1,0 +1,36 @@
+name: Build and Release for GitHub
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deno 
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: install cndi
+        run: deno run -A --unstable ./main.ts install # cndi install
+
+      - name: Test
+        run: deno task test
+
+      - name: Build
+        run: deno task build
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          files: |
+            Release.txt
+            dist/cndi-*

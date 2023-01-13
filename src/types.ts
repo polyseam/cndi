@@ -1,32 +1,49 @@
-// list of all commands for the CLI
+// https://youtu.be/jjMbPt_H3RQ?t=303 Pocock Wizardry
+type ObjectValues<T> = T[keyof T];
 
-export const enum NodeKind {
-  aws = "aws",
-  gcp = "gcp",
-}
+export const NODE_KIND = {
+  aws: "aws",
+  gcp: "gcp",
+} as const;
+
+export const DEPLOYMENT_TARGET = {
+  aws: "aws",
+  gcp: "gcp",
+} as const;
+
+export const COMMAND = {
+  init: "init",
+  overwrite: "overwrite",
+  run: "run",
+  help: "help",
+  default: "default",
+  install: "install",
+  terraform: "terraform",
+  ow: "ow",
+} as const;
+
+export const NODE_ROLE = {
+  leader: "leader",
+  controller: "controller",
+} as const;
+
+// NodeRole refers to the role of the node, e.g. leader, controller.. worker in the future?
+export type NodeRole = ObjectValues<typeof NODE_ROLE>;
+
+// NodeKind refers to the type of node, e.g. AWS EC2, GCP CE, etc.
+export type NodeKind = ObjectValues<typeof NODE_KIND>;
+
+// DeploymentTarget refers to the type of deployment target, e.g. AWS, GCP, etc.
+export type DeploymentTarget = ObjectValues<typeof DEPLOYMENT_TARGET>;
+
+// a map of all available commands in the cndi binary
+export type Command = ObjectValues<typeof COMMAND>;
 
 interface AirflowTlsTemplateAnswers {
   argocdDomainName: string;
   airflowDomainName: string;
   dagRepoUrl: string;
   letsEncryptClusterIssuerEmailAddress: string;
-}
-
-export const enum Command {
-  init = "init",
-  "overwrite-with" = "overwrite-with",
-  run = "run",
-  help = "help",
-  default = "default",
-  install = "install",
-  terraform = "terraform",
-  ow = "ow",
-}
-
-// node.role is either "leader" or "controller"
-export const enum NodeRole {
-  leader = "leader",
-  controller = "controller",
 }
 
 // incomplete type, nodes will have more options
@@ -42,19 +59,19 @@ interface CNDINode {
 }
 
 interface CNDINodesSpec {
-  entries: Array<BaseNodeEntrySpec>;
-  deploymentTargetConfiguration: DeploymentTargetConfiguration;
+  entries: Array<BaseNodeItemSpec>;
+  deployment_target_configuration: DeploymentTargetConfiguration;
 }
-// cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
-interface GCPNodeEntrySpec extends BaseNodeEntrySpec {
+// cndi-config.jsonc["nodes"]["entries"][kind==="_ce"]
+interface GCPNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
   volume_size?: number;
   instance_type?: string;
 }
-// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["gcp"]
-interface GCPDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
+interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -190,7 +207,7 @@ interface GCPTerraformRouterResource {
   };
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
+interface AWSNodeItemSpec extends BaseNodeItemSpec {
   ami: string;
   instance_type: string;
   availability_zone: string;
@@ -199,8 +216,8 @@ interface AWSNodeEntrySpec extends BaseNodeEntrySpec {
   machine_type?: string;
 }
 
-// cndi-config.jsonc["nodes"]["deploymentTargetConfiguration"]["aws"]
-interface AWSDeploymentTargetConfiguration extends BaseNodeEntrySpec {
+// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
+interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -231,6 +248,17 @@ interface AWSTerraformNodeResource {
     aws_lb_target_group_attachment: AWSTerraformTargetGroupAttachmentResource;
   };
 }
+
+interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
+  [ec2_inst_type: string]: Array<{
+    filter: Array<{
+      name: string;
+      values: Array<string>;
+    }>;
+    location_type: string;
+  }>;
+}
+
 interface RandomTerraformRandomPasswordResource {
   generated_token: Array<{
     length: number;
@@ -252,7 +280,7 @@ interface AWSTerraformLoadBalancerResource {
   nlb: {
     internal: boolean;
     load_balancer_type: string;
-    subnets: Array<string>;
+    subnets: string;
     tags: { Name: string };
   };
 }
@@ -275,6 +303,7 @@ interface AWSTerraformRouteTableResource {
 }
 interface AWSTerraformRouteTableAssociationResource {
   rt_sbn_asso: {
+    count: string;
     route_table_id: string;
     subnet_id: string;
   };
@@ -282,6 +311,8 @@ interface AWSTerraformRouteTableAssociationResource {
 
 interface AWSTerraformSubnetResource {
   subnet: {
+    count: string;
+    availability_zone: string;
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
@@ -297,10 +328,10 @@ interface AWSTerraformSecurityGroupResource {
       cidr_blocks: Array<string>;
       description: string;
       from_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
       protocol: string;
-      security_groups: Array<any>;
+      security_groups: [];
       self: boolean;
       to_port: string;
     }>;
@@ -310,9 +341,9 @@ interface AWSTerraformSecurityGroupResource {
       from_port: string;
       protocol: string;
       to_port: string;
-      ipv6_cidr_blocks: Array<any>;
-      prefix_list_ids: Array<any>;
-      security_groups: Array<any>;
+      ipv6_cidr_blocks: [];
+      prefix_list_ids: [];
+      security_groups: [];
       self: boolean;
     }>;
     tags: {
@@ -393,17 +424,24 @@ interface DeploymentTargetConfiguration {
 
 // incomplete type, config will have more options
 interface CNDIConfig {
-  nodes: CNDINodesSpec;
+  project_name?: string;
+  cndi_version?: string;
+  infrastructure: {
+    cndi: {
+      deployment_target_configuration?: DeploymentTargetConfiguration;
+      nodes: Array<BaseNodeItemSpec>;
+    };
+  };
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster: {
+  cluster_manifests: {
     [key: string]: unknown;
   };
 }
 
 interface KubernetesManifest {
-  apiVersion: string;
+  cndiVersion: string;
   kind: string;
 }
 
@@ -450,6 +488,7 @@ interface CNDIContext {
   projectCndiDirectory: string;
   githubDirectory: string;
   dotEnvPath: string;
+  dotVSCodeDirectory: string;
   pathToConfig: string;
   pathToTerraformResources: string;
   pathToKubernetesManifests: string;
@@ -470,11 +509,12 @@ interface CNDIContext {
   argoUIReadOnlyPassword?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][*]
-interface BaseNodeEntrySpec {
+// cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
+interface BaseNodeItemSpec {
   name: string;
-  role: NodeRole;
   kind: NodeKind;
+  role?: NodeRole; // default: controller
+  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
 }
 
 interface CNDIClients {
@@ -572,6 +612,7 @@ interface GCPTerraformRootFileData {
 interface TerraformRootFileData {
   locals: [
     {
+      node_count: string;
       leader_node_ip: string;
       region: string;
       bootstrap_token: "${random_password.generated_token.result}";
@@ -581,6 +622,7 @@ interface TerraformRootFileData {
       argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
+      availability_zones: string;
     },
   ];
   provider: {
@@ -588,7 +630,13 @@ interface TerraformRootFileData {
     aws?: Array<{ region: string }>;
     gcp?: Array<{ region: string; project: string }>;
   };
-
+  data: [
+    {
+      aws_ec2_instance_type_offerings: [
+        AWSTerraformEC2InstanceTypeOfferingsDataSource,
+      ];
+    },
+  ];
   resource: [
     {
       random_password: RandomTerraformRandomPasswordResource;
@@ -788,9 +836,16 @@ interface TerraformRootFileData {
 
     sbn_cidr_block: [
       {
-        default: "10.0.1.0/24";
+        default: [
+          "10.0.1.0/24",
+          "10.0.2.0/24",
+          "10.0.3.0/24",
+          "10.0.4.0/24",
+          "10.0.5.0/24",
+          "10.0.6.0/24",
+        ];
         description: "CIDR block for the subnet";
-        type: "string";
+        type: "list(string)";
       },
     ];
 
@@ -873,10 +928,10 @@ interface SealedSecretsKeys {
 export type {
   AirflowTlsTemplateAnswers,
   AWSDeploymentTargetConfiguration,
-  AWSNodeEntrySpec,
+  AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
-  BaseNodeEntrySpec,
+  BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
@@ -886,7 +941,7 @@ export type {
   DeploymentTargetConfiguration,
   EnvObject,
   GCPDeploymentTargetConfiguration,
-  GCPNodeEntrySpec,
+  GCPNodeItemSpec,
   GCPTerraformInstanceGroupResource,
   GCPTerraformNodeResource,
   GCPTerraformRootFileData,

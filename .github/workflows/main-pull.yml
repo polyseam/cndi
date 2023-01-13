@@ -1,0 +1,24 @@
+on:
+  pull_request:
+    branches:    
+      - main
+jobs:
+  test_and_lint: # cndi
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        
+      - name: use deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: lint
+        run: deno lint
+
+      - name: install cndi
+        run: deno run -A --unstable ./main.ts install # cndi install
+
+      - name: Test
+        run: deno task test
