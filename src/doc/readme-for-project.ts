@@ -10,6 +10,8 @@ export default function getReadmeForProject({
       "[AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
     gcp:
       "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
+    azure:
+      "[Azure Portal](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Compute%2FVirtualMachines)",
   };
 
   const loggingIntoArgoCDSection = `
@@ -39,6 +41,13 @@ Both entries should point to the single load balancer that was created for your 
 ## gcp
 
 This cluster will be deployed on [Google Cloud Platform](https://cloud.google.com/gcp).
+When your cluster is initialized the next step is to go to your domain registrar and create an A record for your Airflow instance, and another for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster.
+`.trim(),
+    azure: `
+## azure
+
+This cluster will be deployed on [Microsoft Azure](https://azure.microsoft.com/en-ca/).
 When your cluster is initialized the next step is to go to your domain registrar and create an A record for your Airflow instance, and another for ArgoCD.
 Both entries should point to the single load balancer that was created for your cluster.
 `.trim(),

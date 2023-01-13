@@ -71,8 +71,9 @@ const getAzureNodeResource = (
 
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
+
   const machine_type = node?.machine_type || node?.instance_type ||
-    node?.instance_type;
+    node?.instance_type || DEFAULT_MACHINE_TYPE;
   deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
   const size = node?.size || node?.volume_size || node?.disk_size_gb ||
     DEFAULT_SIZE;

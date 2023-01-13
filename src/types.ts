@@ -616,10 +616,13 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   image?: string;
   size?: number;
   volume_size?: number;
+  disk_size_gb?: number;
   instance_type?: string;
 }
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
 interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
+  image?: string;
+  machine_type?: string;
   disk_size_gb?: number;
   size?: number | string;
 }
