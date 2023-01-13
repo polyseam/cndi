@@ -237,7 +237,7 @@ const getTerraformRootFile = async ({
     const region = Deno.env.get("AZURE_REGION") || DEFAULT_AZURE_REGION;
 
     azureMainTerraformFileObject.locals[0].leader_node_ip =
-      `\${azurerm_linux_virtual_machine.${leaderName}.private_ip}`;
+      `\${azurerm_linux_virtual_machine.${leaderName}.private_ip_address}`;
 
     azureMainTerraformFileObject.locals[0].location = region;
     azureMainTerraformFileObject.output.leader_node_public_ip_address.value =
