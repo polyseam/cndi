@@ -44,6 +44,7 @@ interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
   nodes: Array<BaseNodeItemSpec>;
+  cndi_project_name: string;
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -52,7 +53,7 @@ const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
   nodes,
-  cndi_project_name
+  cndi_project_name,
 }: GetTerraformRootFileArgs): Promise<string> => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -220,7 +221,9 @@ const getTerraformRootFile = async ({
 
     const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
 
-    azureMainTerraformFileObject.locals[0].cndi_project_name = cndi_project_name;
+    azureMainTerraformFileObject.locals[0].cndi_project_name =
+      cndi_project_name;
+
     azureMainTerraformFileObject.provider.azurerm = [
       {
         features: {},
