@@ -207,22 +207,22 @@ export default async function main(args: string[]) {
 
     switch (operation) {
       case COMMAND.install:
-        commands[COMMAND.install](context);
+        await commands[COMMAND.install](context);
         break;
       case COMMAND.init:
-        commands[COMMAND.init](context);
+        await commands[COMMAND.init](context);
         break;
       case COMMAND.run:
-        commands[COMMAND.run](context);
+        await commands[COMMAND.run](context);
         break;
       case COMMAND.overwrite:
-        commands[COMMAND.overwrite](context);
+        await commands[COMMAND.overwrite](context);
         break;
       case COMMAND.ow:
-        commands[COMMAND.overwrite](context);
+        await commands[COMMAND.overwrite](context);
         break;
       case COMMAND.terraform:
-        commands[COMMAND.terraform](context, args.slice(1));
+        await commands[COMMAND.terraform](context, args.slice(1));
         break;
       default:
         commands[COMMAND.default](operation);

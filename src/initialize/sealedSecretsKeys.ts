@@ -46,7 +46,7 @@ const createSealedSecretsKeys = async ({
     sealed_secrets_public_key = await Deno.readTextFile(
       sealed_secrets_public_key_path,
     );
-    Deno.remove(pathToKeys, { recursive: true });
+    Deno.removeSync(pathToKeys, { recursive: true });
   }
 
   ranOpenSSLGenerateKeyPair.close();
