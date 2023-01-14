@@ -68,15 +68,7 @@ const runFn = async ({
 
     // if `terraform apply` fails, exit the process and swallow the error
     if (applyStatus.code !== 0) {
-      // this is all done so we can persist state to "_state" branch even when TF fails to apply
-      // our GitHub Actions workflow will check for this file, if it is present we report a failure after state is persisted
-      const failureFilePath = path.join(Deno.cwd(), "apply-did-fail");
-      console.log(
-        runLabel,
-        brightRed(`terraform apply failed, writing to "${failureFilePath}"`),
-      );
-      Deno.writeTextFileSync(failureFilePath, "true");
-      Deno.exit(0); // if we failed here we wouldn't be able to persist state to "_state" branch
+      Deno.exit(1); // if we failed here we wouldn't be able to persist state to "_state" branch
     }
 
     ranTerraformApply.close();
