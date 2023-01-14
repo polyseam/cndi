@@ -45,9 +45,9 @@ export default async function pullStateForRun(
   }
 
   try {
-    await git.raw("switch", "--orphan", "_state");
-  } catch {
     await git.checkout("_state");
+  } catch {
+    await git.raw("switch", "--orphan", "_state");
   }
 
   let state;
