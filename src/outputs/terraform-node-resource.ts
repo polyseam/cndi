@@ -2,7 +2,7 @@ import {
   brightRed,
   white,
   yellow,
-} from "https://deno.land/std@0.157.0/fmt/colors.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
   AWSNodeItemSpec,

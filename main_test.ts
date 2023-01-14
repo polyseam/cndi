@@ -1,10 +1,10 @@
-import { assert } from "https://deno.land/std@0.167.0/testing/asserts.ts";
-import { crypto } from "https://deno.land/std@0.171.0/crypto/mod.ts";
-import { describe, it } from "https://deno.land/std@0.171.0/testing/bdd.ts";
+import { assert } from "https://deno.land/std@0.172.0/testing/asserts.ts";
+import { crypto } from "https://deno.land/std@0.172.0/crypto/mod.ts";
+import { describe, it } from "https://deno.land/std@0.172.0/testing/bdd.ts";
 
 import cndi from "./src/cndi.ts";
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { homedir } from "https://deno.land/std@0.171.0/node/os.ts";
+import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import { homedir } from "https://deno.land/std@0.172.0/node/os.ts";
 
 function digestMessage(message: string) {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array

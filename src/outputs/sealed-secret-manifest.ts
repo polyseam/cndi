@@ -10,7 +10,7 @@ import {
   green,
   white,
   yellow,
-} from "https://deno.land/std@0.158.0/fmt/colors.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";

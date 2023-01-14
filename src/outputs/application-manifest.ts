@@ -1,9 +1,9 @@
-import { brightWhite } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import { brightWhite } from "https://deno.land/std@0.172.0/fmt/colors.ts";
 import {
   brightRed,
   cyan,
   white,
-} from "https://deno.land/std@0.161.0/fmt/colors.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 import { getPrettyJSONString } from "../utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;

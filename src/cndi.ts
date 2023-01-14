@@ -1,7 +1,7 @@
-import * as flags from "https://deno.land/std@0.157.0/flags/mod.ts";
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import "https://deno.land/std@0.157.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
-import { homedir } from "https://deno.land/std@0.157.0/node/os.ts?s=homedir";
+import * as flags from "https://deno.land/std@0.172.0/flags/mod.ts";
+import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import "https://deno.land/std@0.172.0/dotenv/load.ts"; // loads contents of .env into Deno.env automatically
+import { homedir } from "https://deno.land/std@0.172.0/node/os.ts?s=homedir";
 import {
   checkInstalled,
   getFileSuffixForPlatform,
@@ -14,7 +14,7 @@ import {
   cyan,
   white,
   yellow,
-} from "https://deno.land/std@0.158.0/fmt/colors.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 
 import runFn from "./commands/run.ts";
 import initFn from "./commands/init.ts";

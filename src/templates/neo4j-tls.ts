@@ -6,7 +6,7 @@
 import { EnvObject, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { cyan } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import { cyan } from "https://deno.land/std@0.172.0/fmt/colors.ts";
 import { getDefaultVmTypeForKind, getPrettyJSONString } from "../utils.ts";
 import {
   GetConfigurationFn,

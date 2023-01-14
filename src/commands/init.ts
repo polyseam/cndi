@@ -1,6 +1,6 @@
 import { CNDIConfig, CNDIContext, NodeKind } from "../types.ts";
 
-import { copy } from "https://deno.land/std@0.157.0/fs/copy.ts";
+import { copy } from "https://deno.land/std@0.172.0/fs/copy.ts";
 
 import { getPrettyJSONString, loadJSONC } from "../utils.ts";
 
@@ -9,9 +9,9 @@ import {
   cyan,
   white,
   yellow,
-} from "https://deno.land/std@0.158.0/fmt/colors.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 import overwriteWithFn from "./overwrite.ts";
 
 import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
