@@ -1,3 +1,9 @@
+name: cndi
+on:
+  push:
+    branches:
+      - main
+      - "releases/**"
 jobs:
   cndi-run:
     runs-on: ubuntu-20.04
