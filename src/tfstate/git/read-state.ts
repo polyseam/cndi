@@ -2,10 +2,11 @@ import {
   cyan,
   white,
   yellow,
-} from "https://deno.land/std@0.157.0/fmt/colors.ts";
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+} from "https://deno.land/std@0.172.0/fmt/colors.ts";
 
-import { simpleGit } from "npm:simple-git";
+import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+
+import { simpleGit } from "https://esm.sh/simple-git@3.15.1?no-dts&target=deno&deno-std=0.172.0&bundle&deps=@kwsites/file-exists@1.1.1";
 
 import decrypt from "../decrypt.ts";
 

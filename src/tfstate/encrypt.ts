@@ -1,4 +1,4 @@
-import CryptoJS from "https://esm.sh/crypto-js@4.1.1";
+import CryptoJS from "https://esm.sh/crypto-js@4.1.1?bundle";
 
 export default function encrypt(text: string, secret: string) {
   const encryptedString = CryptoJS.AES.encrypt(text, secret).toString();
