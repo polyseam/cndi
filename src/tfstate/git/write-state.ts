@@ -21,6 +21,9 @@ export default async function pushStateFromRun(
     Deno.exit(1);
   }
 
+  await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
+  await git.raw("config", "user.name", Deno.env.get("GIT_USERNAME") || "cndi");
+
   const originalBranch = (await git.branch()).current;
 
   const pathToState = path.join(pathToTerraformResources, "terraform.tfstate");

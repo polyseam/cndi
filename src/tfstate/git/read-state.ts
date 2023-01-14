@@ -15,17 +15,21 @@ const git = simpleGit();
 const gitReadStateLabel = white("tfstate/git/read-state:");
 
 export default async function pullStateForRun(
-  pathToTerraformResources: string,
+  pathToTerraformResources: string
 ) {
+  // fails in GitHub Actions
   const isGitRepo = git.checkIsRepo();
 
   if (!isGitRepo) {
     console.log(
       gitReadStateLabel,
-      '"cndi run" must be executed inside a git repository',
+      '"cndi run" must be executed inside a git repository'
     );
     Deno.exit(1);
   }
+
+  await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
+  await git.raw("config", "user.name", Deno.env.get("GIT_USERNAME") || "cndi");
 
   await git.fetch();
 
@@ -35,7 +39,7 @@ export default async function pullStateForRun(
     console.log(
       gitReadStateLabel,
       "you must make a commit on your branch before running",
-      cyan("cndi run\n"),
+      cyan("cndi run\n")
     );
     Deno.exit(1);
   }
@@ -50,12 +54,12 @@ export default async function pullStateForRun(
 
   try {
     state = Deno.readTextFileSync(
-      path.join(pathToTerraformResources, "terraform.tfstate.encrypted"),
+      path.join(pathToTerraformResources, "terraform.tfstate.encrypted")
     );
   } catch {
     console.log(
       gitReadStateLabel,
-      "'terraform.tfstate.encrypted' not found, using fresh state",
+      "'terraform.tfstate.encrypted' not found, using fresh state"
     );
   }
 
@@ -65,7 +69,7 @@ export default async function pullStateForRun(
     console.log(
       gitReadStateLabel,
       yellow("TERRAFORM_STATE_PASSPHRASE"),
-      "is not set in your environment file",
+      "is not set in your environment file"
     );
     Deno.exit(1);
   }
@@ -76,7 +80,7 @@ export default async function pullStateForRun(
     const decryptedState = decrypt(state, secret);
     Deno.writeTextFileSync(
       path.join(pathToTerraformResources, "terraform.tfstate"),
-      decryptedState,
+      decryptedState
     );
   }
 }
