@@ -42,7 +42,7 @@ const runFn = async ({
 
     if (initStatus.code !== 0) {
       console.log(runLabel, brightRed("terraform init failed"));
-      Deno.exit(1);
+      Deno.exit(initStatus.code);
     }
 
     ranTerraformInit.close();
@@ -65,9 +65,9 @@ const runFn = async ({
 
     await pushStateFromRun(pathToTerraformResources);
 
-    // if `terraform apply` fails, exit the process and swallow the error
+    // if `terraform apply` fails, exit with the code
     if (applyStatus.code !== 0) {
-      Deno.exit(1); // if we failed here we wouldn't be able to persist state to "_state" branch
+      Deno.exit(applyStatus.code);
     }
 
     ranTerraformApply.close();
