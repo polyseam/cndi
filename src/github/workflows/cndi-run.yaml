@@ -34,6 +34,7 @@ jobs:
           GIT_REPO:  https://github.com/${{ github.repository}}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+          TERRAFORM_STATE_PASSPHRASE: ${{ secrets.TERRAFORM_STATE_PASSPHRASE }}
           SEALED_SECRETS_PRIVATE_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PRIVATE_KEY_MATERIAL }}
           SEALED_SECRETS_PUBLIC_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PUBLIC_KEY_MATERIAL }}
           ARGO_UI_READONLY_PASSWORD: ${{ secrets.ARGO_UI_READONLY_PASSWORD }}
