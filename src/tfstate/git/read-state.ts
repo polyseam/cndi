@@ -45,8 +45,10 @@ export default async function pullStateForRun(
   }
 
   try {
+    // create new _state branch
     await git.checkout("_state");
   } catch {
+    // checkout existing _state branch
     await git.raw("switch", "--orphan", "_state");
   }
 
