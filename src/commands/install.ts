@@ -1,7 +1,7 @@
 import { CNDIContext } from "../types.ts";
 import { embeddedFiles } from "../installer/embedded/all.ts";
-import { writableStreamFromWriter } from "https://deno.land/std@0.172.0/streams/mod.ts";
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import { writableStreamFromWriter } from "https://deno.land/std@0.173.0/streams/mod.ts";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import {
   SpinnerTypes,
   TerminalSpinner,

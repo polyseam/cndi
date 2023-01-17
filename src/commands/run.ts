@@ -1,10 +1,10 @@
-import "https://deno.land/std@0.172.0/dotenv/load.ts";
-import { copy } from "https://deno.land/std@0.172.0/streams/copy.ts";
+import "https://deno.land/std@0.173.0/dotenv/load.ts";
+import { copy } from "https://deno.land/std@0.173.0/streams/copy.ts";
 
 import pullStateForRun from "../tfstate/git/read-state.ts";
 import pushStateFromRun from "../tfstate/git/write-state.ts";
 
-import { brightRed, white } from "https://deno.land/std@0.172.0/fmt/colors.ts";
+import { brightRed, white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
 import setTF_VARs from "../setTF_VARs.ts";
 import { CNDIContext } from "../types.ts";
 

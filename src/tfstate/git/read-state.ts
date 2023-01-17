@@ -2,9 +2,9 @@ import {
   cyan,
   white,
   yellow,
-} from "https://deno.land/std@0.172.0/fmt/colors.ts";
+} from "https://deno.land/std@0.173.0/fmt/colors.ts";
 
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
 import { simpleGit } from "../../deps.ts";
 

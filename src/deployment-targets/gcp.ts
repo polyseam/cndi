@@ -4,8 +4,8 @@ import {
   green,
   white,
   yellow,
-} from "https://deno.land/std@0.172.0/fmt/colors.ts";
-import { homedir } from "https://deno.land/std@0.172.0/node/os.ts?s=homedir";
+} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 
 import { EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";

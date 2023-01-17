@@ -1,6 +1,6 @@
 import { CNDIContext } from "../types.ts";
 import setTF_VARs from "../setTF_VARs.ts";
-import { copy } from "https://deno.land/std@0.172.0/streams/conversion.ts";
+import { copy } from "https://deno.land/std@0.173.0/streams/mod.ts";
 
 /**
  * COMMAND fn: cndi terraform

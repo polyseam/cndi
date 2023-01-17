@@ -16,7 +16,7 @@ import {
   brightRed,
   cyan,
   white,
-} from "https://deno.land/std@0.172.0/fmt/colors.ts";
+} from "https://deno.land/std@0.173.0/fmt/colors.ts";
 
 const deploymentTargetsSharedLabel = white("deployment-targets/shared:");
 

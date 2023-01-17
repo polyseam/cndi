@@ -1,4 +1,4 @@
-import { walkSync } from "https://deno.land/std@0.172.0/fs/mod.ts?s=walk";
+import { walkSync } from "https://deno.land/std@0.173.0/fs/mod.ts?s=walk";
 
 interface FileContentsDictionary {
   [filepath: string]: string;
