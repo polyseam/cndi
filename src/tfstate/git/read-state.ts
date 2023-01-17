@@ -6,7 +6,7 @@ import {
 
 import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 
-import { simpleGit } from "https://esm.sh/simple-git@3.15.1?no-dts&target=deno&deno-std=0.172.0&bundle&deps=@kwsites/file-exists@1.1.1";
+import { simpleGit } from "../../deps.ts";
 
 import decrypt from "../decrypt.ts";
 
