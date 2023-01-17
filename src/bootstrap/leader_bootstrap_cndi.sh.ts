@@ -10,7 +10,12 @@ echo "Installing nfs-common"
 sudo apt-get install nfs-common -y
 
 echo "Installing microk8s"
-sudo snap install microk8s --classic --channel=1.26/stable
+
+while ! sudo snap install microk8s --classic --channel=1.26/stable
+do
+    echo 'microk8s failed to install, retrying in 180 seconds'
+    sleep 180
+done
 
 echo "Adding user to group"
 sudo usermod -a -G microk8s ubuntu
