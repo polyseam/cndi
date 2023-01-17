@@ -860,11 +860,7 @@ interface AzureTerraformRootFileData {
     aws?: Array<{ region: string }>;
     google?: Array<{ region: string; project: string; zone?: string }>;
     azurerm?: Array<{
-      client_id: string;
-      client_secret: string;
       features: Record<string | number | symbol, never>;
-      subscription_id: string;
-      tenant_id: string;
     }>;
   };
 

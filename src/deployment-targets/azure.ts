@@ -4,58 +4,58 @@ import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
 const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
-  const AZURE_REGION = "eastus";
-  const AZURE_CLIENT_SECRET = "";
-  const AZURE_CLIENT_ID = "";
-  const AZURE_TENANT_ID = "";
-  const AZURE_SUBSCRIPTION_ID = "";
+  const ARM_REGION = "eastus";
+  const ARM_CLIENT_SECRET = "";
+  const ARM_CLIENT_ID = "";
+  const ARM_TENANT_ID = "";
+  const ARM_SUBSCRIPTION_ID = "";
 
   const azureEnvObject: EnvObject = {};
 
-  azureEnvObject.AZURE_REGION = {
-    comment: "Azure",
+  azureEnvObject.ARM_REGION = {
+    comment: "Azure Resource Manager",
     value: interactive
       ? ((await Input.prompt({
         message: cyan("Enter your Azure region:"),
-        default: AZURE_REGION,
+        default: ARM_REGION,
       })) as string)
-      : AZURE_REGION,
+      : ARM_REGION,
   };
 
-  azureEnvObject.AZURE_CLIENT_ID = {
+  azureEnvObject.ARM_CLIENT_ID = {
     value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your Azure Client ID:"),
-        default: AZURE_CLIENT_ID,
+        default: ARM_CLIENT_ID,
       })) as string)
-      : AZURE_CLIENT_ID,
+      : ARM_CLIENT_ID,
   };
 
-  azureEnvObject.AZURE_CLIENT_SECRET = {
+  azureEnvObject.ARM_CLIENT_SECRET = {
     value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your Azure Client Secret:"),
-        default: AZURE_CLIENT_SECRET,
+        default: ARM_CLIENT_SECRET,
       })) as string)
-      : AZURE_CLIENT_SECRET,
+      : ARM_CLIENT_SECRET,
   };
 
-  azureEnvObject.AZURE_TENANT_ID = {
+  azureEnvObject.ARM_TENANT_ID = {
     value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your Azure Tenant ID:"),
-        default: AZURE_TENANT_ID,
+        default: ARM_TENANT_ID,
       })) as string)
-      : AZURE_TENANT_ID,
+      : ARM_TENANT_ID,
   };
 
-  azureEnvObject.AZURE_SUBSCRIPTION_ID = {
+  azureEnvObject.ARM_SUBSCRIPTION_ID = {
     value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your Azure Subscription ID:"),
-        default: AZURE_SUBSCRIPTION_ID,
+        default: ARM_SUBSCRIPTION_ID,
       })) as string)
-      : AZURE_SUBSCRIPTION_ID,
+      : ARM_SUBSCRIPTION_ID,
   };
   return azureEnvObject;
 };

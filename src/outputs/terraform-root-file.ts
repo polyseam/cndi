@@ -15,7 +15,7 @@ import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
-const DEFAULT_AZURE_REGION = "eastus";
+const DEFAULT_ARM_REGION = "eastus";
 const terraformDependencies: TerraformDependencies = {
   required_providers: [
     {
@@ -170,71 +170,12 @@ const getTerraformRootFile = async ({
   }
   // add parts of setup-cndi.tf file that are required if kind===azure
   if (requiredProviders.has("azure")) {
-    const client_id = Deno.env.get("AZURE_CLIENT_ID");
-    const client_secret = Deno.env.get("AZURE_CLIENT_SECRET");
-    const subscription_id = Deno.env.get("AZURE_SUBSCRIPTION_ID");
-    const tenant_id = Deno.env.get("AZURE_TENANT_ID");
-
-    if (!client_id) {
-      console.log(
-        terraformRootFileLabel,
-        '"AZURE_CLIENT_ID"',
-        brightRed(`is undefined\nPlease set`),
-        '"AZURE_CLIENT_ID"',
-        brightRed("and try again\n"),
-      );
-      Deno.exit(1);
-    }
-
-    if (!client_secret) {
-      console.log(
-        terraformRootFileLabel,
-        '"AZURE_CLIENT_SECRET"',
-        brightRed(`is undefined\nPlease set`),
-        '"AZURE_CLIENT_SECRET"',
-        brightRed("and try again\n"),
-      );
-      Deno.exit(1);
-    }
-
-    if (!subscription_id) {
-      console.log(
-        terraformRootFileLabel,
-        '"AZURE_SUBSCRIPTION_ID"',
-        brightRed(`is undefined\nPlease set`),
-        '"AZURE_SUBSCRIPTION_ID"',
-        brightRed("and try again\n"),
-      );
-      Deno.exit(1);
-    }
-
-    if (!tenant_id) {
-      console.log(
-        terraformRootFileLabel,
-        '"AZURE_TENANT_ID"',
-        brightRed(`is undefined\nPlease set`),
-        '"AZURE_TENANT_ID"',
-        brightRed("and try again\n"),
-      );
-      Deno.exit(1);
-    }
-
     const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
 
     azureMainTerraformFileObject.locals[0].cndi_project_name =
       cndi_project_name;
 
-    azureMainTerraformFileObject.provider.azurerm = [
-      {
-        features: {},
-        client_id,
-        client_secret,
-        subscription_id,
-        tenant_id,
-      },
-    ];
-
-    const region = Deno.env.get("AZURE_REGION") || DEFAULT_AZURE_REGION;
+    const region = Deno.env.get("ARM_REGION") || DEFAULT_ARM_REGION;
 
     azureMainTerraformFileObject.locals[0].leader_node_ip =
       `\${azurerm_linux_virtual_machine.${leaderName}.private_ip_address}`;
@@ -243,6 +184,12 @@ const getTerraformRootFile = async ({
     // add azure provider dependency
     terraformDependencies.required_providers[0].azurerm =
       azureTerraformProviderDependency;
+
+    azureMainTerraformFileObject.provider.azurerm = [
+      {
+        features: {},
+      },
+    ];
 
     azureMainTerraformFileObject.terraform = [terraformDependencies];
     return getPrettyJSONString(azureMainTerraformFileObject);
