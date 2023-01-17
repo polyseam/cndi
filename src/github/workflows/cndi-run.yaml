@@ -30,15 +30,23 @@ jobs:
       # this next step is the core of the workflow
       - name: cndi run
         env:
-          GIT_REPO: https://github.com/${{ github.repository}}
+          # coreEnv
+          GIT_REPO:  https://github.com/${{ github.repository}}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
-          TERRAFORM_STATE_PASSPHRASE: ${{ secrets.TERRAFORM_STATE_PASSPHRASE }}
+          SEALED_SECRETS_PRIVATE_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PRIVATE_KEY_MATERIAL }}
+          SEALED_SECRETS_PUBLIC_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PUBLIC_KEY_MATERIAL }}
           ARGO_UI_READONLY_PASSWORD: ${{ secrets.ARGO_UI_READONLY_PASSWORD }}
+          # AWS
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          # GCP
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          SEALED_SECRETS_PRIVATE_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PRIVATE_KEY_MATERIAL }}
-          SEALED_SECRETS_PUBLIC_KEY_MATERIAL: ${{ secrets.SEALED_SECRETS_PUBLIC_KEY_MATERIAL }}
+          # Azure Resource Manager
+          ARM_REGION: ${{ secrets.ARM_REGION }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         run: bin/cndi run # run 'cndi run'
