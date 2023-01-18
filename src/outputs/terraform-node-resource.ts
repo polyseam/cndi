@@ -152,8 +152,6 @@ const getAzureNodeResource = (
         {
           name: `cndi_${name}_network_interface_ip_config`,
           private_ip_address_allocation: "Dynamic",
-          public_ip_address_id:
-            `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
           subnet_id: "${azurerm_subnet.cndi_subnet.id}",
         },
       ],
@@ -164,16 +162,6 @@ const getAzureNodeResource = (
     },
   };
 
-  const azurerm_public_ip = {
-    [`cndi_${name}_public_ip`]: {
-      allocation_method: "Static",
-      location: "${azurerm_resource_group.cndi_resource_group.location}",
-      name: `cndi_${name}_public_ip`,
-      resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-      sku: "Standard",
-      tags: { cndi_project_name: "${local.cndi_project_name}" },
-    },
-  };
 
   const nodeResource: AzureTerraformNodeResource = {
     resource: {
@@ -196,7 +184,7 @@ const getAzureNodeResource = (
       azurerm_network_interface_security_group_association,
       azurerm_network_interface_backend_address_pool_association,
       azurerm_network_interface,
-      azurerm_public_ip,
+
     },
   };
 

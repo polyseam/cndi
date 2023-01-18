@@ -662,7 +662,6 @@ interface AzureTerraformNodeResource {
       AzureTerraformNetworkInterfaceSecurityGroupAssociationResource;
     azurerm_network_interface_backend_address_pool_association:
       AzureTerraformLoadBalancerBackendAddressPoolAssociationResource;
-    azurerm_public_ip: AzureTerraformPublicIPResource;
     azurerm_network_interface: AzureTerraformNetworkInterfaceResource;
   };
 }
@@ -721,7 +720,6 @@ interface AzureTerraformNetworkInterfaceResource {
     ip_configuration: Array<{
       name: string;
       private_ip_address_allocation: string;
-      public_ip_address_id: string;
       subnet_id: string;
     }>;
     location: string;
