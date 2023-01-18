@@ -633,7 +633,7 @@ interface AzureTerraformNodeResource {
         admin_username: string;
         admin_password: string;
         disable_password_authentication: boolean;
-        availability_set_id: string;
+        zone: string;
         location: string;
         name: string;
         network_interface_ids: Array<string>;
@@ -665,16 +665,7 @@ interface AzureTerraformNodeResource {
     azurerm_network_interface: AzureTerraformNetworkInterfaceResource;
   };
 }
-interface AzureTerraformAvailabilitySetResource {
-  cndi_availability_set: {
-    location: string;
-    name: string;
-    resource_group_name: string;
-    tags: {
-      cndi_project_name: string;
-    };
-  };
-}
+
 interface AzureTerraformResourceGroupResource {
   cndi_resource_group: {
     location: string;
@@ -710,6 +701,7 @@ interface AzureTerraformPublicIPResource {
     name: string;
     resource_group_name: string;
     sku: string;
+    zones : [string];
     tags: {
       cndi_project_name: string;
     };
@@ -865,7 +857,6 @@ interface AzureTerraformRootFileData {
   resource: [
     {
       random_password: RandomTerraformRandomPasswordResource;
-      azurerm_availability_set: AzureTerraformAvailabilitySetResource;
       azurerm_resource_group: AzureTerraformResourceGroupResource;
       azurerm_virtual_network: AzureTerraformVirtualNetworkResource;
       azurerm_subnet: AzureTerraformSubnetResource;

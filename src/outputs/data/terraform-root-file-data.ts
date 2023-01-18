@@ -798,15 +798,6 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      azurerm_availability_set: {
-        cndi_availability_set: {
-          location: "${azurerm_resource_group.cndi_resource_group.location}",
-          name: "cndi_availability_set",
-          resource_group_name:
-            "${azurerm_resource_group.cndi_resource_group.name}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
-        },
-      },
       azurerm_virtual_network: {
         cndi_virtual_network: {
           address_space: ["10.0.0.0/16"],
@@ -835,6 +826,7 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           resource_group_name:
             "${azurerm_resource_group.cndi_resource_group.name}",
           sku: "Standard",
+          zones : ["1"],
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },

@@ -102,9 +102,8 @@ const getAzureNodeResource = (
     `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
   ];
 
-  const availability_set_id =
-    "${azurerm_availability_set.cndi_availability_set.id}";
-
+  const zone = "1"
+  
   const os_disk = [
     {
       name: `cndi_${name}_disk`,
@@ -170,7 +169,7 @@ const getAzureNodeResource = (
           admin_username,
           admin_password,
           disable_password_authentication,
-          availability_set_id,
+          zone,
           location,
           name,
           network_interface_ids,
