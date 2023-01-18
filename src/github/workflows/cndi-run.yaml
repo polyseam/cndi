@@ -19,7 +19,7 @@ jobs:
       - name: setup cndi
         uses: polyseam/setup-cndi@1.0.3
         with:
-          version: state-hack
+          version: main
 
       - name: cndi chmod
         run: chmod +x bin/cndi # make cndi cli executable
