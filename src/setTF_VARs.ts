@@ -1,5 +1,5 @@
 import { padPrivatePem, padPublicPem } from "./utils.ts";
-import { brightRed, white } from "https://deno.land/std@0.157.0/fmt/colors.ts";
+import { brightRed, white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
 
 const setTF_VARsLabel = white("setTF_VARs:");
 

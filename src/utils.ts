@@ -1,6 +1,6 @@
-import * as JSONC from "https://deno.land/std@0.157.0/encoding/jsonc.ts";
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
-import { platform } from "https://deno.land/std@0.157.0/node/os.ts";
+import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 
 import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
