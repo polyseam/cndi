@@ -1,5 +1,5 @@
 import { padPrivatePem, padPublicPem } from "../utils.ts";
-import * as path from "https://deno.land/std@0.157.0/path/mod.ts";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
 import { CNDIContext, SealedSecretsKeys } from "../types.ts";
 

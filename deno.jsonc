@@ -8,5 +8,6 @@
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "build": "deno task stringUp && deno fmt && deno task compile-all",
     "test": "deno test --unstable --allow-all"
-  }
+  },
+  "importMap": "import_map.json"
 }

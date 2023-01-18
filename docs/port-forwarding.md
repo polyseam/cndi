@@ -38,7 +38,7 @@ clusters:
 - cluster:
     certificate-authority-data:
     dNPUHFObk9utNxN5cNI3T2bWF...PQotLS0tLLUVORCtLS0tCgBDRVJUSUZJQ0FURS0==
-    server: https://172.31.90.189:16443 # the IP address provided here is typically the private IP of the Kubernetes controller. We need to update this to the public IP of the controller so we can access it from outside of the node's network. The port should stay as "16443" and the scheme as "https://".
+    server: https://173.31.90.189:16443 # the IP address provided here is typically the private IP of the Kubernetes controller. We need to update this to the public IP of the controller so we can access it from outside of the node's network. The port should stay as "16443" and the scheme as "https://".
   name: microk8s-cluster
 contexts:
 - context:

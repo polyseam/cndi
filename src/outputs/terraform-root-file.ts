@@ -9,8 +9,8 @@ import {
   gcpTerraformRootFileData,
   terraformRootFileData,
 } from "./data/terraform-root-file-data.ts";
-import { white } from "https://deno.land/std@0.158.0/fmt/colors.ts";
-import { brightRed } from "https://deno.land/std@0.158.0/fmt/colors.ts";
+import { white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { brightRed } from "https://deno.land/std@0.173.0/fmt/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
