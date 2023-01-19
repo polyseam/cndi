@@ -17,15 +17,10 @@ jobs:
           fetch-depth: 0
 
       - name: setup cndi
-        uses: polyseam/setup-cndi@1.0.3
-        with:
-          version: main
-
-      - name: cndi chmod
-        run: chmod +x bin/cndi # make cndi cli executable
+        uses: polyseam/setup-cndi@v2.0.0
 
       - name: cndi install
-        run: bin/cndi install # run 'cndi install'
+        run: cndi install # run 'cndi install'
 
       # this next step is the core of the workflow
       - name: cndi run
@@ -50,4 +45,4 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        run: bin/cndi run # run 'cndi run'
+        run: cndi run

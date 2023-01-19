@@ -18,11 +18,12 @@ const runFn = async ({
   pathToTerraformBinary,
   pathToTerraformResources,
 }: CNDIContext) => {
-  console.log("cndi run\n");
+  const cmd = "cndi run";
+  console.log(`${cmd}\n`);
   try {
     setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
-    await pullStateForRun(pathToTerraformResources);
+    await pullStateForRun({ pathToTerraformResources, cmd });
 
     // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = Deno.run({
@@ -63,7 +64,7 @@ const runFn = async ({
 
     const applyStatus = await ranTerraformApply.status();
 
-    await pushStateFromRun(pathToTerraformResources);
+    await pushStateFromRun({ pathToTerraformResources, cmd });
 
     // if `terraform apply` fails, exit with the code
     if (applyStatus.code !== 0) {
