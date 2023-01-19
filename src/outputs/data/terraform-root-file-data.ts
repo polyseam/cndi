@@ -798,15 +798,6 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
-      azurerm_availability_set: {
-        cndi_availability_set: {
-          location: "${azurerm_resource_group.cndi_resource_group.location}",
-          name: "cndi_availability_set",
-          resource_group_name:
-            "${azurerm_resource_group.cndi_resource_group.name}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
-        },
-      },
       azurerm_virtual_network: {
         cndi_virtual_network: {
           address_space: ["10.0.0.0/16"],
@@ -827,6 +818,13 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
             "${azurerm_virtual_network.cndi_virtual_network.name}",
         },
       },
+      azurerm_subnet_network_security_group_association: {
+        cndi_subnet_network_security_group_association: {
+          subnet_id: "${azurerm_subnet.cndi_subnet.id}",
+          network_security_group_id:
+            "${azurerm_network_security_group.cndi_network_security_group.id}",
+        },
+      },
       azurerm_public_ip: {
         cndi_load_balancer_public_ip: {
           allocation_method: "Static",
@@ -835,6 +833,7 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           resource_group_name:
             "${azurerm_resource_group.cndi_resource_group.name}",
           sku: "Standard",
+          zones: ["1"],
           tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },

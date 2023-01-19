@@ -95,15 +95,14 @@ const getAzureNodeResource = (
   const location = "${azurerm_resource_group.cndi_resource_group.location}";
 
   const admin_username = "ubuntu";
-  const admin_password = "password";
+  const admin_password = "Password123";
   const disable_password_authentication = false;
 
   const network_interface_ids = [
     `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
   ];
 
-  const availability_set_id =
-    "${azurerm_availability_set.cndi_availability_set.id}";
+  const zone = "1";
 
   const os_disk = [
     {
@@ -127,15 +126,6 @@ const getAzureNodeResource = (
     cndi_project_name: "${local.cndi_project_name}",
   };
 
-  const azurerm_network_interface_security_group_association = {
-    [`cndi_${name}_network_interface_security_group_association`]: {
-      network_interface_id:
-        `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
-      network_security_group_id:
-        "${azurerm_network_security_group.cndi_network_security_group.id}",
-    },
-  };
-
   const azurerm_network_interface_backend_address_pool_association = {
     [`cndi_${name}_load_balancer_address_pool_association`]: {
       backend_address_pool_id:
@@ -152,25 +142,12 @@ const getAzureNodeResource = (
         {
           name: `cndi_${name}_network_interface_ip_config`,
           private_ip_address_allocation: "Dynamic",
-          public_ip_address_id:
-            `\${azurerm_public_ip.cndi_${name}_public_ip.id}`,
           subnet_id: "${azurerm_subnet.cndi_subnet.id}",
         },
       ],
       location: "${azurerm_resource_group.cndi_resource_group.location}",
       name: `cndi_${name}_network_interface`,
       resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-      tags: { cndi_project_name: "${local.cndi_project_name}" },
-    },
-  };
-
-  const azurerm_public_ip = {
-    [`cndi_${name}_public_ip`]: {
-      allocation_method: "Static",
-      location: "${azurerm_resource_group.cndi_resource_group.location}",
-      name: `cndi_${name}_public_ip`,
-      resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
-      sku: "Standard",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
   };
@@ -182,7 +159,7 @@ const getAzureNodeResource = (
           admin_username,
           admin_password,
           disable_password_authentication,
-          availability_set_id,
+          zone,
           location,
           name,
           network_interface_ids,
@@ -193,10 +170,8 @@ const getAzureNodeResource = (
           tags,
         },
       },
-      azurerm_network_interface_security_group_association,
       azurerm_network_interface_backend_address_pool_association,
       azurerm_network_interface,
-      azurerm_public_ip,
     },
   };
 
