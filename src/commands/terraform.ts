@@ -1,7 +1,8 @@
+import { copy } from "https://deno.land/std@0.173.0/streams/mod.ts";
 import { CNDIContext } from "../types.ts";
 import setTF_VARs from "../setTF_VARs.ts";
-import { copy } from "https://deno.land/std@0.173.0/streams/mod.ts";
-
+import pullStateForRun from "../tfstate/git/read-state.ts";
+import pushStateFromRun from "../tfstate/git/write-state.ts";
 /**
  * COMMAND fn: cndi terraform
  * Wraps the terraform cli with a CNDI context
@@ -14,24 +15,23 @@ export default async function terraform(
 
   setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
+  await pullStateForRun(pathToTerraformResources);
+
   const ranProxiedTerraformCmd = Deno.run({
     cmd: [pathToTerraformBinary, `-chdir=${pathToTerraformResources}`, ...args],
-    "stderr": "piped",
-    "stdout": "piped",
+    stderr: "piped",
+    stdout: "piped",
   });
 
   copy(ranProxiedTerraformCmd.stdout, Deno.stdout);
   copy(ranProxiedTerraformCmd.stderr, Deno.stderr);
 
   const proxiedTerraformCmdStatus = await ranProxiedTerraformCmd.status();
-  const proxiedTerraformCmdOutput = await ranProxiedTerraformCmd.output();
-  const proxiedTerraformCmdStderr = await ranProxiedTerraformCmd.stderrOutput();
+
+  await pushStateFromRun(pathToTerraformResources);
 
   if (proxiedTerraformCmdStatus.code !== 0) {
-    await Deno.stdout.write(proxiedTerraformCmdStderr);
-    Deno.exit(253); // arbitrary exit code
-  } else {
-    await Deno.stdout.write(proxiedTerraformCmdOutput);
+    Deno.exit(proxiedTerraformCmdStatus.code); // arbitrary exit code
   }
 
   ranProxiedTerraformCmd.close();
