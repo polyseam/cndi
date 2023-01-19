@@ -126,15 +126,6 @@ const getAzureNodeResource = (
     cndi_project_name: "${local.cndi_project_name}",
   };
 
-  const azurerm_network_interface_security_group_association = {
-    [`cndi_${name}_network_interface_security_group_association`]: {
-      network_interface_id:
-        `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
-      network_security_group_id:
-        "${azurerm_network_security_group.cndi_network_security_group.id}",
-    },
-  };
-
   const azurerm_network_interface_backend_address_pool_association = {
     [`cndi_${name}_load_balancer_address_pool_association`]: {
       backend_address_pool_id:
@@ -180,7 +171,6 @@ const getAzureNodeResource = (
           tags,
         },
       },
-      azurerm_network_interface_security_group_association,
       azurerm_network_interface_backend_address_pool_association,
       azurerm_network_interface,
 

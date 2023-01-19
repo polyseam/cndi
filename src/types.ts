@@ -658,8 +658,6 @@ interface AzureTerraformNodeResource {
         user_data?: string;
       };
     };
-    azurerm_network_interface_security_group_association:
-      AzureTerraformNetworkInterfaceSecurityGroupAssociationResource;
     azurerm_network_interface_backend_address_pool_association:
       AzureTerraformLoadBalancerBackendAddressPoolAssociationResource;
     azurerm_network_interface: AzureTerraformNetworkInterfaceResource;
@@ -692,6 +690,12 @@ interface AzureTerraformSubnetResource {
     name: string;
     resource_group_name: string;
     virtual_network_name: string;
+  };
+}
+interface AzureTerraformSubnetNetworkSecurityGroupAssociationResource {
+  cndi_subnet_network_security_group_association: {
+    subnet_id: string;
+    network_security_group_id: string;
   };
 }
 interface AzureTerraformPublicIPResource {
@@ -868,6 +872,7 @@ interface AzureTerraformRootFileData {
       azurerm_network_security_group:
         AzureTerraformNetworkInterfaceSecurityGroupResource;
       azurerm_public_ip: AzureTerraformPublicIPResource;
+      azurerm_subnet_network_security_group_association: AzureTerraformSubnetNetworkSecurityGroupAssociationResource;
     },
   ];
 

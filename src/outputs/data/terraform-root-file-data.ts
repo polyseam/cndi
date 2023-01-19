@@ -817,6 +817,12 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
           virtual_network_name:
             "${azurerm_virtual_network.cndi_virtual_network.name}",
         },
+      },     
+      azurerm_subnet_network_security_group_association: {
+        cndi_subnet_network_security_group_association: {
+          subnet_id: "${azurerm_subnet.cndi_subnet.id}",
+          network_security_group_id: "${azurerm_network_security_group.cndi_network_security_group.id}"
+        }
       },
       azurerm_public_ip: {
         cndi_load_balancer_public_ip: {
