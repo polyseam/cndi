@@ -13,15 +13,19 @@ const git = simpleGit();
 
 const gitWriteStateLabel = white("tfstate/git/write-state:");
 
-export default async function pushStateFromRun(
-  pathToTerraformResources: string,
-) {
+export default async function pushStateFromRun({
+  pathToTerraformResources,
+  cmd,
+}: {
+  pathToTerraformResources: string;
+  cmd: string;
+}) {
   const isGitRepo = await git.checkIsRepo();
 
   if (!isGitRepo) {
     console.log(
       gitWriteStateLabel,
-      '"cndi run" must be executed inside a git repository',
+      `"${cmd}" must be executed inside a git repository`,
     );
     Deno.exit(1);
   }
@@ -33,7 +37,7 @@ export default async function pushStateFromRun(
     console.log(
       gitWriteStateLabel,
       brightRed("your branch must be clean before running"),
-      cyan("cndi run\n"),
+      `"${cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -45,9 +49,7 @@ export default async function pushStateFromRun(
 
   const pathToState = path.join(pathToTerraformResources, "terraform.tfstate");
 
-  const state = Deno.readTextFileSync(
-    pathToState,
-  );
+  const state = Deno.readTextFileSync(pathToState);
 
   try {
     // this should throw an error if state is corrupted
@@ -55,7 +57,7 @@ export default async function pushStateFromRun(
   } catch {
     console.log(
       gitWriteStateLabel,
-      "corrupted state, please run 'cndi run' again",
+      `corrupted state, please run "${cmd}" again`,
     );
     Deno.exit(1);
   }
@@ -95,13 +97,13 @@ export default async function pushStateFromRun(
   try {
     await git.raw("add", pathToNewState, "--force");
     await git.commit(
-      `automated commit from cndi run: ${Math.floor(Date.now() / 1000)}`,
+      `automated commit from "${cmd}": ${Math.floor(Date.now() / 1000)}`,
       [pathToNewState],
     );
   } catch (e) {
     console.log(
       gitWriteStateLabel,
-      "failed to commit encrypted tfstate to '_state' branch",
+      `failed to commit encrypted tfstate to "_state" branch`,
     );
     console.log(e);
   }
@@ -111,7 +113,7 @@ export default async function pushStateFromRun(
   } catch (pushError) {
     console.log(
       gitWriteStateLabel,
-      "failed to push encrypted terraform.tfstate to remote '_state' branch",
+      `failed to push encrypted terraform.tfstate to remote "_state" branch`,
     );
     console.log('did you forget to add an "origin" remote?');
     console.log(pushError);

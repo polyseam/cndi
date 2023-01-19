@@ -15,16 +15,20 @@ const git = simpleGit();
 
 const gitReadStateLabel = white("tfstate/git/read-state:");
 
-export default async function pullStateForRun(
-  pathToTerraformResources: string,
-) {
+export default async function pullStateForRun({
+  pathToTerraformResources,
+  cmd,
+}: {
+  pathToTerraformResources: string;
+  cmd: string;
+}) {
   // fails in GitHub Actions
   const isGitRepo = git.checkIsRepo();
 
   if (!isGitRepo) {
     console.log(
       gitReadStateLabel,
-      '"cndi run" must be executed inside a git repository',
+      `"${cmd}" must be executed inside a git repository`,
     );
     Deno.exit(1);
   }
@@ -40,7 +44,7 @@ export default async function pullStateForRun(
     console.log(
       gitReadStateLabel,
       "you must make a commit on your branch before running",
-      cyan("cndi run\n"),
+      `"${cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -52,7 +56,7 @@ export default async function pullStateForRun(
     console.log(
       gitReadStateLabel,
       brightRed("your branch must be clean before running"),
-      cyan("cndi run\n"),
+      `"${cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -74,7 +78,7 @@ export default async function pullStateForRun(
   } catch {
     console.log(
       gitReadStateLabel,
-      "'terraform.tfstate.encrypted' not found, using fresh state",
+      `"terraform.tfstate.encrypted" not found, using fresh state`,
     );
   }
 
