@@ -11,11 +11,12 @@ export default async function terraform(
   { pathToTerraformBinary, pathToTerraformResources }: CNDIContext,
   args: string[],
 ) {
-  console.log("cndi terraform", args.join(" "), "\n");
+  const cmd = `cndi terraform ${args.join(" ")}`;
+  console.log(`${cmd}\n`);
 
   setTF_VARs(); // set TF_VARs using CNDI's .env variables
 
-  await pullStateForRun(pathToTerraformResources);
+  await pullStateForRun({ pathToTerraformResources, cmd });
 
   const ranProxiedTerraformCmd = Deno.run({
     cmd: [pathToTerraformBinary, `-chdir=${pathToTerraformResources}`, ...args],
@@ -28,7 +29,7 @@ export default async function terraform(
 
   const proxiedTerraformCmdStatus = await ranProxiedTerraformCmd.status();
 
-  await pushStateFromRun(pathToTerraformResources);
+  await pushStateFromRun({ pathToTerraformResources, cmd });
 
   if (proxiedTerraformCmdStatus.code !== 0) {
     Deno.exit(proxiedTerraformCmdStatus.code); // arbitrary exit code
