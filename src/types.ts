@@ -705,7 +705,7 @@ interface AzureTerraformPublicIPResource {
     name: string;
     resource_group_name: string;
     sku: string;
-    zones : [string];
+    zones: [string];
     tags: {
       cndi_project_name: string;
     };
@@ -872,7 +872,8 @@ interface AzureTerraformRootFileData {
       azurerm_network_security_group:
         AzureTerraformNetworkInterfaceSecurityGroupResource;
       azurerm_public_ip: AzureTerraformPublicIPResource;
-      azurerm_subnet_network_security_group_association: AzureTerraformSubnetNetworkSecurityGroupAssociationResource;
+      azurerm_subnet_network_security_group_association:
+        AzureTerraformSubnetNetworkSecurityGroupAssociationResource;
     },
   ];
 

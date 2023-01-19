@@ -102,8 +102,8 @@ const getAzureNodeResource = (
     `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
   ];
 
-  const zone = "1"
-  
+  const zone = "1";
+
   const os_disk = [
     {
       name: `cndi_${name}_disk`,
@@ -152,7 +152,6 @@ const getAzureNodeResource = (
     },
   };
 
-
   const nodeResource: AzureTerraformNodeResource = {
     resource: {
       azurerm_linux_virtual_machine: {
@@ -173,7 +172,6 @@ const getAzureNodeResource = (
       },
       azurerm_network_interface_backend_address_pool_association,
       azurerm_network_interface,
-
     },
   };
 
