@@ -8,6 +8,9 @@ import {
   AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
+  AzureDeploymentTargetConfiguration,
+  AzureNodeItemSpec,
+  AzureTerraformNodeResource,
   BaseNodeItemSpec,
   DeploymentTargetConfiguration,
   GCPDeploymentTargetConfiguration,
@@ -40,6 +43,13 @@ const getTerraformNodeResource = (
         deployment_target_configuration.gcp as GCPDeploymentTargetConfiguration,
         controllerName,
       );
+    case "azure":
+      return getAzureNodeResource(
+        node as AzureNodeItemSpec,
+        deployment_target_configuration
+          .azure as AzureDeploymentTargetConfiguration,
+        controllerName,
+      );
 
     default:
       console.log(
@@ -50,18 +60,177 @@ const getTerraformNodeResource = (
   }
 };
 
+const getAzureNodeResource = (
+  node: AzureNodeItemSpec,
+  deployment_target_configuration: AzureDeploymentTargetConfiguration,
+  leaderName: string,
+) => {
+  const { name, role } = node;
+  const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
+  const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
+  const DEFAULT_SIZE = 130; // The size of the image in gigabytes\
+
+  const image = node?.image || deployment_target_configuration?.image ||
+    DEFAULT_IMAGE;
+
+  let machine_type = node?.machine_type ||
+    node?.instance_type ||
+    DEFAULT_MACHINE_TYPE;
+
+  let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
+
+  if (node?.size && typeof node.size === "string") {
+    machine_type = node.size;
+  }
+
+  if (node?.size && typeof node.size === "number") {
+    disk_size_gb = node.size;
+  }
+
+  deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
+
+  const resource_group_name =
+    "${azurerm_resource_group.cndi_resource_group.name}";
+
+  const location = "${azurerm_resource_group.cndi_resource_group.location}";
+
+  const admin_username = "ubuntu";
+  const admin_password = "Password123";
+  const disable_password_authentication = false;
+
+  const network_interface_ids = [
+    `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+  ];
+
+  const zone = "1";
+
+  const os_disk = [
+    {
+      name: `cndi_${name}_disk`,
+      caching: "ReadWrite",
+      storage_account_type: "StandardSSD_LRS",
+      disk_size_gb,
+    },
+  ];
+
+  const source_image_reference = [
+    {
+      publisher: "canonical",
+      offer: image,
+      sku: "20_04-lts-gen2",
+      version: "latest",
+    },
+  ];
+
+  const tags = {
+    cndi_project_name: "${local.cndi_project_name}",
+  };
+
+  const azurerm_network_interface_backend_address_pool_association = {
+    [`cndi_${name}_load_balancer_address_pool_association`]: {
+      backend_address_pool_id:
+        "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+      ip_configuration_name: `cndi_${name}_network_interface_ip_config`,
+      network_interface_id:
+        `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+    },
+  };
+
+  const azurerm_network_interface = {
+    [`cndi_${name}_network_interface`]: {
+      ip_configuration: [
+        {
+          name: `cndi_${name}_network_interface_ip_config`,
+          private_ip_address_allocation: "Dynamic",
+          subnet_id: "${azurerm_subnet.cndi_subnet.id}",
+        },
+      ],
+      location: "${azurerm_resource_group.cndi_resource_group.location}",
+      name: `cndi_${name}_network_interface`,
+      resource_group_name: "${azurerm_resource_group.cndi_resource_group.name}",
+      tags: { cndi_project_name: "${local.cndi_project_name}" },
+    },
+  };
+
+  const nodeResource: AzureTerraformNodeResource = {
+    resource: {
+      azurerm_linux_virtual_machine: {
+        [name]: {
+          admin_username,
+          admin_password,
+          disable_password_authentication,
+          zone,
+          location,
+          name,
+          network_interface_ids,
+          os_disk,
+          resource_group_name,
+          size: machine_type,
+          source_image_reference,
+          tags,
+        },
+      },
+      azurerm_network_interface_backend_address_pool_association,
+      azurerm_network_interface,
+    },
+  };
+
+  if (role === "leader") {
+    const user_data =
+      '${base64encode(templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${local.git_repo}", "git_password": "${local.git_password}", "git_username": "${local.git_username}", "sealed_secrets_private_key": "${local.sealed_secrets_private_key}", "sealed_secrets_public_key": "${local.sealed_secrets_public_key}", "argo_ui_readonly_password": "${local.argo_ui_readonly_password}" }))}';
+
+    const leaderNodeResourceObj = { ...nodeResource };
+
+    leaderNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].user_data = user_data;
+
+    const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
+
+    return leaderNodeResourceString;
+  } else {
+    // if the role is non-null and also not controller, warn the user and run default
+    if (role?.length && role !== "controller") {
+      console.log(
+        terraformNodeResourceLabel,
+        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+      );
+      console.log(yellow("defaulting node role to"), '"controller"\n');
+    }
+
+    const user_data =
+      '${base64encode(templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"}))}';
+
+    const controllerNodeResourceObj = { ...nodeResource };
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].depends_on = [`azurerm_linux_virtual_machine.${leaderName}`];
+
+    controllerNodeResourceObj.resource.azurerm_linux_virtual_machine[
+      name
+    ].user_data = user_data;
+
+    const controllerNodeResourceString = getPrettyJSONString(
+      controllerNodeResourceObj,
+    );
+
+    return controllerNodeResourceString;
+  }
+};
 const getGCPNodeResource = (
   node: GCPNodeItemSpec,
   deployment_target_configuration: GCPDeploymentTargetConfiguration,
   leaderName: string,
 ) => {
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
-  const DEFAULT_MACHINE_TYPE = "e2-standard-4"; // The machine type to create.
+  const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const { name, role } = node;
   const image = node?.image || deployment_target_configuration?.image ||
     DEFAULT_IMAGE;
-  const machine_type = node?.machine_type || node?.instance_type ||
-    deployment_target_configuration?.machine_type || DEFAULT_MACHINE_TYPE;
+  const machine_type = node?.machine_type ||
+    node?.instance_type ||
+    deployment_target_configuration?.machine_type ||
+    DEFAULT_MACHINE_TYPE;
   const allow_stopping_for_update = true; // If true, allows Terraform to stop the instance to update its properties.
   const DEFAULT_SIZE = 100; // The size of the image in gigabytes
   const size = node?.size || node?.volume_size || DEFAULT_SIZE;
@@ -118,8 +287,9 @@ const getGCPNodeResource = (
 
     const leaderNodeResourceObj = { ...nodeResource };
 
-    leaderNodeResourceObj.resource.google_compute_instance[name]
-      .metadata["user-data"] = user_data;
+    leaderNodeResourceObj.resource.google_compute_instance[name].metadata[
+      "user-data"
+    ] = user_data;
 
     const leaderNodeResourceString = getPrettyJSONString(leaderNodeResourceObj);
 
@@ -139,13 +309,13 @@ const getGCPNodeResource = (
 
     const controllerNodeResourceObj = { ...nodeResource };
 
-    controllerNodeResourceObj.resource.google_compute_instance[name]
-      .depends_on = [
-        `google_compute_instance.${leaderName}`,
-      ];
+    controllerNodeResourceObj.resource.google_compute_instance[
+      name
+    ].depends_on = [`google_compute_instance.${leaderName}`];
 
-    controllerNodeResourceObj.resource.google_compute_instance[name]
-      .metadata["user-data"] = user_data;
+    controllerNodeResourceObj.resource.google_compute_instance[name].metadata[
+      "user-data"
+    ] = user_data;
 
     const controllerNodeResourceString = getPrettyJSONString(
       controllerNodeResourceObj,
@@ -161,11 +331,12 @@ const getAWSNodeResource = (
   leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
-  const DEFAULT_INSTANCE_TYPE = "t3.medium";
+  const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const { name } = node;
   const role = node.role as NodeRole;
   const ami = node?.ami || deployment_target_configuration?.ami || DEFAULT_AMI;
-  const instance_type = node?.instance_type || node?.machine_type ||
+  const instance_type = node?.instance_type ||
+    node?.machine_type ||
     deployment_target_configuration?.instance_type ||
     DEFAULT_INSTANCE_TYPE;
 

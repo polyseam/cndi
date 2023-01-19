@@ -306,7 +306,7 @@ export default async function init(context: CNDIContext) {
 
   const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
-    kind,
+    kind, // aws | gcp | azure
   );
 
   const templateEnvObject = template

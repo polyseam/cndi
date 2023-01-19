@@ -11,7 +11,7 @@ import { trimPemString } from "../utils.ts";
 
 import { prepareAWSEnv } from "../deployment-targets/aws.ts";
 import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
-
+import { prepareAzureEnv } from "../deployment-targets/azure.ts";
 import {
   brightRed,
   cyan,
@@ -132,6 +132,11 @@ const getCoreEnvObject = async (
       return {
         ...coreEnvObject,
         ...(await prepareGCPEnv(context.interactive)),
+      };
+    case DEPLOYMENT_TARGET.azure:
+      return {
+        ...coreEnvObject,
+        ...(await prepareAzureEnv(context.interactive)),
       };
     default:
       console.log(brightRed(`kind "${deploymentTarget}" is not yet supported`));

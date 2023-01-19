@@ -4,11 +4,13 @@ type ObjectValues<T> = T[keyof T];
 export const NODE_KIND = {
   aws: "aws",
   gcp: "gcp",
+  azure: "azure",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
   aws: "aws",
   gcp: "gcp",
+  azure: "azure",
 } as const;
 
 export const COMMAND = {
@@ -112,7 +114,6 @@ interface GCPTerraformDiskResource {
     image: string;
   };
 }
-
 interface GCPTerraformProjectServiceResource {
   [cndi_enable_project_service: string]: {
     disable_on_destroy: boolean;
@@ -419,7 +420,7 @@ interface AWSTerraformVPCResource {
 interface DeploymentTargetConfiguration {
   aws: AWSDeploymentTargetConfiguration;
   gcp: unknown;
-  azure: unknown;
+  azure: AzureDeploymentTargetConfiguration;
 }
 
 // incomplete type, config will have more options
@@ -609,6 +610,313 @@ interface GCPTerraformRootFileData {
     ];
   };
 }
+
+interface AzureNodeItemSpec extends BaseNodeItemSpec {
+  machine_type?: string;
+  image?: string;
+  size?: number;
+  volume_size?: number;
+  disk_size_gb?: number;
+  instance_type?: string;
+}
+// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
+interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
+  image?: string;
+  machine_type?: string;
+  disk_size_gb?: number;
+  size?: number | string;
+}
+interface AzureTerraformNodeResource {
+  resource: {
+    azurerm_linux_virtual_machine: {
+      [name: string]: {
+        admin_username: string;
+        admin_password: string;
+        disable_password_authentication: boolean;
+        zone: string;
+        location: string;
+        name: string;
+        network_interface_ids: Array<string>;
+        os_disk: Array<{
+          caching: string;
+          disk_size_gb: number;
+          name: string;
+          storage_account_type: string;
+        }>;
+        resource_group_name: string;
+        size: string;
+        source_image_reference: Array<{
+          offer: string;
+          publisher: string;
+          sku: string;
+          version: string;
+        }>;
+        tags: {
+          cndi_project_name: string;
+        };
+        depends_on?: [string];
+        user_data?: string;
+      };
+    };
+    azurerm_network_interface_backend_address_pool_association:
+      AzureTerraformLoadBalancerBackendAddressPoolAssociationResource;
+    azurerm_network_interface: AzureTerraformNetworkInterfaceResource;
+  };
+}
+
+interface AzureTerraformResourceGroupResource {
+  cndi_resource_group: {
+    location: string;
+    name: string;
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+interface AzureTerraformVirtualNetworkResource {
+  cndi_virtual_network: {
+    address_space: Array<string>;
+    location: string;
+    name: string;
+    resource_group_name: string;
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+interface AzureTerraformSubnetResource {
+  cndi_subnet: {
+    address_prefixes: Array<string>;
+    name: string;
+    resource_group_name: string;
+    virtual_network_name: string;
+  };
+}
+interface AzureTerraformSubnetNetworkSecurityGroupAssociationResource {
+  cndi_subnet_network_security_group_association: {
+    subnet_id: string;
+    network_security_group_id: string;
+  };
+}
+interface AzureTerraformPublicIPResource {
+  [cndi_load_balancer_public_ip: string]: {
+    allocation_method: string;
+    location: string;
+    name: string;
+    resource_group_name: string;
+    sku: string;
+    zones: [string];
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+interface AzureTerraformNetworkInterfaceResource {
+  [cndi_network_interface: string]: {
+    ip_configuration: Array<{
+      name: string;
+      private_ip_address_allocation: string;
+      subnet_id: string;
+    }>;
+    location: string;
+    name: string;
+    resource_group_name: string;
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+interface AzureTerraformLoadBalancerResource {
+  cndi_load_balancer: {
+    frontend_ip_configuration: Array<{
+      name: string;
+      public_ip_address_id: string;
+    }>;
+    location: string;
+    name: string;
+    resource_group_name: string;
+    sku: string;
+    sku_tier: string;
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+interface AzureTerraformLoadBalancerProbeResource {
+  cndi_load_balancer_https_health_probe: {
+    loadbalancer_id: string;
+    name: string;
+    port: number;
+  };
+  cndi_load_balancer_http_health_probe: {
+    loadbalancer_id: string;
+    name: string;
+    port: number;
+    protocol: string;
+  };
+}
+interface AzureTerraformLoadBalancerRuleResource {
+  SSH: Array<{
+    backend_address_pool_ids: Array<string>;
+    backend_port: number;
+    frontend_ip_configuration_name: string;
+    frontend_port: number;
+    loadbalancer_id: string;
+    name: string;
+    protocol: string;
+  }>;
+  HTTPS: Array<{
+    backend_address_pool_ids: Array<string>;
+    backend_port: number;
+    frontend_ip_configuration_name: string;
+    frontend_port: number;
+    loadbalancer_id: string;
+    name: string;
+    probe_id: string;
+    protocol: string;
+  }>;
+  HTTP: Array<{
+    backend_address_pool_ids: Array<string>;
+    backend_port: number;
+    frontend_ip_configuration_name: string;
+    frontend_port: number;
+    loadbalancer_id: string;
+    name: string;
+    probe_id: string;
+    protocol: string;
+  }>;
+}
+interface AzureTerraformLoadBalancerBackendAddressPoolResource {
+  cndi_load_balancer_address_pool: {
+    loadbalancer_id: string;
+    name: string;
+  };
+}
+interface AzureTerraformLoadBalancerBackendAddressPoolAssociationResource {
+  [cndi_load_balancer_address_pool_association: string]: {
+    backend_address_pool_id: string;
+    ip_configuration_name: string;
+    network_interface_id: string;
+  };
+}
+interface AzureTerraformNetworkInterfaceSecurityGroupAssociationResource {
+  [cndi_network_Security_Group_Association: string]: {
+    network_interface_id: string;
+    network_security_group_id: string;
+  };
+}
+interface AzureTerraformNetworkInterfaceSecurityGroupResource {
+  cndi_network_security_group: {
+    location: string;
+    name: string;
+    resource_group_name: string;
+    security_rule: Array<{
+      access: string;
+      description: string;
+      destination_address_prefix: string;
+      destination_address_prefixes: Array<string>;
+      destination_application_security_group_ids: Array<string>;
+      destination_port_range: string;
+      destination_port_ranges: Array<string>;
+      direction: string;
+      name: string;
+      priority: number;
+      protocol: string;
+      source_address_prefix: string;
+      source_address_prefixes: Array<string>;
+      source_application_security_group_ids: Array<string>;
+      source_port_range: string;
+      source_port_ranges: Array<string>;
+    }>;
+    tags: {
+      cndi_project_name: string;
+    };
+  };
+}
+
+interface AzureTerraformRootFileData {
+  locals: [
+    {
+      location: string;
+      cndi_project_name: string;
+      leader_node_ip: string;
+      bootstrap_token: "${random_password.generated_token.result}";
+      git_password: "${var.git_password}";
+      git_username: "${var.git_username}";
+      git_repo: "${var.git_repo}";
+      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
+      sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
+    },
+  ];
+  provider: {
+    random: [Record<string | number | symbol, never>]; // equal to [{}]
+    aws?: Array<{ region: string }>;
+    google?: Array<{ region: string; project: string; zone?: string }>;
+    azurerm?: Array<{
+      features: Record<string | number | symbol, never>;
+    }>;
+  };
+
+  resource: [
+    {
+      random_password: RandomTerraformRandomPasswordResource;
+      azurerm_resource_group: AzureTerraformResourceGroupResource;
+      azurerm_virtual_network: AzureTerraformVirtualNetworkResource;
+      azurerm_subnet: AzureTerraformSubnetResource;
+      azurerm_lb: AzureTerraformLoadBalancerResource;
+      azurerm_lb_probe: AzureTerraformLoadBalancerProbeResource;
+      azurerm_lb_rule: AzureTerraformLoadBalancerRuleResource;
+      azurerm_lb_backend_address_pool:
+        AzureTerraformLoadBalancerBackendAddressPoolResource;
+      azurerm_network_security_group:
+        AzureTerraformNetworkInterfaceSecurityGroupResource;
+      azurerm_public_ip: AzureTerraformPublicIPResource;
+      azurerm_subnet_network_security_group_association:
+        AzureTerraformSubnetNetworkSecurityGroupAssociationResource;
+    },
+  ];
+
+  terraform: [TerraformDependencies];
+  variable: {
+    git_password: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_username: [
+      {
+        description: "password for accessing the repositories";
+        type: "string";
+      },
+    ];
+    git_repo: [
+      {
+        description: "repository URL to access";
+        type: "string";
+      },
+    ];
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets";
+        type: "string";
+      },
+    ];
+    argo_ui_readonly_password: [
+      {
+        description: "password for accessing the argo ui";
+        type: "string";
+      },
+    ];
+  };
+}
 interface TerraformRootFileData {
   locals: [
     {
@@ -626,7 +934,7 @@ interface TerraformRootFileData {
     },
   ];
   provider: {
-    random: [Record<never, never>]; // equal to [{}]
+    random: [Record<string | number | symbol, never>]; // equal to [{}]
     aws?: Array<{ region: string }>;
     gcp?: Array<{ region: string; project: string }>;
   };
@@ -931,6 +1239,10 @@ export type {
   AWSNodeItemSpec,
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
+  AzureDeploymentTargetConfiguration,
+  AzureNodeItemSpec,
+  AzureTerraformNodeResource,
+  AzureTerraformRootFileData,
   BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIClients,

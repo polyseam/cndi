@@ -1,4 +1,5 @@
 import {
+  AzureTerraformRootFileData,
   GCPTerraformRootFileData,
   TerraformRootFileData,
 } from "../../types.ts";
@@ -513,7 +514,6 @@ const terraformRootFileData: TerraformRootFileData = {
     ],
   },
 };
-
 const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   locals: [
     {
@@ -719,5 +719,282 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
     ],
   },
 };
+const azureTerraformRootFileData: AzureTerraformRootFileData = {
+  locals: [
+    {
+      location: "",
+      cndi_project_name: "",
+      leader_node_ip: "",
+      bootstrap_token: "${random_password.generated_token.result}",
+      git_password: "${var.git_password}",
+      git_username: "${var.git_username}",
+      git_repo: "${var.git_repo}",
+      argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
+      sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
+      sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
+    },
+  ],
+  provider: {
+    random: [{}],
+  },
 
-export { gcpTerraformRootFileData, terraformRootFileData };
+  terraform: [
+    {
+      required_providers: [
+        {
+          external: {
+            source: "hashicorp/external",
+            version: "2.2.2",
+          },
+        },
+      ],
+      required_version: ">= 1.2.0",
+    },
+  ],
+  variable: {
+    git_password: [
+      {
+        description: "password for accessing the repositories",
+        type: "string",
+      },
+    ],
+    git_username: [
+      {
+        description: "password for accessing the repositories",
+        type: "string",
+      },
+    ],
+    git_repo: [
+      {
+        description: "repository URL to access",
+        type: "string",
+      },
+    ],
+    argo_ui_readonly_password: [
+      {
+        description: "password for accessing the argo ui",
+        type: "string",
+      },
+    ],
+    sealed_secrets_private_key: [
+      {
+        description: "private key for decrypting sealed secrets",
+        type: "string",
+      },
+    ],
+    sealed_secrets_public_key: [
+      {
+        description: "public key for encrypting sealed secrets",
+        type: "string",
+      },
+    ],
+  },
+  resource: [
+    {
+      azurerm_resource_group: {
+        cndi_resource_group: {
+          location: "${local.location}",
+          name: "${local.cndi_project_name}",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      azurerm_virtual_network: {
+        cndi_virtual_network: {
+          address_space: ["10.0.0.0/16"],
+          location: "${azurerm_resource_group.cndi_resource_group.location}",
+          name: "cndi_virtual_network",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      azurerm_subnet: {
+        cndi_subnet: {
+          address_prefixes: ["10.0.0.0/24"],
+          name: "cndi_subnet",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          virtual_network_name:
+            "${azurerm_virtual_network.cndi_virtual_network.name}",
+        },
+      },
+      azurerm_subnet_network_security_group_association: {
+        cndi_subnet_network_security_group_association: {
+          subnet_id: "${azurerm_subnet.cndi_subnet.id}",
+          network_security_group_id:
+            "${azurerm_network_security_group.cndi_network_security_group.id}",
+        },
+      },
+      azurerm_public_ip: {
+        cndi_load_balancer_public_ip: {
+          allocation_method: "Static",
+          location: "${azurerm_resource_group.cndi_resource_group.location}",
+          name: "cndi_load_balancer_public_ip",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          sku: "Standard",
+          zones: ["1"],
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      azurerm_lb: {
+        cndi_load_balancer: {
+          frontend_ip_configuration: [
+            {
+              name: "cndi_load_balancer_public_ip_address",
+              public_ip_address_id:
+                "${azurerm_public_ip.cndi_load_balancer_public_ip.id}",
+            },
+          ],
+          location: "${azurerm_resource_group.cndi_resource_group.location}",
+          name: "cndi_load_balancer",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          sku: "Standard",
+          sku_tier: "Regional",
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      azurerm_lb_probe: {
+        cndi_load_balancer_http_health_probe: {
+          loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+          name: "cndi_load_balancer_http_health_probe",
+          port: 80,
+          protocol: "Tcp",
+        },
+        cndi_load_balancer_https_health_probe: {
+          loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+          name: "cndi_load_balancer_https_health_probe",
+          port: 443,
+        },
+      },
+      azurerm_lb_rule: {
+        HTTP: [
+          {
+            backend_address_pool_ids: [
+              "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+            ],
+            backend_port: 80,
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
+            frontend_port: 80,
+            loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+            name: "HTTP",
+            probe_id:
+              "${azurerm_lb_probe.cndi_load_balancer_http_health_probe.id}",
+            protocol: "Tcp",
+          },
+        ],
+        HTTPS: [
+          {
+            backend_address_pool_ids: [
+              "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+            ],
+            backend_port: 443,
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
+            frontend_port: 443,
+            loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+            name: "HTTPS",
+            probe_id:
+              "${azurerm_lb_probe.cndi_load_balancer_https_health_probe.id}",
+            protocol: "Tcp",
+          },
+        ],
+        SSH: [
+          {
+            backend_address_pool_ids: [
+              "${azurerm_lb_backend_address_pool.cndi_load_balancer_address_pool.id}",
+            ],
+            backend_port: 22,
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
+            frontend_port: 22,
+            loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+            name: "SSH",
+            protocol: "Tcp",
+          },
+        ],
+      },
+      azurerm_lb_backend_address_pool: {
+        cndi_load_balancer_address_pool: {
+          loadbalancer_id: "${azurerm_lb.cndi_load_balancer.id}",
+          name: "cndi_load_balancer_address_pool",
+        },
+      },
+      azurerm_network_security_group: {
+        cndi_network_security_group: {
+          location: "${azurerm_resource_group.cndi_resource_group.location}",
+          name: "cndi_network_security_group",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_resource_group.name}",
+          security_rule: [
+            {
+              access: "Allow",
+              description: "Allow inbound SSH traffic",
+              destination_address_prefix: "*",
+              destination_address_prefixes: [],
+              destination_application_security_group_ids: [],
+              destination_port_range: "22",
+              destination_port_ranges: [],
+              direction: "Inbound",
+              name: "AllowSSH",
+              priority: 100,
+              protocol: "Tcp",
+              source_address_prefix: "*",
+              source_address_prefixes: [],
+              source_application_security_group_ids: [],
+              source_port_range: "*",
+              source_port_ranges: [],
+            },
+            {
+              access: "Allow",
+              description: "Allow inbound for HTTP traffic",
+              destination_address_prefix: "*",
+              destination_address_prefixes: [],
+              destination_application_security_group_ids: [],
+              destination_port_range: "80",
+              destination_port_ranges: [],
+              direction: "Inbound",
+              name: "AllowHTTP",
+              priority: 150,
+              protocol: "Tcp",
+              source_address_prefix: "*",
+              source_address_prefixes: [],
+              source_application_security_group_ids: [],
+              source_port_range: "*",
+              source_port_ranges: [],
+            },
+            {
+              access: "Allow",
+              description: "Allow inbound for HTTPS traffic",
+              destination_address_prefix: "*",
+              destination_address_prefixes: [],
+              destination_application_security_group_ids: [],
+              destination_port_range: "443",
+              destination_port_ranges: [],
+              direction: "Inbound",
+              name: "AllowHTTPS",
+              priority: 200,
+              protocol: "Tcp",
+              source_address_prefix: "*",
+              source_address_prefixes: [],
+              source_application_security_group_ids: [],
+              source_port_range: "*",
+              source_port_ranges: [],
+            },
+          ],
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
+        },
+      },
+      random_password: {
+        generated_token: [{ length: 32, special: false, upper: false }],
+      },
+    },
+  ],
+};
+export {
+  azureTerraformRootFileData,
+  gcpTerraformRootFileData,
+  terraformRootFileData,
+};

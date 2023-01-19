@@ -6,6 +6,7 @@ import {
 } from "../types.ts";
 
 import {
+  azureTerraformRootFileData,
   gcpTerraformRootFileData,
   terraformRootFileData,
 } from "./data/terraform-root-file-data.ts";
@@ -14,7 +15,7 @@ import { brightRed } from "https://deno.land/std@0.173.0/fmt/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
-
+const DEFAULT_ARM_REGION = "eastus";
 const terraformDependencies: TerraformDependencies = {
   required_providers: [
     {
@@ -31,16 +32,19 @@ const awsTerraformProviderDependency = {
   source: "hashicorp/aws",
   version: "~> 4.16",
 };
-
 const googleTerraformProviderDependency = {
   source: "hashicorp/google",
   version: "~> 4.44",
 };
-
+const azureTerraformProviderDependency = {
+  source: "hashicorp/azurerm",
+  version: "~> 3.0.2",
+};
 interface GetTerraformRootFileArgs {
   leaderName: string;
   requiredProviders: Set<string>;
   nodes: Array<BaseNodeItemSpec>;
+  cndi_project_name: string;
 }
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
@@ -49,6 +53,7 @@ const getTerraformRootFile = async ({
   leaderName,
   requiredProviders,
   nodes,
+  cndi_project_name,
 }: GetTerraformRootFileArgs): Promise<string> => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -96,8 +101,8 @@ const getTerraformRootFile = async ({
     gcpMainTerraformFileObject.locals[0].region = region;
 
     gcpMainTerraformFileObject.resource[0].google_compute_instance_group
-      .cndi_cluster.instances = nodeNames.map(
-        (name) => `\${google_compute_instance.${name}.self_link}`,
+      .cndi_cluster.instances = nodeNames.map((name) =>
+        `\${google_compute_instance.${name}.self_link}`
       );
 
     gcpMainTerraformFileObject.provider.google = [
@@ -141,7 +146,11 @@ const getTerraformRootFile = async ({
     });
 
     awsMainTerraformFileObject.locals[0].availability_zones =
-      `\${sort(setintersection(${availabilityZoneKeys.join(",")}))}`;
+      `\${sort(setintersection(${
+        availabilityZoneKeys.join(
+          ",",
+        )
+      }))}`;
 
     awsMainTerraformFileObject.locals[0].leader_node_ip =
       `\${aws_instance.${leaderName}.private_ip}`;
@@ -159,10 +168,36 @@ const getTerraformRootFile = async ({
     awsMainTerraformFileObject.terraform = [terraformDependencies];
     return getPrettyJSONString(awsMainTerraformFileObject);
   }
+  // add parts of setup-cndi.tf file that are required if kind===azure
+  if (requiredProviders.has("azure")) {
+    const azureMainTerraformFileObject = { ...azureTerraformRootFileData };
+
+    azureMainTerraformFileObject.locals[0].cndi_project_name =
+      cndi_project_name;
+
+    const region = Deno.env.get("ARM_REGION") || DEFAULT_ARM_REGION;
+
+    azureMainTerraformFileObject.locals[0].leader_node_ip =
+      `\${azurerm_linux_virtual_machine.${leaderName}.private_ip_address}`;
+
+    azureMainTerraformFileObject.locals[0].location = region;
+    // add azure provider dependency
+    terraformDependencies.required_providers[0].azurerm =
+      azureTerraformProviderDependency;
+
+    azureMainTerraformFileObject.provider.azurerm = [
+      {
+        features: {},
+      },
+    ];
+
+    azureMainTerraformFileObject.terraform = [terraformDependencies];
+    return getPrettyJSONString(azureMainTerraformFileObject);
+  }
 
   console.log(
     terraformRootFileLabel,
-    'required providers must contain either "gcp" or "aws"',
+    'required providers must contain either "gcp", "aws" or azure',
   );
   Deno.exit(1);
 };
