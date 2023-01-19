@@ -95,7 +95,7 @@ const getAzureNodeResource = (
   const location = "${azurerm_resource_group.cndi_resource_group.location}";
 
   const admin_username = "ubuntu";
-  const admin_password = "password";
+  const admin_password = "Password123";
   const disable_password_authentication = false;
 
   const network_interface_ids = [
