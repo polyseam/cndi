@@ -26,6 +26,7 @@ export default async function pushStateFromRun(
     Deno.exit(1);
   }
 
+  // we can't have any uncommitted changes
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
