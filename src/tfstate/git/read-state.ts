@@ -1,4 +1,5 @@
 import {
+  brightRed,
   cyan,
   white,
   yellow,
@@ -39,6 +40,17 @@ export default async function pullStateForRun(
     console.log(
       gitReadStateLabel,
       "you must make a commit on your branch before running",
+      cyan("cndi run\n"),
+    );
+    Deno.exit(1);
+  }
+
+  const cleanGitState = (await git.status()).isClean();
+
+  if (!cleanGitState) {
+    console.log(
+      gitReadStateLabel,
+      brightRed("your branch must be clean before running"),
       cyan("cndi run\n"),
     );
     Deno.exit(1);

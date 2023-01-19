@@ -1,4 +1,9 @@
-import { white, yellow } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import {
+  brightRed,
+  cyan,
+  white,
+  yellow,
+} from "https://deno.land/std@0.173.0/fmt/colors.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { simpleGit } from "../../deps.ts";
 
@@ -17,6 +22,17 @@ export default async function pushStateFromRun(
     console.log(
       gitWriteStateLabel,
       '"cndi run" must be executed inside a git repository',
+    );
+    Deno.exit(1);
+  }
+
+  const cleanGitState = (await git.status()).isClean();
+
+  if (!cleanGitState) {
+    console.log(
+      gitWriteStateLabel,
+      brightRed("your branch must be clean before running"),
+      cyan("cndi run\n"),
     );
     Deno.exit(1);
   }
