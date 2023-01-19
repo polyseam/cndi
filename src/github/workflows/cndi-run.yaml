@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: setup cndi
-        uses: polyseam/setup-cndi@2
+        uses: polyseam/setup-cndi@v2.0.0
 
       - name: cndi install
         run: cndi install # run 'cndi install'
