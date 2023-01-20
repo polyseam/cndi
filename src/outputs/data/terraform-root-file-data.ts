@@ -10,6 +10,7 @@ const terraformRootFileData: TerraformRootFileData = {
       region: "",
       leader_node_ip: "",
       node_count: "",
+      cndi_project_name: "",
       bootstrap_token: "${random_password.generated_token.result}",
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
@@ -41,7 +42,7 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_internet_gateway: {
         igw: {
-          tags: { Name: "${var.owner}-internet-gateway" },
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -50,7 +51,7 @@ const terraformRootFileData: TerraformRootFileData = {
           internal: false,
           load_balancer_type: "network",
           subnets: "${aws_subnet.subnet[*].id}",
-          tags: { Name: "${var.owner}-nlb" },
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
       aws_route: {
@@ -63,7 +64,7 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table: {
         rt: {
-          tags: { Name: "${var.owner}-aws-route-table" },
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -81,7 +82,7 @@ const terraformRootFileData: TerraformRootFileData = {
             "${element(local.availability_zones, count.index)}",
           cidr_block: "${element(var.sbn_cidr_block, count.index)}",
           map_public_ip_on_launch: "${var.sbn_public_ip}",
-          tags: { Name: "${var.owner}-subnet" },
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -174,14 +175,14 @@ const terraformRootFileData: TerraformRootFileData = {
               },
             ],
             vpc_id: "${aws_vpc.vpc.id}",
-            tags: { Name: "${var.owner}-sg" },
+            tags: { cndi_project_name: "${local.cndi_project_name}" },
           },
         ],
       },
       aws_lb_target_group: {
         "tg-http": [
           {
-            tags: { Name: "${var.owner}-http-target-group " },
+            tags: { cndi_project_name: "${local.cndi_project_name}" },
             port: "${var.tg_http}",
             protocol: "${var.tg_http_proto}",
             vpc_id: "${aws_vpc.vpc.id}",
@@ -189,7 +190,7 @@ const terraformRootFileData: TerraformRootFileData = {
         ],
         "tg-https": [
           {
-            tags: { Name: "${var.owner}-https-target-group " },
+            tags: { cndi_project_name: "${local.cndi_project_name}" },
             port: "${var.tg_https}",
             protocol: "${var.tg_https_proto}",
             vpc_id: "${aws_vpc.vpc.id}",
@@ -208,7 +209,7 @@ const terraformRootFileData: TerraformRootFileData = {
             load_balancer_arn: "${aws_lb.nlb.arn}",
             port: "${var.tg_https}",
             protocol: "${var.tg_https_proto}",
-            tags: { Name: "${var.owner}-https-target-group-listener" },
+            tags: { cndi_project_name: "${local.cndi_project_name}" },
           },
         ],
         "tg-http-listener": [
@@ -219,7 +220,7 @@ const terraformRootFileData: TerraformRootFileData = {
                 type: "forward",
               },
             ],
-            tags: { Name: "${var.owner}-https-target-group-listeners" },
+            tags: { cndi_project_name: "${local.cndi_project_name}" },
             load_balancer_arn: "${aws_lb.nlb.arn}",
             port: "${var.tg_http}",
             protocol: "${var.tg_http_proto}",
@@ -231,7 +232,7 @@ const terraformRootFileData: TerraformRootFileData = {
           cidr_block: "${var.vpc_cidr_block}",
           enable_dns_hostnames: "${var.vpc_dns_hostnames}",
           enable_dns_support: "${var.vpc_dns_support}",
-          tags: { Name: "${var.owner}-vpc" },
+          tags: { cndi_project_name: "${local.cndi_project_name}" },
         },
       },
     },
