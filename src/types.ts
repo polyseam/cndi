@@ -535,6 +535,7 @@ interface TerraformDependencies {
 interface GCPTerraformRootFileData {
   locals: [
     {
+      cndi_project_name: string;
       region: string;
       zone: "${local.region}-a";
       leader_node_ip: string;
