@@ -4,6 +4,12 @@ const bootstrapShellScript = `
 
 # Leader Bootstrap Template
 
+# build-time packer:
+# sudo apt-get install nfs-common -y
+# sudo snap install microk8s --classic --channel=1.26/stable
+
+# run-time cloud-init: 
+
 echo "bootstrapping leader"
 
 echo "Adding user to group"
