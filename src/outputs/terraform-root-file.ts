@@ -105,6 +105,8 @@ const getTerraformRootFile = async ({
         `\${google_compute_instance.${name}.self_link}`
       );
 
+    gcpMainTerraformFileObject.locals[0].cndi_project_name = cndi_project_name;
+
     gcpMainTerraformFileObject.provider.google = [
       {
         region,
