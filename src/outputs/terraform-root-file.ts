@@ -158,6 +158,8 @@ const getTerraformRootFile = async ({
     // maybe this should be a string??
     awsMainTerraformFileObject.locals[0].node_count = `${nodeCount}`;
 
+    awsMainTerraformFileObject.locals[0].cndi_project_name = cndi_project_name;
+
     // TODO: verify that this provider configuration is being consumed instead of the environment variable
     awsMainTerraformFileObject.provider.aws = [{ region }];
 
