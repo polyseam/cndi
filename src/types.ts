@@ -231,7 +231,7 @@ interface AWSTerraformNodeResource {
         ami: string;
         instance_type: string;
         tags: {
-          Name: string;
+          cndi_project_name: string;
           CNDINodeRole: NodeRole;
         };
         user_data?: string;
@@ -271,7 +271,7 @@ interface RandomTerraformRandomPasswordResource {
 interface AWSTerraformInternetGatewayResource {
   igw: {
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     vpc_id: string;
   };
@@ -282,7 +282,9 @@ interface AWSTerraformLoadBalancerResource {
     internal: boolean;
     load_balancer_type: string;
     subnets: string;
-    tags: { Name: string };
+    tags: {
+      cndi_project_name: string;
+    };
   };
 }
 
@@ -297,7 +299,7 @@ interface AWSTerraformRouteResource {
 interface AWSTerraformRouteTableResource {
   rt: {
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     vpc_id: string;
   };
@@ -317,7 +319,7 @@ interface AWSTerraformSubnetResource {
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     vpc_id: string;
   };
@@ -348,7 +350,7 @@ interface AWSTerraformSecurityGroupResource {
       self: boolean;
     }>;
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     vpc_id: string;
   }>;
@@ -357,7 +359,7 @@ interface AWSTerraformSecurityGroupResource {
 interface AWSTerraformTargetGroupResource {
   "tg-http": Array<{
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     port: string;
     protocol: string;
@@ -365,7 +367,7 @@ interface AWSTerraformTargetGroupResource {
   }>;
   "tg-https": Array<{
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
     port: string;
     protocol: string;
@@ -390,7 +392,7 @@ interface AWSTerraformTargetGroupListenerResource {
     port: string;
     protocol: string;
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
   }>;
   "tg-http-listener": Array<{
@@ -402,7 +404,7 @@ interface AWSTerraformTargetGroupListenerResource {
     port: string;
     protocol: string;
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
   }>;
 }
@@ -413,7 +415,7 @@ interface AWSTerraformVPCResource {
     enable_dns_hostnames: string;
     enable_dns_support: string;
     tags: {
-      Name: string;
+      cndi_project_name: string;
     };
   };
 }
@@ -923,6 +925,7 @@ interface TerraformRootFileData {
       node_count: string;
       leader_node_ip: string;
       region: string;
+      cndi_project_name: string;
       bootstrap_token: "${random_password.generated_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
