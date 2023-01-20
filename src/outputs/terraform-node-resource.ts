@@ -263,6 +263,8 @@ const getGCPNodeResource = (
       depends_on: ["google_project_service.cndi_enable_compute_service"],
     },
   };
+  const cndi_project_name = "${local.cndi_project_name}";
+
   const nodeResource: GCPTerraformNodeResource = {
     resource: {
       google_compute_instance: {
@@ -274,7 +276,7 @@ const getGCPNodeResource = (
           metadata: {},
           name: name,
           network_interface,
-          tags: [name],
+          tags: [cndi_project_name],
         },
       },
       google_compute_disk,
