@@ -517,6 +517,7 @@ const terraformRootFileData: TerraformRootFileData = {
 const gcpTerraformRootFileData: GCPTerraformRootFileData = {
   locals: [
     {
+      cndi_project_name: "",
       zone: "${local.region}-a",
       region: "",
       leader_node_ip: "",
