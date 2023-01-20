@@ -6,22 +6,16 @@ const bootstrapShellScript = `
 
 echo "bootstrapping leader"
 
-echo "Installing nfs-common"
-sudo apt-get install nfs-common -y
-
-echo "Installing microk8s"
-
-while ! sudo snap install microk8s --classic --channel=1.26/stable
-do
-    echo 'microk8s failed to install, retrying in 180 seconds'
-    sleep 180
-done
-
 echo "Adding user to group"
 sudo usermod -a -G microk8s ubuntu
 
 echo "granting access to ~/.kube"
 sudo chown -f -R ubuntu ~/.kube
+
+# in order to get a fresh install we need to leave the og packer cluster
+echo "running microk8s leave"
+sudo microk8s leave
+echo "packer microk8s cluster was left"
 
 echo "awaiting microk8s to be ready"
 sudo microk8s status --wait-ready

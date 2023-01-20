@@ -6,7 +6,8 @@
       "nodes": [
         {
           "name": "x-node",
-          "kind": "aws",
+          "kind": "remote",
+          "host": "localhost:3000",
           "role": "leader",
           "instance_type": "m5a.2xlarge",
           "volume_size": 128
