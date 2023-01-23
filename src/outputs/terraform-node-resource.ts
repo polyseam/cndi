@@ -385,7 +385,8 @@ const getAWSNodeResource = (
             ami,
             instance_type,
             tags: {
-              cndi_project_name: "${local.cndi_project_name}",
+              Name: name,
+              CNDIProject: "${local.cndi_project_name}",
               CNDINodeRole: role,
             },
             ebs_block_device,
