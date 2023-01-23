@@ -231,7 +231,8 @@ interface AWSTerraformNodeResource {
         ami: string;
         instance_type: string;
         tags: {
-          cndi_project_name: string;
+          Name: string;
+          CNDIProject: string;
           CNDINodeRole: NodeRole;
         };
         user_data?: string;
@@ -271,7 +272,8 @@ interface RandomTerraformRandomPasswordResource {
 interface AWSTerraformInternetGatewayResource {
   igw: {
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -283,7 +285,8 @@ interface AWSTerraformLoadBalancerResource {
     load_balancer_type: string;
     subnets: string;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
   };
 }
@@ -299,7 +302,8 @@ interface AWSTerraformRouteResource {
 interface AWSTerraformRouteTableResource {
   rt: {
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -319,7 +323,8 @@ interface AWSTerraformSubnetResource {
     cidr_block: string;
     map_public_ip_on_launch: string;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -350,7 +355,8 @@ interface AWSTerraformSecurityGroupResource {
       self: boolean;
     }>;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   }>;
@@ -359,7 +365,8 @@ interface AWSTerraformSecurityGroupResource {
 interface AWSTerraformTargetGroupResource {
   "tg-http": Array<{
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     port: string;
     protocol: string;
@@ -367,7 +374,8 @@ interface AWSTerraformTargetGroupResource {
   }>;
   "tg-https": Array<{
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
     port: string;
     protocol: string;
@@ -392,7 +400,8 @@ interface AWSTerraformTargetGroupListenerResource {
     port: string;
     protocol: string;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
   }>;
   "tg-http-listener": Array<{
@@ -404,7 +413,8 @@ interface AWSTerraformTargetGroupListenerResource {
     port: string;
     protocol: string;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
   }>;
 }
@@ -415,7 +425,8 @@ interface AWSTerraformVPCResource {
     enable_dns_hostnames: string;
     enable_dns_support: string;
     tags: {
-      cndi_project_name: string;
+      Name: string;
+      CNDIProject: string;
     };
   };
 }
