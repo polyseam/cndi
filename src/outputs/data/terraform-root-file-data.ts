@@ -42,7 +42,10 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_internet_gateway: {
         igw: {
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
+          tags: {
+            Name: "InternetGateway",
+            CNDIProject: "${local.cndi_project_name}",
+          },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -51,7 +54,10 @@ const terraformRootFileData: TerraformRootFileData = {
           internal: false,
           load_balancer_type: "network",
           subnets: "${aws_subnet.subnet[*].id}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
+          tags: {
+            Name: "NetworkLB",
+            CNDIProject: "${local.cndi_project_name}",
+          },
         },
       },
       aws_route: {
@@ -64,7 +70,10 @@ const terraformRootFileData: TerraformRootFileData = {
       },
       aws_route_table: {
         rt: {
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
+          tags: {
+            Name: "RouteTable",
+            CNDIProject: "${local.cndi_project_name}",
+          },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -82,7 +91,7 @@ const terraformRootFileData: TerraformRootFileData = {
             "${element(local.availability_zones, count.index)}",
           cidr_block: "${element(var.sbn_cidr_block, count.index)}",
           map_public_ip_on_launch: "${var.sbn_public_ip}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
+          tags: { Name: "Subnet", CNDIProject: "${local.cndi_project_name}" },
           vpc_id: "${aws_vpc.vpc.id}",
         },
       },
@@ -175,14 +184,20 @@ const terraformRootFileData: TerraformRootFileData = {
               },
             ],
             vpc_id: "${aws_vpc.vpc.id}",
-            tags: { cndi_project_name: "${local.cndi_project_name}" },
+            tags: {
+              Name: "SecurityGroup",
+              CNDIProject: "${local.cndi_project_name}",
+            },
           },
         ],
       },
       aws_lb_target_group: {
         "tg-http": [
           {
-            tags: { cndi_project_name: "${local.cndi_project_name}" },
+            tags: {
+              Name: "HTTPLBTargetGroup",
+              CNDIProject: "${local.cndi_project_name}",
+            },
             port: "${var.tg_http}",
             protocol: "${var.tg_http_proto}",
             vpc_id: "${aws_vpc.vpc.id}",
@@ -190,7 +205,10 @@ const terraformRootFileData: TerraformRootFileData = {
         ],
         "tg-https": [
           {
-            tags: { cndi_project_name: "${local.cndi_project_name}" },
+            tags: {
+              Name: "HTTPSLBTargetGroup",
+              CNDIProject: "${local.cndi_project_name}",
+            },
             port: "${var.tg_https}",
             protocol: "${var.tg_https_proto}",
             vpc_id: "${aws_vpc.vpc.id}",
@@ -209,7 +227,10 @@ const terraformRootFileData: TerraformRootFileData = {
             load_balancer_arn: "${aws_lb.nlb.arn}",
             port: "${var.tg_https}",
             protocol: "${var.tg_https_proto}",
-            tags: { cndi_project_name: "${local.cndi_project_name}" },
+            tags: {
+              Name: "HTTPSLBListener",
+              CNDIProject: "${local.cndi_project_name}",
+            },
           },
         ],
         "tg-http-listener": [
@@ -220,7 +241,10 @@ const terraformRootFileData: TerraformRootFileData = {
                 type: "forward",
               },
             ],
-            tags: { cndi_project_name: "${local.cndi_project_name}" },
+            tags: {
+              Name: "HTTPLBListener",
+              CNDIProject: "${local.cndi_project_name}",
+            },
             load_balancer_arn: "${aws_lb.nlb.arn}",
             port: "${var.tg_http}",
             protocol: "${var.tg_http_proto}",
@@ -232,7 +256,7 @@ const terraformRootFileData: TerraformRootFileData = {
           cidr_block: "${var.vpc_cidr_block}",
           enable_dns_hostnames: "${var.vpc_dns_hostnames}",
           enable_dns_support: "${var.vpc_dns_support}",
-          tags: { cndi_project_name: "${local.cndi_project_name}" },
+          tags: { Name: "VPC", CNDIProject: "${local.cndi_project_name}" },
         },
       },
     },
