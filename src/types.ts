@@ -498,6 +498,8 @@ interface CNDIApplicationSpec {
 interface CNDIContext {
   CNDI_HOME: string;
   CNDI_SRC: string;
+  timestamp: string;
+  stagingDirectory: string;
   projectDirectory: string;
   projectCndiDirectory: string;
   githubDirectory: string;

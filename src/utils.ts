@@ -1,7 +1,7 @@
 import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
-
+import { move } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
 
@@ -16,6 +16,16 @@ const loadJSONC = async (path: string) => {
 
 function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
+}
+
+async function stageFile(stagingDirectory: string, relativePath: string, fileContents: string ){
+  const stagingPath = path.join(stagingDirectory, relativePath);
+  await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
+  await Deno.writeTextFile(stagingPath, fileContents);
+}
+
+async function persistStagedFiles(stagingDirectory:string, targetDirectory:string){
+  await move(stagingDirectory, targetDirectory, { overwrite: true });
 }
 
 async function checkInstalled({
@@ -129,6 +139,8 @@ function getSecretOfLength(len = 32): string {
 export {
   checkInitialized,
   checkInstalled,
+  stageFile,
+  persistStagedFiles,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
