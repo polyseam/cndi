@@ -22,6 +22,7 @@ export const COMMAND = {
   install: "install",
   terraform: "terraform",
   ow: "ow",
+  destroy: "destroy",
 } as const;
 
 export const NODE_ROLE = {
