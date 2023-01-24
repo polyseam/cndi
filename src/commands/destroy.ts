@@ -25,7 +25,6 @@ const destroyFn = async ({
 
     await pullStateForRun({ pathToTerraformResources, cmd });
 
-    // terraform.tfstate will be in this folder after the first run
     const ranTerraformInit = Deno.run({
       cmd: [
         pathToTerraformBinary,
@@ -62,13 +61,13 @@ const destroyFn = async ({
     copy(ranTerraformDestroy.stdout, Deno.stdout);
     copy(ranTerraformDestroy.stderr, Deno.stderr);
 
-    const applyStatus = await ranTerraformDestroy.status();
+    const destroyStatus = await ranTerraformDestroy.status();
 
     await pushStateFromRun({ pathToTerraformResources, cmd });
 
-    // if `terraform apply` fails, exit with the code
-    if (applyStatus.code !== 0) {
-      Deno.exit(applyStatus.code);
+    // if `terraform destroy` fails, exit with the code
+    if (destroyStatus.code !== 0) {
+      Deno.exit(destroyStatus.code);
     }
 
     ranTerraformDestroy.close();
