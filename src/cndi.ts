@@ -30,13 +30,16 @@ const TERRAFORM_VERSION = "1.3.2";
 
 export default async function main(args: string[]) {
   console.log(); /* blank line */
+  const homeDirectory = homedir() || "~";
+
+  const CNDI_HOME = path.join(homeDirectory, ".cndi");
+  
   const timestamp = `${Date.now()}`;
+  const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
+
   const fileSuffixForPlatform = getFileSuffixForPlatform();
   const pathToOpenSSL = getPathToOpenSSLForPlatform();
   const executionDirectory = Deno.cwd();
-  const homeDirectory = homedir() || "~";
-  const CNDI_HOME = path.join(homeDirectory, ".cndi");
-  const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 
   // CNDI_SRC is determined at compile time, that's no good
   const CNDI_SRC = path.join(CNDI_HOME, "src");

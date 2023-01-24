@@ -28,6 +28,16 @@ async function stageFile(
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+function stageFileSync(
+  stagingDirectory: string,
+  relativePath: string,
+  fileContents: string,
+) {
+  const stagingPath = path.join(stagingDirectory, relativePath);
+  Deno.mkdirSync(path.dirname(stagingPath), { recursive: true });
+  Deno.writeTextFileSync(stagingPath, fileContents);
+}
+
 async function persistStagedFiles(
   stagingDirectory: string,
   targetDirectory: string,
@@ -156,5 +166,6 @@ export {
   padPublicPem,
   persistStagedFiles,
   stageFile,
+  stageFileSync,
   trimPemString,
 };
