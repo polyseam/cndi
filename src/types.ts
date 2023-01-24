@@ -232,6 +232,7 @@ interface AWSTerraformNodeResource {
         instance_type: string;
         tags: {
           Name: string;
+          CNDIProject: string;
           CNDINodeRole: NodeRole;
         };
         user_data?: string;
@@ -272,6 +273,7 @@ interface AWSTerraformInternetGatewayResource {
   igw: {
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -282,7 +284,10 @@ interface AWSTerraformLoadBalancerResource {
     internal: boolean;
     load_balancer_type: string;
     subnets: string;
-    tags: { Name: string };
+    tags: {
+      Name: string;
+      CNDIProject: string;
+    };
   };
 }
 
@@ -298,6 +303,7 @@ interface AWSTerraformRouteTableResource {
   rt: {
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -318,6 +324,7 @@ interface AWSTerraformSubnetResource {
     map_public_ip_on_launch: string;
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   };
@@ -349,6 +356,7 @@ interface AWSTerraformSecurityGroupResource {
     }>;
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     vpc_id: string;
   }>;
@@ -358,6 +366,7 @@ interface AWSTerraformTargetGroupResource {
   "tg-http": Array<{
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     port: string;
     protocol: string;
@@ -366,6 +375,7 @@ interface AWSTerraformTargetGroupResource {
   "tg-https": Array<{
     tags: {
       Name: string;
+      CNDIProject: string;
     };
     port: string;
     protocol: string;
@@ -391,6 +401,7 @@ interface AWSTerraformTargetGroupListenerResource {
     protocol: string;
     tags: {
       Name: string;
+      CNDIProject: string;
     };
   }>;
   "tg-http-listener": Array<{
@@ -403,6 +414,7 @@ interface AWSTerraformTargetGroupListenerResource {
     protocol: string;
     tags: {
       Name: string;
+      CNDIProject: string;
     };
   }>;
 }
@@ -414,6 +426,7 @@ interface AWSTerraformVPCResource {
     enable_dns_support: string;
     tags: {
       Name: string;
+      CNDIProject: string;
     };
   };
 }
@@ -923,6 +936,7 @@ interface TerraformRootFileData {
       node_count: string;
       leader_node_ip: string;
       region: string;
+      cndi_project_name: string;
       bootstrap_token: "${random_password.generated_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
