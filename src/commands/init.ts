@@ -302,7 +302,7 @@ export default async function init(context: CNDIContext) {
     argoUIReadOnlyPassword,
   };
 
-  await Deno.writeTextFile(gitignorePath, getGitignoreContents());
+  
 
   const coreEnvObject = await getCoreEnvObject(
     cndiContextWithGeneratedValues,
@@ -372,6 +372,8 @@ export default async function init(context: CNDIContext) {
       );
     }
   }
+
+  await Deno.writeTextFile(gitignorePath, getGitignoreContents());
 
   // if the user has specified a template, use that
   if (template) {
