@@ -18,13 +18,20 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
-async function stageFile(stagingDirectory: string, relativePath: string, fileContents: string ){
+async function stageFile(
+  stagingDirectory: string,
+  relativePath: string,
+  fileContents: string,
+) {
   const stagingPath = path.join(stagingDirectory, relativePath);
   await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
-async function persistStagedFiles(stagingDirectory:string, targetDirectory:string){
+async function persistStagedFiles(
+  stagingDirectory: string,
+  targetDirectory: string,
+) {
   await move(stagingDirectory, targetDirectory, { overwrite: true });
 }
 
@@ -139,8 +146,6 @@ function getSecretOfLength(len = 32): string {
 export {
   checkInitialized,
   checkInstalled,
-  stageFile,
-  persistStagedFiles,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
   getPathToOpenSSLForPlatform,
@@ -149,5 +154,7 @@ export {
   loadJSONC,
   padPrivatePem,
   padPublicPem,
+  persistStagedFiles,
+  stageFile,
   trimPemString,
 };
