@@ -1,7 +1,11 @@
 import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
-import { move } from "https://deno.land/std@0.173.0/fs/mod.ts";
+import {
+  move,
+  WalkEntry,
+  walkSync,
+} from "https://deno.land/std@0.173.0/fs/mod.ts";
 import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
 
@@ -42,7 +46,20 @@ async function persistStagedFiles(
   stagingDirectory: string,
   targetDirectory: string,
 ) {
-  await move(stagingDirectory, targetDirectory, { overwrite: true });
+  for (const entry of walkSync(stagingDirectory)) {
+    if (entry.isFile) {
+      const fileContents = await Deno.readTextFile(entry.path);
+      const destinationAbsPath = entry.path.replace(
+        stagingDirectory,
+        targetDirectory,
+      );
+
+      Deno.mkdirSync(path.dirname(destinationAbsPath), { recursive: true });
+      Deno.writeTextFileSync(destinationAbsPath, fileContents, {
+        create: true,
+      });
+    }
+  }
 }
 
 async function checkInstalled({

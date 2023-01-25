@@ -44,6 +44,7 @@ import getGitignoreContents from "../outputs/gitignore.ts";
 import vscodeSettings from "../outputs/vscode-settings.ts";
 
 import { Template } from "../templates/Template.ts";
+import { dirname } from "https://deno.land/std@0.173.0/path/mod.ts";
 
 const initLabel = white("init:");
 
@@ -348,10 +349,24 @@ export default async function init(context: CNDIContext) {
 
   if (!noGitHub) {
     try {
+      const workflowContents = await Deno.readTextFile(
+        path.join(CNDI_SRC, "github", "workflows", "cndi-run.yaml"),
+      );
+
+      const targetGithubDirectory = path.join(
+        ".github",
+        "workflows",
+        "cndi-run.yaml",
+      );
+
+      await Deno.mkdir(dirname(targetGithubDirectory), { recursive: true });
+
       // overwrite the github workflows and readme, do not clobber other files
-      await copy(path.join(CNDI_SRC, "github"), githubDirectory, {
-        overwrite: true,
-      });
+      await stageFile(
+        context.stagingDirectory,
+        targetGithubDirectory,
+        workflowContents,
+      );
     } catch (githubCopyError) {
       console.log(
         initLabel,
@@ -400,6 +415,8 @@ export default async function init(context: CNDIContext) {
       "cndi-config.jsonc",
       templateString,
     );
+
+    await persistStagedFiles(context.stagingDirectory, projectDirectory);
 
     const finalContext = {
       ...cndiContextWithGeneratedValues,

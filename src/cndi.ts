@@ -33,7 +33,7 @@ export default async function main(args: string[]) {
   const homeDirectory = homedir() || "~";
 
   const CNDI_HOME = path.join(homeDirectory, ".cndi");
-  
+
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 

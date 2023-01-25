@@ -6,9 +6,11 @@ import {
   yellow,
 } from "https://deno.land/std@0.173.0/fmt/colors.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-
-import { EnvObject } from "../types.ts";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+import { CNDIContext, EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+
+import { stageFileSync } from "../utils.ts";
 
 const deploymentTargetsLabel = white("deployment-targets/gcp:");
 
@@ -17,7 +19,13 @@ const GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY =
 const GOOGLE_CREDENTIALS_ENVKEY = "GOOGLE_CREDENTIALS";
 
 // pull contents of the gcp service account key file into the env, and write them to .env
-const getGoogleCredentials = async (dotEnvPath: string) => {
+const getEnvStringWithGoogleCredentials = (
+  context: CNDIContext,
+): string | void => {
+  const { projectDirectory } = context;
+
+  const dotEnvPath = path.join(projectDirectory, ".env");
+
   const gcp_path_to_service_account_key = Deno.env.get(
     GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY,
   );
@@ -32,7 +40,7 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
   // if the user interactively provides a path to a service account key, we copy it to `.env` and discard the path
   if (shouldAttemptToLoadKey) {
     try {
-      const keyText = await Deno.readTextFile(
+      const keyText = Deno.readTextFileSync(
         gcp_path_to_service_account_key.replace("~", homedir() || "~"),
       );
 
@@ -57,8 +65,7 @@ const getGoogleCredentials = async (dotEnvPath: string) => {
 
         // join the array of lines back into a string
         const newDotEnvContents = newDotEnvLines.join("\n");
-        // overwrite `.env` with the new contents
-        Deno.writeTextFileSync(dotEnvPath, newDotEnvContents);
+        return newDotEnvContents;
       }
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
@@ -143,4 +150,4 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
   return gcpEnvObject;
 };
 
-export { getGoogleCredentials, prepareGCPEnv };
+export { getEnvStringWithGoogleCredentials, prepareGCPEnv };

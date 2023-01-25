@@ -2,8 +2,8 @@ import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import {
   getPrettyJSONString,
   loadJSONC,
-  stageFile,
   persistStagedFiles,
+  stageFile,
   stageFileSync,
 } from "../utils.ts";
 import {
@@ -29,7 +29,7 @@ import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassph
 
 import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
 
-import { getGoogleCredentials } from "../deployment-targets/gcp.ts";
+import { getEnvStringWithGoogleCredentials } from "../deployment-targets/gcp.ts";
 
 import {
   brightRed,
@@ -83,10 +83,12 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     console.log(
       owLabel,
       brightRed(
-        `you need to specify a ${cyan(
-          '"project_name"'
-        )} for your CNDI cluster, it is used to tag resources we create`
-      )
+        `you need to specify a ${
+          cyan(
+            '"project_name"',
+          )
+        } for your CNDI cluster, it is used to tag resources we create`,
+      ),
     );
     Deno.exit(1);
   }
@@ -126,20 +128,20 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   await stageFile(
     context.stagingDirectory,
     path.join("cndi", "terraform", "leader_bootstrap_cndi.sh.tftpl"),
-    leaderBootstrapTerraformTemplate
+    leaderBootstrapTerraformTemplate,
   );
 
   await stageFile(
     context.stagingDirectory,
     path.join("cndi", "terraform", "controller_bootstrap_cndi.sh.tftpl"),
-    controllerBootstrapTerrformTemplate
+    controllerBootstrapTerrformTemplate,
   );
 
   // create temporary key for sealing secrets
   const tempPublicKeyFilePath = await Deno.makeTempFile();
   await Deno.writeTextFile(
     tempPublicKeyFilePath,
-    sealedSecretsKeys.sealed_secrets_public_key
+    sealedSecretsKeys.sealed_secrets_public_key,
   );
 
   // write each manifest in the "cluster" section of the config to `cndi/cluster`
@@ -152,14 +154,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       const sealedSecretManifest = await getSealedSecretManifest(
         secret,
         tempPublicKeyFilePath,
-        context
+        context,
       );
 
       if (sealedSecretManifest) {
         stageFileSync(
           context.stagingDirectory,
           path.join("cndi", "cluster_manifests", secretName),
-          sealedSecretManifest
+          sealedSecretManifest,
         );
         console.log(`created encrypted secret:`, secretName);
       }
@@ -169,7 +171,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     await stageFile(
       context.stagingDirectory,
       path.join("cndi", "cluster_manifests", `${key}.json`),
-      getPrettyJSONString(manifestObj)
+      getPrettyJSONString(manifestObj),
     );
   });
 
@@ -193,42 +195,55 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       // eg: aws -> aws
       const provider = node.kind;
       return provider;
-    })
+    }),
   );
 
   if (requiredProviders.size !== 1) {
     console.log(
-      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`)
+      yellow(`we currently only support ${cyan("1")} "kind" per cluster\n`),
     );
     console.log(
-      `your nodes have the following ${brightRed(
-        `${requiredProviders.size}`
-      )} "kind"s:`
+      `your nodes have the following ${
+        brightRed(
+          `${requiredProviders.size}`,
+        )
+      } "kind"s:`,
     );
     requiredProviders.forEach((kind) => {
       console.log(` - ${yellow(kind)}`);
     });
     console.log();
+    Deno.exit(1);
   }
 
   if (requiredProviders.has("gcp")) {
-    // if there is a service account key path, read the contents and write them to .env and this runtime env
+    // if there is a service account key path
+    // read the contents and create a string of .env contents with the key
     // caution: this needs to run before the terraform root file is created
-    await getGoogleCredentials(context.dotEnvPath);
+    const envStringIncludingGCPCreds = getEnvStringWithGoogleCredentials(
+      context,
+    );
+    if (envStringIncludingGCPCreds) {
+      stageFileSync(
+        context.stagingDirectory,
+        ".env",
+        envStringIncludingGCPCreds,
+      );
+    }
   }
 
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  const terraformRootFile = await getTerraformRootFile({
+  const terraformRootFileContents = getTerraformRootFile({
     cndi_project_name: config.project_name,
     leaderName: leader.name,
     requiredProviders,
     nodes,
   });
 
-  // write terraform root file
-  await Deno.writeTextFile(
-    path.join(pathToTerraformResources, "setup-cndi.tf.json"),
-    terraformRootFile
+  await stageFile(
+    context.stagingDirectory,
+    path.join("cndi", "terraform", "setup-cndi.tf.json"),
+    terraformRootFileContents,
   );
 
   // write terraform nodes files
@@ -236,18 +251,21 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const nodeFileContents: string = getTerraformNodeResource(
       node,
       deployment_target_configuration,
-      leader.name
+      leader.name,
     );
-    Deno.writeTextFileSync(
-      path.join(pathToTerraformResources, `${node.name}.cndi-node.tf.json`),
-      nodeFileContents
+
+    stageFileSync(
+      context.stagingDirectory,
+      path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
+      nodeFileContents,
     );
   });
 
   // write the cndi/cluster_manifests/Chart.yaml file
-  await Deno.writeTextFile(
-    path.join(pathToKubernetesManifests, "Chart.yaml"),
-    RootChartYaml
+  await stageFile(
+    context.stagingDirectory,
+    path.join("cndi", "cluster_manifests", "Chart.yaml"),
+    RootChartYaml,
   );
 
   const { applications } = config;
@@ -257,16 +275,26 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
-      applicationSpec
+      applicationSpec,
     );
-    Deno.writeTextFileSync(
-      path.join(pathToKubernetesManifests, "applications", filename),
-      manifestContent
+    stageFileSync(
+      context.stagingDirectory,
+      path.join("cndi", "cluster_manifests", "applications", filename),
+      manifestContent,
     );
     console.log("created application manifest:", filename);
   });
 
-  await persistStagedFiles(context.stagingDirectory, context.projectDirectory);
+  try {
+    await persistStagedFiles(
+      context.stagingDirectory,
+      context.projectDirectory,
+    );
+  } catch (errorPersistingStagedFiles) {
+    console.log(owLabel, brightRed(`Error persisting staged files`));
+    console.log(errorPersistingStagedFiles);
+    Deno.exit(1);
+  }
 
   const completionMessage = initializing
     ? "initialized your cndi project in the ./cndi directory!"
