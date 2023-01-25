@@ -23,7 +23,7 @@ const deploymentTargetsSharedLabel = white("deployment-targets/shared:");
 interface CNDIContextWithGeneratedValues extends CNDIContext {
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
-  argoUIReadOnlyPassword: string;
+  argoUIAdminPassword: string;
 }
 
 const getCoreEnvObject = async (
@@ -33,7 +33,7 @@ const getCoreEnvObject = async (
   const {
     sealedSecretsKeys,
     terraformStatePassphrase,
-    argoUIReadOnlyPassword,
+    argoUIAdminPassword,
   } = context;
 
   // git
@@ -42,7 +42,7 @@ const getCoreEnvObject = async (
   const GIT_PASSWORD = "";
 
   const TERRAFORM_STATE_PASSPHRASE = terraformStatePassphrase;
-  const ARGO_UI_READONLY_PASSWORD = argoUIReadOnlyPassword;
+  const ARGO_UI_ADMIN_PASSWORD = argoUIAdminPassword;
 
   if (!sealedSecretsKeys) {
     console.log(
@@ -60,10 +60,10 @@ const getCoreEnvObject = async (
     Deno.exit(1);
   }
 
-  if (!ARGO_UI_READONLY_PASSWORD) {
+  if (!ARGO_UI_ADMIN_PASSWORD) {
     console.log(
       deploymentTargetsSharedLabel,
-      brightRed(`"argoUIReadOnlyPassword" is not defined in context`),
+      brightRed(`"argoUIAdminPassword" is not defined in context`),
     );
     Deno.exit(1);
   }
@@ -84,9 +84,9 @@ const getCoreEnvObject = async (
     SEALED_SECRETS_PRIVATE_KEY_MATERIAL: {
       value: SEALED_SECRETS_PRIVATE_KEY_MATERIAL,
     },
-    ARGO_UI_READONLY_PASSWORD: {
+    ARGO_UI_ADMIN_PASSWORD: {
       comment: "ArgoUI",
-      value: ARGO_UI_READONLY_PASSWORD,
+      value: ARGO_UI_ADMIN_PASSWORD,
     },
     TERRAFORM_STATE_PASSPHRASE: {
       comment: "Passphrase for encrypting/decrypting terraform state",
