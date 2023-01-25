@@ -130,6 +130,18 @@ spec:
 EOF
 
 echo "argo configured"
+echo "patching argocd-secret"
+
+ARGO_BCRYPYT_ADMIN_PASSWORD="$(htpasswd -bnBC 10 "" \${argoui_admin_password}" | tr -d ':\\n')"  
+NOW="'$(date +%FT%T%Z)'"
+
+sudo microk8s kubectl apply -f - <<EOF
+kubectl -n argocd patch secret argocd-secret \
+  -p '{"stringData": {
+    "admin.password": "$ARGO_BCRYPYT_ADMIN_PASSWORD",
+    "admin.passwordMtime": "$NOW"
+  }}'
+EOF
 
 echo "leader bootstrap complete"
 
