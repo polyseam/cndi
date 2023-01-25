@@ -113,16 +113,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     // folder did not exist
   }
 
-  // create 'cndi/' 'cndi/cluster' and 'cndi/cluster_manifests/applications'
-  await Deno.mkdir(path.join(pathToKubernetesManifests, "applications"), {
-    recursive: true,
-  });
-
-  // create 'cndi/' 'cndi/terraform'
-  await Deno.mkdir(pathToTerraformResources, {
-    recursive: true,
-  });
-
   // write tftpl terraform template for the user_data bootstrap script
 
   await stageFile(

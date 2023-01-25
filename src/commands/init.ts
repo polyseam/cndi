@@ -359,8 +359,6 @@ export default async function init(context: CNDIContext) {
         "cndi-run.yaml",
       );
 
-      await Deno.mkdir(dirname(targetGithubDirectory), { recursive: true });
-
       // overwrite the github workflows and readme, do not clobber other files
       await stageFile(
         context.stagingDirectory,
