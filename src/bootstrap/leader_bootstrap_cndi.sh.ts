@@ -132,7 +132,7 @@ EOF
 echo "argo configured"
 echo "patching argocd-secret"
 
-ARGO_BCRYPYT_ADMIN_PASSWORD="$(htpasswd -bnBC 10 "" \${argoui_admin_password}" | tr -d ':\\n')"  
+ARGO_BCRYPYT_ADMIN_PASSWORD="$(htpasswd -bnBC 10 "" \${argo_ui_admin_password}" | tr -d ':\\n')"  
 NOW="'$(date +%FT%T%Z)'"
 
 sudo microk8s kubectl apply -f - <<EOF
