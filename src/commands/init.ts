@@ -410,13 +410,11 @@ export default async function init(context: CNDIContext) {
     const conf = await template.getConfiguration(context.interactive);
     const templateString = template.getTemplate(kind, conf, project_name);
 
-    await stageFile(
-      context.stagingDirectory,
-      "cndi-config.jsonc",
+    // this file is processed by OW so we need to write it to disk immediately
+    await Deno.writeTextFile(
+      path.join(context.projectDirectory, CNDI_CONFIG_FILENAME),
       templateString,
     );
-
-    await persistStagedFiles(context.stagingDirectory, projectDirectory);
 
     const finalContext = {
       ...cndiContextWithGeneratedValues,
