@@ -293,6 +293,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   } catch (errorPersistingStagedFiles) {
     console.log(owLabel, brightRed(`Error persisting staged files`));
     console.log(errorPersistingStagedFiles);
+    Deno.removeSync(context.stagingDirectory, { recursive: true });
     Deno.exit(1);
   }
 
@@ -301,6 +302,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log(completionMessage);
+  Deno.removeSync(context.stagingDirectory, { recursive: true });
 };
 
 export default overwriteWithFn;
