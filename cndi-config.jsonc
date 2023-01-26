@@ -1,31 +1,19 @@
 {
   "cndi_version": "v1",
-  "project_name": "my-cndi-project",
+  "project_name": "my-data-domain",
   "infrastructure": {
     "cndi": {
       "nodes": [
         {
-          "name": "x-node",
-          "kind": "aws",
-          "role": "leader",
-          "instance_type": "m5a.2xlarge",
-          "volume_size": 128
+          "kind": "aws", // DO NOT DO THIS ON YOUR PC if we figure out this, we can do it all with ssh later (or inside of multipass)
+          "role": "leader"
         },
         {
-          "name": "y-node",
-          "kind": "aws",
-          "role": "controller", // default role
-          "instance_type": "m5a.large",
-          "volume_size": 128
-        },
-        {
-          "name": "z-node",
-          "kind": "aws",
-          "instance_type": "m5a.large",
-          "volume_size": 128
+          "kind": "gcp", // DO NOT DO THIS ON YOUR PC if we figure out this, we can do it all with ssh later (or inside of multipass)
+          "role": "leader"
         }
-      ]
-    }
+      ] // cndi run
+    } // local => multipass => remote (one node) => remote (multiple nodes)
   },
   "cluster_manifests": {
     "argo-ingress": {
@@ -63,6 +51,5 @@
       }
     }
   },
-  "applications": {
-  }
+  "applications": {}
 }
