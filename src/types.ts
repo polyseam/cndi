@@ -521,7 +521,7 @@ interface CNDIContext {
   template?: string;
   sealedSecretsKeys?: SealedSecretsKeys;
   terraformStatePassphrase?: string;
-  argoUIReadOnlyPassword?: string;
+  argoUIAdminPassword?: string;
 }
 
 // cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
@@ -556,7 +556,7 @@ interface GCPTerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      argo_ui_admin_password: "${var.argo_ui_admin_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
     },
@@ -616,7 +616,7 @@ interface GCPTerraformRootFileData {
         type: "string";
       },
     ];
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui";
         type: "string";
@@ -858,7 +858,7 @@ interface AzureTerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      argo_ui_admin_password: "${var.argo_ui_admin_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
     },
@@ -923,7 +923,7 @@ interface AzureTerraformRootFileData {
         type: "string";
       },
     ];
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui";
         type: "string";
@@ -942,7 +942,7 @@ interface TerraformRootFileData {
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}";
+      argo_ui_admin_password: "${var.argo_ui_admin_password}";
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}";
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}";
       availability_zones: string;
@@ -1234,7 +1234,7 @@ interface TerraformRootFileData {
         type: "string";
       },
     ];
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui";
         type: "string";

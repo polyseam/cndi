@@ -28,7 +28,7 @@ import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 
 import { createTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
-import { createArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
+import { createArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
 import availableTemplates from "../templates/available-templates.ts";
 
@@ -262,7 +262,7 @@ export default async function init(context: CNDIContext) {
   // GENERATE ENV VARS
   const sealedSecretsKeys = await createSealedSecretsKeys(context);
   const terraformStatePassphrase = createTerraformStatePassphrase();
-  const argoUIReadOnlyPassword = createArgoUIReadOnlyPassword();
+  const argoUIAdminPassword = createArgoUIAdminPassword();
 
   const {
     noGitHub,
@@ -299,7 +299,7 @@ export default async function init(context: CNDIContext) {
     ...context,
     sealedSecretsKeys,
     terraformStatePassphrase,
-    argoUIReadOnlyPassword,
+    argoUIAdminPassword,
   };
 
   await Deno.writeTextFile(gitignorePath, getGitignoreContents());
