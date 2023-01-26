@@ -1,8 +1,11 @@
 import { CNDIConfig, CNDIContext, NodeKind } from "../types.ts";
 
-import { copy } from "https://deno.land/std@0.173.0/fs/copy.ts";
-
-import { getPrettyJSONString, loadJSONC } from "../utils.ts";
+import {
+  getPrettyJSONString,
+  loadJSONC,
+  persistStagedFiles,
+  stageFile,
+} from "../utils.ts";
 
 import {
   brightRed,
@@ -34,7 +37,7 @@ import availableTemplates from "../templates/available-templates.ts";
 
 import { checkInitialized } from "../utils.ts";
 
-import writeEnvObject from "../outputs/env.ts";
+import getEnvFileContents from "../outputs/env.ts";
 import getGitignoreContents from "../outputs/gitignore.ts";
 import vscodeSettings from "../outputs/vscode-settings.ts";
 
@@ -53,7 +56,12 @@ export default async function init(context: CNDIContext) {
   // template:Template does not have a "kind" associated, it takes one as an argument in it's applicable methods
 
   const initializing = true;
-  const CNDI_CONFIG_FILENAME = "cndi-config.jsonc"; // this is used for writing a cndi-config.jsonc file when using templates
+
+  try {
+    await Deno.mkdir(context.stagingDirectory, { recursive: true });
+  } catch {
+    // directory exists already
+  }
 
   // kind comes in from one of 2 places
   // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
@@ -264,15 +272,7 @@ export default async function init(context: CNDIContext) {
   const terraformStatePassphrase = createTerraformStatePassphrase();
   const argoUIAdminPassword = createArgoUIAdminPassword();
 
-  const {
-    noGitHub,
-    CNDI_SRC,
-    githubDirectory,
-    interactive,
-    projectDirectory,
-    gitignorePath,
-    dotEnvPath,
-  } = context;
+  const { CNDI_SRC, interactive, projectDirectory } = context;
 
   let baseTemplateName = context.template?.split("/")[1]; // eg. "airflow-tls"
 
@@ -295,6 +295,21 @@ export default async function init(context: CNDIContext) {
     (t) => t.name === baseTemplateName,
   ) as Template; // we know this exists because we checked it above
 
+  const coreEnvObject = await getCoreEnvObject(
+    { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword },
+    kind, // aws | gcp | azure
+    context.interactive,
+  );
+
+  const templateEnvObject = template
+    ? await template.getEnv(context.interactive)
+    : {};
+
+  const envObject = {
+    ...coreEnvObject,
+    ...templateEnvObject,
+  };
+
   const cndiContextWithGeneratedValues = {
     ...context,
     sealedSecretsKeys,
@@ -302,47 +317,29 @@ export default async function init(context: CNDIContext) {
     argoUIAdminPassword,
   };
 
-  await Deno.writeTextFile(gitignorePath, getGitignoreContents());
-
-  const coreEnvObject = await getCoreEnvObject(
-    cndiContextWithGeneratedValues,
-    kind, // aws | gcp | azure
+  await stageFile(
+    context.stagingDirectory,
+    path.join(".vscode", "settings.json"),
+    getPrettyJSONString(vscodeSettings),
   );
 
-  const templateEnvObject = template
-    ? await template.getEnv(context.interactive)
-    : {};
-
-  await writeEnvObject(dotEnvPath, {
-    ...coreEnvObject,
-    ...templateEnvObject,
-  });
-
-  const pathToVSCodeSettings = path.join(
-    context.dotVSCodeDirectory,
-    "settings.json",
-  );
-
-  try {
-    await Deno.mkdir(context.dotVSCodeDirectory, {});
-    await Deno.writeTextFile(
-      pathToVSCodeSettings,
-      getPrettyJSONString(vscodeSettings),
-    );
-  } catch {
-    console.log(
-      initLabel,
-      yellow(`failed to write ${cyan(`"${pathToVSCodeSettings}"`)}`),
-    );
-    console.log(initLabel, "continuing without editor integration...");
-  }
-
-  if (!noGitHub) {
+  if (!context.noGitHub) {
     try {
-      // overwrite the github workflows and readme, do not clobber other files
-      await copy(path.join(CNDI_SRC, "github"), githubDirectory, {
-        overwrite: true,
-      });
+      const workflowContents = await Deno.readTextFile(
+        path.join(CNDI_SRC, "github", "workflows", "cndi-run.yaml"),
+      );
+
+      const targetGithubDirectory = path.join(
+        ".github",
+        "workflows",
+        "cndi-run.yaml",
+      );
+
+      await stageFile(
+        context.stagingDirectory,
+        targetGithubDirectory,
+        workflowContents,
+      );
     } catch (githubCopyError) {
       console.log(
         initLabel,
@@ -365,31 +362,51 @@ export default async function init(context: CNDIContext) {
     );
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      await Deno.writeTextFile(
-        readmePath,
+      await stageFile(
+        context.stagingDirectory,
+        "README.md",
         template?.getReadmeString({ project_name, kind }) ||
           getReadmeForProject({ project_name, kind }),
       );
     }
   }
 
+  await stageFile(
+    context.stagingDirectory,
+    ".gitignore",
+    getGitignoreContents(),
+  );
+
+  // .env is processed by OW so we need to write it to disk immediately
+  await stageFile(
+    context.stagingDirectory,
+    ".env",
+    getEnvFileContents(envObject),
+  );
+
   // if the user has specified a template, use that
   if (template) {
-    const configOutputPath = path.join(projectDirectory, CNDI_CONFIG_FILENAME);
+    const pathToConfig = path.join(projectDirectory, "cndi-config.jsonc");
     const conf = await template.getConfiguration(context.interactive);
     const templateString = template.getTemplate(kind, conf, project_name);
 
-    await Deno.writeTextFile(configOutputPath, templateString);
+    await stageFile(
+      context.stagingDirectory,
+      "cndi-config.jsonc",
+      templateString,
+    );
 
     const finalContext = {
       ...cndiContextWithGeneratedValues,
-      pathToConfig: configOutputPath,
+      pathToConfig,
     };
+
+    await persistStagedFiles(context.stagingDirectory, projectDirectory);
 
     // because there is no "pathToConfig" when using a template, we need to set it here
     overwriteWithFn(finalContext, initializing);
     return;
   }
-
+  await persistStagedFiles(context.stagingDirectory, projectDirectory);
   overwriteWithFn(cndiContextWithGeneratedValues, initializing);
 }

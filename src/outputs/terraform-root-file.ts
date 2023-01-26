@@ -49,12 +49,12 @@ interface GetTerraformRootFileArgs {
 
 const terraformRootFileLabel = white("outputs/terraform-root-file:");
 
-const getTerraformRootFile = async ({
+const getTerraformRootFile = ({
   leaderName,
   requiredProviders,
   nodes,
   cndi_project_name,
-}: GetTerraformRootFileArgs): Promise<string> => {
+}: GetTerraformRootFileArgs): string => {
   const nodeNames = nodes.map((entry) => entry.name);
 
   const nodeCount = nodes.length;
@@ -64,13 +64,7 @@ const getTerraformRootFile = async ({
     const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData };
     const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
     if (!googleCredentials) {
-      console.log(
-        terraformRootFileLabel,
-        '"GOOGLE_CREDENTIALS"',
-        brightRed(`is undefined\nPlease set`),
-        '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
-        brightRed("and try again\n"),
-      );
+      // the message about missing credentials should have already been printed
       Deno.exit(1);
     }
 
@@ -85,12 +79,6 @@ const getTerraformRootFile = async ({
       );
       Deno.exit(1);
     }
-
-    const tempFilePath = await Deno.makeTempFile();
-
-    // TODO: can we delete this?
-    Deno.writeTextFileSync(tempFilePath, googleCredentials); // contents of service account JSON written to temp file
-    Deno.env.set("GOOGLE_APPLICATION_CREDENTIALS", tempFilePath); // set env var to give terraform path to temp file
 
     terraformDependencies.required_providers[0].google =
       googleTerraformProviderDependency;

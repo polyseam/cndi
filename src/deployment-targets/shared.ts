@@ -1,5 +1,4 @@
 import {
-  CNDIContext,
   DEPLOYMENT_TARGET,
   DeploymentTarget,
   EnvObject,
@@ -20,21 +19,22 @@ import {
 
 const deploymentTargetsSharedLabel = white("deployment-targets/shared:");
 
-interface CNDIContextWithGeneratedValues extends CNDIContext {
+interface CNDIGeneratedValues {
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
 }
 
 const getCoreEnvObject = async (
-  context: CNDIContextWithGeneratedValues,
+  cndiGeneratedValues: CNDIGeneratedValues,
   deploymentTarget: DeploymentTarget,
+  interactive: boolean,
 ): Promise<EnvObject> => {
   const {
     sealedSecretsKeys,
     terraformStatePassphrase,
     argoUIAdminPassword,
-  } = context;
+  } = cndiGeneratedValues;
 
   // git
   const GIT_USERNAME = "";
@@ -96,7 +96,7 @@ const getCoreEnvObject = async (
 
   coreEnvObject.GIT_USERNAME = {
     comment: "git credentials",
-    value: context.interactive
+    value: interactive
       ? ((await Input.prompt({
         message: cyan("Enter your GitHub username:"),
         default: GIT_USERNAME,
@@ -105,7 +105,7 @@ const getCoreEnvObject = async (
   };
 
   coreEnvObject.GIT_PASSWORD = {
-    value: context.interactive
+    value: interactive
       ? ((await Secret.prompt({
         message: cyan("Enter your GitHub Personal Access Token:"),
         default: GIT_PASSWORD,
@@ -114,7 +114,7 @@ const getCoreEnvObject = async (
   };
 
   coreEnvObject.GIT_REPO = {
-    value: context.interactive
+    value: interactive
       ? await Input.prompt({
         message: cyan("Enter your GitHub repository URL:"),
         default: GIT_REPO,
@@ -126,17 +126,17 @@ const getCoreEnvObject = async (
     case DEPLOYMENT_TARGET.aws:
       return {
         ...coreEnvObject,
-        ...(await prepareAWSEnv(context.interactive)),
+        ...(await prepareAWSEnv(interactive)),
       };
     case DEPLOYMENT_TARGET.gcp:
       return {
         ...coreEnvObject,
-        ...(await prepareGCPEnv(context.interactive)),
+        ...(await prepareGCPEnv(interactive)),
       };
     case DEPLOYMENT_TARGET.azure:
       return {
         ...coreEnvObject,
-        ...(await prepareAzureEnv(context.interactive)),
+        ...(await prepareAzureEnv(interactive)),
       };
     default:
       console.log(brightRed(`kind "${deploymentTarget}" is not yet supported`));

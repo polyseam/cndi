@@ -1,7 +1,7 @@
 import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
-
+import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
 // helper function to load a JSONC file
 
@@ -16,6 +16,47 @@ const loadJSONC = async (path: string) => {
 
 function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
+}
+
+async function stageFile(
+  stagingDirectory: string,
+  relativePath: string,
+  fileContents: string,
+) {
+  const stagingPath = path.join(stagingDirectory, relativePath);
+  await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
+  await Deno.writeTextFile(stagingPath, fileContents);
+}
+
+function stageFileSync(
+  stagingDirectory: string,
+  relativePath: string,
+  fileContents: string,
+) {
+  const stagingPath = path.join(stagingDirectory, relativePath);
+  Deno.mkdirSync(path.dirname(stagingPath), { recursive: true });
+  Deno.writeTextFileSync(stagingPath, fileContents);
+}
+
+async function persistStagedFiles(
+  stagingDirectory: string,
+  targetDirectory: string,
+) {
+  for await (const entry of walk(stagingDirectory)) {
+    if (entry.isFile) {
+      const fileContents = await Deno.readTextFile(entry.path);
+      const destinationAbsPath = entry.path.replace(
+        stagingDirectory,
+        targetDirectory,
+      );
+
+      await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
+      await Deno.writeTextFile(destinationAbsPath, fileContents, {
+        create: true,
+      });
+    }
+  }
+  await Deno.remove(stagingDirectory, { recursive: true });
 }
 
 async function checkInstalled({
@@ -137,5 +178,8 @@ export {
   loadJSONC,
   padPrivatePem,
   padPublicPem,
+  persistStagedFiles,
+  stageFile,
+  stageFileSync,
   trimPemString,
 };
