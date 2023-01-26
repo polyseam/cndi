@@ -2,12 +2,13 @@
   "version": "1.0.0",
   "tasks": {
     "stringUp": "deno run -A --unstable src/installer/doStringUp.ts",
-    "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
-    "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
-    "compile-mac": "deno compile --unstable -A --target x86_64-apple-darwin --output dist/cndi-mac main.ts",
+    "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe dist/cndi.js",
+    "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux dist/cndi.js",
+    "compile-mac": "deno compile --unstable -A --target x86_64-apple-darwin --output dist/cndi-mac dist/cndi.js",
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
-    "build": "deno task stringUp && deno fmt && deno task compile-all",
-    "test": "deno test --unstable --allow-all"
+    "build": "deno task stringUp && deno fmt && deno task bundle && deno task compile-all",
+    "test": "deno test --unstable --allow-all",
+    "bundle": "deno bundle --unstable main.ts dist/cndi.js"
   },
   "importMap": "import_map.json"
 }

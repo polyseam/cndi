@@ -13,6 +13,7 @@ node_modules
 dist/cndi-linux
 dist/cndi-mac
 dist/cndi-win.exe
+dist/cndi.js
 .keys
 
 cndi/terraform/.terraform*
