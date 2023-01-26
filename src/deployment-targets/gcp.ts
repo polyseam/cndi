@@ -117,7 +117,9 @@ const getEnvStringWithGoogleCredentials = (
       `\"${GCP_PATH_TO_SERVICE_ACCOUNT_KEY_ENVKEY}\"`,
       brightRed("or"),
       `\"${GOOGLE_CREDENTIALS_ENVKEY}\"`,
-      brightRed(`defined in the environment when depolying to "gcp"`),
+      brightRed(
+        `defined in the environment when deploying to ${cyan('"gcp"')}\n`,
+      ),
     );
   }
 };

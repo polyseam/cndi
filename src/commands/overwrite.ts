@@ -51,6 +51,26 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   let terraformStatePassphrase;
   let argoUIAdminPassword;
 
+  let config;
+  try {
+    config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
+  } catch {
+    console.log(
+      owLabel,
+      brightRed(
+        `there is no cndi-config file at ${white(`"${pathToConfig}"`)}\n`,
+      ),
+    );
+    console.log(
+      `if you don't have a cndi-config file try ${
+        cyan(
+          "cndi init --interactive",
+        )
+      }\n`,
+    );
+    Deno.exit(1);
+  }
+
   if (initializing) {
     sealedSecretsKeys = context.sealedSecretsKeys;
     terraformStatePassphrase = context.terraformStatePassphrase;
@@ -76,8 +96,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     console.log(owLabel, brightRed(`"terraformStatePassphrase" is undefined`));
     Deno.exit(1);
   }
-
-  const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
   if (!config?.project_name) {
     console.log(
@@ -230,7 +248,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     nodes,
   });
 
-  if(terraformRootFileContents) {
+  if (terraformRootFileContents) {
     await stageFile(
       context.stagingDirectory,
       path.join("cndi", "terraform", "setup-cndi.tf.json"),
