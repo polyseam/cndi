@@ -230,11 +230,13 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     nodes,
   });
 
-  await stageFile(
-    context.stagingDirectory,
-    path.join("cndi", "terraform", "setup-cndi.tf.json"),
-    terraformRootFileContents,
-  );
+  if(terraformRootFileContents) {
+    await stageFile(
+      context.stagingDirectory,
+      path.join("cndi", "terraform", "setup-cndi.tf.json"),
+      terraformRootFileContents,
+    );
+  }
 
   // write terraform nodes files
   nodes.forEach((node: BaseNodeItemSpec) => {
@@ -292,7 +294,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log(completionMessage);
-  Deno.removeSync(context.stagingDirectory, { recursive: true });
 };
 
 export default overwriteWithFn;

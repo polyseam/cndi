@@ -2,10 +2,7 @@ import { EnvObject } from "../types.ts";
 
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const writeEnvObject = async (
-  pathToDotEnv: string,
-  envObj: EnvObject,
-): Promise<void> => {
+const writeEnvObject = (envObj: EnvObject): string => {
   const dotEnvString = Object.keys(envObj)
     .map((key) => {
       const val = (
@@ -18,9 +15,10 @@ const writeEnvObject = async (
 
       return `${comment}\n${key}=${val}`;
     })
-    .join("\n").trim();
+    .join("\n")
+    .trim();
 
-  await Deno.writeTextFile(pathToDotEnv, dotEnvString + "\n");
+  return dotEnvString + "\n";
 };
 
 export default writeEnvObject;

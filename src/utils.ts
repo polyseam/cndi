@@ -60,6 +60,7 @@ async function persistStagedFiles(
       });
     }
   }
+  Deno.removeSync(stagingDirectory, { recursive: true });
 }
 
 async function checkInstalled({
