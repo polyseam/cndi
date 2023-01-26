@@ -331,7 +331,6 @@ const getAWSNodeResource = (
   leaderName: string,
 ) => {
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
-
   const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const { name } = node;
   const role = node.role as NodeRole;
