@@ -64,13 +64,7 @@ const getTerraformRootFile = ({
     const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData };
     const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
     if (!googleCredentials) {
-      // console.log(
-      //   terraformRootFileLabel,
-      //   '"GOOGLE_CREDENTIALS"',
-      //   brightRed(`is undefined\nPlease set`),
-      //   '"GCP_PATH_TO_SERVICE_ACCOUNT_KEY"',
-      //   brightRed("and try again\n"),
-      // );
+      // the message about missing credentials should have already been printed
       Deno.exit(1);
     }
 

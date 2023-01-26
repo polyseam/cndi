@@ -152,8 +152,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  // write each manifest in the "cluster" section of the config to `cndi/cluster`
-  Object.keys(cluster_manifests).forEach(async (key) => {
+  // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
+  for (const key in cluster_manifests) {
     const manifestObj = cluster_manifests[key] as KubernetesManifest;
 
     if (manifestObj?.kind && manifestObj.kind === "Secret") {
@@ -166,14 +166,14 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       );
 
       if (sealedSecretManifest) {
-        stageFileSync(
+        await stageFile(
           context.stagingDirectory,
           path.join("cndi", "cluster_manifests", secretName),
           sealedSecretManifest,
         );
         console.log(`created encrypted secret:`, secretName);
       }
-      return;
+      continue;
     }
 
     await stageFile(
@@ -181,7 +181,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       path.join("cndi", "cluster_manifests", `${key}.json`),
       getPrettyJSONString(manifestObj),
     );
-  });
+  }
 
   const { nodes } = config.infrastructure.cndi;
 
@@ -232,7 +232,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
       context,
     );
     if (envStringIncludingGCPCreds) {
-      stageFileSync(
+      await stageFile(
         context.stagingDirectory,
         ".env",
         envStringIncludingGCPCreds,
@@ -257,19 +257,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   }
 
   // write terraform nodes files
-  nodes.forEach((node: BaseNodeItemSpec) => {
+  for (const node of nodes) {
     const nodeFileContents: string = getTerraformNodeResource(
       node,
       deployment_target_configuration,
       leader.name,
     );
 
-    stageFileSync(
+    await stageFile(
       context.stagingDirectory,
       path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
       nodeFileContents,
     );
-  });
+  }
 
   // write the cndi/cluster_manifests/Chart.yaml file
   await stageFile(
@@ -281,19 +281,19 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   const { applications } = config;
 
   // write the `cndi/cluster_manifests/applications/${applicationName}.application.json` file for each application
-  Object.keys(applications).forEach((releaseName) => {
+  for (const releaseName in applications) {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
       releaseName,
       applicationSpec,
     );
-    stageFileSync(
+    await stageFile(
       context.stagingDirectory,
       path.join("cndi", "cluster_manifests", "applications", filename),
       manifestContent,
     );
     console.log("created application manifest:", filename);
-  });
+  }
 
   try {
     await persistStagedFiles(
@@ -303,7 +303,7 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
   } catch (errorPersistingStagedFiles) {
     console.log(owLabel, brightRed(`Error persisting staged files`));
     console.log(errorPersistingStagedFiles);
-    Deno.removeSync(context.stagingDirectory, { recursive: true });
+    await Deno.remove(context.stagingDirectory, { recursive: true });
     Deno.exit(1);
   }
 

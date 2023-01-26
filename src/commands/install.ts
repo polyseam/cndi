@@ -27,17 +27,17 @@ export default async function install(
 
   spinner.start();
 
-  Object.keys(embeddedFiles).forEach((key) => {
+  for (const key in embeddedFiles) {
     const k = key as EmbeddedFileKey;
     const folder = path.dirname(k) as string;
 
     const file = embeddedFiles[k];
-    Deno.mkdirSync(path.join(CNDI_HOME, folder), { recursive: true });
-    Deno.writeTextFileSync(path.join(CNDI_HOME, key), file, {
+    await Deno.mkdir(path.join(CNDI_HOME, folder), { recursive: true });
+    await Deno.writeTextFile(path.join(CNDI_HOME, key), file, {
       create: true,
       append: false,
     });
-  });
+  }
 
   // TODO: configurable?
   const terraformVersion = "1.3.2";
