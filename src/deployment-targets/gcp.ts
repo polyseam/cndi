@@ -10,7 +10,6 @@ import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { CNDIContext, EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
-import { stageFileSync } from "../utils.ts";
 
 const deploymentTargetsLabel = white("deployment-targets/gcp:");
 

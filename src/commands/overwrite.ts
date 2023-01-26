@@ -4,7 +4,6 @@ import {
   loadJSONC,
   persistStagedFiles,
   stageFile,
-  stageFileSync,
 } from "../utils.ts";
 import {
   BaseNodeItemSpec,

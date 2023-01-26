@@ -1,13 +1,10 @@
-import { CNDIConfig, CNDIContext, EnvObject, NodeKind } from "../types.ts";
-
-import { copy } from "https://deno.land/std@0.173.0/fs/copy.ts";
+import { CNDIConfig, CNDIContext, NodeKind } from "../types.ts";
 
 import {
   getPrettyJSONString,
   loadJSONC,
   persistStagedFiles,
   stageFile,
-  stageFileSync,
 } from "../utils.ts";
 
 import {
@@ -45,7 +42,6 @@ import getGitignoreContents from "../outputs/gitignore.ts";
 import vscodeSettings from "../outputs/vscode-settings.ts";
 
 import { Template } from "../templates/Template.ts";
-import { dirname } from "https://deno.land/std@0.173.0/path/mod.ts";
 
 const initLabel = white("init:");
 
