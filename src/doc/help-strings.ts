@@ -4,6 +4,7 @@ type HelpStrings = {
   install: string;
   overwrite: string;
   terraform: string;
+  destroy: string;
   ow: string;
   run: string;
   help: string;
@@ -76,6 +77,14 @@ SYNOPSIS
         cndi run
 DESCRIPTION
         Reads files in the user's cndi directory and deploys as a cndi cluster
+  `.trim(),
+  destroy: `
+NAME
+        cndi-destroy - destroys the CNDI cluster associated with the cndi project in the target directory
+SYNOPSIS
+        cndi destroy
+DESCRIPTION
+        Calls "terraform destroy" on the cndi project in the target directory
   `.trim(),
   install: `
 NAME

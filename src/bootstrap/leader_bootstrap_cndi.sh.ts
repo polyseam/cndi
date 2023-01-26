@@ -6,6 +6,12 @@ const bootstrapShellScript = `
 
 echo "bootstrapping leader"
 
+echo "Updating package manager"
+sudo apt-get update
+
+echo "Installing apache2-utils"
+sudo apt-get install apache2-utils -y
+
 echo "Installing nfs-common"
 sudo apt-get install nfs-common -y
 
@@ -130,6 +136,9 @@ spec:
 EOF
 
 echo "argo configured"
+echo "patching argocd-secret"
+
+sudo microk8s kubectl -n argocd patch secret argocd-secret   -p "{\"stringData\": {\"admin.password\":\"$(htpasswd -bnBC 10 "" \${argo_ui_admin_password} | tr -d ':\n')\",\"admin.passwordMtime\": \"$(date +%FT%T%Z)\"}}"
 
 echo "leader bootstrap complete"
 

@@ -9,6 +9,7 @@ import {
   loadJSONC,
 } from "./utils.ts";
 import { COMMAND } from "./types.ts";
+
 import {
   brightRed,
   cyan,
@@ -22,6 +23,7 @@ import overwriteFn from "./commands/overwrite.ts";
 import helpFn from "./commands/help.ts";
 import installFn from "./commands/install.ts";
 import terraformFn from "./commands/terraform.ts";
+import destroyFn from "./commands/destroy.ts";
 
 const cndiLabel = white("src/cndi:");
 
@@ -160,6 +162,7 @@ export default async function main(args: string[]) {
     [COMMAND.help]: helpFn,
     [COMMAND.install]: installFn,
     [COMMAND.terraform]: terraformFn,
+    [COMMAND.destroy]: destroyFn,
     [COMMAND.default]: (c: string) => {
       console.log(
         `Command "${c}" not found. Use "cndi --help" for more information.`,
@@ -221,6 +224,9 @@ export default async function main(args: string[]) {
         break;
       case COMMAND.run:
         await commands[COMMAND.run](context);
+        break;
+      case COMMAND.destroy:
+        await commands[COMMAND.destroy](context);
         break;
       case COMMAND.overwrite:
         await commands[COMMAND.overwrite](context);

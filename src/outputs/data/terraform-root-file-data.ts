@@ -15,7 +15,7 @@ const terraformRootFileData: TerraformRootFileData = {
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
+      argo_ui_admin_password: "${var.argo_ui_admin_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
       availability_zones: "",
@@ -519,7 +519,7 @@ const terraformRootFileData: TerraformRootFileData = {
         type: "string",
       },
     ],
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui",
         type: "string",
@@ -549,7 +549,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
+      argo_ui_admin_password: "${var.argo_ui_admin_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
     },
@@ -724,7 +724,7 @@ const gcpTerraformRootFileData: GCPTerraformRootFileData = {
         type: "string",
       },
     ],
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui",
         type: "string",
@@ -754,7 +754,7 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
       git_password: "${var.git_password}",
       git_username: "${var.git_username}",
       git_repo: "${var.git_repo}",
-      argo_ui_readonly_password: "${var.argo_ui_readonly_password}",
+      argo_ui_admin_password: "${var.argo_ui_admin_password}",
       sealed_secrets_private_key: "${var.sealed_secrets_private_key}",
       sealed_secrets_public_key: "${var.sealed_secrets_public_key}",
     },
@@ -795,7 +795,7 @@ const azureTerraformRootFileData: AzureTerraformRootFileData = {
         type: "string",
       },
     ],
-    argo_ui_readonly_password: [
+    argo_ui_admin_password: [
       {
         description: "password for accessing the argo ui",
         type: "string",

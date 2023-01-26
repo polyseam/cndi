@@ -27,7 +27,7 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 
-import { loadArgoUIReadOnlyPassword } from "../initialize/argoUIReadOnlyPassword.ts";
+import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
 import { getEnvStringWithGoogleCredentials } from "../deployment-targets/gcp.ts";
 
@@ -49,17 +49,17 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
 
   let sealedSecretsKeys;
   let terraformStatePassphrase;
-  let argoUIReadOnlyPassword;
+  let argoUIAdminPassword;
 
   if (initializing) {
     sealedSecretsKeys = context.sealedSecretsKeys;
     terraformStatePassphrase = context.terraformStatePassphrase;
-    argoUIReadOnlyPassword = context.argoUIReadOnlyPassword;
+    argoUIAdminPassword = context.argoUIAdminPassword;
   } else {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
     sealedSecretsKeys = loadSealedSecretsKeys();
     terraformStatePassphrase = loadTerraformStatePassphrase();
-    argoUIReadOnlyPassword = loadArgoUIReadOnlyPassword();
+    argoUIAdminPassword = loadArgoUIAdminPassword();
   }
 
   if (!sealedSecretsKeys) {
@@ -67,8 +67,8 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     Deno.exit(1);
   }
 
-  if (!argoUIReadOnlyPassword) {
-    console.log(owLabel, brightRed(`"argoUIReadOnlyPassword" is undefined`));
+  if (!argoUIAdminPassword) {
+    console.log(owLabel, brightRed(`"argoUIAdminPassword" is undefined`));
     Deno.exit(1);
   }
 
