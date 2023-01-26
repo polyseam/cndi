@@ -108,26 +108,4 @@ Let's open the port displayed in the browser:
 eg: `http://127.0.0.1:50445`
 
 You should now see a login page for argo, and a place to enter a username and
-password. We know the username but not yet the password.
-
-**6. Logging into Argo:**
-
-Let's leave the service running and get the `password` from the cluster now in a
-separate shell:
-
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
-```
-
-You should now see a password displayed that looks something like:
-
-```
-wLLoUS3493WlHKpc
-```
-
-Let's once again go to the the argo web UI, and enter the credentials including
-the password you just got:
-
-Username: `admin`
-
-Password: `wLLoUS3493WlHKpc`
+password. The username is `admin` and the password is available in the `.env` file we created for you under the key `ARGO_UI_ADMIN_PASSWORD`.
