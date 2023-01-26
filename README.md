@@ -432,12 +432,6 @@ resources. Some of our templates setup Ingress for ArgoCD automatically, if you
 don't have an Ingress you can still access it by following our
 [port-forwarding doc](docs/port-forwarding.md). Once you can see the login screen for ArgoCD you can login with the username `admin` and the password we set for you in your `.env` file under the key `ARGO_UI_ADMIN_PASSWORD`.
 
-```bash
-# run this on one of your nodes to get the initial password for the "admin" user
-microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
-# wLLoUS3493WlHKpc
-```
-
 ### dns 🌐
 
 Setting up DNS for your cluster is a critical step if your cluster will be
