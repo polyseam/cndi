@@ -1,4 +1,3 @@
-import { padPrivatePem, padPublicPem } from "../utils.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
 import { CNDIContext, SealedSecretsKeys } from "../types.ts";
@@ -58,28 +57,23 @@ const createSealedSecretsKeys = async ({
 };
 
 const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
-  const sealed_secrets_public_key_material = Deno.env
-    .get("SEALED_SECRETS_PUBLIC_KEY_MATERIAL")
-    ?.trim()
-    .replaceAll("_", "\n");
-  const sealed_secrets_private_key_material = Deno.env
-    .get("SEALED_SECRETS_PRIVATE_KEY_MATERIAL")
-    ?.trim()
-    .replaceAll("_", "\n");
+  const sealed_secrets_public_key = Deno.env
+    .get("SEALED_SECRETS_PUBLIC_KEY") as string;
 
-  if (!sealed_secrets_public_key_material) {
+  const sealed_secrets_private_key = Deno.env
+    .get("SEALED_SECRETS_PRIVATE_KEY") as string;
+
+  if (!sealed_secrets_public_key) {
     return null;
   }
 
-  if (!sealed_secrets_private_key_material) {
+  if (!sealed_secrets_private_key) {
     return null;
   }
 
   const sealedSecrets = {
-    sealed_secrets_private_key: padPrivatePem(
-      sealed_secrets_private_key_material,
-    ),
-    sealed_secrets_public_key: padPublicPem(sealed_secrets_public_key_material),
+    sealed_secrets_private_key,
+    sealed_secrets_public_key,
   };
 
   return sealedSecrets;
