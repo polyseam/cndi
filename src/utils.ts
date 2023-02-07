@@ -142,21 +142,6 @@ function getSecretOfLength(len = 32): string {
   return Array.from(values, base10intToHex).join("");
 }
 
-// /**
-//  * Wraps a multiline string in quotes and newlines for use in env files
-//  * @param multilineString the multiline env string to wrap
-//  * @returns formatted env block string
-//  */
-// function wrapMultilineEnv(multilineString: string): string {
-//   return `'${multilineString.trim()}'`;
-// }
-
-// function unwrapMultilineEnv(envBlockString: string): string {
-//   const unwrapped = envBlockString.trim().slice(1, -1);
-//   console.log("unwrapped", unwrapped);
-//   return unwrapped.trim();
-// }
-
 export {
   checkInitialized,
   checkInstalled,
@@ -169,6 +154,4 @@ export {
   persistStagedFiles,
   stageFile,
   stageFileSync,
-  // wrapMultilineEnv,
-  // unwrapMultilineEnv,
 };

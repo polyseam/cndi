@@ -43,7 +43,6 @@ export default async function main(args: string[]) {
   const pathToOpenSSL = getPathToOpenSSLForPlatform();
   const executionDirectory = Deno.cwd();
 
-  console.log("Deno.env.nla", Deno.env.get("SEALED_SECRETS_PRIVATE_KEY"));
   // CNDI_SRC is determined at compile time, that's no good
   const CNDI_SRC = path.join(CNDI_HOME, "src");
   const pathToKubeseal = path.join(
