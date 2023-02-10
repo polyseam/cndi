@@ -37,7 +37,7 @@ export default function setTF_VARs() {
   if (!sealed_secrets_private_key) {
     console.log(
       setTF_VARsLabel,
-      brightRed("SEALED_SECRETS_PRIVATE_KE env var is not set"),
+      brightRed("SEALED_SECRETS_PRIVATE_KEY env var is not set"),
     );
     Deno.exit(1);
   }
