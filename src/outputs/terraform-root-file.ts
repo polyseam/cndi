@@ -63,7 +63,6 @@ const getTerraformRootFile = ({
   if (requiredProviders.has("gcp")) {
     const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData };
     const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
-    console.log("googleCredentials: ", googleCredentials);
     if (!googleCredentials) {
       console.log("google credentials are missing");
       // the message about missing credentials should have already been printed
