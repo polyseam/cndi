@@ -9,11 +9,12 @@ import {
 
 import {
   brightRed,
+  brightWhite,
   cyan,
   white,
   yellow,
 } from "https://deno.land/std@0.173.0/fmt/colors.ts";
-
+import { platform } from "https://deno.land/std@0.177.0/node/os.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import overwriteWithFn from "./overwrite.ts";
 
@@ -72,6 +73,14 @@ export default async function init(context: CNDIContext) {
 
   // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
   const useCNDIConfigFile = !context.interactive && !context.template;
+
+  const templateNamesList: string[] = [];
+
+  availableTemplates.forEach((tpl) => {
+    availableDeploymentTargets.forEach((kind: NodeKind) => {
+      templateNamesList.push(`${kind}/${tpl.name}`);
+    });
+  });
 
   if (useCNDIConfigFile) {
     try {
@@ -202,6 +211,24 @@ export default async function init(context: CNDIContext) {
       kind = context.template?.split("/")[0] as NodeKind;
       console.log(`cndi init --interactive --template ${context.template}\n`);
     } else {
+      if (platform() === "win32") {
+        console.log(
+          initLabel,
+          brightWhite(`cndi init --interactive`),
+          brightRed(
+            `requires a specified template on Windows`,
+          ),
+          `please select one of the following templates:\n`,
+          `${templateNamesList.map((t) => cyan(t)).join(", ")}\n`,
+          `and use ${
+            cyan(
+              "cndi init --interactive --template " +
+                brightWhite("my-template"),
+            )
+          } instead!\n`,
+        );
+        Deno.exit(1);
+      }
       // we don't know the kind so we need to get it when the user chooses a template (see 2c)
       console.log("cndi init --interactive\n");
     }
@@ -234,14 +261,6 @@ export default async function init(context: CNDIContext) {
   if (!shouldContinue) {
     Deno.exit(0);
   }
-
-  const templateNamesList: string[] = [];
-
-  availableTemplates.forEach((tpl) => {
-    availableDeploymentTargets.forEach((kind: NodeKind) => {
-      templateNamesList.push(`${kind}/${tpl.name}`);
-    });
-  });
 
   if (context.template) {
     const templateUnavailable = !templateNamesList.includes(context.template);
