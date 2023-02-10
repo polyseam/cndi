@@ -63,12 +63,17 @@ const getTerraformRootFile = ({
   if (requiredProviders.has("gcp")) {
     const gcpMainTerraformFileObject = { ...gcpTerraformRootFileData };
     const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
+    console.log("googleCredentials: ", googleCredentials);
     if (!googleCredentials) {
+      console.log("google credentials are missing");
       // the message about missing credentials should have already been printed
       Deno.exit(1);
     }
 
     const region = (Deno.env.get("GCP_REGION") as string) || DEFAULT_GCP_REGION;
+
+    // we parse the key to extract the project_id for use in terraform
+    // the json key is only used for auth within `cndi run`
     let parsedJSONServiceAccountKey: { project_id: string };
     try {
       parsedJSONServiceAccountKey = JSON.parse(googleCredentials);

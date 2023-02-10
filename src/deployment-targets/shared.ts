@@ -6,7 +6,6 @@ import {
 } from "../types.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
-import { trimPemString } from "../utils.ts";
 
 import { prepareAWSEnv } from "../deployment-targets/aws.ts";
 import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
@@ -16,6 +15,8 @@ import {
   cyan,
   white,
 } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+
+// import { wrapMultilineEnv } from "../utils.ts";
 
 const deploymentTargetsSharedLabel = white("deployment-targets/shared:");
 
@@ -68,21 +69,13 @@ const getCoreEnvObject = async (
     Deno.exit(1);
   }
 
-  const SEALED_SECRETS_PUBLIC_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_public_key,
-  ).replaceAll("\n", "_");
-
-  const SEALED_SECRETS_PRIVATE_KEY_MATERIAL = trimPemString(
-    sealedSecretsKeys.sealed_secrets_private_key,
-  ).replaceAll("\n", "_");
-
   const coreEnvObject: EnvObject = {
-    SEALED_SECRETS_PUBLIC_KEY_MATERIAL: {
+    SEALED_SECRETS_PUBLIC_KEY: {
       comment: "Sealed Secrets keys for Kubeseal",
-      value: SEALED_SECRETS_PUBLIC_KEY_MATERIAL,
+      value: sealedSecretsKeys.sealed_secrets_public_key,
     },
-    SEALED_SECRETS_PRIVATE_KEY_MATERIAL: {
-      value: SEALED_SECRETS_PRIVATE_KEY_MATERIAL,
+    SEALED_SECRETS_PRIVATE_KEY: {
+      value: sealedSecretsKeys.sealed_secrets_private_key,
     },
     ARGO_UI_ADMIN_PASSWORD: {
       comment: "ArgoUI",

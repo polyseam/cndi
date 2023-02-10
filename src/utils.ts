@@ -3,13 +3,8 @@ import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
+
 // helper function to load a JSONC file
-
-const CERT_TOP = "-----BEGIN CERTIFICATE-----\n";
-const CERT_BOTTOM = "\n-----END CERTIFICATE-----\n";
-const PRIVATE_KEY_TOP = "-----BEGIN PRIVATE KEY-----\n";
-const PRIVATE_KEY_BOTTOM = "\n-----END PRIVATE KEY-----\n";
-
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
@@ -106,26 +101,6 @@ const getFileSuffixForPlatform = () => {
   return fileSuffixForPlatform[currentPlatform];
 };
 
-const trimPemString = (key: string): string => {
-  const trimmedKey = key
-    .replace(CERT_TOP, "")
-    .replace(CERT_BOTTOM, "")
-    .replace(PRIVATE_KEY_BOTTOM, "")
-    .replace(PRIVATE_KEY_TOP, "");
-  return trimmedKey;
-};
-
-const padPrivatePem = (keyMaterial: string): string => {
-  const paddedPrivateKey =
-    `${PRIVATE_KEY_TOP}${keyMaterial}${PRIVATE_KEY_BOTTOM}`;
-  return paddedPrivateKey;
-};
-
-const padPublicPem = (keyMaterial: string): string => {
-  const paddedPublicKey = `${CERT_TOP}${keyMaterial}${CERT_BOTTOM}`;
-  return paddedPublicKey;
-};
-
 const getPathToOpenSSLForPlatform = () => {
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
 
@@ -176,10 +151,7 @@ export {
   getPrettyJSONString,
   getSecretOfLength,
   loadJSONC,
-  padPrivatePem,
-  padPublicPem,
   persistStagedFiles,
   stageFile,
   stageFileSync,
-  trimPemString,
 };

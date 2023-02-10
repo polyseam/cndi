@@ -28,8 +28,6 @@ import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassph
 
 import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
-import { getEnvStringWithGoogleCredentials } from "../deployment-targets/gcp.ts";
-
 import {
   brightRed,
   cyan,
@@ -221,22 +219,6 @@ const overwriteWithFn = async (context: CNDIContext, initializing = false) => {
     });
     console.log();
     Deno.exit(1);
-  }
-
-  if (requiredProviders.has("gcp")) {
-    // if there is a service account key path
-    // read the contents and create a string of .env contents with the key
-    // caution: this needs to run before the terraform root file is created
-    const envStringIncludingGCPCreds = getEnvStringWithGoogleCredentials(
-      context,
-    );
-    if (envStringIncludingGCPCreds) {
-      await stageFile(
-        context.stagingDirectory,
-        ".env",
-        envStringIncludingGCPCreds,
-      );
-    }
   }
 
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
