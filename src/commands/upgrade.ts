@@ -44,12 +44,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     }
     spinner.stop();
     console.info(
-      `Successfully upgraded ${name} from ${from} to version ${to}! \n${
-        this.getRegistryUrl(
-          name,
-          to,
-        )
-      })`,
+      `Successfully upgraded ${name} from ${from} to version ${to}! \n${`https://github.com/polyseam/cndi/releases/${to}`}`,
     );
     console.log();
   }
