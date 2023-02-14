@@ -6,6 +6,7 @@ import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
   checkInitialized,
+  checkInstalled,
   getPrettyJSONString,
   loadJSONC,
   persistStagedFiles,
@@ -55,9 +56,17 @@ const initCommand = new Command()
     "Destination for new cndi project files.",
     { default: Deno.cwd() },
   )
-  .option("-i, --interactive", "Run in interactive mode.", { default: false })
+  .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
   .action(async (options) => {
+    console.log();
+
+    if (!(await checkInstalled())) {
+      console.log(`cndi is not installed`);
+      console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
+      Deno.exit(1);
+    }
+
     const pathToConfig = options.file;
 
     // kind comes in from one of 2 places
@@ -294,11 +303,11 @@ const initCommand = new Command()
     const coreEnvObject = await getCoreEnvObject(
       { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword },
       kind, // aws | gcp | azure
-      options.interactive,
+      !!options.interactive,
     );
 
     const templateEnvObject = template
-      ? await template.getEnv(options.interactive)
+      ? await template.getEnv(!!options.interactive)
       : {};
 
     const envObject = {
@@ -332,11 +341,7 @@ const initCommand = new Command()
     }
 
     await stageFile(
-      path.join(
-        ".github",
-        "workflows",
-        "cndi-run.yaml",
-      ),
+      path.join(".github", "workflows", "cndi-run.yaml"),
       getCndiRunGitHubWorkflowYamlContents(),
     );
 
@@ -347,7 +352,7 @@ const initCommand = new Command()
 
     // if the user has specified a template, use that
     if (template) {
-      const conf = await template.getConfiguration(options.interactive);
+      const conf = await template.getConfiguration(!!options.interactive);
       const templateString = template.getTemplate(kind, conf, project_name);
 
       await stageFile("cndi-config.jsonc", templateString);

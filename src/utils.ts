@@ -43,7 +43,7 @@ async function stageFile(relativePath: string, fileContents: string) {
 function getStagingDir() {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
-    console.error(`${colors.yellow("CNDI_STAGING_DIRECTORY")} is not set!`);
+    console.error(`${colors.yellow("CNDI_STAGING_DIRECTORY")} is not set!\n`);
     Deno.exit(1);
   }
   return stagingDirectory;

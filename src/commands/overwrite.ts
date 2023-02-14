@@ -5,6 +5,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
+  checkInstalled,
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
@@ -41,6 +42,14 @@ interface OverwriteActionArgs {
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
+  console.log();
+
+  if (!(await checkInstalled())) {
+    console.log(`cndi is not installed`);
+    console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
+    Deno.exit(1);
+  }
+
   const pathToConfig = path.join(options.output, "cndi-config.jsonc");
 
   const pathToKubernetesManifests = path.join(

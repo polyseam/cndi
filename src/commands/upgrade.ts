@@ -12,6 +12,7 @@ import { UpgradeCommand } from "https://deno.land/x/cliffy@v0.25.7/command/mod.t
 
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
+    console.log();
     const spinner = new TerminalSpinner({
       text: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",

@@ -9,7 +9,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import setTF_VARs from "../setTF_VARs.ts";
-import { getPathToTerraformBinary } from "../utils.ts";
+import { checkInstalled, getPathToTerraformBinary } from "../utils.ts";
 
 const runLabel = colors.white("run:");
 
@@ -60,6 +60,14 @@ const runCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
+    console.log();
+
+    if (!(await checkInstalled())) {
+      console.log(`cndi is not installed`);
+      console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
+      Deno.exit(1);
+    }
+
     const cmd = "cndi run";
     console.log(`${cmd}\n`);
 
