@@ -1,23 +1,32 @@
-import { brightRed, white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-const setTF_VARsLabel = white("setTF_VARs:");
+const setTF_VARsLabel = colors.white("setTF_VARs:");
 
 export default function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
   if (!git_username) {
-    console.log(setTF_VARsLabel, brightRed("GIT_USERNAME env var is not set"));
+    console.log(
+      setTF_VARsLabel,
+      colors.brightRed("GIT_USERNAME env var is not set"),
+    );
     Deno.exit(1);
   }
 
   const git_password = Deno.env.get("GIT_PASSWORD");
   if (!git_password) {
-    console.log(setTF_VARsLabel, brightRed("GIT_PASSWORD env var is not set"));
+    console.log(
+      setTF_VARsLabel,
+      colors.brightRed("GIT_PASSWORD env var is not set"),
+    );
     Deno.exit(1);
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
   if (!git_repo) {
-    console.log(setTF_VARsLabel, brightRed("GIT_REPO env var is not set"));
+    console.log(
+      setTF_VARsLabel,
+      colors.brightRed("GIT_REPO env var is not set"),
+    );
     Deno.exit(1);
   }
 
@@ -25,7 +34,7 @@ export default function setTF_VARs() {
   if (!argo_ui_admin_password) {
     console.log(
       setTF_VARsLabel,
-      brightRed("ARGO_UI_ADMIN_PASSWORD env var is not set"),
+      colors.brightRed("ARGO_UI_ADMIN_PASSWORD env var is not set"),
     );
     Deno.exit(1);
   }
@@ -37,7 +46,7 @@ export default function setTF_VARs() {
   if (!sealed_secrets_private_key) {
     console.log(
       setTF_VARsLabel,
-      brightRed("SEALED_SECRETS_PRIVATE_KEY env var is not set"),
+      colors.brightRed("SEALED_SECRETS_PRIVATE_KEY env var is not set"),
     );
     Deno.exit(1);
   }
@@ -49,7 +58,7 @@ export default function setTF_VARs() {
   if (!sealed_secrets_public_key) {
     console.log(
       setTF_VARsLabel,
-      brightRed("SEALED_SECRETS_PUBLIC_KEY env var is not set"),
+      colors.brightRed("SEALED_SECRETS_PUBLIC_KEY env var is not set"),
     );
     Deno.exit(1);
   }

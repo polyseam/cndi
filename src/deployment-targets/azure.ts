@@ -1,5 +1,5 @@
 import { EnvObject } from "../types.ts";
-import { cyan } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
@@ -16,7 +16,7 @@ const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
     comment: "Azure Resource Manager",
     value: interactive
       ? ((await Input.prompt({
-        message: cyan("Enter your Azure region:"),
+        message: colors.cyan("Enter your Azure region:"),
         default: ARM_REGION,
       })) as string)
       : ARM_REGION,
@@ -25,7 +25,7 @@ const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
   azureEnvObject.ARM_CLIENT_ID = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your Azure Client ID:"),
+        message: colors.cyan("Enter your Azure Client ID:"),
         default: ARM_CLIENT_ID,
       })) as string)
       : ARM_CLIENT_ID,
@@ -34,7 +34,7 @@ const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
   azureEnvObject.ARM_CLIENT_SECRET = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your Azure Client Secret:"),
+        message: colors.cyan("Enter your Azure Client Secret:"),
         default: ARM_CLIENT_SECRET,
       })) as string)
       : ARM_CLIENT_SECRET,
@@ -43,7 +43,7 @@ const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
   azureEnvObject.ARM_TENANT_ID = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your Azure Tenant ID:"),
+        message: colors.cyan("Enter your Azure Tenant ID:"),
         default: ARM_TENANT_ID,
       })) as string)
       : ARM_TENANT_ID,
@@ -52,7 +52,7 @@ const prepareAzureEnv = async (interactive: boolean): Promise<EnvObject> => {
   azureEnvObject.ARM_SUBSCRIPTION_ID = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your Azure Subscription ID:"),
+        message: colors.cyan("Enter your Azure Subscription ID:"),
         default: ARM_SUBSCRIPTION_ID,
       })) as string)
       : ARM_SUBSCRIPTION_ID,

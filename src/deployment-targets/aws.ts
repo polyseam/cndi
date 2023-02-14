@@ -1,5 +1,5 @@
 import { EnvObject } from "../types.ts";
-import { cyan } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
@@ -13,7 +13,7 @@ const prepareAWSEnv = async (interactive: boolean): Promise<EnvObject> => {
     comment: "AWS",
     value: interactive
       ? ((await Input.prompt({
-        message: cyan("Enter your AWS region:"),
+        message: colors.cyan("Enter your AWS region:"),
         default: AWS_REGION,
       })) as string)
       : AWS_REGION,
@@ -22,7 +22,7 @@ const prepareAWSEnv = async (interactive: boolean): Promise<EnvObject> => {
   awsEnvObject.AWS_ACCESS_KEY_ID = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your AWS access key ID:"),
+        message: colors.cyan("Enter your AWS access key ID:"),
         default: AWS_ACCESS_KEY_ID,
       })) as string)
       : AWS_ACCESS_KEY_ID,
@@ -31,7 +31,7 @@ const prepareAWSEnv = async (interactive: boolean): Promise<EnvObject> => {
   awsEnvObject.AWS_SECRET_ACCESS_KEY = {
     value: interactive
       ? ((await Secret.prompt({
-        message: cyan("Enter your AWS secret access key:"),
+        message: colors.cyan("Enter your AWS secret access key:"),
         default: AWS_SECRET_ACCESS_KEY,
       })) as string)
       : AWS_SECRET_ACCESS_KEY,

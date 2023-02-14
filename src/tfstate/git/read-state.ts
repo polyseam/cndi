@@ -1,9 +1,4 @@
-import {
-  brightRed,
-  cyan,
-  white,
-  yellow,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
@@ -13,7 +8,7 @@ import decrypt from "../decrypt.ts";
 
 const git = simpleGit();
 
-const gitReadStateLabel = white("tfstate/git/read-state:");
+const gitReadStateLabel = colors.white("tfstate/git/read-state:");
 
 export default async function pullStateForRun({
   pathToTerraformResources,
@@ -44,7 +39,7 @@ export default async function pullStateForRun({
     console.log(
       gitReadStateLabel,
       "you must make a commit on your branch before running",
-      `"${cyan(cmd)}"\n`,
+      `"${colors.cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -55,8 +50,8 @@ export default async function pullStateForRun({
   if (!cleanGitState) {
     console.log(
       gitReadStateLabel,
-      brightRed("your branch must be clean before running"),
-      `"${cyan(cmd)}"\n`,
+      colors.brightRed("your branch must be clean before running"),
+      `"${colors.cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -87,7 +82,7 @@ export default async function pullStateForRun({
   if (!secret) {
     console.log(
       gitReadStateLabel,
-      yellow("TERRAFORM_STATE_PASSPHRASE"),
+      colors.yellow("TERRAFORM_STATE_PASSPHRASE"),
       "is not set in your environment file",
     );
     Deno.exit(1);

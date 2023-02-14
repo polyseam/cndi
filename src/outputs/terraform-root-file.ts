@@ -10,8 +10,7 @@ import {
   gcpTerraformRootFileData,
   terraformRootFileData,
 } from "./data/terraform-root-file-data.ts";
-import { white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
-import { brightRed } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
@@ -47,7 +46,7 @@ interface GetTerraformRootFileArgs {
   cndi_project_name: string;
 }
 
-const terraformRootFileLabel = white("outputs/terraform-root-file:");
+const terraformRootFileLabel = colors.white("outputs/terraform-root-file:");
 
 const getTerraformRootFile = ({
   leaderName,
@@ -79,7 +78,7 @@ const getTerraformRootFile = ({
     } catch {
       console.log(
         terraformRootFileLabel,
-        brightRed("failed to parse service account key json"),
+        colors.brightRed("failed to parse service account key json"),
       );
       Deno.exit(1);
     }

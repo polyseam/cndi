@@ -1,7 +1,7 @@
 import { CNDIConfig, EnvObject, NODE_ROLE, NodeKind } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { cyan } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { getDefaultVmTypeForKind } from "../utils.ts";
 import {
   GetConfigurationFn,
@@ -44,12 +44,16 @@ const getEnv = async (interactive: boolean): Promise<EnvObject> => {
 
   if (interactive) {
     GIT_SYNC_USERNAME = (await Input.prompt({
-      message: cyan("Please enter your git username for Airflow DAG Storage:"),
+      message: colors.cyan(
+        "Please enter your git username for Airflow DAG Storage:",
+      ),
       default: GIT_SYNC_USERNAME,
     })) as string;
 
     GIT_SYNC_PASSWORD = (await Secret.prompt({
-      message: cyan("Please enter your git password for Airflow DAG Storage:"),
+      message: colors.cyan(
+        "Please enter your git password for Airflow DAG Storage:",
+      ),
       default: GIT_SYNC_PASSWORD,
     })) as string;
   }
@@ -77,28 +81,28 @@ async function getAirflowTlsConfiguration(
 
   if (interactive) {
     dagRepoUrl = (await Input.prompt({
-      message: cyan(
+      message: colors.cyan(
         "Please enter the url of the git repo containing your dags:",
       ),
       default: dagRepoUrl,
     })) as string;
 
     argocdDomainName = (await Input.prompt({
-      message: cyan(
+      message: colors.cyan(
         "Please enter the domain name you want argocd to be accessible on:",
       ),
       default: argocdDomainName,
     })) as string;
 
     airflowDomainName = (await Input.prompt({
-      message: cyan(
+      message: colors.cyan(
         "Please enter the domain name you want airflow to be accessible on:",
       ),
       default: airflowDomainName,
     })) as string;
 
     letsEncryptClusterIssuerEmailAddress = (await Input.prompt({
-      message: cyan(
+      message: colors.cyan(
         "Please enter the email address you want to use for lets encrypt:",
       ),
       default: letsEncryptClusterIssuerEmailAddress,
