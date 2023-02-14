@@ -91,6 +91,7 @@ const installCommand = new Command()
     }
 
     spinner.succeed("cndi installed");
+    console.log();
   });
 
 export default installCommand;

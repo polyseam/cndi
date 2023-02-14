@@ -51,6 +51,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         )
       })`,
     );
+    console.log();
   }
 }
 

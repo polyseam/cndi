@@ -75,6 +75,15 @@ async function persistStagedFiles(targetDirectory: string) {
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
+async function ensureInstalled() {
+  const installed = await checkInstalled();
+  if (!installed) {
+    console.log("cndi is not installed!\n");
+    console.log(`Please run ${colors.cyan("cndi install")} and try again.\n`);
+    Deno.exit(1);
+  }
+}
+
 async function checkInstalled() {
   try {
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
@@ -168,6 +177,7 @@ function getSecretOfLength(len = 32): string {
 export {
   checkInitialized,
   checkInstalled,
+  ensureInstalled,
   getCndiInstallPath,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,

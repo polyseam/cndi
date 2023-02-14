@@ -6,6 +6,7 @@ import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
   checkInstalled,
+  ensureInstalled,
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
@@ -44,11 +45,7 @@ interface OverwriteActionArgs {
 const overwriteAction = async (options: OverwriteActionArgs) => {
   console.log();
 
-  if (!(await checkInstalled())) {
-    console.log(`cndi is not installed`);
-    console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
-    Deno.exit(1);
-  }
+  await ensureInstalled();
 
   const pathToConfig = path.join(options.output, "cndi-config.jsonc");
 
@@ -72,9 +69,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       owLabel,
       colors.brightRed(
         `there is no cndi-config file at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
+          colors.white(`"${pathToConfig}"`)
         }\n`,
       ),
     );
@@ -87,17 +82,15 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     );
     Deno.exit(1);
   }
-
-  console.log(`cndi overwrite --file "${pathToConfig}"\n`);
+  if (!options.initializing) {
+    console.log(`cndi overwrite --file "${pathToConfig}"\n`);
+  }
   const sealedSecretsKeys = loadSealedSecretsKeys();
   const terraformStatePassphrase = loadTerraformStatePassphrase();
   const argoUIAdminPassword = loadArgoUIAdminPassword();
 
   if (!sealedSecretsKeys) {
-    console.log(
-      owLabel,
-      colors.brightRed(`"sealedSecretsKeys" are undefined`),
-    );
+    console.log(owLabel, colors.brightRed(`"sealedSecretsKeys" are undefined`));
     Deno.exit(1);
   }
 
@@ -311,6 +304,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log(completionMessage);
+  console.log();
 };
 
 /**
@@ -318,17 +312,11 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
 const overwriteCommand = new Command()
-  .description(
-    `Update cndi project files using cndi-config.jsonc file.`,
-  )
+  .description(`Update cndi project files using cndi-config.jsonc file.`)
   .alias("ow")
-  .option(
-    "-o, --output <output:string>",
-    "Path to your cndi git repository.",
-    {
-      default: Deno.cwd(),
-    },
-  )
+  .option("-o, --output <output:string>", "Path to your cndi git repository.", {
+    default: Deno.cwd(),
+  })
   .option(
     "--initializing <initializing:boolean>",
     'true if "cndi init" is the caller of this command',

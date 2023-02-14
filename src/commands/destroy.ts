@@ -9,7 +9,11 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import setTF_VARs from "../setTF_VARs.ts";
-import { checkInstalled, getPathToTerraformBinary } from "../utils.ts";
+import {
+  checkInstalled,
+  ensureInstalled,
+  getPathToTerraformBinary,
+} from "../utils.ts";
 
 const destroyLabel = colors.white("destroy:");
 
@@ -62,11 +66,7 @@ const destroyCommand = new Command()
   .action(async (options) => {
     console.log();
 
-    if (!(await checkInstalled())) {
-      console.log(`cndi is not installed`);
-      console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
-      Deno.exit(1);
-    }
+    await ensureInstalled();
 
     const cmd = "cndi destroy";
     console.log(`${cmd}\n`);
@@ -133,6 +133,7 @@ const destroyCommand = new Command()
     } catch (err) {
       console.log(destroyLabel, colors.brightRed("unhandled error"), err);
     }
+    console.log();
   });
 
 export default destroyCommand;

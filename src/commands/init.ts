@@ -7,6 +7,7 @@ import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import {
   checkInitialized,
   checkInstalled,
+  ensureInstalled,
   getPrettyJSONString,
   loadJSONC,
   persistStagedFiles,
@@ -61,11 +62,7 @@ const initCommand = new Command()
   .action(async (options) => {
     console.log();
 
-    if (!(await checkInstalled())) {
-      console.log(`cndi is not installed`);
-      console.log(`Please run ${colors.cyan("cndi install")} and try again.`);
-      Deno.exit(1);
-    }
+    await ensureInstalled();
 
     const pathToConfig = options.file;
 
