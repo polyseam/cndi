@@ -3,6 +3,7 @@ import {
   GithubProvider,
   UpgradeOptions,
 } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { getCndiInstallPath, getFileSuffixForPlatform } from "../utils.ts";
 import {
   SpinnerTypes,
@@ -10,9 +11,9 @@ import {
 } from "https://deno.land/x/spinners@v1.1.2/mod.ts";
 import { UpgradeCommand } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
+const upgradeLabel = colors.white("\nupgrade:");
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
-    console.log();
     const spinner = new TerminalSpinner({
       text: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
@@ -32,21 +33,33 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     const binaryUrl = new URL(
       `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getFileSuffixForPlatform()}`,
     );
-    const response = await fetch(binaryUrl);
-    if (response.body) {
-      const cndiFile = await Deno.open(destinationPath, {
-        create: true,
-        write: true,
-        mode: 0o777,
-      });
-      const cndiWritableStream = writableStreamFromWriter(cndiFile);
-      await response.body.pipeTo(cndiWritableStream);
+    try {
+      const response = await fetch(binaryUrl);
+      if (response.body) {
+        const cndiFile = await Deno.open(destinationPath, {
+          create: true,
+          write: true,
+          mode: 0o777,
+        });
+        const cndiWritableStream = writableStreamFromWriter(cndiFile);
+        await response.body.pipeTo(cndiWritableStream);
+      }
+      spinner.stop();
+      const fromMsg = from ? ` from ${colors.yellow(from)}` : "";
+      console.info(
+        `Successfully upgraded ${colors.cyan(name)}${fromMsg} to version ${
+          colors.green(to)
+        }!\n\n${
+          colors.cyan(`https://github.com/polyseam/cndi/releases/${to}`)
+        }`,
+      );
+    } catch (upgradeError) {
+      console.log(
+        upgradeLabel,
+        colors.brightRed(`\nfailed to upgrade ${name}, please try again`),
+      );
+      console.log(upgradeError);
     }
-    spinner.stop();
-    console.info(
-      `Successfully upgraded ${name} from ${from} to version ${to}! \n${`https://github.com/polyseam/cndi/releases/${to}`}`,
-    );
-    console.log();
   }
 }
 

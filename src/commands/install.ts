@@ -20,7 +20,6 @@ import {
 const installCommand = new Command()
   .description(`Install cndi dependencies.`)
   .action(async () => {
-    console.log();
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
 
     const fileSuffixForPlatform = getFileSuffixForPlatform();
@@ -91,7 +90,6 @@ const installCommand = new Command()
     }
 
     spinner.succeed("cndi installed");
-    console.log();
   });
 
 export default installCommand;

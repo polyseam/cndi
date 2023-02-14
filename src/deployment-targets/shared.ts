@@ -12,7 +12,9 @@ import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
 import { prepareAzureEnv } from "../deployment-targets/azure.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-const deploymentTargetsSharedLabel = colors.white("deployment-targets/shared:");
+const deploymentTargetsSharedLabel = colors.white(
+  "\nsrc/deployment-targets/shared:",
+);
 
 interface CNDIGeneratedValues {
   sealedSecretsKeys: SealedSecretsKeys;

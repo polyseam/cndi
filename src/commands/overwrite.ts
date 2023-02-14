@@ -42,8 +42,6 @@ interface OverwriteActionArgs {
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
-  console.log();
-
   await ensureInstalled();
 
   const pathToConfig = path.join(options.output, "cndi-config.jsonc");
@@ -304,7 +302,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log(completionMessage);
-  console.log();
 };
 
 /**

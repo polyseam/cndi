@@ -6,7 +6,7 @@ import encrypt from "../encrypt.ts";
 
 const git = simpleGit();
 
-const gitWriteStateLabel = colors.white("tfstate/git/write-state:");
+const gitWriteStateLabel = colors.white("\nsrc/tfstate/git/write-state:");
 
 export default async function pushStateFromRun({
   pathToTerraformResources,

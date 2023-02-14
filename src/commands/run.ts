@@ -60,8 +60,6 @@ const runCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
-    console.log();
-
     await ensureInstalled();
 
     const cmd = "cndi run";
@@ -129,7 +127,6 @@ const runCommand = new Command()
     } catch (err) {
       console.log(runLabel, colors.brightRed("unhandled error"), err);
     }
-    console.log();
   });
 
 export default runCommand;

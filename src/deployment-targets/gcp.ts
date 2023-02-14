@@ -3,7 +3,7 @@ import { EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 
-const deploymentTargetsLabel = colors.white("deployment-targets/gcp:");
+const deploymentTargetsLabel = colors.white("src/deployment-targets/gcp:");
 
 const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
   const GCP_REGION = "us-central1";

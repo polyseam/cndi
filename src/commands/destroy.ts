@@ -60,8 +60,6 @@ const destroyCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
-    console.log();
-
     await ensureInstalled();
 
     const cmd = "cndi destroy";
@@ -129,7 +127,6 @@ const destroyCommand = new Command()
     } catch (err) {
       console.log(destroyLabel, colors.brightRed("unhandled error"), err);
     }
-    console.log();
   });
 
 export default destroyCommand;

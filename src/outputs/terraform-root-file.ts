@@ -47,7 +47,9 @@ interface GetTerraformRootFileArgs {
   dotEnvPath: string;
 }
 
-const terraformRootFileLabel = colors.white("outputs/terraform-root-file:");
+const terraformRootFileLabel = colors.white(
+  "\nsrc/outputs/terraform-root-file:",
+);
 
 const getTerraformRootFile = ({
   leaderName,

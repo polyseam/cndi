@@ -1,6 +1,6 @@
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-const setTF_VARsLabel = colors.white("setTF_VARs:");
+const setTF_VARsLabel = colors.white("\nsrc/setTF_VARs:");
 
 export default function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");

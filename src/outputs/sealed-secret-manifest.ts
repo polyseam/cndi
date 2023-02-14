@@ -6,7 +6,7 @@ const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
 const sealedSecretManifestLabel = colors.white(
-  "outputs/sealed-secret-manifest:",
+  "\nsrc/outputs/sealed-secret-manifest:",
 );
 
 const parseCndiSecret = (

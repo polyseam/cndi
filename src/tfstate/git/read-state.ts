@@ -8,7 +8,7 @@ import decrypt from "../decrypt.ts";
 
 const git = simpleGit();
 
-const gitReadStateLabel = colors.white("tfstate/git/read-state:");
+const gitReadStateLabel = colors.white("src/tfstate/git/read-state:");
 
 export default async function pullStateForRun({
   pathToTerraformResources,

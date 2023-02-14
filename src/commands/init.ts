@@ -59,8 +59,6 @@ const initCommand = new Command()
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
   .action(async (options) => {
-    console.log();
-
     await ensureInstalled();
 
     const pathToConfig = options.file;

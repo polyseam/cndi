@@ -1,7 +1,7 @@
 import { CryptoJS } from "../deps.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-const decryptLabel = colors.white("tfstate/decrypt:");
+const decryptLabel = colors.white("\nsrc/tfstate/decrypt:");
 
 export default function decrypt(encryptedText: string, secret: string) {
   try {

@@ -58,8 +58,6 @@ const terraformCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
-    console.log();
-
     await ensureInstalled();
 
     const args = Deno.args.slice(1);
@@ -98,7 +96,6 @@ const terraformCommand = new Command()
     }
 
     ranProxiedTerraformCmd.close();
-    console.log();
   });
 
 export default terraformCommand;

@@ -17,7 +17,7 @@ import {
 
 import { getPrettyJSONString } from "../utils.ts";
 const terraformNodeResourceLabel = colors.white(
-  "outputs/terraform-node-resource:",
+  "\nsrc/outputs/terraform-node-resource:",
 );
 
 const getTerraformNodeResource = (

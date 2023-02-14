@@ -41,7 +41,9 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-const applicationManifestLabel = colors.white("outputs/application-manifest:");
+const applicationManifestLabel = colors.white(
+  "\nsrc/outputs/application-manifest:",
+);
 
 const manifestFramework = {
   apiVersion: DEFAULT_ARGOCD_API_VERSION,
