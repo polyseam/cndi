@@ -496,36 +496,6 @@ interface CNDIApplicationSpec {
   };
 }
 
-interface CNDIContext {
-  CNDI_HOME: string;
-  CNDI_SRC: string;
-  timestamp: string;
-  stagingDirectory: string;
-  projectDirectory: string;
-  projectCndiDirectory: string;
-  githubDirectory: string;
-  dotEnvPath: string;
-  dotVSCodeDirectory: string;
-  pathToConfig: string;
-  pathToTerraformResources: string;
-  pathToKubernetesManifests: string;
-  pathToTerraformBinary: string;
-  pathToCNDIBinary: string;
-  fileSuffixForPlatform: string;
-  noGitHub: boolean;
-  noDotEnv: boolean;
-  pathToOpenSSL: string;
-  pathToKeys: string;
-  pathToKubeseal: string;
-  gitignorePath: string;
-  noKeys: boolean;
-  interactive: boolean;
-  template?: string;
-  sealedSecretsKeys?: SealedSecretsKeys;
-  terraformStatePassphrase?: string;
-  argoUIAdminPassword?: string;
-}
-
 // cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
 interface BaseNodeItemSpec {
   name: string;
@@ -1264,7 +1234,6 @@ export type {
   CNDIApplicationSpec,
   CNDIClients,
   CNDIConfig,
-  CNDIContext,
   CNDINode,
   CNDINodesSpec,
   DeploymentTargetConfiguration,

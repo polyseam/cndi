@@ -2,7 +2,7 @@ import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
-import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
+import { NODE_KIND, NodeKind } from "./types.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 // helper function to load a JSONC file
@@ -75,17 +75,14 @@ async function persistStagedFiles(targetDirectory: string) {
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
-async function checkInstalled({
-  pathToTerraformBinary,
-  CNDI_HOME,
-  CNDI_SRC,
-}: CNDIContext) {
+async function checkInstalled() {
   try {
+    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
     // if any of these files/folders don't exist, return false
     await Promise.all([
       Deno.stat(CNDI_HOME),
-      Deno.stat(CNDI_SRC),
-      Deno.stat(pathToTerraformBinary),
+      Deno.stat(getPathToTerraformBinary()),
+      Deno.stat(getPathToKubesealBinary()),
     ]);
 
     return true;
