@@ -15,7 +15,7 @@ import {
   getPathToTerraformBinary,
 } from "../utils.ts";
 
-const runLabel = colors.white("run:");
+const runLabel = colors.white("\nrun:");
 
 /**
  * COMMAND cndi run

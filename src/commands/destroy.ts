@@ -15,7 +15,7 @@ import {
   getPathToTerraformBinary,
 } from "../utils.ts";
 
-const destroyLabel = colors.white("destroy:");
+const destroyLabel = colors.white("\ndestroy:");
 
 /**
  * COMMAND cndi destroy

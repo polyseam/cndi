@@ -4,7 +4,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import { getFileSuffixForPlatform } from "../utils.ts";
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../deps.ts";
-const installLabel = colors.white("install:");
+const installLabel = colors.white("\ninstall:");
 
 import { writableStreamFromWriter } from "https://deno.land/std@0.173.0/streams/mod.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
@@ -56,7 +56,7 @@ const installCommand = new Command()
     } catch (terraformInstallError) {
       console.log(
         installLabel,
-        colors.brightRed("\n failed to install terraform, please try again"),
+        colors.brightRed("\nfailed to install terraform, please try again"),
       );
       console.log(terraformInstallError);
       Deno.exit(1);
@@ -84,7 +84,7 @@ const installCommand = new Command()
     } catch (kubesealInstallError) {
       console.log(
         installLabel,
-        colors.brightRed("\n failed to install kubeseal, please try again"),
+        colors.brightRed("\nfailed to install kubeseal, please try again"),
       );
       console.log(kubesealInstallError);
       Deno.exit(1);

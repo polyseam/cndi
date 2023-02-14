@@ -41,7 +41,7 @@ import getReadmeForProject from "../outputs/readme.ts";
 
 import { Template } from "../templates/Template.ts";
 
-const initLabel = colors.white("init:");
+const initLabel = colors.white("\ninit:");
 
 /**
  * COMMAND cndi init

@@ -35,7 +35,7 @@ import {
   KubernetesSecret,
 } from "../types.ts";
 
-const owLabel = colors.white("overwrite:");
+const owLabel = colors.white("\noverwrite:");
 
 interface OverwriteActionArgs {
   output: string;
@@ -245,6 +245,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     leaderName: leader.name,
     requiredProviders,
     nodes,
+    dotEnvPath,
   });
 
   if (terraformRootFileContents) {

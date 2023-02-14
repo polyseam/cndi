@@ -44,6 +44,7 @@ interface GetTerraformRootFileArgs {
   requiredProviders: Set<string>;
   nodes: Array<BaseNodeItemSpec>;
   cndi_project_name: string;
+  dotEnvPath: string;
 }
 
 const terraformRootFileLabel = colors.white("outputs/terraform-root-file:");
@@ -53,6 +54,7 @@ const getTerraformRootFile = ({
   requiredProviders,
   nodes,
   cndi_project_name,
+  dotEnvPath,
 }: GetTerraformRootFileArgs): string => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -76,9 +78,31 @@ const getTerraformRootFile = ({
     try {
       parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
     } catch {
+      const placeholder = "GOOGLE_CREDENTIALS_PLACEHOLDER__";
+      if (googleCredentials === placeholder) {
+        console.log(
+          colors.yellow(
+            `\n\n${
+              colors.brightRed(
+                "ERROR",
+              )
+            }: GOOGLE_CREDENTIALS not found in environment`,
+          ),
+        );
+        console.log(
+          `You need to replace `,
+          colors.cyan(placeholder),
+          `with the desired value in "${dotEnvPath}"\nthen run ${
+            colors.green(
+              "cndi ow",
+            )
+          }\n`,
+        );
+        Deno.exit(1);
+      }
       console.log(
         terraformRootFileLabel,
-        colors.brightRed("failed to parse service account key json"),
+        colors.brightRed("failed to parse service account key json\n"),
       );
       Deno.exit(1);
     }
