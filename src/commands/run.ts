@@ -9,11 +9,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import setTF_VARs from "../setTF_VARs.ts";
-import {
-  checkInstalled,
-  ensureInstalled,
-  getPathToTerraformBinary,
-} from "../utils.ts";
+import { ensureInstalled, getPathToTerraformBinary } from "../utils.ts";
 
 const runLabel = colors.white("\nrun:");
 

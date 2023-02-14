@@ -5,7 +5,6 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
-  checkInstalled,
   ensureInstalled,
   getPrettyJSONString,
   getStagingDir,
