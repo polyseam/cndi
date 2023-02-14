@@ -1,6 +1,5 @@
 import { CNDIConfig, EnvObject, NodeKind } from "../types.ts";
 import { getPrettyJSONString } from "../utils.ts";
-import coreReadmeBlock from "../doc/core.ts";
 
 export type GetTemplateFn = (
   kind: NodeKind,
@@ -33,7 +32,6 @@ export class Template {
   options: TemplateOptions;
   env: EnvObject = {};
   configuration = {};
-  readmeCore = coreReadmeBlock;
 
   constructor(name: string, options: TemplateOptions) {
     this.name = name;

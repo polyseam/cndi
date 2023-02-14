@@ -10,7 +10,7 @@ import {
   Template,
 } from "./Template.ts";
 
-import getReadmeForProject from "../doc/readme-for-project.ts";
+import getReadmeForProject from "../outputs/readme.ts";
 
 interface AirflowTlsConfiguration {
   argocdDomainName: string;

@@ -1,9 +1,5 @@
-import {
-  CNDIContext,
-  KubernetesSecret,
-  KubernetesSecretWithStringData,
-} from "../types.ts";
-import { getPrettyJSONString } from "../utils.ts";
+import { KubernetesSecret, KubernetesSecretWithStringData } from "../types.ts";
+import { getPathToKubesealBinary, getPrettyJSONString } from "../utils.ts";
 import {
   brightRed,
   cyan,
@@ -188,14 +184,18 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
   }
 }
 
+type GetSealedSecretManifestOptions = {
+  publicKeyFilePath: string;
+  dotEnvPath: string;
+};
+
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,
-  publicKeyFilePath: string,
-  { pathToKubeseal, dotEnvPath }: CNDIContext,
+  { publicKeyFilePath, dotEnvPath }: GetSealedSecretManifestOptions,
 ): Promise<string | null> => {
   let sealed = "";
+  const pathToKubeseal = getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
-
   const secretWithStringData = parseCndiSecret(secret, dotEnvPath);
 
   // if the secret is just a placeholder we don't want to seal it
