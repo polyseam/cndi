@@ -15,14 +15,14 @@
   <a href="https://github.com/polyseam/cndi/issues">
     <img src="https://img.shields.io/github/issues/polyseam/cndi" alt="GitHub issues">
   </a>
-  <a href="https://github.com/polyseam/cndi/releases">
+  <a href="https://cndi.run/dl?utm_content=gh_badge_releases&utm_campaign=readme_v1&utm_source=github.com/polyseam/cndi&utm_medium=repo&utm_id=1002">
     <img src="https://img.shields.io/github/v/release/polyseam/cndi.svg?style=flat" alt="GitHub Release">
   </a>
-  <a href="https://discord.gg/ygt2rpegJ5">
+  <a href="https://cndi.run/di?utm_content=gh_badge_discord&utm_campaign=readme_v1&utm_source=github.com/polyseam/cndi&utm_medium=repo&utm_id=1001">
     <img src="https://img.shields.io/discord/956275914596040754.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" alt="Discord">
   </a>
-  <a href="https://twitter.com/Polyseam">
-    <img src="https://img.shields.io/twitter/follow/Polyseam?label=Follow&style=social" alt="Twitter">
+  <a href="https://cndi.run/tw?utm_content=gh_badge_twitter&utm_campaign=readme_v1&utm_source=github.com/polyseam/cndi&utm_medium=repo&utm_id=1000">
+    <img src="https://img.shields.io/twitter/follow/Polyseam?label=&style=social" alt="Twitter">
   </a>
 </p>
 
