@@ -89,7 +89,7 @@ echo "creating argocd namespace"
 sudo microk8s kubectl create namespace argocd
 
 echo "installing argocd with manifest"
-sudo microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.6.1/manifests/install.yaml
+sudo microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.22/manifests/install.yaml
 
 echo "applying argocd repo config manifest"
 sudo microk8s kubectl apply -f - <<EOF
