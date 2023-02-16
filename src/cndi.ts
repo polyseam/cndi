@@ -14,6 +14,7 @@ import destroyCommand from "./commands/destroy.ts";
 import deno_json from "../deno.json" assert { type: "json" };
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "./deps.ts";
 import installDependenciesIfRequired from "./install.ts";
+import installCommand from "./commands/install.ts";
 
 export default async function cndi() {
   if (!deno_json?.version) {
@@ -52,6 +53,7 @@ export default async function cndi() {
     .command("terraform", terraformCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
+    .command("install", installCommand)
     .command("completions", new CompletionsCommand().global())
     .command("help", new HelpCommand().global())
     .parse(Deno.args);
