@@ -10,10 +10,13 @@ import {
   TerminalSpinner,
 } from "https://deno.land/x/spinners@v1.1.2/mod.ts";
 import { UpgradeCommand } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../deps.ts";
+import installDependenciesIfRequired from "../install.ts";
 
 const upgradeLabel = colors.white("\nupgrade:");
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
+    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
     const spinner = new TerminalSpinner({
       text: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
@@ -53,6 +56,11 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           colors.cyan(`https://github.com/polyseam/cndi/releases/${to}`)
         }`,
       );
+      await installDependenciesIfRequired({
+        CNDI_HOME,
+        KUBESEAL_VERSION,
+        TERRAFORM_VERSION,
+      }, true);
     } catch (upgradeError) {
       console.log(
         upgradeLabel,

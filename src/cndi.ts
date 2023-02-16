@@ -11,9 +11,9 @@ import initCommand from "./commands/init.ts";
 import { overwriteCommand } from "./commands/overwrite.ts";
 import terraformCommand from "./commands/terraform.ts";
 import destroyCommand from "./commands/destroy.ts";
-import installCommand from "./commands/install.ts";
 import deno_json from "../deno.json" assert { type: "json" };
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "./deps.ts";
+import installDependenciesIfRequired from "./install.ts";
 
 export default async function cndi() {
   if (!deno_json?.version) {
@@ -24,6 +24,15 @@ export default async function cndi() {
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 
+  Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
+  Deno.env.set("CNDI_HOME", CNDI_HOME);
+
+  await installDependenciesIfRequired({
+    CNDI_HOME,
+    KUBESEAL_VERSION,
+    TERRAFORM_VERSION,
+  });
+
   try {
     Deno.mkdirSync(stagingDirectory, { recursive: true });
   } catch {
@@ -31,16 +40,12 @@ export default async function cndi() {
     Deno.exit(1);
   }
 
-  Deno.env.set("CNDI_HOME", CNDI_HOME);
-  Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
-
   await new Command()
     .name("cndi")
     .version(`v${CNDI_VERSION}`)
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
-    .command("install", installCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)

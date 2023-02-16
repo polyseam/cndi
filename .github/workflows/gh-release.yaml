@@ -16,9 +16,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: install cndi
-        run: deno run -A --unstable ./main.ts install # cndi install
 
       - name: Test
         run: deno task test

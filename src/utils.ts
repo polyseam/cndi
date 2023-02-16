@@ -5,6 +5,7 @@ import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import { NODE_KIND, NodeKind } from "./types.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
@@ -75,18 +76,10 @@ async function persistStagedFiles(targetDirectory: string) {
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
-async function ensureInstalled() {
-  const installed = await checkInstalled();
-  if (!installed) {
-    console.log("cndi is not installed!\n");
-    console.log(`Please run ${colors.cyan("cndi install")} and try again.\n`);
-    Deno.exit(1);
-  }
-}
-
-async function checkInstalled() {
+async function checkInstalled(
+  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
+) {
   try {
-    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
     // if any of these files/folders don't exist, return false
     await Promise.all([
       Deno.stat(CNDI_HOME),
@@ -177,7 +170,6 @@ function getSecretOfLength(len = 32): string {
 export {
   checkInitialized,
   checkInstalled,
-  ensureInstalled,
   getCndiInstallPath,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,

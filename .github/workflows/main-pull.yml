@@ -17,8 +17,5 @@ jobs:
       - name: lint
         run: deno lint
 
-      - name: install cndi
-        run: deno run -A --unstable ./main.ts install # cndi install
-
       - name: Test
         run: deno task test

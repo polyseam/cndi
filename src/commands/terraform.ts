@@ -8,7 +8,7 @@ import pushStateFromRun from "../tfstate/git/write-state.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import setTF_VARs from "../setTF_VARs.ts";
-import { ensureInstalled, getPathToTerraformBinary } from "../utils.ts";
+import { getPathToTerraformBinary } from "../utils.ts";
 
 /**
  * COMMAND cndi terrafrom ...args
@@ -58,8 +58,6 @@ const terraformCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
-    await ensureInstalled();
-
     const args = Deno.args.slice(1);
     const pathToTerraformResources = path.join(
       options.path,

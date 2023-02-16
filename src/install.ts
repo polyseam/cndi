@@ -1,30 +1,36 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
-
+import path from "https://deno.land/std@0.173.0/node/path.ts";
+import { writableStreamFromWriter } from "https://deno.land/std@0.177.0/streams/writable_stream_from_writer.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-import { getFileSuffixForPlatform } from "../utils.ts";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../deps.ts";
-const installLabel = colors.white("\ninstall:");
+import { SpinnerTypes } from "https://deno.land/x/spinners@v1.1.2/spinner-types.ts";
+import { TerminalSpinner } from "https://deno.land/x/spinners@v1.1.2/terminal-spinner.ts";
+import { checkInstalled, getFileSuffixForPlatform } from "./utils.ts";
 
-import { writableStreamFromWriter } from "https://deno.land/std@0.173.0/streams/mod.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-import {
-  SpinnerTypes,
-  TerminalSpinner,
-} from "https://deno.land/x/spinners@v1.1.2/mod.ts";
+const installLabel = colors.white("\nsrc/install:");
 
-/**
- * COMMAND cndi install
- * installs cndi's dependencies and prepares the software for use
- */
-const installCommand = new Command()
-  .description(`Install cndi dependencies.`)
-  .action(async () => {
+interface InstallDependenciesIfRequiredOptions {
+  CNDI_HOME: string;
+  KUBESEAL_VERSION: string;
+  TERRAFORM_VERSION: string;
+}
+
+export default async function installDependenciesIfRequired(
+  {
+    KUBESEAL_VERSION,
+    TERRAFORM_VERSION,
+    CNDI_HOME,
+  }: InstallDependenciesIfRequiredOptions,
+  force?: boolean,
+) {
+  if (force || !(await checkInstalled(CNDI_HOME))) {
+    console.log(force ? "" : "cndi dependencies not installed!\n");
+
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
+    await Deno.mkdir(CNDI_HOME, { recursive: true });
 
     const fileSuffixForPlatform = getFileSuffixForPlatform();
+
     const spinner = new TerminalSpinner({
-      text: "cndi installing",
+      text: "installing cndi dependencies...",
       color: "cyan",
       indent: 2,
       spinner: SpinnerTypes.windows,
@@ -40,9 +46,9 @@ const installCommand = new Command()
       CNDI_HOME,
       `terraform-${fileSuffixForPlatform}`,
     );
+
     try {
       const terraformFileResponse = await fetch(terraformBinaryURL);
-
       if (terraformFileResponse.body) {
         const terraformFile = await Deno.open(terraformBinaryPath, {
           create: true,
@@ -51,6 +57,7 @@ const installCommand = new Command()
         });
         const terraformWritableStream = writableStreamFromWriter(terraformFile);
         await terraformFileResponse.body.pipeTo(terraformWritableStream);
+        console.log("\n    terraform installed!\n");
       }
     } catch (terraformInstallError) {
       console.log(
@@ -79,6 +86,7 @@ const installCommand = new Command()
         });
         const kubesealWritableStream = writableStreamFromWriter(kubesealFile);
         await kubesealFileResponse.body.pipeTo(kubesealWritableStream);
+        console.log("\n    kubeseal installed!\n");
       }
     } catch (kubesealInstallError) {
       console.log(
@@ -88,8 +96,7 @@ const installCommand = new Command()
       console.log(kubesealInstallError);
       Deno.exit(1);
     }
-
-    spinner.succeed("cndi installed");
-  });
-
-export default installCommand;
+    console.log();
+    spinner.succeed("cndi dependencies installed!\n");
+  }
+}

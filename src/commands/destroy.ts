@@ -9,7 +9,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import setTF_VARs from "../setTF_VARs.ts";
-import { ensureInstalled, getPathToTerraformBinary } from "../utils.ts";
+import { getPathToTerraformBinary } from "../utils.ts";
 
 const destroyLabel = colors.white("\ndestroy:");
 
@@ -60,8 +60,6 @@ const destroyCommand = new Command()
     { required: true },
   )
   .action(async (options) => {
-    await ensureInstalled();
-
     const cmd = "cndi destroy";
     console.log(`${cmd}\n`);
 

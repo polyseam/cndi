@@ -6,7 +6,6 @@ import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
   checkInitialized,
-  ensureInstalled,
   getPrettyJSONString,
   loadJSONC,
   persistStagedFiles,
@@ -59,8 +58,6 @@ const initCommand = new Command()
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
   .action(async (options) => {
-    await ensureInstalled();
-
     const pathToConfig = options.file;
 
     // kind comes in from one of 2 places

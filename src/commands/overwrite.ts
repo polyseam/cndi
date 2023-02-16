@@ -5,7 +5,6 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 import {
-  ensureInstalled,
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
@@ -42,8 +41,6 @@ interface OverwriteActionArgs {
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
-  await ensureInstalled();
-
   const pathToConfig = path.join(options.output, "cndi-config.jsonc");
 
   const pathToKubernetesManifests = path.join(
@@ -301,7 +298,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     ? "initialized your cndi project in the ./cndi directory!"
     : "overwrote your cndi project in the ./cndi directory!";
 
-  console.log(completionMessage);
+  console.log("\n" + completionMessage);
 };
 
 /**
