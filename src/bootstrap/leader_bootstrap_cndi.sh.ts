@@ -41,7 +41,7 @@ echo "token registered"
 echo "enabling microk8s addons"
 
 echo "  dns"
-sudo microk8s enable dns
+sudo microk8s enable dns:1.1.1.1
 
 echo "  ingress"
 sudo microk8s enable ingress
