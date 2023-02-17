@@ -22,7 +22,7 @@ jobs:
         uses: polyseam/get-version-from-package-json@1.0.0
         id: get-version-from-deno-json-step
         with:
-          path-to-package-json: './deno.jsonc'
+          path-to-package-json: './deno.json'
           
       - id: upload-source-code
         uses: jakejarvis/s3-sync-action@v0.5.1
