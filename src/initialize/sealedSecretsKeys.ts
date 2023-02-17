@@ -1,11 +1,13 @@
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
-import { CNDIContext, SealedSecretsKeys } from "../types.ts";
+import { SealedSecretsKeys } from "../types.ts";
+import { getPathToOpenSSLForPlatform } from "../utils.ts";
 
-const createSealedSecretsKeys = async ({
-  pathToKeys,
-  pathToOpenSSL,
-}: CNDIContext): Promise<SealedSecretsKeys> => {
+const createSealedSecretsKeys = async (
+  outputDir: string,
+): Promise<SealedSecretsKeys> => {
+  const pathToKeys = path.join(outputDir, ".keys");
+  const pathToOpenSSL = getPathToOpenSSLForPlatform();
   Deno.mkdir(pathToKeys, { recursive: true });
   const sealed_secrets_public_key_path = path.join(pathToKeys, "public.pem");
   const sealed_secrets_private_key_path = path.join(pathToKeys, "private.pem");
@@ -57,11 +59,13 @@ const createSealedSecretsKeys = async ({
 };
 
 const loadSealedSecretsKeys = (): SealedSecretsKeys | null => {
-  const sealed_secrets_public_key = Deno.env
-    .get("SEALED_SECRETS_PUBLIC_KEY") as string;
+  const sealed_secrets_public_key = Deno.env.get(
+    "SEALED_SECRETS_PUBLIC_KEY",
+  ) as string;
 
-  const sealed_secrets_private_key = Deno.env
-    .get("SEALED_SECRETS_PRIVATE_KEY") as string;
+  const sealed_secrets_private_key = Deno.env.get(
+    "SEALED_SECRETS_PRIVATE_KEY",
+  ) as string;
 
   if (!sealed_secrets_public_key) {
     return null;

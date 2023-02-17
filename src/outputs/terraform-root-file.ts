@@ -10,8 +10,7 @@ import {
   gcpTerraformRootFileData,
   terraformRootFileData,
 } from "./data/terraform-root-file-data.ts";
-import { white } from "https://deno.land/std@0.173.0/fmt/colors.ts";
-import { brightRed } from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const DEFAULT_GCP_REGION = "us-central1";
@@ -45,15 +44,19 @@ interface GetTerraformRootFileArgs {
   requiredProviders: Set<string>;
   nodes: Array<BaseNodeItemSpec>;
   cndi_project_name: string;
+  dotEnvPath: string;
 }
 
-const terraformRootFileLabel = white("outputs/terraform-root-file:");
+const terraformRootFileLabel = colors.white(
+  "\nsrc/outputs/terraform-root-file:",
+);
 
 const getTerraformRootFile = ({
   leaderName,
   requiredProviders,
   nodes,
   cndi_project_name,
+  dotEnvPath,
 }: GetTerraformRootFileArgs): string => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -77,9 +80,31 @@ const getTerraformRootFile = ({
     try {
       parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
     } catch {
+      const placeholder = "GOOGLE_CREDENTIALS_PLACEHOLDER__";
+      if (googleCredentials === placeholder) {
+        console.log(
+          colors.yellow(
+            `\n\n${
+              colors.brightRed(
+                "ERROR",
+              )
+            }: GOOGLE_CREDENTIALS not found in environment`,
+          ),
+        );
+        console.log(
+          `You need to replace `,
+          colors.cyan(placeholder),
+          `with the desired value in "${dotEnvPath}"\nthen run ${
+            colors.green(
+              "cndi ow",
+            )
+          }\n`,
+        );
+        Deno.exit(1);
+      }
       console.log(
         terraformRootFileLabel,
-        brightRed("failed to parse service account key json"),
+        colors.brightRed("failed to parse service account key json\n"),
       );
       Deno.exit(1);
     }

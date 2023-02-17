@@ -1,8 +1,4 @@
-import {
-  brightRed,
-  white,
-  yellow,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import {
   AWSDeploymentTargetConfiguration,
   AWSNodeItemSpec,
@@ -20,7 +16,9 @@ import {
 } from "../types.ts";
 
 import { getPrettyJSONString } from "../utils.ts";
-const terraformNodeResourceLabel = white("outputs/terraform-node-resource:");
+const terraformNodeResourceLabel = colors.white(
+  "\nsrc/outputs/terraform-node-resource:",
+);
 
 const getTerraformNodeResource = (
   node: BaseNodeItemSpec,
@@ -54,7 +52,9 @@ const getTerraformNodeResource = (
     default:
       console.log(
         terraformNodeResourceLabel,
-        brightRed(`node kind: ${white(`"${kind}"`)} not yet supported`),
+        colors.brightRed(
+          `node kind: ${colors.white(`"${kind}"`)} not yet supported`,
+        ),
       );
       Deno.exit(1);
   }
@@ -193,9 +193,11 @@ const getAzureNodeResource = (
     if (role?.length && role !== "controller") {
       console.log(
         terraformNodeResourceLabel,
-        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+        colors.yellow(
+          `node role: ${colors.white(`"${role}"`)} is not supported`,
+        ),
       );
-      console.log(yellow("defaulting node role to"), '"controller"\n');
+      console.log(colors.yellow("defaulting node role to"), '"controller"\n');
     }
 
     const user_data =
@@ -299,9 +301,11 @@ const getGCPNodeResource = (
     if (role?.length && role !== "controller") {
       console.log(
         terraformNodeResourceLabel,
-        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+        colors.yellow(
+          `node role: ${colors.white(`"${role}"`)} is not supported`,
+        ),
       );
-      console.log(yellow("defaulting node role to"), '"controller"\n');
+      console.log(colors.yellow("defaulting node role to"), '"controller"\n');
     }
 
     const user_data =
@@ -415,9 +419,11 @@ const getAWSNodeResource = (
     if (role?.length && role !== "controller") {
       console.log(
         terraformNodeResourceLabel,
-        yellow(`node role: ${white(`"${role}"`)} is not supported`),
+        colors.yellow(
+          `node role: ${colors.white(`"${role}"`)} is not supported`,
+        ),
       );
-      console.log(yellow("defaulting node role to"), '"controller"\n');
+      console.log(colors.yellow("defaulting node role to"), '"controller"\n');
     }
 
     const user_data =

@@ -1,9 +1,4 @@
-import {
-  brightRed,
-  cyan,
-  white,
-  yellow,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { simpleGit } from "../../deps.ts";
 
@@ -11,7 +6,7 @@ import encrypt from "../encrypt.ts";
 
 const git = simpleGit();
 
-const gitWriteStateLabel = white("tfstate/git/write-state:");
+const gitWriteStateLabel = colors.white("\nsrc/tfstate/git/write-state:");
 
 export default async function pushStateFromRun({
   pathToTerraformResources,
@@ -36,8 +31,8 @@ export default async function pushStateFromRun({
   if (!cleanGitState) {
     console.log(
       gitWriteStateLabel,
-      brightRed("your branch must be clean before running"),
-      `"${cyan(cmd)}"\n`,
+      colors.brightRed("your branch must be clean before running"),
+      `"${colors.cyan(cmd)}"\n`,
     );
     Deno.exit(1);
   }
@@ -67,7 +62,7 @@ export default async function pushStateFromRun({
   if (!secret) {
     console.log(
       gitWriteStateLabel,
-      yellow("TERRAFORM_STATE_PASSPHRASE"),
+      colors.yellow("TERRAFORM_STATE_PASSPHRASE"),
       "is not set in your environment file",
     );
     Deno.exit(1);

@@ -1,14 +1,9 @@
-import {
-  brightRed,
-  cyan,
-  white,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-// import { wrapMultilineEnv } from "../utils.ts";
 
-const deploymentTargetsLabel = white("deployment-targets/gcp:");
+const deploymentTargetsLabel = colors.white("src/deployment-targets/gcp:");
 
 const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
   const GCP_REGION = "us-central1";
@@ -20,7 +15,7 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
     comment: "GCP",
     value: interactive
       ? ((await Input.prompt({
-        message: cyan("Enter your GCP Region:"),
+        message: colors.cyan("Enter your GCP Region:"),
         default: GCP_REGION,
       })) as string)
       : GCP_REGION,
@@ -31,7 +26,7 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
 
     const google_credentials_path = (
       (await Input.prompt({
-        message: cyan("Enter the path to your GCP credentials JSON:"),
+        message: colors.cyan("Enter the path to your GCP credentials JSON:"),
       })) as string
     ).replace("~", homedir() || "~");
 
@@ -41,9 +36,9 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
     } catch {
       console.log(
         `${deploymentTargetsLabel} ${
-          brightRed(
+          colors.brightRed(
             `No GCP JSON key file found at the provided path ${
-              white(
+              colors.white(
                 `\"${google_credentials_path}\"`,
               )
             }`,
@@ -59,9 +54,9 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
     } catch {
       console.log(
         `${deploymentTargetsLabel} ${
-          brightRed(
+          colors.brightRed(
             `Invalid GCP JSON key file found at the provided path ${
-              white(
+              colors.white(
                 `\"${google_credentials_path}\"`,
               )
             }`,

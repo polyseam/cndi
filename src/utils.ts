@@ -2,7 +2,9 @@ import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
-import { CNDIContext, NODE_KIND, NodeKind } from "./types.ts";
+import { NODE_KIND, NodeKind } from "./types.ts";
+import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -13,30 +15,50 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
-async function stageFile(
-  stagingDirectory: string,
-  relativePath: string,
-  fileContents: string,
-) {
-  const stagingPath = path.join(stagingDirectory, relativePath);
+function getPathToTerraformBinary() {
+  const fileSuffixForPlatform = getFileSuffixForPlatform();
+  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
+  const pathToTerraformBinary = path.join(
+    CNDI_HOME,
+    `terraform-${fileSuffixForPlatform}`,
+  );
+  return pathToTerraformBinary;
+}
+
+function getPathToKubesealBinary() {
+  const fileSuffixForPlatform = getFileSuffixForPlatform();
+  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
+  const pathToKubesealBinary = path.join(
+    CNDI_HOME,
+    `kubeseal-${fileSuffixForPlatform}`,
+  );
+  return pathToKubesealBinary;
+}
+
+async function stageFile(relativePath: string, fileContents: string) {
+  const stagingPath = path.join(getStagingDir(), relativePath);
   await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
-function stageFileSync(
-  stagingDirectory: string,
-  relativePath: string,
-  fileContents: string,
-) {
+function getStagingDir() {
+  const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
+  if (!stagingDirectory) {
+    console.error(`${colors.yellow("CNDI_STAGING_DIRECTORY")} is not set!\n`);
+    Deno.exit(1);
+  }
+  return stagingDirectory;
+}
+
+function stageFileSync(relativePath: string, fileContents: string) {
+  const stagingDirectory = getStagingDir();
   const stagingPath = path.join(stagingDirectory, relativePath);
   Deno.mkdirSync(path.dirname(stagingPath), { recursive: true });
   Deno.writeTextFileSync(stagingPath, fileContents);
 }
 
-async function persistStagedFiles(
-  stagingDirectory: string,
-  targetDirectory: string,
-) {
+async function persistStagedFiles(targetDirectory: string) {
+  const stagingDirectory = getStagingDir();
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
       const fileContents = await Deno.readTextFile(entry.path);
@@ -54,17 +76,15 @@ async function persistStagedFiles(
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
-async function checkInstalled({
-  pathToTerraformBinary,
-  CNDI_HOME,
-  CNDI_SRC,
-}: CNDIContext) {
+async function checkInstalled(
+  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
+) {
   try {
     // if any of these files/folders don't exist, return false
     await Promise.all([
       Deno.stat(CNDI_HOME),
-      Deno.stat(CNDI_SRC),
-      Deno.stat(pathToTerraformBinary),
+      Deno.stat(getPathToTerraformBinary()),
+      Deno.stat(getPathToKubesealBinary()),
     ]);
 
     return true;
@@ -73,17 +93,13 @@ async function checkInstalled({
   }
 }
 
-async function checkInitialized({
-  projectCndiDirectory,
-  githubDirectory,
-  dotEnvPath,
-}: CNDIContext) {
+async function checkInitialized(output: string) {
   // if any of these files/folders don't exist, return false
   try {
     await Promise.all([
-      Deno.stat(projectCndiDirectory),
-      Deno.stat(githubDirectory),
-      Deno.stat(dotEnvPath),
+      Deno.stat(path.join(output, "cndi")),
+      Deno.stat(path.join(output, ".gitignore")),
+      Deno.stat(path.join(output, ".env")),
     ]);
     return true;
   } catch {
@@ -94,11 +110,20 @@ async function checkInitialized({
 const getFileSuffixForPlatform = () => {
   const fileSuffixForPlatform = {
     linux: "linux",
-    darwin: "macos",
+    darwin: "mac",
     win32: "win.exe",
   };
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   return fileSuffixForPlatform[currentPlatform];
+};
+
+const getCndiInstallPath = (): string => {
+  if (!homedir()) {
+    console.error(colors.red("cndi could not find your home directory!"));
+    console.log('try setting the "HOME" environment variable on your system.');
+    Deno.exit(1);
+  }
+  return path.join(homedir()!, "bin", `cndi-${getFileSuffixForPlatform()}`);
 };
 
 const getPathToOpenSSLForPlatform = () => {
@@ -145,11 +170,15 @@ function getSecretOfLength(len = 32): string {
 export {
   checkInitialized,
   checkInstalled,
+  getCndiInstallPath,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
+  getPathToKubesealBinary,
   getPathToOpenSSLForPlatform,
+  getPathToTerraformBinary,
   getPrettyJSONString,
   getSecretOfLength,
+  getStagingDir,
   loadJSONC,
   persistStagedFiles,
   stageFile,

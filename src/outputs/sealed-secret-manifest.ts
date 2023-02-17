@@ -1,21 +1,13 @@
-import {
-  CNDIContext,
-  KubernetesSecret,
-  KubernetesSecretWithStringData,
-} from "../types.ts";
-import { getPrettyJSONString } from "../utils.ts";
-import {
-  brightRed,
-  cyan,
-  green,
-  white,
-  yellow,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { KubernetesSecret, KubernetesSecretWithStringData } from "../types.ts";
+import { getPathToKubesealBinary, getPrettyJSONString } from "../utils.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const sealedSecretManifestLabel = white("outputs/sealed-secret-manifest:");
+const sealedSecretManifestLabel = colors.white(
+  "\nsrc/outputs/sealed-secret-manifest:",
+);
 
 const parseCndiSecret = (
   inputSecret: KubernetesSecret,
@@ -46,9 +38,9 @@ const parseCndiSecret = (
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
-            yellow(
+            colors.yellow(
               `\n\n${
-                brightRed(
+                colors.brightRed(
                   "ERROR",
                 )
               }: ${secretEnvName} not found in environment`,
@@ -56,9 +48,9 @@ const parseCndiSecret = (
           );
           console.log(
             `You need to replace `,
-            cyan(placeholder),
+            colors.cyan(placeholder),
             `with the desired value in "${dotEnvPath}"\nthen run ${
-              green(
+              colors.green(
                 "cndi ow",
               )
             }\n`,
@@ -77,13 +69,13 @@ const parseCndiSecret = (
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
         console.log(
           sealedSecretManifestLabel,
-          brightRed(
+          colors.brightRed(
             `Secret string literals are not supported. Use ${
-              cyan(
+              colors.cyan(
                 `"${CNDI_SECRETS_PREFIX}"`,
               )
             } prefix to reference environment variables at ${
-              white(
+              colors.white(
                 `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
               )
             }`,
@@ -108,9 +100,9 @@ const parseCndiSecret = (
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
-            yellow(
+            colors.yellow(
               `\n\n${
-                brightRed(
+                colors.brightRed(
                   "ERROR",
                 )
               }: ${secretEnvName} not found in environment`,
@@ -118,9 +110,9 @@ const parseCndiSecret = (
           );
           console.log(
             `You need to replace `,
-            cyan(placeholder),
+            colors.cyan(placeholder),
             `with the desired value in "${dotEnvPath}"\nthen run ${
-              green(
+              colors.green(
                 "cndi ow",
               )
             }\n`,
@@ -136,13 +128,13 @@ const parseCndiSecret = (
       } else {
         console.log(
           sealedSecretManifestLabel,
-          brightRed(
+          colors.brightRed(
             `Secret string literals are not supported. Use ${
-              cyan(
+              colors.cyan(
                 `"${CNDI_SECRETS_PREFIX}"`,
               )
             } prefix to reference environment variables at ${
-              white(
+              colors.white(
                 `"${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
               )
             }`,
@@ -154,7 +146,7 @@ const parseCndiSecret = (
   } else {
     console.log(
       sealedSecretManifestLabel,
-      brightRed(
+      colors.brightRed(
         `Secret "${inputSecret.metadata.name}" has no data or stringData`,
       ),
     );
@@ -179,23 +171,27 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
     const needsHeading = !dotEnvLines.some((line) => line === secretHeading);
 
     if (needsHeading) {
-      dotEnvLines.push(`\n${secretHeading}\n${secretEnvName}=${placeholder}`);
+      dotEnvLines.push(`\n${secretHeading}\n${secretEnvName}='${placeholder}'`);
     } else {
-      dotEnvLines.push(`\n${secretEnvName}=${placeholder}`);
+      dotEnvLines.push(`\n${secretEnvName}='${placeholder}'`);
     }
 
     Deno.writeTextFileSync(dotEnvPath, dotEnvLines.join("\n"));
   }
 }
 
+type GetSealedSecretManifestOptions = {
+  publicKeyFilePath: string;
+  dotEnvPath: string;
+};
+
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,
-  publicKeyFilePath: string,
-  { pathToKubeseal, dotEnvPath }: CNDIContext,
+  { publicKeyFilePath, dotEnvPath }: GetSealedSecretManifestOptions,
 ): Promise<string | null> => {
   let sealed = "";
+  const pathToKubeseal = await getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
-
   const secretWithStringData = parseCndiSecret(secret, dotEnvPath);
 
   // if the secret is just a placeholder we don't want to seal it

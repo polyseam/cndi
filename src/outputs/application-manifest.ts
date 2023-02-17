@@ -1,9 +1,5 @@
-import { brightWhite } from "https://deno.land/std@0.173.0/fmt/colors.ts";
-import {
-  brightRed,
-  cyan,
-  white,
-} from "https://deno.land/std@0.173.0/fmt/colors.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+
 import { getPrettyJSONString } from "../utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;
@@ -45,7 +41,9 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-const applicationManifestLabel = white("outputs/application-manifest:");
+const applicationManifestLabel = colors.white(
+  "\nsrc/outputs/application-manifest:",
+);
 
 const manifestFramework = {
   apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -81,15 +79,17 @@ const getApplicationManifest = (
   const specSourceChart = applicationSpec.chart;
 
   if (!specSourcePath && !specSourceChart) {
-    const releaseNameForPrint = cyan(`"${releaseName}"`);
+    const releaseNameForPrint = colors.cyan(`"${releaseName}"`);
     console.log(
       applicationManifestLabel,
-      brightRed(
-        `either applications[${releaseNameForPrint}].${brightWhite("path")}`,
+      colors.brightRed(
+        `either applications[${releaseNameForPrint}].${
+          colors.brightWhite("path")
+        }`,
       ),
-      brightRed(
+      colors.brightRed(
         `or applications[${releaseNameForPrint}].${
-          brightWhite(
+          colors.brightWhite(
             "chart",
           )
         } must be defined`,

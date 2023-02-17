@@ -38,7 +38,6 @@ main() {
 	echo "cndi was downloaded successfully to $exe"
 
 	if command -v cndi >/dev/null; then
-        cndi install
 		echo "Run 'cndi --help' to get started"
 	else
     
