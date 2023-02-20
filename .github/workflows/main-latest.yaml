@@ -4,10 +4,9 @@ on:
     branches:
       - 'main'
 jobs:
-  build-cndi-binaries: # cndi
+  main-test-and-lint:
     runs-on: ubuntu-20.04
     steps:
-
       - name: checkout
         uses: actions/checkout@v3
 
@@ -15,8 +14,21 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-          
+
+      - run: deno lint
+
       - run: deno task test
+
+  main-build: # cndi
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: use deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
 
       - run: deno task build
           
