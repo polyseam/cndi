@@ -14,7 +14,7 @@ jobs:
         with:
           deno-version: v1.x
 
-      - name: lint
+      - name: Lint
         run: deno lint
 
       - name: Test

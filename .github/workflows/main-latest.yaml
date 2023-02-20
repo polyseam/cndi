@@ -1,4 +1,4 @@
-name: main-latest # used by the cndi team, not end users
+name: main # used by the cndi team, not end users
 on:
   push:
     branches:
@@ -15,14 +15,10 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
+          
+      - run: deno task test
 
       - run: deno task build
-
-      - name: Get Version from package.json
-        uses: polyseam/get-version-from-package-json@1.0.0
-        id: get-version-from-deno-json-step
-        with:
-          path-to-package-json: './deno.json'
           
       - id: upload-source-code
         uses: jakejarvis/s3-sync-action@v0.5.1
