@@ -1,7 +1,7 @@
 # a demo that is very cool
 
-This doc is going to walk through the "golden path" for CNDIv2. It uses the
-GitHub CLI for creating GitHub Actions Secrets, but that isn't necessary.
+This doc is going to walk through the "golden path" for CNDI. It uses the GitHub
+CLI for creating GitHub Actions Secrets, but that isn't necessary.
 
 1. Ensure you have the GitHub CLI
    [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
@@ -19,18 +19,16 @@ curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 4. Download the following file and place it in the `my-repo` folder.
    [/cndi-config.jsonc](/cndi-config.jsonc)
 
-5. Run `cndi init`
+5. Run `cndi init -i`
 
-6. Populate your environment variables in the `.env` file
+6. Run `gh secret set -f .env`
 
-7. Run `gh secret set -f .env`
+7. Run `git add .`
 
-8. Run `git add .`
+8. Run `git status`
 
-9. Run `git status`
+9. Run `git commit -m 'deploy!'`
 
-10. Run `git commit -m 'first commit'`
+10. Run `git push -u origin main`
 
-11. Run `git push -u origin main`
-
-12. Watch the magic 🪄
+11. Watch the magic 🪄
