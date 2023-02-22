@@ -40,7 +40,6 @@ can be done using the script below:
 ```bash
 # if you are on windows you should run this in 'git bash'
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
-# now add the binary to your PATH such that it is executable in your shell
 ```
 
 ## usage
