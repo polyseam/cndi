@@ -6,7 +6,7 @@ main() {
     cndi_install="${CNDI_INSTALL:-$HOME/bin}"
     bin_suffix=""
     if [ "$OS" = "Windows_NT" ]; then
-        bin_suffix="-win.exe"
+        bin_suffix=".exe"
         target="win.exe"
     else
         case $(uname -sm) in
@@ -43,17 +43,7 @@ main() {
         /bin/zsh) shell_profile=".zshrc" ;;
         *) shell_profile=".bash_profile" ;;
     esac
-    
-    # append or create alias in $shell_profile
-    if [ "$OS" = "Windows_NT" ]; then
-        windows_alias="alias cndi='winpty $exe'"
-        # if $windows_alias is not in $shell_profile then append it
-        if ! grep -q "$windows_alias" "$HOME/$shell_profile"; then
-            echo "creating alias for Windows..."
-            echo "$windows_alias" | tee -a "$HOME/$shell_profile" # log alias and write to $shell_profile
-        fi
-    fi
-    
+
     if ! command -v cndi >/dev/null; then
         # if ~/bin is not in $PATH then append it
         if ! grep -q "$cndi_install" "$HOME/$shell_profile"; then
