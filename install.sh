@@ -6,7 +6,7 @@ main() {
     cndi_install="${CNDI_INSTALL:-$HOME/bin}"
     bin_suffix=""
     if [ "$OS" = "Windows_NT" ]; then
-        bin_suffix=".exe"
+        bin_suffix="-win.exe"
         target="win.exe"
     else
         case $(uname -sm) in
@@ -47,7 +47,6 @@ main() {
     # append or create alias in $shell_profile
     if [ "$OS" = "Windows_NT" ]; then
         windows_alias="alias cndi='winpty $exe'"
-        shell_profile=".bashrc" # use .bashrc on Windows, so that the alias is prioritised over path
         # if $windows_alias is not in $shell_profile then append it
         if ! grep -q "$windows_alias" "$HOME/$shell_profile"; then
             echo "creating alias for Windows..."
