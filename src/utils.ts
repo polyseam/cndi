@@ -6,6 +6,16 @@ import { NODE_KIND, NodeKind } from "./types.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
+async function sha256Digest(message: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join(""); // convert bytes to hex string
+  return hashHex;
+}
+
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
@@ -20,7 +30,7 @@ function getPathToTerraformBinary() {
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
-    `terraform-${fileSuffixForPlatform}`,
+    `terraform-${fileSuffixForPlatform}`
   );
   return pathToTerraformBinary;
 }
@@ -30,7 +40,7 @@ function getPathToKubesealBinary() {
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
-    `kubeseal-${fileSuffixForPlatform}`,
+    `kubeseal-${fileSuffixForPlatform}`
   );
   return pathToKubesealBinary;
 }
@@ -64,7 +74,7 @@ async function persistStagedFiles(targetDirectory: string) {
       const fileContents = await Deno.readTextFile(entry.path);
       const destinationAbsPath = entry.path.replace(
         stagingDirectory,
-        targetDirectory,
+        targetDirectory
       );
 
       await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
@@ -77,7 +87,7 @@ async function persistStagedFiles(targetDirectory: string) {
 }
 
 async function checkInstalled(
-  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
+  CNDI_HOME: string = path.join(homedir() || "~", ".cndi")
 ) {
   try {
     // if any of these files/folders don't exist, return false
@@ -181,6 +191,7 @@ export {
   getStagingDir,
   loadJSONC,
   persistStagedFiles,
+  sha256Digest,
   stageFile,
   stageFileSync,
 };
