@@ -38,7 +38,6 @@ To install CNDI we just need to download the binary and add it to our PATH. This
 can be done using the script below:
 
 ```bash
-# if you are on windows you should run this in 'git bash' with Windows Terminal
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
