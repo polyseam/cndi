@@ -37,8 +37,8 @@ main() {
     chmod +x "$exe"
     
     echo "cndi was downloaded successfully to $exe"
-
-	# set shell profile for user shell
+    
+    # set shell profile for user shell
     case "$SHELL" in
         /bin/zsh) shell_profile=".zshrc" ;;
         *) shell_profile=".bash_profile" ;;
@@ -46,7 +46,7 @@ main() {
     
     # append or create alias in $shell_profile
     if [ "$OS" = "Windows_NT" ]; then
-        windows_alias = "alias cndi='winpty $exe'"
+        windows_alias="alias cndi='winpty $exe'"
         # if $windows_alias is not in $shell_profile then append it
         if ! grep -q "$windows_alias" "$HOME/$shell_profile"; then
             echo "creating alias for Windows..."
