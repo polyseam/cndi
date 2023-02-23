@@ -43,15 +43,22 @@ main() {
         /bin/zsh) shell_profile=".zshrc" ;;
         *) shell_profile=".bash_profile" ;;
     esac
-
+    
+    # if $cndi_install is not in $PATH
     if ! command -v cndi >/dev/null; then
-        # if ~/bin is not in $PATH then append it
+        # if $cndi_install is not in $shell_profile
         if ! grep -q "$cndi_install" "$HOME/$shell_profile"; then
             echo "adding $cndi_install to \$PATH"
             command printf '\nexport PATH="%s:$PATH"' "$cndi_install" >>"$HOME/$shell_profile"
             echo "Please restart your terminal then run 'cndi --help' to get started!"
-            exit 0 # exit early because sourcing $shell_profile will not work in this shell (probably macOS)
+            exit 0 # exit early because sourcing $shell_profile will cause an error
         fi
+    fi
+    
+    # if $shell_profile is .zshrc exit because sourcing it will cause an error
+    if [ "$shell_profile" = ".zshrc" ]; then
+        echo "Run 'cndi --help' to get started!"
+        exit 0
     fi
     
     # source $shell_profile
