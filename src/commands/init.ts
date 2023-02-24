@@ -3,7 +3,7 @@ import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-
+import { SEP } from "https://deno.land/std@0.178.0/path/mod.ts";
 import {
   checkInitialized,
   getPrettyJSONString,
@@ -64,7 +64,8 @@ const initCommand = new Command()
     // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
     // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
     let kind: NodeKind | undefined;
-    let project_name = Deno.cwd().split("/").pop() || "my-cndi-project";
+
+    let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
 
     // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
     const useCNDIConfigFile = !options.interactive && !options.template;
