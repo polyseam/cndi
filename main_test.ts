@@ -9,18 +9,18 @@ const permissions = {
   write: true,
 };
 
-const sanitizeOps = false; // this seems to be necessary, but it shouldn't be. sanitizeOps checks for unfinished operations like fs reads and writes
-const sanitizeResources = false; // this seems to be necessary, but it shouldn't be. sanitizeResources checks for open resources like file handles
+// const sanitizeOps = false; // this seems to be necessary, but it shouldn't be. sanitizeOps checks for unfinished operations like fs reads and writes
+// const sanitizeResources = false; // this seems to be necessary, but it shouldn't be. sanitizeResources checks for open resources like file handles
 
-const unclean = {
-  sanitizeOps,
-  sanitizeResources,
-};
+// const unclean = {
+//   sanitizeOps,
+//   sanitizeResources,
+// };
 
 // use "cndi" command in a unique directory by hashing the command to test
 
-describe("cndi", { permissions, sanitizeOps }, () => {
-  describe("system", unclean, () => {
+describe("cndi", { permissions }, () => {
+  describe("system", () => {
     it("should have a working test suite", () => {
       assert(true);
     });
