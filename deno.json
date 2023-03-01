@@ -6,7 +6,7 @@
     "compile-mac": "deno compile --unstable -A --target x86_64-apple-darwin --output dist/cndi-mac dist/cndi.js",
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "build": "deno lint && deno fmt && deno task bundle && deno task compile-all",
-    "test": "deno test --unstable --allow-all",
+    "test": "deno test --unstable --allow-all -q",
     "bundle": "deno bundle --unstable main.ts dist/cndi.js"
   },
   "importMap": "import_map.json"
