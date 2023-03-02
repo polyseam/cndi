@@ -13,7 +13,10 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-
+      
+      - name: Check formatting
+        run: deno fmt --check
+        
       - name: Lint
         run: deno lint
 

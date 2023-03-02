@@ -41,7 +41,7 @@ export default async function cndi() {
     Deno.exit(1);
   }
 
-  await new Command()
+  return await new Command()
     .name("cndi")
     .version(`v${CNDI_VERSION}`)
     .description("Cloud-Native Data Infrastructure")

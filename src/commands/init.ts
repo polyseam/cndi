@@ -90,6 +90,8 @@ const initCommand = new Command()
             ),
           );
           Deno.exit(1);
+        } else {
+          project_name = config.project_name;
         }
 
         if (!config.infrastructure) {
