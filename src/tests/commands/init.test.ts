@@ -1,80 +1,124 @@
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { assert } from "https://deno.land/std@0.173.0/testing/asserts.ts";
-import { describe, it } from "https://deno.land/std@0.173.0/testing/bdd.ts";
+import {
+  beforeEach,
+  describe,
+  it,
+} from "https://deno.land/std@0.173.0/testing/bdd.ts";
 
-import { basicCndiConfig } from "../mocks/cndiConfigs.ts";
+import { basicCndiConfig, emptyCndiConfig } from "../mocks/cndiConfigs.ts";
 
-const cndiCmd = [
-  "deno",
-  "run",
-  "--allow-all",
-  "--unstable",
-  `${Deno.cwd()}/main.ts`,
-];
+import { getPrettyJSONString } from "src/utils.ts";
 
-const permissions = {
-  env: true,
-  net: true,
-  read: true,
-  run: true,
-  write: true,
-};
+import { runCndi } from "../helpers/run-cndi.ts";
+import { assertSetEquality } from "../helpers/util.ts";
 
-// const sanitizeOps = false; // this seems to be necessary, but it shouldn't be. sanitizeOps checks for unfinished operations like fs reads and writes
-// const sanitizeResources = false; // this seems to be necessary, but it shouldn't be. sanitizeResources checks for open resources like file handles
-
-// const unclean = {
-//   sanitizeOps,
-//   sanitizeResources,
-// };
-
-describe("cndi init command", { permissions }, () => {
-  describe("cndi init", () => {
-    it("should fail if ./cndi-config.jsonc does not exist and interactive mode is disabled", async () => {
-      const dir = Deno.makeTempDirSync();
-      Deno.chdir(dir);
-      const cmd = [...cndiCmd, "init"];
-      const p = Deno.run({
-        cmd,
-      });
-      const status = await p.status();
-      assert(!status.success);
-      p.close();
-    });
-
-    it("should succeed if ./cndi-config.jsonc is valid", async () => {
-      const dir = Deno.makeTempDirSync();
-      Deno.chdir(dir);
-
-      Deno.writeTextFileSync(
-        path.join(dir, `cndi-config.jsonc`),
-        JSON.stringify(basicCndiConfig, null, 2),
-      );
-
-      const cmd = [...cndiCmd, "init"];
-      const p = Deno.run({
-        cmd,
-      });
-      const status = await p.status();
-      assert(status.success);
-      p.close();
-    });
-  });
+beforeEach(() => {
+  // initialize sandbox
+  const dir = Deno.makeTempDirSync();
+  Deno.chdir(dir);
 });
 
-// describe("cndi init command", { permissions }, () => {
-//   describe("cndi init", () => {
-//     it("should fail if ./cndi-config.jsonc does not exist and interactive mode is disabled", async () => {
-//       const dir = Deno.makeTempDirSync();
-//       Deno.chdir(dir);
-//       const { cmd } = await cndi();
-//       assertRejects(
-//         async () => {
-//           await cmd.parse(["init"]);
-//         },
-//         Error,
-//         "Could not find cndi-config.jsonc",
-//       );
-//     });
-//   });
-// });
+describe("cndi init", () => {
+  it("should fail if ./cndi-config.jsonc does not exist and interactive mode is disabled", async () => {
+    const { status } = await runCndi("init");
+    assert(!status.success);
+  });
+
+  it("should succeed if ./cndi-config.jsonc is valid", async () => {
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString(basicCndiConfig),
+    );
+    const { status } = await runCndi("init");
+    assert(status.success);
+  });
+
+  it("should fail if ./cndi-config.jsonc is invalid", async () => {
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString(emptyCndiConfig),
+    );
+    const { status } = await runCndi("init");
+    assert(!status.success);
+  });
+
+  it(`should create a README beginning with the "project_name" if a config file is supplied`, async () => {
+    const project_name = "my-foo-project";
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString({ ...basicCndiConfig, project_name }),
+    );
+    const { status } = await runCndi("init");
+    assert(status.success);
+    const readme = Deno.readTextFileSync(path.join(Deno.cwd(), `README.md`));
+    assert(readme.startsWith(`# ${project_name}`));
+  });
+
+  it(`should throw an error if a config file is supplied without a "project_name"`, async () => {
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString({ ...basicCndiConfig, project_name: undefined }),
+    );
+
+    const { status } = await runCndi("init");
+    assert(!status.success);
+  });
+
+  it(`should throw an error if a config file is supplied with no nodes`, async () => {
+    const nodelessCndiConfig = {
+      ...basicCndiConfig,
+      infrastructure: { cndi: { nodes: [] } },
+    };
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString(nodelessCndiConfig),
+    );
+    const { status } = await runCndi("init");
+    assert(!status.success);
+  });
+
+  it(`should not add files or directories when it fails`, async () => {
+    const originalContents = new Set<string>();
+    // read the current directory entries (files, symlinks, and directories)
+    for await (const dirEntry of Deno.readDir(".")) {
+      originalContents.add(dirEntry.name);
+    }
+    // cndi init should fail because there is no config file
+    const { status } = await runCndi("init");
+
+    const afterContents = new Set<string>();
+    // read the current directory entries after "cndi init" has ran
+    for await (const afterDirEntry of Deno.readDir(".")) {
+      afterContents.add(afterDirEntry.name);
+    }
+    assert(!status.success);
+    assertSetEquality(originalContents, afterContents);
+  });
+
+  it(`should add correct files and directories when it succeeds`, async () => {
+    const initFileList = new Set([
+      "cndi-config.jsonc",
+      "README.md",
+      ".github",
+      ".gitignore",
+      ".env",
+      ".vscode",
+      "cndi",
+    ]);
+
+    Deno.writeTextFileSync(
+      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      getPrettyJSONString(basicCndiConfig),
+    );
+    // cndi init should fail because there is no config file
+    const { status } = await runCndi("init");
+
+    // read the current directory entries after "cndi init" has ran
+    for await (const afterDirEntry of Deno.readDir(".")) {
+      initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+    }
+    assert(initFileList.size === 0); // if the set is empty, all files were created
+    assert(status.success);
+  });
+});

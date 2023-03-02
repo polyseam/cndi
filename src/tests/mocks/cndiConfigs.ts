@@ -18,4 +18,6 @@ const basicCndiConfig = {
   applications: {},
 };
 
-export { basicCndiConfig };
+const emptyCndiConfig = {};
+
+export { basicCndiConfig, emptyCndiConfig };
