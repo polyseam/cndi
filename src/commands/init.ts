@@ -38,6 +38,7 @@ import getCndiRunGitHubWorkflowYamlContents from "../outputs/cndi-run-workflow.t
 import getReadmeForProject from "../outputs/readme.ts";
 
 import { Template } from "../templates/Template.ts";
+import validateConfig from "../validate/cndiConfig.ts";
 
 const initLabel = colors.white("\ninit:");
 
@@ -71,95 +72,14 @@ const initCommand = new Command()
     const useCNDIConfigFile = !options.interactive && !options.template;
 
     if (useCNDIConfigFile) {
+      // validate config file
       try {
         console.log(`cndi init --file "${pathToConfig}"\n`);
         const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
-        if (!config?.project_name) {
-          console.log(
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have the required ${
-                colors.cyan(
-                  '"project_name"',
-                )
-              } key\n`,
-            ),
-          );
-          Deno.exit(1);
-        } else {
-          project_name = config.project_name;
-        }
-
-        if (!config.infrastructure) {
-          console.log(
-            initLabel,
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have the required ${
-                colors.cyan(
-                  '"infrastructure"',
-                )
-              } key\n`,
-            ),
-          );
-
-          // TODO: remove this warning, there are at most only a few people using the old syntax
-          const badconfig = config as unknown as Record<string, unknown>;
-
-          if (badconfig?.nodes) {
-            console.log(
-              initLabel,
-              colors.yellow(
-                `You appear to be using the deprecated pre-release config syntax. Sorry!`,
-              ),
-            );
-            console.log(
-              initLabel,
-              "please read more about the 1.x.x syntax at",
-              colors.cyan(
-                "https://github.com/polyseam/cndi#infrastructure-and-nodes\n",
-              ),
-            );
-          }
-
-          Deno.exit(1);
-        } else if (!config.infrastructure.cndi.nodes[0]) {
-          console.log(
-            initLabel,
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have any ${
-                colors.cyan(
-                  '"cndi.infrastructure.nodes"',
-                )
-              } entries\n`,
-            ),
-          );
-        }
-
-        if (!config.cndi_version) {
-          console.log(
-            initLabel,
-            colors.yellow(
-              `You haven't specified a ${
-                colors.cyan(
-                  '"cndi_version"',
-                )
-              } in your config file, defaulting to "v1"\n`,
-            ),
-          );
-        }
-
+        // validate config
+        validateConfig(config, pathToConfig);
+        project_name = config.project_name as string;
         // 1. the user brought their own config file, we use the kind of the first node
         kind = config.infrastructure.cndi.nodes[0].kind as NodeKind; // only works when all nodes are the same kind
       } catch (e) {

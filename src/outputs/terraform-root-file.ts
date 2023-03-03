@@ -45,6 +45,7 @@ interface GetTerraformRootFileArgs {
   nodes: Array<BaseNodeItemSpec>;
   cndi_project_name: string;
   dotEnvPath: string;
+  initializing: boolean;
 }
 
 const terraformRootFileLabel = colors.white(
@@ -57,6 +58,7 @@ const getTerraformRootFile = ({
   nodes,
   cndi_project_name,
   dotEnvPath,
+  initializing,
 }: GetTerraformRootFileArgs): string => {
   const nodeNames = nodes.map((entry) => entry.name);
 
@@ -100,7 +102,8 @@ const getTerraformRootFile = ({
             )
           }\n`,
         );
-        Deno.exit(1);
+
+        Deno.exit(initializing ? 0 : 1);
       }
       console.log(
         terraformRootFileLabel,
