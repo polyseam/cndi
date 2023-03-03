@@ -76,9 +76,11 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     );
     Deno.exit(1);
   }
+
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
   }
+
   const sealedSecretsKeys = loadSealedSecretsKeys();
   const terraformStatePassphrase = loadTerraformStatePassphrase();
   const argoUIAdminPassword = loadArgoUIAdminPassword();
@@ -206,8 +208,25 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   const leader = leaders[0];
 
   const requiredProviders = new Set(
-    nodes.map((node: BaseNodeItemSpec) => {
+    nodes.map((node: BaseNodeItemSpec, index: number) => {
       // eg: aws -> aws
+      if (!node.kind) {
+        console.log(
+          `node ${colors.cyan(`${index}`)} ${
+            node.name ? `("${node.name}")` : ""
+          } is missing the property "${colors.cyan("kind")}"`,
+        );
+        Deno.exit(1);
+      }
+
+      if (!node.name) {
+        console.log(
+          `node ${colors.cyan(`${index}`)} is missing the property "${
+            colors.cyan("kind")
+          }"`,
+        );
+        Deno.exit(1);
+      }
       const provider = node.kind;
       return provider;
     }),
@@ -235,6 +254,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
   const terraformRootFileContents = getTerraformRootFile({
+    initializing: !!options?.initializing,
     cndi_project_name: config.project_name,
     leaderName: leader.name,
     requiredProviders,

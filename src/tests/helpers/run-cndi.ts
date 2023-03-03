@@ -1,6 +1,12 @@
 import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 const srcDir = Deno.cwd(); // this is the root of the project, runs on import (side-effect bad?)
 
+export interface RunCndiResult {
+  status: Deno.ProcessStatus;
+  output: Uint8Array;
+  stderror: Uint8Array;
+}
+
 const cmd = [
   "deno",
   "run",
@@ -16,14 +22,24 @@ async function runCndi(...args: string[]) {
     stderr: "piped",
   });
 
-  const [status, output, stderror] = await Promise.all([
+  const [status, output, stderrOutput] = await Promise.all([
     p.status(),
     p.output(),
     p.stderrOutput(),
   ]);
 
   p.close();
-  return { status, output, stderror };
+  return { status, output, stderrOutput };
 }
 
-export { runCndi };
+async function runCndiLoud(...args: string[]) {
+  const p = Deno.run({
+    cmd: [...cmd, ...args],
+  });
+
+  const status = await p.status();
+  p.close();
+  return { status };
+}
+
+export { runCndi, runCndiLoud };
