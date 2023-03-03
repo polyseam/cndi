@@ -2,8 +2,18 @@
   "cndi_version": "v1",
   "project_name": "my-cndi-project",
   "infrastructure": {
-    "terraform": { // this is the default setup and can be ommited
-      "resource": {},
+    "terraform": {
+      // this is the default setup and can be ommited
+      "resource": {
+        "google_project_service": {
+          "cndi_enable_compute_service": {
+            "disable_on_destroy": true
+          },
+          "cndi_enable_container_service": {
+            "disable_on_destroy": false
+          }
+        }
+      },
       "provider": {},
       "variable": {},
       "locals": {},
