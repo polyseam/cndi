@@ -252,6 +252,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     Deno.exit(1);
   }
 
+  stageTerraformResourcesForConfig(config);
+
   // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
   const terraformRootFileContents = getTerraformRootFile({
     initializing: !!options?.initializing,

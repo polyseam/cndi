@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-const terraformPassword = {
+const joinToken = {
   resource: {
     random_password: {
       generated_token: [
@@ -15,5 +15,5 @@ const terraformPassword = {
 };
 
 export default function getTerraformPasswordTFJSON(): string {
-  return getPrettyJSONString(terraformPassword);
+  return getPrettyJSONString(joinToken);
 }
