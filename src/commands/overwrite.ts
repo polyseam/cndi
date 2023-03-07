@@ -253,8 +253,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log();
     Deno.exit(1);
   }
-  console.log('config', config)
-  console.log('options', options)
+  // console.log('config', config)
+  // console.log('options', options)
   await stageTerraformResourcesForConfig(config, options);
 
   // // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed

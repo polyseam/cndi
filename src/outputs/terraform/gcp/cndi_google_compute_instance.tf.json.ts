@@ -9,6 +9,7 @@ export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
   config: CNDIConfig
 ): string {
+
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const DEFAULT_SIZE = 100; // The size of the disk in gigabytes
@@ -55,7 +56,7 @@ export default function getGCPComputeInstanceTFJSON(
     '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
 
   const user_data = role === "leader" ? leader_user_data : controller_user_data;
-  const depends_on = role === "controller" ? [leaderComputeInstance] : [];
+  const depends_on = role !== "leader" ? [leaderComputeInstance] : [];
 
   const computeInstanceResource = getTFResource(
     "google_compute_instance",

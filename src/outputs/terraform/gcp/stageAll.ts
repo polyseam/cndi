@@ -26,7 +26,7 @@ export default async function stageTerraformResourcesForGCP(
     console.log('stageTerraformResourcesForGCP')
   const dotEnvPath = path.join(options.output, ".env");
   const region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
-  const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string;
+  const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
 
   if (!googleCredentials) {
     console.log("google credentials are missing");
