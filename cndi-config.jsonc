@@ -3,7 +3,6 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "terraform": {
-      // this is the default setup and can be ommited
       "resource": {
         "google_project_service": {
           "cndi_enable_compute_service": {
@@ -14,7 +13,9 @@
           }
         }
       },
-      "provider": {},
+      "provider": {
+        "zone": "us-central1-a"
+      },
       "variable": {},
       "locals": {},
       "terraform": {}
@@ -31,7 +32,7 @@
         {
           "name": "y-node",
           "kind": "aws",
-          "role": "controller", // default role
+          "role": "controller",
           "instance_type": "m5a.large",
           "volume_size": 128
         },
