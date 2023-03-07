@@ -1,8 +1,22 @@
 import { CNDIConfig } from "src/types.ts";
-// import { stageFile } from "src/utils.ts";
+import stageTerraformResourcesForGCP from "./gcp/stageAll.ts";
 
-export default function stageTerraformResourcesForConfig(
-  _config: CNDIConfig,
+export default async function stageTerraformResourcesForConfig(
+  config: CNDIConfig,
+  options: { output: string; initializing: boolean }
 ) {
-  console.log("staging terraform resources for config");
+  const kind = config.infrastructure.cndi.nodes[0].kind;
+  switch (kind) {
+    // case "aws":
+    //   stageTerraformResourcesForAWS(config);
+    //   break;
+    case "gcp":
+      await stageTerraformResourcesForGCP(config, options);
+      break;
+    // case "azure":
+    //   stageTerraformResourcesForAzure(config);
+    //   break;
+    default:
+      throw new Error(`Unknown kind: ${kind}`);
+  }
 }

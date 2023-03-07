@@ -10,7 +10,7 @@ export default function getGCPComputeHealthCheckTFJSON(): string {
       },
     ],
     timeout_sec: 1,
-    depends_on: ["google_project_service.cndi_enable_compute_service"],
+    depends_on: ["google_project_service.cndi_google_project_service_compute"],
   });
   return getPrettyJSONString(resource);
 }

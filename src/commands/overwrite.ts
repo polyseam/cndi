@@ -253,39 +253,40 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log();
     Deno.exit(1);
   }
+  console.log('config', config)
+  console.log('options', options)
+  await stageTerraformResourcesForConfig(config, options);
 
-  stageTerraformResourcesForConfig(config);
+  // // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
+  // const terraformRootFileContents = getTerraformRootFile({
+  //   initializing: !!options?.initializing,
+  //   cndi_project_name: config.project_name,
+  //   leaderName: leader.name,
+  //   requiredProviders,
+  //   nodes,
+  //   dotEnvPath,
+  // });
 
-  // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  const terraformRootFileContents = getTerraformRootFile({
-    initializing: !!options?.initializing,
-    cndi_project_name: config.project_name,
-    leaderName: leader.name,
-    requiredProviders,
-    nodes,
-    dotEnvPath,
-  });
+  // if (terraformRootFileContents) {
+  //   await stageFile(
+  //     path.join("cndi", "terraform", "setup-cndi.tf.json"),
+  //     terraformRootFileContents,
+  //   );
+  // }
 
-  if (terraformRootFileContents) {
-    await stageFile(
-      path.join("cndi", "terraform", "setup-cndi.tf.json"),
-      terraformRootFileContents,
-    );
-  }
+  // // write terraform nodes files
+  // for (const node of nodes) {
+  //   const nodeFileContents: string = getTerraformNodeResource(
+  //     node,
+  //     deployment_target_configuration,
+  //     leader.name,
+  //   );
 
-  // write terraform nodes files
-  for (const node of nodes) {
-    const nodeFileContents: string = getTerraformNodeResource(
-      node,
-      deployment_target_configuration,
-      leader.name,
-    );
-
-    await stageFile(
-      path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
-      nodeFileContents,
-    );
-  }
+  //   await stageFile(
+  //     path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
+  //     nodeFileContents,
+  //   );
+  // }
 
   // write the cndi/cluster_manifests/Chart.yaml file
   await stageFile(

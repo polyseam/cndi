@@ -5,7 +5,7 @@ export default function getGCPProjectServiceComputeTFJSON(): string {
     disable_on_destroy: false,
     service: "compute.googleapis.com",
     depends_on: [
-      "google_project_service.cndi_enable_cloudresourcemanager_service",
+      "google_project_service.cndi_google_project_service_cloudresourcemanager",
     ],
   }, "cndi_google_project_service_compute");
   return getPrettyJSONString(resource);
