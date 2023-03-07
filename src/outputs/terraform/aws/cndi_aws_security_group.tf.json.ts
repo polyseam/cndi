@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAWSRouteTableAssociationTFJSON(): string {
+export default function getAWSSecurityGroupTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       aws_security_group: {
