@@ -21,7 +21,11 @@ import {
   projectService,
   provider,
 } from "https://esm.sh/v103/@cdktf/provider-google@5.0.6";
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { CNDIConfig, GCPNodeItemSpec } from "../../../../types.ts";
+
+import controllerBootstrapScript from "src/bootstrap/controller_bootstrap_cndi.sh.ts";
+import leaderBootstrapScript from "src/bootstrap/controller_bootstrap_cndi.sh.ts";
 
 interface SynthGCPComputeEngineStackOptions {
   cndiConfig: CNDIConfig;
@@ -31,14 +35,29 @@ interface SynthGCPComputeEngineStackOptions {
 export default function synthGCPComputeEngine(
   options: SynthGCPComputeEngineStackOptions,
 ) {
+  const stagingDir = Deno.env.get("CNDI_STAGING_DIRECTORY");
+  if (!stagingDir) throw new Error("CNDI_STAGING_DIRECTORY not set");
+
+  const stagingDirSegments = stagingDir?.split(path.SEP) || [];
+  const outdir = [...stagingDirSegments, "cndi", "terraform"].join(path.SEP);
   const GCPApp = new App({
-    outdir: "cndi/terraform",
+    outdir,
   });
+
   const PREFIX = "cndi_google";
 
   class GCPComputeEngineStack extends TerraformStack {
     constructor(scope: Construct, name: string) {
       super(scope, name);
+
+      const leaderUserDataFilePath = Deno.makeTempFileSync();
+      const controllerUserDataFilePath = Deno.makeTempFileSync();
+
+      Deno.writeTextFileSync(leaderUserDataFilePath, leaderBootstrapScript);
+      Deno.writeTextFileSync(
+        controllerUserDataFilePath,
+        controllerBootstrapScript,
+      );
 
       const { cndiConfig } = options;
 
@@ -53,6 +72,7 @@ export default function synthGCPComputeEngine(
       });
 
       const git_repo = new TerraformVariable(this, "git_repo", {
+        // TF_VAR_git_repo
         type: "string",
         description: "git repo where your CNDI project is stored",
       });
@@ -143,18 +163,16 @@ export default function synthGCPComputeEngine(
           ];
 
           if (node.role === "leader") {
-            const user_data = Fn.templatefile(
-              "cndi/terraform/leader_bootstrap_cndi.sh.tftpl",
-              {
-                bootstap_token: bootstrap_token.value,
-                git_repo: git_repo.value,
-                git_password: git_password.value,
-                git_username: git_username.value,
-                sealed_secrets_private_key: sealed_secrets_private_key.value,
-                sealed_secrets_public_key: sealed_secrets_public_key.value,
-                argo_ui_admin_password: argo_ui_admin_password.value,
-              },
-            );
+            const user_data = Fn.templatefile(leaderUserDataFilePath, {
+              bootstap_token: bootstrap_token.value,
+              git_repo: git_repo.value,
+              git_password: git_password.value,
+              git_username: git_username.value,
+              sealed_secrets_private_key: sealed_secrets_private_key.value,
+              sealed_secrets_public_key: sealed_secrets_public_key.value,
+              argo_ui_admin_password: argo_ui_admin_password.value,
+            });
+
             leaderInstance = new computeInstance.ComputeInstance(
               this,
               `${PREFIX}_compute_instance_${node.name}`,
@@ -175,13 +193,10 @@ export default function synthGCPComputeEngine(
             return;
           }
 
-          const user_data = Fn.templatefile(
-            "cndi/terraform/controller_bootstrap_cndi.sh.tftpl",
-            {
-              bootstap_token: bootstrap_token.value,
-              leader_node_ip: leaderInstance.networkInterface.get(0).networkIp,
-            },
-          );
+          const user_data = Fn.templatefile(controllerUserDataFilePath, {
+            bootstap_token: bootstrap_token.value,
+            leader_node_ip: leaderInstance.networkInterface.get(0).networkIp,
+          });
 
           instances.push(
             new computeInstance.ComputeInstance(
