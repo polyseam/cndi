@@ -1,14 +1,9 @@
-import { getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 export default function getGCPComputeRouterTFJSON(): string {
-  return getPrettyJSONString({
-    resource: {
-      google_compute_router: {
-        cndi_router: {
-          name: "cndi-router",
-          network: "${google_compute_network.cndi_vpc_network.self_link}",
-        },
-      },
-    },
+  const resource = getTFResource("google_compute_router", {
+    name: "cndi-router",
+    network: "${google_compute_network.cndi_vpc_network.self_link}",
   });
+  return getPrettyJSONString(resource);
 }

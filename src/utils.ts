@@ -15,6 +15,23 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
+function getTFResource(
+  resource_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_${resource_type}`;
+  return {
+    resource: {
+      [resource_type]: {
+        [name]: {
+          ...content,
+        },
+      },
+    },
+  };
+}
+
 function getPathToTerraformBinary() {
   const fileSuffixForPlatform = getFileSuffixForPlatform();
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
@@ -179,6 +196,7 @@ export {
   getPrettyJSONString,
   getSecretOfLength,
   getStagingDir,
+  getTFResource,
   loadJSONC,
   persistStagedFiles,
   stageFile,
