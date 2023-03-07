@@ -6,11 +6,9 @@ interface GetGCPComputeEngineProviderTFJSONArg {
   zone: string;
 }
 
-
 export default function getGCPComputeEngineProviderTFJSON(
-  options: GetGCPComputeEngineProviderTFJSONArg
+  options: GetGCPComputeEngineProviderTFJSONArg,
 ): string {
-
   const { project_id, region, zone } = options;
 
   return getPrettyJSONString({

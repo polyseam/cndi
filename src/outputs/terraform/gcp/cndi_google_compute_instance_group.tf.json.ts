@@ -2,9 +2,8 @@ import { getPrettyJSONString } from "src/utils.ts";
 import { GCPNodeItemSpec } from "src/types.ts";
 
 export default function getGCPComputeInstanceGroupTFJSON(
-  nodes: Array<GCPNodeItemSpec>
+  nodes: Array<GCPNodeItemSpec>,
 ): string {
-    
   const instances = nodes.map((node) => {
     return `\${google_compute_instance.${node.name}.self_link}`;
   });

@@ -25,6 +25,8 @@ import getTerraformRootFile from "../outputs/terraform-root-file.ts";
 import RootChartYaml from "../outputs/root-chart.ts";
 import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
 
+import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
+
 import {
   BaseNodeItemSpec,
   CNDIConfig,

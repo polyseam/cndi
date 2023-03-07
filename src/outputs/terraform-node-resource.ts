@@ -256,6 +256,7 @@ const getGCPNodeResource = (
       subnetwork,
     },
   ];
+
   const google_compute_disk = {
     [`${name}-cndi-disk`]: {
       name: `${name}-cndi-disk`,
@@ -265,6 +266,7 @@ const getGCPNodeResource = (
       depends_on: ["google_project_service.cndi_enable_compute_service"],
     },
   };
+
   const nodeResource: GCPTerraformNodeResource = {
     resource: {
       google_compute_instance: {
