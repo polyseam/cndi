@@ -1,12 +1,19 @@
 import { Construct } from "https://esm.sh/v103/constructs@10.1.269";
-import { App, TerraformStack } from "https://esm.sh/v103/cdktf@0.15.5";
+import {
+  App,
+  Fn,
+  TerraformStack,
+  TerraformVariable,
+} from "https://esm.sh/v103/cdktf@0.15.5";
 
 import {
+  computeDisk,
   computeFirewall,
   computeForwardingRule,
-  // computeInstance,
+  computeInstance,
   computeInstanceGroup,
   computeNetwork,
+  computeRegionBackendService,
   computeRegionHealthCheck,
   computeRouter,
   computeRouterNat,
@@ -14,7 +21,8 @@ import {
   projectService,
   provider,
 } from "https://esm.sh/v103/@cdktf/provider-google@5.0.6";
-import { CNDIConfig } from "../../../../types.ts";
+import { CNDIConfig, GCPNodeItemSpec } from "../../../../types.ts";
+import { ComputeInstance } from "https://esm.sh/v103/@cdktf/provider-google@5.0.6/lib/compute-instance/index";
 
 interface SynthGCPComputeEngineStackOptions {
   cndiConfig: CNDIConfig;
@@ -40,6 +48,53 @@ export default function synthGCPComputeEngine(
         zone: "us-central1-a",
       });
 
+      const bootstrap_token = new TerraformVariable(this, "bootstrap_token", {
+        type: "string",
+        description: "secret token to invite nodes to the cluster",
+      });
+
+      const git_repo = new TerraformVariable(this, "git_repo", {
+        type: "string",
+        description: "git repo where your CNDI project is stored",
+      });
+
+      const git_username = new TerraformVariable(this, "git_username", {
+        type: "string",
+        description: "git username to access your CNDI project",
+      });
+
+      const git_password = new TerraformVariable(this, "git_password", {
+        type: "string",
+        description: "git password to access your CNDI project",
+      });
+
+      const sealed_secrets_public_key = new TerraformVariable(
+        this,
+        "sealed_secrets_public_key",
+        {
+          type: "string",
+          description: "sealed secrets public key",
+        },
+      );
+
+      const sealed_secrets_private_key = new TerraformVariable(
+        this,
+        "sealed_secrets_private_key",
+        {
+          type: "string",
+          description: "sealed secrets private key",
+        },
+      );
+
+      const argo_ui_admin_password = new TerraformVariable(
+        this,
+        "argo_ui_admin_password",
+        {
+          type: "string",
+          description: "argo ui admin password",
+        },
+      );
+
       const cloudresourcemanagerProjectService = new projectService
         .ProjectService(
         this,
@@ -60,14 +115,94 @@ export default function synthGCPComputeEngine(
         },
       );
 
-      cndiConfig.infrastructure.cndi.nodes.forEach((node) => {
-        console.log("adding new node", node.name);
-        // new computeInstance.ComputeInstance(
-        //   this,
-        //   `cndi_google_compute_instance_${node.name}`,
-        //   {}
-        // );
-      });
+      let leaderInstance: ComputeInstance;
+      const instances: string[] = []; // list of "instance.selfLink"s for the instance group
+
+      cndiConfig.infrastructure.cndi.nodes
+        .sort(({ role }) => (role === "leader" ? -1 : +1)) // leader first
+        .forEach((n) => {
+          const node = n as GCPNodeItemSpec;
+
+          const bootDisk = new computeDisk.ComputeDisk(
+            this,
+            `${PREFIX}_compute_disk_${node.name}`,
+            {
+              name: `${PREFIX}_compute_disk_${node.name}`,
+              type: "pd-ssd",
+              size: node?.size || node?.volume_size || 100,
+              dependsOn: [computeProjectService],
+              image: "ubuntu-2004-focal-v20221121",
+            },
+          );
+
+          const networkInterface = [
+            {
+              network: net.selfLink,
+              subnetwork: subnet.selfLink,
+              accessConfig: [{ networkTier: "STANDARD" }],
+            },
+          ];
+
+          if (node.role === "leader") {
+            const user_data = Fn.templatefile(
+              "cndi/terraform/leader_bootstrap_cndi.sh.tftpl",
+              {
+                bootstap_token: bootstrap_token.value,
+                git_repo: git_repo.value,
+                git_password: git_password.value,
+                git_username: git_username.value,
+                sealed_secrets_private_key: sealed_secrets_private_key.value,
+                sealed_secrets_public_key: sealed_secrets_public_key.value,
+                argo_ui_admin_password: argo_ui_admin_password.value,
+              },
+            );
+            leaderInstance = new computeInstance.ComputeInstance(
+              this,
+              `${PREFIX}_compute_instance_${node.name}`,
+              {
+                name: node.name,
+                allowStoppingForUpdate: true,
+                machineType: node?.machine_type || node?.instance_type ||
+                  "n2-standard-2",
+                tags: ["cndi", node.name],
+                metadata: { user_data },
+                networkInterface,
+                bootDisk: {
+                  source: bootDisk.selfLink,
+                },
+              },
+            );
+            instances.push(leaderInstance.selfLink);
+            return;
+          }
+
+          const user_data = Fn.templatefile(
+            "cndi/terraform/controller_bootstrap_cndi.sh.tftpl",
+            {
+              bootstap_token: bootstrap_token.value,
+              leader_node_ip: leaderInstance.networkInterface[0].networkIp,
+            },
+          );
+
+          instances.push(
+            new computeInstance.ComputeInstance(
+              this,
+              `${PREFIX}_compute_instance_${node.name}`,
+              {
+                name: node.name,
+                allowStoppingForUpdate: true,
+                machineType: node?.machine_type || node?.instance_type ||
+                  "n2-standard-2",
+                tags: ["cndi", node.name],
+                metadata: { user_data },
+                networkInterface,
+                bootDisk: {
+                  source: bootDisk.selfLink,
+                },
+              },
+            ).selfLink,
+          );
+        });
 
       const net = new computeNetwork.ComputeNetwork(
         this,
@@ -157,13 +292,12 @@ export default function synthGCPComputeEngine(
         },
       );
 
-      const _healthCheck = new computeRegionHealthCheck
-        .ComputeRegionHealthCheck(
+      const healthCheck = new computeRegionHealthCheck.ComputeRegionHealthCheck(
         this,
         `${PREFIX}_compute_region_health_check`,
         {
           checkIntervalSec: 1,
-          name: "cndi-healthcheck",
+          name: `${PREFIX}_compute_region_health_check`,
           tcpHealthCheck: {
             port: 80,
           },
@@ -193,12 +327,12 @@ export default function synthGCPComputeEngine(
         },
       );
 
-      const _instanceGroup = new computeInstanceGroup.ComputeInstanceGroup(
+      const instanceGroup = new computeInstanceGroup.ComputeInstanceGroup(
         this,
         `${PREFIX}_compute_instance_group`,
         {
           description: "group of instances that form a cndi cluster",
-          instances: [],
+          instances,
           name: "cndi-cluster",
           namedPort: [
             {
@@ -210,7 +344,25 @@ export default function synthGCPComputeEngine(
               port: 443,
             },
           ],
-          zone: "${local.zone}",
+          zone: `${options?.region || "us-central1"}a`,
+        },
+      );
+
+      const _computeRegionBackendService = new computeRegionBackendService
+        .ComputeRegionBackendService(
+        this,
+        `${PREFIX}_compute_region_backend_service`,
+        {
+          backend: [
+            {
+              group: instanceGroup.selfLink,
+            },
+          ],
+          healthChecks: [healthCheck.selfLink],
+          loadBalancingScheme: "EXTERNAL",
+          name: "cndi-backend-service",
+          portName: "http",
+          protocol: "TCP",
         },
       );
     }
