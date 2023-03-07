@@ -71,6 +71,13 @@ export default function synthGCPComputeEngine(
 
       });
 
+      const aws_vpc = new vpc.Vpc(this, "cndi_aws_vpc", {
+        cidr_block: "${var.vpc_cidr_block}",
+        enable_dns_hostnames: "${var.vpc_dns_hostnames}",
+        enable_dns_support: "${var.vpc_dns_support}",
+        tags: { Name: "VPC", CNDIProject: "${local.cndi_project_name}" },
+      });
+
       cndiConfig.infrastructure.cndi.nodes.map((node: AWSNodeItemSpec) => {
         const aws_lb_target_group_attachment_https = new new albTargetGroupAttachment.AlbTargetGroupAttachment(this, `aws_lb_target_group_attachment_https_${node.name}`, {
           target_group_arn: aws_lb_target_group_https.arn,
@@ -96,7 +103,7 @@ export default function synthGCPComputeEngine(
           },
           port: "${var.tg_http}",
           protocol: "${var.tg_http_proto}",
-          vpc_id: "${aws_vpc.vpc.id}",
+          vpc_id: aws_vpc.id,
         },
       );
       const aws_lb_target_group_https = new albTargetGroup.AlbTargetGroup(this, "cndi_aws_lb_target_group_https",
@@ -107,16 +114,11 @@ export default function synthGCPComputeEngine(
           },
           port: "${var.tg_https}",
           protocol: "${var.tg_https_proto}",
-          vpc_id: "${aws_vpc.vpc.id}",
+          vpc_id: aws_vpc.id,
         }
       );
 
-      const aws_vpc = new vpc.Vpc(this, "cndi_aws_vpc", {
-        cidr_block: "${var.vpc_cidr_block}",
-        enable_dns_hostnames: "${var.vpc_dns_hostnames}",
-        enable_dns_support: "${var.vpc_dns_support}",
-        tags: { Name: "VPC", CNDIProject: "${local.cndi_project_name}" },
-      });
+
 
       const aws_subnet = new subnet.Subnet(this, "cndi_aws_subnet", {
         count: "1",
@@ -124,7 +126,7 @@ export default function synthGCPComputeEngine(
         cidr_block: "${element(var.sbn_cidr_block, count.index)}",
         map_public_ip_on_launch: "${var.sbn_public_ip}",
         tags: { Name: "Subnet", CNDIProject: "${local.cndi_project_name}" },
-        vpc_id: "${aws_vpc.vpc.id}",
+        vpc_id: aws_vpc.id,
       });
       const aws_route_table = new routeTable.RouteTable(this, "cndi_aws_route_table", {
         tags: { Name: "CNDI Route Table", CNDIProject: "${local.cndi_project_name}" },
