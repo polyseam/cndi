@@ -22,7 +22,6 @@ import {
   provider,
 } from "https://esm.sh/v103/@cdktf/provider-google@5.0.6";
 import { CNDIConfig, GCPNodeItemSpec } from "../../../../types.ts";
-import { ComputeInstance } from "https://esm.sh/v103/@cdktf/provider-google@5.0.6/lib/compute-instance/index";
 
 interface SynthGCPComputeEngineStackOptions {
   cndiConfig: CNDIConfig;
@@ -115,7 +114,7 @@ export default function synthGCPComputeEngine(
         },
       );
 
-      let leaderInstance: ComputeInstance;
+      let leaderInstance: computeInstance.ComputeInstance;
       const instances: string[] = []; // list of "instance.selfLink"s for the instance group
 
       cndiConfig.infrastructure.cndi.nodes
@@ -180,7 +179,7 @@ export default function synthGCPComputeEngine(
             "cndi/terraform/controller_bootstrap_cndi.sh.tftpl",
             {
               bootstap_token: bootstrap_token.value,
-              leader_node_ip: leaderInstance.networkInterface[0].networkIp,
+              leader_node_ip: leaderInstance.networkInterface.get(0).networkIp,
             },
           );
 
