@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAWSSubnetTFJSON(): string {
+export default function getAzureLbRuleTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_lb_rule: {

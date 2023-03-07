@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermVirtualNetworkTFJSON(): string {
+export default function getAzureVirtualNetworkTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_virtual_network: {

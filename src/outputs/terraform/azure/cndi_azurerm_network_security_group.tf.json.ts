@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermNetworkSecurityGroupTFJSON(): string {
+export default function getAzureNetworkSecurityGroupTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_network_security_group: {

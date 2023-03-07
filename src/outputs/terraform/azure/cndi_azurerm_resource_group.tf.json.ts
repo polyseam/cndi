@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermResourceGroupTFJSON(): string {
+export default function getAzureResourceGroupTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_resource_group: {

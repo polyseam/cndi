@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermSubnetTFJSON(): string {
+export default function getAzureLocalsTFJSON(): string {
   return getPrettyJSONString({
     locals: [
       {

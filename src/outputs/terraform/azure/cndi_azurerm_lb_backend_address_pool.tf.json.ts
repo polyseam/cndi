@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermLbBackendAddressPoolTFJSON(): string {
+export default function getAzureLbBackendAddressPoolTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_lb_backend_address_pool: {

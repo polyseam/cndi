@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzurermPublicIpTFJSON(): string {
+export default function getAzurePublicIpTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_public_ip: {
