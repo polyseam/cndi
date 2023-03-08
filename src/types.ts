@@ -210,9 +210,9 @@ interface GCPTerraformRouterResource {
 }
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSNodeItemSpec extends BaseNodeItemSpec {
-  ami: string;
-  instance_type: string;
-  availability_zone: string;
+  ami?: string;
+  instance_type?: string;
+  availability_zone?: string;
   volume_size?: number;
   size?: number;
   machine_type?: string;
