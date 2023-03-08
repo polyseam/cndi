@@ -8,7 +8,7 @@ export default function getAWSLbListenerTFJSON(): string {
           {
             default_action: [
               {
-                target_group_arn: "${aws_lb_target_group.aws_lb_target_group_https.arn}",
+                target_group_arn: "${aws_lb_target_group.cndi_aws_lb_target_group_https.arn}",
                 type: "forward",
               },
             ],
