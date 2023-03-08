@@ -10,6 +10,7 @@ import cndi_google_compute_firewall_external from "./cndi_google_compute_firewal
 import cndi_google_compute_firewall_internal from "./cndi_google_compute_firewall_internal.tf.json.ts";
 import cndi_google_compute_forwarding_rule from "./cndi_google_compute_forwarding_rule.tf.json.ts";
 import cndi_google_compute_instance from "./cndi_google_compute_instance.tf.json.ts";
+import cndi_google_compute_disk from "./cndi_google_compute_disk.tf.json.ts";
 import cndi_google_compute_instance_group from "./cndi_google_compute_instance_group.tf.json.ts";
 import cndi_google_compute_network from "./cndi_google_compute_network.tf.json.ts";
 import cndi_google_compute_region_health_check from "./cndi_google_compute_region_health_check.tf.json.ts";
@@ -74,10 +75,22 @@ export default async function stageTerraformResourcesForGCP(
     );
   });
 
+  const stageDisks = config.infrastructure.cndi.nodes.map((node) => {
+    return stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `${node.name}.cndi_google_compute_disk.tf.json`
+      ),
+      cndi_google_compute_disk(node)
+    );
+  });
+
   // stage all the terraform files at once
   try {
     await Promise.all([
       ...stageNodes,
+      ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider({
@@ -158,6 +171,7 @@ export default async function stageTerraformResourcesForGCP(
         ),
         cndi_google_compute_instance_group(config.infrastructure.cndi.nodes)
       ),
+      
       stageFile(
         path.join(
           "cndi",
