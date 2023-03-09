@@ -9,7 +9,7 @@ export default function getAzureLbTFJSON(): string {
             {
               name: "cndi_load_balancer_public_ip",
               public_ip_address_id:
-                "${azurerm_public_ip.cndi_azurerm_lb_public_ip_address.id}",
+                "${azurerm_public_ip.cndi_azurerm_public_ip.id}",
             },
           ],
           location:

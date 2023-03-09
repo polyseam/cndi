@@ -12,7 +12,7 @@ export default function getAzureNetworkInterfaceBackendAddressPoolAssociationTFJ
         "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}",
       ip_configuration_name: `cndi_azurerm_network_interface_ip_config_${name}`,
       network_interface_id:
-        `\${azurerm_network_interface.cndi_azurerm_network_interface_network_interface_${name}.id}`,
+        `\${azurerm_network_interface.cndi_azurerm_network_interface_${name}.id}`,
     },
     `cndi_azurerm_network_interface_backend_address_pool_association_${node.name}`,
   );

@@ -4,7 +4,7 @@ export default function getAzurePublicIpTFJSON(): string {
   return getPrettyJSONString({
     resource: {
       azurerm_public_ip: {
-        cndi_azurerm_public_ip_load_balancer: {
+        cndi_azurerm_public_ip: {
           allocation_method: "Static",
           location:
             "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
