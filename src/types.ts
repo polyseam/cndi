@@ -1227,6 +1227,7 @@ export type {
   AWSTerraformNodeResource,
   AWSTerraformTargetGroupAttachmentResource,
   AzureDeploymentTargetConfiguration,
+  AWSTerraformEC2InstanceTypeOfferingsDataSource,
   AzureNodeItemSpec,
   AzureTerraformNodeResource,
   AzureTerraformRootFileData,
