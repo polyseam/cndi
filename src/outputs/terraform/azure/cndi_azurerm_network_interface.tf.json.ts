@@ -1,7 +1,7 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { AzureNodeItemSpec } from "../../../types.ts";
 
-export default function getAzureComputeInstanceTFJSON(
+export default function getAzureNetworkInterfaceTFJSON(
   node: AzureNodeItemSpec,
 ): string {
   const { name } = node;
@@ -22,10 +22,8 @@ export default function getAzureComputeInstanceTFJSON(
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
-    `azurerm_network_interface_${node.name}`,
-  ).resource;
+    `cndi_azurerm_network_interface_${node.name}`,
+  );
 
-  return getPrettyJSONString({
-    resource,
-  });
+  return getPrettyJSONString(resource);
 }

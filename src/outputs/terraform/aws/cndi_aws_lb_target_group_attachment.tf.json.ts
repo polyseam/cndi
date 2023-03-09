@@ -1,7 +1,7 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { AWSNodeItemSpec } from "../../../types.ts";
 
-export default function getAWSComputeInstanceTFJSON(
+export default function getAWSComputeInstanceTargetGroupAttachmentTFJSON(
   node: AWSNodeItemSpec,
 ): string {
   const { name } = node;

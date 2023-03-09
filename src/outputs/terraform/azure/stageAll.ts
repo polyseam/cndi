@@ -6,8 +6,8 @@ import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
-import cndi_azurerm_network_interface from "./azurerm_network_interface.tf.json.ts";
-import cndi_azurerm_network_interface_backend_address_pool_association from "./azurerm_network_interface_backend_address_pool_association.tf.json.ts";
+import cndi_azurerm_network_interface from "./cndi_azurerm_network_interface.tf.json.ts";
+import cndi_azurerm_network_interface_backend_address_pool_association from "./cndi_azurerm_network_interface_backend_address_pool_association.tf.json.ts";
 import cndi_azurerm_lb from "./cndi_azurerm_lb.tf.json.ts";
 import cndi_azurerm_lb_backend_address_pool from "./cndi_azurerm_lb_backend_address_pool.tf.json.ts";
 import cndi_azurerm_lb_probe from "./cndi_azurerm_lb_probe.tf.json.ts";
