@@ -2,7 +2,7 @@ import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 import { CNDIConfig } from "src/types.ts";
-import { stageFile } from "../../../utils.ts";
+import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -19,15 +19,20 @@ import cndi_google_compute_router_nat from "./cndi_google_compute_router_nat.tf.
 import cndi_google_compute_subnetwork from "./cndi_google_compute_subnetwork.tf.json.ts";
 import cndi_google_project_service_compute from "./cndi_google_project_service_compute.tf.json.ts";
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
+import cndi_google_locals from "./locals.tf.json.ts";
 
 export default async function stageTerraformResourcesForGCP(
   config: CNDIConfig,
   options: { output: string; initializing: boolean }
 ) {
-    console.log('stageTerraformResourcesForGCP')
+  console.log("stageTerraformResourcesForGCP");
   const dotEnvPath = path.join(options.output, ".env");
-  const region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
+  const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
+
+  const leaderName = getLeaderNodeNameFromConfig(config);
+
+  const leader_node_ip = `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
     console.log("google credentials are missing");
@@ -92,11 +97,15 @@ export default async function stageTerraformResourcesForGCP(
       ...stageNodes,
       ...stageDisks,
       stageFile(
+        path.join("cndi", "terraform", "locals.tf.json"),
+        cndi_google_locals({ gcp_region, leader_node_ip })
+      ),
+      stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider({
-          region,
+          region: "local.project_id",
           project_id: parsedJSONServiceAccountKey.project_id,
-          zone: `${region}-a`,
+          zone: "local.gcp_zone",
         })
       ),
       stageFile(
@@ -171,7 +180,7 @@ export default async function stageTerraformResourcesForGCP(
         ),
         cndi_google_compute_instance_group(config.infrastructure.cndi.nodes)
       ),
-      
+
       stageFile(
         path.join(
           "cndi",

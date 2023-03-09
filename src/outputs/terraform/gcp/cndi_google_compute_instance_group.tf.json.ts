@@ -22,7 +22,7 @@ export default function getGCPComputeInstanceGroupTFJSON(
         port: "443",
       },
     ],
-    zone: "${local.zone}",
+    zone: "${local.gcp_zone}",
   });
 
   return getPrettyJSONString(resource);
