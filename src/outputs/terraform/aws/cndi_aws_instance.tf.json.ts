@@ -44,24 +44,21 @@ export default function getAWSComputeInstanceTFJSON(
   const resource = getTFResource(
     "aws_instance",
     {
-      [name]: [
-        {
-          ami,
-          instance_type,
-          tags: {
-            Name: name,
-            CNDIProject: "${local.cndi_project_name}",
-            CNDINodeRole: role,
-          },
-          ebs_block_device,
-          subnet_id,
-          vpc_security_group_ids,
-          user_data,
-          depends_on,
-        },
-      ],
+      ami,
+      instance_type,
+      tags: {
+        Name: name,
+        CNDIProject: "${local.cndi_project_name}",
+        CNDINodeRole: role,
+      },
+      ebs_block_device,
+      subnet_id,
+      vpc_security_group_ids,
+      user_data,
+      depends_on,
+
     },
-    `cndi_aws_instance_${node.name}`,
+    `${node.name}`,
   ).resource;
 
   return getPrettyJSONString({

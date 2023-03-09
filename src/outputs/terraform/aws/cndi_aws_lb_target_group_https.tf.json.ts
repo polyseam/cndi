@@ -8,7 +8,7 @@ export default function getAWSLbTargetGroupHTTPSTFJSON(): string {
     },
     port: 443,
     protocol: "TCP",
-    vpc_id: "${aws_vpc.vpc.id}",
+    vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
   }, "cndi_aws_lb_target_group_https");
   return getPrettyJSONString(resource);
 }

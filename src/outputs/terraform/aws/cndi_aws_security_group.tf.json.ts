@@ -1,7 +1,7 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 export default function getAWSSecurityGroupTFJSON(): string {
-  const resource = getTFResource("aws_security_group", [
+  const resource = getTFResource("aws_security_group", 
     {
       description: "Security firewall",
       egress: [
@@ -55,9 +55,9 @@ export default function getAWSSecurityGroupTFJSON(): string {
           cidr_blocks: ["0.0.0.0/0"],
           description:
             "Kubernetes API server port to access cluster from local machine",
-          from_port: "${var.sg_ingress_k8s_API}",
-          protocol: "${var.sg_ingress_proto}",
-          to_port: "${var.sg_ingress_k8s_API}",
+          from_port: "16443",
+          protocol: "-1",
+          to_port: "16443",
           ipv6_cidr_blocks: [],
           prefix_list_ids: [],
           security_groups: [],
@@ -67,9 +67,9 @@ export default function getAWSSecurityGroupTFJSON(): string {
           cidr_blocks: ["10.0.0.0/16"],
           description:
             "Inbound rule that enables traffic between EC2 instances in the VPC ",
-          from_port: "${var.sg_ingress_all}",
-          protocol: "${var.sg_ingress_proto_all}",
-          to_port: "${var.sg_ingress_all}",
+          from_port: "0",
+          protocol: "-1",
+          to_port: "0",
           ipv6_cidr_blocks: [],
           prefix_list_ids: [],
           security_groups: [],
@@ -82,6 +82,6 @@ export default function getAWSSecurityGroupTFJSON(): string {
         CNDIProject: "${local.cndi_project_name}",
       },
     },
-  ]);
+  );
   return getPrettyJSONString(resource);
 }

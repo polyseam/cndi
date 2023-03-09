@@ -4,6 +4,7 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import { CNDIConfig } from "src/types.ts";
 import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
+import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
 import cndi_aws_lb_target_group_attachment from "./cndi_aws_lb_target_group_attachment.tf.json.ts";
