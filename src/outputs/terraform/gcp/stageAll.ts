@@ -20,6 +20,7 @@ import cndi_google_compute_router_nat from "./cndi_google_compute_router_nat.tf.
 import cndi_google_compute_subnetwork from "./cndi_google_compute_subnetwork.tf.json.ts";
 import cndi_google_project_service_compute from "./cndi_google_project_service_compute.tf.json.ts";
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
+import cndi_google_compute_region_backend_service from "./cndi_google_compute_region_backend_service.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
 
 export default async function stageTerraformResourcesForGCP(
@@ -34,7 +35,7 @@ export default async function stageTerraformResourcesForGCP(
   const leaderName = getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
-    `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
+    `\${google_compute_instance.cndi_google_compute_instance_${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
     console.log("google credentials are missing");
@@ -53,20 +54,18 @@ export default async function stageTerraformResourcesForGCP(
     if (googleCredentials === placeholder) {
       console.log(
         colors.yellow(
-          `\n\n${
-            colors.brightRed(
-              "ERROR",
-            )
+          `\n\n${colors.brightRed(
+            "ERROR",
+          )
           }: GOOGLE_CREDENTIALS not found in environment`,
         ),
       );
       console.log(
         `You need to replace `,
         colors.cyan(placeholder),
-        `with the desired value in "${dotEnvPath}"\nthen run ${
-          colors.green(
-            "cndi ow",
-          )
+        `with the desired value in "${dotEnvPath}"\nthen run ${colors.green(
+          "cndi ow",
+        )
         }\n`,
       );
       Deno.exit(options.initializing ? 0 : 1);
@@ -115,6 +114,13 @@ export default async function stageTerraformResourcesForGCP(
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
+      ), stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "google_compute_region_backend_service.tf.json",
+        ),
+        cndi_google_compute_region_backend_service(),
       ),
       stageFile(
         path.join(

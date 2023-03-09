@@ -24,7 +24,7 @@ export default function getGCPComputeInstanceTFJSON(
   const source =
     `\${google_compute_disk.cndi_google_compute_disk_${name}.self_link}`;
   const leaderComputeInstance =
-    `cndi_google_compute_instance_${leaderNodeName}`;
+    `google_compute_instance.cndi_google_compute_instance_${leaderNodeName}`;
   const boot_disk = [
     {
       source,
