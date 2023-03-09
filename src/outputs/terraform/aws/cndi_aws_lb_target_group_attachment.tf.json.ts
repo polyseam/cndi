@@ -5,7 +5,7 @@ export default function getAWSComputeInstanceTargetGroupAttachmentTFJSON(
   node: AWSNodeItemSpec,
 ): string {
   const { name } = node;
-  const target_id = `\${aws_instance.${name}.id}`;
+  const target_id = `\${aws_instance.cndi_aws_instance_${name}.id}`;
   const resource = {
     [`aws_lb_target_group_attachment`]: {
       [`cndi_aws_lb_target_group_attachment_https_${name}`]: [
