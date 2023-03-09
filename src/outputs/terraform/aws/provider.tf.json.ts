@@ -1,18 +1,10 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-interface GetAWSProviderTFJSONArg {
-  region: string;
-}
-
-export default function getAWSComputeEngineProviderTFJSON(
-  options: GetAWSProviderTFJSONArg,
-): string {
-  const { region } = options;
-
+export default function getAWSComputeEngineProviderTFJSON(): string {
   return getPrettyJSONString({
     provider: {
       aws: {
-        region,
+        region: "${local.aws_region}",
       },
     },
   });

@@ -1,16 +1,22 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAWSLocalsTFJSON(): string {
+interface GetAWSLocalsTFJSONArgs {
+  aws_region: string;
+  leader_node_ip: string;
+}
+
+export default function getAWSLocalsTFJSON(
+  { aws_region, leader_node_ip }: GetAWSLocalsTFJSONArgs,
+): string {
   return getPrettyJSONString({
     locals: [
       {
-        region: "",
-        leader_node_ip: "",
-        node_count: "",
-        cndi_project_name: "",
+        aws_region,
+        leader_node_ip,
         bootstrap_token: "${random_password.generated_token.result}",
-        availability_zones: "${sort(setintersection(data.aws_ec2_instance_type_offerings.available_az_for_x-airflow-node_instance_type.locations,data.aws_ec2_instance_type_offerings.available_az_for_y-airflow-node_instance_type.locations,data.aws_ec2_instance_type_offerings.available_az_for_z-airflow-node_instance_type.locations))}",
-      },
+        // node_count: "", may be useful for az redundancy
+        // availability_zones: this used to be in the locals, now it's in data.tf.json
+       },
     ],
   });
 }

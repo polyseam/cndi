@@ -2,7 +2,7 @@ import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 import { CNDIConfig } from "src/types.ts";
-import { stageFile } from "../../../utils.ts";
+import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -19,14 +19,16 @@ import cndi_aws_route from "./cndi_aws_route.tf.json.ts";
 import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
 import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
+import cndi_aws_locals from "./locals.tf.json.ts";
 
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
   console.log('stageTerraformResourcesForAWS')
 
-  const region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
-
+  const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
+  const leaderName = getLeaderNodeNameFromConfig(config);
+  const leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     return stageFile(
@@ -43,7 +45,7 @@ export default async function stageTerraformResourcesForAWS(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_aws_lb_target_group_attachment.tf.json`
+        `cndi_aws_lb_target_group_attachment_${node.name}.tf.json`
       ),
       cndi_aws_instance(node, config)
     );
@@ -54,10 +56,14 @@ export default async function stageTerraformResourcesForAWS(
       ...stageNodes,
       ...stageLbTargetGroupAttachment,
       stageFile(
-        path.join("cndi", "terraform", "provider.tf.json"),
-        provider({
-          region,
+        path.join("cndi", "terraform", "locals.tf.json"), cndi_aws_locals({
+          leader_node_ip,
+          aws_region
         })
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "provider.tf.json"),
+        provider()
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),

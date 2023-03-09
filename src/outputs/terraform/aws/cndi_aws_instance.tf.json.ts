@@ -20,8 +20,8 @@ export default function getAWSComputeInstanceTFJSON(
   const device_name = "/dev/sda1";
   const volume_size = node?.volume_size || node?.size || DEFAULT_VOLUME_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
-  const subnet_id = `\${aws_subnet.subnet[0].id}`;
-  const vpc_security_group_ids = ["${aws_security_group.sg.id}"];
+  const subnet_id = `\${aws_subnet.cndi_aws_subnet[0].id}`;
+  const vpc_security_group_ids = ["${aws_security_group.cndi_aws_security_group.id}"];
   const ebs_block_device = [
     {
       device_name,
