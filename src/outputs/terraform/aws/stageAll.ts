@@ -6,6 +6,7 @@ import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
+import cndi_aws_lb_target_group_attachment from "./cndi_aws_lb_target_group_attachment.tf.json.ts"
 import cndi_aws_instance from "./cndi_aws_instance.tf.json.ts"
 import cndi_aws_internet_gateway from "./cndi_aws_internet_gateway.tf.json.ts";
 import cndi_aws_lb_listener_http from "./cndi_aws_lb_listener_http.tf.json.ts";
@@ -47,7 +48,7 @@ export default async function stageTerraformResourcesForAWS(
         "terraform",
         `cndi_aws_lb_target_group_attachment_${node.name}.tf.json`
       ),
-      cndi_aws_instance(node, config)
+      cndi_aws_lb_target_group_attachment(node)
     );
   });
   // stage all the terraform files at once

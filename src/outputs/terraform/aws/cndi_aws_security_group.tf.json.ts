@@ -77,7 +77,7 @@ export default function getAWSSecurityGroupTFJSON(): string {
                 self: false,
               },
             ],
-            vpc_id: "${aws_vpc.vpc.id}",
+            vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
             tags: {
               Name: "SecurityGroup",
               CNDIProject: "${local.cndi_project_name}",
