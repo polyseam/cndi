@@ -1,12 +1,20 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getAzureLocalsTFJSON(): string {
+
+interface GetAzureLocalsTFJSONArg {
+  azure_location: string;
+  leader_node_ip: string;
+}
+
+export default function getAzureLocalsTFJSON({
+  azure_location,
+  leader_node_ip
+}: GetAzureLocalsTFJSONArg): string {
   return getPrettyJSONString({
     locals: [
       {
-        location: "",
-        cndi_project_name: "",
-        leader_node_ip: "",
+        azure_location,
+        leader_node_ip,
         bootstrap_token: "${random_password.generated_token.result}",
       },
     ],
