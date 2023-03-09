@@ -6,6 +6,7 @@ import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
+
 import cndi_google_compute_firewall_external from "./cndi_google_compute_firewall_external.tf.json.ts";
 import cndi_google_compute_firewall_internal from "./cndi_google_compute_firewall_internal.tf.json.ts";
 import cndi_google_compute_forwarding_rule from "./cndi_google_compute_forwarding_rule.tf.json.ts";
@@ -23,7 +24,7 @@ import cndi_google_locals from "./locals.tf.json.ts";
 
 export default async function stageTerraformResourcesForGCP(
   config: CNDIConfig,
-  options: { output: string; initializing: boolean }
+  options: { output: string; initializing: boolean },
 ) {
   console.log("stageTerraformResourcesForGCP");
   const dotEnvPath = path.join(options.output, ".env");
@@ -32,7 +33,8 @@ export default async function stageTerraformResourcesForGCP(
 
   const leaderName = getLeaderNodeNameFromConfig(config);
 
-  const leader_node_ip = `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
+  const leader_node_ip =
+    `\${google_compute_instance.${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
     console.log("google credentials are missing");
@@ -51,17 +53,21 @@ export default async function stageTerraformResourcesForGCP(
     if (googleCredentials === placeholder) {
       console.log(
         colors.yellow(
-          `\n\n${colors.brightRed(
-            "ERROR"
-          )}: GOOGLE_CREDENTIALS not found in environment`
-        )
+          `\n\n${
+            colors.brightRed(
+              "ERROR",
+            )
+          }: GOOGLE_CREDENTIALS not found in environment`,
+        ),
       );
       console.log(
         `You need to replace `,
         colors.cyan(placeholder),
-        `with the desired value in "${dotEnvPath}"\nthen run ${colors.green(
-          "cndi ow"
-        )}\n`
+        `with the desired value in "${dotEnvPath}"\nthen run ${
+          colors.green(
+            "cndi ow",
+          )
+        }\n`,
       );
       Deno.exit(options.initializing ? 0 : 1);
     }
@@ -74,9 +80,9 @@ export default async function stageTerraformResourcesForGCP(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_google_compute_instance.tf.json`
+        `${node.name}.cndi_google_compute_instance.tf.json`,
       ),
-      cndi_google_compute_instance(node, config)
+      cndi_google_compute_instance(node, config),
     );
   });
 
@@ -85,9 +91,9 @@ export default async function stageTerraformResourcesForGCP(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_google_compute_disk.tf.json`
+        `${node.name}.cndi_google_compute_disk.tf.json`,
       ),
-      cndi_google_compute_disk(node)
+      cndi_google_compute_disk(node),
     );
   });
 
@@ -98,96 +104,94 @@ export default async function stageTerraformResourcesForGCP(
       ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_google_locals({ gcp_region, leader_node_ip })
+        cndi_google_locals({ gcp_region, leader_node_ip }),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider({
-          region: "local.project_id",
           project_id: parsedJSONServiceAccountKey.project_id,
-          zone: "local.gcp_zone",
-        })
+        }),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
-        terraform()
+        terraform(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_project_service_compute.tf.json"
+          "cndi_google_project_service_compute.tf.json",
         ),
-        cndi_google_project_service_compute()
+        cndi_google_project_service_compute(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_project_service_cloudresourcemanager.tf.json"
+          "cndi_google_project_service_cloudresourcemanager.tf.json",
         ),
-        cndi_google_project_service_cloudresourcemanager()
+        cndi_google_project_service_cloudresourcemanager(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_google_compute_network.tf.json"),
-        cndi_google_compute_network()
+        cndi_google_compute_network(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_subnetwork.tf.json"
+          "cndi_google_compute_subnetwork.tf.json",
         ),
-        cndi_google_compute_subnetwork()
+        cndi_google_compute_subnetwork(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_firewall_external.tf.json"
+          "cndi_google_compute_firewall_external.tf.json",
         ),
-        cndi_google_compute_firewall_external()
+        cndi_google_compute_firewall_external(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_firewall_internal.tf.json"
+          "cndi_google_compute_firewall_internal.tf.json",
         ),
-        cndi_google_compute_firewall_internal()
+        cndi_google_compute_firewall_internal(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_google_compute_router.tf.json"),
-        cndi_google_compute_router()
+        cndi_google_compute_router(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_router_nat.tf.json"
+          "cndi_google_compute_router_nat.tf.json",
         ),
-        cndi_google_compute_router_nat()
+        cndi_google_compute_router_nat(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_google_forwarding_rule.tf.json"),
-        cndi_google_compute_forwarding_rule()
+        cndi_google_compute_forwarding_rule(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_instance_group.tf.json"
+          "cndi_google_compute_instance_group.tf.json",
         ),
-        cndi_google_compute_instance_group(config.infrastructure.cndi.nodes)
+        cndi_google_compute_instance_group(config.infrastructure.cndi.nodes),
       ),
 
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_google_compute_region_health_check.tf.json"
+          "cndi_google_compute_region_health_check.tf.json",
         ),
-        cndi_google_compute_region_health_check()
+        cndi_google_compute_region_health_check(),
       ),
     ]);
   } catch (e) {
