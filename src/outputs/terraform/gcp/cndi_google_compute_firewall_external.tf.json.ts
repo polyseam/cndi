@@ -25,7 +25,8 @@ export default function getGCPComputeFirewallExternalTFJSON(): string {
       description: "Security firewall",
       direction: "INGRESS",
       name: "cndi-allow-external-traffic",
-      network: "${google_compute_network.cndi_google_compute_network.self_link}",
+      network:
+        "${google_compute_network.cndi_google_compute_network.self_link}",
       source_ranges: ["0.0.0.0/0"],
     },
     "cndi_google_compute_firewall_external",

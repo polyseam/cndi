@@ -11,7 +11,7 @@ export default function getAWSInternetGatewayTFJSON(): string {
           },
           vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
         },
-      }
+      },
     },
   });
 }

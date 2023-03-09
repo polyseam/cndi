@@ -8,7 +8,10 @@ export default function getAWSLbTFJSON(): string {
           internal: false,
           load_balancer_type: "network",
           subnets: "${aws_subnet.cndi_aws_subnet[*].id}",
-          tags: { Name: "NetworkLB", CNDIProject: "${local.cndi_project_name}" },
+          tags: {
+            Name: "NetworkLB",
+            CNDIProject: "${local.cndi_project_name}",
+          },
         },
       },
     },

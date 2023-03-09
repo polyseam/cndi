@@ -2,7 +2,7 @@ import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
-import { NODE_KIND, NodeKind, BaseNodeItemSpec, CNDIConfig } from "./types.ts";
+import { BaseNodeItemSpec, CNDIConfig, NODE_KIND, NodeKind } from "./types.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
@@ -17,14 +17,16 @@ function getPrettyJSONString(object: unknown) {
 
 function getLeaderNodeNameFromConfig(config: CNDIConfig) {
   const leaderNode = config.infrastructure.cndi.nodes.find(
-    (node: BaseNodeItemSpec) => node.role === "leader"
-  )
+    (node: BaseNodeItemSpec) => node.role === "leader",
+  );
   if (!leaderNode) {
     console.log('no node with role "leader" node found in config!');
     Deno.exit(1);
   }
-  if(!leaderNode.name) {
-    console.log('no name found for node with role "leader" node found in config!');
+  if (!leaderNode.name) {
+    console.log(
+      'no name found for node with role "leader" node found in config!',
+    );
     Deno.exit(1);
   }
   return leaderNode.name;
@@ -205,6 +207,7 @@ export {
   getCndiInstallPath,
   getDefaultVmTypeForKind,
   getFileSuffixForPlatform,
+  getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,
   getPathToOpenSSLForPlatform,
   getPathToTerraformBinary,
@@ -212,7 +215,6 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFResource,
-  getLeaderNodeNameFromConfig,
   loadJSONC,
   persistStagedFiles,
   stageFile,

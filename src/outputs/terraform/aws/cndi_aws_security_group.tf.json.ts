@@ -56,7 +56,8 @@ export default function getAWSSecurityGroupTFJSON(): string {
               },
               {
                 cidr_blocks: ["0.0.0.0/0"],
-                description: "Kubernetes API server port to access cluster from local machine",
+                description:
+                  "Kubernetes API server port to access cluster from local machine",
                 from_port: "${var.sg_ingress_k8s_API}",
                 protocol: "${var.sg_ingress_proto}",
                 to_port: "${var.sg_ingress_k8s_API}",
@@ -67,7 +68,8 @@ export default function getAWSSecurityGroupTFJSON(): string {
               },
               {
                 cidr_blocks: ["10.0.0.0/16"],
-                description: "Inbound rule that enables traffic between EC2 instances in the VPC ",
+                description:
+                  "Inbound rule that enables traffic between EC2 instances in the VPC ",
                 from_port: "${var.sg_ingress_all}",
                 protocol: "${var.sg_ingress_proto_all}",
                 to_port: "${var.sg_ingress_all}",

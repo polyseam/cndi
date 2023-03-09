@@ -1,7 +1,6 @@
-import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { getPrettyJSONString } from "src/utils.ts";
 
 export default function getAzureLbProbeTFJSON(): string {
-
   return getPrettyJSONString({
     resource: {
       azurerm_lb_probe: {

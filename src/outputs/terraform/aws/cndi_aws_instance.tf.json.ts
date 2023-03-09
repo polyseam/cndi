@@ -1,13 +1,13 @@
 import {
+  getLeaderNodeNameFromConfig,
   getPrettyJSONString,
   getTFResource,
-  getLeaderNodeNameFromConfig,
 } from "src/utils.ts";
 import { AWSNodeItemSpec, CNDIConfig } from "../../../types.ts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSNodeItemSpec,
-  config: CNDIConfig
+  config: CNDIConfig,
 ): string {
   const { name, role } = node;
   const leaderNodeName = getLeaderNodeNameFromConfig(config);
@@ -15,13 +15,16 @@ export default function getAWSComputeInstanceTFJSON(
   const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const DEFAULT_VOLUME_SIZE = 100;
   const ami = node?.ami || DEFAULT_AMI;
-  const instance_type = node?.instance_type || node?.machine_type || DEFAULT_INSTANCE_TYPE;
+  const instance_type = node?.instance_type || node?.machine_type ||
+    DEFAULT_INSTANCE_TYPE;
   const delete_on_termination = false;
   const device_name = "/dev/sda1";
   const volume_size = node?.volume_size || node?.size || DEFAULT_VOLUME_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
   const subnet_id = `\${aws_subnet.cndi_aws_subnet[0].id}`;
-  const vpc_security_group_ids = ["${aws_security_group.cndi_aws_security_group.id}"];
+  const vpc_security_group_ids = [
+    "${aws_security_group.cndi_aws_security_group.id}",
+  ];
   const ebs_block_device = [
     {
       device_name,
@@ -37,7 +40,7 @@ export default function getAWSComputeInstanceTFJSON(
     '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
   const user_data = role === "leader" ? leader_user_data : controller_user_data;
   const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
-  
+
   const resource = getTFResource(
     "aws_instance",
     {
@@ -54,13 +57,14 @@ export default function getAWSComputeInstanceTFJSON(
           subnet_id,
           vpc_security_group_ids,
           user_data,
-          depends_on
+          depends_on,
         },
       ],
-    }, `cndi_aws_instance_${node.name}`
+    },
+    `cndi_aws_instance_${node.name}`,
   ).resource;
 
   return getPrettyJSONString({
-    resource
+    resource,
   });
 }

@@ -10,7 +10,8 @@ export default function getAzureLbRuleTFJSON(): string {
               "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}",
             ],
             backend_port: 80,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 80,
             loadbalancer_id: "${azurerm_lb.cndi_azurerm_lb.id}",
             name: "HTTP",
@@ -21,10 +22,11 @@ export default function getAzureLbRuleTFJSON(): string {
         HTTPS: [
           {
             backend_address_pool_ids: [
-               "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}",
+              "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}",
             ],
             backend_port: 443,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 443,
             loadbalancer_id: "${azurerm_lb.cndi_azurerm_lb.id}",
             name: "HTTPS",
@@ -38,7 +40,8 @@ export default function getAzureLbRuleTFJSON(): string {
               "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}",
             ],
             backend_port: 22,
-            frontend_ip_configuration_name: "cndi_load_balancer_public_ip_address",
+            frontend_ip_configuration_name:
+              "cndi_load_balancer_public_ip_address",
             frontend_port: 22,
             loadbalancer_id: "${azurerm_lb.cndi_azurerm_lb.id}",
             name: "SSH",

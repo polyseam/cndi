@@ -20,8 +20,6 @@ import controllerBootstrapTerrformTemplate from "../bootstrap/controller_bootstr
 import leaderBootstrapTerraformTemplate from "../bootstrap/leader_bootstrap_cndi.sh.ts";
 
 import getApplicationManifest from "../outputs/application-manifest.ts";
-import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
-import getTerraformRootFile from "../outputs/terraform-root-file.ts";
 import RootChartYaml from "../outputs/root-chart.ts";
 import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
 
@@ -30,7 +28,6 @@ import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerrafo
 import {
   BaseNodeItemSpec,
   CNDIConfig,
-  DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
 } from "../types.ts";
@@ -193,10 +190,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   const { nodes } = config.infrastructure.cndi;
 
-  const deployment_target_configuration =
-    config.infrastructure.cndi.deployment_target_configuration ||
-    ({} as DeploymentTargetConfiguration);
-
   const leaders = nodes.filter((node) => node.role === "leader");
 
   if (leaders.length !== 1) {
@@ -206,8 +199,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     );
     Deno.exit(1);
   }
-
-  const leader = leaders[0];
 
   const requiredProviders = new Set(
     nodes.map((node: BaseNodeItemSpec, index: number) => {

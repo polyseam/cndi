@@ -1,7 +1,4 @@
-import {
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { GCPNodeItemSpec } from "../../../types.ts";
 
 export default function getGCPComputeInstanceTFJSON(
@@ -21,12 +18,14 @@ export default function getGCPComputeInstanceTFJSON(
       image,
       size,
       type,
-      depends_on: ["google_project_service.cndi_google_project_service_compute"],
+      depends_on: [
+        "google_project_service.cndi_google_project_service_compute",
+      ],
     },
-    `cndi_google_compute_disk_${node.name}`
+    `cndi_google_compute_disk_${node.name}`,
   ).resource;
 
   return getPrettyJSONString({
-    resource
+    resource,
   });
 }

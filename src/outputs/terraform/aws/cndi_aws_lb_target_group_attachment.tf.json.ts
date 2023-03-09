@@ -1,10 +1,5 @@
-import {
-  getPrettyJSONString,
-
-} from "src/utils.ts";
-import {
-  AWSNodeItemSpec
-} from "../../../types.ts";
+import { getPrettyJSONString } from "src/utils.ts";
+import { AWSNodeItemSpec } from "../../../types.ts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSNodeItemSpec,
@@ -15,19 +10,21 @@ export default function getAWSComputeInstanceTFJSON(
     [`aws_lb_target_group_attachment_${name}`]: {
       [`cndi_aws_lb_target_group_attachment_https_${name}`]: [
         {
-          target_group_arn: "${aws_lb_target_group.cndi_aws_lb_target_group_https.arn}",
+          target_group_arn:
+            "${aws_lb_target_group.cndi_aws_lb_target_group_https.arn}",
           target_id,
         },
       ],
       [`cndi_aws_lb_target_group_attachment_http_${name}`]: [
         {
-          target_group_arn: "${aws_lb_target_group.cndi_aws_lb_target_group_http.arn}",
+          target_group_arn:
+            "${aws_lb_target_group.cndi_aws_lb_target_group_http.arn}",
           target_id,
         },
       ],
-    }
-  }
+    },
+  };
   return getPrettyJSONString({
-    resource
+    resource,
   });
 }

@@ -8,12 +8,15 @@ export default function getAzureLbTFJSON(): string {
           frontend_ip_configuration: [
             {
               name: "cndi_load_balancer_public_ip",
-              public_ip_address_id: "${azurerm_public_ip.cndi_azurerm_lb_public_ip_address.id}",
+              public_ip_address_id:
+                "${azurerm_public_ip.cndi_azurerm_lb_public_ip_address.id}",
             },
           ],
-          location: "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
+          location:
+            "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
           name: "cndi_azurerm_lb",
-          resource_group_name: "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
           sku: "Standard",
           sku_tier: "Regional",
           tags: { CNDIProject: "${local.cndi_project_name}" },

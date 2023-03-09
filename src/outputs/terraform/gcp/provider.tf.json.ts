@@ -14,7 +14,7 @@ export default function getGCPComputeEngineProviderTFJSON(
       google: {
         project: project_id,
         region: "${local.gcp_region}",
-        zone: "${local.gcp_region}-a"
+        zone: "${local.gcp_region}-a",
       },
     },
   });

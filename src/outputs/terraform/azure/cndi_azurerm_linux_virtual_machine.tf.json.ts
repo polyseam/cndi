@@ -1,13 +1,13 @@
 import {
+  getLeaderNodeNameFromConfig,
   getPrettyJSONString,
   getTFResource,
-  getLeaderNodeNameFromConfig,
 } from "src/utils.ts";
 import { AzureNodeItemSpec, CNDIConfig } from "../../../types.ts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
-  config: CNDIConfig
+  config: CNDIConfig,
 ): string {
   const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const { name, role } = node;
@@ -15,9 +15,11 @@ export default function getAzureComputeInstanceTFJSON(
   const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
   const DEFAULT_SIZE = 130; // The size of the image in gigabytes\
   const image = node?.image || DEFAULT_IMAGE;
-  let machine_type = node?.machine_type || node?.instance_type || DEFAULT_MACHINE_TYPE;
+  let machine_type = node?.machine_type || node?.instance_type ||
+    DEFAULT_MACHINE_TYPE;
   let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
-  const leaderComputeInstance = `cndi_google_compute_instance_${leaderNodeName}`;
+  const leaderComputeInstance =
+    `cndi_google_compute_instance_${leaderNodeName}`;
   if (node?.size && typeof node.size === "string") {
     machine_type = node.size;
   }
@@ -88,14 +90,13 @@ export default function getAzureComputeInstanceTFJSON(
         source_image_reference,
         tags,
         user_data,
-        depends_on
+        depends_on,
       },
     },
-    `cndi_azurerm_linux_virtual_machine_${node.name}`
+    `cndi_azurerm_linux_virtual_machine_${node.name}`,
   ).resource;
 
-
   return getPrettyJSONString({
-    resource
+    resource,
   });
 }

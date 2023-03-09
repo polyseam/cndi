@@ -16,7 +16,7 @@ export default function getAWSLocalsTFJSON(
         bootstrap_token: "${random_password.generated_token.result}",
         // node_count: "", may be useful for az redundancy
         // availability_zones: this used to be in the locals, now it's in data.tf.json
-       },
+      },
     ],
   });
 }

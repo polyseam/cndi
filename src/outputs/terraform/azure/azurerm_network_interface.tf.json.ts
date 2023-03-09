@@ -1,7 +1,4 @@
-import {
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { AzureNodeItemSpec } from "../../../types.ts";
 
 export default function getAzureComputeInstanceTFJSON(
@@ -18,16 +15,17 @@ export default function getAzureComputeInstanceTFJSON(
           subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
         },
       ],
-      location: "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
+      location:
+        "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
       name: `cndi_azurerm_network_interface_${name}`,
-      resource_group_name: "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+      resource_group_name:
+        "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
       tags: { cndi_project_name: "${local.cndi_project_name}" },
     },
-    `azurerm_network_interface_${node.name}`
+    `azurerm_network_interface_${node.name}`,
   ).resource;
 
-
   return getPrettyJSONString({
-    resource
+    resource,
   });
 }

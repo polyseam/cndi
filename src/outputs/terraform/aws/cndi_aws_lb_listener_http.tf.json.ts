@@ -8,7 +8,8 @@ export default function getAWSLbListenerTFJSON(): string {
           {
             default_action: [
               {
-                target_group_arn: "${aws_lb_target_group.cndi_aws_lb_target_group_http.arn}",
+                target_group_arn:
+                  "${aws_lb_target_group.cndi_aws_lb_target_group_http.arn}",
                 type: "forward",
               },
             ],
@@ -23,6 +24,5 @@ export default function getAWSLbListenerTFJSON(): string {
         ],
       },
     },
-
   });
 }

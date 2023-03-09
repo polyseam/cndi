@@ -7,7 +7,7 @@ interface GetGCPLocalsTFJSONArg {
 
 export default function getGCPLocalsTFJSON({
   gcp_region,
-  leader_node_ip
+  leader_node_ip,
 }: GetGCPLocalsTFJSONArg): string {
   return getPrettyJSONString({
     locals: [
