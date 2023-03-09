@@ -50,7 +50,7 @@ export default function getAWSDataTFJSON(
     )
   }))}`;
 
-  return getPrettyJSONString(data);
+  return getPrettyJSONString({ data });
   //   data: [
   //     {
   //       aws_ec2_instance_type_offerings: [

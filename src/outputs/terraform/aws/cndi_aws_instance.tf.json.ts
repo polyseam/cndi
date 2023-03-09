@@ -56,7 +56,6 @@ export default function getAWSComputeInstanceTFJSON(
       vpc_security_group_ids,
       user_data,
       depends_on,
-
     },
     `${node.name}`,
   ).resource;

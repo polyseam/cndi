@@ -1,7 +1,7 @@
 import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
 import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 
 import data from "./data.tf.json.ts";
@@ -59,6 +59,10 @@ export default async function stageTerraformResourcesForAWS(
     await Promise.all([
       ...stageNodes,
       ...stageLbTargetGroupAttachment,
+      stageFile(
+        path.join("cndi", "terraform", "data.tf.json"),
+        data(config.infrastructure.cndi.nodes as Array<AWSNodeItemSpec>),
+      ),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
         cndi_aws_locals({
