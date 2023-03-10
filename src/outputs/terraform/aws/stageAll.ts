@@ -26,8 +26,6 @@ import cndi_aws_locals from "./locals.tf.json.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
-  console.log("stageTerraformResourcesForAWS");
-
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
   const leaderName = getLeaderNodeNameFromConfig(config);
   const leader_node_ip =

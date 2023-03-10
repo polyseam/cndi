@@ -27,7 +27,6 @@ export default async function stageTerraformResourcesForGCP(
   config: CNDIConfig,
   options: { output: string; initializing: boolean },
 ) {
-  console.log("stageTerraformResourcesForGCP");
   const dotEnvPath = path.join(options.output, ".env");
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id

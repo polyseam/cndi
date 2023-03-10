@@ -27,7 +27,6 @@ import cndi_azurerm_locals from "./locals.tf.json.ts";
 export default async function stageTerraformResourcesForAzure(
   config: CNDIConfig,
 ) {
-  console.log("stageTerraformResourcesForAzure");
   const azure_location = (Deno.env.get("ARM_REGION") as string) || "eastus";
 
   const leaderName = getLeaderNodeNameFromConfig(config);
