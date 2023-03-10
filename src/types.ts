@@ -437,6 +437,27 @@ interface DeploymentTargetConfiguration {
   azure: AzureDeploymentTargetConfiguration;
 }
 
+type TFBlocks = {
+  terraform?: {
+    [key: string]: unknown;
+  };
+  provider?: {
+    [key: string]: unknown;
+  };
+  variable?: {
+    [key: string]: unknown;
+  };
+  locals?: {
+    [key: string]: unknown;
+  };
+  data?: {
+    [key: string]: unknown;
+  };
+  resource?: {
+    [key: string]: unknown;
+  };
+};
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
@@ -446,6 +467,7 @@ interface CNDIConfig {
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
     };
+    terraform?: TFBlocks;
   };
   applications: {
     [key: string]: CNDIApplicationSpec;
@@ -1250,4 +1272,5 @@ export type {
   SealedSecretsKeys,
   TerraformDependencies,
   TerraformRootFileData,
+  TFBlocks,
 };

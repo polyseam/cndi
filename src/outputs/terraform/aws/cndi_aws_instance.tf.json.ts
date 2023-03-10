@@ -57,7 +57,7 @@ export default function getAWSComputeInstanceTFJSON(
       user_data,
       depends_on,
     },
-    `${node.name}`,
+    `aws_instance.cndi_aws_instance_${node.name}`,
   ).resource;
 
   return getPrettyJSONString({

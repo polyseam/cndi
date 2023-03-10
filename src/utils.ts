@@ -2,7 +2,13 @@ import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
-import { BaseNodeItemSpec, CNDIConfig, NODE_KIND, NodeKind } from "./types.ts";
+import {
+  BaseNodeItemSpec,
+  CNDIConfig,
+  NODE_KIND,
+  NodeKind,
+  TFBlocks,
+} from "./types.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
@@ -47,6 +53,110 @@ function getTFResource(
       },
     },
   };
+}
+
+async function patchAndStageTerraformResources(
+  resourceObj: Record<string, unknown>,
+) {
+  for (const key in resourceObj) {
+    const suffix = `.tf.json`;
+    const filename = `${key}${suffix}`;
+    const content = resourceObj[key] as Record<string, unknown>;
+
+    let originalContent = {};
+
+    try {
+      originalContent = await loadJSONC(
+        path.join("cndi", "terraform", filename),
+      ) as Record<string, unknown>;
+    } catch (error) {
+      // there was no pre-existing resource with this name
+      console.log("no pre-existing resource with this name");
+      console.log(error);
+    }
+
+    const newContent = {
+      ...originalContent,
+      ...content,
+    };
+
+    await stageFile(
+      path.join("cndi", "terraform", filename),
+      getPrettyJSONString(newContent),
+    );
+  }
+}
+
+async function mergeAndStageTerraformObj(
+  terraformBlockName: string,
+  blockContentsPatch: Record<string, unknown>,
+) {
+  const pathToTFBlock = path.join(
+    "cndi",
+    "terraform",
+    `${terraformBlockName}.tf.json`,
+  );
+  let newBlock = {};
+  try {
+    const originalBlock = await loadJSONC(pathToTFBlock) as Record<
+      string,
+      unknown
+    >;
+    newBlock = {
+      ...originalBlock,
+      ...blockContentsPatch,
+    };
+  } catch {
+    // there was no pre-existing block with this name
+    newBlock = blockContentsPatch;
+  }
+
+  await stageFile(pathToTFBlock, getPrettyJSONString(newBlock));
+}
+
+async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
+  if (!config?.infrastructure?.terraform) return;
+  const terraformBlocks = config.infrastructure.terraform as TFBlocks;
+  const workload: Array<Promise<void>> = [];
+
+  for (const tftype in terraformBlocks) { // terraform[key]: resource, data, provider, etc.\
+    if (tftype === "resource") {
+      const resources = config.infrastructure?.terraform?.resource;
+
+      const blockContainsResources = resources &&
+        Object.keys(resources).length &&
+        typeof resources === "object";
+
+      if (
+        blockContainsResources
+      ) {
+        workload.push(
+          patchAndStageTerraformResources(
+            resources,
+          ),
+        );
+      }
+    } else {
+      const t = tftype as keyof TFBlocks;
+      const contentObj = config.infrastructure?.terraform?.[t];
+
+      const blockContainsEntries = contentObj &&
+        Object.keys(contentObj).length &&
+        typeof contentObj === "object";
+
+      if (
+        blockContainsEntries
+      ) {
+        workload.push(mergeAndStageTerraformObj(tftype, contentObj));
+      }
+    }
+  }
+  try {
+    await Promise.all(workload);
+  } catch (error) {
+    console.log("error patching terraform files with config");
+    console.log(error);
+  }
 }
 
 function getPathToTerraformBinary() {
@@ -216,6 +326,7 @@ export {
   getStagingDir,
   getTFResource,
   loadJSONC,
+  patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   stageFile,
   stageFileSync,

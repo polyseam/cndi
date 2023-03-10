@@ -5,7 +5,7 @@ export default function getVariablesTFJSON(
 ): string {
   return getPrettyJSONString({
     locals: [{
-      cndi_project_name: cndi_project_name,
+      cndi_project_name,
     }],
   });
 }
