@@ -132,10 +132,7 @@ async function mergeAndStageTerraformObj(
       string,
       unknown
     >;
-    newBlock = {
-      ...originalBlock,
-      ...blockContentsPatch,
-    };
+    newBlock = deepMerge(originalBlock, blockContentsPatch);
   } catch {
     // there was no pre-existing block with this name
     newBlock = blockContentsPatch;
