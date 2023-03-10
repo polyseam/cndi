@@ -115,10 +115,26 @@ async function patchAndStageTerraformResources(
   }
 }
 
+const terraformBlockTypeNames = [
+  "terraform",
+  "provider",
+  "variable",
+  "output",
+  "locals",
+  "resource",
+  "data",
+  "module",
+];
+
 async function mergeAndStageTerraformObj(
   terraformBlockName: string,
   blockContentsPatch: Record<string, unknown>,
 ) {
+  if (!terraformBlockTypeNames.includes(terraformBlockName)) {
+    console.log("there is no terraform block type named", terraformBlockName);
+    Deno.exit(1);
+  }
+
   const pathToTFBlock = path.join(
     "cndi",
     "terraform",
@@ -132,10 +148,7 @@ async function mergeAndStageTerraformObj(
       string,
       unknown
     >;
-    newBlock = {
-      ...originalBlock,
-      ...blockContentsPatch,
-    };
+    newBlock = deepMerge(originalBlock, blockContentsPatch);
   } catch {
     // there was no pre-existing block with this name
     newBlock = blockContentsPatch;

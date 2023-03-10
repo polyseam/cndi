@@ -456,6 +456,9 @@ type TFBlocks = {
   resource?: {
     [key: string]: unknown;
   };
+  module?: {
+    [key: string]: unknown;
+  };
 };
 
 // incomplete type, config will have more options
