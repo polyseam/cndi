@@ -1,18 +1,15 @@
 import { getPrettyJSONString } from "../../../utils.ts";
+import getTerraform from "../shared/basicTerraform.ts";
 
 export default function getGCPTerraformTFJSON() {
-  return getPrettyJSONString({
-    terraform: [
-      {
-        required_providers: [
-          {
-            google: {
-              source: "hashicorp/google",
-              version: "~> 4.44",
-            },
-          },
-        ],
-      },
-    ],
+  const terraform = getTerraform();
+
+  terraform.required_providers.push({
+    google: {
+      source: "hashicorp/google",
+      version: "~> 4.44",
+    },
   });
+
+  return getPrettyJSONString(terraform);
 }

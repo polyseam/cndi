@@ -1,15 +1,10 @@
-import { getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 export default function getAzureResourceGroupTFJSON(): string {
-  return getPrettyJSONString({
-    resource: {
-      azurerm_resource_group: {
-        cndi_azurerm_resource_group: {
-          location: "${local.azure_location}",
-          name: "${local.cndi_project_name}",
-          tags: { CNDIProject: "${local.cndi_project_name}" },
-        },
-      },
-    },
+  const resource = getTFResource("azurerm_resource_group", {
+    location: "${local.azure_location}",
+    name: "${local.cndi_project_name}",
+    tags: { CNDIProject: "${local.cndi_project_name}" },
   });
+  return getPrettyJSONString(resource);
 }

@@ -1,18 +1,15 @@
 import { getPrettyJSONString } from "../../../utils.ts";
+import getTerraform from "../shared/basicTerraform.ts";
 
 export default function getAzureTerraformTFJSON() {
-  return getPrettyJSONString({
-    terraform: [
-      {
-        required_providers: [
-          {
-            azurerm: {
-              source: "hashicorp/azurerm",
-              version: "~> 3.0.2",
-            },
-          },
-        ],
-      },
-    ],
+  const terraform = getTerraform();
+
+  terraform.required_providers.push({
+    azurerm: {
+      source: "hashicorp/azurerm",
+      version: "~> 3.0.2",
+    },
   });
+
+  return getPrettyJSONString(terraform);
 }

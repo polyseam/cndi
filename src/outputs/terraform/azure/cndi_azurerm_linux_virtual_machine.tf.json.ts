@@ -31,7 +31,8 @@ export default function getAzureComputeInstanceTFJSON(
   const resource_group_name =
     "${azurerm_resource_group.cndi_azurerm_resource_group.name}";
 
-  const location = "${azurerm_resource_group.cndi_azurerm_resource_group.location}";
+  const location =
+    "${azurerm_resource_group.cndi_azurerm_resource_group.location}";
 
   const admin_username = "ubuntu";
   const admin_password = "Password123";
@@ -76,27 +77,23 @@ export default function getAzureComputeInstanceTFJSON(
   const resource = getTFResource(
     "azurerm_linux_virtual_machine",
     {
-      
-        admin_username,
-        admin_password,
-        disable_password_authentication,
-        zone,
-        location,
-        name,
-        network_interface_ids,
-        os_disk,
-        resource_group_name,
-        size: machine_type,
-        source_image_reference,
-        tags,
-        user_data,
-        depends_on,
-    
+      admin_username,
+      admin_password,
+      disable_password_authentication,
+      zone,
+      location,
+      name,
+      network_interface_ids,
+      os_disk,
+      resource_group_name,
+      size: machine_type,
+      source_image_reference,
+      tags,
+      user_data,
+      depends_on,
     },
     `cndi_azurerm_linux_virtual_machine_${node.name}`,
-  ).resource;
+  );
 
-  return getPrettyJSONString({
-    resource,
-  });
+  return getPrettyJSONString(resource);
 }

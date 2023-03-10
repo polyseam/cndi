@@ -15,7 +15,6 @@ type TFData = [
 export default function getAWSDataTFJSON(
   nodes: Array<AWSNodeItemSpec>,
 ): string {
-
   const data: TFData = [{
     aws_ec2_instance_type_offerings: [
       {},
@@ -37,32 +36,5 @@ export default function getAWSDataTFJSON(
     ];
   });
 
-  return getPrettyJSONString({data});
-  //   data: [
-  //     {
-  //       aws_ec2_instance_type_offerings: [
-  //         {
-  //           "available_az_for_x-airflow-node_instance_type": [
-  //             {
-  //               filter: [{ name: "instance-type", values: ["m5a.large"] }],
-  //               location_type: "availability-zone",
-  //             },
-  //           ],
-  //           "available_az_for_y-airflow-node_instance_type": [
-  //             {
-  //               filter: [{ name: "instance-type", values: ["m5a.large"] }],
-  //               location_type: "availability-zone",
-  //             },
-  //           ],
-  //           "available_az_for_z-airflow-node_instance_type": [
-  //             {
-  //               filter: [{ name: "instance-type", values: ["m5a.large"] }],
-  //               location_type: "availability-zone",
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // });
+  return getPrettyJSONString({ data });
 }
