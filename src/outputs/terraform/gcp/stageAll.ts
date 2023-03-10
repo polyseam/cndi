@@ -80,7 +80,7 @@ export default async function stageTerraformResourcesForGCP(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_google_compute_instance.tf.json`,
+        `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
       cndi_google_compute_instance(node, config),
     )
@@ -91,7 +91,7 @@ export default async function stageTerraformResourcesForGCP(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_google_compute_disk.tf.json`,
+        `cndi_google_compute_disk_${node.name}.tf.json`,
       ),
       cndi_google_compute_disk(node),
     )

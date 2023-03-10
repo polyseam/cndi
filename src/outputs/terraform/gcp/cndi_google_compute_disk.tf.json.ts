@@ -4,7 +4,7 @@ import { GCPNodeItemSpec } from "../../../types.ts";
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
 ): string {
-  const name = { node };
+  const { name }=node ;
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const DEFAULT_SIZE = 100; // The size of the disk in gigabytes
   const image = node?.image || DEFAULT_IMAGE;
