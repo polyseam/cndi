@@ -22,15 +22,13 @@ export default function getAWSLocalsTFJSON(
   }))}`;
 
   return getPrettyJSONString({
-    locals: [
-      {
-        aws_region,
-        leader_node_ip,
-        bootstrap_token: "${random_password.generated_token.result}",
-        availability_zones,
-        // node_count: "", may be useful for az redundancy
-        // availability_zones: this used to be in the locals, now it's in data.tf.json
-      },
-    ],
+    locals: {
+      aws_region,
+      leader_node_ip,
+      bootstrap_token: "${random_password.generated_token.result}",
+      availability_zones,
+      // node_count: "", may be useful for az redundancy
+      // availability_zones: this used to be in the locals, now it's in data.tf.json
+    },
   });
 }

@@ -10,12 +10,10 @@ export default function getAzureLocalsTFJSON({
   leader_node_ip,
 }: GetAzureLocalsTFJSONArg): string {
   return getPrettyJSONString({
-    locals: [
-      {
-        azure_location,
-        leader_node_ip,
-        bootstrap_token: "${random_password.generated_token.result}",
-      },
-    ],
+    locals: {
+      azure_location,
+      leader_node_ip,
+      bootstrap_token: "${random_password.generated_token.result}",
+    },
   });
 }
