@@ -61,23 +61,26 @@ async function patchAndStageTerraformResources(
   for (const key in resourceObj) {
     const suffix = `.tf.json`;
     const filename = `${key}${suffix}`;
-    const content = resourceObj[key] as Record<string, unknown>;
 
-    let originalContent = {};
+    let originalContent = {
+      resource: {},
+    };
 
     try {
       originalContent = await loadJSONC(
         path.join("cndi", "terraform", filename),
-      ) as Record<string, unknown>;
-    } catch (error) {
+      ) as {
+        resource: Record<string, unknown>;
+      };
+    } catch {
       // there was no pre-existing resource with this name
-      console.log("no pre-existing resource with this name");
-      console.log(error);
     }
 
     const newContent = {
-      ...originalContent,
-      ...content,
+      resource: {
+        ...originalContent.resource,
+        ...resourceObj,
+      },
     };
 
     await stageFile(
