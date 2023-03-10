@@ -148,13 +148,20 @@ async function mergeAndStageTerraformObj(
       string,
       unknown
     >;
-    newBlock = deepMerge(originalBlock, blockContentsPatch);
+    const originalBlockContents = originalBlock?.[terraformBlockName];
+    newBlock = deepMerge(
+      originalBlockContents || {},
+      blockContentsPatch,
+    );
   } catch {
     // there was no pre-existing block with this name
     newBlock = blockContentsPatch;
   }
 
-  await stageFile(pathToTFBlock, getPrettyJSONString(newBlock));
+  await stageFile(
+    pathToTFBlock,
+    getPrettyJSONString({ [terraformBlockName]: newBlock }),
+  );
 }
 
 // MUST be called after all other terraform files have been staged
