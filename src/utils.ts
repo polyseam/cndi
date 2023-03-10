@@ -55,38 +55,61 @@ function getTFResource(
   };
 }
 
+const exampleResources = {
+  "aws_s3_bucket": {
+    "cndi_aws_s3_bucket": {
+      "bucket": "cndi-terraform-state",
+    },
+  },
+};
+
+interface TFResourceFileObject{
+  resource:{
+    [key:string]: Record<string, unknown>
+  }
+}
+
 async function patchAndStageTerraformResources(
   resourceObj: Record<string, unknown>,
 ) {
-  for (const key in resourceObj) {
-    const suffix = `.tf.json`;
-    const filename = `${key}${suffix}`;
+  const suffix = `.tf.json`;
+  for (const tfResourceType in resourceObj) { // aws_s3_bucket
+    const resourceTypeBlock = resourceObj[tfResourceType] as Record<
+      string,
+      never
+    >;
+    
+    for (const resourceName in resourceTypeBlock) { // cndi_aws_s3_bucket
+      const filename = `${resourceName}${suffix}`;
 
-    let originalContent = {
-      resource: {},
-    };
-
-    try {
-      originalContent = await loadJSONC(
-        path.join("cndi", "terraform", filename),
-      ) as {
-        resource: Record<string, unknown>;
+      let originalContent = {
+        resource: {},
       };
-    } catch {
-      // there was no pre-existing resource with this name
+
+      try {
+        originalContent = await loadJSONC(
+          path.join("cndi", "terraform", filename),
+        ) as unknown as TFResourceFileObject;
+      } catch {
+        // there was no pre-existing resource with this name
+      }
+
+      const newContent = {
+        resource: {
+          ...originalContent.resource,
+          ...resourceObj,
+        },
+      };
+
+      const newContentStr  = getPrettyJSONString(newContent);
+
+      console.log('patching', filename, 'with\n',newContentStr);
+
+      await stageFile(
+        path.join("cndi", "terraform", filename),
+        newContentStr,
+      );
     }
-
-    const newContent = {
-      resource: {
-        ...originalContent.resource,
-        ...resourceObj,
-      },
-    };
-
-    await stageFile(
-      path.join("cndi", "terraform", filename),
-      getPrettyJSONString(newContent),
-    );
   }
 }
 

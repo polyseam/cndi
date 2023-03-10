@@ -7,7 +7,8 @@ import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
-import cndi_aws_lb_target_group_attachment from "./cndi_aws_lb_target_group_attachment.tf.json.ts";
+import cndi_aws_lb_target_group_attachment_http from "./cndi_aws_lb_target_group_attachment_http.tf.json.ts";
+import cndi_aws_lb_target_group_attachment_https from "./cndi_aws_lb_target_group_attachment_https.tf.json.ts";
 import cndi_aws_instance from "./cndi_aws_instance.tf.json.ts";
 import cndi_aws_internet_gateway from "./cndi_aws_internet_gateway.tf.json.ts";
 import cndi_aws_lb_listener_http from "./cndi_aws_lb_listener_http.tf.json.ts";
@@ -42,15 +43,27 @@ export default async function stageTerraformResourcesForAWS(
     )
   );
 
-  const stageLbTargetGroupAttachment = config.infrastructure.cndi.nodes.map(
+  const stageLbTargetGroupAttachmentHTTP = config.infrastructure.cndi.nodes.map(
     (node) =>
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          `cndi_aws_lb_target_group_attachment_${node.name}.tf.json`,
+          `cndi_aws_lb_target_group_attachment_http_${node.name}.tf.json`,
         ),
-        cndi_aws_lb_target_group_attachment(node),
+        cndi_aws_lb_target_group_attachment_http(node),
+      ),
+  );
+
+  const stageLbTargetGroupAttachmentHTTPS = config.infrastructure.cndi.nodes.map(
+    (node) =>
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_aws_lb_target_group_attachment_https_${node.name}.tf.json`,
+        ),
+        cndi_aws_lb_target_group_attachment_https(node),
       ),
   );
 
@@ -58,7 +71,8 @@ export default async function stageTerraformResourcesForAWS(
   try {
     await Promise.all([
       ...stageNodes,
-      ...stageLbTargetGroupAttachment,
+      ...stageLbTargetGroupAttachmentHTTP,
+      ...stageLbTargetGroupAttachmentHTTPS,
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
         data(config.infrastructure.cndi.nodes as Array<AWSNodeItemSpec>),
