@@ -16,9 +16,6 @@ import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
 import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
 import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
-import controllerBootstrapTerrformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
-import leaderBootstrapTerraformTemplate from "../bootstrap/leader_bootstrap_cndi.sh.ts";
-
 import getApplicationManifest from "../outputs/application-manifest.ts";
 import RootChartYaml from "../outputs/root-chart.ts";
 import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
@@ -139,18 +136,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     // folder did not exist
   }
 
-  // write tftpl terraform template for the user_data bootstrap script
-
-  await stageFile(
-    path.join("cndi", "terraform", "leader_bootstrap_cndi.sh.tftpl"),
-    leaderBootstrapTerraformTemplate,
-  );
-
-  await stageFile(
-    path.join("cndi", "terraform", "controller_bootstrap_cndi.sh.tftpl"),
-    controllerBootstrapTerrformTemplate,
-  );
-
   // create temporary key for sealing secrets
   const tempPublicKeyFilePath = await Deno.makeTempFile();
   const dotEnvPath = path.join(options.output, ".env");
@@ -244,42 +229,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log();
     Deno.exit(1);
   }
-  // console.log('config', config)
-  // console.log('options', options)
+  
   await stageTerraformResourcesForConfig(config, options);
 
-  // // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  // const terraformRootFileContents = getTerraformRootFile({
-  //   initializing: !!options?.initializing,
-  //   cndi_project_name: config.project_name,
-  //   leaderName: leader.name,
-  //   requiredProviders,
-  //   nodes,
-  //   dotEnvPath,
-  // });
-
-  // if (terraformRootFileContents) {
-  //   await stageFile(
-  //     path.join("cndi", "terraform", "setup-cndi.tf.json"),
-  //     terraformRootFileContents,
-  //   );
-  // }
-
-  // // write terraform nodes files
-  // for (const node of nodes) {
-  //   const nodeFileContents: string = getTerraformNodeResource(
-  //     node,
-  //     deployment_target_configuration,
-  //     leader.name,
-  //   );
-
-  //   await stageFile(
-  //     path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
-  //     nodeFileContents,
-  //   );
-  // }
-
-  // write the cndi/cluster_manifests/Chart.yaml file
   await stageFile(
     path.join("cndi", "cluster_manifests", "Chart.yaml"),
     RootChartYaml,

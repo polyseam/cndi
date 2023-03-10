@@ -9,6 +9,9 @@ import join_token from "./shared/join_token.tf.json.ts";
 import variable from "./shared/variable.tf.json.ts";
 import global_locals from "./shared/global.locals.tf.json.ts";
 
+import leaderBootstrapTerraformTemplate from "src/bootstrap/leader_bootstrap_cndi.sh.ts";
+import controllerBootstrapTerrformTemplate from "src/bootstrap/controller_bootstrap_cndi.sh.ts";
+
 export default async function stageTerraformResourcesForConfig(
   config: CNDIConfig,
   options: { output: string; initializing: boolean },
@@ -31,14 +34,26 @@ export default async function stageTerraformResourcesForConfig(
   }
 
   await Promise.all([
+    // add global variables
     stageFile(path.join("cndi", "terraform", "variables.tf.json"), variable()),
+    // add global locals
     stageFile(
       path.join("cndi", "terraform", "global.locals.tf.json"),
       global_locals({ cndi_project_name }),
     ),
+    // write the microk8s join token generator
     stageFile(
       path.join("cndi", "terraform", "join_token.tf.json"),
       join_token(),
+    ),
+    // write tftpl terraform template for the user_data bootstrap script
+    stageFile(
+      path.join("cndi", "terraform", "leader_bootstrap_cndi.sh.tftpl"),
+      leaderBootstrapTerraformTemplate,
+    ),
+    stageFile(
+      path.join("cndi", "terraform", "controller_bootstrap_cndi.sh.tftpl"),
+      controllerBootstrapTerrformTemplate,
     ),
   ]);
 
