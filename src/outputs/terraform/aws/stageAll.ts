@@ -38,7 +38,7 @@ export default async function stageTerraformResourcesForAWS(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.cndi_aws_instance.tf.json`,
+        `cndi_aws_instance_${node.name}.tf.json`,
       ),
       cndi_aws_instance(node, config),
     )
