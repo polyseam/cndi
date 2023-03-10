@@ -4,7 +4,8 @@ export default function getGCPComputeRegionBackendServiceTFJSON(): string {
   const resource = getTFResource("google_compute_region_backend_service", {
     backend: [
       {
-        group: "${google_compute_instance_group.cndi_google_compute_instance_group.self_link}",
+        group:
+          "${google_compute_instance_group.cndi_google_compute_instance_group.self_link}",
       },
     ],
     health_checks: [

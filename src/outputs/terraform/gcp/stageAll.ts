@@ -54,18 +54,20 @@ export default async function stageTerraformResourcesForGCP(
     if (googleCredentials === placeholder) {
       console.log(
         colors.yellow(
-          `\n\n${colors.brightRed(
-            "ERROR",
-          )
+          `\n\n${
+            colors.brightRed(
+              "ERROR",
+            )
           }: GOOGLE_CREDENTIALS not found in environment`,
         ),
       );
       console.log(
         `You need to replace `,
         colors.cyan(placeholder),
-        `with the desired value in "${dotEnvPath}"\nthen run ${colors.green(
-          "cndi ow",
-        )
+        `with the desired value in "${dotEnvPath}"\nthen run ${
+          colors.green(
+            "cndi ow",
+          )
         }\n`,
       );
       Deno.exit(options.initializing ? 0 : 1);
@@ -74,27 +76,27 @@ export default async function stageTerraformResourcesForGCP(
     Deno.exit(1);
   }
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
-    return stageFile(
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
+    stageFile(
       path.join(
         "cndi",
         "terraform",
         `${node.name}.cndi_google_compute_instance.tf.json`,
       ),
       cndi_google_compute_instance(node, config),
-    );
-  });
+    )
+  );
 
-  const stageDisks = config.infrastructure.cndi.nodes.map((node) => {
-    return stageFile(
+  const stageDisks = config.infrastructure.cndi.nodes.map((node) =>
+    stageFile(
       path.join(
         "cndi",
         "terraform",
         `${node.name}.cndi_google_compute_disk.tf.json`,
       ),
       cndi_google_compute_disk(node),
-    );
-  });
+    )
+  );
 
   // stage all the terraform files at once
   try {
@@ -114,7 +116,8 @@ export default async function stageTerraformResourcesForGCP(
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
-      ), stageFile(
+      ),
+      stageFile(
         path.join(
           "cndi",
           "terraform",

@@ -30,30 +30,32 @@ export default async function stageTerraformResourcesForAWS(
 
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
   const leaderName = getLeaderNodeNameFromConfig(config);
-  const leader_node_ip = `\${aws_instance.cndi_aws_instance_${leaderName}.private_ip}`;
+  const leader_node_ip =
+    `\${aws_instance.cndi_aws_instance_${leaderName}.private_ip}`;
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
-    return stageFile(
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
+    stageFile(
       path.join(
         "cndi",
         "terraform",
         `${node.name}.cndi_aws_instance.tf.json`,
       ),
       cndi_aws_instance(node, config),
-    );
-  });
+    )
+  );
+
   const stageLbTargetGroupAttachment = config.infrastructure.cndi.nodes.map(
-    (node) => {
-      return stageFile(
+    (node) =>
+      stageFile(
         path.join(
           "cndi",
           "terraform",
           `cndi_aws_lb_target_group_attachment_${node.name}.tf.json`,
         ),
         cndi_aws_lb_target_group_attachment(node),
-      );
-    },
+      ),
   );
+
   // stage all the terraform files at once
   try {
     await Promise.all([

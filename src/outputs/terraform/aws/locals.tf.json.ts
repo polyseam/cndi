@@ -10,7 +10,6 @@ interface GetAWSLocalsTFJSONArgs {
 export default function getAWSLocalsTFJSON(
   { aws_region, leader_node_ip, nodes }: GetAWSLocalsTFJSONArgs,
 ): string {
-
   const availabilityZoneKeys = nodes.map((node) => {
     const azKey = `available_az_for_${node.name}_instance_type`;
     return `data.aws_ec2_instance_type_offerings.${azKey}.locations`;
