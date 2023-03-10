@@ -117,6 +117,7 @@ async function mergeAndStageTerraformObj(
   await stageFile(pathToTFBlock, getPrettyJSONString(newBlock));
 }
 
+// MUST be called after all other terraform files have been staged
 async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   if (!config?.infrastructure?.terraform) return;
   const terraformBlocks = config.infrastructure.terraform as TFBlocks;
