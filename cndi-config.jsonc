@@ -2,22 +2,6 @@
   "cndi_version": "v1",
   "project_name": "my-cndi-project",
   "infrastructure": {
-    "terraform": {
-      "resource": {
-        "postgres": {
-        },
-        "my_aws_vpc": {
-          "cidr_block": "1.11.3235"
-        }
-      },
-      "provider": {
-        "zone": "us-central1-a"
-      },
-      "variable": {
-      },
-      "locals": {},
-      "terraform": {}
-    },
     "cndi": {
       "nodes": [
         {
