@@ -1,5 +1,6 @@
 import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
 import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+import { deepMerge } from "https://deno.land/std@0.179.0/collections/deep_merge.ts";
 import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import {
@@ -55,55 +56,56 @@ function getTFResource(
   };
 }
 
-const exampleResources = {
-  "aws_s3_bucket": {
-    "cndi_aws_s3_bucket": {
-      "bucket": "cndi-terraform-state",
-    },
-  },
-};
-
-interface TFResourceFileObject{
-  resource:{
-    [key:string]: Record<string, unknown>
-  }
+interface TFResourceFileObject {
+  resource: {
+    [key: string]: Record<string, unknown>;
+  };
 }
 
 async function patchAndStageTerraformResources(
   resourceObj: Record<string, unknown>,
 ) {
   const suffix = `.tf.json`;
+  // resourceObj: { aws_s3_bucket: { cndi_aws_s3_bucket: { ... } } }
   for (const tfResourceType in resourceObj) { // aws_s3_bucket
     const resourceTypeBlock = resourceObj[tfResourceType] as Record<
       string,
       never
     >;
-    
+
     for (const resourceName in resourceTypeBlock) { // cndi_aws_s3_bucket
       const filename = `${resourceName}${suffix}`;
 
-      let originalContent = {
+      let originalContent: TFResourceFileObject = {
         resource: {},
       };
 
       try {
         originalContent = await loadJSONC(
-          path.join("cndi", "terraform", filename),
+          path.join(getStagingDir(), "cndi", "terraform", filename),
         ) as unknown as TFResourceFileObject;
       } catch {
         // there was no pre-existing resource with this name
       }
 
+      // deno-lint-ignore no-explicit-any
+      const attrs = resourceTypeBlock[resourceName] as any;
+      const originalAttrs =
+        originalContent?.resource?.[tfResourceType]?.[resourceName] || {};
+
       const newContent = {
+        ...originalContent,
         resource: {
           ...originalContent.resource,
-          ...resourceObj,
+          [tfResourceType]: {
+            [resourceName]: {
+              ...deepMerge(originalAttrs, attrs),
+            },
+          },
         },
       };
 
-      const newContentStr  = getPrettyJSONString(newContent);
-
-      console.log('patching', filename, 'with\n',newContentStr);
+      const newContentStr = getPrettyJSONString(newContent);
 
       await stageFile(
         path.join("cndi", "terraform", filename),
@@ -124,7 +126,9 @@ async function mergeAndStageTerraformObj(
   );
   let newBlock = {};
   try {
-    const originalBlock = await loadJSONC(pathToTFBlock) as Record<
+    const originalBlock = await loadJSONC(
+      path.join(getStagingDir(), pathToTFBlock),
+    ) as Record<
       string,
       unknown
     >;

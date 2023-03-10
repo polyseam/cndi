@@ -55,17 +55,18 @@ export default async function stageTerraformResourcesForAWS(
       ),
   );
 
-  const stageLbTargetGroupAttachmentHTTPS = config.infrastructure.cndi.nodes.map(
-    (node) =>
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          `cndi_aws_lb_target_group_attachment_https_${node.name}.tf.json`,
+  const stageLbTargetGroupAttachmentHTTPS = config.infrastructure.cndi.nodes
+    .map(
+      (node) =>
+        stageFile(
+          path.join(
+            "cndi",
+            "terraform",
+            `cndi_aws_lb_target_group_attachment_https_${node.name}.tf.json`,
+          ),
+          cndi_aws_lb_target_group_attachment_https(node),
         ),
-        cndi_aws_lb_target_group_attachment_https(node),
-      ),
-  );
+    );
 
   // stage all the terraform files at once
   try {
