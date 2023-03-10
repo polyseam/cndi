@@ -11,5 +11,5 @@ export default function getAzureTerraformTFJSON() {
     },
   });
 
-  return getPrettyJSONString(terraform);
+  return getPrettyJSONString({ terraform });
 }

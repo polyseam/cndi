@@ -11,5 +11,5 @@ export default function getGCPTerraformTFJSON() {
     },
   });
 
-  return getPrettyJSONString(terraform);
+  return getPrettyJSONString({ terraform });
 }

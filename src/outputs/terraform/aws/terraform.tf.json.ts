@@ -9,5 +9,5 @@ export default function getAWSTerraformTFJSON() {
       version: "~> 4.16",
     },
   });
-  return getPrettyJSONString(terraform);
+  return getPrettyJSONString({ terraform });
 }
