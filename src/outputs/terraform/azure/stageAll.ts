@@ -30,7 +30,7 @@ export default async function stageTerraformResourcesForAzure(
   const leaderName = getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
-    `\${azurerm_linux_virtual_machine.${leaderName}.private_ip_address}`;
+    `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderName}.private_ip_address}`;
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     return stageFile(
       path.join(

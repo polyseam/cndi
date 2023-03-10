@@ -19,7 +19,7 @@ export default function getAzureComputeInstanceTFJSON(
     DEFAULT_MACHINE_TYPE;
   let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
   const leaderComputeInstance =
-    `cndi_google_compute_instance_${leaderNodeName}`;
+    `azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}`;
   if (node?.size && typeof node.size === "string") {
     machine_type = node.size;
   }
@@ -29,16 +29,16 @@ export default function getAzureComputeInstanceTFJSON(
   }
 
   const resource_group_name =
-    "${azurerm_resource_group.cndi_resource_group.name}";
+    "${azurerm_resource_group.cndi_azurerm_resource_group.name}";
 
-  const location = "${azurerm_resource_group.cndi_resource_group.location}";
+  const location = "${azurerm_resource_group.cndi_azurerm_resource_group.location}";
 
   const admin_username = "ubuntu";
   const admin_password = "Password123";
   const disable_password_authentication = false;
 
   const network_interface_ids = [
-    `\${azurerm_network_interface.cndi_${name}_network_interface.id}`,
+    `\${azurerm_network_interface.cndi_azurerm_network_interface_${name}.id}`,
   ];
 
   const zone = "1";
@@ -76,7 +76,7 @@ export default function getAzureComputeInstanceTFJSON(
   const resource = getTFResource(
     "azurerm_linux_virtual_machine",
     {
-      [name]: {
+      
         admin_username,
         admin_password,
         disable_password_authentication,
@@ -91,7 +91,7 @@ export default function getAzureComputeInstanceTFJSON(
         tags,
         user_data,
         depends_on,
-      },
+    
     },
     `cndi_azurerm_linux_virtual_machine_${node.name}`,
   ).resource;

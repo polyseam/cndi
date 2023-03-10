@@ -30,7 +30,7 @@ export default async function stageTerraformResourcesForAWS(
 
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
   const leaderName = getLeaderNodeNameFromConfig(config);
-  const leader_node_ip = `\${aws_instance.${leaderName}.private_ip}`;
+  const leader_node_ip = `\${aws_instance.cndi_aws_instance_${leaderName}.private_ip}`;
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     return stageFile(
@@ -68,6 +68,7 @@ export default async function stageTerraformResourcesForAWS(
         cndi_aws_locals({
           leader_node_ip,
           aws_region,
+          nodes: config.infrastructure.cndi.nodes,
         }),
       ),
       stageFile(

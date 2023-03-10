@@ -5,7 +5,7 @@ export default function getGCPComputeInstanceGroupTFJSON(
   nodes: Array<GCPNodeItemSpec>,
 ): string {
   const instances = nodes.map((node) => {
-    return `\${google_compute_instance.${node.name}.self_link}`;
+    return `\${google_compute_instance.cndi_google_compute_instance_${node.name}.self_link}`;
   });
 
   const resource = getTFResource("google_compute_instance_group", {

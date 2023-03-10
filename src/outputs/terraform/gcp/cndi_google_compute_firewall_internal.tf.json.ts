@@ -21,9 +21,9 @@ export default function getGCPComputeFirewallInternalTFJSON(): string {
         "Inbound rule that enables traffic between EC2 instances in the VPC",
       direction: "INGRESS",
       name: "cndi-allow-internal-traffic",
-      network: "${google_compute_network.cndi_vpc_network.self_link}",
+      network: "${google_compute_network.cndi_google_compute_network.self_link}",
       source_ranges: [
-        "${google_compute_subnetwork.cndi_vpc_subnetwork.ip_cidr_range}",
+        "${google_compute_subnetwork.cndi_google_compute_subnetwork.ip_cidr_range}",
       ],
     },
     "cndi_google_compute_firewall_internal",
