@@ -229,7 +229,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log();
     Deno.exit(1);
   }
-  
+
   await stageTerraformResourcesForConfig(config, options);
 
   await stageFile(
