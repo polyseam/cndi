@@ -21,7 +21,7 @@ export default function getAWSSecurityGroupTFJSON(): string {
         cidr_blocks: ["0.0.0.0/0"],
         description: "SSH port to access EC2 instances",
         from_port: "22",
-        protocol: "-1",
+        protocol: "tcp",
         to_port: "22",
         ipv6_cidr_blocks: [],
         prefix_list_ids: [],
