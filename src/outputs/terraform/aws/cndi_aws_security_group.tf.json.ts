@@ -55,7 +55,7 @@ export default function getAWSSecurityGroupTFJSON(): string {
         description:
           "Kubernetes API server port to access cluster from local machine",
         from_port: "16443",
-        protocol: "-1",
+        protocol: "tcp",
         to_port: "16443",
         ipv6_cidr_blocks: [],
         prefix_list_ids: [],
