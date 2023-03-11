@@ -6,12 +6,15 @@ import {
   it,
 } from "https://deno.land/std@0.173.0/testing/bdd.ts";
 
-import { basicCndiConfig } from "../mocks/cndiConfigs.ts";
+import { basicAWSCndiConfig } from "../mocks/cndiConfigs.ts";
 
 import { getPrettyJSONString } from "src/utils.ts";
 
 import { runCndi } from "../helpers/run-cndi.ts";
-import { hasSameFilesAfter } from "../helpers/util.ts";
+import {
+  ensureResoureNamesMatchFileNames,
+  hasSameFilesAfter,
+} from "../helpers/util.ts";
 
 beforeEach(() => {
   // initialize sandbox
@@ -33,7 +36,7 @@ describe("cndi init", () => {
 
     Deno.writeTextFileSync(
       path.join(Deno.cwd(), `cndi-config.jsonc`),
-      getPrettyJSONString(basicCndiConfig),
+      getPrettyJSONString(basicAWSCndiConfig),
     );
     // cndi init should fail because there is no config file
     const { status } = await runCndi("init");
@@ -59,7 +62,7 @@ describe("cndi init", () => {
     const project_name = "my-foo-project";
     Deno.writeTextFileSync(
       path.join(Deno.cwd(), `cndi-config.jsonc`),
-      getPrettyJSONString({ ...basicCndiConfig, project_name }),
+      getPrettyJSONString({ ...basicAWSCndiConfig, project_name }),
     );
     const { status } = await runCndi("init");
     assert(status.success);
@@ -71,7 +74,7 @@ describe("cndi init", () => {
     it(`should fail if a config file is supplied without a "project_name"`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
-        getPrettyJSONString({ ...basicCndiConfig, project_name: undefined }),
+        getPrettyJSONString({ ...basicAWSCndiConfig, project_name: undefined }),
       );
 
       assert(
@@ -84,7 +87,7 @@ describe("cndi init", () => {
 
     it(`should fail if a config file is supplied with no nodes`, async () => {
       const nodelessCndiConfig = {
-        ...basicCndiConfig,
+        ...basicAWSCndiConfig,
         infrastructure: { cndi: { nodes: [] } },
       };
       Deno.writeTextFileSync(
@@ -106,7 +109,7 @@ describe("cndi init", () => {
       ];
 
       const multikindNodesConfig = {
-        ...basicCndiConfig,
+        ...basicAWSCndiConfig,
         infrastructure: { cndi: { nodes } },
       };
 
@@ -130,7 +133,7 @@ describe("cndi init", () => {
       ];
 
       const noLeaderConfig = {
-        ...basicCndiConfig,
+        ...basicAWSCndiConfig,
         infrastructure: { cndi: { nodes } },
       };
 
@@ -154,7 +157,7 @@ describe("cndi init", () => {
       ];
 
       const multipleLeaderConfig = {
-        ...basicCndiConfig,
+        ...basicAWSCndiConfig,
         infrastructure: { cndi: { nodes } },
       };
 
@@ -178,7 +181,7 @@ describe("cndi init", () => {
       ];
 
       const duplicateNodeNameConfig = {
-        ...basicCndiConfig,
+        ...basicAWSCndiConfig,
         infrastructure: { cndi: { nodes } },
       };
 
@@ -236,6 +239,12 @@ describe("cndi init", () => {
         assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);
         assert(status.success);
       });
+
+      it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
+        const { status } = await runCndi("init", "-t", "aws/airflow-tls");
+        assert(status.success);
+        await ensureResoureNamesMatchFileNames();
+      });
     });
 
     describe("gcp", () => {
@@ -257,6 +266,11 @@ describe("cndi init", () => {
         assert(dotenv.indexOf(`GCP_REGION`) > -1);
         assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
         assert(status.success);
+      });
+      it(`should create a set of terraform files where the resource name is the filename for gcp`, async () => {
+        const { status } = await runCndi("init", "-t", "gcp/airflow-tls");
+        assert(status.success);
+        await ensureResoureNamesMatchFileNames();
       });
     });
 
@@ -282,6 +296,11 @@ describe("cndi init", () => {
         assert(dotenv.indexOf(`ARM_TENANT_ID`) > -1);
         assert(dotenv.indexOf(`ARM_SUBSCRIPTION_ID`) > -1);
         assert(status.success);
+      });
+      it(`should create a set of terraform files where the resource name is the filename for azure`, async () => {
+        const { status } = await runCndi("init", "-t", "azure/airflow-tls");
+        assert(status.success);
+        await ensureResoureNamesMatchFileNames();
       });
     });
   });
