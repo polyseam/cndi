@@ -16,7 +16,7 @@ import cndi_azurerm_lb_rule_http from "./cndi_azurerm_lb_rule_http.tf.json.ts";
 import cndi_azurerm_lb_rule_https from "./cndi_azurerm_lb_rule_https.tf.json.ts";
 import cndi_azurerm_lb_rule_ssh from "./cndi_azurerm_lb_rule_ssh.tf.json.ts";
 import cndi_azurerm_network_security_group from "./cndi_azurerm_network_security_group.tf.json.ts";
-import cndi_azurerm_public_ip_load_balancer from "./cndi_azurerm_public_ip_load_balancer.tf.json.ts";
+import cndi_azurerm_public_ip from "./cndi_azurerm_public_ip.tf.json.ts";
 import cndi_azurerm_resource_group from "./cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_subnet from "./cndi_azurerm_subnet.tf.json.ts";
 import cndi_azurerm_subnet_network_security_group_association from "./cndi_azurerm_subnet_network_security_group_association.tf.json.ts";
@@ -39,7 +39,7 @@ export default async function stageTerraformResourcesForAzure(
       path.join(
         "cndi",
         "terraform",
-        `${node.name}.azurerm_linux_virtual_machine.tf.json`,
+        `cndi_azurerm_linux_virtual_machine_${node.name}.tf.json`,
       ),
       cndi_azurerm_linux_virtual_machine(node, config),
     )
@@ -50,7 +50,7 @@ export default async function stageTerraformResourcesForAzure(
       path.join(
         "cndi",
         "terraform",
-        `azurerm_network_interface_${node.name}.tf.json`,
+        `cndi_azurerm_network_interface_${node.name}.tf.json`,
       ),
       cndi_azurerm_network_interface(node),
     )
@@ -62,7 +62,7 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
-          `azurerm_network_interface_backend_address_pool_association_${node.name}.tf.json`,
+          `cndi_azurerm_network_interface_backend_address_pool_association_${node.name}.tf.json`,
         ),
         cndi_azurerm_network_interface_backend_address_pool_association(node),
       )
@@ -154,9 +154,9 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
-          "cndi_azurerm_public_ip_load_balancer.tf.json",
+          "cndi_azurerm_public_ip.tf.json",
         ),
-        cndi_azurerm_public_ip_load_balancer(),
+        cndi_azurerm_public_ip(),
       ),
       stageFile(
         path.join(
@@ -186,7 +186,7 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_security_group.tf.json",
+          "cndi_azurerm_virtual_network.tf.json",
         ),
         cndi_azurerm_virtual_network(),
       ),

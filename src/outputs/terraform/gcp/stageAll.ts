@@ -30,7 +30,7 @@ export default async function stageTerraformResourcesForGCP(
   const dotEnvPath = path.join(options.output, ".env");
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
-
+  console.log("googleCredentials", googleCredentials);
   const leaderName = getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
@@ -44,7 +44,7 @@ export default async function stageTerraformResourcesForGCP(
 
   // we parse the key to extract the project_id for use in terraform
   // the json key is only used for auth within `cndi run`
-  let parsedJSONServiceAccountKey: { project_id: string };
+  let parsedJSONServiceAccountKey = { project_id: "" };
 
   try {
     parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
@@ -69,10 +69,20 @@ export default async function stageTerraformResourcesForGCP(
           )
         }\n`,
       );
-      Deno.exit(options.initializing ? 0 : 1);
+      if (!options.initializing) {
+        console.log(
+          colors.yellow(
+            "If you are initializing a new project, you can ignore this message",
+          ),
+        );
+        Deno.exit(1);
+      }
+    } else {
+      console.log(
+        colors.brightRed("failed to parse service account key json\n"),
+      );
+      Deno.exit(1);
     }
-    console.log(colors.brightRed("failed to parse service account key json\n"));
-    Deno.exit(1);
   }
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
@@ -120,7 +130,7 @@ export default async function stageTerraformResourcesForGCP(
         path.join(
           "cndi",
           "terraform",
-          "google_compute_region_backend_service.tf.json",
+          "cndi_google_compute_region_backend_service.tf.json",
         ),
         cndi_google_compute_region_backend_service(),
       ),
@@ -181,7 +191,11 @@ export default async function stageTerraformResourcesForGCP(
         cndi_google_compute_router_nat(),
       ),
       stageFile(
-        path.join("cndi", "terraform", "cndi_google_forwarding_rule.tf.json"),
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_google_compute_forwarding_rule.tf.json",
+        ),
         cndi_google_compute_forwarding_rule(),
       ),
       stageFile(

@@ -263,7 +263,7 @@ interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
 }
 
 interface RandomTerraformRandomPasswordResource {
-  generated_token: Array<{
+  cndi_join_token: Array<{
     length: number;
     special: boolean;
     upper: boolean;
@@ -549,7 +549,7 @@ interface GCPTerraformRootFileData {
       region: string;
       zone: "${local.region}-a";
       leader_node_ip: string;
-      bootstrap_token: "${random_password.generated_token.result}";
+      bootstrap_token: "${random_password.cndi_join_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
@@ -851,7 +851,7 @@ interface AzureTerraformRootFileData {
       location: string;
       cndi_project_name: string;
       leader_node_ip: string;
-      bootstrap_token: "${random_password.generated_token.result}";
+      bootstrap_token: "${random_password.cndi_join_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";
@@ -935,7 +935,7 @@ interface TerraformRootFileData {
       leader_node_ip: string;
       region: string;
       cndi_project_name: string;
-      bootstrap_token: "${random_password.generated_token.result}";
+      bootstrap_token: "${random_password.cndi_join_token.result}";
       git_password: "${var.git_password}";
       git_username: "${var.git_username}";
       git_repo: "${var.git_repo}";

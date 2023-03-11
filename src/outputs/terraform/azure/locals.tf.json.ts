@@ -13,7 +13,7 @@ export default function getAzureLocalsTFJSON({
     locals: {
       azure_location,
       leader_node_ip,
-      bootstrap_token: "${random_password.generated_token.result}",
+      bootstrap_token: "${random_password.cndi_join_token.result}",
     },
   });
 }

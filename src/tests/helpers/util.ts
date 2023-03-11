@@ -1,5 +1,5 @@
 import { assert } from "https://deno.land/std@0.173.0/testing/asserts.ts";
-
+import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 function areSetsEqual(setA: Set<string>, setB: Set<string>) {
   if (setA.size !== setB.size) return false;
   for (const a of setA) if (!setB.has(a)) return false;
@@ -29,4 +29,35 @@ const hasSameFilesAfter = async (
   return areSetsEqual(originalContents, afterContents);
 };
 
-export { assertSetEquality, hasSameFilesAfter };
+async function ensureResoureNamesMatchFileNames() {
+  //assert(status.success);
+  for await (
+    const afterDirEntry of (Deno.readDir(
+      path.join(".", "cndi", "terraform"),
+    ))
+  ) {
+    if (!afterDirEntry.name.endsWith(".tf.json")) continue;
+    const fileObj = JSON.parse(
+      await Deno.readTextFile(
+        path.join(".", "cndi", "terraform", afterDirEntry.name),
+      ),
+    );
+    if (fileObj?.resource) {
+      const resourceType = Object.keys(fileObj.resource)[0];
+      const resourceName = Object.keys(fileObj.resource[resourceType])[0];
+      const resourceNameMatches =
+        afterDirEntry.name === `${resourceName}.tf.json`;
+      if (!resourceNameMatches) {
+        console.log("resourceName", resourceName, "DOES NOT MATCH");
+        console.log("afterDirEntry.name", afterDirEntry.name);
+      }
+      assert(resourceNameMatches);
+    }
+  }
+}
+
+export {
+  assertSetEquality,
+  ensureResoureNamesMatchFileNames,
+  hasSameFilesAfter,
+};

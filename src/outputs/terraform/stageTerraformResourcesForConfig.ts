@@ -5,7 +5,7 @@ import stageTerraformResourcesForGCP from "./gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "./azure/stageAll.ts";
 import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
 
-import join_token from "./shared/join_token.tf.json.ts";
+import cndi_join_token from "./shared/cndi_join_token.tf.json.ts";
 import variable from "./shared/variable.tf.json.ts";
 import global_locals from "./shared/global.locals.tf.json.ts";
 
@@ -43,8 +43,8 @@ export default async function stageTerraformResourcesForConfig(
     ),
     // write the microk8s join token generator
     stageFile(
-      path.join("cndi", "terraform", "join_token.tf.json"),
-      join_token(),
+      path.join("cndi", "terraform", "cndi_join_token.tf.json"),
+      cndi_join_token(),
     ),
     // write tftpl terraform template for the user_data bootstrap script
     stageFile(

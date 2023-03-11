@@ -14,7 +14,7 @@ export default function getGCPLocalsTFJSON({
       gcp_zone: "${local.gcp_region}-a",
       gcp_region,
       leader_node_ip,
-      bootstrap_token: "${random_password.generated_token.result}",
+      bootstrap_token: "${random_password.cndi_join_token.result}",
     },
   });
 }

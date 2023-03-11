@@ -3,7 +3,7 @@ import { getPrettyJSONString } from "src/utils.ts";
 const joinToken = {
   resource: {
     random_password: {
-      generated_token: [
+      cndi_join_token: [
         {
           length: 32,
           special: false,

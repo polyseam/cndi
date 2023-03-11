@@ -15,7 +15,7 @@ import cndi_aws_lb_listener_http from "./cndi_aws_lb_listener_http.tf.json.ts";
 import cndi_aws_lb_listener_https from "./cndi_aws_lb_listener_https.tf.json.ts";
 import cndi_aws_lb_target_group_http from "./cndi_aws_lb_target_group_http.tf.json.ts";
 import cndi_aws_lb_target_group_https from "./cndi_aws_lb_target_group_https.tf.json.ts";
-import cndi_aws_load_balancer from "./cndi_aws_load_balancer.tf.json.ts";
+import cndi_aws_lb from "./cndi_aws_lb.tf.json.ts";
 import cndi_aws_route_table_association from "./cndi_aws_route_table_association.tf.json.ts";
 import cndi_aws_route_table from "./cndi_aws_route_table.tf.json.ts";
 import cndi_aws_route from "./cndi_aws_route.tf.json.ts";
@@ -134,9 +134,9 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_load_balancer.tf.json",
+          "cndi_aws_lb.tf.json",
         ),
-        cndi_aws_load_balancer(),
+        cndi_aws_lb(),
       ),
       stageFile(
         path.join(
