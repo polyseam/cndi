@@ -1,8 +1,15 @@
 import { getPrettyJSONString } from "src/utils.ts";
-import {
-  AWSNodeItemSpec,
-  AWSTerraformEC2InstanceTypeOfferingsDataSource,
-} from "src/types.ts";
+import { AWSNodeItemSpec } from "src/types.ts";
+
+interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
+  [ec2_inst_type: string]: Array<{
+    filter: Array<{
+      name: string;
+      values: Array<string>;
+    }>;
+    location_type: string;
+  }>;
+}
 
 type TFData = [
   {
