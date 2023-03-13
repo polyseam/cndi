@@ -232,7 +232,7 @@ interface wraps the compute resources from every deployment target we support.
 
 All `"nodes"` entries are nearly identical, the only difference is the `"kind"`
 field which is used to specify the deployment target. These `"node"` resources
-and thier supporting infrastructure are ultimately provisioned by Terraform, but
+and their supporting infrastructure are ultimately provisioned by Terraform, but
 we've abstracted a lot of complexity through this interface.
 
 Declaring a node is simple, we give it a name, we give it some specs, and we add
