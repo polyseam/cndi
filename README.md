@@ -28,7 +28,7 @@
 
 Welcome to CNDI, it deploys an entire data stack in minutes!
 
-It's perfect for deploying Data Products consistently that are reliable,
+It's perfect for deploying data services consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each stack.
 
