@@ -2,16 +2,6 @@
   "cndi-config": {
     "prompts": [
       {
-        "name": "kind",
-        "type": "Select",
-        "message": "Please select the cloud provider you want to use:",
-        "options": [
-          { "name": "AWS", "value": "aws" },
-          { "name": "GCP", "value": "gcp" },
-          { "name": "Azure", "value": "azure" }
-        ]
-      },
-      {
         "name": "argocdDomainName",
         "default": "https://github.com/polyseam/demo-dag-bag",
         "message": "Please enter the domain name you want argocd to be accessible on:",
@@ -30,18 +20,19 @@
           "nodes": [
             {
               "name": "x-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "gcp",
+              "machine_type": "n2-standard-2",
               "role": "leader",
               "volume_size": 128
             },
             {
               "name": "y-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "gcp",
               "volume_size": 128
             },
             {
               "name": "z-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "gcp",
               "volume_size": 128
             }
           ]
@@ -121,9 +112,9 @@
     }
   },
   "env": {
-    "prompts": []
+    "extend_basic_env": "gcp"
   },
   "readme": {
-    "extend_basic_readme": true
+    "extend_basic_readme": "gcp"
   }
 }

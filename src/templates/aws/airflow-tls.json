@@ -2,16 +2,6 @@
   "cndi-config": {
     "prompts": [
       {
-        "name": "kind",
-        "type": "Select",
-        "message": "Please select the cloud provider you want to use:",
-        "options": [
-          { "name": "AWS", "value": "aws" },
-          { "name": "GCP", "value": "gcp" },
-          { "name": "Azure", "value": "azure" }
-        ]
-      },
-      {
         "name": "dagRepoUrl",
         "default": "https://github.com/polyseam/demo-dag-bag",
         "message": "Please enter the url of the git repo containing your dags:",
@@ -42,18 +32,19 @@
           "nodes": [
             {
               "name": "x-airflow-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "aws",
               "role": "leader",
+              "instance_type": "t3.medium",
               "volume_size": 128
             },
             {
               "name": "y-airflow-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "aws",
               "volume_size": 128
             },
             {
               "name": "z-airflow-node",
-              "kind": "$.cndi.prompts.kind",
+              "kind": "aws",
               "volume_size": 128
             }
           ]
@@ -204,9 +195,11 @@
     }
   },
   "env": {
+    "extend_basic_env": "aws",
     "prompts": [
       {
         "type": "Comment",
+        "name": "airflowComment",
         "value": "airflow-git-credentials secret values for DAG Storage"
       },
       {
@@ -222,7 +215,7 @@
     ]
   },
   "readme": {
-    "extend_basic_readme": true,
+    "extend_basic_readme": "aws",
     "template": "## airflow-tls\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
   }
 }
