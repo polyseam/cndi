@@ -1,4 +1,4 @@
-import { loadJSONC } from "src/utils.ts";
+import { loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvObject } from "src/deployment-targets/shared.ts";
 import {
   CNDIConfig,
@@ -81,26 +81,31 @@ interface CNDIGeneratedValues {
   argoUIAdminPassword: string;
 }
 
-const POLYSEAM_TEMPLATE_DIRECTORY = "https://github.com/polyseam/cndi/tree/templates-as-urls/src/templates/"
+const POLYSEAM_TEMPLATE_DIRECTORY =
+  "https://raw.githubusercontent.com/polyseam/cndi/templates-as-urls/src/templates/";
 
 export default async function useTemplate(
-  cndiGeneratedValues: CNDIGeneratedValues,
   templateLocation: string,
-  interactive: boolean,
+  opt: {
+    project_name: string;
+    cndiGeneratedValues: CNDIGeneratedValues;
+    interactive: boolean;
+  },
 ): Promise<TemplateResult> {
   let templateUrl: URL;
+  const { cndiGeneratedValues, interactive } = opt;
+
   try {
     templateUrl = new URL(templateLocation);
-  } catch (e) {
+  } catch {
     console.log("Template location is not a URL, loading from cndi repo");
-    console.error(e);
     templateUrl = new URL(
-      templateLocation,
+      `${templateLocation}.json`,
       POLYSEAM_TEMPLATE_DIRECTORY,
     );
   }
-  const templateObject = await loadJSONC(
-    templateUrl.toString(),
+  const templateObject = await loadRemoteJSONC(
+    templateUrl,
   ) as unknown as Template;
 
   const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts;
@@ -130,6 +135,7 @@ export default async function useTemplate(
 
   try {
     cndiConfig = JSON.parse(cndiConfigStringified);
+    cndiConfig.project_name = opt.project_name;
   } catch {
     throw new Error("Invalid cndi-config.jsonc generated");
   }
@@ -159,7 +165,8 @@ export default async function useTemplate(
   };
 
   const readme = await getReadmeForProject({
-    kind: templateObject.readme.extend_basic_readme,
+    deploymentTarget: templateObject.readme.extend_basic_readme,
+    project_name: opt.project_name,
   });
 
   return {

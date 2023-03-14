@@ -1,4 +1,4 @@
-import { GetReadmeStringArgs } from "../templates/Template.ts";
+import { DeploymentTarget } from "../types.ts";
 
 const coreReadmeSection = `
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
@@ -62,8 +62,8 @@ If you've modified your nodes, the infrastructure should be updated with Terrafo
 
 export default function getReadmeForProject({
   project_name,
-  kind,
-}: GetReadmeStringArgs): string {
+  deploymentTarget,
+}: { project_name: string; deploymentTarget: DeploymentTarget }): string {
   const linkToDashboards = {
     aws:
       "[AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
@@ -77,7 +77,7 @@ export default function getReadmeForProject({
 ### logging into argocd
 
 When the \`cndi run\` command is finished, you should have a leader vm spinning up in the ${
-    linkToDashboards[kind]
+    linkToDashboards[deploymentTarget]
   }, by connecting to this node you should be able to get the new [ArgoCD](https://argo-cd.readthedocs.io) password.
 
 \`\`\`bash
@@ -116,6 +116,6 @@ Both entries should point to the single load balancer that was created for your 
     `# ${project_name || "my-cndi-project"}`,
     coreReadmeSection,
     loggingIntoArgoCDSection,
-    readmeSectionsForKind[kind],
+    readmeSectionsForKind[deploymentTarget],
   ].join("\n\n");
 }

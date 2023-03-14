@@ -6,6 +6,7 @@ import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
 import {
   BaseNodeItemSpec,
   CNDIConfig,
+  DeploymentTarget,
   NODE_KIND,
   NodeKind,
   TFBlocks,
@@ -16,6 +17,12 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
+};
+
+const loadRemoteJSONC = async (url: URL) => {
+  const response = await fetch(url);
+  const text = await response.text();
+  return JSONC.parse(text);
 };
 
 function getPrettyJSONString(object: unknown) {
@@ -37,6 +44,10 @@ function getLeaderNodeNameFromConfig(config: CNDIConfig) {
     Deno.exit(1);
   }
   return leaderNode.name;
+}
+
+function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
+  return config.infrastructure.cndi.nodes[0].kind;
 }
 
 function getTFResource(
@@ -367,6 +378,7 @@ export {
   checkInstalled,
   getCndiInstallPath,
   getDefaultVmTypeForKind,
+  getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,
@@ -377,6 +389,7 @@ export {
   getStagingDir,
   getTFResource,
   loadJSONC,
+  loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   stageFile,

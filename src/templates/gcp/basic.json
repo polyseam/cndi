@@ -3,7 +3,7 @@
     "prompts": [
       {
         "name": "argocdDomainName",
-        "default": "https://github.com/polyseam/demo-dag-bag",
+        "default": "argocd.example.com",
         "message": "Please enter the domain name you want argocd to be accessible on:",
         "type": "Input"
       },
