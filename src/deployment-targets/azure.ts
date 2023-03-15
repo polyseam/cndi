@@ -46,7 +46,7 @@ const getAzureEnvLines = async (interactive: boolean): Promise<EnvLines> => {
     : ARM_SUBSCRIPTION_ID;
 
   return [
-    { comment: "# Azure Resource Manager" },
+    { comment: "Azure Resource Manager" },
     { value: { ARM_REGION } },
     { value: { ARM_CLIENT_ID } },
     { value: { ARM_CLIENT_SECRET } },

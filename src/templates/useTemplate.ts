@@ -116,7 +116,7 @@ export default async function useTemplate(
   try {
     templateUrl = new URL(templateLocation);
   } catch {
-    //console.log("Template location is not a URL, loading from cndi repo");
+    // if it's not a valid URL, assume it's a Polyseam named template
     templateUrl = new URL(
       `${templateLocation}.json`,
       POLYSEAM_TEMPLATE_DIRECTORY,

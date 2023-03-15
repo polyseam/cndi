@@ -1,5 +1,6 @@
 import { assert } from "https://deno.land/std@0.173.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+
 function areSetsEqual(setA: Set<string>, setB: Set<string>) {
   if (setA.size !== setB.size) return false;
   for (const a of setA) if (!setB.has(a)) return false;

@@ -67,7 +67,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
 
   return [
     {
-      comment: "# GCP",
+      comment: "GCP",
     },
     { value: { GCP_REGION } },
     { value: { GOOGLE_CREDENTIALS } },

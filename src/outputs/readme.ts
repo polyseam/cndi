@@ -119,10 +119,5 @@ Both entries should point to the single load balancer that was created for your 
     readmeSectionsForDeploymentTarget[deploymentTarget],
   ].join("\n\n");
 
-  console.log(
-    "📝  Writing README.md file to project directory with the following content:",
-    readmeContent,
-  );
-
   return readmeContent;
 }

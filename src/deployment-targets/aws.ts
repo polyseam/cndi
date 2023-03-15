@@ -30,7 +30,7 @@ const getAWSEnvLines = async (interactive: boolean): Promise<EnvLines> => {
     : AWS_SECRET_ACCESS_KEY;
 
   return [
-    { comment: "# AWS" },
+    { comment: "AWS" },
     { value: { AWS_REGION } },
     { value: { AWS_ACCESS_KEY_ID } },
     { value: { AWS_SECRET_ACCESS_KEY } },

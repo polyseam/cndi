@@ -64,7 +64,7 @@ const getCoreEnvLines = async (
   }
 
   const coreEnvLines: EnvLines = [
-    { comment: "# Sealed Secrets keys for Kubeseal" },
+    { comment: "Sealed Secrets keys for Kubeseal" },
     {
       value: {
         SEALED_SECRETS_PUBLIC_KEY: sealedSecretsKeys.sealed_secrets_public_key,
@@ -76,11 +76,11 @@ const getCoreEnvLines = async (
           sealedSecretsKeys.sealed_secrets_private_key,
       },
     },
-    { comment: "# ArgoCD" },
+    { comment: "ArgoCD" },
     { value: { ARGO_UI_ADMIN_PASSWORD } },
-    { comment: "# Passphrase for encrypting/decrypting terraform state" },
+    { comment: "Passphrase for encrypting/decrypting terraform state" },
     { value: { TERRAFORM_STATE_PASSPHRASE } },
-    { comment: "# git credentials" },
+    { comment: "git credentials" },
     { value: { GIT_USERNAME } },
     { value: { GIT_REPO } },
     { value: { GIT_PASSWORD } },
