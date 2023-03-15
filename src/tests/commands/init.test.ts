@@ -23,6 +23,15 @@ beforeEach(() => {
 });
 
 describe("cndi init", () => {
+  it("should fail if ./cndi-config.jsonc is missing without -i", async () => {
+    assert(
+      await hasSameFilesAfter(async () => {
+        const { status } = await runCndi("init");
+        assert(!status.success);
+      }),
+    );
+  });
+
   it(`should add correct files and directories when it succeeds`, async () => {
     const initFileList = new Set([
       "cndi-config.jsonc",
@@ -47,15 +56,6 @@ describe("cndi init", () => {
     }
     assert(initFileList.size === 0); // if the set is empty, all files were created
     assert(status.success);
-  });
-
-  it("should fail if ./cndi-config.jsonc is missing without -i", async () => {
-    assert(
-      await hasSameFilesAfter(async () => {
-        const { status } = await runCndi("init");
-        assert(!status.success);
-      }),
-    );
   });
 
   it(`should create a README beginning with the "project_name" if a config file is supplied`, async () => {
@@ -207,6 +207,55 @@ describe("cndi init", () => {
           assert(!status.success);
         }),
       );
+    });
+
+    it(`should throw an error if a named template does not exist`, async () => {
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init -t aws/foo"); // cndi init -t aws/foo
+          assert(!status.success);
+        }),
+      );
+    });
+
+    it(`should throw an error if a template url 404s`, async () => {
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi(
+            "init",
+            "-t",
+            "https://example.com/does-not-exist.jsonc",
+          );
+          assert(!status.success);
+        }),
+      );
+    });
+
+    it(`should successfully execute remote templates`, async () => {
+      const initFileList = new Set([
+        "cndi-config.jsonc",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "https://raw.githubusercontent.com/polyseam/example-cndi-templates/main/azure/airflow-tls.jsonc",
+      );
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
     });
 
     it("should add an template specific readme section", async () => {
