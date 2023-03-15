@@ -1,9 +1,12 @@
-import path from "https://deno.land/std@0.173.0/node/path.ts";
-import { writableStreamFromWriter } from "https://deno.land/std@0.177.0/streams/writable_stream_from_writer.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { SpinnerTypes } from "https://deno.land/x/spinners@v1.1.2/spinner-types.ts";
-import { TerminalSpinner } from "https://deno.land/x/spinners@v1.1.2/terminal-spinner.ts";
-import { checkInstalled, getFileSuffixForPlatform } from "./utils.ts";
+import {
+  colors,
+  path,
+  SpinnerTypes,
+  TerminalSpinner,
+  writableStreamFromWriter,
+} from "deps";
+
+import { checkInstalled, getFileSuffixForPlatform } from "src/utils.ts";
 
 const installLabel = colors.white("\nsrc/install:");
 

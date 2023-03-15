@@ -3,7 +3,7 @@ import {
   getPrettyJSONString,
   getTFResource,
 } from "src/utils.ts";
-import { AzureNodeItemSpec, CNDIConfig } from "../../../types.ts";
+import { AzureNodeItemSpec, CNDIConfig } from "src/types.ts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,

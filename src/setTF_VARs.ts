@@ -1,4 +1,4 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { colors } from "deps";
 
 const setTF_VARsLabel = colors.white("\nsrc/setTF_VARs:");
 

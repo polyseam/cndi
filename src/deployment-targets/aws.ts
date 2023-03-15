@@ -1,7 +1,6 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
-import { EnvLines } from "../types.ts";
+import { colors, Input, Secret } from "deps";
+
+import { EnvLines } from "src/types.ts";
 
 const getAWSEnvLines = async (interactive: boolean): Promise<EnvLines> => {
   let AWS_REGION = "us-east-1";

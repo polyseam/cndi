@@ -1,4 +1,4 @@
-import { DeploymentTarget } from "../types.ts";
+import { DeploymentTarget } from "src/types.ts";
 
 const coreReadmeSection = `
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.

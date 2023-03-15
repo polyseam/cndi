@@ -1,5 +1,6 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { BaseNodeItemSpec, CNDIConfig } from "../types.ts";
+import { colors } from "deps";
+import { BaseNodeItemSpec, CNDIConfig } from "src/types.ts";
+
 const cndiConfigLabel = colors.white("\n/src/validate/cndiConfig:");
 
 export default function validateConfig(

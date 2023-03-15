@@ -1,20 +1,15 @@
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-import { assert } from "https://deno.land/std@0.173.0/testing/asserts.ts";
-import {
-  beforeEach,
-  describe,
-  it,
-} from "https://deno.land/std@0.173.0/testing/bdd.ts";
+import { assert, beforeEach, describe, it, path } from "deps";
 
-import { basicAWSCndiConfig } from "../mocks/cndiConfigs.ts";
+import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { runCndi } from "../helpers/run-cndi.ts";
+import { runCndi } from "src/tests/helpers/run-cndi.ts";
+
 import {
   ensureResoureNamesMatchFileNames,
   hasSameFilesAfter,
-} from "../helpers/util.ts";
+} from "src/tests/helpers/util.ts";
 
 beforeEach(() => {
   // initialize sandbox

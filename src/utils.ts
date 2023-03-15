@@ -1,8 +1,5 @@
-import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-import { deepMerge } from "https://deno.land/std@0.179.0/collections/deep_merge.ts";
-import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
-import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
+import { colors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+
 import {
   BaseNodeItemSpec,
   CNDIConfig,
@@ -10,9 +7,7 @@ import {
   NODE_KIND,
   NodeKind,
   TFBlocks,
-} from "./types.ts";
-import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+} from "src/types.ts";
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {

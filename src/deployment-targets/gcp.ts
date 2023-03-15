@@ -1,7 +1,5 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
-import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-import { EnvLines } from "../types.ts";
+import { colors, homedir, Input } from "deps";
+import { EnvLines } from "src/types.ts";
 
 const deploymentTargetsLabel = colors.white("src/deployment-targets/gcp:");
 

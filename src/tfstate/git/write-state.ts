@@ -1,8 +1,6 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-import { simpleGit } from "../../deps.ts";
+import { colors, path, simpleGit } from "deps";
 
-import encrypt from "../encrypt.ts";
+import encrypt from "src/tfstate/encrypt.ts";
 
 const git = simpleGit();
 

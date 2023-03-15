@@ -1,5 +1,5 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { AzureNodeItemSpec } from "../../../types.ts";
+import { AzureNodeItemSpec } from "src/types.ts";
 
 export default function getAzureNetworkInterfaceBackendAddressPoolAssociationTFJSON(
   node: AzureNodeItemSpec,

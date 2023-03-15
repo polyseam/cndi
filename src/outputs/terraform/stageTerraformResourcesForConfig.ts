@@ -1,13 +1,13 @@
+import { path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { patchAndStageTerraformFilesWithConfig, stageFile } from "src/utils.ts";
-import stageTerraformResourcesForAWS from "./aws/stageAll.ts";
-import stageTerraformResourcesForGCP from "./gcp/stageAll.ts";
-import stageTerraformResourcesForAzure from "./azure/stageAll.ts";
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import stageTerraformResourcesForAWS from "src/outputs/terraform/aws/stageAll.ts";
+import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
+import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 
-import cndi_join_token from "./shared/cndi_join_token.tf.json.ts";
-import variable from "./shared/variable.tf.json.ts";
-import global_locals from "./shared/global.locals.tf.json.ts";
+import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
+import variable from "src/outputs/terraform/shared/variable.tf.json.ts";
+import global_locals from "src/outputs/terraform/shared/global.locals.tf.json.ts";
 
 import leaderBootstrapTerraformTemplate from "src/bootstrap/leader_bootstrap_cndi.sh.ts";
 import controllerBootstrapTerrformTemplate from "src/bootstrap/controller_bootstrap_cndi.sh.ts";

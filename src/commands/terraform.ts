@@ -1,14 +1,11 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import { copy } from "https://deno.land/std@0.173.0/streams/copy.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+import { Command, copy, path } from "deps";
 
-import pullStateForRun from "../tfstate/git/read-state.ts";
-import pushStateFromRun from "../tfstate/git/write-state.ts";
+import pullStateForRun from "src/tfstate/git/read-state.ts";
+import pushStateFromRun from "src/tfstate/git/write-state.ts";
 
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-
-import setTF_VARs from "../setTF_VARs.ts";
-import { getPathToTerraformBinary } from "../utils.ts";
+import setTF_VARs from "src/setTF_VARs.ts";
+import { getPathToTerraformBinary } from "src/utils.ts";
 
 /**
  * COMMAND cndi terrafrom ...args

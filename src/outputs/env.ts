@@ -1,4 +1,4 @@
-import { EnvCommentEntry, EnvLines, EnvValueEntry } from "../types.ts";
+import { EnvCommentEntry, EnvLines, EnvValueEntry } from "src/types.ts";
 
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 

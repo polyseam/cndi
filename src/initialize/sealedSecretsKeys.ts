@@ -1,7 +1,7 @@
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+import { path } from "deps";
 
-import { SealedSecretsKeys } from "../types.ts";
-import { getPathToOpenSSLForPlatform } from "../utils.ts";
+import { SealedSecretsKeys } from "src/types.ts";
+import { getPathToOpenSSLForPlatform } from "src/utils.ts";
 
 const createSealedSecretsKeys = async (
   outputDir: string,

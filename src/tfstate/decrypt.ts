@@ -1,5 +1,4 @@
-import { CryptoJS } from "../deps.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { colors, CryptoJS } from "deps";
 
 const decryptLabel = colors.white("\nsrc/tfstate/decrypt:");
 

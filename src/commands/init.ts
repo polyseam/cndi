@@ -1,9 +1,7 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-import { SEP } from "https://deno.land/std@0.178.0/path/mod.ts";
+import { colors, Command, Input, path, Select, SEP } from "deps";
+
 import {
   checkInitialized,
   getDeploymentTargetFromConfig,
@@ -11,33 +9,29 @@ import {
   loadJSONC,
   persistStagedFiles,
   stageFile,
-} from "../utils.ts";
-import { CNDIConfig, EnvLines } from "../types.ts";
+} from "src/utils.ts";
 
-import { overwriteAction } from "./overwrite.ts";
+import { CNDIConfig, EnvLines } from "src/types.ts";
 
-import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+import { overwriteAction } from "src/commands/overwrite.ts";
 
-import { getCoreEnvLines } from "../deployment-targets/shared.ts";
+import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import useTemplate from "src/templates/useTemplate.ts";
 
-import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
-
-import { createTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
-
-import { createArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
+import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
+import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getKnownTemplates from "src/templates/knownTemplates.ts";
 
-import getEnvFileContents from "../outputs/env.ts";
-import getGitignoreContents from "../outputs/gitignore.ts";
-import vscodeSettings from "../outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "../outputs/cndi-run-workflow.ts";
-import getReadmeForProject from "../outputs/readme.ts";
+import getEnvFileContents from "src/outputs/env.ts";
+import getGitignoreContents from "src/outputs/gitignore.ts";
+import vscodeSettings from "src/outputs/vscode-settings.ts";
+import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getReadmeForProject from "src/outputs/readme.ts";
 
-import validateConfig from "../validate/cndiConfig.ts";
+import validateConfig from "src/validate/cndiConfig.ts";
 
 const initLabel = colors.white("\ninit:");
 

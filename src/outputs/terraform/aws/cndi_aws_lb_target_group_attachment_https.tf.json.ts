@@ -1,5 +1,5 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { AWSNodeItemSpec } from "../../../types.ts";
+import { AWSNodeItemSpec } from "src/types.ts";
 
 export default function getAWSComputeInstanceTargetGroupAttachmentTFJSON(
   node: AWSNodeItemSpec,

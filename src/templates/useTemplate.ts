@@ -1,5 +1,6 @@
 import { loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
+
 import {
   CNDIConfig,
   DeploymentTarget,
@@ -7,9 +8,11 @@ import {
   EnvLines,
   EnvValueEntry,
   SealedSecretsKeys,
-} from "../types.ts";
+} from "src/types.ts";
+
 import {
   Checkbox,
+  colors,
   Confirm,
   Input,
   List,
@@ -18,10 +21,10 @@ import {
   Secret,
   Select,
   Toggle,
-} from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+} from "deps";
+
 import getReadmeForProject from "src/outputs/readme.ts";
-import { POLYSEAM_TEMPLATE_DIRECTORY } from "./knownTemplates.ts";
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
 
 type TemplatePromptTypeNames =
   | "Input"

@@ -1,5 +1,5 @@
-import { getPrettyJSONString } from "../../../utils.ts";
-import getTerraform from "../shared/basicTerraform.ts";
+import { getPrettyJSONString } from "src/utils.ts";
+import getTerraform from "src/outputs/terraform/shared/basicTerraform.ts";
 
 export default function getAzureTerraformTFJSON() {
   const terraform = getTerraform({

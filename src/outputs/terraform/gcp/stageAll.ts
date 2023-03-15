@@ -1,8 +1,7 @@
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { colors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
-import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
+import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";

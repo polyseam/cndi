@@ -1,14 +1,14 @@
+import { colors } from "deps";
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
   EnvLines,
   SealedSecretsKeys,
-} from "../types.ts";
+} from "src/types.ts";
 
-import { getAWSEnvLines } from "../deployment-targets/aws.ts";
-import { getGCPEnvLines } from "../deployment-targets/gcp.ts";
-import { getAzureEnvLines } from "../deployment-targets/azure.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { getAWSEnvLines } from "src/deployment-targets/aws.ts";
+import { getGCPEnvLines } from "src/deployment-targets/gcp.ts";
+import { getAzureEnvLines } from "src/deployment-targets/azure.ts";
 
 const deploymentTargetsSharedLabel = colors.white(
   "\nsrc/deployment-targets/shared:",

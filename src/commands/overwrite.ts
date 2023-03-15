@@ -1,8 +1,5 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+import { colors, Command, path } from "deps";
 
 import {
   getPrettyJSONString,
@@ -10,15 +7,15 @@ import {
   loadJSONC,
   persistStagedFiles,
   stageFile,
-} from "../utils.ts";
+} from "src/utils.ts";
 
-import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
-import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
-import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
+import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { loadTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
+import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
-import getApplicationManifest from "../outputs/application-manifest.ts";
-import RootChartYaml from "../outputs/root-chart.ts";
-import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
+import getApplicationManifest from "src/outputs/application-manifest.ts";
+import RootChartYaml from "src/outputs/root-chart.ts";
+import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -27,7 +24,7 @@ import {
   CNDIConfig,
   KubernetesManifest,
   KubernetesSecret,
-} from "../types.ts";
+} from "src/types.ts";
 
 const owLabel = colors.white("\noverwrite:");
 

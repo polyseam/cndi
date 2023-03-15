@@ -1,6 +1,6 @@
-import { KubernetesSecret, KubernetesSecretWithStringData } from "../types.ts";
-import { getPathToKubesealBinary, getPrettyJSONString } from "../utils.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { colors } from "deps";
+import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
+import { getPathToKubesealBinary, getPrettyJSONString } from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
