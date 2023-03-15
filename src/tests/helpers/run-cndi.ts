@@ -16,6 +16,7 @@ const cmd = [
 ];
 
 async function runCndi(...args: string[]) {
+  const decoder = new TextDecoder("utf-8");
   const lastIndex = args.length - 1;
   if (args[lastIndex] === "--loud") {
     args.pop();
@@ -42,7 +43,12 @@ async function runCndi(...args: string[]) {
     ]);
 
     p.close();
-    return { status, output, stderrOutput };
+
+    return {
+      status,
+      output: decoder.decode(output),
+      stderrOutput: decoder.decode(stderrOutput),
+    };
   }
 }
 
