@@ -1,15 +1,13 @@
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
-  EnvObject,
+  EnvLines,
   SealedSecretsKeys,
 } from "../types.ts";
-import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
-import { prepareAWSEnv } from "../deployment-targets/aws.ts";
-import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
-import { prepareAzureEnv } from "../deployment-targets/azure.ts";
+import { getAWSEnvLines } from "../deployment-targets/aws.ts";
+import { getGCPEnvLines } from "../deployment-targets/gcp.ts";
+import { getAzureEnvLines } from "../deployment-targets/azure.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 const deploymentTargetsSharedLabel = colors.white(
@@ -22,11 +20,11 @@ interface CNDIGeneratedValues {
   argoUIAdminPassword: string;
 }
 
-const getCoreEnvObject = async (
+const getCoreEnvLines = async (
   cndiGeneratedValues: CNDIGeneratedValues,
   deploymentTarget: DeploymentTarget,
   interactive: boolean,
-): Promise<EnvObject> => {
+): Promise<EnvLines> => {
   const {
     sealedSecretsKeys,
     terraformStatePassphrase,
@@ -65,68 +63,36 @@ const getCoreEnvObject = async (
     Deno.exit(1);
   }
 
-  const coreEnvObject: EnvObject = {
-    SEALED_SECRETS_PUBLIC_KEY: {
-      comment: "Sealed Secrets keys for Kubeseal",
-      value: sealedSecretsKeys.sealed_secrets_public_key,
+  const coreEnvLines: EnvLines = [
+    { comment: "Sealed Secrets keys for Kubeseal" },
+    {
+      value: {
+        SEALED_SECRETS_PUBLIC_KEY: sealedSecretsKeys.sealed_secrets_public_key,
+      },
     },
-    SEALED_SECRETS_PRIVATE_KEY: {
-      value: sealedSecretsKeys.sealed_secrets_private_key,
+    {
+      value: {
+        SEALED_SECRETS_PRIVATE_KEY:
+          sealedSecretsKeys.sealed_secrets_private_key,
+      },
     },
-    ARGO_UI_ADMIN_PASSWORD: {
-      comment: "ArgoUI",
-      value: ARGO_UI_ADMIN_PASSWORD,
-    },
-    TERRAFORM_STATE_PASSPHRASE: {
-      comment: "Passphrase for encrypting/decrypting terraform state",
-      value: TERRAFORM_STATE_PASSPHRASE,
-    },
-  };
-
-  coreEnvObject.GIT_USERNAME = {
-    comment: "git credentials",
-    value: interactive
-      ? ((await Input.prompt({
-        message: colors.cyan("Enter your GitHub username:"),
-        default: GIT_USERNAME,
-      })) as string)
-      : GIT_USERNAME,
-  };
-
-  coreEnvObject.GIT_PASSWORD = {
-    value: interactive
-      ? ((await Secret.prompt({
-        message: colors.cyan("Enter your GitHub Personal Access Token:"),
-        default: GIT_PASSWORD,
-      })) as string)
-      : GIT_PASSWORD,
-  };
-
-  coreEnvObject.GIT_REPO = {
-    value: interactive
-      ? await Input.prompt({
-        message: colors.cyan("Enter your GitHub repository URL:"),
-        default: GIT_REPO,
-      })
-      : GIT_REPO,
-  };
+    { comment: "ArgoCD" },
+    { value: { ARGO_UI_ADMIN_PASSWORD } },
+    { comment: "Passphrase for encrypting/decrypting terraform state" },
+    { value: { TERRAFORM_STATE_PASSPHRASE } },
+    { comment: "git credentials" },
+    { value: { GIT_USERNAME } },
+    { value: { GIT_REPO } },
+    { value: { GIT_PASSWORD } },
+  ];
 
   switch (deploymentTarget) {
     case DEPLOYMENT_TARGET.aws:
-      return {
-        ...coreEnvObject,
-        ...(await prepareAWSEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getAWSEnvLines(interactive))];
     case DEPLOYMENT_TARGET.gcp:
-      return {
-        ...coreEnvObject,
-        ...(await prepareGCPEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getGCPEnvLines(interactive))];
     case DEPLOYMENT_TARGET.azure:
-      return {
-        ...coreEnvObject,
-        ...(await prepareAzureEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getAzureEnvLines(interactive))];
     default:
       console.log(
         colors.brightRed(`kind "${deploymentTarget}" is not yet supported`),
@@ -137,4 +103,4 @@ const getCoreEnvObject = async (
 
 const availableDeploymentTargets = Object.values(DEPLOYMENT_TARGET);
 
-export { availableDeploymentTargets, getCoreEnvObject };
+export { availableDeploymentTargets, getCoreEnvLines };

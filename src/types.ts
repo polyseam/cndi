@@ -181,12 +181,15 @@ interface KubernetesSecret extends KubernetesManifest {
   isPlaceholder: boolean;
 }
 
-interface EnvObject {
-  [key: string]: {
-    value?: string;
-    comment?: string;
-  };
+interface EnvCommentEntry {
+  comment: string;
 }
+interface EnvValueEntry {
+  value: { [key: string]: string };
+}
+
+type EnvLines = Array<EnvCommentEntry | EnvValueEntry>;
+
 interface KubernetesSecretWithStringData extends KubernetesSecret {
   stringData: {
     [key: string]: string;
@@ -218,7 +221,9 @@ export type {
   CNDIConfig,
   CNDINode,
   DeploymentTargetConfiguration,
-  EnvObject,
+  EnvCommentEntry,
+  EnvLines,
+  EnvValueEntry,
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   KubernetesManifest,

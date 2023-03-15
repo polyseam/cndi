@@ -1,25 +1,20 @@
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { EnvObject } from "../types.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
+import { EnvLines } from "../types.ts";
 
 const deploymentTargetsLabel = colors.white("src/deployment-targets/gcp:");
 
-const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
-  const GCP_REGION = "us-central1";
+const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
+  let GCP_REGION = "us-central1";
   let GOOGLE_CREDENTIALS = "";
 
-  const gcpEnvObject: EnvObject = {};
-
-  gcpEnvObject.GCP_REGION = {
-    comment: "GCP",
-    value: interactive
-      ? ((await Input.prompt({
-        message: colors.cyan("Enter your GCP Region:"),
-        default: GCP_REGION,
-      })) as string)
-      : GCP_REGION,
-  };
+  GCP_REGION = interactive
+    ? ((await Input.prompt({
+      message: colors.cyan("Enter your GCP Region:"),
+      default: GCP_REGION,
+    })) as string)
+    : GCP_REGION;
 
   if (interactive) {
     let credentials_string;
@@ -70,9 +65,13 @@ const prepareGCPEnv = async (interactive: boolean): Promise<EnvObject> => {
     GOOGLE_CREDENTIALS = credentials_string;
   }
 
-  gcpEnvObject.GOOGLE_CREDENTIALS = { value: GOOGLE_CREDENTIALS };
-
-  return gcpEnvObject;
+  return [
+    {
+      comment: "GCP",
+    },
+    { value: { GCP_REGION } },
+    { value: { GOOGLE_CREDENTIALS } },
+  ];
 };
 
-export { prepareGCPEnv };
+export { getGCPEnvLines };
