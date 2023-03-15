@@ -88,7 +88,7 @@ microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{
 Now to login to ArgoCD you can visit that controller's public IP address, and login with the username \`"admin"\` and the password you just printed.
 `.trim();
 
-  const readmeSectionsForKind = {
+  const readmeSectionsForDeploymentTarget = {
     aws: `
 ## aws
 
@@ -112,10 +112,17 @@ Both entries should point to the single load balancer that was created for your 
 `.trim(),
   };
 
-  return [
+  const readmeContent = [
     `# ${project_name || "my-cndi-project"}`,
     coreReadmeSection,
     loggingIntoArgoCDSection,
-    readmeSectionsForKind[deploymentTarget],
+    readmeSectionsForDeploymentTarget[deploymentTarget],
   ].join("\n\n");
+
+  console.log(
+    "📝  Writing README.md file to project directory with the following content:",
+    readmeContent,
+  );
+
+  return readmeContent;
 }

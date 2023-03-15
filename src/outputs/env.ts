@@ -11,7 +11,10 @@ const writeEnvObject = (envLines: EnvLines): string => {
       return `\n${commentLine.comment}`;
     } else if (valueLine?.value) {
       const key = Object.keys(valueLine.value)[0];
-      const val = valueLine.value[key] ?? `${key}${PLACEHOLDER_SUFFIX}`;
+      const val = valueLine?.value?.[key]
+        ? valueLine.value[key]
+        : `${key}${PLACEHOLDER_SUFFIX}`;
+      console.log("key", key, "val", val);
       Deno.env.set(key, val);
       return `${key}='${val}'`;
     } else {

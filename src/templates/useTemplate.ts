@@ -83,6 +83,7 @@ interface Template {
   "readme": {
     prompts?: Array<TemplatePrompt>;
     extend_basic_readme: DeploymentTarget;
+    template?: string;
   };
 }
 
@@ -179,7 +180,7 @@ export default async function useTemplate(
       const { comment } = p;
       templateEnvLines.push({ comment } as EnvCommentEntry);
       continue;
-    } else {
+    } else if (opt.interactive) {
       // deno-lint-ignore no-explicit-any
       const P = getPromptModuleForType(p.type) as any;
       const v = await P?.prompt({
@@ -187,15 +188,23 @@ export default async function useTemplate(
         message: colors.cyan(p.message),
       });
       templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
+    } else {
+      templateEnvLines.push(
+        { value: { [p.name]: p.default } } as EnvValueEntry,
+      );
     }
   }
 
   const env = [...coreEnvLines, ...templateEnvLines];
 
-  const readme = await getReadmeForProject({
+  const coreReadme = await getReadmeForProject({
     deploymentTarget: templateObject.readme.extend_basic_readme,
     project_name: opt.project_name,
   });
+
+  const templateReadmeText = templateObject.readme?.template || "";
+
+  const readme = coreReadme + templateReadmeText;
 
   return {
     cndiConfig,
