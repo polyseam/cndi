@@ -126,6 +126,12 @@ export default async function useTemplate(
     templateUrl,
   ) as unknown as Template;
 
+  const coreEnvLines = await getCoreEnvLines(
+    cndiGeneratedValues,
+    templateObject.env.extend_basic_env,
+    interactive,
+  );
+
   const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts ||
     [];
 
@@ -163,12 +169,6 @@ export default async function useTemplate(
   } catch {
     throw new Error("Invalid cndi-config.jsonc generated");
   }
-
-  const coreEnvLines = await getCoreEnvLines(
-    cndiGeneratedValues,
-    templateObject.env.extend_basic_env,
-    interactive,
-  );
 
   const templateEnvLines = [];
 
