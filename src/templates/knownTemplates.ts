@@ -1,4 +1,4 @@
-const POLYSEAM_TEMPLATE_DIRECTORY =
+export const POLYSEAM_TEMPLATE_DIRECTORY =
   "https://raw.githubusercontent.com/polyseam/cndi/templates-as-urls/src/templates/";
 
 export default function getKnownTemplates() {

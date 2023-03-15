@@ -21,6 +21,7 @@ import {
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import getReadmeForProject from "src/outputs/readme.ts";
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "./knownTemplates.ts";
 
 type TemplatePromptTypeNames =
   | "Input"
@@ -98,9 +99,6 @@ interface CNDIGeneratedValues {
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
 }
-
-const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/templates-as-urls/src/templates/";
 
 export default async function useTemplate(
   templateLocation: string,
