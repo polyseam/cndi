@@ -1,48 +1,60 @@
 import { loadRemoteJSONC } from "src/utils.ts";
-import { getCoreEnvObject } from "src/deployment-targets/shared.ts";
+import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 import {
   CNDIConfig,
   DeploymentTarget,
-  EnvObject,
+  EnvCommentEntry,
+  EnvLines,
+  EnvValueEntry,
   SealedSecretsKeys,
 } from "../types.ts";
 import {
+  Checkbox,
+  Confirm,
   Input,
+  List,
+  Number,
   prompt,
   Secret,
+  Select,
+  Toggle,
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 import getReadmeForProject from "src/outputs/readme.ts";
 
 type TemplatePromptTypeNames =
   | "Input"
   | "Secret"
+  | "Confirm"
+  | "Toggle"
+  | "Select"
+  | "List"
+  | "Checkbox"
+  | "Number"
   | "Comment";
-
-type TemplatePromptTypes = typeof Input | typeof Secret | typeof Comment;
-
-class Comment {
-  value: string;
-  constructor(value: string) {
-    this.value = value;
-  }
-  get comment() {
-    return this.value;
-  }
-  prompt() {
-    return this.value;
-  }
-}
 
 function getPromptModuleForType(
   type: TemplatePromptTypeNames,
-): TemplatePromptTypes {
+) {
   switch (type) {
     case "Input":
       return Input;
     case "Secret":
       return Secret;
+    case "Confirm":
+      return Confirm;
+    case "Toggle":
+      return Toggle;
+    case "Select":
+      return Select;
+    case "List":
+      return List;
+    case "Checkbox":
+      return Checkbox;
+    case "Number":
+      return Number;
     case "Comment":
-      return Comment;
+      return "Comment";
     default:
       throw new Error(`Unknown prompt type ${type}`);
   }
@@ -52,6 +64,11 @@ interface TemplatePrompt {
   name: string;
   message: string;
   type: TemplatePromptTypeNames;
+  default: string;
+  comment?: string;
+  hint?: string;
+  transform?: (value: string) => string;
+  validate?: (value: string) => boolean | string;
 }
 
 interface Template {
@@ -71,7 +88,7 @@ interface Template {
 
 interface TemplateResult {
   "cndiConfig": CNDIConfig;
-  "env": EnvObject;
+  "env": EnvLines;
   "readme": string;
 }
 
@@ -98,7 +115,7 @@ export default async function useTemplate(
   try {
     templateUrl = new URL(templateLocation);
   } catch {
-    console.log("Template location is not a URL, loading from cndi repo");
+    //console.log("Template location is not a URL, loading from cndi repo");
     templateUrl = new URL(
       `${templateLocation}.json`,
       POLYSEAM_TEMPLATE_DIRECTORY,
@@ -108,19 +125,25 @@ export default async function useTemplate(
     templateUrl,
   ) as unknown as Template;
 
-  const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts;
+  const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts ||
+    [];
+
+  const defaultCndiConfigValues: Record<string, string> = {};
 
   const cndiConfigPrompts = cndiConfigPromptDefinitions.map(
     (promptDefinition) => {
+      defaultCndiConfigValues[promptDefinition.name] = promptDefinition.default;
       return {
         ...promptDefinition,
+        message: colors.cyan(promptDefinition.message),
         type: getPromptModuleForType(promptDefinition.type),
       };
     },
   );
 
-  // deno-lint-ignore no-explicit-any
-  const cndiConfigValues = await prompt(cndiConfigPrompts as unknown as any);
+  const cndiConfigValues = opt.interactive // deno-lint-ignore no-explicit-any
+    ? await prompt(cndiConfigPrompts as unknown as any)
+    : defaultCndiConfigValues;
 
   const cndiConfigStringified = JSON.stringify(
     templateObject["cndi-config"].template,
@@ -140,29 +163,34 @@ export default async function useTemplate(
     throw new Error("Invalid cndi-config.jsonc generated");
   }
 
-  const basicEnvPrompts = await getCoreEnvObject(
+  const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,
     templateObject.env.extend_basic_env,
     interactive,
   );
 
-  const templateEnvPromptDefinitions = templateObject.env.prompts;
+  const templateEnvLines = [];
 
-  const templateEnvPrompts = templateEnvPromptDefinitions?.map((prompt) => {
-    return {
-      ...prompt,
-      type: getPromptModuleForType(prompt.type),
-    };
-  });
+  const templateEnvPromptDefinitions: Array<TemplatePrompt> =
+    templateObject?.env?.prompts || [];
 
-  const templateEnvValues = templateEnvPrompts // deno-lint-ignore no-explicit-any
-    ? await prompt(templateEnvPrompts as unknown as any)
-    : {};
+  for (const p of templateEnvPromptDefinitions) {
+    if (p.type === "Comment") {
+      const { comment } = p;
+      templateEnvLines.push({ comment } as EnvCommentEntry);
+      continue;
+    } else {
+      // deno-lint-ignore no-explicit-any
+      const P = getPromptModuleForType(p.type) as any;
+      const v = await P?.prompt({
+        ...p,
+        message: colors.cyan(p.message),
+      });
+      templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
+    }
+  }
 
-  const env: EnvObject = {
-    ...basicEnvPrompts,
-    ...(templateEnvValues || {}),
-  };
+  const env = [...coreEnvLines, ...templateEnvLines];
 
   const readme = await getReadmeForProject({
     deploymentTarget: templateObject.readme.extend_basic_readme,

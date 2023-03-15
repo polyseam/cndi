@@ -12,14 +12,14 @@ import {
   persistStagedFiles,
   stageFile,
 } from "../utils.ts";
-import { CNDIConfig, EnvObject } from "../types.ts";
+import { CNDIConfig, EnvLines } from "../types.ts";
 
 import { overwriteAction } from "./overwrite.ts";
 
 import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
-import { getCoreEnvObject } from "../deployment-targets/shared.ts";
+import { getCoreEnvLines } from "../deployment-targets/shared.ts";
 
 import useTemplate from "src/templates/useTemplate.ts";
 
@@ -61,7 +61,7 @@ const initCommand = new Command()
     const pathToConfig = options.file;
     let template: string | undefined = options.template;
     let cndiConfig: CNDIConfig;
-    let env: EnvObject;
+    let env: EnvLines;
     let readme: string;
     let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
     // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
@@ -185,7 +185,7 @@ const initCommand = new Command()
         deploymentTarget: getDeploymentTargetFromConfig(cndiConfig!),
       });
 
-      env = await getCoreEnvObject(
+      env = await getCoreEnvLines(
         cndiGeneratedValues,
         getDeploymentTargetFromConfig(cndiConfig!),
         !!options.interactive,

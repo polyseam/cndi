@@ -199,7 +199,7 @@
     "prompts": [
       {
         "type": "Comment",
-        "value": "airflow-git-credentials secret values for DAG Storage"
+        "comment": "airflow-git-credentials secret values for DAG Storage"
       },
       {
         "name": "GIT_SYNC_USERNAME",
