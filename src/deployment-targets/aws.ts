@@ -1,4 +1,4 @@
-import { colors, Input, Secret } from "deps";
+import { ccolors, Input, Secret } from "deps";
 
 import { EnvLines } from "src/types.ts";
 
@@ -9,21 +9,21 @@ const getAWSEnvLines = async (interactive: boolean): Promise<EnvLines> => {
 
   AWS_REGION = interactive
     ? ((await Input.prompt({
-      message: colors.cyan("Enter your AWS region:"),
+      message: ccolors.prompt("Enter your AWS region:"),
       default: AWS_REGION,
     })) as string)
     : AWS_REGION;
 
   AWS_ACCESS_KEY_ID = interactive
     ? ((await Secret.prompt({
-      message: colors.cyan("Enter your AWS access key ID:"),
+      message: ccolors.prompt("Enter your AWS access key ID:"),
       default: AWS_ACCESS_KEY_ID,
     })) as string)
     : AWS_ACCESS_KEY_ID;
 
   AWS_SECRET_ACCESS_KEY = interactive
     ? ((await Secret.prompt({
-      message: colors.cyan("Enter your AWS secret access key:"),
+      message: ccolors.prompt("Enter your AWS secret access key:"),
       default: AWS_SECRET_ACCESS_KEY,
     })) as string)
     : AWS_SECRET_ACCESS_KEY;

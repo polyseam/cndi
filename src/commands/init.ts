@@ -1,6 +1,6 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
 
-import { colors, Command, Input, path, Select, SEP } from "deps";
+import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {
   checkInitialized,
@@ -33,7 +33,7 @@ import getReadmeForProject from "src/outputs/readme.ts";
 
 import validateConfig from "src/validate/cndiConfig.ts";
 
-const initLabel = colors.white("\ninit:");
+const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 /**
  * COMMAND cndi init
@@ -72,11 +72,11 @@ const initCommand = new Command()
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
           // if config is not found at 'pathToConfig' we want to throw an error
-          console.log(
+          console.error(
             initLabel,
-            colors.brightRed(
+            ccolors.error(
               `cndi-config file not found at ${
-                colors.white(
+                ccolors.user_input(
                   `"${pathToConfig}"`,
                 )
               }\n`,
@@ -86,7 +86,7 @@ const initCommand = new Command()
           // and suggest a solution
           console.log(
             `if you don't have a cndi-config file try ${
-              colors.cyan(
+              ccolors.prompt(
                 "cndi init --interactive",
               )
             }\n`,
@@ -99,7 +99,7 @@ const initCommand = new Command()
     if (options.template === "true") {
       console.error(
         initLabel,
-        colors.brightRed(`--template (-t) flag requires a value`),
+        ccolors.error(`--template (-t) flag requires a value`),
       );
       Deno.exit(1);
     }
@@ -132,7 +132,7 @@ const initCommand = new Command()
 
     if (options.interactive) {
       project_name = (await Input.prompt({
-        message: colors.cyan("Please enter a name for your CNDI project:"),
+        message: ccolors.prompt("Please enter a name for your CNDI project:"),
         default: project_name,
       })) as string;
     }
@@ -146,7 +146,7 @@ const initCommand = new Command()
 
     if (options.interactive && !template) {
       template = await Select.prompt({
-        message: colors.cyan("Pick a template"),
+        message: ccolors.prompt("Pick a template"),
         options: templateNamesList,
       });
     }
@@ -193,7 +193,8 @@ const initCommand = new Command()
       await Deno.stat(readmePath);
       console.log(
         initLabel,
-        colors.yellow(`"${readmePath}" already exists, skipping generation`),
+        ccolors.user_input(`"${readmePath}"`),
+        ccolors.warn(`already exists, skipping generation`),
       );
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {

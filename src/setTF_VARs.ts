@@ -1,40 +1,44 @@
-import { colors } from "deps";
+import { ccolors } from "deps";
 
-const setTF_VARsLabel = colors.white("\nsrc/setTF_VARs:");
+const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
 export default function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
   if (!git_username) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("GIT_USERNAME env var is not set"),
+      ccolors.key_name(`"GIT_USERNAME"`),
+      "env var is not set",
     );
     Deno.exit(1);
   }
 
   const git_password = Deno.env.get("GIT_PASSWORD");
   if (!git_password) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("GIT_PASSWORD env var is not set"),
+      ccolors.key_name(`"GIT_PASSWORD"`),
+      ccolors.error("env var is not set"),
     );
     Deno.exit(1);
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
   if (!git_repo) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("GIT_REPO env var is not set"),
+      ccolors.key_name(`"GIT_REPO"`),
+      ccolors.error("env var is not set"),
     );
     Deno.exit(1);
   }
 
   const argo_ui_admin_password = Deno.env.get("ARGO_UI_ADMIN_PASSWORD");
   if (!argo_ui_admin_password) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("ARGO_UI_ADMIN_PASSWORD env var is not set"),
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error("env var is not set"),
     );
     Deno.exit(1);
   }
@@ -44,9 +48,10 @@ export default function setTF_VARs() {
     ?.trim();
 
   if (!sealed_secrets_private_key) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("SEALED_SECRETS_PRIVATE_KEY env var is not set"),
+      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+      ccolors.error("env var is not set"),
     );
     Deno.exit(1);
   }
@@ -56,9 +61,10 @@ export default function setTF_VARs() {
     ?.trim();
 
   if (!sealed_secrets_public_key) {
-    console.log(
+    console.error(
       setTF_VARsLabel,
-      colors.brightRed("SEALED_SECRETS_PUBLIC_KEY env var is not set"),
+      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+      ccolors.error("env var is not set"),
     );
     Deno.exit(1);
   }

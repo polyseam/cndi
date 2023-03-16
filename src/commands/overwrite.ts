@@ -1,5 +1,5 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import { colors, Command, path } from "deps";
+import { ccolors, Command, path } from "deps";
 
 import {
   getPrettyJSONString,
@@ -26,7 +26,7 @@ import {
   KubernetesSecret,
 } from "src/types.ts";
 
-const owLabel = colors.white("\noverwrite:");
+const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
 interface OverwriteActionArgs {
   output: string;
@@ -52,17 +52,17 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   try {
     config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
   } catch {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(
+      ccolors.error(
         `there is no cndi-config file at ${
-          colors.white(`"${pathToConfig}"`)
+          ccolors.user_input(`"${pathToConfig}"`)
         }\n`,
       ),
     );
     console.log(
       `if you don't have a cndi-config file try ${
-        colors.cyan(
+        ccolors.prompt(
           "cndi init --interactive",
         )
       }\n`,
@@ -79,35 +79,45 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   const argoUIAdminPassword = loadArgoUIAdminPassword();
 
   if (!sealedSecretsKeys) {
-    console.log(owLabel, colors.brightRed(`"sealedSecretsKeys" are undefined`));
+    console.error(
+      owLabel,
+      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+      ccolors.error(`and/or`),
+      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+      ccolors.error(`are not present in environment`),
+    );
     Deno.exit(1);
   }
 
   if (!argoUIAdminPassword) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(`"argoUIAdminPassword" is undefined`),
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error(`is not set in environment`),
     );
     Deno.exit(1);
   }
 
   if (!terraformStatePassphrase) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(`"terraformStatePassphrase" is undefined`),
+      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+      ccolors.error(`is not set in environment`),
     );
     Deno.exit(1);
   }
 
   if (!config?.project_name) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(
-        `you need to specify a ${
-          colors.cyan(
-            '"project_name"',
-          )
-        } for your CNDI cluster, it is used to tag resources we create`,
+      ccolors.error(
+        `you need to specify a`,
+      ),
+      ccolors.key_name(
+        '"project_name"',
+      ),
+      ccolors.error(
+        `for your CNDI cluster, it is used to tag resources we create in the cloud`,
       ),
     );
     Deno.exit(1);
@@ -175,9 +185,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   const leaders = nodes.filter((node) => node.role === "leader");
 
   if (leaders.length !== 1) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(`There must be exactly one leader node`),
+      ccolors.error(`There must be exactly one leader node`),
     );
     Deno.exit(1);
   }
@@ -186,43 +196,51 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     nodes.map((node: BaseNodeItemSpec, index: number) => {
       // eg: aws -> aws
       if (!node.kind) {
-        console.log(
-          `node ${colors.cyan(`${index}`)} ${
-            node.name ? `("${node.name}")` : ""
-          } is missing the property "${colors.cyan("kind")}"`,
+        console.error(
+          `node`,
+          ccolors.key_name(`${index}`),
+          node.name ? ccolors.user_input(`("${node.name}")`) : "",
+          `is missing the property`,
+          ccolors.key_name(`"kind"`),
         );
         Deno.exit(1);
       }
 
       if (!node.name) {
-        console.log(
-          `node ${colors.cyan(`${index}`)} is missing the property "${
-            colors.cyan("kind")
-          }"`,
+        console.error(
+          `node`,
+          ccolors.key_name(`${index}`),
+          `is missing the property`,
+          ccolors.key_name(`"name"`),
         );
         Deno.exit(1);
       }
+
       const provider = node.kind;
       return provider;
     }),
   );
 
   if (requiredProviders.size !== 1) {
+    console.error(
+      ccolors.error(`we currently only support`),
+      ccolors.warn("1"),
+      ccolors.key_name(`"kind"`),
+      ccolors.error(`per cluster`),
+    );
+
     console.log(
-      colors.yellow(
-        `we currently only support ${colors.cyan("1")} "kind" per cluster\n`,
+      `your nodes have the following`,
+      ccolors.user_input(
+        `${requiredProviders.size}`,
       ),
+      ccolors.key_name(`"kind"s`),
     );
-    console.log(
-      `your nodes have the following ${
-        colors.brightRed(
-          `${requiredProviders.size}`,
-        )
-      } "kind"s:`,
-    );
+
     requiredProviders.forEach((kind) => {
-      console.log(` - ${colors.yellow(kind)}`);
+      console.log(` - ${ccolors.warn(kind)}`);
     });
+
     console.log();
     Deno.exit(1);
   }
@@ -253,8 +271,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   try {
     await persistStagedFiles(options.output);
   } catch (errorPersistingStagedFiles) {
-    console.log(owLabel, colors.brightRed(`Error persisting staged files`));
-    console.log(errorPersistingStagedFiles);
+    console.error(
+      owLabel,
+      ccolors.error(
+        `failed to persist staged cndi files to`,
+      ),
+      ccolors.user_input(`${options.output}`),
+    );
+    console.log(ccolors.caught(errorPersistingStagedFiles));
     await Deno.remove(getStagingDir(), { recursive: true });
     Deno.exit(1);
   }

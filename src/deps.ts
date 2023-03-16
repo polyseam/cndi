@@ -1,5 +1,5 @@
 // Deno std lib
-export { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+
 export { copy } from "https://deno.land/std@0.178.0/streams/copy.ts";
 export { SEP } from "https://deno.land/std@0.178.0/path/mod.ts";
 export { writableStreamFromWriter } from "https://deno.land/std@0.177.0/streams/writable_stream_from_writer.ts";
@@ -33,6 +33,7 @@ export {
 } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
 
 import { UpgradeOptions } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
 export {
   Checkbox,
@@ -62,6 +63,18 @@ export {
 // import/export required
 export { CryptoJS };
 export type { UpgradeOptions };
+
+// custom colors
+export const ccolors = {
+  faded: colors.white,
+  user_input: colors.brightWhite,
+  warn: colors.yellow,
+  error: colors.brightRed,
+  prompt: colors.cyan,
+  success: colors.green,
+  key_name: colors.cyan,
+  caught: colors.red,
+};
 
 // constants
 export const TERRAFORM_VERSION = "1.3.2";

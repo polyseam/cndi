@@ -1,5 +1,5 @@
 import {
-  colors,
+  ccolors,
   GithubProvider,
   KUBESEAL_VERSION,
   SpinnerTypes,
@@ -14,7 +14,7 @@ import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
 
 import installDependenciesIfRequired from "src/install.ts";
 
-const upgradeLabel = colors.white("\nupgrade:");
+const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
@@ -49,12 +49,12 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         await response.body.pipeTo(cndiWritableStream);
       }
       spinner.stop();
-      const fromMsg = from ? ` from ${colors.yellow(from)}` : "";
-      console.info(
-        `Successfully upgraded ${colors.cyan(name)}${fromMsg} to version ${
-          colors.green(to)
+      const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
+      console.log(
+        `Successfully upgraded ${ccolors.prompt(name)}${fromMsg} to version ${
+          ccolors.success(to)
         }!\n\n${
-          colors.cyan(`https://github.com/polyseam/cndi/releases/${to}`)
+          ccolors.prompt(`https://github.com/polyseam/cndi/releases/${to}`)
         }`,
       );
       await installDependenciesIfRequired({
@@ -63,11 +63,11 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         TERRAFORM_VERSION,
       }, true);
     } catch (upgradeError) {
-      console.log(
+      console.error(
         upgradeLabel,
-        colors.brightRed(`\nfailed to upgrade ${name}, please try again`),
+        ccolors.error(`\nfailed to upgrade ${name}, please try again`),
       );
-      console.log(upgradeError);
+      console.log(ccolors.caught(upgradeError));
     }
   }
 }

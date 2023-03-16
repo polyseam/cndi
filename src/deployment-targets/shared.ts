@@ -1,4 +1,4 @@
-import { colors } from "deps";
+import { ccolors } from "deps";
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
@@ -10,8 +10,8 @@ import { getAWSEnvLines } from "src/deployment-targets/aws.ts";
 import { getGCPEnvLines } from "src/deployment-targets/gcp.ts";
 import { getAzureEnvLines } from "src/deployment-targets/azure.ts";
 
-const deploymentTargetsSharedLabel = colors.white(
-  "\nsrc/deployment-targets/shared:",
+const deploymentTargetsSharedLabel = ccolors.faded(
+  "\nsrc/deployment-targets/shared.ts:",
 );
 
 interface CNDIGeneratedValues {
@@ -41,8 +41,10 @@ const getCoreEnvLines = async (
 
   if (!sealedSecretsKeys) {
     console.log(
-      deploymentTargetsSharedLabel,
-      colors.brightRed(`"sealedSecretsKeys" is not defined in context`),
+      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+      ccolors.error(`and/or`),
+      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+      ccolors.error(`are not present in environment`),
     );
     Deno.exit(1);
   }
@@ -50,7 +52,8 @@ const getCoreEnvLines = async (
   if (!TERRAFORM_STATE_PASSPHRASE) {
     console.log(
       deploymentTargetsSharedLabel,
-      colors.brightRed(`"terraformStatePassphrase" is not defined in context`),
+      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+      ccolors.error(`is not set in environment`),
     );
     Deno.exit(1);
   }
@@ -58,7 +61,8 @@ const getCoreEnvLines = async (
   if (!ARGO_UI_ADMIN_PASSWORD) {
     console.log(
       deploymentTargetsSharedLabel,
-      colors.brightRed(`"argoUIAdminPassword" is not defined in context`),
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error(`is not set in environment`),
     );
     Deno.exit(1);
   }
@@ -94,8 +98,10 @@ const getCoreEnvLines = async (
     case DEPLOYMENT_TARGET.azure:
       return [...coreEnvLines, ...(await getAzureEnvLines(interactive))];
     default:
-      console.log(
-        colors.brightRed(`kind "${deploymentTarget}" is not yet supported`),
+      console.error(
+        ccolors.key_name(`"kind"`),
+        ccolors.user_input(`"${deploymentTarget}"`),
+        ccolors.error(`is not yet supported`),
       );
       Deno.exit(1);
   }

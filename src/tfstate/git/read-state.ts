@@ -1,10 +1,10 @@
-import { colors, path, simpleGit } from "deps";
+import { ccolors, path, simpleGit } from "deps";
 
 import decrypt from "src/tfstate/decrypt.ts";
 
 const git = simpleGit();
 
-const gitReadStateLabel = colors.white("src/tfstate/git/read-state:");
+const gitReadStateLabel = ccolors.faded("src/tfstate/git/read-state.ts:");
 
 export default async function pullStateForRun({
   pathToTerraformResources,
@@ -17,9 +17,10 @@ export default async function pullStateForRun({
   const isGitRepo = git.checkIsRepo();
 
   if (!isGitRepo) {
-    console.log(
+    console.error(
       gitReadStateLabel,
-      `"${cmd}" must be executed inside a git repository`,
+      ccolors.user_input(`"${cmd}"`),
+      ccolors.error("must be executed inside a git repository"),
     );
     Deno.exit(1);
   }
@@ -32,10 +33,10 @@ export default async function pullStateForRun({
   const originalBranch = (await git.branch()).current;
 
   if (!originalBranch) {
-    console.log(
+    console.error(
       gitReadStateLabel,
-      "you must make a commit on your branch before running",
-      `"${colors.cyan(cmd)}"\n`,
+      ccolors.error("you must make a commit on your branch before running"),
+      ccolors.user_input(`"${cmd}"`),
     );
     Deno.exit(1);
   }
@@ -44,10 +45,10 @@ export default async function pullStateForRun({
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
-    console.log(
+    console.error(
       gitReadStateLabel,
-      colors.brightRed("your branch must be clean before running"),
-      `"${colors.cyan(cmd)}"\n`,
+      ccolors.error("your branch must be clean before running"),
+      ccolors.user_input(`"${cmd}"`),
     );
     Deno.exit(1);
   }
@@ -76,10 +77,10 @@ export default async function pullStateForRun({
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
   if (!secret) {
-    console.log(
+    console.error(
       gitReadStateLabel,
-      colors.yellow("TERRAFORM_STATE_PASSPHRASE"),
-      "is not set in your environment file",
+      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+      "is not set in your environment",
     );
     Deno.exit(1);
   }

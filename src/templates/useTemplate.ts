@@ -11,8 +11,8 @@ import {
 } from "src/types.ts";
 
 import {
+  ccolors,
   Checkbox,
-  colors,
   Confirm,
   Input,
   List,
@@ -143,7 +143,7 @@ export default async function useTemplate(
       defaultCndiConfigValues[promptDefinition.name] = promptDefinition.default;
       return {
         ...promptDefinition,
-        message: colors.cyan(promptDefinition.message),
+        message: ccolors.prompt(promptDefinition.message),
         type: getPromptModuleForType(promptDefinition.type),
       };
     },
@@ -186,7 +186,7 @@ export default async function useTemplate(
       const P = getPromptModuleForType(p.type) as any;
       const v = await P?.prompt({
         ...p,
-        message: colors.cyan(p.message),
+        message: ccolors.prompt(p.message),
       });
       templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
     } else {

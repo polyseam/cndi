@@ -1,5 +1,5 @@
 import {
-  colors,
+  ccolors,
   path,
   SpinnerTypes,
   TerminalSpinner,
@@ -8,7 +8,7 @@ import {
 
 import { checkInstalled, getFileSuffixForPlatform } from "src/utils.ts";
 
-const installLabel = colors.white("\nsrc/install:");
+const installLabel = ccolors.faded("\nsrc/install.ts:");
 
 interface InstallDependenciesIfRequiredOptions {
   CNDI_HOME: string;
@@ -63,11 +63,11 @@ export default async function installDependenciesIfRequired(
         console.log("\n    terraform installed!\n");
       }
     } catch (terraformInstallError) {
-      console.log(
+      console.error(
         installLabel,
-        colors.brightRed("\nfailed to install terraform, please try again"),
+        ccolors.error("\nfailed to install terraform, please try again"),
       );
-      console.log(terraformInstallError);
+      console.log(ccolors.caught(terraformInstallError));
       Deno.exit(1);
     }
 
@@ -92,11 +92,11 @@ export default async function installDependenciesIfRequired(
         console.log("\n    kubeseal installed!\n");
       }
     } catch (kubesealInstallError) {
-      console.log(
+      console.error(
         installLabel,
-        colors.brightRed("\nfailed to install kubeseal, please try again"),
+        ccolors.error("\nfailed to install kubeseal, please try again"),
       );
-      console.log(kubesealInstallError);
+      console.log(ccolors.caught(kubesealInstallError));
       Deno.exit(1);
     }
     console.log();

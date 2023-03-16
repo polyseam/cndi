@@ -5,9 +5,9 @@ import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
 import { getPathToTerraformBinary } from "src/utils.ts";
 
-import { colors, Command, copy, path } from "deps";
+import { ccolors, Command, copy, path } from "deps";
 
-const destroyLabel = colors.white("\ndestroy:");
+const destroyLabel = ccolors.faded("\nsrc/commands/destroy.ts:");
 
 /**
  * COMMAND cndi destroy
@@ -88,7 +88,7 @@ const destroyCommand = new Command()
       const initStatus = await ranTerraformInit.status();
 
       if (initStatus.code !== 0) {
-        console.log(destroyLabel, colors.brightRed("terraform init failed"));
+        console.log(destroyLabel, ccolors.error("terraform init failed"));
         Deno.exit(initStatus.code);
       }
 
@@ -118,8 +118,12 @@ const destroyCommand = new Command()
       }
 
       ranTerraformDestroy.close();
-    } catch (err) {
-      console.log(destroyLabel, colors.brightRed("unhandled error"), err);
+    } catch (cndiDestroyError) {
+      console.error(
+        destroyLabel,
+        ccolors.error("failed to destroy your cndi terraform resources"),
+      );
+      console.log(ccolors.caught(cndiDestroyError));
     }
   });
 

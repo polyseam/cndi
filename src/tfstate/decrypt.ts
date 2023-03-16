@@ -1,6 +1,6 @@
-import { colors, CryptoJS } from "deps";
+import { ccolors, CryptoJS } from "deps";
 
-const decryptLabel = colors.white("\nsrc/tfstate/decrypt:");
+const decryptLabel = ccolors.faded("\nsrc/tfstate/decrypt.ts:");
 
 export default function decrypt(encryptedText: string, secret: string) {
   try {
@@ -9,19 +9,21 @@ export default function decrypt(encryptedText: string, secret: string) {
       secret,
     ).toString(CryptoJS.enc.Utf8);
     return decryptedString;
-  } catch {
-    console.log(
+  } catch (decryptError) {
+    console.error(
       decryptLabel,
-      colors.brightRed("failed to decrypt tfstate file from your"),
-      colors.cyan('"_state"'),
-      colors.brightRed("branch\n"),
+      ccolors.error("failed to decrypt tfstate file from your"),
+      ccolors.key_name('"_state"'),
+      ccolors.error("branch\n"),
     );
+
     console.log(
       decryptLabel,
-      colors.yellow(
+      ccolors.warn(
         'your "TERRAFORM_STATE_PASSPHRASE" is likely incorrect, consider deleting your "_state" branch\n',
       ),
     );
+    ccolors.caught(decryptError);
     Deno.exit(1);
   }
 }

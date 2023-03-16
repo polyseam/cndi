@@ -1,4 +1,4 @@
-import { colors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
 
 import {
   BaseNodeItemSpec,
@@ -8,6 +8,8 @@ import {
   NodeKind,
   TFBlocks,
 } from "src/types.ts";
+
+const utilsLabel = ccolors.faded("src/utils.ts:");
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -29,12 +31,18 @@ function getLeaderNodeNameFromConfig(config: CNDIConfig) {
     (node: BaseNodeItemSpec) => node.role === "leader",
   );
   if (!leaderNode) {
-    console.log('no node with role "leader" node found in config!');
+    console.error(
+      utilsLabel,
+      ccolors.error('no node with role "leader" node found in config!'),
+    );
     Deno.exit(1);
   }
   if (!leaderNode.name) {
-    console.log(
-      'no name found for node with role "leader" node found in config!',
+    console.error(
+      utilsLabel,
+      ccolors.error(
+        'no name found for node with role "leader" node found in config!',
+      ),
     );
     Deno.exit(1);
   }
@@ -137,7 +145,11 @@ async function mergeAndStageTerraformObj(
   blockContentsPatch: Record<string, unknown>,
 ) {
   if (!terraformBlockTypeNames.includes(terraformBlockName)) {
-    console.log("there is no terraform block type named", terraformBlockName);
+    console.error(
+      utilsLabel,
+      ccolors.error("there is no terraform block type named"),
+      ccolors.user_input(`"${terraformBlockName}"`),
+    );
     Deno.exit(1);
   }
 
@@ -211,7 +223,10 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   try {
     await Promise.all(workload);
   } catch (error) {
-    console.log("error patching terraform files with config");
+    console.error(
+      utilsLabel,
+      ccolors.error("error patching terraform files with config"),
+    );
     console.log(error);
   }
 }
@@ -245,7 +260,11 @@ async function stageFile(relativePath: string, fileContents: string) {
 function getStagingDir() {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
-    console.error(`${colors.yellow("CNDI_STAGING_DIRECTORY")} is not set!\n`);
+    console.error(
+      utilsLabel,
+      `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
+      ccolors.error(`is not set!\n`),
+    );
     Deno.exit(1);
   }
   return stagingDirectory;
@@ -320,7 +339,10 @@ const getFileSuffixForPlatform = () => {
 
 const getCndiInstallPath = (): string => {
   if (!homedir()) {
-    console.error(colors.red("cndi could not find your home directory!"));
+    console.error(
+      utilsLabel,
+      ccolors.error("cndi could not find your home directory!"),
+    );
     console.log('try setting the "HOME" environment variable on your system.');
     Deno.exit(1);
   }

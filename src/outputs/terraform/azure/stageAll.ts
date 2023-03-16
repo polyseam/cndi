@@ -1,4 +1,4 @@
-import { colors, path } from "deps";
+import { ccolors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
 import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
@@ -191,8 +191,8 @@ export default async function stageTerraformResourcesForAzure(
       ),
     ]);
   } catch (e) {
-    console.log(colors.brightRed("failed to stage terraform resources\n"));
-    console.log(e);
+    console.error(ccolors.error("failed to stage terraform resources"));
+    console.log(ccolors.caught(e));
     Deno.exit(1);
   }
 }
