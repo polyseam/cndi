@@ -1,8 +1,7 @@
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { ccolors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
-import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
+import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -23,6 +22,10 @@ import cndi_google_project_service_cloudresourcemanager from "./cndi_google_proj
 import cndi_google_compute_region_backend_service from "./cndi_google_compute_region_backend_service.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
 
+const gcpStageAllLable = ccolors.faded(
+  "\nsrc/outputs/terraform/gcp/stageAll.ts:",
+);
+
 export default async function stageTerraformResourcesForGCP(
   config: CNDIConfig,
   options: { output: string; initializing: boolean },
@@ -37,7 +40,7 @@ export default async function stageTerraformResourcesForGCP(
     `\${google_compute_instance.cndi_google_compute_instance_${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
-    console.log("google credentials are missing");
+    console.log("google credentials are missing", "\n");
     // the message about missing credentials should have already been printed
     Deno.exit(1);
   }
@@ -48,39 +51,33 @@ export default async function stageTerraformResourcesForGCP(
 
   try {
     parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
-  } catch {
+  } catch (parsingError) {
     const placeholder = "GOOGLE_CREDENTIALS_PLACEHOLDER__";
     if (googleCredentials === placeholder) {
       console.log(
-        colors.yellow(
-          `\n\n${
-            colors.brightRed(
-              "ERROR",
-            )
-          }: GOOGLE_CREDENTIALS not found in environment`,
-        ),
+        gcpStageAllLable,
+        ccolors.error("ERROR:"),
+        ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
+        ccolors.warn("not found in environment"),
       );
       console.log(
-        `You need to replace `,
-        colors.cyan(placeholder),
-        `with the desired value in "${dotEnvPath}"\nthen run ${
-          colors.green(
-            "cndi ow",
-          )
-        }\n`,
+        "You need to replace",
+        ccolors.key_name(placeholder),
+        "with the desired value in",
+        ccolors.user_input(`"${dotEnvPath}"`),
+        "\nthen run",
+        ccolors.success("cndi ow\n"),
       );
       if (!options.initializing) {
-        console.log(
-          colors.yellow(
-            "If you are initializing a new project, you can ignore this message",
-          ),
-        );
+        console.log();
         Deno.exit(1);
       }
     } else {
-      console.log(
-        colors.brightRed("failed to parse service account key json\n"),
+      console.error(
+        ccolors.error("failed to parse service account key json from"),
+        ccolors.user_input(`"${dotEnvPath}"`),
       );
+      console.log(ccolors.caught(parsingError), "\n");
       Deno.exit(1);
     }
   }
@@ -217,8 +214,8 @@ export default async function stageTerraformResourcesForGCP(
       ),
     ]);
   } catch (e) {
-    console.log(colors.brightRed("failed to stage terraform resources\n"));
-    console.log(e);
+    console.log(ccolors.error("failed to stage terraform resources"));
+    console.log(ccolors.caught(e), "\n");
     Deno.exit(1);
   }
 }

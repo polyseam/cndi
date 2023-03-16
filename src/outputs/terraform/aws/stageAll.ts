@@ -1,8 +1,7 @@
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { ccolors, path } from "deps";
 
 import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import { getLeaderNodeNameFromConfig, stageFile } from "../../../utils.ts";
+import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
 
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
@@ -180,8 +179,8 @@ export default async function stageTerraformResourcesForAWS(
       ),
     ]);
   } catch (e) {
-    console.log(colors.brightRed("failed to stage terraform resources\n"));
-    console.log(e);
+    console.error(ccolors.error("failed to stage terraform resources"));
+    console.log(ccolors.caught(e), "\n");
     Deno.exit(1);
   }
 }

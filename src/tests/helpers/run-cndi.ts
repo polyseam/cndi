@@ -1,4 +1,4 @@
-import * as path from "https://deno.land/std@0.172.0/path/mod.ts";
+import { path } from "deps";
 const srcDir = Deno.cwd(); // this is the root of the project, runs on import (side-effect bad?)
 
 export interface RunCndiResult {

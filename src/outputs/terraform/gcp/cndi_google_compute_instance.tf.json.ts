@@ -3,7 +3,7 @@ import {
   getPrettyJSONString,
   getTFResource,
 } from "src/utils.ts";
-import { CNDIConfig, GCPNodeItemSpec } from "../../../types.ts";
+import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,

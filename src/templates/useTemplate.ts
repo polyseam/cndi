@@ -1,5 +1,6 @@
 import { loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
+
 import {
   CNDIConfig,
   DeploymentTarget,
@@ -7,8 +8,10 @@ import {
   EnvLines,
   EnvValueEntry,
   SealedSecretsKeys,
-} from "../types.ts";
+} from "src/types.ts";
+
 import {
+  ccolors,
   Checkbox,
   Confirm,
   Input,
@@ -18,10 +21,10 @@ import {
   Secret,
   Select,
   Toggle,
-} from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+} from "deps";
+
 import getReadmeForProject from "src/outputs/readme.ts";
-import { POLYSEAM_TEMPLATE_DIRECTORY } from "./knownTemplates.ts";
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
 
 type TemplatePromptTypeNames =
   | "Input"
@@ -140,7 +143,7 @@ export default async function useTemplate(
       defaultCndiConfigValues[promptDefinition.name] = promptDefinition.default;
       return {
         ...promptDefinition,
-        message: colors.cyan(promptDefinition.message),
+        message: ccolors.prompt(promptDefinition.message),
         type: getPromptModuleForType(promptDefinition.type),
       };
     },
@@ -183,7 +186,7 @@ export default async function useTemplate(
       const P = getPromptModuleForType(p.type) as any;
       const v = await P?.prompt({
         ...p,
-        message: colors.cyan(p.message),
+        message: ccolors.prompt(p.message),
       });
       templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
     } else {

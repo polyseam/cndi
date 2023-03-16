@@ -1,8 +1,5 @@
-import * as JSONC from "https://deno.land/std@0.173.0/encoding/jsonc.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-import { deepMerge } from "https://deno.land/std@0.179.0/collections/deep_merge.ts";
-import { platform } from "https://deno.land/std@0.173.0/node/os.ts";
-import { walk } from "https://deno.land/std@0.173.0/fs/mod.ts";
+import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+
 import {
   BaseNodeItemSpec,
   CNDIConfig,
@@ -10,9 +7,9 @@ import {
   NODE_KIND,
   NodeKind,
   TFBlocks,
-} from "./types.ts";
-import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+} from "src/types.ts";
+
+const utilsLabel = ccolors.faded("src/utils.ts:");
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -34,12 +31,20 @@ function getLeaderNodeNameFromConfig(config: CNDIConfig) {
     (node: BaseNodeItemSpec) => node.role === "leader",
   );
   if (!leaderNode) {
-    console.log('no node with role "leader" node found in config!');
+    console.error(
+      utilsLabel,
+      ccolors.error('no node with role "leader" node found in config!'),
+      "\n",
+    );
     Deno.exit(1);
   }
   if (!leaderNode.name) {
-    console.log(
-      'no name found for node with role "leader" node found in config!',
+    console.error(
+      utilsLabel,
+      ccolors.error(
+        'no name found for node with role "leader" node found in config!',
+      ),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -142,7 +147,12 @@ async function mergeAndStageTerraformObj(
   blockContentsPatch: Record<string, unknown>,
 ) {
   if (!terraformBlockTypeNames.includes(terraformBlockName)) {
-    console.log("there is no terraform block type named", terraformBlockName);
+    console.error(
+      utilsLabel,
+      ccolors.error("there is no terraform block type named"),
+      ccolors.user_input(`"${terraformBlockName}"`),
+      "\n",
+    );
     Deno.exit(1);
   }
 
@@ -216,7 +226,10 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   try {
     await Promise.all(workload);
   } catch (error) {
-    console.log("error patching terraform files with config");
+    console.error(
+      utilsLabel,
+      ccolors.error("error patching terraform files with config"),
+    );
     console.log(error);
   }
 }
@@ -250,7 +263,12 @@ async function stageFile(relativePath: string, fileContents: string) {
 function getStagingDir() {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
-    console.error(`${colors.yellow("CNDI_STAGING_DIRECTORY")} is not set!\n`);
+    console.error(
+      utilsLabel,
+      `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
+      ccolors.error(`is not set!`),
+      "\n",
+    );
     Deno.exit(1);
   }
   return stagingDirectory;
@@ -325,8 +343,13 @@ const getFileSuffixForPlatform = () => {
 
 const getCndiInstallPath = (): string => {
   if (!homedir()) {
-    console.error(colors.red("cndi could not find your home directory!"));
-    console.log('try setting the "HOME" environment variable on your system.');
+    console.error(
+      utilsLabel,
+      ccolors.error("cndi could not find your home directory!"),
+    );
+    console.log(
+      'try setting the "HOME" environment variable on your system.\n',
+    );
     Deno.exit(1);
   }
   return path.join(homedir()!, "bin", `cndi-${getFileSuffixForPlatform()}`);
@@ -352,7 +375,7 @@ function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
     case NODE_KIND.azure:
       return ["machine_type", "Standard_D4s_v3"];
     default:
-      console.log("Unknown kind: " + kind);
+      console.log("Unknown kind: " + kind, "\n");
       Deno.exit(1);
   }
 }

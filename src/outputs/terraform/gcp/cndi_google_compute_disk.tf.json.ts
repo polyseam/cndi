@@ -1,5 +1,5 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { GCPNodeItemSpec } from "../../../types.ts";
+import { GCPNodeItemSpec } from "src/types.ts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,

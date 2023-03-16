@@ -3,7 +3,7 @@ import {
   getPrettyJSONString,
   getTFResource,
 } from "src/utils.ts";
-import { AWSNodeItemSpec, CNDIConfig } from "../../../types.ts";
+import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSNodeItemSpec,

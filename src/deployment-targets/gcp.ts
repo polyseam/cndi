@@ -1,9 +1,7 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
-import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-import { EnvLines } from "../types.ts";
+import { ccolors, homedir, Input } from "deps";
+import { EnvLines } from "src/types.ts";
 
-const deploymentTargetsLabel = colors.white("src/deployment-targets/gcp:");
+const deploymentTargetsLabel = ccolors.faded("src/deployment-targets/gcp.ts:");
 
 const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
   let GCP_REGION = "us-central1";
@@ -11,7 +9,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
 
   GCP_REGION = interactive
     ? ((await Input.prompt({
-      message: colors.cyan("Enter your GCP Region:"),
+      message: ccolors.prompt("Enter your GCP Region:"),
       default: GCP_REGION,
     })) as string)
     : GCP_REGION;
@@ -21,43 +19,39 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
 
     const google_credentials_path = (
       (await Input.prompt({
-        message: colors.cyan("Enter the path to your GCP credentials JSON:"),
+        message: ccolors.prompt("Enter the path to your GCP credentials JSON:"),
       })) as string
     ).replace("~", homedir() || "~");
 
     // if path to google json key is invalid, throw an error
     try {
       credentials_string = await Deno.readTextFile(google_credentials_path);
-    } catch {
+    } catch (errorReadingCredentials) {
       console.log(
         `${deploymentTargetsLabel} ${
-          colors.brightRed(
+          ccolors.error(
             `No GCP JSON key file found at the provided path ${
-              colors.white(
-                `\"${google_credentials_path}\"`,
+              ccolors.user_input(
+                `"${google_credentials_path}"`,
               )
             }`,
           )
         }`,
       );
+      console.log(ccolors.caught(errorReadingCredentials), "\n");
       Deno.exit(1);
     }
 
     // if the path to google json key is valid, but the file is not a valid json, throw an error
     try {
       JSON.parse(credentials_string);
-    } catch {
-      console.log(
-        `${deploymentTargetsLabel} ${
-          colors.brightRed(
-            `Invalid GCP JSON key file found at the provided path ${
-              colors.white(
-                `\"${google_credentials_path}\"`,
-              )
-            }`,
-          )
-        }`,
+    } catch (errorParsingCredentials) {
+      console.error(
+        deploymentTargetsLabel,
+        ccolors.error(`Invalid GCP JSON key file found at the provided path`),
+        ccolors.user_input(`"${google_credentials_path}"`),
       );
+      console.log(ccolors.caught(errorParsingCredentials), "\n");
       Deno.exit(1);
     }
 

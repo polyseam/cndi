@@ -1,19 +1,20 @@
-import { writableStreamFromWriter } from "https://deno.land/std@0.177.0/streams/writable_stream_from_writer.ts";
 import {
+  ccolors,
   GithubProvider,
-  UpgradeOptions,
-} from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { getCndiInstallPath, getFileSuffixForPlatform } from "../utils.ts";
-import {
+  KUBESEAL_VERSION,
   SpinnerTypes,
   TerminalSpinner,
-} from "https://deno.land/x/spinners@v1.1.2/mod.ts";
-import { UpgradeCommand } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../deps.ts";
-import installDependenciesIfRequired from "../install.ts";
+  TERRAFORM_VERSION,
+  UpgradeCommand,
+  UpgradeOptions,
+  writableStreamFromWriter,
+} from "deps";
 
-const upgradeLabel = colors.white("\nupgrade:");
+import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
+
+import installDependenciesIfRequired from "src/install.ts";
+
+const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
@@ -48,12 +49,12 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         await response.body.pipeTo(cndiWritableStream);
       }
       spinner.stop();
-      const fromMsg = from ? ` from ${colors.yellow(from)}` : "";
-      console.info(
-        `Successfully upgraded ${colors.cyan(name)}${fromMsg} to version ${
-          colors.green(to)
+      const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
+      console.log(
+        `Successfully upgraded ${ccolors.prompt(name)}${fromMsg} to version ${
+          ccolors.success(to)
         }!\n\n${
-          colors.cyan(`https://github.com/polyseam/cndi/releases/${to}`)
+          ccolors.prompt(`https://github.com/polyseam/cndi/releases/${to}`)
         }`,
       );
       await installDependenciesIfRequired({
@@ -62,11 +63,11 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         TERRAFORM_VERSION,
       }, true);
     } catch (upgradeError) {
-      console.log(
+      console.error(
         upgradeLabel,
-        colors.brightRed(`\nfailed to upgrade ${name}, please try again`),
+        ccolors.error(`\nfailed to upgrade ${name}, please try again`),
       );
-      console.log(upgradeError);
+      console.log(ccolors.caught(upgradeError));
     }
   }
 }

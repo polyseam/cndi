@@ -1,6 +1,7 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { BaseNodeItemSpec, CNDIConfig } from "../types.ts";
-const cndiConfigLabel = colors.white("\n/src/validate/cndiConfig:");
+import { ccolors } from "deps";
+import { CNDIConfig } from "src/types.ts";
+
+const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
 export default function validateConfig(
   config: CNDIConfig,
@@ -9,53 +10,38 @@ export default function validateConfig(
   if (!config?.project_name) {
     console.log(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it does not have the required ${
-          colors.cyan(
-            '"project_name"',
-          )
-        } key\n`,
-      ),
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have the required"),
+      ccolors.key_name('"project_name"'),
+      ccolors.error("key"),
+      "\n",
     );
     Deno.exit(1);
   }
 
   if (!config?.infrastructure) {
-    console.log(
+    console.error(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it does not have the required ${
-          colors.cyan(
-            '"infrastructure"',
-          )
-        } key\n`,
-      ),
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have the required"),
+      ccolors.key_name('"infrastructure"'),
+      ccolors.error("key"),
+      "\n",
     );
     Deno.exit(1);
   }
 
   if (!config?.infrastructure?.cndi?.nodes?.[0]) {
-    console.log(
+    console.error(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it does not have any ${
-          colors.cyan(
-            '"cndi.infrastructure.nodes"',
-          )
-        } entries\n`,
-      ),
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have any"),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entries"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -65,23 +51,16 @@ export default function validateConfig(
   );
 
   if (!onlyOneNodeKind) {
-    console.log(
+    console.error(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it has multiple ${
-          colors.cyan(
-            '"cndi.infrastructure.nodes"',
-          )
-        } entries with different ${
-          colors.cyan(
-            '"kind"',
-          )
-        } values. This is not supported.\n`,
-      ),
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it has multiple"),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entries with different"),
+      ccolors.key_name('"kind"'),
+      ccolors.error("values. This is not supported."),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -89,40 +68,10 @@ export default function validateConfig(
   if (!config.cndi_version) {
     console.log(
       cndiConfigLabel,
-      colors.yellow(
-        `You haven't specified a ${
-          colors.cyan(
-            '"cndi_version"',
-          )
-        } in your config file, defaulting to "v1"\n`,
-      ),
+      ccolors.warn(`You haven't specified a`),
+      ccolors.key_name(`"cndi_version"`),
+      ccolors.warn(`in your config file, defaulting to "v1"`),
     );
-  }
-
-  const deploymentTargets = new Set(
-    config.infrastructure.cndi.nodes.map((node: BaseNodeItemSpec) => node.kind),
-  );
-
-  if (deploymentTargets.size > 1) {
-    console.log(
-      cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it has multiple ${
-          colors.cyan(
-            '"cndi.infrastructure.nodes"',
-          )
-        } entries with different ${
-          colors.cyan(
-            '"kind"',
-          )
-        } values. This is not supported.\n`,
-      ),
-    );
-    Deno.exit(1);
   }
 
   const nodeNamesAreUnique =
@@ -131,23 +80,16 @@ export default function validateConfig(
       config?.infrastructure?.cndi?.nodes.length;
 
   if (!nodeNamesAreUnique) {
-    console.log(
+    console.error(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it has multiple ${
-          colors.cyan(
-            '"cndi.infrastructure.nodes"',
-          )
-        } entries with the same ${
-          colors.cyan(
-            '"name"',
-          )
-        } values. Node names must be unique.\n`,
-      ),
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it has multiple "),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entries with the same"),
+      ccolors.key_name('"name"'),
+      ccolors.error("values. Node names must be unique."),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -158,23 +100,18 @@ export default function validateConfig(
     ).length;
 
   if (numberOfNodesWithRoleLeader !== 1) {
-    console.log(
+    console.error(
       cndiConfigLabel,
-      colors.brightRed(
-        `cndi-config file found was at ${
-          colors.white(
-            `"${pathToConfig}"`,
-          )
-        } but it does not have exactly 1 ${
-          colors.cyan(
-            '"cndi.infrastructure.nodes"',
-          )
-        } entry with ${
-          colors.cyan(
-            '"role": "leader',
-          )
-        }. There must be exactly one leader node.\n`,
-      ),
+      ccolors.error("cndi-config file found was at"),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have exactly 1"),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entry with "),
+      ccolors.key_name('"role"'),
+      ccolors.error("is"),
+      ccolors.key_name('"leader".'),
+      ccolors.error("There must be exactly one leader node."),
+      "\n",
     );
     Deno.exit(1);
   }

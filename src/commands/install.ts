@@ -1,6 +1,5 @@
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../deps.ts";
-import install from "../install.ts";
+import { Command, KUBESEAL_VERSION, TERRAFORM_VERSION } from "deps";
+import install from "src/install.ts";
 
 /**
  * COMMAND cndi install
