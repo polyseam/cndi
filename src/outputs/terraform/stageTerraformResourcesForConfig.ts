@@ -56,6 +56,5 @@ export default async function stageTerraformResourcesForConfig(
       controllerBootstrapTerrformTemplate,
     ),
   ]);
-
   await patchAndStageTerraformFilesWithConfig(config);
 }

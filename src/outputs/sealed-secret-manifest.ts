@@ -50,9 +50,9 @@ const parseCndiSecret = (
           );
 
           console.log(
-            `You need to replace `,
+            `You need to replace`,
             ccolors.key_name(placeholder),
-            `with the desired value in`,
+            `\nwith the desired value in`,
             ccolors.user_input(`"${dotEnvPath}"`),
             "\nthen run",
             ccolors.success(
@@ -73,7 +73,7 @@ const parseCndiSecret = (
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
         console.error(
           sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported. Use"),
+          ccolors.error("Secret string literals are not supported.\nUse"),
           ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
           ccolors.error("prefix to reference environment variables at"),
           ccolors.key_name(
@@ -100,16 +100,19 @@ const parseCndiSecret = (
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
+            sealedSecretManifestLabel,
             ccolors.error(
               "ERROR",
             ),
             ccolors.key_name(`"${secretEnvName}"`),
-            ccolors.error(`not found in environment`),
-            ccolors.error("You need to replace"),
+            ccolors.warn("not found in environment"),
+          );
+          console.log(
+            ccolors.warn(`You need to replace`),
             ccolors.key_name(placeholder),
-            ccolors.error("with the desired value in"),
+            ccolors.warn("with the desired value in"),
             ccolors.user_input(`"${dotEnvPath}"`),
-            ccolors.error("then run"),
+            ccolors.warn("\nthen run"),
             ccolors.success("cndi ow\n"),
           );
           if (!secretEnvVal) {
@@ -123,11 +126,11 @@ const parseCndiSecret = (
       } else {
         console.error(
           sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported. Use"),
+          ccolors.error("Secret string literals are not supported\nUse"),
           ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
           ccolors.error("prefix to reference environment variables at"),
           ccolors.key_name(
-            `"${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
+            `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
           "\n",
         );

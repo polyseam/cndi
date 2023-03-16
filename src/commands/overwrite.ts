@@ -153,34 +153,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
-  for (const key in cluster_manifests) {
-    const manifestObj = cluster_manifests[key] as KubernetesManifest;
-
-    if (manifestObj?.kind && manifestObj.kind === "Secret") {
-      const secret = cluster_manifests[key] as KubernetesSecret;
-      const secretName = `${key}.json`;
-      const sealedSecretManifest = await getSealedSecretManifest(secret, {
-        publicKeyFilePath: tempPublicKeyFilePath,
-        dotEnvPath,
-      });
-
-      if (sealedSecretManifest) {
-        await stageFile(
-          path.join("cndi", "cluster_manifests", secretName),
-          sealedSecretManifest,
-        );
-        console.log(`created encrypted secret:`, secretName);
-      }
-      continue;
-    }
-
-    await stageFile(
-      path.join("cndi", "cluster_manifests", `${key}.json`),
-      getPrettyJSONString(manifestObj),
-    );
-  }
-
   const { nodes } = config.infrastructure.cndi;
 
   const leaders = nodes.filter((node) => node.role === "leader");
@@ -249,7 +221,47 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     Deno.exit(1);
   }
 
-  await stageTerraformResourcesForConfig(config, options);
+  await stageTerraformResourcesForConfig(
+    config,
+    options,
+  );
+
+  console.log(ccolors.success("staged terraform files"));
+
+  // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
+  for (const key in cluster_manifests) {
+    const manifestObj = cluster_manifests[key] as KubernetesManifest;
+
+    if (manifestObj?.kind && manifestObj.kind === "Secret") {
+      const secret = cluster_manifests[key] as KubernetesSecret;
+      const secretName = `${key}.json`;
+      const sealedSecretManifest = await getSealedSecretManifest(secret, {
+        publicKeyFilePath: tempPublicKeyFilePath,
+        dotEnvPath,
+      });
+
+      if (sealedSecretManifest) {
+        await stageFile(
+          path.join("cndi", "cluster_manifests", secretName),
+          sealedSecretManifest,
+        );
+        console.log(
+          ccolors.success(`staged encrypted secret:`),
+          ccolors.key_name(secretName),
+        );
+      }
+      continue;
+    }
+    const manifestFilename = `${key}.json`;
+    await stageFile(
+      path.join("cndi", "cluster_manifests", manifestFilename),
+      getPrettyJSONString(manifestObj),
+    );
+    console.log(
+      ccolors.success("staged manifest:"),
+      ccolors.key_name(manifestFilename),
+    );
+  }
 
   await stageFile(
     path.join("cndi", "cluster_manifests", "Chart.yaml"),
@@ -269,11 +281,15 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       path.join("cndi", "cluster_manifests", "applications", filename),
       manifestContent,
     );
-    console.log("created application manifest:", filename);
+    console.log(
+      ccolors.success("staged application manifest:"),
+      ccolors.key_name(filename),
+    );
   }
 
   try {
     await persistStagedFiles(options.output);
+    console.log();
   } catch (errorPersistingStagedFiles) {
     console.error(
       owLabel,
@@ -284,7 +300,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     );
     console.log(ccolors.caught(errorPersistingStagedFiles));
     await Deno.remove(getStagingDir(), { recursive: true });
-    console.log();
     Deno.exit(1);
   }
 
