@@ -121,7 +121,13 @@ const initCommand = new Command()
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+        [
+          ccolors.warn(
+            "it looks like you have already initialized a cndi project in this directory:",
+          ),
+          ccolors.user_input(options.output),
+          ccolors.prompt("\n\noverwrite existing artifacts?"),
+        ].join(" "),
       )
       : true;
 

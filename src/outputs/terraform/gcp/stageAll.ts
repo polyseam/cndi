@@ -40,7 +40,16 @@ export default async function stageTerraformResourcesForGCP(
     `\${google_compute_instance.cndi_google_compute_instance_${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
-    console.log("google credentials are missing", "\n");
+    console.error(
+      gcpStageAllLable,
+      ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
+      ccolors.error("is not set in your environment"),
+    );
+    console.log(
+      ccolors.error(
+        "You need to set it to the contents of your service account key json file\n",
+      ),
+    );
     // the message about missing credentials should have already been printed
     Deno.exit(1);
   }
@@ -61,11 +70,13 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.warn("not found in environment"),
       );
       console.log(
-        "You need to replace",
+        ccolors.warn("You need to replace"),
         ccolors.key_name(placeholder),
-        "with the desired value in",
+        ccolors.warn(
+          "with the contents of your service account key json file in",
+        ),
         ccolors.user_input(`"${dotEnvPath}"`),
-        "\nthen run",
+        ccolors.warn("\nthen run"),
         ccolors.success("cndi ow\n"),
       );
       if (!options.initializing) {

@@ -230,7 +230,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       utilsLabel,
       ccolors.error("error patching terraform files with config"),
     );
-    console.log(error);
+    console.log(ccolors.caught(error));
   }
 }
 
