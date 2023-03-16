@@ -54,18 +54,15 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   } catch {
     console.error(
       owLabel,
-      ccolors.error(
-        `there is no cndi-config file at ${
-          ccolors.user_input(`"${pathToConfig}"`)
-        }\n`,
-      ),
+      ccolors.error("there is no cndi-config file at"),
+      ccolors.user_input(`"${pathToConfig}"`),
     );
     console.log(
-      `if you don't have a cndi-config file try ${
-        ccolors.prompt(
-          "cndi init --interactive",
-        )
-      }\n`,
+      "if you don't have a cndi-config file try",
+      ccolors.prompt(
+        "cndi init --interactive",
+      ),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -85,6 +82,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.error(`and/or`),
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error(`are not present in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -94,6 +92,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       owLabel,
       ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
       ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -103,6 +102,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       owLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -119,6 +119,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.error(
         `for your CNDI cluster, it is used to tag resources we create in the cloud`,
       ),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -188,6 +189,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.error(
       owLabel,
       ccolors.error(`There must be exactly one leader node`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -202,6 +204,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           node.name ? ccolors.user_input(`("${node.name}")`) : "",
           `is missing the property`,
           ccolors.key_name(`"kind"`),
+          "\n",
         );
         Deno.exit(1);
       }
@@ -212,6 +215,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           ccolors.key_name(`${index}`),
           `is missing the property`,
           ccolors.key_name(`"name"`),
+          "\n",
         );
         Deno.exit(1);
       }
@@ -280,6 +284,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     );
     console.log(ccolors.caught(errorPersistingStagedFiles));
     await Deno.remove(getStagingDir(), { recursive: true });
+    console.log();
     Deno.exit(1);
   }
 

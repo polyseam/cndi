@@ -9,6 +9,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_USERNAME"`),
       "env var is not set",
+      "\n",
     );
     Deno.exit(1);
   }
@@ -19,6 +20,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_PASSWORD"`),
       ccolors.error("env var is not set"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -29,6 +31,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_REPO"`),
       ccolors.error("env var is not set"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -39,6 +42,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
       ccolors.error("env var is not set"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -52,6 +56,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error("env var is not set"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -65,6 +70,7 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
       ccolors.error("env var is not set"),
+      "\n",
     );
     Deno.exit(1);
   }

@@ -40,7 +40,7 @@ export default async function stageTerraformResourcesForGCP(
     `\${google_compute_instance.cndi_google_compute_instance_${leaderName}.network_interface.0.network_ip}`;
 
   if (!googleCredentials) {
-    console.log("google credentials are missing");
+    console.log("google credentials are missing", "\n");
     // the message about missing credentials should have already been printed
     Deno.exit(1);
   }
@@ -69,6 +69,7 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.success("cndi ow\n"),
       );
       if (!options.initializing) {
+        console.log();
         Deno.exit(1);
       }
     } else {
@@ -76,7 +77,7 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.error("failed to parse service account key json from"),
         ccolors.user_input(`"${dotEnvPath}"`),
       );
-      console.log(ccolors.caught(parsingError));
+      console.log(ccolors.caught(parsingError), "\n");
       Deno.exit(1);
     }
   }
@@ -214,7 +215,7 @@ export default async function stageTerraformResourcesForGCP(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e), "\n");
     Deno.exit(1);
   }
 }

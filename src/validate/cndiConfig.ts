@@ -15,6 +15,7 @@ export default function validateConfig(
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"project_name"'),
       ccolors.error("key"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -27,6 +28,7 @@ export default function validateConfig(
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"infrastructure"'),
       ccolors.error("key"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -39,6 +41,7 @@ export default function validateConfig(
       ccolors.error("but it does not have any"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
       ccolors.error("entries"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -57,6 +60,7 @@ export default function validateConfig(
       ccolors.error("entries with different"),
       ccolors.key_name('"kind"'),
       ccolors.error("values. This is not supported."),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -85,6 +89,7 @@ export default function validateConfig(
       ccolors.error("entries with the same"),
       ccolors.key_name('"name"'),
       ccolors.error("values. Node names must be unique."),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -106,6 +111,7 @@ export default function validateConfig(
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
       ccolors.error("There must be exactly one leader node."),
+      "\n",
     );
     Deno.exit(1);
   }

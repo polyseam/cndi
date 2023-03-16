@@ -21,6 +21,7 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.user_input(`"${cmd}"`),
       ccolors.error("must be executed inside a git repository"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -37,6 +38,7 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.error("you must make a commit on your branch before running"),
       ccolors.user_input(`"${cmd}"`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -49,6 +51,7 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.error("your branch must be clean before running"),
       ccolors.user_input(`"${cmd}"`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -81,6 +84,7 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       "is not set in your environment",
+      "\n",
     );
     Deno.exit(1);
   }

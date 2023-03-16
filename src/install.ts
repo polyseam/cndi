@@ -67,7 +67,7 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install terraform, please try again"),
       );
-      console.log(ccolors.caught(terraformInstallError));
+      console.log(ccolors.caught(terraformInstallError), "\n");
       Deno.exit(1);
     }
 
@@ -96,7 +96,7 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install kubeseal, please try again"),
       );
-      console.log(ccolors.caught(kubesealInstallError));
+      console.log(ccolors.caught(kubesealInstallError), "\n");
       Deno.exit(1);
     }
     console.log();

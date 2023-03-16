@@ -23,7 +23,7 @@ export default function decrypt(encryptedText: string, secret: string) {
         'your "TERRAFORM_STATE_PASSPHRASE" is likely incorrect, consider deleting your "_state" branch\n',
       ),
     );
-    ccolors.caught(decryptError);
+    console.log(ccolors.caught(decryptError), "\n");
     Deno.exit(1);
   }
 }

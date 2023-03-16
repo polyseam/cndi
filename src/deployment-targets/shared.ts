@@ -45,6 +45,7 @@ const getCoreEnvLines = async (
       ccolors.error(`and/or`),
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error(`are not present in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -54,6 +55,7 @@ const getCoreEnvLines = async (
       deploymentTargetsSharedLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -63,6 +65,7 @@ const getCoreEnvLines = async (
       deploymentTargetsSharedLabel,
       ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
       ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -102,6 +105,7 @@ const getCoreEnvLines = async (
         ccolors.key_name(`"kind"`),
         ccolors.user_input(`"${deploymentTarget}"`),
         ccolors.error(`is not yet supported`),
+        "\n",
       );
       Deno.exit(1);
   }

@@ -34,6 +34,7 @@ function getLeaderNodeNameFromConfig(config: CNDIConfig) {
     console.error(
       utilsLabel,
       ccolors.error('no node with role "leader" node found in config!'),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -43,6 +44,7 @@ function getLeaderNodeNameFromConfig(config: CNDIConfig) {
       ccolors.error(
         'no name found for node with role "leader" node found in config!',
       ),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -149,6 +151,7 @@ async function mergeAndStageTerraformObj(
       utilsLabel,
       ccolors.error("there is no terraform block type named"),
       ccolors.user_input(`"${terraformBlockName}"`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -263,7 +266,8 @@ function getStagingDir() {
     console.error(
       utilsLabel,
       `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
-      ccolors.error(`is not set!\n`),
+      ccolors.error(`is not set!`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -343,7 +347,9 @@ const getCndiInstallPath = (): string => {
       utilsLabel,
       ccolors.error("cndi could not find your home directory!"),
     );
-    console.log('try setting the "HOME" environment variable on your system.');
+    console.log(
+      'try setting the "HOME" environment variable on your system.\n',
+    );
     Deno.exit(1);
   }
   return path.join(homedir()!, "bin", `cndi-${getFileSuffixForPlatform()}`);
@@ -369,7 +375,7 @@ function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
     case NODE_KIND.azure:
       return ["machine_type", "Standard_D4s_v3"];
     default:
-      console.log("Unknown kind: " + kind);
+      console.log("Unknown kind: " + kind, "\n");
       Deno.exit(1);
   }
 }

@@ -12,10 +12,11 @@ import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
 import deno_json from "../deno.json" assert { type: "json" };
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "src/deps.ts";
+import { ccolors, KUBESEAL_VERSION, TERRAFORM_VERSION } from "src/deps.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
 
+const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
 export default async function cndi() {
   if (!deno_json?.version) {
     throw new Error("deno.json is missing a version");
@@ -36,8 +37,13 @@ export default async function cndi() {
 
   try {
     Deno.mkdirSync(stagingDirectory, { recursive: true });
-  } catch {
-    console.error(`Could not create staging directory "${stagingDirectory}"`);
+  } catch (failedToCreateStagingDirectoryError) {
+    console.error(
+      cndiLabel,
+      ccolors.error(`Could not create staging directory`),
+      ccolors.key_name(`"${stagingDirectory}"`),
+    );
+    console.log(ccolors.caught(failedToCreateStagingDirectoryError), "\n");
     Deno.exit(1);
   }
 

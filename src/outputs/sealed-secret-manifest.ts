@@ -79,6 +79,7 @@ const parseCndiSecret = (
           ccolors.key_name(
             `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
           ),
+          "\n",
         );
         Deno.exit(1);
       }
@@ -128,6 +129,7 @@ const parseCndiSecret = (
           ccolors.key_name(
             `"${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
+          "\n",
         );
         Deno.exit(1);
       }
@@ -140,6 +142,7 @@ const parseCndiSecret = (
       ),
       ccolors.key_name(`"${inputSecret.metadata.name}"`),
       ccolors.error("has no data or stringData"),
+      "\n",
     );
     Deno.exit(1);
   }

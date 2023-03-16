@@ -85,11 +85,11 @@ const initCommand = new Command()
 
           // and suggest a solution
           console.log(
-            `if you don't have a cndi-config file try ${
-              ccolors.prompt(
-                "cndi init --interactive",
-              )
-            }\n`,
+            "if you don't have a cndi-config file try",
+            ccolors.prompt(
+              "cndi init --interactive",
+            ),
+            "\n",
           );
           Deno.exit(1);
         }
@@ -100,6 +100,7 @@ const initCommand = new Command()
       console.error(
         initLabel,
         ccolors.error(`--template (-t) flag requires a value`),
+        "\n",
       );
       Deno.exit(1);
     }

@@ -20,6 +20,7 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.user_input(`"${cmd}"`),
       ccolors.error("must be executed inside a git repository"),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -32,6 +33,7 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.error("you must have clean git state when running"),
       ccolors.user_input(`"${cmd}"`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -52,6 +54,7 @@ export default async function pushStateFromRun({
     console.log(
       gitWriteStateLabel,
       `corrupted state, please run "${cmd}" again`,
+      "\n",
     );
     Deno.exit(1);
   }
@@ -63,6 +66,7 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       "is not set in your environment",
+      "\n",
     );
     Deno.exit(1);
   }
