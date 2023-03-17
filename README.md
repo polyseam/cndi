@@ -512,7 +512,7 @@ are in the right place. Let's start with setting up your environment:
 
 ### setup 🦕
 
-The first step as you might expect is to clone the repo. Take note of where you
+The first step as you might expect is to clone this repo. Take note of where you
 clone to, it will matter later when we setup some convenience aliases.
 
 **1. Clone Repo:**
