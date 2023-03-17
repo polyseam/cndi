@@ -204,7 +204,7 @@
       {
         "name": "GIT_SYNC_USERNAME",
         "message": "Please enter your git username for Airflow DAG Storage:",
-        "type": "Secret"
+        "type": "Input"
       },
       {
         "name": "GIT_SYNC_PASSWORD",
