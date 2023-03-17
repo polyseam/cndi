@@ -69,6 +69,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
+  } else {
+    console.log();
   }
 
   const sealedSecretsKeys = loadSealedSecretsKeys();
