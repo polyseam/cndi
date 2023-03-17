@@ -205,7 +205,7 @@ export default async function useTemplate(
 
   const templateReadmeText = templateObject.readme?.template || "";
 
-  const readme = coreReadme + templateReadmeText;
+  const readme = `${coreReadme}\n\n${templateReadmeText}`;
 
   return {
     cndiConfig,
