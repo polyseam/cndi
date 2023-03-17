@@ -1,4 +1,4 @@
-import { getPrettyJSONString, loadRemoteJSONC } from "src/utils.ts";
+import { loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -159,7 +159,10 @@ export default async function useTemplate(
 
   for (const [key, value] of Object.entries(cndiConfigValues)) {
     const stringToReplace = `$.cndi.prompts.${key}`;
-    cndiConfigStringified = cndiConfigStringified.replaceAll(stringToReplace, `${value}`);
+    cndiConfigStringified = cndiConfigStringified.replaceAll(
+      stringToReplace,
+      `${value}`,
+    );
   }
 
   let cndiConfig;
