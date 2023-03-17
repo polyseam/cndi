@@ -36,28 +36,26 @@ const getCoreEnvLines = async (
   let GIT_REPO = "";
   let GIT_PASSWORD = "";
 
-  if (interactive) {
-    GIT_USERNAME = interactive
-      ? ((await Input.prompt({
-        message: ccolors.prompt("Enter your GitHub username:"),
-        default: GIT_USERNAME,
-      })) as string)
-      : GIT_USERNAME;
+  GIT_USERNAME = interactive
+    ? await Input.prompt({
+      message: ccolors.prompt("Enter your GitHub username:"),
+      default: GIT_USERNAME,
+    })
+    : GIT_USERNAME;
 
-    GIT_PASSWORD = interactive
-      ? ((await Secret.prompt({
-        message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
-        default: GIT_PASSWORD,
-      })) as string)
-      : GIT_PASSWORD;
+  GIT_PASSWORD = interactive
+    ? await Secret.prompt({
+      message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
+      default: GIT_PASSWORD,
+    })
+    : GIT_PASSWORD;
 
-    GIT_REPO = interactive
-      ? await Input.prompt({
-        message: ccolors.prompt("Enter your GitHub repository URL:"),
-        default: GIT_REPO,
-      })
-      : GIT_REPO;
-  }
+  GIT_REPO = interactive
+    ? await Input.prompt({
+      message: ccolors.prompt("Enter your GitHub repository URL:"),
+      default: GIT_REPO,
+    })
+    : GIT_REPO;
 
   const TERRAFORM_STATE_PASSPHRASE = terraformStatePassphrase;
   const ARGO_UI_ADMIN_PASSWORD = argoUIAdminPassword;
