@@ -352,7 +352,11 @@ const getCndiInstallPath = (): string => {
     );
     Deno.exit(1);
   }
-  return path.join(homedir()!, "bin", `cndi-${getFileSuffixForPlatform()}`);
+  let suffix = "";
+  if (platform() === "win32") {
+    suffix = ".exe";
+  }
+  return path.join(homedir()!, "bin", `cndi${suffix}`);
 };
 
 const getPathToOpenSSLForPlatform = () => {
