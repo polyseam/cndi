@@ -10,9 +10,11 @@ export { deepMerge } from "https://deno.land/std@0.180.0/collections/deep_merge.
 export { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 export { walk } from "https://deno.land/std@0.180.0/fs/mod.ts";
 export * as JSONC from "https://deno.land/std@0.180.0/encoding/jsonc.ts";
-
+export { delay } from "https://deno.land/std@0.180.0/async/delay.ts";
 //  - testing
 export {
+  afterAll,
+  beforeAll,
   beforeEach,
   describe,
   it,
