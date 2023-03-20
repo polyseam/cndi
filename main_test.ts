@@ -1,14 +1,4 @@
-// deno-lint-ignore-file
-
-import {
-  afterAll,
-  assert,
-  beforeAll,
-  beforeEach,
-  describe,
-  it,
-  path,
-} from "deps";
+import { assert, beforeEach, describe, it, path } from "deps";
 
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 
@@ -24,7 +14,7 @@ import {
 } from "src/tests/helpers/util.ts";
 
 // Key codes
-const keys = {
+const _keys = {
   up: "\x1B\x5B\x41",
   down: "\x1B\x5B\x42",
   enter: "\x0D",
