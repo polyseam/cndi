@@ -15,6 +15,16 @@ const cmd = [
   path.join(srcDir, "main.ts"),
 ];
 
+function getRunningCNDIProcess(...args: string[]) {
+  const p = Deno.run({
+    cmd: [...cmd, ...args],
+    stdout: "piped",
+    stderr: "piped",
+    stdin: "piped",
+  });
+  return p;
+}
+
 async function runCndi(...args: string[]) {
   const decoder = new TextDecoder("utf-8");
   const lastIndex = args.length - 1;
@@ -62,4 +72,4 @@ async function runCndiLoud(...args: string[]) {
   return { status };
 }
 
-export { runCndi, runCndiLoud };
+export { getRunningCNDIProcess, runCndi, runCndiLoud };
