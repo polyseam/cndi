@@ -20,18 +20,18 @@
           "nodes": [
             {
               "name": "x-node",
-              "kind": "gcp",
+              "kind": "azure",
               "role": "leader",
               "volume_size": 128
             },
             {
               "name": "y-node",
-              "kind": "gcp",
+              "kind": "azure",
               "volume_size": 128
             },
             {
               "name": "z-node",
-              "kind": "gcp",
+              "kind": "azure",
               "volume_size": 128
             }
           ]
