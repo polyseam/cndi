@@ -175,7 +175,7 @@ describe("cndi", () => {
         const status = await processInteractiveEntries(
           p,
           {
-            project_name: "acme-project-gcp",
+            project_name: "acme-project-azure",
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",
