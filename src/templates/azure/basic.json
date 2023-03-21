@@ -111,9 +111,9 @@
     }
   },
   "env": {
-    "extend_basic_env": "gcp"
+    "extend_basic_env": "azure"
   },
   "readme": {
-    "extend_basic_readme": "gcp"
+    "extend_basic_readme": "azure"
   }
 }
