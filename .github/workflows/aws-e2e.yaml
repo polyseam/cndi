@@ -34,7 +34,7 @@ jobs:
         run: cndi install
 
       - name: cndi init
-        run: cndi init -t https://raw.githubusercontent.com/polyseam/cndi-e2e-test-templates/main/aws/airflow-e2e.jsonc
+        run: cndi init -t https://raw.githubusercontent.com/polyseam/cndi-e2e/main/templates/aws/airflow-e2e.jsonc
       
       # replace all placeholders in .env with secrets
       - name: rewrite AWS_REGION .env
