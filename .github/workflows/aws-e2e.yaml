@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Create Test Repo'
-        run: 'gh repo create polyseam/aws-active-cndi-test --private --clone'
+        run: 'gh repo create polyseam-e2e/aws-airflow-cndi-e2e --private --clone'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -53,7 +53,7 @@ jobs:
         run: sed -i "s/GIT_PASSWORD_PLACEHOLDER__/${{ secrets.GIT_PASSWORD }}" .env
         
       - name: rewrite GIT_REPO .env
-        run: sed -i "s/GIT_REPO_PLACEHOLDER__/https:\/\/github.com\/polyseam\/aws-active-cndi-test" .env
+        run: sed -i "s/GIT_REPO_PLACEHOLDER__/https:\/\/github.com\/polyseam-e2e\/aws-airflow-cndi-e2e" .env
 
       - name: set secrets
         run: gh secrets set -f .env
