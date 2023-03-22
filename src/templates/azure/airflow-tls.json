@@ -142,7 +142,7 @@
             "dags": {
               "gitSync": {
                 "enabled": true,
-                "repo": "https://github.com/polyseam/demo-dag-bag",
+                "repo": "$.prompts.dagRepoUrl",
                 "credentialsSecret": "airflow-git-credentials",
                 "branch": "main",
                 "wait": 40,
