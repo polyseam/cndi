@@ -142,7 +142,7 @@
             "dags": {
               "gitSync": {
                 "enabled": true,
-                "repo": "$.prompts.dagRepoUrl",
+                "repo": "$.cndi.prompts.dagRepoUrl",
                 "credentialsSecret": "airflow-git-credentials",
                 "branch": "main",
                 "wait": 40,
