@@ -1,17 +1,14 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import { copy } from "https://deno.land/std@0.173.0/streams/copy.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
-import pullStateForRun from "../tfstate/git/read-state.ts";
-import pushStateFromRun from "../tfstate/git/write-state.ts";
+import { ccolors, Command, copy, path } from "deps";
 
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+import pullStateForRun from "src/tfstate/git/read-state.ts";
+import pushStateFromRun from "src/tfstate/git/write-state.ts";
 
-import setTF_VARs from "../setTF_VARs.ts";
-import { getPathToTerraformBinary } from "../utils.ts";
+import setTF_VARs from "src/setTF_VARs.ts";
+import { getPathToTerraformBinary } from "src/utils.ts";
 
-const runLabel = colors.white("\nrun:");
+const runLabel = ccolors.faded("\nsrc/commands/run.ts:");
 
 /**
  * COMMAND cndi run
@@ -92,7 +89,7 @@ const runCommand = new Command()
       const initStatus = await ranTerraformInit.status();
 
       if (initStatus.code !== 0) {
-        console.log(runLabel, colors.brightRed("terraform init failed"));
+        console.log(runLabel, ccolors.error("terraform init failed"));
         Deno.exit(initStatus.code);
       }
 
@@ -123,7 +120,11 @@ const runCommand = new Command()
 
       ranTerraformApply.close();
     } catch (err) {
-      console.log(runLabel, colors.brightRed("unhandled error"), err);
+      console.log(
+        runLabel,
+        ccolors.error("cndi failed to deploy your resources"),
+      );
+      console.log(ccolors.caught(err));
     }
   });
 

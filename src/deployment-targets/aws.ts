@@ -1,42 +1,39 @@
-import { EnvObject } from "../types.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+import { ccolors, Input, Secret } from "deps";
 
-const prepareAWSEnv = async (interactive: boolean): Promise<EnvObject> => {
-  const AWS_REGION = "us-east-1";
-  const AWS_ACCESS_KEY_ID = "";
-  const AWS_SECRET_ACCESS_KEY = "";
-  const awsEnvObject: EnvObject = {};
+import { EnvLines } from "src/types.ts";
 
-  awsEnvObject.AWS_REGION = {
-    comment: "AWS",
-    value: interactive
-      ? ((await Input.prompt({
-        message: colors.cyan("Enter your AWS region:"),
-        default: AWS_REGION,
-      })) as string)
-      : AWS_REGION,
-  };
+const getAWSEnvLines = async (interactive: boolean): Promise<EnvLines> => {
+  let AWS_REGION = "us-east-1";
+  let AWS_ACCESS_KEY_ID = "";
+  let AWS_SECRET_ACCESS_KEY = "";
 
-  awsEnvObject.AWS_ACCESS_KEY_ID = {
-    value: interactive
-      ? ((await Secret.prompt({
-        message: colors.cyan("Enter your AWS access key ID:"),
-        default: AWS_ACCESS_KEY_ID,
-      })) as string)
-      : AWS_ACCESS_KEY_ID,
-  };
+  AWS_REGION = interactive
+    ? ((await Input.prompt({
+      message: ccolors.prompt("Enter your AWS region:"),
+      default: AWS_REGION,
+    })) as string)
+    : AWS_REGION;
 
-  awsEnvObject.AWS_SECRET_ACCESS_KEY = {
-    value: interactive
-      ? ((await Secret.prompt({
-        message: colors.cyan("Enter your AWS secret access key:"),
-        default: AWS_SECRET_ACCESS_KEY,
-      })) as string)
-      : AWS_SECRET_ACCESS_KEY,
-  };
-  return awsEnvObject;
+  AWS_ACCESS_KEY_ID = interactive
+    ? ((await Secret.prompt({
+      message: ccolors.prompt("Enter your AWS access key ID:"),
+      default: AWS_ACCESS_KEY_ID,
+    })) as string)
+    : AWS_ACCESS_KEY_ID;
+
+  AWS_SECRET_ACCESS_KEY = interactive
+    ? ((await Secret.prompt({
+      message: ccolors.prompt("Enter your AWS secret access key:"),
+      default: AWS_SECRET_ACCESS_KEY,
+    })) as string)
+    : AWS_SECRET_ACCESS_KEY;
+
+  return [
+    { comment: "AWS" },
+    { value: { AWS_REGION } },
+    { value: { AWS_ACCESS_KEY_ID } },
+    { value: { AWS_SECRET_ACCESS_KEY } },
+  ];
 };
 
-export { prepareAWSEnv };
+export { getAWSEnvLines };

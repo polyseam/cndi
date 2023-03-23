@@ -21,3 +21,5 @@ cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/
 
 cndi
+
+src/tests/cwd

@@ -28,7 +28,7 @@
 
 Welcome to CNDI, it deploys an entire data stack in minutes!
 
-It's perfect for deploying Data Products consistently that are reliable,
+It's perfect for deploying data services consistently that are reliable,
 discoverable, maintainable, and interoperable, all while remaining flexible to
 the needs of each stack.
 
@@ -38,9 +38,7 @@ To install CNDI we just need to download the binary and add it to our PATH. This
 can be done using the script below:
 
 ```bash
-# if you are on windows you should run this in 'git bash'
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
-# now add the binary to your PATH such that it is executable in your shell
 ```
 
 ## usage
@@ -221,12 +219,21 @@ other applications that aren't Airflow.
 Let's run through the 3 parts of a `cndi-config.jsonc` file. This one file is
 the key to understanding CNDI, and it's really pretty simple.
 
-### infrastructure and nodes 🏗️
+### infrastructure.cndi 🏗️
 
 The `"infrastructure"` section is used to define the infrastructure that will
-power our cluster. Currently the only type of infrastructure CNDI uses are
-virtual machines that will run the cluster. We call these `"nodes"`, and
-ultimately they will be Kubernetes Nodes.
+power our cluster. The infrastructure section is broken out into 2 distinct
+categories. The first category is `"cndi"`, and it refers to infrastructure
+abstractions our team has invented that CNDI exposes for you.
+
+Currently CNDI exposes only one abstraction, the `"nodes"` interface, and it's a
+wrapper that simplifies deploying Kubernetes cluster nodes. The CNDI `"nodes"`
+interface wraps the compute resources from every deployment target we support.
+
+All `"nodes"` entries are nearly identical, the only difference is the `"kind"`
+field which is used to specify the deployment target. These `"node"` resources
+and their supporting infrastructure are ultimately provisioned by Terraform, but
+we've abstracted a lot of complexity through this interface.
 
 Declaring a node is simple, we give it a name, we give it some specs, and we add
 it to the array!
@@ -250,23 +257,81 @@ it to the array!
           "name": "gcp-charlie",
           "kind": "gcp"
         }
-      ],
-      "deployment_target_configuration": {
-        "gcp": {
-          "machine_type": "n2-standard-8" // this overrides the default machine_type
-        }
-      }
+      ]
     }
-  }
-  // tip: we parse this file as JSONC so you can add comments!
+  },
+  ...
+}
+// tip: we parse this file as JSONC so you can add comments!
 ```
 
-Currently we have support for `aws` nodes, and `gcp` nodes. More deployment
+Currently we have support for `aws`, `azure` and `gcp` nodes. More deployment
 targets are on the way!
 
 Just like every other component in CNDI, nodes can be updated in our
 `cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git
 remote to modify the cluster accordingly.
+
+### infrastructure.terraform 🧱
+
+The second category within `"infrastructure"` is `"terraform"`, and in contrast
+to `"cndi"` the infrastructure in this category is not abstracted by CNDI. This
+is where you can define any Terraform resources you want to be provisioned
+alongside your cluster.
+
+```jsonc
+{
+  "infrastructure": {
+    "cndi":{...},
+    "terraform": {
+      "resource": {
+        "aws_s3_bucket": {
+          "my-bucket": {
+            "acl": "public-read",
+            "bucket": "s3-website-test.hashicorp.com",
+            "cors_rule": [
+              {
+                "allowed_headers": ["*"],
+                "allowed_methods": ["PUT", "POST"],
+                "allowed_origins": ["https://s3-website-test.hashicorp.com"],
+                "expose_headers": ["ETag"],
+                "max_age_seconds": 3000
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+💡 You can also use this section to override any of the default Terraform
+objects that CNDI deploys.
+
+_Generally, you should be able to customize CNDI resources through the `"cndi"`
+section instead._
+
+But, if you do need to patch a Terraform resource CNDI has created for you, you
+simply need to match the resource name we have used, and specify the fields you
+want to update.
+
+```jsonc
+{
+  "infrastructure": {
+    "cndi": {...},
+    "terraform": {
+      "resource": {
+        "aws_vpc": {
+          "cndi_aws_vpc": {
+            "cidr_block": "10.0.0.0/24"
+          }
+        }
+      }
+    }
+  }
+}
+```
 
 ### applications 💽
 
@@ -447,7 +512,7 @@ are in the right place. Let's start with setting up your environment:
 
 ### setup 🦕
 
-The first step as you might expect is to clone the repo. Take note of where you
+The first step as you might expect is to clone this repo. Take note of where you
 clone to, it will matter later when we setup some convenience aliases.
 
 **1. Clone Repo:**

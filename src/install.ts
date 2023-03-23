@@ -1,11 +1,14 @@
-import path from "https://deno.land/std@0.173.0/node/path.ts";
-import { writableStreamFromWriter } from "https://deno.land/std@0.177.0/streams/writable_stream_from_writer.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { SpinnerTypes } from "https://deno.land/x/spinners@v1.1.2/spinner-types.ts";
-import { TerminalSpinner } from "https://deno.land/x/spinners@v1.1.2/terminal-spinner.ts";
-import { checkInstalled, getFileSuffixForPlatform } from "./utils.ts";
+import {
+  ccolors,
+  path,
+  SpinnerTypes,
+  TerminalSpinner,
+  writableStreamFromWriter,
+} from "deps";
 
-const installLabel = colors.white("\nsrc/install:");
+import { checkInstalled, getFileSuffixForPlatform } from "src/utils.ts";
+
+const installLabel = ccolors.faded("\nsrc/install.ts:");
 
 interface InstallDependenciesIfRequiredOptions {
   CNDI_HOME: string;
@@ -60,11 +63,11 @@ export default async function installDependenciesIfRequired(
         console.log("\n    terraform installed!\n");
       }
     } catch (terraformInstallError) {
-      console.log(
+      console.error(
         installLabel,
-        colors.brightRed("\nfailed to install terraform, please try again"),
+        ccolors.error("\nfailed to install terraform, please try again"),
       );
-      console.log(terraformInstallError);
+      console.log(ccolors.caught(terraformInstallError), "\n");
       Deno.exit(1);
     }
 
@@ -89,11 +92,11 @@ export default async function installDependenciesIfRequired(
         console.log("\n    kubeseal installed!\n");
       }
     } catch (kubesealInstallError) {
-      console.log(
+      console.error(
         installLabel,
-        colors.brightRed("\nfailed to install kubeseal, please try again"),
+        ccolors.error("\nfailed to install kubeseal, please try again"),
       );
-      console.log(kubesealInstallError);
+      console.log(ccolors.caught(kubesealInstallError), "\n");
       Deno.exit(1);
     }
     console.log();

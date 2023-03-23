@@ -1,6 +1,6 @@
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { ccolors } from "deps";
 
-import { getPrettyJSONString } from "../utils.ts";
+import { getPrettyJSONString } from "src/utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -41,8 +41,8 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-const applicationManifestLabel = colors.white(
-  "\nsrc/outputs/application-manifest:",
+const applicationManifestLabel = ccolors.faded(
+  "\nsrc/outputs/application-manifest.ts:",
 );
 
 const manifestFramework = {
@@ -79,21 +79,18 @@ const getApplicationManifest = (
   const specSourceChart = applicationSpec.chart;
 
   if (!specSourcePath && !specSourceChart) {
-    const releaseNameForPrint = colors.cyan(`"${releaseName}"`);
-    console.log(
+    const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
+    console.error(
       applicationManifestLabel,
-      colors.brightRed(
-        `either applications[${releaseNameForPrint}].${
-          colors.brightWhite("path")
+      ccolors.error(
+        `either applications[${releaseNameForPrint}]${
+          ccolors.key_name(".path")
         }`,
       ),
-      colors.brightRed(
-        `or applications[${releaseNameForPrint}].${
-          colors.brightWhite(
-            "chart",
-          )
-        } must be defined`,
+      ccolors.error(
+        `or applications[${releaseNameForPrint}]${ccolors.key_name(".chart")}`,
       ),
+      ccolors.error(`must be defined`),
     );
   }
 

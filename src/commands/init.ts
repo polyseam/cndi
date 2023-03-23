@@ -1,45 +1,39 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
 
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {
   checkInitialized,
+  getDeploymentTargetFromConfig,
   getPrettyJSONString,
   loadJSONC,
   persistStagedFiles,
   stageFile,
-} from "../utils.ts";
-import { CNDIConfig, NodeKind } from "../types.ts";
+} from "src/utils.ts";
 
-import { overwriteAction } from "./overwrite.ts";
+import { CNDIConfig, EnvLines } from "src/types.ts";
 
-import { Select } from "https://deno.land/x/cliffy@v0.25.4/prompt/select.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+import { overwriteAction } from "src/commands/overwrite.ts";
 
-import {
-  availableDeploymentTargets,
-  getCoreEnvObject,
-} from "../deployment-targets/shared.ts";
+import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
-import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
+import useTemplate from "src/templates/useTemplate.ts";
 
-import { createTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
+import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
+import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
-import { createArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
+import getKnownTemplates from "src/templates/knownTemplates.ts";
 
-import availableTemplates from "../templates/available-templates.ts";
+import getEnvFileContents from "src/outputs/env.ts";
+import getGitignoreContents from "src/outputs/gitignore.ts";
+import vscodeSettings from "src/outputs/vscode-settings.ts";
+import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getReadmeForProject from "src/outputs/readme.ts";
 
-import getEnvFileContents from "../outputs/env.ts";
-import getGitignoreContents from "../outputs/gitignore.ts";
-import vscodeSettings from "../outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "../outputs/cndi-run-workflow.ts";
-import getReadmeForProject from "../outputs/readme.ts";
+import validateConfig from "src/validate/cndiConfig.ts";
 
-import { Template } from "../templates/Template.ts";
-
-const initLabel = colors.white("\ninit:");
+const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 /**
  * COMMAND cndi init
@@ -59,114 +53,30 @@ const initCommand = new Command()
   .option("-t, --template <template:string>", "CNDI Template to use.")
   .action(async (options) => {
     const pathToConfig = options.file;
-
-    // kind comes in from one of 2 places
-    // 1. if the user chooses a template, we use the first part of the template name, eg. "aws" or "gcp"
-    // 2. if the user brings their own config file, we read it from the first NodeItemSpec in the config file
-    let kind: NodeKind | undefined;
-    let project_name = Deno.cwd().split("/").pop() || "my-cndi-project";
-
+    let template: string | undefined = options.template;
+    let cndiConfig: CNDIConfig;
+    let env: EnvLines;
+    let readme: string;
+    let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
     // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-    const useCNDIConfigFile = !options.interactive && !options.template;
+    const useCNDIConfigFile = !options.interactive && !template;
 
     if (useCNDIConfigFile) {
+      console.log(`cndi init --file "${pathToConfig}"\n`);
       try {
-        console.log(`cndi init --file "${pathToConfig}"\n`);
-        const config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
+        cndiConfig = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
-        if (!config?.project_name) {
-          console.log(
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have the required ${
-                colors.cyan(
-                  '"project_name"',
-                )
-              } key\n`,
-            ),
-          );
-          Deno.exit(1);
-        }
-
-        if (!config.infrastructure) {
-          console.log(
-            initLabel,
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have the required ${
-                colors.cyan(
-                  '"infrastructure"',
-                )
-              } key\n`,
-            ),
-          );
-
-          // TODO: remove this warning, there are at most only a few people using the old syntax
-          const badconfig = config as unknown as Record<string, unknown>;
-
-          if (badconfig?.nodes) {
-            console.log(
-              initLabel,
-              colors.yellow(
-                `You appear to be using the deprecated pre-release config syntax. Sorry!`,
-              ),
-            );
-            console.log(
-              initLabel,
-              "please read more about the 1.x.x syntax at",
-              colors.cyan(
-                "https://github.com/polyseam/cndi#infrastructure-and-nodes\n",
-              ),
-            );
-          }
-
-          Deno.exit(1);
-        } else if (!config.infrastructure.cndi.nodes[0]) {
-          console.log(
-            initLabel,
-            colors.brightRed(
-              `cndi-config file found was at ${
-                colors.white(
-                  `"${pathToConfig}"`,
-                )
-              } but it does not have any ${
-                colors.cyan(
-                  '"cndi.infrastructure.nodes"',
-                )
-              } entries\n`,
-            ),
-          );
-        }
-
-        if (!config.cndi_version) {
-          console.log(
-            initLabel,
-            colors.yellow(
-              `You haven't specified a ${
-                colors.cyan(
-                  '"cndi_version"',
-                )
-              } in your config file, defaulting to "v1"\n`,
-            ),
-          );
-        }
-
-        // 1. the user brought their own config file, we use the kind of the first node
-        kind = config.infrastructure.cndi.nodes[0].kind as NodeKind; // only works when all nodes are the same kind
+        // validate config
+        validateConfig(cndiConfig, pathToConfig);
+        project_name = cndiConfig.project_name as string;
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
           // if config is not found at 'pathToConfig' we want to throw an error
-          console.log(
+          console.error(
             initLabel,
-            colors.brightRed(
+            ccolors.error(
               `cndi-config file not found at ${
-                colors.white(
+                ccolors.user_input(
                   `"${pathToConfig}"`,
                 )
               }\n`,
@@ -175,55 +85,49 @@ const initCommand = new Command()
 
           // and suggest a solution
           console.log(
-            `if you don't have a cndi-config file try ${
-              colors.cyan(
-                "cndi init --interactive",
-              )
-            }\n`,
+            "if you don't have a cndi-config file try",
+            ccolors.prompt(
+              "cndi init --interactive",
+            ),
+            "\n",
           );
           Deno.exit(1);
         }
       }
-    } else if (options.interactive) {
-      if (options.template) {
-        if (`${options.template}` === "true") {
-          console.log(`cndi init --interactive --template\n`);
-          console.error(
-            initLabel,
-            colors.brightRed(`--template (-t) flag requires a value`),
-          );
-          Deno.exit(1);
-        }
-        // 2a. the user used a template name, we pull the 'kind' out of it
-        kind = options.template?.split("/")[0] as NodeKind;
-        console.log(`cndi init --interactive --template ${options.template}\n`);
-      } else {
-        // we don't know the kind so we need to get it when the user chooses a template (see 2c)
-        console.log("cndi init --interactive\n");
-      }
-    } else {
-      // if the user passes -t or --template with no value, we raise an error
-      if (`${options.template}` === "true") {
-        // if template flag is truthy but empty, throw error
-        console.log(`cndi init --template\n`);
-        console.error(
-          initLabel,
-          colors.brightRed(`--template (-t) flag requires a value`),
-        );
-        Deno.exit(1);
-      }
+    }
 
-      console.log(`cndi init --template ${options.template}\n`);
-      // 2b. the user has passed a template name, we pull the 'deploymentTarget' out of it then select the default kind for that platform
-      // eg. aws -> aws
-      kind = options.template?.split("/")[0] as NodeKind;
+    if (options.template === "true") {
+      console.error(
+        initLabel,
+        ccolors.error(`--template (-t) flag requires a value`),
+        "\n",
+      );
+      Deno.exit(1);
+    }
+
+    if (options.interactive && !template) {
+      console.log("cndi init --interactive\n");
+    }
+
+    if (options.interactive && template) {
+      console.log(`cndi init --interactive --template ${template}\n`);
+    }
+
+    if (!options.interactive && template) {
+      console.log(`cndi init --template ${template}\n`);
     }
 
     const directoryContainsCNDIFiles = await checkInitialized(options.output);
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
-        "It looks like you have already initialized a cndi project in this directory. Overwrite existing artifacts?",
+        [
+          ccolors.warn(
+            "it looks like you have already initialized a cndi project in this directory:",
+          ),
+          ccolors.user_input(options.output),
+          ccolors.prompt("\n\noverwrite existing artifacts?"),
+        ].join(" "),
       )
       : true;
 
@@ -231,36 +135,11 @@ const initCommand = new Command()
       Deno.exit(0);
     }
 
-    const templateNamesList: string[] = [];
-
-    availableTemplates.forEach((tpl) => {
-      availableDeploymentTargets.forEach((kind: NodeKind) => {
-        templateNamesList.push(`${kind}/${tpl.name}`);
-      });
-    });
-
-    if (options.template) {
-      const templateUnavailable = !templateNamesList.includes(options.template);
-
-      if (templateUnavailable) {
-        console.log(
-          initLabel,
-          colors.brightRed(
-            `The template you selected "${options.template}" is not available.\n`,
-          ),
-        );
-
-        console.log("Available templates are:\n");
-        console.log(
-          `${templateNamesList.map((t) => colors.cyan(t)).join(", ")}\n`,
-        );
-        Deno.exit(1);
-      }
-    }
+    const templateNamesList: string[] = getKnownTemplates().map((t) => t.name);
 
     if (options.interactive) {
       project_name = (await Input.prompt({
-        message: colors.cyan("Please enter a name for your CNDI project:"),
+        message: ccolors.prompt("Please enter a name for your CNDI project:"),
         default: project_name,
       })) as string;
     }
@@ -270,66 +149,75 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-tls"
+    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-tls"
 
-    if (options.interactive && !options.template) {
-      const selectedTemplate = await Select.prompt({
-        message: colors.cyan("Pick a template"),
+    if (options.interactive && !template) {
+      template = await Select.prompt({
+        message: ccolors.prompt("Pick a template"),
         options: templateNamesList,
       });
-      // 2c. the user finally selected a template, we pull the 'kind' out of it
-      kind = selectedTemplate.split("/")[0] as NodeKind;
-      baseTemplateName = selectedTemplate.split("/")[1]; // eg. "airflow-tls"
     }
 
-    if (!kind) {
-      console.log(initLabel, colors.brightRed(`"kind" cannot be inferred`));
-      Deno.exit(1);
-    }
-
-    const template: Template = availableTemplates.find(
-      (t) => t.name === baseTemplateName,
-    ) as Template; // we know this exists because we checked it above
-
-    const coreEnvObject = await getCoreEnvObject(
-      { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword },
-      kind, // aws | gcp | azure
-      !!options.interactive,
-    );
-
-    const templateEnvObject = template
-      ? await template.getEnv(!!options.interactive)
-      : {};
-
-    const envObject = {
-      ...coreEnvObject,
-      ...templateEnvObject,
+    const cndiGeneratedValues = {
+      sealedSecretsKeys,
+      terraformStatePassphrase,
+      argoUIAdminPassword,
     };
 
-    await stageFile(
-      path.join(".vscode", "settings.json"),
-      getPrettyJSONString(vscodeSettings),
-    );
+    if (template) {
+      const templateResult = await useTemplate(
+        template!,
+        {
+          project_name,
+          cndiGeneratedValues,
+          interactive: !!options.interactive,
+        },
+      );
+      cndiConfig = templateResult.cndiConfig;
+      await stageFile(
+        "cndi-config.jsonc",
+        getPrettyJSONString(cndiConfig),
+      );
+      readme = templateResult.readme;
+      env = templateResult.env;
+    } else {
+      readme = getReadmeForProject({
+        project_name,
+        deploymentTarget: getDeploymentTargetFromConfig(cndiConfig!),
+      });
+
+      env = await getCoreEnvLines(
+        cndiGeneratedValues,
+        getDeploymentTargetFromConfig(cndiConfig!),
+        !!options.interactive,
+      );
+    }
 
     // write a readme, extend via Template.readmeBlock if it exists
 
     const readmePath = path.join(options.output, "README.md");
-
     try {
       await Deno.stat(readmePath);
       console.log(
         initLabel,
-        colors.yellow(`"${readmePath}" already exists, skipping generation`),
+        ccolors.user_input(`"${readmePath}"`),
+        ccolors.warn(`already exists, skipping generation`),
       );
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
         await stageFile(
           "README.md",
-          template?.getReadmeString({ project_name, kind }) ||
-            getReadmeForProject({ project_name, kind }),
+          readme,
         );
       }
     }
+
+    await stageFile(".env", getEnvFileContents(env));
+
+    await stageFile(
+      path.join(".vscode", "settings.json"),
+      getPrettyJSONString(vscodeSettings),
+    );
 
     await stageFile(
       path.join(".github", "workflows", "cndi-run.yaml"),
@@ -338,16 +226,7 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    // .env is processed by OW so we need to write it to disk immediately
-    await stageFile(".env", getEnvFileContents(envObject));
-
-    // if the user has specified a template, use that
     if (template) {
-      const conf = await template.getConfiguration(!!options.interactive);
-      const templateString = template.getTemplate(kind, conf, project_name);
-
-      await stageFile("cndi-config.jsonc", templateString);
-
       await persistStagedFiles(options.output);
 
       // because there is no "pathToConfig" when using a template, we need to set it here

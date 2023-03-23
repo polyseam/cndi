@@ -1,4 +1,4 @@
-import { stringify } from "https://deno.land/std@0.177.0/encoding/yaml.ts";
+import { stringify } from "deps";
 
 const cndiWorkflowObj = {
   name: "cndi",

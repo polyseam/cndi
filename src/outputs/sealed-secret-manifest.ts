@@ -1,12 +1,12 @@
-import { KubernetesSecret, KubernetesSecretWithStringData } from "../types.ts";
-import { getPathToKubesealBinary, getPrettyJSONString } from "../utils.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { ccolors } from "deps";
+import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
+import { getPathToKubesealBinary, getPrettyJSONString } from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const sealedSecretManifestLabel = colors.white(
-  "\nsrc/outputs/sealed-secret-manifest:",
+const sealedSecretManifestLabel = ccolors.faded(
+  "\nsrc/outputs/sealed-secret-manifest.ts:",
 );
 
 const parseCndiSecret = (
@@ -38,22 +38,26 @@ const parseCndiSecret = (
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
-            colors.yellow(
+            ccolors.warn(
               `\n\n${
-                colors.brightRed(
+                ccolors.error(
                   "ERROR",
                 )
-              }: ${secretEnvName} not found in environment`,
+              }: ${
+                ccolors.key_name(`"${secretEnvName}"`)
+              } not found in environment`,
             ),
           );
+
           console.log(
-            `You need to replace `,
-            colors.cyan(placeholder),
-            `with the desired value in "${dotEnvPath}"\nthen run ${
-              colors.green(
-                "cndi ow",
-              )
-            }\n`,
+            `You need to replace`,
+            ccolors.key_name(placeholder),
+            `\nwith the desired value in`,
+            ccolors.user_input(`"${dotEnvPath}"`),
+            "\nthen run",
+            ccolors.success(
+              "cndi ow\n",
+            ),
           );
 
           if (!secretEnvVal) {
@@ -67,19 +71,15 @@ const parseCndiSecret = (
         }
       } else {
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
-        console.log(
+        console.error(
           sealedSecretManifestLabel,
-          colors.brightRed(
-            `Secret string literals are not supported. Use ${
-              colors.cyan(
-                `"${CNDI_SECRETS_PREFIX}"`,
-              )
-            } prefix to reference environment variables at ${
-              colors.white(
-                `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
-              )
-            }`,
+          ccolors.error("Secret string literals are not supported.\nUse"),
+          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
+          ccolors.error("prefix to reference environment variables at"),
+          ccolors.key_name(
+            `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
           ),
+          "\n",
         );
         Deno.exit(1);
       }
@@ -100,22 +100,20 @@ const parseCndiSecret = (
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.log(
-            colors.yellow(
-              `\n\n${
-                colors.brightRed(
-                  "ERROR",
-                )
-              }: ${secretEnvName} not found in environment`,
+            sealedSecretManifestLabel,
+            ccolors.error(
+              "ERROR",
             ),
+            ccolors.key_name(`"${secretEnvName}"`),
+            ccolors.warn("not found in environment"),
           );
           console.log(
-            `You need to replace `,
-            colors.cyan(placeholder),
-            `with the desired value in "${dotEnvPath}"\nthen run ${
-              colors.green(
-                "cndi ow",
-              )
-            }\n`,
+            ccolors.warn(`You need to replace`),
+            ccolors.key_name(placeholder),
+            ccolors.warn("with the desired value in"),
+            ccolors.user_input(`"${dotEnvPath}"`),
+            ccolors.warn("\nthen run"),
+            ccolors.success("cndi ow\n"),
           );
           if (!secretEnvVal) {
             addSecretPlaceholder(secretEnvName, dotEnvPath);
@@ -126,29 +124,28 @@ const parseCndiSecret = (
           outputSecret.isPlaceholder = false;
         }
       } else {
-        console.log(
+        console.error(
           sealedSecretManifestLabel,
-          colors.brightRed(
-            `Secret string literals are not supported. Use ${
-              colors.cyan(
-                `"${CNDI_SECRETS_PREFIX}"`,
-              )
-            } prefix to reference environment variables at ${
-              colors.white(
-                `"${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
-              )
-            }`,
+          ccolors.error("Secret string literals are not supported\nUse"),
+          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
+          ccolors.error("prefix to reference environment variables at"),
+          ccolors.key_name(
+            `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
+          "\n",
         );
         Deno.exit(1);
       }
     });
   } else {
-    console.log(
+    console.error(
       sealedSecretManifestLabel,
-      colors.brightRed(
-        `Secret "${inputSecret.metadata.name}" has no data or stringData`,
+      ccolors.error(
+        `Secret`,
       ),
+      ccolors.key_name(`"${inputSecret.metadata.name}"`),
+      ccolors.error("has no data or stringData"),
+      "\n",
     );
     Deno.exit(1);
   }

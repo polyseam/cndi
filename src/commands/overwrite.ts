@@ -1,8 +1,5 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
-
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+import { ccolors, Command, path } from "deps";
 
 import {
   getPrettyJSONString,
@@ -10,30 +7,26 @@ import {
   loadJSONC,
   persistStagedFiles,
   stageFile,
-} from "../utils.ts";
+} from "src/utils.ts";
 
-import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
-import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
-import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
+import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { loadTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
+import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
-import controllerBootstrapTerrformTemplate from "../bootstrap/controller_bootstrap_cndi.sh.ts";
-import leaderBootstrapTerraformTemplate from "../bootstrap/leader_bootstrap_cndi.sh.ts";
+import getApplicationManifest from "src/outputs/application-manifest.ts";
+import RootChartYaml from "src/outputs/root-chart.ts";
+import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
 
-import getApplicationManifest from "../outputs/application-manifest.ts";
-import getTerraformNodeResource from "../outputs/terraform-node-resource.ts";
-import getTerraformRootFile from "../outputs/terraform-root-file.ts";
-import RootChartYaml from "../outputs/root-chart.ts";
-import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
+import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import {
   BaseNodeItemSpec,
   CNDIConfig,
-  DeploymentTargetConfiguration,
   KubernetesManifest,
   KubernetesSecret,
-} from "../types.ts";
+} from "src/types.ts";
 
-const owLabel = colors.white("\noverwrite:");
+const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
 interface OverwriteActionArgs {
   output: string;
@@ -59,61 +52,76 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   try {
     config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
   } catch {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(
-        `there is no cndi-config file at ${
-          colors.white(`"${pathToConfig}"`)
-        }\n`,
-      ),
+      ccolors.error("there is no cndi-config file at"),
+      ccolors.user_input(`"${pathToConfig}"`),
     );
     console.log(
-      `if you don't have a cndi-config file try ${
-        colors.cyan(
-          "cndi init --interactive",
-        )
-      }\n`,
+      "if you don't have a cndi-config file try",
+      ccolors.prompt(
+        "cndi init --interactive",
+      ),
+      "\n",
     );
     Deno.exit(1);
   }
+
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
+  } else {
+    console.log();
   }
+
   const sealedSecretsKeys = loadSealedSecretsKeys();
   const terraformStatePassphrase = loadTerraformStatePassphrase();
   const argoUIAdminPassword = loadArgoUIAdminPassword();
 
   if (!sealedSecretsKeys) {
-    console.log(owLabel, colors.brightRed(`"sealedSecretsKeys" are undefined`));
+    console.error(
+      owLabel,
+      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+      ccolors.error(`and/or`),
+      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+      ccolors.error(`are not present in environment`),
+      "\n",
+    );
     Deno.exit(1);
   }
 
   if (!argoUIAdminPassword) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(`"argoUIAdminPassword" is undefined`),
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
 
   if (!terraformStatePassphrase) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(`"terraformStatePassphrase" is undefined`),
+      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+      ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
 
   if (!config?.project_name) {
-    console.log(
+    console.error(
       owLabel,
-      colors.brightRed(
-        `you need to specify a ${
-          colors.cyan(
-            '"project_name"',
-          )
-        } for your CNDI cluster, it is used to tag resources we create`,
+      ccolors.error(
+        `you need to specify a`,
       ),
+      ccolors.key_name(
+        '"project_name"',
+      ),
+      ccolors.error(
+        `for your CNDI cluster, it is used to tag resources we create in the cloud`,
+      ),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -138,18 +146,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     // folder did not exist
   }
 
-  // write tftpl terraform template for the user_data bootstrap script
-
-  await stageFile(
-    path.join("cndi", "terraform", "leader_bootstrap_cndi.sh.tftpl"),
-    leaderBootstrapTerraformTemplate,
-  );
-
-  await stageFile(
-    path.join("cndi", "terraform", "controller_bootstrap_cndi.sh.tftpl"),
-    controllerBootstrapTerrformTemplate,
-  );
-
   // create temporary key for sealing secrets
   const tempPublicKeyFilePath = await Deno.makeTempFile();
   const dotEnvPath = path.join(options.output, ".env");
@@ -158,6 +154,81 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     tempPublicKeyFilePath,
     sealedSecretsKeys.sealed_secrets_public_key,
   );
+
+  const { nodes } = config.infrastructure.cndi;
+
+  const leaders = nodes.filter((node) => node.role === "leader");
+
+  if (leaders.length !== 1) {
+    console.error(
+      owLabel,
+      ccolors.error(`There must be exactly one leader node`),
+      "\n",
+    );
+    Deno.exit(1);
+  }
+
+  const requiredProviders = new Set(
+    nodes.map((node: BaseNodeItemSpec, index: number) => {
+      // eg: aws -> aws
+      if (!node.kind) {
+        console.error(
+          `node`,
+          ccolors.key_name(`${index}`),
+          node.name ? ccolors.user_input(`("${node.name}")`) : "",
+          `is missing the property`,
+          ccolors.key_name(`"kind"`),
+          "\n",
+        );
+        Deno.exit(1);
+      }
+
+      if (!node.name) {
+        console.error(
+          `node`,
+          ccolors.key_name(`${index}`),
+          `is missing the property`,
+          ccolors.key_name(`"name"`),
+          "\n",
+        );
+        Deno.exit(1);
+      }
+
+      const provider = node.kind;
+      return provider;
+    }),
+  );
+
+  if (requiredProviders.size !== 1) {
+    console.error(
+      ccolors.error(`we currently only support`),
+      ccolors.warn("1"),
+      ccolors.key_name(`"kind"`),
+      ccolors.error(`per cluster`),
+    );
+
+    console.log(
+      `your nodes have the following`,
+      ccolors.user_input(
+        `${requiredProviders.size}`,
+      ),
+      ccolors.key_name(`"kind"s`),
+    );
+
+    requiredProviders.forEach((kind) => {
+      console.log(` - ${ccolors.warn(kind)}`);
+    });
+
+    console.log();
+    Deno.exit(1);
+  }
+
+  await stageTerraformResourcesForConfig(
+    config,
+    options,
+  );
+
+  console.log(ccolors.success("staged terraform files"));
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   for (const key in cluster_manifests) {
@@ -176,94 +247,24 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           path.join("cndi", "cluster_manifests", secretName),
           sealedSecretManifest,
         );
-        console.log(`created encrypted secret:`, secretName);
+        console.log(
+          ccolors.success(`staged encrypted secret:`),
+          ccolors.key_name(secretName),
+        );
       }
       continue;
     }
-
+    const manifestFilename = `${key}.json`;
     await stageFile(
-      path.join("cndi", "cluster_manifests", `${key}.json`),
+      path.join("cndi", "cluster_manifests", manifestFilename),
       getPrettyJSONString(manifestObj),
     );
-  }
-
-  const { nodes } = config.infrastructure.cndi;
-
-  const deployment_target_configuration =
-    config.infrastructure.cndi.deployment_target_configuration ||
-    ({} as DeploymentTargetConfiguration);
-
-  const leaders = nodes.filter((node) => node.role === "leader");
-
-  if (leaders.length !== 1) {
     console.log(
-      owLabel,
-      colors.brightRed(`There must be exactly one leader node`),
-    );
-    Deno.exit(1);
-  }
-
-  const leader = leaders[0];
-
-  const requiredProviders = new Set(
-    nodes.map((node: BaseNodeItemSpec) => {
-      // eg: aws -> aws
-      const provider = node.kind;
-      return provider;
-    }),
-  );
-
-  if (requiredProviders.size !== 1) {
-    console.log(
-      colors.yellow(
-        `we currently only support ${colors.cyan("1")} "kind" per cluster\n`,
-      ),
-    );
-    console.log(
-      `your nodes have the following ${
-        colors.brightRed(
-          `${requiredProviders.size}`,
-        )
-      } "kind"s:`,
-    );
-    requiredProviders.forEach((kind) => {
-      console.log(` - ${colors.yellow(kind)}`);
-    });
-    console.log();
-    Deno.exit(1);
-  }
-
-  // generate setup-cndi.tf.json which depends on which kind of nodes are being deployed
-  const terraformRootFileContents = getTerraformRootFile({
-    cndi_project_name: config.project_name,
-    leaderName: leader.name,
-    requiredProviders,
-    nodes,
-    dotEnvPath,
-  });
-
-  if (terraformRootFileContents) {
-    await stageFile(
-      path.join("cndi", "terraform", "setup-cndi.tf.json"),
-      terraformRootFileContents,
+      ccolors.success("staged manifest:"),
+      ccolors.key_name(manifestFilename),
     );
   }
 
-  // write terraform nodes files
-  for (const node of nodes) {
-    const nodeFileContents: string = getTerraformNodeResource(
-      node,
-      deployment_target_configuration,
-      leader.name,
-    );
-
-    await stageFile(
-      path.join("cndi", "terraform", `${node.name}.cndi-node.tf.json`),
-      nodeFileContents,
-    );
-  }
-
-  // write the cndi/cluster_manifests/Chart.yaml file
   await stageFile(
     path.join("cndi", "cluster_manifests", "Chart.yaml"),
     RootChartYaml,
@@ -282,14 +283,24 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       path.join("cndi", "cluster_manifests", "applications", filename),
       manifestContent,
     );
-    console.log("created application manifest:", filename);
+    console.log(
+      ccolors.success("staged application manifest:"),
+      ccolors.key_name(filename),
+    );
   }
 
   try {
     await persistStagedFiles(options.output);
+    console.log();
   } catch (errorPersistingStagedFiles) {
-    console.log(owLabel, colors.brightRed(`Error persisting staged files`));
-    console.log(errorPersistingStagedFiles);
+    console.error(
+      owLabel,
+      ccolors.error(
+        `failed to persist staged cndi files to`,
+      ),
+      ccolors.user_input(`${options.output}`),
+    );
+    console.log(ccolors.caught(errorPersistingStagedFiles));
     await Deno.remove(getStagingDir(), { recursive: true });
     Deno.exit(1);
   }

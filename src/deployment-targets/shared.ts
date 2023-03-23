@@ -1,19 +1,17 @@
+import { ccolors, Input, Secret } from "deps";
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
-  EnvObject,
+  EnvLines,
   SealedSecretsKeys,
-} from "../types.ts";
-import { Secret } from "https://deno.land/x/cliffy@v0.25.4/prompt/secret.ts";
-import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
+} from "src/types.ts";
 
-import { prepareAWSEnv } from "../deployment-targets/aws.ts";
-import { prepareGCPEnv } from "../deployment-targets/gcp.ts";
-import { prepareAzureEnv } from "../deployment-targets/azure.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { getAWSEnvLines } from "src/deployment-targets/aws.ts";
+import { getGCPEnvLines } from "src/deployment-targets/gcp.ts";
+import { getAzureEnvLines } from "src/deployment-targets/azure.ts";
 
-const deploymentTargetsSharedLabel = colors.white(
-  "\nsrc/deployment-targets/shared:",
+const deploymentTargetsSharedLabel = ccolors.faded(
+  "\nsrc/deployment-targets/shared.ts:",
 );
 
 interface CNDIGeneratedValues {
@@ -22,11 +20,11 @@ interface CNDIGeneratedValues {
   argoUIAdminPassword: string;
 }
 
-const getCoreEnvObject = async (
+const getCoreEnvLines = async (
   cndiGeneratedValues: CNDIGeneratedValues,
   deploymentTarget: DeploymentTarget,
   interactive: boolean,
-): Promise<EnvObject> => {
+): Promise<EnvLines> => {
   const {
     sealedSecretsKeys,
     terraformStatePassphrase,
@@ -34,17 +32,41 @@ const getCoreEnvObject = async (
   } = cndiGeneratedValues;
 
   // git
-  const GIT_USERNAME = "";
-  const GIT_REPO = "";
-  const GIT_PASSWORD = "";
+  let GIT_USERNAME = "";
+  let GIT_REPO = "";
+  let GIT_PASSWORD = "";
+
+  GIT_USERNAME = interactive
+    ? await Input.prompt({
+      message: ccolors.prompt("Enter your GitHub username:"),
+      default: GIT_USERNAME,
+    })
+    : GIT_USERNAME;
+
+  GIT_PASSWORD = interactive
+    ? await Secret.prompt({
+      message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
+      default: GIT_PASSWORD,
+    })
+    : GIT_PASSWORD;
+
+  GIT_REPO = interactive
+    ? await Input.prompt({
+      message: ccolors.prompt("Enter your GitHub repository URL:"),
+      default: GIT_REPO,
+    })
+    : GIT_REPO;
 
   const TERRAFORM_STATE_PASSPHRASE = terraformStatePassphrase;
   const ARGO_UI_ADMIN_PASSWORD = argoUIAdminPassword;
 
   if (!sealedSecretsKeys) {
     console.log(
-      deploymentTargetsSharedLabel,
-      colors.brightRed(`"sealedSecretsKeys" is not defined in context`),
+      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+      ccolors.error(`and/or`),
+      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+      ccolors.error(`are not present in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -52,7 +74,9 @@ const getCoreEnvObject = async (
   if (!TERRAFORM_STATE_PASSPHRASE) {
     console.log(
       deploymentTargetsSharedLabel,
-      colors.brightRed(`"terraformStatePassphrase" is not defined in context`),
+      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+      ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
@@ -60,76 +84,49 @@ const getCoreEnvObject = async (
   if (!ARGO_UI_ADMIN_PASSWORD) {
     console.log(
       deploymentTargetsSharedLabel,
-      colors.brightRed(`"argoUIAdminPassword" is not defined in context`),
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error(`is not set in environment`),
+      "\n",
     );
     Deno.exit(1);
   }
 
-  const coreEnvObject: EnvObject = {
-    SEALED_SECRETS_PUBLIC_KEY: {
-      comment: "Sealed Secrets keys for Kubeseal",
-      value: sealedSecretsKeys.sealed_secrets_public_key,
+  const coreEnvLines: EnvLines = [
+    { comment: "Sealed Secrets keys for Kubeseal" },
+    {
+      value: {
+        SEALED_SECRETS_PUBLIC_KEY: sealedSecretsKeys.sealed_secrets_public_key,
+      },
     },
-    SEALED_SECRETS_PRIVATE_KEY: {
-      value: sealedSecretsKeys.sealed_secrets_private_key,
+    {
+      value: {
+        SEALED_SECRETS_PRIVATE_KEY:
+          sealedSecretsKeys.sealed_secrets_private_key,
+      },
     },
-    ARGO_UI_ADMIN_PASSWORD: {
-      comment: "ArgoUI",
-      value: ARGO_UI_ADMIN_PASSWORD,
-    },
-    TERRAFORM_STATE_PASSPHRASE: {
-      comment: "Passphrase for encrypting/decrypting terraform state",
-      value: TERRAFORM_STATE_PASSPHRASE,
-    },
-  };
-
-  coreEnvObject.GIT_USERNAME = {
-    comment: "git credentials",
-    value: interactive
-      ? ((await Input.prompt({
-        message: colors.cyan("Enter your GitHub username:"),
-        default: GIT_USERNAME,
-      })) as string)
-      : GIT_USERNAME,
-  };
-
-  coreEnvObject.GIT_PASSWORD = {
-    value: interactive
-      ? ((await Secret.prompt({
-        message: colors.cyan("Enter your GitHub Personal Access Token:"),
-        default: GIT_PASSWORD,
-      })) as string)
-      : GIT_PASSWORD,
-  };
-
-  coreEnvObject.GIT_REPO = {
-    value: interactive
-      ? await Input.prompt({
-        message: colors.cyan("Enter your GitHub repository URL:"),
-        default: GIT_REPO,
-      })
-      : GIT_REPO,
-  };
+    { comment: "ArgoCD" },
+    { value: { ARGO_UI_ADMIN_PASSWORD } },
+    { comment: "Passphrase for encrypting/decrypting terraform state" },
+    { value: { TERRAFORM_STATE_PASSPHRASE } },
+    { comment: "git credentials" },
+    { value: { GIT_USERNAME } },
+    { value: { GIT_REPO } },
+    { value: { GIT_PASSWORD } },
+  ];
 
   switch (deploymentTarget) {
     case DEPLOYMENT_TARGET.aws:
-      return {
-        ...coreEnvObject,
-        ...(await prepareAWSEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getAWSEnvLines(interactive))];
     case DEPLOYMENT_TARGET.gcp:
-      return {
-        ...coreEnvObject,
-        ...(await prepareGCPEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getGCPEnvLines(interactive))];
     case DEPLOYMENT_TARGET.azure:
-      return {
-        ...coreEnvObject,
-        ...(await prepareAzureEnv(interactive)),
-      };
+      return [...coreEnvLines, ...(await getAzureEnvLines(interactive))];
     default:
-      console.log(
-        colors.brightRed(`kind "${deploymentTarget}" is not yet supported`),
+      console.error(
+        ccolors.key_name(`"kind"`),
+        ccolors.user_input(`"${deploymentTarget}"`),
+        ccolors.error(`is not yet supported`),
+        "\n",
       );
       Deno.exit(1);
   }
@@ -137,4 +134,4 @@ const getCoreEnvObject = async (
 
 const availableDeploymentTargets = Object.values(DEPLOYMENT_TARGET);
 
-export { availableDeploymentTargets, getCoreEnvObject };
+export { availableDeploymentTargets, getCoreEnvLines };

@@ -1,22 +1,29 @@
-import { EnvObject } from "../types.ts";
+import { EnvCommentEntry, EnvLines, EnvValueEntry } from "src/types.ts";
 
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const writeEnvObject = (envObj: EnvObject): string => {
-  const dotEnvString = Object.keys(envObj)
-    .map((key) => {
-      const val = ((
-        envObj[key]?.value ? envObj[key].value : `${key}${PLACEHOLDER_SUFFIX}`
-      ) as string).trim();
+const writeEnvObject = (envLines: EnvLines): string => {
+  const dotEnvString = envLines.map((line) => {
+    const commentLine = line as EnvCommentEntry;
+    const valueLine = line as EnvValueEntry;
 
-      const comment = envObj[key]?.comment ? `\n# ${envObj[key].comment}` : "";
+    if (commentLine?.comment) {
+      return `\n# ${commentLine.comment}`;
+    } else if (valueLine?.value) {
+      const key = Object.keys(valueLine.value)[0];
+
+      const val = valueLine?.value?.[key]
+        ? valueLine.value[key]
+        : `${key}${PLACEHOLDER_SUFFIX}`;
 
       Deno.env.set(key, val);
 
-      return `${comment}\n${key}='${val}'`;
-    })
-    .join("\n")
-    .trim();
+      return `${key}='${val}'`;
+    } else {
+      console.error("failed to build env file line", line);
+      return "";
+    }
+  }).join("\n").trim();
 
   return dotEnvString + "\n";
 };

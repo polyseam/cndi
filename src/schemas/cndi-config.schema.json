@@ -22,6 +22,9 @@
       "description": "An object which defines the infrastructure resources CNDI should deploy.",
       "required": ["cndi"],
       "properties": {
+        "terraform": {
+          "": {}
+        },
         "cndi": {
           "type": "object",
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
