@@ -5,19 +5,39 @@ on:
     - '0 4 * 12 *' # we will change this when we are ready to run this nightly
 jobs:
   build:
+    # env:
+    #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
-      - name: 'Create Test Repo'
-        run: 'gh repo create polyseam-e2e/aws-airflow-cndi-e2e --private --clone'
+      - name: 'install gh'
+
+        run: |
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+
+      - name: 'Delete Test Repo'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: 'gh repo delete polyseam-e2e/aws-airflow-cndi-e2e --yes'
+
+      - name: 'Create Test Repo'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: 'gh repo create polyseam-e2e/aws-airflow-cndi-e2e --private --clone --add-readme'
 
       - name: 'Checkout Test Repo'
         uses: actions/checkout@v2
         with:
-          repository: polyseam/aws-active-cndi-test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: aws-active-cndi-test
+          repository: polyseam-e2e/aws-airflow-cndi-e2e
+          token: ${{ secrets.GH_TOKEN }}
+          # path: aws-airflow-cndi-e2e
+      
+      - name: echo hi
+        run: echo hi
 
       - name: Deno 
         uses: denoland/setup-deno@v1
