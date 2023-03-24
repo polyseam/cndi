@@ -33,7 +33,7 @@ const cndiWorkflowObj = {
         {
           name: "cndi run",
           env: {
-            GIT_REPO: "https://github.com/${{ github.repository}}",
+            GIT_REPO: "https://github.com/${{ github.repository }}",
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
             TERRAFORM_STATE_PASSPHRASE:

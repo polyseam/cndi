@@ -26,7 +26,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       writer: Deno.stdout,
     });
 
-    const destinationPath = getCndiInstallPath();
+    const destinationPath = await getCndiInstallPath();
 
     if (to === "latest") {
       const { latest } = await this.getVersions(name);

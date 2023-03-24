@@ -1,5 +1,6 @@
 import { ccolors, homedir, Input } from "deps";
 import { EnvLines } from "src/types.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const deploymentTargetsLabel = ccolors.faded("src/deployment-targets/gcp.ts:");
 
@@ -38,8 +39,9 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
           )
         }`,
       );
-      console.log(ccolors.caught(errorReadingCredentials), "\n");
-      Deno.exit(1);
+      console.log(ccolors.caught(errorReadingCredentials));
+      await emitExitEvent(607);
+      Deno.exit(607);
     }
 
     // if the path to google json key is valid, but the file is not a valid json, throw an error
@@ -51,8 +53,9 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
         ccolors.error(`Invalid GCP JSON key file found at the provided path`),
         ccolors.user_input(`"${google_credentials_path}"`),
       );
-      console.log(ccolors.caught(errorParsingCredentials), "\n");
-      Deno.exit(1);
+      console.log(ccolors.caught(errorParsingCredentials));
+      await emitExitEvent(608);
+      Deno.exit(608);
     }
 
     // if the path to google json key is valid, and the file is a valid json, write the GOOGLE_CREDENTIALS env variable

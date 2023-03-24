@@ -1,6 +1,7 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import encrypt from "src/tfstate/encrypt.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 
@@ -20,9 +21,9 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.user_input(`"${cmd}"`),
       ccolors.error("must be executed inside a git repository"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1005);
+    Deno.exit(1005);
   }
 
   // we can't have any uncommitted changes
@@ -33,9 +34,9 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.error("you must have clean git state when running"),
       ccolors.user_input(`"${cmd}"`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1006);
+    Deno.exit(1006);
   }
 
   await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
@@ -54,9 +55,9 @@ export default async function pushStateFromRun({
     console.log(
       gitWriteStateLabel,
       `corrupted state, please run "${cmd}" again`,
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1007);
+    Deno.exit(1007);
   }
 
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
@@ -66,9 +67,9 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       "is not set in your environment",
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1008);
+    Deno.exit(1008);
   }
 
   try {

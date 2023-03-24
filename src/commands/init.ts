@@ -4,6 +4,7 @@ import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {
   checkInitialized,
+  emitExitEvent,
   getDeploymentTargetFromConfig,
   getPrettyJSONString,
   loadJSONC,
@@ -67,7 +68,7 @@ const initCommand = new Command()
         cndiConfig = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
 
         // validate config
-        validateConfig(cndiConfig, pathToConfig);
+        await validateConfig(cndiConfig, pathToConfig);
         project_name = cndiConfig.project_name as string;
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
@@ -89,9 +90,9 @@ const initCommand = new Command()
             ccolors.prompt(
               "cndi init --interactive",
             ),
-            "\n",
           );
-          Deno.exit(1);
+          await emitExitEvent(400);
+          Deno.exit(400);
         }
       }
     }
@@ -100,9 +101,9 @@ const initCommand = new Command()
       console.error(
         initLabel,
         ccolors.error(`--template (-t) flag requires a value`),
-        "\n",
       );
-      Deno.exit(1);
+      await emitExitEvent(401);
+      Deno.exit(401);
     }
 
     if (options.interactive && !template) {
@@ -132,7 +133,8 @@ const initCommand = new Command()
       : true;
 
     if (!shouldContinue) {
-      Deno.exit(0);
+      console.log();
+      Deno.exit(0); // this event isn't handled by telemetry, it's just not very interesting
     }
 
     const templateNamesList: string[] = getKnownTemplates().map((t) => t.name);

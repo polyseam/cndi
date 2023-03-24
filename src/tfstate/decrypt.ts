@@ -1,8 +1,12 @@
 import { ccolors, CryptoJS } from "deps";
+import { emitExitEvent } from "src/utils.ts";
 
 const decryptLabel = ccolors.faded("\nsrc/tfstate/decrypt.ts:");
 
-export default function decrypt(encryptedText: string, secret: string) {
+export default async function decrypt(
+  encryptedText: string,
+  secret: string,
+): Promise<string> {
   try {
     const decryptedString = CryptoJS.AES.decrypt(
       encryptedText,
@@ -23,7 +27,8 @@ export default function decrypt(encryptedText: string, secret: string) {
         'your "TERRAFORM_STATE_PASSPHRASE" is likely incorrect, consider deleting your "_state" branch\n',
       ),
     );
-    console.log(ccolors.caught(decryptError), "\n");
-    Deno.exit(1);
+    console.log(ccolors.caught(decryptError));
+    await emitExitEvent(1000);
+    Deno.exit(1000);
   }
 }

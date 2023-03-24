@@ -2,6 +2,7 @@ import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { ccolors, Command, path } from "deps";
 
 import {
+  emitExitEvent,
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
@@ -19,12 +20,8 @@ import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import {
-  BaseNodeItemSpec,
-  CNDIConfig,
-  KubernetesManifest,
-  KubernetesSecret,
-} from "src/types.ts";
+import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -62,9 +59,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.prompt(
         "cndi init --interactive",
       ),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(500);
+    Deno.exit(500);
   }
 
   if (!options.initializing) {
@@ -72,6 +69,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   } else {
     console.log();
   }
+
+  await validateConfig(config, pathToConfig);
 
   const sealedSecretsKeys = loadSealedSecretsKeys();
   const terraformStatePassphrase = loadTerraformStatePassphrase();
@@ -84,9 +83,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.error(`and/or`),
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error(`are not present in environment`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(501);
+    Deno.exit(501);
   }
 
   if (!argoUIAdminPassword) {
@@ -94,9 +93,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       owLabel,
       ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
       ccolors.error(`is not set in environment`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(502);
+    Deno.exit(502);
   }
 
   if (!terraformStatePassphrase) {
@@ -104,26 +103,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       owLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       ccolors.error(`is not set in environment`),
-      "\n",
     );
-    Deno.exit(1);
-  }
-
-  if (!config?.project_name) {
-    console.error(
-      owLabel,
-      ccolors.error(
-        `you need to specify a`,
-      ),
-      ccolors.key_name(
-        '"project_name"',
-      ),
-      ccolors.error(
-        `for your CNDI cluster, it is used to tag resources we create in the cloud`,
-      ),
-      "\n",
-    );
-    Deno.exit(1);
+    await emitExitEvent(503);
+    Deno.exit(503);
   }
 
   const cluster_manifests = config?.cluster_manifests || {};
@@ -154,74 +136,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     tempPublicKeyFilePath,
     sealedSecretsKeys.sealed_secrets_public_key,
   );
-
-  const { nodes } = config.infrastructure.cndi;
-
-  const leaders = nodes.filter((node) => node.role === "leader");
-
-  if (leaders.length !== 1) {
-    console.error(
-      owLabel,
-      ccolors.error(`There must be exactly one leader node`),
-      "\n",
-    );
-    Deno.exit(1);
-  }
-
-  const requiredProviders = new Set(
-    nodes.map((node: BaseNodeItemSpec, index: number) => {
-      // eg: aws -> aws
-      if (!node.kind) {
-        console.error(
-          `node`,
-          ccolors.key_name(`${index}`),
-          node.name ? ccolors.user_input(`("${node.name}")`) : "",
-          `is missing the property`,
-          ccolors.key_name(`"kind"`),
-          "\n",
-        );
-        Deno.exit(1);
-      }
-
-      if (!node.name) {
-        console.error(
-          `node`,
-          ccolors.key_name(`${index}`),
-          `is missing the property`,
-          ccolors.key_name(`"name"`),
-          "\n",
-        );
-        Deno.exit(1);
-      }
-
-      const provider = node.kind;
-      return provider;
-    }),
-  );
-
-  if (requiredProviders.size !== 1) {
-    console.error(
-      ccolors.error(`we currently only support`),
-      ccolors.warn("1"),
-      ccolors.key_name(`"kind"`),
-      ccolors.error(`per cluster`),
-    );
-
-    console.log(
-      `your nodes have the following`,
-      ccolors.user_input(
-        `${requiredProviders.size}`,
-      ),
-      ccolors.key_name(`"kind"s`),
-    );
-
-    requiredProviders.forEach((kind) => {
-      console.log(` - ${ccolors.warn(kind)}`);
-    });
-
-    console.log();
-    Deno.exit(1);
-  }
 
   await stageTerraformResourcesForConfig(
     config,
@@ -301,8 +215,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.user_input(`${options.output}`),
     );
     console.log(ccolors.caught(errorPersistingStagedFiles));
-    await Deno.remove(getStagingDir(), { recursive: true });
-    Deno.exit(1);
+    await Deno.remove(await getStagingDir(), { recursive: true });
+    await emitExitEvent(509);
+    Deno.exit(509);
   }
 
   const completionMessage = options?.initializing

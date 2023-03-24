@@ -9,7 +9,19 @@ import {
   TFBlocks,
 } from "src/types.ts";
 
+import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+
 const utilsLabel = ccolors.faded("src/utils.ts:");
+
+async function sha256Digest(message: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join(""); // convert bytes to hex string
+  return hashHex;
+}
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -26,29 +38,11 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
-function getLeaderNodeNameFromConfig(config: CNDIConfig) {
+function getLeaderNodeNameFromConfig(config: CNDIConfig): string | undefined {
   const leaderNode = config.infrastructure.cndi.nodes.find(
     (node: BaseNodeItemSpec) => node.role === "leader",
   );
-  if (!leaderNode) {
-    console.error(
-      utilsLabel,
-      ccolors.error('no node with role "leader" node found in config!'),
-      "\n",
-    );
-    Deno.exit(1);
-  }
-  if (!leaderNode.name) {
-    console.error(
-      utilsLabel,
-      ccolors.error(
-        'no name found for node with role "leader" node found in config!',
-      ),
-      "\n",
-    );
-    Deno.exit(1);
-  }
-  return leaderNode.name;
+  return leaderNode?.name;
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
@@ -98,7 +92,7 @@ async function patchAndStageTerraformResources(
 
       try {
         originalContent = await loadJSONC(
-          path.join(getStagingDir(), "cndi", "terraform", filename),
+          path.join(await getStagingDir(), "cndi", "terraform", filename),
         ) as unknown as TFResourceFileObject;
       } catch {
         // there was no pre-existing resource with this name
@@ -151,9 +145,9 @@ async function mergeAndStageTerraformObj(
       utilsLabel,
       ccolors.error("there is no terraform block type named"),
       ccolors.user_input(`"${terraformBlockName}"`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(203);
+    Deno.exit(203);
   }
 
   const pathToTFBlock = path.join(
@@ -161,10 +155,11 @@ async function mergeAndStageTerraformObj(
     "terraform",
     `${terraformBlockName}.tf.json`,
   );
+
   let newBlock = {};
   try {
     const originalBlock = await loadJSONC(
-      path.join(getStagingDir(), pathToTFBlock),
+      path.join(await getStagingDir(), pathToTFBlock),
     ) as Record<
       string,
       unknown
@@ -255,34 +250,27 @@ function getPathToKubesealBinary() {
 }
 
 async function stageFile(relativePath: string, fileContents: string) {
-  const stagingPath = path.join(getStagingDir(), relativePath);
+  const stagingPath = path.join(await getStagingDir(), relativePath);
   await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
-function getStagingDir() {
+async function getStagingDir(): Promise<string> {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
     console.error(
       utilsLabel,
       `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
       ccolors.error(`is not set!`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(202);
+    Deno.exit(202);
   }
   return stagingDirectory;
 }
 
-function stageFileSync(relativePath: string, fileContents: string) {
-  const stagingDirectory = getStagingDir();
-  const stagingPath = path.join(stagingDirectory, relativePath);
-  Deno.mkdirSync(path.dirname(stagingPath), { recursive: true });
-  Deno.writeTextFileSync(stagingPath, fileContents);
-}
-
 async function persistStagedFiles(targetDirectory: string) {
-  const stagingDirectory = getStagingDir();
+  const stagingDirectory = await getStagingDir();
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
       const fileContents = await Deno.readTextFile(entry.path);
@@ -341,16 +329,17 @@ const getFileSuffixForPlatform = () => {
   return fileSuffixForPlatform[currentPlatform];
 };
 
-const getCndiInstallPath = (): string => {
+const getCndiInstallPath = async (): Promise<string> => {
   if (!homedir()) {
     console.error(
       utilsLabel,
       ccolors.error("cndi could not find your home directory!"),
     );
     console.log(
-      'try setting the "HOME" environment variable on your system.\n',
+      'try setting the "HOME" environment variable on your system.',
     );
-    Deno.exit(1);
+    await emitExitEvent(204);
+    Deno.exit(204);
   }
   let suffix = "";
   if (platform() === "win32") {
@@ -369,7 +358,9 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
-function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
+async function getDefaultVmTypeForKind(
+  kind: NodeKind,
+): Promise<[string, string]> {
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
     case NODE_KIND.aws:
@@ -379,8 +370,9 @@ function getDefaultVmTypeForKind(kind: NodeKind): [string, string] {
     case NODE_KIND.azure:
       return ["machine_type", "Standard_D4s_v3"];
     default:
-      console.log("Unknown kind: " + kind, "\n");
-      Deno.exit(1);
+      console.log("Unknown kind: " + kind);
+      await emitExitEvent(205);
+      Deno.exit(205);
   }
 }
 
@@ -400,9 +392,17 @@ function getSecretOfLength(len = 32): string {
   return Array.from(values, base10intToHex).join("");
 }
 
+async function emitExitEvent(exit_code: number) {
+  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
+  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (isDebug) console.log("\nevent_uuid", event_uuid);
+  console.log();
+}
+
 export {
   checkInitialized,
   checkInstalled,
+  emitExitEvent,
   getCndiInstallPath,
   getDefaultVmTypeForKind,
   getDeploymentTargetFromConfig,
@@ -419,6 +419,6 @@ export {
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
+  sha256Digest,
   stageFile,
-  stageFileSync,
 };

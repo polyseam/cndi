@@ -22,6 +22,8 @@ const _keys = {
   space: "\x20",
 };
 
+Deno.env.set("CNDI_TELEMETRY", "debug");
+
 beforeEach(() => {
   // initialize sandbox
   const dir = Deno.makeTempDirSync();

@@ -1,12 +1,13 @@
 import { ccolors } from "deps";
 import { CNDIConfig } from "src/types.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
-export default function validateConfig(
+export default async function validateConfig(
   config: CNDIConfig,
   pathToConfig: string,
-) {
+): Promise<void> {
   if (!config?.project_name) {
     console.log(
       cndiConfigLabel,
@@ -15,9 +16,9 @@ export default function validateConfig(
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"project_name"'),
       ccolors.error("key"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(900);
+    Deno.exit(900);
   }
 
   if (!config?.infrastructure) {
@@ -28,9 +29,9 @@ export default function validateConfig(
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"infrastructure"'),
       ccolors.error("key"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(901);
+    Deno.exit(901);
   }
 
   if (!config?.infrastructure?.cndi?.nodes?.[0]) {
@@ -41,9 +42,28 @@ export default function validateConfig(
       ccolors.error("but it does not have any"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
       ccolors.error("entries"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(902);
+    Deno.exit(902);
+  }
+
+  const nodeIsMissingKind = config.infrastructure.cndi.nodes.every((node) =>
+    !node?.kind
+  );
+
+  if (nodeIsMissingKind) {
+    console.error(
+      cndiConfigLabel,
+      ccolors.error("cndi-config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it has atleast 1"),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entry missing a"),
+      ccolors.key_name('"kind"'),
+      ccolors.error('value. All nodes must specify a "kind".'),
+    );
+    await emitExitEvent(903);
+    Deno.exit(903);
   }
 
   const onlyOneNodeKind = config.infrastructure.cndi.nodes.every(
@@ -59,10 +79,10 @@ export default function validateConfig(
       ccolors.key_name('"infrastructure.cndi.nodes"'),
       ccolors.error("entries with different"),
       ccolors.key_name('"kind"'),
-      ccolors.error("values. This is not supported."),
-      "\n",
+      ccolors.error('values. All nodes must be deployed with the same "kind".'),
     );
-    Deno.exit(1);
+    await emitExitEvent(904);
+    Deno.exit(904);
   }
 
   if (!config.cndi_version) {
@@ -74,10 +94,28 @@ export default function validateConfig(
     );
   }
 
+  const nodeNameSet = new Set();
+
+  for (const node of config?.infrastructure?.cndi?.nodes) {
+    if (!node.name) {
+      console.error(
+        cndiConfigLabel,
+        ccolors.error("cndi-config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it has at least one"),
+        ccolors.key_name('"infrastructure.cndi.nodes"'),
+        ccolors.error("entry that is missing a"),
+        ccolors.key_name('"name"'),
+        ccolors.error("value. Node names must be specified."),
+      );
+      await emitExitEvent(905);
+      Deno.exit(905);
+    }
+    nodeNameSet.add(node.name);
+  }
+
   const nodeNamesAreUnique =
-    new Set(config?.infrastructure?.cndi?.nodes.map(({ name }) => (name)))
-      .size ===
-      config?.infrastructure?.cndi?.nodes.length;
+    nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
 
   if (!nodeNamesAreUnique) {
     console.error(
@@ -89,9 +127,9 @@ export default function validateConfig(
       ccolors.error("entries with the same"),
       ccolors.key_name('"name"'),
       ccolors.error("values. Node names must be unique."),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(906);
+    Deno.exit(906);
   }
 
   const numberOfNodesWithRoleLeader =
@@ -111,8 +149,8 @@ export default function validateConfig(
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
       ccolors.error("There must be exactly one leader node."),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(907);
+    Deno.exit(907);
   }
 }

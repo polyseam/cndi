@@ -6,7 +6,11 @@ import {
   writableStreamFromWriter,
 } from "deps";
 
-import { checkInstalled, getFileSuffixForPlatform } from "src/utils.ts";
+import {
+  checkInstalled,
+  emitExitEvent,
+  getFileSuffixForPlatform,
+} from "src/utils.ts";
 
 const installLabel = ccolors.faded("\nsrc/install.ts:");
 
@@ -67,8 +71,10 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install terraform, please try again"),
       );
-      console.log(ccolors.caught(terraformInstallError), "\n");
-      Deno.exit(1);
+      console.log(ccolors.caught(terraformInstallError));
+
+      await emitExitEvent(300);
+      Deno.exit(300);
     }
 
     const kubesealBinaryPath = path.join(
@@ -96,8 +102,9 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install kubeseal, please try again"),
       );
-      console.log(ccolors.caught(kubesealInstallError), "\n");
-      Deno.exit(1);
+      console.log(ccolors.caught(kubesealInstallError));
+      await emitExitEvent(301);
+      Deno.exit(301);
     }
     console.log();
     spinner.succeed("cndi dependencies installed!\n");
