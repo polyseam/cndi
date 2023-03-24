@@ -39,7 +39,7 @@ describe("cndi", () => {
     it("should fail if ./cndi-config.jsonc is missing without -i", async () => {
       assert(
         await hasSameFilesAfter(async () => {
-          const { status } = await runCndi("init", "--loud");
+          const { status } = await runCndi("init");
           assert(!status.success);
         }),
       );
@@ -61,7 +61,7 @@ describe("cndi", () => {
         getPrettyJSONString(basicAWSCndiConfig),
       );
       // cndi init should fail because there is no config file
-      const { status } = await runCndi("init", "--loud");
+      const { status } = await runCndi("init");
 
       // read the current directory entries after "cndi init" has ran
       for await (const afterDirEntry of Deno.readDir(".")) {
@@ -224,7 +224,7 @@ describe("cndi", () => {
 
       assert(
         await hasSameFilesAfter(async () => {
-          const { status } = await runCndi("init", "--loud");
+          const { status } = await runCndi("init");
           assert(!status.success);
         }),
       );
