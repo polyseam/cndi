@@ -22,7 +22,7 @@ CNDI will by default send an event that includes:
   "name": "command_exit",
   "command": "cndi run",
   "repo_id": "eb0aee70de92acd688b70dddb3d0b1fb8832d81bbdb98933b5f1accde3e0ded6",
-  "git_repo": "https://github.com/your/repo",
+  "repo_url": "https://github.com/your/repo",
   "exit_code": 0
 }
 ```
