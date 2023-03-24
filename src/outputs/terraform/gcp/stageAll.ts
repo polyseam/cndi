@@ -1,7 +1,11 @@
 import { ccolors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
-import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getLeaderNodeNameFromConfig,
+  stageFile,
+} from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -51,7 +55,8 @@ export default async function stageTerraformResourcesForGCP(
       ),
     );
     // the message about missing credentials should have already been printed
-    Deno.exit(1);
+    await emitExitEvent(803);
+    Deno.exit(803);
   }
 
   // we parse the key to extract the project_id for use in terraform
@@ -81,15 +86,17 @@ export default async function stageTerraformResourcesForGCP(
       );
       if (!options.initializing) {
         console.log();
-        Deno.exit(1);
+        await emitExitEvent(804);
+        Deno.exit(804);
       }
     } else {
       console.error(
         ccolors.error("failed to parse service account key json from"),
         ccolors.user_input(`"${dotEnvPath}"`),
       );
-      console.log(ccolors.caught(parsingError), "\n");
-      Deno.exit(1);
+      console.log(ccolors.caught(parsingError));
+      await emitExitEvent(805);
+      Deno.exit(805);
     }
   }
 
@@ -226,7 +233,8 @@ export default async function stageTerraformResourcesForGCP(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e), "\n");
-    Deno.exit(1);
+    console.log(ccolors.caught(e));
+    await emitExitEvent(802);
+    Deno.exit(802);
   }
 }

@@ -1,0 +1,230 @@
+[
+  {
+    "code": 1,
+    "message": "Could not create staging directory"
+  },
+  {
+    "code": 100,
+    "message": "'GIT_USERNAME' env var is not set for terraform"
+  },
+  {
+    "code": 101,
+    "message": "'GIT_PASSWORD' env var is not set for terraform"
+  },
+  {
+    "code": 102,
+    "message": "'GIT_REPO' env var is not set for terraform"
+  },
+  {
+    "code": 103,
+    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set for terraform"
+  },
+  {
+    "code": 104,
+    "message": "'SEALED_SECRETS_PRIVATE_KEY' env var is not set for terraform"
+  },
+  {
+    "code": 105,
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' env var is not set for terraform"
+  },
+  {
+    "code": 200,
+    "message": "No node with role 'leader' found in config"
+  },
+  {
+    "code": 201,
+    "message": "No 'name' for node with role 'leader' found in config"
+  },
+  {
+    "code": 202,
+    "message": "'CNDI_STAGING_DIRECTORY' is not set"
+  },
+  {
+    "code": 203,
+    "message": "Terraform block in config does not exist"
+  },
+  {
+    "code": 204,
+    "message": "'HOME' env var is not set"
+  },
+  {
+    "code": 205,
+    "message": "Failed to get default VM type, invalid node 'kind'"
+  },
+  {
+    "code": 300,
+    "message": "Failed to install terraform"
+  },
+  {
+    "code": 301,
+    "message": "Failed to install kubeseal"
+  },
+  {
+    "code": 400,
+    "message": "cndi-config file not found"
+  },
+  {
+    "code": 401,
+    "message": "cndi init called with an unspecified --template"
+  },
+  {
+    "code": 500,
+    "message": "cndi-config not found during overwrite"
+  },
+  {
+    "code": 501,
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' env vars not set during overwrite"
+  },
+  {
+    "code": 502,
+    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set during overwrite"
+  },
+  {
+    "code": 503,
+    "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during overwrite"
+  },
+  {
+    "code": 509,
+    "message": "Failed to persist staged files during overwrite"
+  },
+  {
+    "code": 600,
+    "message": "'GIT_USERNAME' env var is not setialization"
+  },
+  {
+    "code": 601,
+    "message": "'GIT_PASSWORD' env var is not set during initialization"
+  },
+  {
+    "code": 602,
+    "message": "'GIT_REPO' env var is not set  during initialization"
+  },
+  {
+    "code": 603,
+    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set during initialization"
+  },
+  {
+    "code": 604,
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' env vars not set during overwrite"
+  },
+  {
+    "code": 605,
+    "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during overwrite"
+  },
+  {
+    "code": 606,
+    "message": "failed to generate .emv, invalid node 'kind'"
+  },
+  {
+    "code": 607,
+    "message": "There was no GCP key JSON found at the path specified during initialization"
+  },
+  {
+    "code": 608,
+    "message": "The file found at the GCP key JSON path specified during initialization was not a valid JSON file"
+  },
+  {
+    "code": 700,
+    "message": "Kubernetes secret manifest data was specified as a literal, secrets must be sealed"
+  },
+  {
+    "code": 701,
+    "message": "Kubernetes secret manifest stringData was specified as a literal, secrets must be sealed"
+  },
+  {
+    "code": 702,
+    "message": "Kubernetes secret manifest has no data or stringData, one of these must be specified"
+  },
+  {
+    "code": 800,
+    "message": "failed to stage aws terraform objects"
+  },
+  {
+    "code": 801,
+    "message": "failed to stage azure terraform objects"
+  },
+  {
+    "code": 802,
+    "message": "failed to stage gcp terraform objects"
+  },
+  {
+    "code": 803,
+    "message": "'GOOGLE_CREDENTIALS' env var is not set during terraform staging"
+  },
+  {
+    "code": 804,
+    "message": "'GOOGLE_CREDENTIALS' env var is set to placeholder during terraform staging"
+  },
+  {
+    "code": 805,
+    "message": "failed to parse 'GOOGLE_CREDENTIALS' JSON Key env var during terraform staging"
+  },
+  {
+    "code": 900,
+    "message": "cndi-config does not have 'project_name'"
+  },
+  {
+    "code": 901,
+    "message": "cndi-config does not have 'infrastructure'"
+  },
+  {
+    "code": 902,
+    "message": "cndi-config does not have any 'infrastructure.nodes'"
+  },
+  {
+    "code": 903,
+    "message": "cndi-config contains at least one node without a 'kind'"
+  },
+  {
+    "code": 904,
+    "message": "cndi-config contains multiple node 'kind's"
+  },
+  {
+    "code": 905,
+    "message": "cndi-config contains at least one node with a missing 'name'"
+  },
+  {
+    "code": 906,
+    "message": "cndi-config contains more than one node with the same 'name'"
+  },
+  {
+    "code": 907,
+    "message": "cndi-config does not have exactly 1 node with role 'leader'"
+  },
+  {
+    "code": 1000,
+    "message": "failed to decrypt tf state, 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
+  },
+  {
+    "code": 1001,
+    "message": "failed to read tf state, executed outside of a git repository"
+  },
+  {
+    "code": 1002,
+    "message": "failed to read tf state, your repo must have atleast 1 commit"
+  },
+  {
+    "code": 1003,
+    "message": "failed to read tf state, your branch must be clean before executing"
+  },
+  {
+    "code": 1004,
+    "message": "failed to read tf state, 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+  },
+  {
+    "code": 1005,
+    "message": "failed to write tf state, executed outside of a git repository"
+  },
+  {
+    "code": 1006,
+    "message": "failed to write tf state, your branch must be clean before executing"
+  },
+  {
+    "code": 1007,
+    "message": "failed to write tf state, JSON failed to parse"
+  },
+  {
+    "code": 1008,
+    "message": "failed to write tf state 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+  }
+]

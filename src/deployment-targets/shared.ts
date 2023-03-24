@@ -9,6 +9,7 @@ import {
 import { getAWSEnvLines } from "src/deployment-targets/aws.ts";
 import { getGCPEnvLines } from "src/deployment-targets/gcp.ts";
 import { getAzureEnvLines } from "src/deployment-targets/azure.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const deploymentTargetsSharedLabel = ccolors.faded(
   "\nsrc/deployment-targets/shared.ts:",
@@ -60,15 +61,25 @@ const getCoreEnvLines = async (
   const TERRAFORM_STATE_PASSPHRASE = terraformStatePassphrase;
   const ARGO_UI_ADMIN_PASSWORD = argoUIAdminPassword;
 
+  if (!ARGO_UI_ADMIN_PASSWORD) {
+    console.log(
+      deploymentTargetsSharedLabel,
+      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.error(`is not set in environment`),
+    );
+    await emitExitEvent(603);
+    Deno.exit(603);
+  }
+
   if (!sealedSecretsKeys) {
     console.log(
       ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
       ccolors.error(`and/or`),
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error(`are not present in environment`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(604);
+    Deno.exit(604);
   }
 
   if (!TERRAFORM_STATE_PASSPHRASE) {
@@ -76,19 +87,9 @@ const getCoreEnvLines = async (
       deploymentTargetsSharedLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       ccolors.error(`is not set in environment`),
-      "\n",
     );
-    Deno.exit(1);
-  }
-
-  if (!ARGO_UI_ADMIN_PASSWORD) {
-    console.log(
-      deploymentTargetsSharedLabel,
-      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
-      ccolors.error(`is not set in environment`),
-      "\n",
-    );
-    Deno.exit(1);
+    await emitExitEvent(605);
+    Deno.exit(605);
   }
 
   const coreEnvLines: EnvLines = [
@@ -126,9 +127,9 @@ const getCoreEnvLines = async (
         ccolors.key_name(`"kind"`),
         ccolors.user_input(`"${deploymentTarget}"`),
         ccolors.error(`is not yet supported`),
-        "\n",
       );
-      Deno.exit(1);
+      await emitExitEvent(606);
+      Deno.exit(606);
   }
 };
 

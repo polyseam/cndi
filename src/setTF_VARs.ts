@@ -1,17 +1,17 @@
 import { ccolors } from "deps";
-
+import { emitExitEvent } from "src/utils.ts";
 const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
-export default function setTF_VARs() {
+export default async function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
   if (!git_username) {
     console.error(
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_USERNAME"`),
       "env var is not set",
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(100);
+    Deno.exit(100);
   }
 
   const git_password = Deno.env.get("GIT_PASSWORD");
@@ -20,9 +20,9 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_PASSWORD"`),
       ccolors.error("env var is not set"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(101);
+    Deno.exit(101);
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
@@ -31,9 +31,9 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_REPO"`),
       ccolors.error("env var is not set"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(102);
+    Deno.exit(102);
   }
 
   const argo_ui_admin_password = Deno.env.get("ARGO_UI_ADMIN_PASSWORD");
@@ -42,9 +42,9 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
       ccolors.error("env var is not set"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(103);
+    Deno.exit(103);
   }
 
   const sealed_secrets_private_key = Deno.env
@@ -56,9 +56,9 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
       ccolors.error("env var is not set"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(104);
+    Deno.exit(104);
   }
 
   const sealed_secrets_public_key = Deno.env
@@ -70,9 +70,9 @@ export default function setTF_VARs() {
       setTF_VARsLabel,
       ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
       ccolors.error("env var is not set"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(105);
+    Deno.exit(105);
   }
 
   Deno.env.set("TF_VAR_git_username", git_username);

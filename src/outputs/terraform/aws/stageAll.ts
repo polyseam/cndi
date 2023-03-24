@@ -1,7 +1,11 @@
 import { ccolors, path } from "deps";
 
 import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import { getLeaderNodeNameFromConfig, stageFile } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getLeaderNodeNameFromConfig,
+  stageFile,
+} from "src/utils.ts";
 
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
@@ -180,7 +184,8 @@ export default async function stageTerraformResourcesForAWS(
     ]);
   } catch (e) {
     console.error(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e), "\n");
-    Deno.exit(1);
+    console.log(ccolors.caught(e));
+    await emitExitEvent(800);
+    Deno.exit(800);
   }
 }

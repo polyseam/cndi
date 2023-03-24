@@ -1,6 +1,10 @@
 import { ccolors } from "deps";
 import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
-import { getPathToKubesealBinary, getPrettyJSONString } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getPathToKubesealBinary,
+  getPrettyJSONString,
+} from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
@@ -9,10 +13,10 @@ const sealedSecretManifestLabel = ccolors.faded(
   "\nsrc/outputs/sealed-secret-manifest.ts:",
 );
 
-const parseCndiSecret = (
+const parseCndiSecret = async (
   inputSecret: KubernetesSecret,
   dotEnvPath: string,
-): KubernetesSecretWithStringData => {
+): Promise<KubernetesSecretWithStringData> => {
   // convert secret.data to secret.stringData
   const outputSecret = {
     stringData: {},
@@ -25,7 +29,7 @@ const parseCndiSecret = (
 
   // this block is specifically for a secret that does not use the stringData field and instead uses base64 encoded data
   if (inputSecret.data) {
-    Object.entries(inputSecret.data).forEach((dataEntry) => {
+    for (const dataEntry of Object.entries(inputSecret.data)) {
       const [dataEntryKey, dataEntryValue] = dataEntry;
 
       // if we recognize our special token we use the value from the environment
@@ -79,16 +83,16 @@ const parseCndiSecret = (
           ccolors.key_name(
             `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
           ),
-          "\n",
         );
-        Deno.exit(1);
+        await emitExitEvent(700);
+        Deno.exit(700);
       }
-    });
+    }
 
     // This block is specifically for a secret that uses the stringData field instead of base64 encoded data
     // we basically do the same thing as above, but we don't need to decode the secret value
   } else if (inputSecret.stringData) {
-    Object.entries(inputSecret.stringData).forEach((dataEntry) => {
+    for (const dataEntry of Object.entries(inputSecret.stringData)) {
       const [dataEntryKey, dataEntryValue] = dataEntry;
 
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
@@ -132,11 +136,11 @@ const parseCndiSecret = (
           ccolors.key_name(
             `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
-          "\n",
         );
-        Deno.exit(1);
+        await emitExitEvent(701);
+        Deno.exit(701);
       }
-    });
+    }
   } else {
     console.error(
       sealedSecretManifestLabel,
@@ -145,9 +149,9 @@ const parseCndiSecret = (
       ),
       ccolors.key_name(`"${inputSecret.metadata.name}"`),
       ccolors.error("has no data or stringData"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(702);
+    Deno.exit(702);
   }
   delete outputSecret.data;
   return outputSecret;
@@ -189,7 +193,7 @@ const getSealedSecretManifest = async (
   let sealed = "";
   const pathToKubeseal = await getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
-  const secretWithStringData = parseCndiSecret(secret, dotEnvPath);
+  const secretWithStringData = await parseCndiSecret(secret, dotEnvPath);
 
   // if the secret is just a placeholder we don't want to seal it
   if (secretWithStringData.isPlaceholder) {

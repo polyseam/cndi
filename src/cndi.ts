@@ -15,12 +15,15 @@ import deno_json from "../deno.json" assert { type: "json" };
 import { ccolors, KUBESEAL_VERSION, TERRAFORM_VERSION } from "src/deps.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
+
 export default async function cndi() {
   if (!deno_json?.version) {
     throw new Error("deno.json is missing a version");
   }
+
   const CNDI_VERSION = `${deno_json?.version}`;
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const timestamp = `${Date.now()}`;
@@ -43,7 +46,8 @@ export default async function cndi() {
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
     );
-    console.log(ccolors.caught(failedToCreateStagingDirectoryError), "\n");
+    console.log(ccolors.caught(failedToCreateStagingDirectoryError));
+    await emitExitEvent(1);
     Deno.exit(1);
   }
 

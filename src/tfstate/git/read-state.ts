@@ -1,6 +1,7 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import decrypt from "src/tfstate/decrypt.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 
@@ -21,9 +22,9 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.user_input(`"${cmd}"`),
       ccolors.error("must be executed inside a git repository"),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1001);
+    Deno.exit(1001);
   }
 
   await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
@@ -38,9 +39,9 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.error("you must make a commit on your branch before running"),
       ccolors.user_input(`"${cmd}"`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1002);
+    Deno.exit(1002);
   }
 
   // we can't have any uncommitted changes
@@ -51,9 +52,9 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.error("your branch must be clean before running"),
       ccolors.user_input(`"${cmd}"`),
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1003);
+    Deno.exit(1003);
   }
 
   try {
@@ -84,15 +85,15 @@ export default async function pullStateForRun({
       gitReadStateLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
       "is not set in your environment",
-      "\n",
     );
-    Deno.exit(1);
+    await emitExitEvent(1004);
+    Deno.exit(1004);
   }
 
   await git.checkout(originalBranch);
 
   if (state) {
-    const decryptedState = decrypt(state, secret);
+    const decryptedState = await decrypt(state, secret);
     Deno.writeTextFileSync(
       path.join(pathToTerraformResources, "terraform.tfstate"),
       decryptedState,
