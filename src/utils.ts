@@ -393,10 +393,10 @@ function getSecretOfLength(len = 32): string {
 }
 
 async function emitExitEvent(exit_code: number) {
-  console.log();
-  const event_id = await emitTelemetryEvent("command_exit", { exit_code });
+  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-  if (isDebug) console.log("event_id", event_id);
+  if (isDebug) console.log("\nevent_uuid", event_uuid);
+  console.log();
 }
 
 export {

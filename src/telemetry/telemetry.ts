@@ -4,7 +4,7 @@ import { sha256Digest } from "src/utils.ts";
 interface TelemetryEvent {
   eventName: string;
   cndi_binary_version: string;
-  repoId: string;
+  repo_id: string;
   repo_url?: string;
   debug: boolean;
   command: string;
@@ -21,12 +21,12 @@ export default async function emitTelemetryEvent(
   if (telemetryMode === "none") return;
 
   const repo_url = Deno.env.get("GIT_REPO") || "";
-  const repoId = await sha256Digest(repo_url);
+  const repo_id = repo_url ? await sha256Digest(repo_url) : "";
 
   const telemetryEvent = {
     eventName,
     cndi_binary_version: deno_json?.version,
-    repoId,
+    repo_id,
     ...eventData,
   } as TelemetryEvent;
 
