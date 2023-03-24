@@ -133,7 +133,8 @@ const initCommand = new Command()
       : true;
 
     if (!shouldContinue) {
-      Deno.exit(0);
+      console.log();
+      Deno.exit(0); // this event isn't handled by telemetry, it's just not very interesting
     }
 
     const templateNamesList: string[] = getKnownTemplates().map((t) => t.name);
