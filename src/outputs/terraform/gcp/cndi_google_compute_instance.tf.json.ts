@@ -1,15 +1,9 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { GCPNodeItemSpec } from "src/types.ts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
-  config: CNDIConfig,
 ): string {
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const { name, role } = node;
   const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const machine_type = node?.machine_type || node?.instance_type ||
@@ -24,7 +18,7 @@ export default function getGCPComputeInstanceTFJSON(
   const source =
     `\${google_compute_disk.cndi_google_compute_disk_${name}.self_link}`;
   const leaderComputeInstance =
-    `google_compute_instance.cndi_google_compute_instance_${leaderNodeName}`;
+    "google_compute_instance.cndi_google_compute_instance_${local.leader_node_name}";
   const boot_disk = [
     {
       source,

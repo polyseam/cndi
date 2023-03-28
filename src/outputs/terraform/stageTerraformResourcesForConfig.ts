@@ -1,6 +1,10 @@
 import { path } from "deps";
 import { CNDIConfig } from "src/types.ts";
-import { patchAndStageTerraformFilesWithConfig, stageFile } from "src/utils.ts";
+import {
+  getLeaderNodeNameFromConfig,
+  patchAndStageTerraformFilesWithConfig,
+  stageFile,
+} from "src/utils.ts";
 import stageTerraformResourcesForAWS from "src/outputs/terraform/aws/stageAll.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
@@ -17,6 +21,8 @@ export default async function stageTerraformResourcesForConfig(
   options: { output: string; initializing: boolean },
 ) {
   const cndi_project_name = config.project_name!;
+
+  const leader_node_name = await getLeaderNodeNameFromConfig(config);
 
   const kind = config.infrastructure.cndi.nodes[0].kind;
   switch (kind) {
@@ -39,7 +45,7 @@ export default async function stageTerraformResourcesForConfig(
     // add global locals
     stageFile(
       path.join("cndi", "terraform", "global.locals.tf.json"),
-      global_locals({ cndi_project_name }),
+      global_locals({ cndi_project_name, leader_node_name }),
     ),
     // write the microk8s join token generator
     stageFile(

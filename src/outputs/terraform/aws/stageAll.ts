@@ -1,11 +1,7 @@
 import { ccolors, path } from "deps";
 
 import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import {
-  emitExitEvent,
-  getLeaderNodeNameFromConfig,
-  stageFile,
-} from "src/utils.ts";
+import { emitExitEvent, stageFile } from "src/utils.ts";
 
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
@@ -31,9 +27,8 @@ export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
-  const leaderName = getLeaderNodeNameFromConfig(config);
   const leader_node_ip =
-    `\${aws_instance.cndi_aws_instance_${leaderName}.private_ip}`;
+    "aws_instance.cndi_aws_instance_${local.leader_node_name}.private_ip";
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -42,7 +37,7 @@ export default async function stageTerraformResourcesForAWS(
         "terraform",
         `cndi_aws_instance_${node.name}.tf.json`,
       ),
-      cndi_aws_instance(node, config),
+      cndi_aws_instance(node),
     )
   );
 

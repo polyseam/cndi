@@ -1,11 +1,7 @@
 import { ccolors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
-import {
-  emitExitEvent,
-  getLeaderNodeNameFromConfig,
-  stageFile,
-} from "src/utils.ts";
+import { emitExitEvent, stageFile } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -32,10 +28,8 @@ export default async function stageTerraformResourcesForAzure(
 ) {
   const azure_location = (Deno.env.get("ARM_REGION") as string) || "eastus";
 
-  const leaderName = getLeaderNodeNameFromConfig(config);
-
   const leader_node_ip =
-    `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderName}.private_ip_address}`;
+    "azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${local.leader_node_name}.private_ip_address";
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -44,7 +38,7 @@ export default async function stageTerraformResourcesForAzure(
         "terraform",
         `cndi_azurerm_linux_virtual_machine_${node.name}.tf.json`,
       ),
-      cndi_azurerm_linux_virtual_machine(node, config),
+      cndi_azurerm_linux_virtual_machine(node),
     )
   );
 

@@ -1,11 +1,7 @@
 import { ccolors, path } from "deps";
 
 import { CNDIConfig } from "src/types.ts";
-import {
-  emitExitEvent,
-  getLeaderNodeNameFromConfig,
-  stageFile,
-} from "src/utils.ts";
+import { emitExitEvent, stageFile } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -38,10 +34,8 @@ export default async function stageTerraformResourcesForGCP(
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
 
-  const leaderName = getLeaderNodeNameFromConfig(config);
-
   const leader_node_ip =
-    `\${google_compute_instance.cndi_google_compute_instance_${leaderName}.network_interface.0.network_ip}`;
+    "google_compute_instance.cndi_google_compute_instance_${local.leader_node_name}.network_interface.0.network_ip";
 
   if (!googleCredentials) {
     console.error(
@@ -107,7 +101,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
-      cndi_google_compute_instance(node, config),
+      cndi_google_compute_instance(node),
     )
   );
 

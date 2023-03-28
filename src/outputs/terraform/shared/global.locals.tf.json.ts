@@ -1,11 +1,17 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getVariablesTFJSON(
-  { cndi_project_name }: { cndi_project_name: string },
+type GetLocalsTFJSONArgs = {
+  cndi_project_name: string;
+  leader_node_name: string;
+};
+
+export default function getLocalsTFJSON(
+  { cndi_project_name, leader_node_name }: GetLocalsTFJSONArgs,
 ): string {
   return getPrettyJSONString({
     locals: {
       cndi_project_name,
+      leader_node_name,
     },
   });
 }

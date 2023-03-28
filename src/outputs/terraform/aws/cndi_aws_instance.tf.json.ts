@@ -1,16 +1,10 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { AWSNodeItemSpec } from "src/types.ts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSNodeItemSpec,
-  config: CNDIConfig,
 ): string {
   const { name, role } = node;
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const DEFAULT_VOLUME_SIZE = 100;
@@ -33,7 +27,8 @@ export default function getAWSComputeInstanceTFJSON(
       delete_on_termination,
     },
   ];
-  const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
+  const leaderAWSInstance =
+    "aws_instance.cndi_aws_instance_${local.leader_node_name}";
   const leader_user_data =
     '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${var.sealed_secrets_private_key}", "sealed_secrets_public_key": "${var.sealed_secrets_public_key}", "argo_ui_admin_password": "${var.argo_ui_admin_password}" })}';
   const controller_user_data =

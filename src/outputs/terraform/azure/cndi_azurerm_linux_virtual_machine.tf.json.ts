@@ -1,15 +1,9 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { AzureNodeItemSpec, CNDIConfig } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { AzureNodeItemSpec } from "src/types.ts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
-  config: CNDIConfig,
 ): string {
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const { name, role } = node;
   const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
@@ -19,7 +13,7 @@ export default function getAzureComputeInstanceTFJSON(
     DEFAULT_MACHINE_TYPE;
   let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
   const leaderComputeInstance =
-    `azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}`;
+    "azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${local.leader_node_name}";
   if (node?.size && typeof node.size === "string") {
     machine_type = node.size;
   }

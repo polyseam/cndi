@@ -38,11 +38,24 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
-function getLeaderNodeNameFromConfig(config: CNDIConfig): string | undefined {
+async function getLeaderNodeNameFromConfig(
+  config: CNDIConfig,
+): Promise<string> {
   const leaderNode = config.infrastructure.cndi.nodes.find(
     (node: BaseNodeItemSpec) => node.role === "leader",
   );
-  return leaderNode?.name;
+
+  if (!leaderNode) {
+    await emitExitEvent(200);
+    Deno.exit(200);
+  }
+
+  if (!leaderNode?.name) {
+    await emitExitEvent(201);
+    Deno.exit(201);
+  }
+
+  return leaderNode.name;
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
