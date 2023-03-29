@@ -73,19 +73,19 @@ export default function getReadmeForProject({
       "[Azure Portal](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Compute%2FVirtualMachines)",
   };
 
+  const linkToLoadBalancers = {
+    aws:
+      "[AWS Load Balancers Page](https://console.aws.amazon.com/ec2/v2/home?#LoadBalancers)",
+    gcp:
+      "[GCP Load Balancers Page](https://console.cloud.google.com/net-services/loadbalancing)",
+    azure:
+      "[Azure Load Balancers Page](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Network%2FloadBalancers)",
+  };
+
   const loggingIntoArgoCDSection = `
 ### logging into argocd
 
-When the \`cndi run\` command is finished, you should have a leader vm spinning up in the ${
-    linkToDashboards[deploymentTarget]
-  }, by connecting to this node you should be able to get the new [ArgoCD](https://argo-cd.readthedocs.io) password.
-
-\`\`\`bash
-# print the argocd default admin password by running this on the controller node in EC2
-microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" --insecure-skip-tls-verify| base64 -d; echo
-\`\`\`
-
-Now to login to ArgoCD you can visit that controller's public IP address, and login with the username \`"admin"\` and the password you just printed.
+Once your cluster is deployed, you can log into ArgoCD to see the status of your cluster. This can be done by logging into the ArgoCD UI with the username "admin" and the password that has been set for you in the [.env](/.env) file as \`ARGOCD_ADMIN_PASSWORD\` at the domain name you configured for Argo's ingress above.
 `.trim();
 
   const readmeSectionsForDeploymentTarget = {
@@ -93,30 +93,36 @@ Now to login to ArgoCD you can visit that controller's public IP address, and lo
 ## aws
 
 This cluster will be deployed on [Amazon Web Services](https://aws.com).
-When your cluster is initialized the next step is to go to your domain registrar and create an CNAME record for your Airflow instance, and another for ArgoCD.
-Both entries should point to the single load balancer that was created for your cluster.
+When your cluster is initialized the next step is to go to your domain registrar and create an CNAME record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.aws}.
+
+You can visit the ${linkToDashboards.aws} to see the status of the nodes that make up your cluster.
 `.trim(),
     gcp: `
 ## gcp
 
 This cluster will be deployed on [Google Cloud Platform](https://cloud.google.com/gcp).
-When your cluster is initialized the next step is to go to your domain registrar and create an A record for your Airflow instance, and another for ArgoCD.
-Both entries should point to the single load balancer that was created for your cluster.
+When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.gcp}.
+
+You can visit the ${linkToDashboards.gcp} to see the status of the nodes that make up your cluster.
 `.trim(),
     azure: `
 ## azure
 
 This cluster will be deployed on [Microsoft Azure](https://azure.microsoft.com/en-ca/).
-When your cluster is initialized the next step is to go to your domain registrar and create an A record for your Airflow instance, and another for ArgoCD.
-Both entries should point to the single load balancer that was created for your cluster.
+When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.azure}.
+
+You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
 `.trim(),
   };
 
   const readmeContent = [
     `# ${project_name || "my-cndi-project"}`,
     coreReadmeSection,
-    loggingIntoArgoCDSection,
     readmeSectionsForDeploymentTarget[deploymentTarget],
+    loggingIntoArgoCDSection,
   ].join("\n\n");
 
   return readmeContent;
