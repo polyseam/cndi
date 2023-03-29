@@ -129,6 +129,7 @@ When all of the values have been set, we want to use the
 environment variables to GitHub.
 
 ```bash
+# cndi requires version 2.23.0 or later of the GitHub CLI
 gh secret set -f .env
 ```
 
