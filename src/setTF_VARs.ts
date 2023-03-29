@@ -36,11 +36,11 @@ export default async function setTF_VARs() {
     Deno.exit(102);
   }
 
-  const argo_ui_admin_password = Deno.env.get("ARGO_UI_ADMIN_PASSWORD");
-  if (!argo_ui_admin_password) {
+  const argocd_admin_password = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
+  if (!argocd_admin_password) {
     console.error(
       setTF_VARsLabel,
-      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
       ccolors.error("env var is not set"),
     );
     await emitExitEvent(103);
@@ -78,7 +78,7 @@ export default async function setTF_VARs() {
   Deno.env.set("TF_VAR_git_username", git_username);
   Deno.env.set("TF_VAR_git_password", git_password);
   Deno.env.set("TF_VAR_git_repo", git_repo);
-  Deno.env.set("TF_VAR_argo_ui_admin_password", argo_ui_admin_password);
+  Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
   Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);
   Deno.env.set("TF_VAR_sealed_secrets_private_key", sealed_secrets_private_key);
 }

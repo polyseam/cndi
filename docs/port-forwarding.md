@@ -109,4 +109,4 @@ eg: `http://127.0.0.1:50445`
 
 You should now see a login page for argo, and a place to enter a username and
 password. The username is `admin` and the password is available in the `.env`
-file we created for you under the key `ARGO_UI_ADMIN_PASSWORD`.
+file we created for you under the key `ARGOCD_ADMIN_PASSWORD`.
