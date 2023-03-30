@@ -71,7 +71,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.letsEncryptClusterIssuerEmailAddress",
+              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -104,13 +104,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.argocdDomainName"],
+                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.argocdDomainName",
+                "host": "$.cndi.prompts.responses.argocdDomainName",
                 "http": {
                   "paths": [
                     {
@@ -142,7 +142,7 @@
             "dags": {
               "gitSync": {
                 "enabled": true,
-                "repo": "$.cndi.prompts.dagRepoUrl",
+                "repo": "$.cndi.prompts.responses.dagRepoUrl",
                 "credentialsSecret": "airflow-git-credentials",
                 "branch": "main",
                 "wait": 40,
@@ -154,7 +154,7 @@
                 "expose_config": "True",
                 "instance_name": "Polyseam",
                 "enable_proxy_fix": "True",
-                "base_url": "https://$.cndi.prompts.airflowDomainName"
+                "base_url": "https://$.cndi.prompts.responses.airflowDomainName"
               },
               "operators": {
                 "default_owner": "Polyseam"
@@ -168,7 +168,7 @@
                 },
                 "hosts": [
                   {
-                    "name": "$.cndi.prompts.airflowDomainName",
+                    "name": "$.cndi.prompts.responses.airflowDomainName",
                     "tls": {
                       "secretName": "lets-encrypt-private-key",
                       "enabled": true

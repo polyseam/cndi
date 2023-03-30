@@ -91,7 +91,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   if (!argoUIAdminPassword) {
     console.error(
       owLabel,
-      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
       ccolors.error(`is not set in environment`),
     );
     await emitExitEvent(502);

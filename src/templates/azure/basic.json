@@ -46,7 +46,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.letsEncryptClusterIssuerEmailAddress",
+              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -79,13 +79,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.argocdDomainName"],
+                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.argocdDomainName",
+                "host": "$.cndi.prompts.responses.argocdDomainName",
                 "http": {
                   "paths": [
                     {

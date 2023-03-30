@@ -138,7 +138,7 @@ EOF
 echo "argo configured"
 echo "patching argocd-secret"
 
-sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\\"stringData\\": {\\"admin.password\\":\\"$(htpasswd -bnBC 10 \"\" \${argo_ui_admin_password} | tr -d ':\\n')\\",\\"admin.passwordMtime\\": \\"$(date +%FT%T%Z)\\"}}"
+sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\\"stringData\\": {\\"admin.password\\":\\"$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')\\",\\"admin.passwordMtime\\": \\"$(date +%FT%T%Z)\\"}}"
 
 echo "leader bootstrap complete"
 

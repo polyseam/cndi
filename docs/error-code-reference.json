@@ -17,7 +17,7 @@
   },
   {
     "code": 103,
-    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set for terraform"
+    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set for terraform"
   },
   {
     "code": 104,
@@ -77,7 +77,7 @@
   },
   {
     "code": 502,
-    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set during overwrite"
+    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set during overwrite"
   },
   {
     "code": 503,
@@ -101,7 +101,7 @@
   },
   {
     "code": 603,
-    "message": "'ARGO_UI_ADMIN_PASSWORD' env var is not set during initialization"
+    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set during initialization"
   },
   {
     "code": 604,

@@ -158,7 +158,7 @@ export default async function useTemplate(
   );
 
   for (const [key, value] of Object.entries(cndiConfigValues)) {
-    const stringToReplace = `$.cndi.prompts.${key}`;
+    const stringToReplace = `$.cndi.prompts.responses.${key}`;
     cndiConfigStringified = cndiConfigStringified.replaceAll(
       stringToReplace,
       `${value}`,

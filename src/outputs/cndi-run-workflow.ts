@@ -42,7 +42,7 @@ const cndiWorkflowObj = {
               "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
             SEALED_SECRETS_PUBLIC_KEY:
               "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
-            ARGO_UI_ADMIN_PASSWORD: "${{ secrets.ARGO_UI_ADMIN_PASSWORD }}",
+            ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
             AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
             AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
             AWS_REGION: "${{ secrets.AWS_REGION }}",
