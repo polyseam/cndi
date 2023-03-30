@@ -436,8 +436,8 @@ and `"GIT_PASSWORD"`, into the destination secret key names
         "namespace": "airflow"
       },
       "stringData": {
-        "GIT_SYNC_USERNAME": "$.cndi.secrets.GIT_USERNAME",
-        "GIT_SYNC_PASSWORD": "$.cndi.secrets.GIT_PASSWORD"
+        "GIT_SYNC_USERNAME": "$.cndi.secrets.seal(GIT_USERNAME)",
+        "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_PASSWORD)"
       }
     }
   }

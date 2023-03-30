@@ -6,7 +6,7 @@ import {
   getPrettyJSONString,
 } from "src/utils.ts";
 
-const CNDI_SECRETS_PREFIX = "$.cndi.secrets.";
+const CNDI_SECRETS_PREFIX = "$.cndi.secrets.seal(";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
 const sealedSecretManifestLabel = ccolors.faded(
@@ -34,7 +34,8 @@ const parseCndiSecret = async (
 
       // if we recognize our special token we use the value from the environment
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
-        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "");
+        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
+          .replace(")", "");
         const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
 
@@ -96,7 +97,8 @@ const parseCndiSecret = async (
       const [dataEntryKey, dataEntryValue] = dataEntry;
 
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
-        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "");
+        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
+          .replace(")", "");
         const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
 
@@ -131,7 +133,7 @@ const parseCndiSecret = async (
         console.error(
           sealedSecretManifestLabel,
           ccolors.error("Secret string literals are not supported\nUse"),
-          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
+          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
           ccolors.error("prefix to reference environment variables at"),
           ccolors.key_name(
             `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
