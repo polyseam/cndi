@@ -17,19 +17,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Test
-        run: deno task test
 
       - name: Get version from deno.json
-        uses: polyseam/get-version-from-package-json@v.1.0.0
+        uses: polyseam/get-version-key-from-json@v1.0.0
         id: get_deno_json
         with:
-          path-to-file: './deno.json'
+          path-to-json: './deno.json'
       
       - name: Compare Git Tag to CNDI Version
         if: ${{ steps.get_deno_json.outputs.version != github.ref_name }}
         run: | 
           echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ github.ref_name }}" && exit 1
+
+
+      - name: Test
+        run: deno task test
 
       - name: Build
         run: deno task build
