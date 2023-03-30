@@ -21,7 +21,7 @@ export default function getVariablesTFJSON(): string {
           type: "string",
         },
       ],
-      argo_ui_admin_password: [
+      argocd_admin_password: [
         {
           description: "password for accessing the argo ui",
           type: "string",

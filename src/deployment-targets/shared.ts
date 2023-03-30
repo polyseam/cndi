@@ -59,12 +59,12 @@ const getCoreEnvLines = async (
     : GIT_REPO;
 
   const TERRAFORM_STATE_PASSPHRASE = terraformStatePassphrase;
-  const ARGO_UI_ADMIN_PASSWORD = argoUIAdminPassword;
+  const ARGOCD_ADMIN_PASSWORD = argoUIAdminPassword;
 
-  if (!ARGO_UI_ADMIN_PASSWORD) {
+  if (!ARGOCD_ADMIN_PASSWORD) {
     console.log(
       deploymentTargetsSharedLabel,
-      ccolors.key_name(`"ARGO_UI_ADMIN_PASSWORD"`),
+      ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
       ccolors.error(`is not set in environment`),
     );
     await emitExitEvent(603);
@@ -106,7 +106,7 @@ const getCoreEnvLines = async (
       },
     },
     { comment: "ArgoCD" },
-    { value: { ARGO_UI_ADMIN_PASSWORD } },
+    { value: { ARGOCD_ADMIN_PASSWORD } },
     { comment: "Passphrase for encrypting/decrypting terraform state" },
     { value: { TERRAFORM_STATE_PASSPHRASE } },
     { comment: "git credentials" },

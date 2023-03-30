@@ -51,7 +51,7 @@ const destroyCommand = new Command()
     { required: true },
   )
   .env(
-    "ARGO_UI_ADMIN_PASSWORD=<value:string>",
+    "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
     { required: true },
   )
