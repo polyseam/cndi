@@ -67,6 +67,12 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         upgradeLabel,
         ccolors.error(`\nfailed to upgrade ${name}, please try again`),
       );
+      console.log(
+        "if you are still having issues, you can update the cndi binary manually here:",
+      );
+      console.log(
+        ccolors.key_name("https://github.com/polyseam/cndi#installation-"),
+      );
       console.log(ccolors.caught(upgradeError));
     }
   }
