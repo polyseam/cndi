@@ -32,10 +32,10 @@ export default async function stageTerraformResourcesForAzure(
 ) {
   const azure_location = (Deno.env.get("ARM_REGION") as string) || "eastus";
 
-  const leaderName = getLeaderNodeNameFromConfig(config);
+  const leaderNodeName = await getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
-    `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderName}.private_ip_address}`;
+    `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}.private_ip_address}`;
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -44,7 +44,7 @@ export default async function stageTerraformResourcesForAzure(
         "terraform",
         `cndi_azurerm_linux_virtual_machine_${node.name}.tf.json`,
       ),
-      cndi_azurerm_linux_virtual_machine(node, config),
+      cndi_azurerm_linux_virtual_machine(node, leaderNodeName),
     )
   );
 

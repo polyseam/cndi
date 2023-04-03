@@ -1,15 +1,10 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { GCPNodeItemSpec } from "src/types.ts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
-  config: CNDIConfig,
+  leaderNodeName: string,
 ): string {
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const { name, role } = node;
   const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const machine_type = node?.machine_type || node?.instance_type ||
