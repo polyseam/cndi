@@ -31,9 +31,9 @@ export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
-  const leaderName = getLeaderNodeNameFromConfig(config);
+  const leaderNodeName = await getLeaderNodeNameFromConfig(config);
   const leader_node_ip =
-    `\${aws_instance.cndi_aws_instance_${leaderName}.private_ip}`;
+    `\${aws_instance.cndi_aws_instance_${leaderNodeName}.private_ip}`;
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -42,7 +42,7 @@ export default async function stageTerraformResourcesForAWS(
         "terraform",
         `cndi_aws_instance_${node.name}.tf.json`,
       ),
-      cndi_aws_instance(node, config),
+      cndi_aws_instance(node, leaderNodeName),
     )
   );
 

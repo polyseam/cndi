@@ -1,16 +1,11 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { AWSNodeItemSpec } from "src/types.ts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSNodeItemSpec,
-  config: CNDIConfig,
+  leaderNodeName: string,
 ): string {
   const { name, role } = node;
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const DEFAULT_AMI = "ami-0c1704bac156af62c";
   const DEFAULT_INSTANCE_TYPE = "m5a.large";
   const DEFAULT_VOLUME_SIZE = 100;

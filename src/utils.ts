@@ -38,11 +38,28 @@ function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
 }
 
-function getLeaderNodeNameFromConfig(config: CNDIConfig): string | undefined {
-  const leaderNode = config.infrastructure.cndi.nodes.find(
+async function getLeaderNodeNameFromConfig(
+  config: CNDIConfig,
+): Promise<string> {
+  const nodesWithRoleLeader = config.infrastructure.cndi.nodes.filter(
     (node: BaseNodeItemSpec) => node.role === "leader",
   );
-  return leaderNode?.name;
+  if (nodesWithRoleLeader.length !== 1) {
+    console.error(
+      utilsLabel,
+      ccolors.error("cndi-config exists"),
+      ccolors.error("but it does not have exactly 1"),
+      ccolors.key_name('"infrastructure.cndi.nodes"'),
+      ccolors.error("entry where"),
+      ccolors.key_name('"role"'),
+      ccolors.error("is"),
+      ccolors.key_name('"leader".'),
+      ccolors.error("There must be exactly one leader node."),
+    );
+    await emitExitEvent(200);
+    Deno.exit(200);
+  }
+  return nodesWithRoleLeader[0].name;
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {

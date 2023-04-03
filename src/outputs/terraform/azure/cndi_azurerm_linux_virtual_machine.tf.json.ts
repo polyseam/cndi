@@ -1,15 +1,10 @@
-import {
-  getLeaderNodeNameFromConfig,
-  getPrettyJSONString,
-  getTFResource,
-} from "src/utils.ts";
-import { AzureNodeItemSpec, CNDIConfig } from "src/types.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { AzureNodeItemSpec } from "src/types.ts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
-  config: CNDIConfig,
+  leaderNodeName: string,
 ): string {
-  const leaderNodeName = getLeaderNodeNameFromConfig(config);
   const { name, role } = node;
   const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
   const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
