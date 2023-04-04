@@ -1,4 +1,13 @@
-import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+import {
+  ccolors,
+  deepMerge,
+  DEFAULT_INSTANCE_TYPES,
+  homedir,
+  JSONC,
+  path,
+  platform,
+  walk,
+} from "deps";
 
 import {
   BaseNodeItemSpec,
@@ -386,11 +395,11 @@ async function getDefaultVmTypeForKind(
   switch (kind) {
     // most recent 4vCPU/16GiB Ram VMs
     case NODE_KIND.aws:
-      return ["instance_type", "m5a.large"];
+      return ["instance_type", DEFAULT_INSTANCE_TYPES.aws];
     case NODE_KIND.gcp:
-      return ["machine_type", "n2-standard-2"];
+      return ["machine_type", DEFAULT_INSTANCE_TYPES.gcp];
     case NODE_KIND.azure:
-      return ["machine_type", "Standard_D4s_v3"];
+      return ["machine_type", DEFAULT_INSTANCE_TYPES.azure];
     default:
       console.log("Unknown kind: " + kind);
       await emitExitEvent(205);

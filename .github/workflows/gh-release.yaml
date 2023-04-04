@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Deno 
+      - name: Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
@@ -17,18 +17,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-
       - name: Get version from deno.json
         uses: polyseam/get-version-key-from-json@v1.0.0
         id: get_deno_json
         with:
-          path-to-json: './deno.json'
-      
-      - name: Compare Git Tag to CNDI Version
-        if: ${{ steps.get_deno_json.outputs.version != github.ref_name }}
-        run: | 
-          echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ github.ref_name }}" && exit 1
+          path-to-json: "./deno.json"
 
+      - name: Get the tag version without prefix
+        id: get_version_from_ref
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
+
+      - name: Compare Git Tag to CNDI Version
+        if: ${{ steps.get_deno_json.outputs.version != steps.get_version_from_ref.outputs.VERSION }}
+        run: |
+          echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ steps.get_version_from_ref.outputs.VERSION }}" && exit 1
 
       - name: Test
         run: deno task test

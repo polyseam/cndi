@@ -1,5 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { AWSNodeItemSpec } from "src/types.ts";
+import { DEFAULT_INSTANCE_TYPES } from "deps";
 
 interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
   [ec2_inst_type: string]: Array<{
@@ -30,7 +31,7 @@ export default function getAWSDataTFJSON(
 
   nodes.forEach((entry) => {
     const instance_type = entry?.instance_type || entry?.machine_type ||
-      "t3.large";
+      DEFAULT_INSTANCE_TYPES.aws;
     const azKey = `available_az_for_${entry.name}_instance_type`;
 
     data[0].aws_ec2_instance_type_offerings[0][
