@@ -66,6 +66,11 @@ function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   return config.infrastructure.cndi.nodes[0].kind;
 }
 
+function getTFResourceName (resource_type: string, project_name?:string):string{
+  const name = project_name ? `${project_name}-${resource_type}` : `cndi_${resource_type}`;
+  return name;
+}
+
 function getTFResource(
   resource_type: string,
   content: Record<never, never>,
@@ -432,6 +437,7 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFResource,
+  getTFResourceName,
   loadJSONC,
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,

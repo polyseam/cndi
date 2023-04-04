@@ -1,7 +1,7 @@
 import { path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { patchAndStageTerraformFilesWithConfig, stageFile } from "src/utils.ts";
-import stageTerraformResourcesForAWS from "src/outputs/terraform/aws/stageAll.ts";
+import stageTerraformResourcesForAWS from "src/outputs/terraform/aws/ec2/stageAwsCdk.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 

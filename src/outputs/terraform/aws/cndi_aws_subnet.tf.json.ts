@@ -1,13 +1,20 @@
-import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { getPrettyJSONString, getTFResourceName } from "src/utils.ts";
+import { Subnet } from "https://esm.sh/@cdktf/provider-aws@12.0.12/lib/subnet";
 
-export default function getAWSSubnetTFJSON(): string {
-  const resource = getTFResource("aws_subnet", {
-    count: "1",
-    availability_zone: "${element(local.availability_zones, count.index)}",
-    cidr_block: "10.0.1.0/24",
-    map_public_ip_on_launch: true,
-    tags: { Name: "Subnet", CNDIProject: "${local.cndi_project_name}" },
-    vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
+export default function getSubnetAwsEc2(scope: any, id: string, options: {
+  vpcId: string;
+}): Subnet {
+  const CNDIProject = scope.project_name;
+  const Name = getTFResourceName("Subnet", CNDIProject);
+  const { vpcId } = options;
+  return new Subnet(scope, id, {
+    count: 1,
+    cidrBlock: "10.0.1.0/24",
+    mapPublicIpOnLaunch: true,
+    tags: {
+      Name,
+      CNDIProject,
+    },
+    vpcId,
   });
-  return getPrettyJSONString(resource);
 }
