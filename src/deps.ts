@@ -81,3 +81,8 @@ export const ccolors = {
 // constants
 export const TERRAFORM_VERSION = "1.3.2";
 export const KUBESEAL_VERSION = "0.19.1";
+export const DEFAULT_INSTANCE_TYPES = {
+  aws: "m5a.large",
+  gcp: "n2-standard-2",
+  azure: "Standard_D4s_v3",
+};
