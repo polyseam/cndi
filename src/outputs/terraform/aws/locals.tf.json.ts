@@ -30,12 +30,6 @@ export default function getAWSLocalsTFJSON(
 
   
 
-  const availability_zones = `\${sort(setintersection(${
-    availabilityZoneKeys.join(
-      ",",
-    )
-  }))}`;
-
   const azs = Fn.sort(Fn.setintersection(availabilityZoneKeys));
 
 getPrettyJSONString({

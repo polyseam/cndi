@@ -1,7 +1,9 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { AWSNodeItemSpec } from "src/types.ts";
 import { DEFAULT_INSTANCE_TYPES } from "deps";
-
+import {
+  TerraformDataSource
+  } from "https://esm.sh/cdktf@0.15.5";
 interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
   [ec2_inst_type: string]: Array<{
     filter: Array<{
@@ -28,6 +30,10 @@ export default function getAWSDataTFJSON(
       {},
     ],
   }];
+
+  const data = new TerraformDataSource(this, "cndi_aws_data", {
+    aws_ec2_instance_type_offerings: []
+  })
 
   nodes.forEach((entry) => {
     const instance_type = entry?.instance_type || entry?.machine_type ||
