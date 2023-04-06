@@ -85,6 +85,22 @@ export default async function validateConfig(
     Deno.exit(904);
   }
 
+  if(config?.infrastructure?.cndi?.nodes?.[0]?.kind === 'local'){
+    if(config.infrastructure.cndi.nodes.length >1){
+      console.error(
+        cndiConfigLabel,
+        ccolors.error("cndi-config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it has multiple"),
+        ccolors.key_name('"infrastructure.cndi.nodes"'),
+        ccolors.error("entries with the"),
+        ccolors.key_name('"kind"'),
+        ccolors.error('value of "local". Only one node can be deployed when doing local deployments.'),
+      )
+    }
+    Deno.exit(908)
+  }
+
   if (!config.cndi_version) {
     console.log(
       cndiConfigLabel,

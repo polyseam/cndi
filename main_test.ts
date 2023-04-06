@@ -213,6 +213,30 @@ describe("cndi", () => {
   });
 
   describe("config validation", () => {
+    it(`should fail if there is more than one node if there is an entry with kind "local"`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          project_name: "local_project",
+          infrastructure: {
+            cndi: {
+              nodes: [
+                { kind: "local" },
+                { kind: "local" },
+              ],
+            },
+          },
+        }),
+      );
+
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(!status.success);
+        }),
+      );
+    });
+
     it(`should fail if a config file is supplied without a "project_name"`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),

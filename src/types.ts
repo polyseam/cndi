@@ -5,12 +5,14 @@ export const NODE_KIND = {
   aws: "aws",
   gcp: "gcp",
   azure: "azure",
+  local: "local",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
   aws: "aws",
   gcp: "gcp",
   azure: "azure",
+  local: "local",
 } as const;
 
 export const COMMAND = {
