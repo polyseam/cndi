@@ -13,6 +13,17 @@ export const DEPLOYMENT_TARGET = {
   azure: "azure",
 } as const;
 
+export const SECRET_TYPES = {
+  Opaque: "Opaque",
+  "kubernetes.io/dockerconfigjson": "kubernetes.io/dockerconfigjson",
+  "kubernetes.io/service-account-token": "kubernetes.io/service-account-token",
+  "kubernetes.io/dockercfg": "kubernetes.io/dockercfg",
+  "kubernetes.io/tls": "kubernetes.io/tls",
+  "bootstrap.kubernetes.io/token": "bootstrap.kubernetes.io/token",
+  "kubernetes.io/ssh-auth": "kubernetes.io/ssh-auth",
+  "kubernetes.io/basic-auth": "kubernetes.io/basic-auth",
+} as const;
+
 export const COMMAND = {
   init: "init",
   overwrite: "overwrite",
