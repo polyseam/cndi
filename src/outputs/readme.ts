@@ -116,6 +116,7 @@ Both entries should point to the single load balancer that was created for your 
 
 You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
 `.trim(),
+    dev: `TODO: add dev readme section`,
   };
 
   const readmeContent = [

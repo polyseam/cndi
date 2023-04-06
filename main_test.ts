@@ -213,16 +213,16 @@ describe("cndi", () => {
   });
 
   describe("config validation", () => {
-    it(`should fail if there is more than one node if there is an entry with kind "local"`, async () => {
+    it(`should fail if there is more than one node if there is an entry with kind "dev"`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
         getPrettyJSONString({
-          project_name: "local_project",
+          project_name: "dev_project",
           infrastructure: {
             cndi: {
               nodes: [
-                { kind: "local" },
-                { kind: "local" },
+                { kind: "dev" },
+                { kind: "dev" },
               ],
             },
           },
