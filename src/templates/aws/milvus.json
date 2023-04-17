@@ -1,0 +1,190 @@
+{
+    "cndi-config": {
+      "prompts": [
+        {
+          "name": "milvusRepoUrl",
+          "default": "https://github.com/milvus-io/milvus",
+          "message": "Please enter the url of the git repo containing your Milvus configurations:",
+          "type": "Input"
+        },
+        {
+          "name": "argocdDomainName",
+          "default": "argocd.example.com",
+          "message": "Please enter the domain name you want ArgoCD to be accessible on:",
+          "type": "Input"
+        },
+        {
+          "name": "milvusDomainName",
+          "default": "milvus.example.com",
+          "message": "Please enter the domain name you want Milvus to be accessible on:",
+          "type": "Input"
+        },
+        {
+          "message": "Please enter the email address you want to use for Lets Encrypt:",
+          "default": "admin@example.com",
+          "name": "letsEncryptClusterIssuerEmailAddress",
+          "type": "Input"
+        }
+      ],
+      "template": {
+        "infrastructure": {
+          "cndi": {
+            "nodes": [
+              {
+                "name": "x-milvus-node",
+                "kind": "aws",
+                "role": "leader",
+                "instance_type": "t3.medium",
+                "volume_size": 128
+              },
+              {
+                "name": "y-milvus-node",
+                "kind": "aws",
+                "volume_size": 128
+              },
+              {
+                "name": "z-milvus-node",
+                "kind": "aws",
+                "volume_size": 128
+              }
+            ]
+          }
+        },
+        "cluster_manifests": {
+          "cert-manager-cluster-issuer": {
+            "apiVersion": "cert-manager.io/v1",
+            "kind": "ClusterIssuer",
+            "metadata": {
+              "name": "lets-encrypt"
+            },
+            "spec": {
+              "acme": {
+                "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+                "server": "https://acme-v02.api.letsencrypt.org/directory",
+                "privateKeySecretRef": {
+                  "name": "lets-encrypt-private-key"
+                },
+                "solvers": [
+                  {
+                    "http01": {
+                      "ingress": {
+                        "class": "public"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "argo-ingress": {
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "Ingress",
+            "metadata": {
+              "name": "argocd-server-ingress",
+              "namespace": "argocd",
+              "annotations": {
+                "cert-manager.io/cluster-issuer": "lets-encrypt",
+                "kubernetes.io/tls-acme": "true",
+                "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+                "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+              }
+            },
+            "spec": {
+              "tls": [
+                {
+                  "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                  "secretName": "lets-encrypt-private-key"
+                }
+              ],
+              "rules": [
+                {
+                  "host": "$.cndi.prompts.responses.argocdDomainName",
+                  "http": {
+                    "paths": [
+                      {
+                        "path": "/",
+                        "pathType": "Prefix",
+                        "backend": {
+                          "service": {
+                            "name": "argocd-server",
+                            "port": {
+                              "name": "https"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+            "applications": {
+                "milvus": {
+                  "targetRevision": "v2.2.6",
+                  "destinationNamespace": "milvus",
+                  "repoURL": "https://github.com/milvus-io/milvus-helm",
+                  "chart": "milvus",
+                  "values": {
+                    "cluster": {
+                      "enabled": true
+                    },
+                    "image": {
+                      "all": {
+                        "repository": "milvusdb/milvus",
+                        "tag": "v2.2.6",
+                        "pullPolicy": "IfNotPresent"
+                      },
+                      "tools": {
+                        "repository": "milvusdb/milvus-config-tool",
+                        "tag": "v0.1.1",
+                        "pullPolicy": "IfNotPresent"
+                      }
+                    },
+
+                    "ingress": {
+                        "enabled": true,
+                        "annotations": {
+                          "cert-manager.io/cluster-issuer": "lets-encrypt"
+                        },
+                        "hosts": [
+                          {
+                            "name": "$.cndi.prompts.responses.milvusDomainName",
+                            "tls": {
+                              "secretName": "lets-encrypt-private-key",
+                              "enabled": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                }
+        },
+        "env": {
+            "extend_basic_env": "aws",
+            "prompts": [
+              {
+                "type": "Comment",
+                "comment": "airflow-git-credentials secret values for DAG Storage"
+              },
+              {
+                "name": "GIT_SYNC_USERNAME",
+                "message": "Please enter your git username for Airflow DAG Storage:",
+                "type": "Input"
+              },
+              {
+                "name": "GIT_SYNC_PASSWORD",
+                "message": "Please enter your git password for Airflow DAG Storage:",
+                "type": "Secret"
+              }
+            ]
+          },
+          "readme": {
+            "extend_basic_readme": "aws",
+            "template": ""
+          }
+      }
+    }
+}
+
