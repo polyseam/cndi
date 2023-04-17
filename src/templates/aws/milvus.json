@@ -51,6 +51,18 @@
           }
         },
         "cluster_manifests": {
+          "git-credentials-secret": {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+              "name": "airflow-git-credentials",
+              "namespace": "airflow"
+            },
+            "stringData": {
+              "GIT_SYNC_USERNAME": "$.cndi.secrets.seal(GIT_SYNC_USERNAME)",
+              "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_SYNC_PASSWORD)"
+            }
+          },
           "cert-manager-cluster-issuer": {
             "apiVersion": "cert-manager.io/v1",
             "kind": "ClusterIssuer",
@@ -160,31 +172,31 @@
                       }
                     }
                 }
-        },
-        "env": {
-            "extend_basic_env": "aws",
-            "prompts": [
-              {
-                "type": "Comment",
-                "comment": "airflow-git-credentials secret values for DAG Storage"
-              },
-              {
-                "name": "GIT_SYNC_USERNAME",
-                "message": "Please enter your git username for Airflow DAG Storage:",
-                "type": "Input"
-              },
-              {
-                "name": "GIT_SYNC_PASSWORD",
-                "message": "Please enter your git password for Airflow DAG Storage:",
-                "type": "Secret"
-              }
-            ]
-          },
-          "readme": {
-            "extend_basic_readme": "aws",
-            "template": ""
-          }
+        }
       }
-    }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "prompts": [
+        {
+          "type": "Comment",
+          "comment": "airflow-git-credentials secret values for DAG Storage"
+        },
+        {
+          "name": "GIT_SYNC_USERNAME",
+          "message": "Please enter your git username for Airflow DAG Storage:",
+          "type": "Input"
+        },
+        {
+          "name": "GIT_SYNC_PASSWORD",
+          "message": "Please enter your git password for Airflow DAG Storage:",
+          "type": "Secret"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template": ""
+   }
 }
 
