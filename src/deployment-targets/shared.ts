@@ -116,7 +116,8 @@ const getCoreEnvLines = async (
   ];
 
   switch (deploymentTarget) {
-    case DEPLOYMENT_TARGET.aws:
+    case DEPLOYMENT_TARGET.aws || DEPLOYMENT_TARGET["aws-eks"] ||
+      DEPLOYMENT_TARGET["aws-ec2"]:
       return [...coreEnvLines, ...(await getAWSEnvLines(interactive))];
     case DEPLOYMENT_TARGET.gcp:
       return [...coreEnvLines, ...(await getGCPEnvLines(interactive))];

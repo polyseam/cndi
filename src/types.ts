@@ -3,12 +3,16 @@ type ObjectValues<T> = T[keyof T];
 
 export const NODE_KIND = {
   aws: "aws",
+  "aws-eks": "aws-eks",
+  "aws-ec2": "aws-ec2",
   gcp: "gcp",
   azure: "azure",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
   aws: "aws",
+  "aws-eks": "aws-eks",
+  "aws-ec2": "aws-ec2",
   gcp: "gcp",
   azure: "azure",
 } as const;
@@ -47,14 +51,18 @@ interface BaseNodeItemSpec {
   name: string;
   kind: NodeKind;
   role?: NodeRole; // default: controller
-  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
+  volume_size?: number;
+  size?: number | string;
+  disk_size_gb?: number;
+  instance_type?: string;
+  machine_type?: string;
 }
 
 // cndi-config.jsonc["nodes"][kind==="azure"]
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
-  size?: number;
+  size?: number | string;
   volume_size?: number;
   disk_size_gb?: number;
   instance_type?: string;
@@ -67,8 +75,11 @@ interface AWSNodeItemSpec extends BaseNodeItemSpec {
   availability_zone?: string;
   volume_size?: number;
   size?: number;
+  disk_size?: number;
   machine_type?: string;
 }
+
+type AWSEKSNodeItemSpec = Omit<AWSNodeItemSpec, "ami">;
 
 // cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
 interface GCPNodeItemSpec extends BaseNodeItemSpec {
@@ -84,6 +95,7 @@ interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
+  size?: number;
 }
 
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
@@ -91,7 +103,7 @@ interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
   image?: string;
   machine_type?: string;
   disk_size_gb?: number;
-  size?: number | string;
+  size?: number | string; // this can be a string if it refers to a machine type which azure named "size"
 }
 
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
@@ -213,6 +225,7 @@ interface SealedSecretsKeys {
 
 export type {
   AWSDeploymentTargetConfiguration,
+  AWSEKSNodeItemSpec,
   AWSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,

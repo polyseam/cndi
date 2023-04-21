@@ -1,6 +1,6 @@
 import { ccolors, path } from "deps";
 
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
 import {
   emitExitEvent,
   getLeaderNodeNameFromConfig,
@@ -107,7 +107,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
-      cndi_google_compute_instance(node, leaderNodeName),
+      cndi_google_compute_instance(node as GCPNodeItemSpec, leaderNodeName),
     )
   );
 
@@ -118,7 +118,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_disk_${node.name}.tf.json`,
       ),
-      cndi_google_compute_disk(node),
+      cndi_google_compute_disk(node as GCPNodeItemSpec),
     )
   );
 
@@ -219,7 +219,9 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_instance_group.tf.json",
         ),
-        cndi_google_compute_instance_group(config.infrastructure.cndi.nodes),
+        cndi_google_compute_instance_group(
+          config.infrastructure.cndi.nodes as Array<GCPNodeItemSpec>,
+        ),
       ),
 
       stageFile(

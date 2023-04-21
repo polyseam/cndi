@@ -6,14 +6,14 @@ const basicAWSCndiConfig = {
       nodes: [
         {
           name: "x-node",
-          kind: "aws",
+          kind: "aws-ec2",
           role: "leader",
           instance_type: "m5a.2xlarge",
           volume_size: 128,
         },
         {
           name: "y-node",
-          kind: "aws",
+          kind: "aws-ec2",
           volume_size: 128,
         },
       ],
