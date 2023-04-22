@@ -13,6 +13,6 @@ export default function getAWSSubnetPrivateBTFJSON(): string {
       "kubernetes.io/role/internal-elb": 1,
     },
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
-  }, "aws_subnet.cndi_aws_subnet_private_b");
+  }, "cndi_aws_subnet_private_b");
   return getPrettyJSONString(resource);
 }
