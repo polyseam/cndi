@@ -1,5 +1,5 @@
 import { getPrettyJSONString } from "src/utils.ts";
-import { AWSNodeItemSpec } from "src/types.ts";
+import { AWSEC2NodeItemSpec } from "src/types.ts";
 import { DEFAULT_INSTANCE_TYPES } from "deps";
 
 interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
@@ -21,7 +21,7 @@ type TFData = [
 ];
 
 export default function getAWSDataTFJSON(
-  nodes: Array<AWSNodeItemSpec>,
+  nodes: Array<AWSEC2NodeItemSpec>,
 ): string {
   const data: TFData = [{
     aws_ec2_instance_type_offerings: [

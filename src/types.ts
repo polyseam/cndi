@@ -3,16 +3,14 @@ type ObjectValues<T> = T[keyof T];
 
 export const NODE_KIND = {
   aws: "aws",
-  "aws-eks": "aws-eks",
-  "aws-ec2": "aws-ec2",
+  eks: "eks",
+  ec2: "ec2",
   gcp: "gcp",
   azure: "azure",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
   aws: "aws",
-  "aws-eks": "aws-eks",
-  "aws-ec2": "aws-ec2",
   gcp: "gcp",
   azure: "azure",
 } as const;
@@ -69,7 +67,7 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
 }
 
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeItemSpec extends BaseNodeItemSpec {
+interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -79,7 +77,11 @@ interface AWSNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
 }
 
-type AWSEKSNodeItemSpec = Omit<AWSNodeItemSpec, "ami">;
+// cndi-config.jsonc["nodes"]["entries"][kind==="eks"]
+type AWSEKSNodeItemSpec = Omit<AWSEC2NodeItemSpec, "ami"> & {
+  min_count: number;
+  max_count: number;
+};
 
 // cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
 interface GCPNodeItemSpec extends BaseNodeItemSpec {
@@ -108,18 +110,6 @@ interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
 
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
 interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
-  machine_type?: string;
-  image?: string;
-  size?: number;
-}
-
-// incomplete type, nodes will have more options
-interface CNDINode {
-  name: string;
-  role: NodeRole;
-  kind: NodeKind;
-  instance_type?: string;
-  ami?: string;
   machine_type?: string;
   image?: string;
   size?: number;
@@ -225,14 +215,13 @@ interface SealedSecretsKeys {
 
 export type {
   AWSDeploymentTargetConfiguration,
+  AWSEC2NodeItemSpec,
   AWSEKSNodeItemSpec,
-  AWSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,
   BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIConfig,
-  CNDINode,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,

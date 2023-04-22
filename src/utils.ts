@@ -61,7 +61,9 @@ async function getLeaderNodeNameFromConfig(
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
-  return config.infrastructure.cndi.nodes[0].kind;
+  const clusterKind = config.infrastructure.cndi.nodes[0].kind;
+  if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  return clusterKind;
 }
 
 function getTFResource(

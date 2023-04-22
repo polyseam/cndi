@@ -11,6 +11,6 @@ export default function getAWSIamPolicyDocumentEKSEC2DATATFJSON(): string {
         ],
       },
     ],
-  },"cndi_data_aws_iam_policy_document_eks_ec2_role");
+  }, "cndi_data_aws_iam_policy_document_eks_ec2_role");
   return getPrettyJSONString(data);
 }

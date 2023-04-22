@@ -1,10 +1,10 @@
 import { getPrettyJSONString } from "src/utils.ts";
-import { AWSNodeItemSpec } from "src/types.ts";
+import { AWSEC2NodeItemSpec } from "src/types.ts";
 
 interface GetAWSLocalsTFJSONArgs {
   aws_region: string;
   leader_node_ip: string;
-  nodes: Array<AWSNodeItemSpec>;
+  nodes: Array<AWSEC2NodeItemSpec>;
 }
 
 export default function getAWSLocalsTFJSON(

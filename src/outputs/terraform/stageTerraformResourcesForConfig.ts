@@ -1,7 +1,8 @@
-import { path } from "deps";
+import { ccolors, path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { patchAndStageTerraformFilesWithConfig, stageFile } from "src/utils.ts";
-import stageTerraformResourcesForAWS from "src/outputs/terraform/aws/stageAll.ts";
+import stageTerraformResourcesForAWSEC2 from "src/outputs/terraform/aws-ec2/stageAll.ts";
+import stageTerraformResourcesForAWSEKS from "src/outputs/terraform/aws-eks/stageAll.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 
@@ -19,9 +20,23 @@ export default async function stageTerraformResourcesForConfig(
   const cndi_project_name = config.project_name!;
 
   const kind = config.infrastructure.cndi.nodes[0].kind;
+
   switch (kind) {
     case "aws":
-      await stageTerraformResourcesForAWS(config);
+      console.log(
+        ccolors.key_name('"kind"'),
+        ccolors.warn("is"),
+        ccolors.user_input('"aws"'),
+        ccolors.warn("defaulting to"),
+        ccolors.key_name('"ec2"'),
+      );
+      await stageTerraformResourcesForAWSEC2(config);
+      break;
+    case "ec2":
+      await stageTerraformResourcesForAWSEC2(config);
+      break;
+    case "eks":
+      await stageTerraformResourcesForAWSEKS(config);
       break;
     case "gcp":
       await stageTerraformResourcesForGCP(config, options);
