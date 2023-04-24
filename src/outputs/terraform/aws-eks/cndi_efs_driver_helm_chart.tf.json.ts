@@ -12,11 +12,11 @@ export default function getEFSCSIDriverTFJSON(): string {
       {
         name:
           "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-        value: "${aws_iam_role.cndi_aws_iam_role_web_identity.arn}",
+        value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
       {
         name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-        value: "${aws_iam_role.cndi_aws_iam_role_web_identity.arn}",
+        value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
       { name: "storageClasses[0].name", value: "efs" },
       { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com " },

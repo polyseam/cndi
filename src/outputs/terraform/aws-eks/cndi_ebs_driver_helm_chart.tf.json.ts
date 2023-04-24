@@ -12,11 +12,11 @@ export default function getEBSCSIDriverTFJSON(): string {
       {
         name:
           "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-        value: "${aws_iam_role.cndi_aws_iam_role_web_identity.arn}",
+        value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
       {
         name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-        value: "${aws_iam_role.cndi_aws_iam_role_web_identity.arn}",
+        value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
     ],
     version: "2.17.2",
