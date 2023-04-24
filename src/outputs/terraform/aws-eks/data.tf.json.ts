@@ -29,10 +29,10 @@ export default function getAWSDataTFJSON(): string {
       },
 
       "aws_eks_node_group": {
-        "cndi_aws_eks_worker_node_group": {
+        "cndi_aws_eks_node_group": {
           "cluster_name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
           "node_group_name":
-            "${aws_eks_node_group.cndi_aws_eks_worker_node_group.node_group_name}",
+            "${aws_eks_node_group.cndi_aws_eks_node_group.node_group_name}",
         },
       },
 
@@ -196,7 +196,8 @@ export default function getAWSDataTFJSON(): string {
             "cluster_name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
             "cluster_user_arn": "${aws_eks_cluster.cndi_aws_eks_cluster.arn}",
             "region": "${local.aws_region}",
-            "token": "${data.aws_eks_cluster_auth.aws_eks_cluster_auth.token}",
+            "token":
+              "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
           },
         },
         "secret_argocd_private_repo": {

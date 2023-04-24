@@ -4,7 +4,7 @@ export default function getNginxControllerTFJSON(): string {
   const resource = getTFResource("helm_release", {
     chart: "ingress-nginx",
     create_namespace: true,
-    depends_on: ["aws_eks_node_group.cndi_aws_eks_worker_node_group"],
+    depends_on: ["aws_eks_node_group.cndi_aws_eks_node_group"],
     name: "ingress-nginx",
     namespace: "ingress",
     repository: "https://kubernetes.github.io/ingress-nginx",

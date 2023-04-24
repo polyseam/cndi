@@ -7,7 +7,7 @@ export default function getArgoATFJSON(): string {
     create_namespace: "true",
     depends_on: [
       "aws_efs_file_system.cndi_aws_efs_file_system",
-      "aws_eks_node_group.cndi_aws_eks_worker_node_group",
+      "aws_eks_node_group.cndi_aws_eks_node_group",
     ],
     force_update: true,
     name: "argo-cd",
