@@ -64,7 +64,7 @@ export default function getAWSDataTFJSON(): string {
             },
           ],
         },
-        "cndi_aws_iam_policy_document_web_identity": {
+        "cndi_aws_iam_policy_document_web_identity_policy": {
           "depends_on": [
             "aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider",
           ],
