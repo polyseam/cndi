@@ -15,7 +15,7 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
             "${data.aws_eks_cluster_auth.cndi_data_aws_eks_cluster_auth.token}",
         },
       },
-      { aws: { region: "${local.region}" } },
+      { aws: { region: "${local.aws_region}" } },
       {
         helm: {
           kubernetes: {

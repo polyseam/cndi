@@ -22,7 +22,6 @@ export default function getAWSEKServiceNodeGroupTFJSON(
     capacity_type: "ON_DEMAND",
     subnet_ids: [
       "${aws_subnet.cndi_aws_subnet_private_a.id}",
-      "${aws_subnet.cndi_aws_subnet_private_b.id}",
     ],
     update_config: [{ max_unavailable: 1 }],
     depends_on: [

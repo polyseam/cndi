@@ -1,3 +1,5 @@
+export default function getArgoRootApplicationManifestYamlTftpl() {
+  return `
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,7 +14,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     path: cndi/cluster_manifests
-    repoURL: ${git_repo}
+    repoURL: \${git_repo}
     targetRevision: HEAD
     directory:
       recurse: true
@@ -24,3 +26,5 @@ spec:
     - CreateNamespace=true
     - PrunePropagationPolicy=foreground
     - PruneLast=true
+    `.trim();
+}

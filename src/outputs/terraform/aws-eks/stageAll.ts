@@ -7,7 +7,6 @@ import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
 import cndi_aws_efs_access_point from "./cndi_aws_efs_access_point.tf.json.ts";
 import cndi_aws_efs_mount_target_a from "./cndi_aws_efs_mount_target_a.tf.json.ts";
-import cndi_aws_efs_mount_target_b from "./cndi_aws_efs_mount_target_b.tf.json.ts";
 import cndi_aws_eip from "./cndi_aws_eip.tf.json.ts";
 import cndi_aws_iam_openid_connect_provider from "./cndi_aws_iam_openid_connect_provider.tf.json.ts";
 import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
@@ -37,26 +36,31 @@ import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_local_file_kubeconfig from "./cndi_local_file_kubeconfig.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
-import cndi_data_template_file_argocd_root_application_manifest from "./cndi_data_template_file_argocd_root_application_manifest.tf.json.ts";
-import cndi_data_template_file_argocd_admin_password_secret_manifest from "./cndi_data_template_file_argocd_admin_password_secret_manifest.tf.json.ts";
-import cndi_data_template_file_argocd_private_repo_secret_manifest from "./cndi_data_template_file_argocd_private_repo_secret_manifest.tf.json.ts";
-import cndi_data_template_file_cndi_sealed_secrets_secret_manifest from "./cndi_data_template_file_sealed_secrets_secret_manifest.tf.json.ts";
-import cndi_data_aws_availability_zones from "./cndi_data_aws_availability_zones.tf.json.ts";
-import cndi_data_aws_caller_identity from "./cndi_data_aws_caller_identity.tf.json.ts";
-import cndi_data_aws_eks_cluster from "./cndi_data_aws_eks_cluster.tf.json.ts";
-import cndi_data_aws_eks_cluster_auth from "./cndi_data_aws_eks_cluster_auth.tf.json.ts";
-import cndi_data_aws_eks_worker_node_group from "./cndi_data_aws_eks_worker_node_group.tf.json.ts";
-import cndi_data_aws_iam_policy_document_eks_ec2_role from "./cndi_data_aws_iam_policy_document_eks_ec2_role.tf.json.ts";
-import cndi_data_aws_iam_policy_document_permissions from "./cndi_data_aws_iam_policy_document_permissions.tf.json.ts";
-import cndi_data_aws_iam_policy_document_web_identity from "./cndi_data_aws_iam_policy_document_web_identity.tf.json.ts";
-import cndi_data_tls_certificate from "./cndi_data_tls_certificate.tf.json.ts";
+// import cndi_data_template_file_argocd_root_application_manifest from "./cndi_data_template_file_argocd_root_application_manifest.tf.json.ts";
+// import cndi_data_template_file_argocd_admin_password_secret_manifest from "./cndi_data_template_file_argocd_admin_password_secret_manifest.tf.json.ts";
+// import cndi_data_template_file_argocd_private_repo_secret_manifest from "./cndi_data_template_file_argocd_private_repo_secret_manifest.tf.json.ts";
+// import cndi_data_template_file_cndi_sealed_secrets_secret_manifest from "./cndi_data_template_file_sealed_secrets_secret_manifest.tf.json.ts";
+// import cndi_data_aws_availability_zones from "./cndi_data_aws_availability_zones.tf.json.ts";
+// import cndi_data_aws_caller_identity from "./cndi_data_aws_caller_identity.tf.json.ts";
+// import cndi_data_aws_eks_cluster from "./cndi_data_aws_eks_cluster.tf.json.ts";
+// import cndi_data_aws_eks_cluster_auth from "./cndi_data_aws_eks_cluster_auth.tf.json.ts";
+// import cndi_data_aws_eks_worker_node_group from "./cndi_data_aws_eks_worker_node_group.tf.json.ts";
+// import cndi_data_aws_iam_policy_document_eks_ec2_role from "./cndi_data_aws_iam_policy_document_eks_ec2_role.tf.json.ts";
+// import cndi_data_aws_iam_policy_document_permissions from "./cndi_data_aws_iam_policy_document_permissions.tf.json.ts";
+// import cndi_data_aws_iam_policy_document_web_identity from "./cndi_data_aws_iam_policy_document_web_identity.tf.json.ts";
+// import cndi_data_tls_certificate from "./cndi_data_tls_certificate.tf.json.ts";
 import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
 import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
 import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
 import cndi_ebs_driver_helm_chart from "./cndi_ebs_driver_helm_chart.tf.json.ts";
 import cndi_efs_driver_helm_chart from "./cndi_efs_driver_helm_chart.tf.json.ts";
 import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
-
+import data from "./data.tf.json.ts";
+import getSealedSecretsKeyYamlTftpl from "./templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
+import getArgoAdminPasswordSecretManifestYamlTftpl from "./templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
+import getArgoPrivateRepoSecretYamlTftpl from "./templates/argocd_private_repo_secret_manifest.yaml.tftpl.ts";
+import getKubeConfigYamlTftpl from "./templates/kubeconfig.yaml.tftpl.ts";
+import getArgoRootApplicationManifestYamlTftpl from "./templates/argocd_root_application_manifest.yaml.tftpl.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
@@ -92,13 +96,57 @@ export default async function stageTerraformResourcesForAWS(
         terraform(),
       ),
       stageFile(
+        path.join("cndi", "terraform", "data.tf.json"),
+        data(),
+      ),
+      stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_data_tls_certificate.tf.json",
+          "argocd_admin_password_secret_manifest.yaml.tftpl",
         ),
-        cndi_data_tls_certificate(),
+        getArgoAdminPasswordSecretManifestYamlTftpl(),
       ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "argocd_private_repo_secret_manifest.yaml.tftpl",
+        ),
+        getArgoPrivateRepoSecretYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "argocd_root_application_manifest.yaml.tftpl",
+        ),
+        getArgoRootApplicationManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "kubeconfig.yaml.tftpl",
+        ),
+        getKubeConfigYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "sealed_secrets_secret_manifest.yaml.tftpl",
+        ),
+        getSealedSecretsKeyYamlTftpl(),
+      ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_tls_certificate.tf.json",
+      //   ),
+      //   cndi_data_tls_certificate(),
+      // ),
       stageFile(
         path.join(
           "cndi",
@@ -147,62 +195,62 @@ export default async function stageTerraformResourcesForAWS(
         ),
         cndi_nginx_controller_helm_chart(),
       ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_template_file_argocd_root_application_manifest.tf.json",
-        ),
-        cndi_data_template_file_argocd_root_application_manifest(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_template_file_argocd_admin_password_secret_manifest.tf.json",
-        ),
-        cndi_data_template_file_argocd_admin_password_secret_manifest(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_template_file_argocd_private_repo_secret_manifest.tf.json",
-        ),
-        cndi_data_template_file_argocd_private_repo_secret_manifest(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_availability_zones.tf.json",
-        ),
-        cndi_data_aws_availability_zones(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_eks_cluster.tf.json",
-        ),
-        cndi_data_aws_eks_cluster(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_caller_identity.tf.json",
-        ),
-        cndi_data_aws_caller_identity(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_template_file_cndi_sealed_secrets_secret_manifest.tf.json",
-        ),
-        cndi_data_template_file_cndi_sealed_secrets_secret_manifest(),
-      ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_template_file_argocd_root_application_manifest.tf.json",
+      //   ),
+      //   cndi_data_template_file_argocd_root_application_manifest(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_template_file_argocd_admin_password_secret_manifest.tf.json",
+      //   ),
+      //   cndi_data_template_file_argocd_admin_password_secret_manifest(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_template_file_argocd_private_repo_secret_manifest.tf.json",
+      //   ),
+      //   cndi_data_template_file_argocd_private_repo_secret_manifest(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_availability_zones.tf.json",
+      //   ),
+      //   cndi_data_aws_availability_zones(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_eks_cluster.tf.json",
+      //   ),
+      //   cndi_data_aws_eks_cluster(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_caller_identity.tf.json",
+      //   ),
+      //   cndi_data_aws_caller_identity(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_template_file_cndi_sealed_secrets_secret_manifest.tf.json",
+      //   ),
+      //   cndi_data_template_file_cndi_sealed_secrets_secret_manifest(),
+      // ),
       stageFile(
         path.join(
           "cndi",
@@ -211,46 +259,46 @@ export default async function stageTerraformResourcesForAWS(
         ),
         cndi_aws_internet_gateway(),
       ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_eks_worker_node_group.tf.json",
-        ),
-        cndi_data_aws_eks_worker_node_group(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_iam_policy_document_eks_ec2_role.tf.json",
-        ),
-        cndi_data_aws_iam_policy_document_eks_ec2_role(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_iam_policy_document_web_identity.tf.json",
-        ),
-        cndi_data_aws_iam_policy_document_web_identity(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_iam_policy_document_permissions.tf.json",
-        ),
-        cndi_data_aws_iam_policy_document_permissions(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_data_aws_eks_cluster_auth.tf.json",
-        ),
-        cndi_data_aws_eks_cluster_auth(),
-      ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_eks_worker_node_group.tf.json",
+      //   ),
+      //   cndi_data_aws_eks_worker_node_group(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_iam_policy_document_eks_ec2_role.tf.json",
+      //   ),
+      //   cndi_data_aws_iam_policy_document_eks_ec2_role(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_iam_policy_document_web_identity.tf.json",
+      //   ),
+      //   cndi_data_aws_iam_policy_document_web_identity(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_iam_policy_document_permissions.tf.json",
+      //   ),
+      //   cndi_data_aws_iam_policy_document_permissions(),
+      // ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_data_aws_eks_cluster_auth.tf.json",
+      //   ),
+      //   cndi_data_aws_eks_cluster_auth(),
+      // ),
       stageFile(
         path.join(
           "cndi",
@@ -372,14 +420,7 @@ export default async function stageTerraformResourcesForAWS(
         ),
         cndi_aws_efs_mount_target_a(),
       ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_aws_efs_mount_target_b.tf.json",
-        ),
-        cndi_aws_efs_mount_target_b(),
-      ),
+
       stageFile(
         path.join(
           "cndi",
