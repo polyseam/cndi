@@ -32,8 +32,8 @@ export default function getAWSEKSClusterTFJSON(): string {
       "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
     },
     depends_on: [
-      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_AmazonEKSClusterPolicy",
-      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_AmazonEKSServicePolicy",
+      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_eks_cluster_policy",
+      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_eks_service_policy",
     ],
   });
   return getPrettyJSONString(resource);

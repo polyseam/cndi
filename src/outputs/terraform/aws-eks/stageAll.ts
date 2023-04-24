@@ -14,13 +14,13 @@ import cndi_aws_eks_node_group from "./cndi_aws_eks_node_group.tf.json.ts";
 import cndi_aws_internet_gateway from "./cndi_aws_internet_gateway.tf.json.ts";
 import cndi_aws_nat_gateway from "./cndi_aws_nat_gateway.tf.json.ts";
 import cndi_aws_iam_role_web_identity from "./cndi_aws_iam_role_web_identity.tf.json.ts";
-import cndi_aws_iam_role_policy_attachment_eks_cluster from "./cndi_aws_iam_role_policy_attachment_eks_cluster.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_cluster_policy from "./cndi_aws_iam_role_policy_attachment_eks_cluster_policy.tf.json.ts";
 import cndi_aws_iam_role_eks_ec2 from "./cndi_aws_iam_role_eks_ec2.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment_web_identity from "./cndi_aws_iam_role_policy_attachment_web_identity.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller from "./cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller.tf.json.ts";
-import cndi_aws_iam_role_policy_attachment_eks_cni from "./cndi_aws_iam_role_policy_attachment_eks_cni.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_cni_policy from "./cndi_aws_iam_role_policy_attachment_eks_cni_policy.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment_eks_worker_node_policy from "./cndi_aws_iam_role_policy_attachment_eks_worker_node_policy.tf.json.ts";
-import cndi_aws_iam_role_policy_attachment_eks_service from "./cndi_aws_iam_role_policy_attachment_eks_service.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_service_policy from "./cndi_aws_iam_role_policy_attachment_eks_service_policy.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly from "./cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly.tf.json.ts";
 import cndi_aws_route_table_association_public_a from "./cndi_aws_route_table_association_public_a.tf.json.ts";
 import cndi_aws_route_table_association_private_a from "./cndi_aws_route_table_association_private_a.tf.json.ts";
@@ -30,12 +30,15 @@ import cndi_aws_route_table_private from "./cndi_aws_route_table_private.tf.json
 import cndi_aws_route_private from "./cndi_aws_route_private.tf.json.ts";
 import cndi_aws_route_public from "./cndi_aws_route_public.tf.json.ts";
 import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
-import cndi_aws_subnet from "./cndi_aws_subnet_public_a.tf.json.ts";
+import cndi_aws_subnet_public_a from "./cndi_aws_subnet_public_a.tf.json.ts";
+import cndi_aws_subnet_private_a from "./cndi_aws_subnet_private_a.tf.json.ts";
+import cndi_aws_subnet_private_b from "./cndi_aws_subnet_private_b.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_local_file_kubeconfig from "./cndi_local_file_kubeconfig.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
+import cndi_aws_efs_file_system from "./cndi_aws_efs_file_system.tf.json.ts";
 // import cndi_data_template_file_argocd_root_application_manifest from "./cndi_data_template_file_argocd_root_application_manifest.tf.json.ts";
 // import cndi_data_template_file_argocd_admin_password_secret_manifest from "./cndi_data_template_file_argocd_admin_password_secret_manifest.tf.json.ts";
 // import cndi_data_template_file_argocd_private_repo_secret_manifest from "./cndi_data_template_file_argocd_private_repo_secret_manifest.tf.json.ts";
@@ -335,6 +338,14 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
+          "cndi_aws_efs_file_system.tf.json",
+        ),
+        cndi_aws_efs_file_system(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
           "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly.tf.json",
         ),
         cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly(),
@@ -343,9 +354,9 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_iam_role_policy_attachment_eks_cluster.tf.json",
+          "cndi_aws_iam_role_policy_attachment_eks_cluster_policy.tf.json",
         ),
-        cndi_aws_iam_role_policy_attachment_eks_cluster(),
+        cndi_aws_iam_role_policy_attachment_eks_cluster_policy(),
       ),
       stageFile(
         path.join(
@@ -375,17 +386,17 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_iam_role_policy_attachment_eks_service.tf.json",
+          "cndi_aws_iam_role_policy_attachment_eks_service_policy.tf.json",
         ),
-        cndi_aws_iam_role_policy_attachment_eks_service(),
+        cndi_aws_iam_role_policy_attachment_eks_service_policy(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_iam_role_policy_attachment_eks_cni.tf.json",
+          "cndi_aws_iam_role_policy_attachment_eks_cni_policy.tf.json",
         ),
-        cndi_aws_iam_role_policy_attachment_eks_cni(),
+        cndi_aws_iam_role_policy_attachment_eks_cni_policy(),
       ),
       stageFile(
         path.join(
@@ -510,8 +521,16 @@ export default async function stageTerraformResourcesForAWS(
         cndi_aws_security_group(),
       ),
       stageFile(
-        path.join("cndi", "terraform", "cndi_aws_subnet.tf.json"),
-        cndi_aws_subnet(),
+        path.join("cndi", "terraform", "cndi_aws_subnet_public_a.tf.json"),
+        cndi_aws_subnet_public_a(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_subnet_private_a.tf.json"),
+        cndi_aws_subnet_private_a(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_subnet_private_b.tf.json"),
+        cndi_aws_subnet_private_b(),
       ),
       stageFile(
         path.join(

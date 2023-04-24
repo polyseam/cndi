@@ -66,7 +66,7 @@ export default function getAWSDataTFJSON(): string {
         },
         "cndi_aws_iam_policy_document_web_identity": {
           "depends_on": [
-            "${aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider}",
+            "aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider",
           ],
           "statement": [
             {
@@ -196,23 +196,19 @@ export default function getAWSDataTFJSON(): string {
             "cluster_name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
             "cluster_user_arn": "${aws_eks_cluster.cndi_aws_eks_cluster.arn}",
             "region": "${local.aws_region}",
-            "token":
-              "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
+            "token": "${data.aws_eks_cluster_auth.aws_eks_cluster_auth.token}",
           },
         },
-        "secret_argocd_private_repo": [
-          {
-            "template": '${file("secret_argocd_private_repo.yaml.tftpl")}',
-            "vars": {
-              "git_password": "${var.git_password}",
-              "git_repo": "${var.git_repo}",
-              "git_username": "${var.git_username}",
-            },
+        "secret_argocd_private_repo": {
+          "template":
+            '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
+          "vars": {
+            "git_password": "${var.git_password}",
+            "git_repo": "${var.git_repo}",
+            "git_username": "${var.git_username}",
           },
-        ],
-      },
-      "secret_cndi_sealed_secrets_key": [
-        {
+        },
+        "secret_cndi_sealed_secrets_key": {
           "template": '${file("sealed_secrets_secret_manifest.yaml.tftpl")}',
           "vars": {
             "sealed_secret_cert_pem": "${var.sealed_secrets_public_key}",
@@ -220,17 +216,13 @@ export default function getAWSDataTFJSON(): string {
               "${var.sealed_secrets_private_key}",
           },
         },
-      ],
-      "argocd_root_application_manifest": [
-        {
+        "argocd_root_application_manifest": {
           "template": '${file("argocd_root_application_manifest.yaml.tftpl")}',
           "vars": {
             "git_repo": "${var.git_repo}",
           },
         },
-      ],
-      "secret_argocd_admin_password": [
-        {
+        "secret_argocd_admin_password": {
           "template":
             '${file("argocd_admin_password_secret_manifest.yaml.tftpl")}',
           "vars": {
@@ -240,7 +232,7 @@ export default function getAWSDataTFJSON(): string {
               "${bcrypt_hash.cndi_bcrypt_hash_argocd_admin_password.id}",
           },
         },
-      ],
+      },
     },
   });
 }
