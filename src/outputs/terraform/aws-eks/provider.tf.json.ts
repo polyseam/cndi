@@ -7,11 +7,11 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
         kubectl: {
           apply_retry_count: 5,
           cluster_ca_certificate:
-            "${base64decode(data.aws_eks_cluster.aws_eks_cluster.certificate_authority[0].data)}",
+            "${base64decode(data.aws_eks_cluster.cndi_aws_eks_cluster.certificate_authority[0].data)}",
           config_path: "~/.kube/config",
           host: "${aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
           load_config_file: true,
-          token: "${data.aws_eks_cluster_auth.aws_eks_cluster_auth.token}",
+          token: "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
         },
       },
       { aws: { region: "${local.aws_region}" } },
@@ -19,10 +19,11 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
         helm: {
           kubernetes: {
             cluster_ca_certificate:
-              "${base64decode(data.aws_eks_cluster.aws_eks_cluster.certificate_authority.0.data)}",
+              "${base64decode(data.aws_eks_cluster.cndi_aws_eks_cluster.certificate_authority.0.data)}",
             config_path: "~/.kube/config",
-            host: "${data.aws_eks_cluster.aws_eks_cluster.endpoint}",
-            token: "${data.aws_eks_cluster_auth.aws_eks_cluster_auth.token}",
+            host: "${data.aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
+            token:
+              "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
           },
         },
       },

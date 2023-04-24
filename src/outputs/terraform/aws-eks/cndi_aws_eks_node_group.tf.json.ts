@@ -25,9 +25,9 @@ export default function getAWSEKServiceNodeGroupTFJSON(
     ],
     update_config: [{ max_unavailable: 1 }],
     depends_on: [
-      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_AmazonEKSWorkerNodePolicy",
-      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_AmazonEKS_CNI_Policy",
-      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_AmazonEC2ContainerRegistryReadOnly",
+      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
+      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_eks_cni_policy",
+      "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
     ],
   });
 
