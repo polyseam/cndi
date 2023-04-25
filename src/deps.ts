@@ -50,13 +50,12 @@ export {
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
 
 //  - simple-git
-export { simpleGit } from "https://esm.sh/v103/simple-git@3.15.1?no-dts&target=deno&deno-std=0.173.0&bundle&deps=@kwsites/file-exists@1.1.1";
+export { simpleGit } from "src/lib/simple-git.js";
 
 //  - crypto-js
-import CryptoJS from "https://esm.sh/v103/crypto-js@4.1.1?bundle";
+import CryptoJS from "src/lib/crypto-js.js";
 
 //  - spinners
-
 export {
   SpinnerTypes,
   TerminalSpinner,
