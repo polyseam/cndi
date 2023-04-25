@@ -8,7 +8,7 @@ export default function getAWSNATGATEWAYTFJSON(): string {
     ],
     subnet_id: "${aws_subnet.cndi_aws_subnet_public_a.id}",
     tags: {
-      Name: "InternetGateway",
+      Name: "NATGateway",
       CNDIProject: "${local.cndi_project_name}",
     },
   });
