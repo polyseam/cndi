@@ -8,7 +8,7 @@ metadata:
   type: kubernetes.io/tls
   labels:
     sealedsecrets.bitnami.com/sealed-secrets-key: active
-stringData:
+data:
   tls.crt: \${sealed_secret_cert_pem}
   tls.key: \${sealed_secret_private_key_pem}
   `.trim();
