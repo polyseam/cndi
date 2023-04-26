@@ -8,6 +8,8 @@ export default function getEBSCSIDriverTFJSON(): string {
     name: "aws-ebs-csi-driver",
     namespace: "kube-system",
     repository: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver/",
+    timeout: "600",
+    atomic: true,
     set: [
       {
         name:

@@ -10,6 +10,8 @@ export default function getCertManagerTFJSON(): string {
     repository: "https://charts.jetstack.io",
     set: [{ name: "installCRDs", value: "true" }],
     version: "1.11.1",
+    timeout    : "600",
+    atomic     :true
   }, "cndi_cert_manager_helm_chart");
   return getPrettyJSONString(resource);
 }
