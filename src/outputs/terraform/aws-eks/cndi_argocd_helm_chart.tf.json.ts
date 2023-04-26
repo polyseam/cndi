@@ -11,7 +11,7 @@ export default function getArgoATFJSON(): string {
     ],
     timeout: "600",
     atomic: true,
-    name: "argo-cd",
+    name: "argocd",
     namespace: "argocd",
     replace: true,
     repository: "https://argoproj.github.io/argo-helm",
