@@ -200,7 +200,7 @@ export default function getAWSDataTFJSON(): string {
               "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
           },
         },
-        "secret_argocd_private_repo": {
+        "argocd_private_repo_secret_manifest": {
           "template":
             '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
           "vars": {
@@ -209,7 +209,7 @@ export default function getAWSDataTFJSON(): string {
             "git_username": "${var.git_username}",
           },
         },
-        "secret_cndi_sealed_secrets_key": {
+        "sealed_secrets_secret_manifest": {
           "template": '${file("sealed_secrets_secret_manifest.yaml.tftpl")}',
           "vars": {
             "sealed_secret_cert_pem": "${var.sealed_secrets_public_key}",
@@ -223,7 +223,7 @@ export default function getAWSDataTFJSON(): string {
             "git_repo": "${var.git_repo}",
           },
         },
-        "secret_argocd_admin_password": {
+        "argocd_admin_password_secret_manifest": {
           "template":
             '${file("argocd_admin_password_secret_manifest.yaml.tftpl")}',
           "vars": {
