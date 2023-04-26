@@ -212,7 +212,8 @@ export default function getAWSDataTFJSON(): string {
         "sealed_secrets_secret_manifest": {
           "template": '${file("sealed_secrets_secret_manifest.yaml.tftpl")}',
           "vars": {
-            "sealed_secret_cert_pem": "${base64encode(var.sealed_secrets_public_key)}",
+            "sealed_secret_cert_pem":
+              "${base64encode(var.sealed_secrets_public_key)}",
             "sealed_secret_private_key_pem":
               "${base64encode(var.sealed_secrets_private_key)}",
           },
