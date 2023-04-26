@@ -16,6 +16,27 @@ const cndiWorkflowObj = {
           run: 'echo "welcome to cndi!"',
         },
         {
+          id: "lock-check",
+          uses: "github/lock@v2.0.1",
+          with: {
+            mode: "check",
+            environment: "global",
+          },
+        },
+        {
+          name: "fail if locked",
+          if: "${{ steps.lock-check.outputs.locked != 'false' }}",
+          run: "echo \"cndi cannot 'run': deployment in progress\" && exit 1",
+        },
+        {
+          id: "lock-acquire",
+          uses: "github/lock@v2.0.1",
+          with: {
+            mode: "lock",
+            environment: "global",
+          },
+        },
+        {
           name: "checkout repo",
           uses: "actions/checkout@v3",
           with: {
@@ -54,6 +75,15 @@ const cndiWorkflowObj = {
             ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
           },
           run: "cndi run",
+        },
+        {
+          id: "lock-release",
+          uses: "github/lock@v2.0.1",
+          if: "always()", // always release the lock even if `cndi run` fails
+          with: {
+            mode: "unlock",
+            environment: "global",
+          },
         },
       ],
     },
