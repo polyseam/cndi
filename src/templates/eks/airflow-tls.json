@@ -34,7 +34,7 @@
               "name": "airflow-nodes",
               "kind": "eks",
               "role": "leader",
-              "instance_type": "t3.medium",
+              "instance_type": "t3.large",
               "volume_size": 128,
               "max_count": 3
             }
