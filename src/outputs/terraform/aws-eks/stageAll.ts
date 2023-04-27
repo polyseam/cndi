@@ -37,7 +37,7 @@ import cndi_aws_subnet_private_b from "./cndi_aws_subnet_private_b.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
-import cndi_local_file_kubeconfig from "./cndi_local_file_kubeconfig.tf.json.ts";
+// import cndi_local_file_kubeconfig from "./cndi_local_file_kubeconfig.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
 import cndi_aws_efs_file_system from "./cndi_aws_efs_file_system.tf.json.ts";
 // import cndi_data_template_file_argocd_root_application_manifest from "./cndi_data_template_file_argocd_root_application_manifest.tf.json.ts";
@@ -348,14 +348,14 @@ export default async function stageTerraformResourcesForAWS(
         ),
         cndi_time_static_admin_password_update(),
       ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_local_file_kubeconfig.tf.json",
-        ),
-        cndi_local_file_kubeconfig(),
-      ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "cndi_local_file_kubeconfig.tf.json",
+      //   ),
+      //   cndi_local_file_kubeconfig(),
+      // ),
       stageFile(
         path.join(
           "cndi",
