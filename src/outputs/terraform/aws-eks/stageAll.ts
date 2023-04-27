@@ -53,6 +53,10 @@ import cndi_aws_efs_file_system from "./cndi_aws_efs_file_system.tf.json.ts";
 // import cndi_data_aws_iam_policy_document_permissions from "./cndi_data_aws_iam_policy_document_permissions.tf.json.ts";
 // import cndi_data_aws_iam_policy_document_web_identity from "./cndi_data_aws_iam_policy_document_web_identity.tf.json.ts";
 // import cndi_data_tls_certificate from "./cndi_data_tls_certificate.tf.json.ts";
+import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_password_secret_manifest.tf.json.ts";
+import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
+import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
+import cndi_sealed_secrets_secret_manifest from "./cndi_sealed_secrets_secret_manifest.tf.json.ts";
 import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
 import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
 import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
@@ -127,6 +131,7 @@ export default async function stageTerraformResourcesForAWS(
         ),
         getArgoRootApplicationManifestYamlTftpl(),
       ),
+
       stageFile(
         path.join(
           "cndi",
@@ -142,6 +147,38 @@ export default async function stageTerraformResourcesForAWS(
           "sealed_secrets_secret_manifest.yaml.tftpl",
         ),
         getSealedSecretsKeyYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_admin_password_secret_manifest.tf.json",
+        ),
+        cndi_argocd_admin_password_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_sealed_secrets_secret_manifest.tf.json",
+        ),
+        cndi_sealed_secrets_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_private_repo_secret_manifest.tf.json",
+        ),
+        cndi_argocd_private_repo_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_root_application_manifest.tf.json",
+        ),
+        cndi_argocd_root_application_manifest(),
       ),
       // stageFile(
       //   path.join(
