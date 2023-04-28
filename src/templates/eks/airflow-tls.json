@@ -162,9 +162,7 @@
                   {
                     "name": "$.cndi.prompts.responses.airflowDomainName",
                     "tls": {
-                      "secretName": "lets-encrypt-private-key",
-                      "enabled": true,
-                      "storageClassName":"efs"
+                      "secretName": "lets-encrypt-private-key"                   
                     }
                   }
                 ]
@@ -173,7 +171,8 @@
             "logs": {
               "persistence": {
                 "enabled": true,
-                "size": "15Gi"
+                "size": "15Gi",
+                "storageClassName":"efs"
               }
             },
             "createUserJob": {
