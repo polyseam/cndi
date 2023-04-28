@@ -3,7 +3,7 @@ export default function getSealedSecretsKeyYamlTftpl() {
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cndi-sealed-secrets-key
+  name: sealed-secrets-key
   namespace: kube-system
   type: kubernetes.io/tls
   labels:
