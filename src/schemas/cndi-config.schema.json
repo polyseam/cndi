@@ -34,17 +34,6 @@
               "$comment": "An array of CNDI cluster nodes to deploy.",
               "minItems": 1,
               "type": "array",
-              "contains": {
-                "type": "object",
-                "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
-                "required": ["role"],
-                "properties": {
-                  "role": {
-                    "type": "string",
-                    "pattern": "leader"
-                  }
-                }
-              },
               "items": {
                 "type": "object",
                 "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
@@ -57,7 +46,7 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "gcp", "azure"]
+                    "enum": ["aws", "eks", "gcp", "azure"]
                   },
                   "role": {
                     "type": "string",

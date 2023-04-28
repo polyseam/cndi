@@ -1,4 +1,4 @@
-import { ccolors } from "deps";
+import { ccolors, nonMicrok8sNodeKinds } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { emitExitEvent } from "src/utils.ts";
 
@@ -137,7 +137,11 @@ export default async function validateConfig(
       ({ role }) => role === "leader",
     ).length;
 
-  if (numberOfNodesWithRoleLeader !== 1) {
+  const isMicrok8sCluster = !nonMicrok8sNodeKinds.includes(
+    config?.infrastructure?.cndi?.nodes[0]?.kind,
+  );
+
+  if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
     console.error(
       cndiConfigLabel,
       ccolors.error("cndi-config file found was at"),
@@ -148,7 +152,7 @@ export default async function validateConfig(
       ccolors.key_name('"role"'),
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node."),
+      ccolors.error("There must be exactly one leader node when using microk8s based clusters."),
     );
     await emitExitEvent(907);
     Deno.exit(907);
