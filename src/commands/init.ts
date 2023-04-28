@@ -183,9 +183,10 @@ const initCommand = new Command()
       readme = templateResult.readme;
       env = templateResult.env;
     } else {
+      const nodeKind = cndiConfig!.infrastructure.cndi.nodes[0].kind;
       readme = getReadmeForProject({
         project_name,
-        deploymentTarget: getDeploymentTargetFromConfig(cndiConfig!),
+        nodeKind,
       });
 
       env = await getCoreEnvLines(

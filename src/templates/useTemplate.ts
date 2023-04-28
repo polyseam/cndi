@@ -202,7 +202,7 @@ export default async function useTemplate(
   const env = [...coreEnvLines, ...templateEnvLines];
 
   const coreReadme = await getReadmeForProject({
-    deploymentTarget: templateObject.readme.extend_basic_readme,
+    nodeKind: templateObject.readme.extend_basic_readme,
     project_name: opt.project_name,
   });
 
