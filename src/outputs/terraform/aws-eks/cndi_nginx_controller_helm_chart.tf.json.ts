@@ -16,6 +16,14 @@ export default function getNginxControllerTFJSON(): string {
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
         value: "nlb",
       },
+      {
+        "name": "controller.ingressClassResource.default",
+        "value": "true",
+      },
+      {
+        "name": "controller.ingressClassResource.name",
+        "value": "public",
+      },
     ],
     version: "4.6.0",
   }, "cndi_nginx_controller_helm_chart");
