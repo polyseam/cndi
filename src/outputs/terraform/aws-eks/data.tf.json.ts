@@ -186,20 +186,6 @@ export default function getAWSDataTFJSON(): string {
         },
       },
       "template_file": {
-        "kubeconfig": {
-          "template": '${file("kubeconfig.yaml.tftpl")}',
-          "vars": {
-            "cluster_ca_certificate":
-              "${aws_eks_cluster.cndi_aws_eks_cluster.certificate_authority[0].data}",
-            "cluster_endpoint":
-              "${aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
-            "cluster_name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
-            "cluster_user_arn": "${aws_eks_cluster.cndi_aws_eks_cluster.arn}",
-            "region": "${local.aws_region}",
-            "token":
-              "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
-          },
-        },
         "argocd_private_repo_secret_manifest": {
           "template":
             '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',

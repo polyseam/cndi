@@ -67,7 +67,7 @@ import data from "./data.tf.json.ts";
 import getSealedSecretsKeyYamlTftpl from "./templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
 import getArgoAdminPasswordSecretManifestYamlTftpl from "./templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretYamlTftpl from "./templates/argocd_private_repo_secret_manifest.yaml.tftpl.ts";
-import getKubeConfigYamlTftpl from "./templates/kubeconfig.yaml.tftpl.ts";
+// import getKubeConfigYamlTftpl from "./templates/kubeconfig.yaml.tftpl.ts";
 import getArgoRootApplicationManifestYamlTftpl from "./templates/argocd_root_application_manifest.yaml.tftpl.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
@@ -132,14 +132,14 @@ export default async function stageTerraformResourcesForAWS(
         getArgoRootApplicationManifestYamlTftpl(),
       ),
 
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "kubeconfig.yaml.tftpl",
-        ),
-        getKubeConfigYamlTftpl(),
-      ),
+      // stageFile(
+      //   path.join(
+      //     "cndi",
+      //     "terraform",
+      //     "kubeconfig.yaml.tftpl",
+      //   ),
+      //   getKubeConfigYamlTftpl(),
+      // ),
       stageFile(
         path.join(
           "cndi",
