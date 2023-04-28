@@ -155,7 +155,8 @@
               "web": {
                 "enabled": true,
                 "annotations": {
-                  "cert-manager.io/cluster-issuer": "lets-encrypt"
+                  "cert-manager.io/cluster-issuer": "lets-encrypt",
+                  "kubernetes.io/ingress.class": "nginx"
                 },
                 "hosts": [
                   {
