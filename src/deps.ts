@@ -94,3 +94,5 @@ export const NODE_DISK_SIZE_KEY = {
   gcp: "size" as const,
   azure: "disk_size_gb" as const,
 };
+
+export const nonMicrok8sNodeKinds = ["eks"];
