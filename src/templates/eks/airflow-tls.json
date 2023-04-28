@@ -71,7 +71,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "class": "nginx"
+                      "class": "public"
                     }
                   }
                 }
@@ -89,8 +89,7 @@
               "cert-manager.io/cluster-issuer": "lets-encrypt",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
-              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-              "kubernetes.io/ingress.class": "nginx"
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
             }
           },
           "spec": {
@@ -162,7 +161,7 @@
                   {
                     "name": "$.cndi.prompts.responses.airflowDomainName",
                     "tls": {
-                      "secretName": "lets-encrypt-private-key"                   
+                      "secretName": "lets-encrypt-private-key"
                     }
                   }
                 ]
@@ -172,7 +171,7 @@
               "persistence": {
                 "enabled": true,
                 "size": "15Gi",
-                "storageClassName":"efs"
+                "storageClassName": "efs"
               }
             },
             "createUserJob": {
