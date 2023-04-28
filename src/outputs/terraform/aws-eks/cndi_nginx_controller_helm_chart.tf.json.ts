@@ -17,6 +17,10 @@ export default function getNginxControllerTFJSON(): string {
         value: "nlb",
       },
       {
+        "name": "controller.ingressClassResource.default",
+        "value": "true",
+      },
+      {
         "name": "controller.ingressClassResource.name",
         "value": "public",
       },
