@@ -7,7 +7,6 @@ import {
   TERRAFORM_VERSION,
   UpgradeCommand,
   UpgradeOptions,
-  writableStreamFromWriter,
 } from "deps";
 
 import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
@@ -45,9 +44,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           write: true,
           mode: 0o777,
         });
-        const cndiWritableStream = writableStreamFromWriter(cndiFile);
-        await response.body.pipeTo(cndiWritableStream);
-        cndiFile.close();
+        await response.body.pipeTo(cndiFile.writable);
       }
       spinner.stop();
       const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
