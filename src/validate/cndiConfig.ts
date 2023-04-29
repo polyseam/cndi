@@ -152,7 +152,9 @@ export default async function validateConfig(
       ccolors.key_name('"role"'),
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node when using microk8s based clusters."),
+      ccolors.error(
+        "There must be exactly one leader node when using microk8s based clusters.",
+      ),
     );
     await emitExitEvent(907);
     Deno.exit(907);

@@ -47,6 +47,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         });
         const cndiWritableStream = writableStreamFromWriter(cndiFile);
         await response.body.pipeTo(cndiWritableStream);
+        cndiFile.close();
       }
       spinner.stop();
       const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
