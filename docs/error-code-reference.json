@@ -225,6 +225,10 @@
   },
   {
     "code": 1008,
-    "message": "failed to write tf state 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to write tf state, 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+  },
+  {
+    "code": 1100,
+    "message": "failed to upgrade cndi, release binary fetch not ok"
   }
 ]

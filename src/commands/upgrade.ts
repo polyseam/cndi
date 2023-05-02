@@ -38,13 +38,22 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     );
     try {
       const response = await fetch(binaryUrl);
-      if (response.body) {
+      if (response.body && response.status === 200) {
         const cndiFile = await Deno.open(destinationPath, {
           create: true,
           write: true,
           mode: 0o777,
         });
         await response.body.pipeTo(cndiFile.writable);
+      } else {
+        spinner.stop();
+        console.error(
+          upgradeLabel,
+          ccolors.error(
+            `\nfailed to upgrade ${name} - http response status ${response.status}`,
+          ),
+        );
+        Deno.exit(1100);
       }
       spinner.stop();
       const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
