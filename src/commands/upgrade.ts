@@ -44,7 +44,8 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           write: true,
           mode: 0o777,
         });
-        await response.body.pipeTo(cndiFile.writable);
+        await response.body.pipeTo(cndiFile.writable, { preventClose: true });
+        cndiFile.close();
       } else {
         spinner.stop();
         console.error(
