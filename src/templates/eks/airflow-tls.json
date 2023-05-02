@@ -161,7 +161,8 @@
                   {
                     "name": "$.cndi.prompts.responses.airflowDomainName",
                     "tls": {
-                      "secretName": "lets-encrypt-private-key"
+                      "secretName": "lets-encrypt-private-key",
+                      "enabled": true
                     }
                   }
                 ]
