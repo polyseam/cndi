@@ -2,7 +2,6 @@
 
 export { copy } from "https://deno.land/std@0.180.0/streams/copy.ts";
 export { SEP } from "https://deno.land/std@0.180.0/path/mod.ts";
-export { writableStreamFromWriter } from "https://deno.land/std@0.180.0/streams/writable_stream_from_writer.ts";
 export { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 export * as path from "https://deno.land/std@0.180.0/path/mod.ts";
 export { stringify } from "https://deno.land/std@0.180.0/encoding/yaml.ts";
@@ -78,7 +77,7 @@ export const ccolors = {
 };
 
 // constants
-export const TERRAFORM_VERSION = "1.3.2";
+export const TERRAFORM_VERSION = "1.4.6";
 export const KUBESEAL_VERSION = "0.19.1";
 
 export const DEFAULT_INSTANCE_TYPES = {
