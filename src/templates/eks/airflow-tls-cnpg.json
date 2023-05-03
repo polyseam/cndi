@@ -290,7 +290,8 @@
       },
       {
         "name": "POSTGRESQL_PROTOCOL",
-        "default": "postgresql"
+        "default": "postgresql",
+        "type": "Input"
       },
       {
         "name": "POSTGRESQL_USER",
@@ -304,11 +305,13 @@
       },
       {
         "name": "POSTGRESQL_HOST",
-        "default": "cnpg-cluster-rw"
+        "default": "cnpg-cluster-rw",
+        "type": "Input"
       },
       {
         "name": "POSTGRESQL_PORT",
-        "default": "5432"
+        "default": "5432",
+        "type": "Input"
       },
       {
         "name": "POSTGRESQL_DB",
@@ -317,15 +320,18 @@
       },
       {
         "name": "POSTGRESQL_SSLMODE",
-        "default": "disable"
+        "default": "disable",
+        "type": "Input"
       },
       {
         "name": "POSTGRESQL_CONNECTION_STRING",
-        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE"
+        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
+        "type": "Input"
       },
       {
         "name": "POSTGRESQL_CLUSTER_SUPERUSER",
         "default": "postgres"
+        ,"type": "Input"
       },
       {
         "type": "Comment",
