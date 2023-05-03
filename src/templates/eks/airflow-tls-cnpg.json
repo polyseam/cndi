@@ -26,6 +26,12 @@
         "type": "Input"
       },
       {
+        "message": "Please enter the name of the postgresql database",
+        "default": "cnpg-db",
+        "name": "postgreSQLDatabaseName",
+        "type": "Input"
+      },
+      {
         "message": "Please enter postgresql user you want to use for your postgresql databse:",
         "default": "admin",
         "name": "postgreSQLUserName",
@@ -38,9 +44,33 @@
         "type": "Input"
       },
       {
-        "message": "Please enter the name of the postgresql database",
-        "default": "cnpg-db",
-        "name": "postgreSQLDatabaseName",
+        "name": "POSTGRESQL_PROTOCOL",
+        "default": "postgresql",
+        "type": "Input"
+      },
+      {
+        "name": "POSTGRESQL_HOST",
+        "default": "cnpg-cluster-rw",
+        "type": "Input"
+      },
+      {
+        "name": "POSTGRESQL_PORT",
+        "default": "5432",
+        "type": "Input"
+      },
+      {
+        "name": "POSTGRESQL_SSLMODE",
+        "default": "disable",
+        "type": "Input"
+      },
+      {
+        "name": "POSTGRESQL_CONNECTION_STRING",
+        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
+        "type": "Input"
+      },
+      {
+        "name": "POSTGRESQL_CLUSTER_SUPERUSER",
+        "default": "postgres",
         "type": "Input"
       }
     ],
@@ -330,8 +360,8 @@
       },
       {
         "name": "POSTGRESQL_CLUSTER_SUPERUSER",
-        "default": "postgres"
-        ,"type": "Input"
+        "default": "postgres",
+        "type": "Input"
       },
       {
         "type": "Comment",
