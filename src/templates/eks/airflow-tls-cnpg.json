@@ -24,61 +24,8 @@
         "default": "admin@example.com",
         "name": "letsEncryptClusterIssuerEmailAddress",
         "type": "Input"
-      },
-      {
-        "message": "Please enter the name of the postgresql database",
-        "default": "cnpg-db",
-        "name": "POSTGRESQL_DB",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql user you want to use for your postgresql database:",
-        "default": "admin",
-        "name": "POSTGRESQL_USER",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql password you want to use for your postgresql database:",
-        "default": "password",
-        "name": "POSTGRESQL_PASSWORD",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql protocol you want to use for your postgresql database:",
-        "name": "POSTGRESQL_PROTOCOL",
-        "default": "postgresql",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql host you want to use for your postgresql database:",
-        "name": "POSTGRESQL_HOST",
-        "default": "cnpg-cluster-rw",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql port you want to use for your postgresql database:",
-        "name": "POSTGRESQL_PORT ",
-        "default": "5432",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql ssl mode you want to use for your postgresql database:",
-        "name": "POSTGRESQL_SSLMODE",
-        "default": "disable",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql connection string you want to use to connect your postgresql database:",
-        "name": "POSTGRESQL_CONNECTION_STRING",
-        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql cluster superuser you want to use for your postgresql cluster:",
-        "name": "POSTGRESQL_CLUSTER_SUPERUSER",
-        "default": "postgres",
-        "type": "Input"
       }
+      
     ],
     "template": {
       "infrastructure": {
