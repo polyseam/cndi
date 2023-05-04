@@ -28,47 +28,47 @@
       {
         "message": "Please enter the name of the postgresql database",
         "default": "cnpg-db",
-        "name": "postgreSQLDatabaseName",
+        "name": "POSTGRESQL_DB",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql user you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql user you want to use for your postgresql database:",
         "default": "admin",
-        "name": "postgreSQLUserName",
+        "name": "POSTGRESQL_USER",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql password you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql password you want to use for your postgresql database:",
         "default": "password",
-        "name": "postgreSQLDatabasePasswordAuthentication",
+        "name": "POSTGRESQL_PASSWORD",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql protocol you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql protocol you want to use for your postgresql database:",
         "name": "POSTGRESQL_PROTOCOL",
         "default": "postgresql",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql host you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql host you want to use for your postgresql database:",
         "name": "POSTGRESQL_HOST",
         "default": "cnpg-cluster-rw",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql port you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql port you want to use for your postgresql database:",
         "name": "POSTGRESQL_PORT ",
         "default": "5432",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql ssl mode you want to use for your postgresql databse:",
+        "message": "Please enter the postgresql ssl mode you want to use for your postgresql database:",
         "name": "POSTGRESQL_SSLMODE",
         "default": "disable",
         "type": "Input"
       },
       {
-        "message": "Please enter the postgresql connection string you want to use to connect your postgresql databse:",
+        "message": "Please enter the postgresql connection string you want to use to connect your postgresql database:",
         "name": "POSTGRESQL_CONNECTION_STRING",
         "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
         "type": "Input"
@@ -107,11 +107,11 @@
             "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_SYNC_PASSWORD)"
           }
         },
-        "custom-airflow-metadata-secret": {
+        "postgresql-connection-string-secret": {
           "apiVersion": "v1",
           "kind": "Secret",
           "metadata": {
-            "name": "custom-metadata-secret"
+            "name": "postgresql-connection-string-secret"
           },
           "type": "Opaque",
           "stringData": {
@@ -137,17 +137,21 @@
             },
             "postgresql": {
               "pg_hba": [
-                "host $.cndi.prompts.responses.postgreSQLDatabaseName $.cndi.prompts.responses.postgreSQLUserName all password"
+                "host $.cndi.prompts.responses.POSTGRESQL_DB $.cndi.prompts.responses.POSTGRESQL_USER all password"
               ]
             },
             "bootstrap": {
               "initdb": {
-                "database": "https://$.cndi.prompts.responses.postgreSQLDatabaseName",
-                "owner": "https://$.cndi.prompts.responses.postgreSQLUserName",
-                "secret": { "name": "cnpg-database-user-auth-secret" }
+                "database": "https://$.cndi.prompts.responses.POSTGRESQL_DB",
+                "owner": "https://$.cndi.prompts.responses.POSTGRESQL_USER",
+                "secret": {
+                  "name": "cnpg-database-user-auth-secret"
+                }
               }
             },
-            "superuserSecret": { "name": "cnpg-cluster-superuser-auth-secret" }
+            "superuserSecret": {
+              "name": "cnpg-cluster-superuser-auth-secret"
+            }
           }
         },
         "cnpg-cluster-superuser-auth-secret": {
@@ -215,7 +219,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": [
+                  "$.cndi.prompts.responses.argocdDomainName"
+                ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
@@ -257,7 +263,7 @@
           "chart": "airflow",
           "values": {
             "data": {
-              "metadataSecretName": "custom-airflow-metadata-secret"
+              "metadataSecretName": "postgresql-connection-string-secret"
             },
             "postgresql": {
               "enabled": false
@@ -325,46 +331,55 @@
         "comment": "PostgreSQL connection parameters"
       },
       {
+        "message": "Please enter the name of the postgresql database",
+        "default": "cnpg-db",
+        "name": "POSTGRESQL_DB",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql user you want to use for your postgresql database:",
+        "default": "admin",
+        "name": "POSTGRESQL_USER",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql password you want to use for your postgresql database:",
+        "default": "password",
+        "name": "POSTGRESQL_PASSWORD",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql protocol you want to use for your postgresql database:",
         "name": "POSTGRESQL_PROTOCOL",
         "default": "postgresql",
         "type": "Input"
       },
       {
-        "name": "POSTGRESQL_USER",
-        "message": "Please enter postgresql user you want to use for your postgresql databse:",
-        "type": "Input"
-      },
-      {
-        "name": "POSTGRESQL_PASSWORD",
-        "message": "Please enter postgresql password you want to use for your postgresql databse:",
-        "type": "Input"
-      },
-      {
+        "message": "Please enter the postgresql host you want to use for your postgresql database:",
         "name": "POSTGRESQL_HOST",
         "default": "cnpg-cluster-rw",
         "type": "Input"
       },
       {
-        "name": "POSTGRESQL_PORT",
+        "message": "Please enter the postgresql port you want to use for your postgresql database:",
+        "name": "POSTGRESQL_PORT ",
         "default": "5432",
         "type": "Input"
       },
       {
-        "name": "POSTGRESQL_DB",
-        "message": "Please enter the name of the postgresql database",
-        "type": "Input"
-      },
-      {
+        "message": "Please enter the postgresql ssl mode you want to use for your postgresql database:",
         "name": "POSTGRESQL_SSLMODE",
         "default": "disable",
         "type": "Input"
       },
       {
+        "message": "Please enter the postgresql connection string you want to use to connect your postgresql database:",
         "name": "POSTGRESQL_CONNECTION_STRING",
         "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
         "type": "Input"
       },
       {
+        "message": "Please enter the postgresql cluster superuser you want to use for your postgresql cluster:",
         "name": "POSTGRESQL_CLUSTER_SUPERUSER",
         "default": "postgres",
         "type": "Input"
