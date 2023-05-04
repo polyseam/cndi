@@ -221,21 +221,13 @@ and add the DNS Name of your load balancer to it
 
 ![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-connect.png)
 
-In order to login to Argocd, we have to get the password from within the
-cluster. Run the command below in the terminal of one of the cluster nodes:
-
-```shell
-sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-```
-
-save that password and then go to the Argocd domain URL that you specified in
-the interactive prompt
-
-You should now see a login page for Argocd, and a place to enter a username and
-password. The username is `admin` and the password is the text you copied in the
-previous step.
+Go to the Argocd domain URL that you specified in the interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
+
+You should now see a login page for Argocd, you will need the username is `admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the .env located in your CNDI project folder
+
+![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-1.png)
 
@@ -291,9 +283,8 @@ Airflow and Argocd
 - Commit changes
 - Push your code changes to the repository
 
-**If you want to take down the entire cluster:**
+**If you want to take down the entire cluster run:**
 
-- Delete all the files in your `cndi/terraform` directory
-- Create an empty called `destroy.tf` in the `cndi/terraform` directory
-- Commit changes
-- Push your code changes to the repository
+```bash
+`cndi destroy`
+```

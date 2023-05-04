@@ -225,24 +225,14 @@ which will in turn route traffic into our cluster.
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
 
-In order to login to ArgoCD we have to get the password from within the cluster
-by runnig the following command on one of the newly deployed CNDI nodes shown:
+Go to the Argocd domain URL that you specified in the interactive prompt
 
-```bash
-# this command will print out the default ArgoCD password
-sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-```
+![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
-- Take note of that password and then go to the ArgoCD domain name that you just
-  updated in your registrar.
+You should now see a login page for Argocd, you will need the username is `admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the .env located in your CNDI project folder
 
-You should now see a login page for Argo, and a place to enter a username and
-password. The username is `admin` and the password is the text you copied in the
-previous step.
+![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
-![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-0.png)
-
-![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-1.png)
 
 Notice that the `cluster_manifests` stored in the GitHub repository match the
 resources displayed in the ArgoCD UI
@@ -296,9 +286,8 @@ Airflow and Argocd
 - Commit changes
 - Push your code changes to the repository
 
-**If you want to take down the entire cluster:**
+**If you want to take down the entire cluster run:**
 
-- Delete all the files in your cndi/terraform directory
-- Create an empty called destroy.tf in the cndi/terraform directory
-- Commit changes
-- Push your code changes to the repository
+```bash
+`cndi destroy`
+```
