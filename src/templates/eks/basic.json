@@ -22,6 +22,8 @@
               "name": "my-nodes",
               "kind": "eks",
               "volume_size": 128,
+              "instance_type": "t3.large",
+              "min_count": 1,
               "max_count": 3
             }
           ]
@@ -45,7 +47,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "class": "public"
+                      "ingressClassName": "public"
                     }
                   }
                 }

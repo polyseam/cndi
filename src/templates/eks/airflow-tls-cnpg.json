@@ -25,7 +25,6 @@
         "name": "letsEncryptClusterIssuerEmailAddress",
         "type": "Input"
       }
-      
     ],
     "template": {
       "infrastructure": {
@@ -36,6 +35,7 @@
               "kind": "eks",
               "instance_type": "t3.large",
               "volume_size": 128,
+              "min_count": 1,
               "max_count": 3
             }
           ]
@@ -71,7 +71,10 @@
           "kind": "Cluster",
           "metadata": {
             "name": "cnpg-cluster",
-            "namespace": "airflow"
+            "namespace": "airflow",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": {"SkipDryRunOnMissingResource":true}
+            }
           },
           "spec": {
             "imageName": "ghcr.io/cloudnative-pg/postgresql:15.2",
@@ -213,6 +216,7 @@
           "repoURL": "https://airflow.apache.org",
           "chart": "airflow",
           "values": {
+            "executor": "LocalKubernetesExecutor",
             "data": {
               "metadataSecretName": "postgresql-connection-string-secret"
             },

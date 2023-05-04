@@ -13,14 +13,13 @@
         "message": "Please enter the domain name you want argocd to be accessible on:",
         "type": "Input"
       },
-    
+
       {
         "message": "Please enter the email address you want to use for lets encrypt:",
         "default": "admin@example.com",
         "name": "letsEncryptClusterIssuerEmailAddress",
         "type": "Input"
       }
-      
     ],
     "template": {
       "infrastructure": {
@@ -31,13 +30,13 @@
               "kind": "eks",
               "instance_type": "t3.large",
               "volume_size": 128,
+              "min_count": 1,
               "max_count": 3
             }
           ]
         }
       },
       "cluster_manifests": {
-        
         "postgresql-connection-string-secret": {
           "apiVersion": "v1",
           "kind": "Secret",
@@ -53,7 +52,11 @@
           "apiVersion": "postgresql.cnpg.io/v1",
           "kind": "Cluster",
           "metadata": {
-            "name": "cnpg-cluster"
+            "name": "cnpg-cluster",
+            "namespace": "argocd",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": {"SkipDryRunOnMissingResource":true}
+            }
           },
           "spec": {
             "imageName": "ghcr.io/cloudnative-pg/postgresql:15.2",
@@ -89,7 +92,8 @@
           "apiVersion": "v1",
           "kind": "Secret",
           "metadata": {
-            "name": "cnpg-cluster-superuser-auth-secret"
+            "name": "cnpg-cluster-superuser-auth-secret",
+            "namespace": "argocd"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -101,7 +105,8 @@
           "apiVersion": "v1",
           "kind": "Secret",
           "metadata": {
-            "name": "cnpg-database-user-auth-secret"
+            "name": "cnpg-database-user-auth-secret",
+            "namespace": "argocd"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -187,7 +192,6 @@
           "repoURL": "https://cloudnative-pg.github.io/charts",
           "chart": "cloudnative-pg"
         }
-
       }
     }
   },
@@ -252,7 +256,6 @@
         "default": "postgres",
         "type": "Input"
       }
-     
     ]
   },
   "readme": {
