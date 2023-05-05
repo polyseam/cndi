@@ -67,7 +67,7 @@ main() {
         . "$HOME/$shell_profile"
     fi
     
-    echo "Run 'cndi --help' to get started!"
+    echo "Please restart your terminal then run 'cndi --help' to get started!"
 }
 
 main "$@"
