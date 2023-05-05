@@ -41,7 +41,7 @@ main() {
     # set shell profile for user shell
     case "$SHELL" in
         /bin/zsh) shell_profile=".zshrc" ;;
-        *) shell_profile=".bash_profile" ;;
+        *) shell_profile=".bashrc" ;;
     esac
     
     # if $cndi_install is not in $PATH
