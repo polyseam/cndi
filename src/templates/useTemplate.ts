@@ -79,7 +79,6 @@ interface TemplateEnvEntry {
   comment?: string;
   name?: string;
   value?: string;
-  do_not_wrap?: boolean;
 }
 
 interface TemplateEnvCommentEntry extends TemplateEnvEntry {
@@ -93,16 +92,16 @@ interface TemplateEnvValueEntry extends TemplateEnvEntry {
 
 interface Template {
   prompts: Array<TemplatePrompt>;
-  "cndi-config": {
-    template: CNDIConfig;
-  };
-  "env": {
-    entries?: Array<TemplateEnvCommentEntry | TemplateEnvValueEntry>;
-    extend_basic_env: DeploymentTarget;
-  };
-  "readme": {
-    extend_basic_readme: DeploymentTarget;
-    template?: string;
+  outputs: {
+    "cndi-config": CNDIConfig;
+    "env": {
+      entries?: Array<TemplateEnvCommentEntry | TemplateEnvValueEntry>;
+      extend_basic_env: DeploymentTarget;
+    };
+    "readme": {
+      extend_basic_readme: DeploymentTarget;
+      template_section?: string;
+    };
   };
 }
 
@@ -198,7 +197,7 @@ export default async function useTemplate(
 
   const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,
-    templateObject.env.extend_basic_env,
+    templateObject.outputs.env.extend_basic_env,
     interactive,
   );
 
@@ -225,7 +224,7 @@ export default async function useTemplate(
     : defaultCndiConfigValues;
 
   const cndiConfigStringified = JSON.stringify(
-    templateObject["cndi-config"],
+    templateObject.outputs["cndi-config"],
   );
 
   const literalizedCndiConfig = literalizeTemplateValuesInString(
@@ -244,7 +243,7 @@ export default async function useTemplate(
 
   const templateEnvLines = [];
 
-  for (const p of templateObject?.env?.entries || []) {
+  for (const p of templateObject?.outputs?.env?.entries || []) {
     if (p.comment?.length) {
       const { comment } = p;
       templateEnvLines.push({ comment } as EnvCommentEntry);
@@ -272,14 +271,14 @@ export default async function useTemplate(
   const env = [...coreEnvLines, ...templateEnvLines];
 
   const coreReadme = await getReadmeForProject({
-    nodeKind: templateObject.readme.extend_basic_readme,
+    nodeKind: templateObject.outputs.readme.extend_basic_readme,
     project_name: opt.project_name,
   });
 
-  const templateReadmeText = templateObject.readme?.template
+  const templateReadmeText = templateObject.outputs?.readme?.template_section
     ? literalizeTemplateValuesInString(
       cndiConfigPromptResponses,
-      templateObject.readme.template,
+      templateObject.outputs.readme.template_section,
     )
     : "";
 
