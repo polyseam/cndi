@@ -37,6 +37,7 @@
   ],
   "outputs": {
     "cndi-config": {
+      "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
           "nodes": [
