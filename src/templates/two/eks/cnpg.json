@@ -1,32 +1,44 @@
 {
-  "cndi-config": {
-    "prompts": [
-      {
-        "name": "dagRepoUrl",
-        "default": "https://github.com/polyseam/demo-dag-bag",
-        "message": "Please enter the url of the git repo containing your dags:",
-        "type": "Input"
-      },
-      {
-        "name": "argocdDomainName",
-        "default": "argocd.example.com",
-        "message": "Please enter the domain name you want argocd to be accessible on:",
-        "type": "Input"
-      },
-
-      {
-        "message": "Please enter the email address you want to use for lets encrypt:",
-        "default": "admin@example.com",
-        "name": "letsEncryptClusterIssuerEmailAddress",
-        "type": "Input"
-      }
-    ],
-    "template": {
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the username for your postgresql admin:",
+      "default": "admin",
+      "name": "postgresqlUser",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the postgresql password you want to use for your postgresql database:",
+      "default": "password",
+      "name": "postgresqlPassword",
+      "type": "Secret"
+    },
+    {
+      "message": "Please enter the name for the postgresql database you want to use:",
+      "default": "my-pgdatabase",
+      "name": "postgresqlDb",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
           "nodes": [
             {
-              "name": "cnpg-nodes",
+              "name": "pg-nodes",
               "kind": "eks",
               "instance_type": "t3.large",
               "volume_size": 128,
@@ -41,7 +53,8 @@
           "apiVersion": "v1",
           "kind": "Secret",
           "metadata": {
-            "name": "postgresql-connection-string-secret"
+            "name": "postgresql-connection-string-secret",
+            "namespace": "default"
           },
           "type": "Opaque",
           "stringData": {
@@ -53,7 +66,7 @@
           "kind": "Cluster",
           "metadata": {
             "name": "cnpg-cluster",
-            "namespace": "argocd",
+            "namespace": "default",
             "annotations": {
               "argocd.argoproj.io/sync-options": {
                 "SkipDryRunOnMissingResource": true
@@ -73,13 +86,13 @@
             },
             "postgresql": {
               "pg_hba": [
-                "host $.cndi.prompts.responses.POSTGRESQL_DB $.cndi.prompts.responses.POSTGRESQL_USER all password"
+                "host {{ $.cndi.prompts.responses.postgresqlDb }} {{ $.cndi.prompts.responses.postgresqlUser }} all password"
               ]
             },
             "bootstrap": {
               "initdb": {
-                "database": "https://$.cndi.prompts.responses.POSTGRESQL_DB",
-                "owner": "https://$.cndi.prompts.responses.POSTGRESQL_USER",
+                "database": "https://{{ $.cndi.prompts.responses.postgresqlDb }}",
+                "owner": "https://{{ $.cndi.prompts.responses.postgresqlUser }}",
                 "secret": {
                   "name": "cnpg-database-user-auth-secret"
                 }
@@ -95,7 +108,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-cluster-superuser-auth-secret",
-            "namespace": "argocd"
+            "namespace": "default"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -108,7 +121,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-database-user-auth-secret",
-            "namespace": "argocd"
+            "namespace": "default"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -124,7 +137,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -157,15 +170,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": [
-                  "$.cndi.prompts.responses.argocdDomainName"
-                ],
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -195,73 +206,55 @@
           "chart": "cloudnative-pg"
         }
       }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "entries": [
+        {
+          "type": "Comment",
+          "comment": "PostgreSQL connection parameters"
+        },
+        {
+          "name": "POSTGRESQL_DB",
+          "value": "{{ $.cndi.prompts.responses.postgresqlDb }}"
+        },
+        {
+          "name": "POSTGRESQL_USER",
+          "value": "{{ $.cndi.prompts.responses.postgresqlUser }}"
+        },
+        {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.postgresqlPassword }}"
+        },
+        {
+          "name": "POSTGRESQL_PROTOCOL",
+          "value": "postgresql"
+        },
+        {
+          "name": "POSTGRESQL_HOST",
+          "value": "cnpg-cluster-rw"
+        },
+        {
+          "name": "POSTGRESQL_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "POSTGRESQL_SSLMODE",
+          "value": "disable"
+        },
+        {
+          "name": "POSTGRESQL_CONNECTION_STRING",
+          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE"
+        },
+        {
+          "name": "POSTGRESQL_CLUSTER_SUPERUSER",
+          "value": "postgres"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template": "## cloudnative-pg\n\nThis template deploys a Standalone production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts)"
     }
-  },
-  "env": {
-    "extend_basic_env": "aws",
-    "prompts": [
-      {
-        "type": "Comment",
-        "comment": "PostgreSQL connection parameters"
-      },
-      {
-        "message": "Please enter the name of the postgresql database",
-        "default": "cnpg-db",
-        "name": "POSTGRESQL_DB",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql user you want to use for your postgresql database:",
-        "default": "admin",
-        "name": "POSTGRESQL_USER",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql password you want to use for your postgresql database:",
-        "default": "password",
-        "name": "POSTGRESQL_PASSWORD",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql protocol you want to use for your postgresql database:",
-        "name": "POSTGRESQL_PROTOCOL",
-        "default": "postgresql",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql host you want to use for your postgresql database:",
-        "name": "POSTGRESQL_HOST",
-        "default": "cnpg-cluster-rw",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql port you want to use for your postgresql database:",
-        "name": "POSTGRESQL_PORT ",
-        "default": "5432",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql ssl mode you want to use for your postgresql database:",
-        "name": "POSTGRESQL_SSLMODE",
-        "default": "disable",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql connection string you want to use to connect your postgresql database:",
-        "name": "POSTGRESQL_CONNECTION_STRING",
-        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the postgresql cluster superuser you want to use for your postgresql cluster:",
-        "name": "POSTGRESQL_CLUSTER_SUPERUSER",
-        "default": "postgres",
-        "type": "Input"
-      }
-    ]
-  },
-  "readme": {
-    "extend_basic_readme": "aws",
-    "template": "## cloudnative-pg\n\nThis template deploys a Standalone production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts)"
   }
 }

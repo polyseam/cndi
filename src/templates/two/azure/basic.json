@@ -1,38 +1,39 @@
 {
-  "cndi-config": {
-    "prompts": [
-      {
-        "name": "argocdDomainName",
-        "default": "argocd.example.com",
-        "message": "Please enter the domain name you want argocd to be accessible on:",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the email address you want to use for lets encrypt:",
-        "default": "admin@example.com",
-        "name": "letsEncryptClusterIssuerEmailAddress",
-        "type": "Input"
-      }
-    ],
-    "template": {
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
           "nodes": [
             {
-              "name": "x-node",
-              "kind": "gcp",
-              "machine_type": "n2-standard-2",
+              "name": "x-airflow-node",
+              "kind": "azure",
               "role": "leader",
+              "machine_type": "n2-standard-2",
               "volume_size": 128
             },
             {
-              "name": "y-node",
-              "kind": "gcp",
+              "name": "y-airflow-node",
+              "kind": "azure",
               "volume_size": 128
             },
             {
-              "name": "z-node",
-              "kind": "gcp",
+              "name": "z-airflow-node",
+              "kind": "azure",
               "volume_size": 128
             }
           ]
@@ -47,7 +48,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -80,13 +81,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -109,12 +110,12 @@
         }
       },
       "applications": {}
+    },
+    "env": {
+      "extend_basic_env": "azure"
+    },
+    "readme": {
+      "extend_basic_readme": "azure"
     }
-  },
-  "env": {
-    "extend_basic_env": "gcp"
-  },
-  "readme": {
-    "extend_basic_readme": "gcp"
   }
 }
