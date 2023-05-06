@@ -150,8 +150,6 @@ function literalizeTemplateValuesInString(
       indexOfClosingBraces,
     );
 
-    console.log("contentsOfFirstPair", contentsOfFirstPair);
-
     const trimmedContents = contentsOfFirstPair.trim();
     const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
     const valueToSubstitute = cndiConfigPromptResponses[key];
