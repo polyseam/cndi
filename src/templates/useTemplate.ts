@@ -75,17 +75,32 @@ interface TemplatePrompt {
   validate?: (value: string) => boolean | string;
 }
 
+interface TemplateEnvEntry {
+  comment?: string;
+  name?: string;
+  value?: string;
+  do_not_wrap?: boolean;
+}
+
+interface TemplateEnvCommentEntry extends TemplateEnvEntry {
+  comment: string;
+}
+
+interface TemplateEnvValueEntry extends TemplateEnvEntry {
+  name: string;
+  value: string;
+}
+
 interface Template {
+  prompts: Array<TemplatePrompt>;
   "cndi-config": {
-    prompts: Array<TemplatePrompt>;
     template: CNDIConfig;
   };
   "env": {
-    prompts?: Array<TemplatePrompt>;
+    entries?: Array<TemplateEnvCommentEntry | TemplateEnvValueEntry>;
     extend_basic_env: DeploymentTarget;
   };
   "readme": {
-    prompts?: Array<TemplatePrompt>;
     extend_basic_readme: DeploymentTarget;
     template?: string;
   };
@@ -101,6 +116,60 @@ interface CNDIGeneratedValues {
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
+}
+
+interface CndiConfigPromptResponses {
+  [key: string]: string;
+}
+
+function replaceRange(
+  s: string,
+  start: number,
+  end: number,
+  substitute: string,
+) {
+  return s.substring(0, start) + substitute + s.substring(end);
+}
+
+// returns a string where templated values are replaced with their literal values
+function literalizeTemplateValuesInString(
+  cndiConfigPromptResponses: CndiConfigPromptResponses,
+  stringToLiteralize: string,
+): string {
+  let literalizedString = stringToLiteralize;
+
+  // eg: ["argocdDomainName", "argocd.cndi.dev"]
+  for (const [key, value] of Object.entries(cndiConfigPromptResponses)) {
+    let indexOfOpeningBraces = literalizedString.indexOf("{{");
+    let indexOfClosingBraces = literalizedString.indexOf("}}");
+
+    // loop so long as there is '{{ something }}' in the string
+    while (indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1) {
+      const contentsOfFirstPair = literalizedString.slice(
+        indexOfOpeningBraces + 2,
+        indexOfClosingBraces,
+      );
+      const trimmedContents = contentsOfFirstPair.trim();
+      const stringToReplace = `$.cndi.prompts.responses.${key}`;
+
+      if (trimmedContents === stringToReplace) {
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpeningBraces,
+          indexOfClosingBraces + 2,
+          `${value}`,
+        );
+      }
+
+      indexOfOpeningBraces = literalizedString.indexOf("{{");
+      indexOfClosingBraces = literalizedString.indexOf("}}");
+      literalizedString = literalizedString.replaceAll(
+        stringToReplace,
+        `${value}`,
+      );
+    }
+  }
+  return literalizedString;
 }
 
 export default async function useTemplate(
@@ -133,14 +202,16 @@ export default async function useTemplate(
     interactive,
   );
 
-  const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts ||
+  const cndiConfigPromptDefinitions = templateObject.prompts ||
     [];
 
   const defaultCndiConfigValues: Record<string, string> = {};
 
   const cndiConfigPrompts = cndiConfigPromptDefinitions.map(
     (promptDefinition) => {
-      defaultCndiConfigValues[promptDefinition.name] = promptDefinition.default;
+      defaultCndiConfigValues[promptDefinition.name] = promptDefinition?.default
+        ? promptDefinition.default
+        : "";
       return {
         ...promptDefinition,
         message: ccolors.prompt(promptDefinition.message),
@@ -149,52 +220,51 @@ export default async function useTemplate(
     },
   );
 
-  const cndiConfigValues = opt.interactive // deno-lint-ignore no-explicit-any
+  const cndiConfigPromptResponses = opt.interactive // deno-lint-ignore no-explicit-any
     ? await prompt(cndiConfigPrompts as unknown as any)
     : defaultCndiConfigValues;
 
-  let cndiConfigStringified = JSON.stringify(
-    templateObject["cndi-config"].template,
+  const cndiConfigStringified = JSON.stringify(
+    templateObject["cndi-config"],
   );
 
-  for (const [key, value] of Object.entries(cndiConfigValues)) {
-    const stringToReplace = `$.cndi.prompts.responses.${key}`;
-    cndiConfigStringified = cndiConfigStringified.replaceAll(
-      stringToReplace,
-      `${value}`,
-    );
-  }
+  const literalizedCndiConfig = literalizeTemplateValuesInString(
+    cndiConfigPromptResponses,
+    cndiConfigStringified,
+  );
 
   let cndiConfig;
 
   try {
-    cndiConfig = JSON.parse(cndiConfigStringified);
+    cndiConfig = JSON.parse(literalizedCndiConfig);
     cndiConfig.project_name = opt.project_name;
   } catch {
-    throw new Error("Invalid cndi-config.jsonc generated");
+    throw new Error("Invalid template['cndi-config'] generated");
   }
 
   const templateEnvLines = [];
 
-  const templateEnvPromptDefinitions: Array<TemplatePrompt> =
-    templateObject?.env?.prompts || [];
-
-  for (const p of templateEnvPromptDefinitions) {
-    if (p.type === "Comment") {
+  for (const p of templateObject?.env?.entries || []) {
+    if (p.comment?.length) {
       const { comment } = p;
       templateEnvLines.push({ comment } as EnvCommentEntry);
       continue;
-    } else if (opt.interactive) {
-      // deno-lint-ignore no-explicit-any
-      const P = getPromptModuleForType(p.type) as any;
-      const v = await P?.prompt({
-        ...p,
-        message: ccolors.prompt(p.message),
-      });
-      templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
     } else {
+      if (!p?.value || typeof p?.value !== "string") {
+        throw new Error(`Invalid env entry ${JSON.stringify(p)}`);
+      }
+
+      if (!p?.name || typeof p?.name !== "string") {
+        throw new Error(`Invalid env entry ${JSON.stringify(p)}`);
+      }
+
+      const value = literalizeTemplateValuesInString(
+        cndiConfigPromptResponses,
+        p.value,
+      );
+
       templateEnvLines.push(
-        { value: { [p.name]: p.default } } as EnvValueEntry,
+        { value: { [p.name]: value } } as EnvValueEntry,
       );
     }
   }
@@ -206,7 +276,12 @@ export default async function useTemplate(
     project_name: opt.project_name,
   });
 
-  const templateReadmeText = templateObject.readme?.template || "";
+  const templateReadmeText = templateObject.readme?.template
+    ? literalizeTemplateValuesInString(
+      cndiConfigPromptResponses,
+      templateObject.readme.template,
+    )
+    : "";
 
   const readme = `${coreReadme}\n\n${templateReadmeText}`;
 

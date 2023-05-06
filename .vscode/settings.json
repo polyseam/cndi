@@ -15,6 +15,12 @@
         "*cndi-config.json*"
       ],
       "url": "/src/schemas/cndi-config.schema.json"
+    },
+    {
+      "fileMatch": [
+        "src/templates/**/*.json*"
+      ],
+      "url": "/src/schemas/cndi-template.schema.json"
     }
   ]
 }

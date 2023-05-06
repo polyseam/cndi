@@ -18,7 +18,7 @@ const writeEnvObject = (envLines: EnvLines): string => {
 
       Deno.env.set(key, val);
 
-      return `${key}='${val}'`;
+      return `${key}=${val}`;
     } else {
       console.error("failed to build env file line", line);
       return "";

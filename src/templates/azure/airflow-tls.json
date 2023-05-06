@@ -1,32 +1,42 @@
 {
-  "cndi-config": {
-    "prompts": [
-      {
-        "name": "dagRepoUrl",
-        "default": "https://github.com/polyseam/demo-dag-bag",
-        "message": "Please enter the url of the git repo containing your dags:",
-        "type": "Input"
-      },
-      {
-        "name": "argocdDomainName",
-        "default": "argocd.example.com",
-        "message": "Please enter the domain name you want argocd to be accessible on:",
-        "type": "Input"
-      },
-      {
-        "name": "airflowDomainName",
-        "default": "airflow.example.com",
-        "message": "Please enter the domain name you want airflow to be accessible on:",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the email address you want to use for lets encrypt:",
-        "default": "admin@example.com",
-        "name": "letsEncryptClusterIssuerEmailAddress",
-        "type": "Input"
-      }
-    ],
-    "template": {
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "airflowDomainName",
+      "default": "airflow.example.com",
+      "message": "Please enter the domain name you want airflow to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "dagRepoUrl",
+      "default": "https://github.com/polyseam/demo-dag-bag",
+      "message": "Please enter the url of the git repo containing your dags:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the username you want to use for git sync DAG storage:",
+      "name": "gitSyncUsername",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the password you want to use for git sync DAG storage:",
+      "name": "gitSyncPassword",
+      "type": "Secret"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
       "infrastructure": {
         "cndi": {
           "nodes": [
@@ -34,7 +44,7 @@
               "name": "x-airflow-node",
               "kind": "azure",
               "role": "leader",
-              "machine_type": "Standard_DC2s_v2",
+              "machine_type": "n2-standard-2",
               "volume_size": 128
             },
             {
@@ -71,7 +81,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -104,13 +114,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -142,7 +152,7 @@
             "dags": {
               "gitSync": {
                 "enabled": true,
-                "repo": "$.cndi.prompts.responses.dagRepoUrl",
+                "repo": "{{ $.cndi.prompts.responses.dagRepoUrl }}",
                 "credentialsSecret": "airflow-git-credentials",
                 "branch": "main",
                 "wait": 40,
@@ -154,7 +164,7 @@
                 "expose_config": "True",
                 "instance_name": "Polyseam",
                 "enable_proxy_fix": "True",
-                "base_url": "https://$.cndi.prompts.responses.airflowDomainName"
+                "base_url": "https://{{ $.cndi.prompts.responses.airflowDomainName }}"
               },
               "operators": {
                 "default_owner": "Polyseam"
@@ -168,7 +178,7 @@
                 },
                 "hosts": [
                   {
-                    "name": "$.cndi.prompts.responses.airflowDomainName",
+                    "name": "{{ $.cndi.prompts.responses.airflowDomainName }}",
                     "tls": {
                       "secretName": "lets-encrypt-private-key",
                       "enabled": true
@@ -192,29 +202,26 @@
           }
         }
       }
+    },
+    "env": {
+      "extend_basic_env": "azure",
+      "entries": [
+        {
+          "comment": "airflow-git-credentials secret values for DAG Storage"
+        },
+        {
+          "name": "GIT_SYNC_USERNAME",
+          "value": "{{ $.cndi.prompts.responses.gitSyncUsername }}"
+        },
+        {
+          "name": "GIT_SYNC_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.gitSyncPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "azure",
+      "template_section": "## airflow-tls\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
     }
-  },
-  "env": {
-    "extend_basic_env": "azure",
-    "prompts": [
-      {
-        "type": "Comment",
-        "comment": "airflow-git-credentials secret values for DAG Storage"
-      },
-      {
-        "name": "GIT_SYNC_USERNAME",
-        "message": "Please enter your git username for Airflow DAG Storage:",
-        "type": "Input"
-      },
-      {
-        "name": "GIT_SYNC_PASSWORD",
-        "message": "Please enter your git password for Airflow DAG Storage:",
-        "type": "Secret"
-      }
-    ]
-  },
-  "readme": {
-    "extend_basic_readme": "azure",
-    "template": "## airflow-tls\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
   }
 }

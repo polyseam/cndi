@@ -96,13 +96,14 @@ const getCoreEnvLines = async (
     { comment: "Sealed Secrets keys for Kubeseal" },
     {
       value: {
-        SEALED_SECRETS_PUBLIC_KEY: sealedSecretsKeys.sealed_secrets_public_key,
+        SEALED_SECRETS_PUBLIC_KEY:
+          `'${sealedSecretsKeys.sealed_secrets_public_key}'`,
       },
     },
     {
       value: {
         SEALED_SECRETS_PRIVATE_KEY:
-          sealedSecretsKeys.sealed_secrets_private_key,
+          `'${sealedSecretsKeys.sealed_secrets_private_key}'`,
       },
     },
     { comment: "ArgoCD" },

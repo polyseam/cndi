@@ -59,7 +59,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
     }
 
     // if the path to google json key is valid, and the file is a valid json, write the GOOGLE_CREDENTIALS env variable
-    GOOGLE_CREDENTIALS = credentials_string;
+    GOOGLE_CREDENTIALS = `'${credentials_string}'`;
   }
 
   return [
