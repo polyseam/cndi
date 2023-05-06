@@ -145,8 +145,6 @@ function literalizeTemplateValuesInString(
     indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1 &&
     indexOfClosingBraces > indexOfOpeningBraces
   ) {
-    console.log("indexOfOpeningBraces", indexOfOpeningBraces);
-    console.log("indexOfClosingBraces", indexOfClosingBraces);
 
     const contentsOfFirstPair = literalizedString.substring(
       indexOfOpeningBraces + 2,
