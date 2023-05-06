@@ -1,4 +1,4 @@
-import { loadRemoteJSONC } from "src/utils.ts";
+import { getPrettyJSONString, loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -130,44 +130,53 @@ function replaceRange(
   return s.substring(0, start) + substitute + s.substring(end);
 }
 
-// returns a string where templated values are replaced with their literal values
+// returns a string where templated values are replaced with their literal values from prompt responses
 function literalizeTemplateValuesInString(
   cndiConfigPromptResponses: CndiConfigPromptResponses,
   stringToLiteralize: string,
 ): string {
   let literalizedString = stringToLiteralize;
 
-  // eg: ["argocdDomainName", "argocd.cndi.dev"]
-  for (const [key, value] of Object.entries(cndiConfigPromptResponses)) {
-    let indexOfOpeningBraces = literalizedString.indexOf("{{");
-    let indexOfClosingBraces = literalizedString.indexOf("}}");
+  let indexOfOpeningBraces = literalizedString.indexOf("{{");
+  let indexOfClosingBraces = literalizedString.indexOf("}}");
 
-    // loop so long as there is '{{ something }}' in the string
-    while (indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1) {
-      const contentsOfFirstPair = literalizedString.slice(
-        indexOfOpeningBraces + 2,
-        indexOfClosingBraces,
-      );
-      const trimmedContents = contentsOfFirstPair.trim();
-      const stringToReplace = `$.cndi.prompts.responses.${key}`;
+  // loop so long as there is '{{ something }}' in the string
+  while (
+    indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1 &&
+    indexOfClosingBraces > indexOfOpeningBraces
+  ) {
+    console.log("indexOfOpeningBraces", indexOfOpeningBraces);
+    console.log("indexOfClosingBraces", indexOfClosingBraces);
 
-      if (trimmedContents === stringToReplace) {
-        literalizedString = replaceRange(
-          literalizedString,
-          indexOfOpeningBraces,
-          indexOfClosingBraces + 2,
-          `${value}`,
-        );
-      }
+    const contentsOfFirstPair = literalizedString.substring(
+      indexOfOpeningBraces + 2,
+      indexOfClosingBraces,
+    );
 
-      indexOfOpeningBraces = literalizedString.indexOf("{{");
-      indexOfClosingBraces = literalizedString.indexOf("}}");
-      literalizedString = literalizedString.replaceAll(
-        stringToReplace,
-        `${value}`,
+    console.log("contentsOfFirstPair", contentsOfFirstPair);
+
+    const trimmedContents = contentsOfFirstPair.trim();
+    const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
+    const valueToSubstitute = cndiConfigPromptResponses[key];
+
+    if (key) {
+      literalizedString = replaceRange(
+        literalizedString,
+        indexOfOpeningBraces,
+        indexOfClosingBraces + 2,
+        `${valueToSubstitute}`,
       );
     }
+    indexOfOpeningBraces = literalizedString.indexOf(
+      "{{",
+      indexOfClosingBraces,
+    );
+    indexOfClosingBraces = literalizedString.indexOf(
+      "}}",
+      indexOfClosingBraces,
+    );
   }
+
   return literalizedString;
 }
 
@@ -223,11 +232,12 @@ export default async function useTemplate(
     ? await prompt(cndiConfigPrompts as unknown as any)
     : defaultCndiConfigValues;
 
-  const cndiConfigStringified = JSON.stringify(
+  // pretty printing is required to play nice with {{ }} templating
+  const cndiConfigStringified = getPrettyJSONString(
     templateObject.outputs["cndi-config"],
   );
 
-  const literalizedCndiConfig = literalizeTemplateValuesInString(
+  const literalizedCndiConfig = await literalizeTemplateValuesInString(
     cndiConfigPromptResponses,
     cndiConfigStringified,
   );
