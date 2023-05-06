@@ -38,6 +38,8 @@ export default async function stageTerraformResourcesForGCP(
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
 
+  console.log("googleCredentials", googleCredentials);
+
   const leaderNodeName = await getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
