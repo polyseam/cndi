@@ -22,7 +22,7 @@ const DEFAULT_SYNC_POLICY = {
     "Validate=false",
     "CreateNamespace=true",
     "PrunePropagationPolicy=foreground",
-    "PruneLast=true",
+    "PruneLast=false",
   ],
   retry: {
     limit: 10,

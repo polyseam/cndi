@@ -1,0 +1,367 @@
+{
+  "prompts": [
+    {
+      "name": "dagRepoUrl",
+      "default": "https://github.com/polyseam/demo-dag-bag",
+      "message": "Please enter the url of the git repo containing your dags:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the username airflow should use to access your dag repo:",
+      "name": "gitSyncUsername",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the password airflow should use to access your dag repo:",
+      "name": "gitSyncPassword",
+      "type": "Secret"
+    },
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "airflowDomainName",
+      "default": "airflow.example.com",
+      "message": "Please enter the domain name you want airflow to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the username for your postgresql admin:",
+      "default": "admin",
+      "name": "postgresqlUser",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the postgresql password you want to use for your postgresql database:",
+      "default": "password",
+      "name": "postgresqlPassword",
+      "type": "Secret"
+    },
+    {
+      "message": "Please enter the name for the postgresql database you want to use:",
+      "default": "airflow-pg",
+      "name": "postgresqlDb",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "airflow-nodes",
+              "kind": "eks",
+              "instance_type": "t3.large",
+              "volume_size": 128,
+              "min_count": 1,
+              "max_count": 3
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "git-credentials-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "airflow-git-credentials",
+            "namespace": "airflow"
+          },
+          "stringData": {
+            "GIT_SYNC_USERNAME": "$.cndi.secrets.seal(GIT_SYNC_USERNAME)",
+            "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_SYNC_PASSWORD)"
+          }
+        },
+        "postgresql-connection-string-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "postgresql-connection-string-secret",
+            "namespace": "airflow"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "connection": "$.cndi.secrets.seal(POSTGRESQL_CONNECTION_STRING)"
+          }
+        },
+        "cnpg-cluster": {
+          "apiVersion": "postgresql.cnpg.io/v1",
+          "kind": "Cluster",
+          "metadata": {
+            "name": "cnpg-cluster",
+            "namespace": "airflow",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": {
+                "SkipDryRunOnMissingResource": true
+              }
+            }
+          },
+          "spec": {
+            "imageName": "ghcr.io/cloudnative-pg/postgresql:15.2",
+            "instances": 3,
+            "storage": {
+              "size": "1Gi"
+            },
+            "replicationSlots": {
+              "highAvailability": {
+                "enabled": true
+              }
+            },
+            "postgresql": {
+              "pg_hba": [
+                "host {{ $.cndi.prompts.responses.postgresqlDb }} {{ $.cndi.prompts.responses.postgresqlUser }} all password"
+              ]
+            },
+            "bootstrap": {
+              "initdb": {
+                "database": "https://{{ $.cndi.prompts.responses.postgresqlDb }}",
+                "owner": "https://{{ $.cndi.prompts.responses.postgresqlUser }}",
+                "secret": {
+                  "name": "cnpg-database-user-auth-secret"
+                }
+              }
+            },
+            "superuserSecret": {
+              "name": "cnpg-cluster-superuser-auth-secret"
+            }
+          }
+        },
+        "cnpg-cluster-superuser-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "cnpg-cluster-superuser-auth-secret",
+            "namespace": "airflow"
+          },
+          "type": "kubernetes.io/basic-auth",
+          "stringData": {
+            "username": "$.cndi.secrets.seal(POSTGRESQL_CLUSTER_SUPERUSER)",
+            "password": "$.cndi.secrets.seal(POSTGRESQL_PASSWORD)"
+          }
+        },
+        "cnpg-database-user-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "cnpg-database-user-auth-secret",
+            "namespace": "airflow"
+          },
+          "type": "kubernetes.io/basic-auth",
+          "stringData": {
+            "username": "$.cndi.secrets.seal(POSTGRESQL_USER)",
+            "password": "$.cndi.secrets.seal(POSTGRESQL_PASSWORD)"
+          }
+        },
+        "cert-manager-cluster-issuer": {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "lets-encrypt"
+          },
+          "spec": {
+            "acme": {
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
+              "server": "https://acme-v02.api.letsencrypt.org/directory",
+              "privateKeySecretRef": {
+                "name": "lets-encrypt-private-key"
+              },
+              "solvers": [
+                {
+                  "http01": {
+                    "ingress": {
+                      "ingressClassName": "public"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "applications": {
+        "cnpg": {
+          "targetRevision": "0.18.0",
+          "destinationNamespace": "cnpg-system",
+          "repoURL": "https://cloudnative-pg.github.io/charts",
+          "chart": "cloudnative-pg"
+        },
+        "airflow": {
+          "targetRevision": "1.7.0",
+          "destinationNamespace": "airflow",
+          "repoURL": "https://airflow.apache.org",
+          "chart": "airflow",
+          "values": {
+            "executor": "LocalKubernetesExecutor",
+            "data": {
+              "metadataSecretName": "postgresql-connection-string-secret"
+            },
+            "postgresql": {
+              "enabled": false
+            },
+            "dags": {
+              "gitSync": {
+                "enabled": true,
+                "repo": "{{ $.cndi.prompts.responses.dagRepoUrl }}",
+                "credentialsSecret": "airflow-git-credentials",
+                "branch": "main",
+                "wait": 40,
+                "subPath": "dags"
+              }
+            },
+            "config": {
+              "webserver": {
+                "expose_config": "True",
+                "instance_name": "Polyseam",
+                "enable_proxy_fix": "True",
+                "base_url": "https://{{ $.cndi.prompts.responses.airflowDomainName }}"
+              },
+              "operators": {
+                "default_owner": "Polyseam"
+              }
+            },
+            "ingress": {
+              "web": {
+                "enabled": true,
+                "annotations": {
+                  "cert-manager.io/cluster-issuer": "lets-encrypt"
+                },
+                "hosts": [
+                  {
+                    "name": "{{ $.cndi.prompts.responses.airflowDomainName }}",
+                    "tls": {
+                      "secretName": "lets-encrypt-private-key",
+                      "enabled": true
+                    }
+                  }
+                ]
+              }
+            },
+            "logs": {
+              "persistence": {
+                "enabled": true,
+                "size": "15Gi",
+                "storageClassName": "efs"
+              }
+            },
+            "createUserJob": {
+              "useHelmHooks": false
+            },
+            "migrateDatabaseJob": {
+              "useHelmHooks": false
+            }
+          }
+        }
+      }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "entries": [
+        {
+          "type": "Comment",
+          "comment": "PostgreSQL connection parameters"
+        },
+        {
+          "name": "POSTGRESQL_DB",
+          "value": "{{ $.cndi.prompts.responses.postgresqlDb }}"
+        },
+        {
+          "name": "POSTGRESQL_USER",
+          "value": "{{ $.cndi.prompts.responses.postgresqlUser }}"
+        },
+        {
+          "name": "POSTGRESQL_PROTOCOL",
+          "value": "postgresql"
+        },
+        {
+          "name": "POSTGRESQL_HOST",
+          "value": "cnpg-cluster-rw"
+        },
+        {
+          "name": "POSTGRESQL_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "POSTGRESQL_SSLMODE",
+          "value": "disable"
+        },
+        {
+          "name": "POSTGRESQL_CONNECTION_STRING",
+          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE"
+        },
+        {
+          "name": "POSTGRESQL_CLUSTER_SUPERUSER",
+          "value": "postgres"
+        },
+        {
+          "type": "Comment",
+          "comment": "airflow-git-credentials secret values for DAG Storage"
+        },
+        {
+          "name": "GIT_SYNC_USERNAME",
+          "value": "{{ $.cndi.prompts.responses.gitSyncUsername }}"
+        },
+        {
+          "name": "GIT_SYNC_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.gitSyncPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template": "## airflow-tls-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
+    }
+  }
+}

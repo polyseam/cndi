@@ -18,7 +18,12 @@ const writeEnvObject = (envLines: EnvLines): string => {
 
       Deno.env.set(key, val);
 
-      return `${key}='${val}'`;
+      // some values (especially multiline) need to be wrapped in quotes
+      if (valueLine?.wrap) {
+        return `${key}='${val}'`;
+      }
+
+      return `${key}=${val}`;
     } else {
       console.error("failed to build env file line", line);
       return "";

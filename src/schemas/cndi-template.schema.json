@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "cndi-config",
+  "$comment": "The root of the cndi config schema",
+  "description": "An object used to configure the changelog generation for GitHub Releases",
+  "required": ["outputs"],
+  "properties": {
+    "outputs": {
+      "type": "object",
+      "description": "An object which defines the outputs of the cndi template",
+      "required": ["cndi-config", "env", "readme"],
+      "properties": {
+        "cndi-config": {
+          "type": "object",
+          "description": "The path to the cndi-config file",
+          "$ref": "./cndi-config.schema.json",
+          "not": {
+            "required": ["project_name"]
+          }
+        },
+        "env": {
+          "type": "object",
+          "description": "The path to the env file",
+          "properties": {
+            "entries": {
+              "type": "array"
+            },
+            "extend_basic_env": {
+              "type": "string",
+              "enum": ["aws", "gcp", "azure"]
+            }
+          }
+        }
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "description": "An array of prompts to be presented to the user for configuration",
+      "items": {
+        "type": "object",
+        "required": ["name", "message", "type"],
+        "description": "A prompt to be presented the user of a CNDI template so they can configure it",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The key which can be used to inject the value later, eg. {{ $.cndi.prompts.responses.myPromptName }}"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message to be presented to the user when they are prompted for a value"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of prompt to be presented to the user",
+            "enum": [
+              "Input",
+              "Secret",
+              "Confirm",
+              "Toggle",
+              "Select",
+              "List",
+              "Checkbox",
+              "Number"
+            ]
+          },
+          "default": {
+            "description": "The default value to be used if the user does not provide one"
+          }
+        }
+      }
+    }
+  }
+}

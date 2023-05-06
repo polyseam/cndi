@@ -148,6 +148,10 @@
     "message": "failed to stage gcp terraform objects"
   },
   {
+    "code": 806,
+    "message": "failed to stage eks terraform objects"
+  },
+  {
     "code": 803,
     "message": "'GOOGLE_CREDENTIALS' env var is not set during terraform staging"
   },

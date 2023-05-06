@@ -39,7 +39,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
           )
         }`,
       );
-      console.log(ccolors.caught(errorReadingCredentials));
+      console.log(ccolors.caught(errorReadingCredentials, 607));
       await emitExitEvent(607);
       Deno.exit(607);
     }
@@ -53,7 +53,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
         ccolors.error(`Invalid GCP JSON key file found at the provided path`),
         ccolors.user_input(`"${google_credentials_path}"`),
       );
-      console.log(ccolors.caught(errorParsingCredentials));
+      console.log(ccolors.caught(errorParsingCredentials, 608));
       await emitExitEvent(608);
       Deno.exit(608);
     }
@@ -67,7 +67,7 @@ const getGCPEnvLines = async (interactive: boolean): Promise<EnvLines> => {
       comment: "GCP",
     },
     { value: { GCP_REGION } },
-    { value: { GOOGLE_CREDENTIALS } },
+    { value: { GOOGLE_CREDENTIALS }, wrap: true },
   ];
 };
 
