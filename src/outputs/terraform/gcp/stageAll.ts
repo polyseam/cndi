@@ -38,8 +38,6 @@ export default async function stageTerraformResourcesForGCP(
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
 
-  console.log("googleCredentials", googleCredentials);
-
   const leaderNodeName = await getLeaderNodeNameFromConfig(config);
 
   const leader_node_ip =
@@ -96,7 +94,7 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.error("failed to parse service account key json from"),
         ccolors.user_input(`"${dotEnvPath}"`),
       );
-      console.log(ccolors.caught(parsingError));
+      console.log(ccolors.caught(parsingError, 805));
       await emitExitEvent(805);
       Deno.exit(805);
     }
@@ -237,7 +235,7 @@ export default async function stageTerraformResourcesForGCP(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e, 802));
     await emitExitEvent(802);
     Deno.exit(802);
   }

@@ -27,7 +27,7 @@ export default async function decrypt(
         'your "TERRAFORM_STATE_PASSPHRASE" is likely incorrect, consider deleting your "_state" branch\n',
       ),
     );
-    console.log(ccolors.caught(decryptError));
+    console.log(ccolors.caught(decryptError, 1000));
     await emitExitEvent(1000);
     Deno.exit(1000);
   }

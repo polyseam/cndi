@@ -258,6 +258,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       ccolors.error("error patching terraform files with config"),
     );
     console.log(ccolors.caught(error));
+    console.log("attempting to continue anyway...");
   }
 }
 
