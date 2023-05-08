@@ -1,6 +1,6 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
 
-import { ccolors, Command, copy, path } from "deps";
+import { ccolors, Command, path } from "deps";
 
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
@@ -72,10 +72,8 @@ const runCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
-      // terraform.tfstate will be in this folder after the first run
-      const ranTerraformInit = Deno.run({
-        cmd: [
-          pathToTerraformBinary,
+      const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
+        args: [
           `-chdir=${pathToTerraformResources}`,
           "init",
         ],
@@ -83,21 +81,18 @@ const runCommand = new Command()
         stdout: "piped",
       });
 
-      copy(ranTerraformInit.stdout, Deno.stdout);
-      copy(ranTerraformInit.stderr, Deno.stderr);
+      const terraformInitCommandOutput = await terraformInitCommand.output();
 
-      const initStatus = await ranTerraformInit.status();
+      await Deno.stdout.write(terraformInitCommandOutput.stdout);
+      await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
-      if (initStatus.code !== 0) {
+      if (terraformInitCommandOutput.code !== 0) {
         console.log(runLabel, ccolors.error("terraform init failed"));
-        Deno.exit(initStatus.code);
+        Deno.exit(terraformInitCommandOutput.code);
       }
 
-      ranTerraformInit.close();
-
-      const ranTerraformApply = Deno.run({
-        cmd: [
-          pathToTerraformBinary,
+      const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
+        args: [
           `-chdir=${pathToTerraformResources}`,
           "apply",
           "-auto-approve",
@@ -106,19 +101,18 @@ const runCommand = new Command()
         stdout: "piped",
       });
 
-      copy(ranTerraformApply.stdout, Deno.stdout);
-      copy(ranTerraformApply.stderr, Deno.stderr);
+      const terraformApplyCommandOutput = await terraformApplyCommand.output();
 
-      const applyStatus = await ranTerraformApply.status();
+      // print any terraform output to stdout/stderr
+      await Deno.stdout.write(terraformApplyCommandOutput.stdout);
+      await Deno.stderr.write(terraformApplyCommandOutput.stderr);
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
       // if `terraform apply` fails, exit with the code
-      if (applyStatus.code !== 0) {
-        Deno.exit(applyStatus.code);
+      if (terraformApplyCommandOutput.code !== 0) {
+        Deno.exit(terraformApplyCommandOutput.code);
       }
-
-      ranTerraformApply.close();
     } catch (err) {
       console.log(
         runLabel,

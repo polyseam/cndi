@@ -1,5 +1,5 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
-import { Command, copy, path } from "deps";
+import { Command, path } from "deps";
 
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
@@ -69,9 +69,8 @@ const terraformCommand = new Command()
 
     await pullStateForRun({ pathToTerraformResources, cmd });
 
-    const ranProxiedTerraformCmd = Deno.run({
-      cmd: [
-        pathToTerraformBinary,
+    const proxiedTerraformCommand = new Deno.Command(pathToTerraformBinary, {
+      args: [
         `-chdir=${pathToTerraformResources}`,
         ...args,
       ],
@@ -79,18 +78,18 @@ const terraformCommand = new Command()
       stdout: "piped",
     });
 
-    copy(ranProxiedTerraformCmd.stdout, Deno.stdout);
-    copy(ranProxiedTerraformCmd.stderr, Deno.stderr);
+    const proxiedTerraformCommandOutput = await proxiedTerraformCommand
+      .output();
 
-    const proxiedTerraformCmdStatus = await ranProxiedTerraformCmd.status();
+    // print any terraform output to stdout/stderr
+    await Deno.stdout.write(proxiedTerraformCommandOutput.stdout);
+    await Deno.stderr.write(proxiedTerraformCommandOutput.stderr);
 
     await pushStateFromRun({ pathToTerraformResources, cmd });
 
-    if (proxiedTerraformCmdStatus.code !== 0) {
-      Deno.exit(proxiedTerraformCmdStatus.code); // arbitrary exit code
+    if (proxiedTerraformCommandOutput.code !== 0) {
+      Deno.exit(proxiedTerraformCommandOutput.code);
     }
-
-    ranProxiedTerraformCmd.close();
   });
 
 export default terraformCommand;

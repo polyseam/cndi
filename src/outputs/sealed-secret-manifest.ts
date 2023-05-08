@@ -211,31 +211,24 @@ const getSealedSecretManifest = async (
     },
   );
 
-  const cmd = [
-    pathToKubeseal,
-    `--cert=${publicKeyFilePath}`,
-    `--secret-file=${secretPath}`,
-    `--scope=cluster-wide`,
-  ];
-
-  const ranKubeseal = Deno.run({
-    cmd,
-    stdout: "piped",
+  const kubesealCommand = new Deno.Command(pathToKubeseal, {
+    args: [
+      `--cert=${publicKeyFilePath}`,
+      `--secret-file=${secretPath}`,
+      `--scope=cluster-wide`,
+    ],
     stderr: "piped",
-    stdin: "piped",
+    stdout: "piped",
   });
 
-  const ranKubesealStatus = await ranKubeseal.status();
-  const ranKubesealOutput = await ranKubeseal.output();
-  const ranKubesealStderr = await ranKubeseal.stderrOutput();
+  const kubesealCommandOutput = await kubesealCommand.output();
 
-  if (ranKubesealStatus.code !== 0) {
+  if (kubesealCommandOutput.code !== 0) {
     console.log("kubeseal failed");
-    Deno.stdout.write(ranKubesealStderr);
+    Deno.stdout.write(kubesealCommandOutput.stderr);
     Deno.exit(332); // arbitrary exit code
   } else {
-    // Deno.stdout.write(ranKubesealOutput);
-    sealed = new TextDecoder().decode(ranKubesealOutput);
+    sealed = new TextDecoder().decode(kubesealCommandOutput.stdout);
   }
   return sealed;
 };
