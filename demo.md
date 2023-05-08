@@ -16,19 +16,16 @@ CLI for creating GitHub Actions Secrets, but that isn't necessary.
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-4. Download the following file and place it in the `my-repo` folder.
-   [/cndi-config.jsonc](/cndi-config.jsonc)
+4. Run `cndi init --interactive` and choose a template
 
-5. Run `cndi init -i`
+5. Run `gh secret set -f .env`
 
-6. Run `gh secret set -f .env`
+6. Run `git add .`
 
-7. Run `git add .`
+7. Run `git status`
 
-8. Run `git status`
+8. Run `git commit -m 'deploy!'`
 
-9. Run `git commit -m 'deploy!'`
+9. Run `git push -u origin main`
 
-10. Run `git push -u origin main`
-
-11. Watch the magic 🪄
+10. Watch the magic 🪄
