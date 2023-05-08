@@ -23,7 +23,7 @@ export default async function processInteractiveEntries(
   for (const [_, value] of Object.entries(entries)) {
     const encoded = encoder.encode(`${value}\n`);
     await wr.write(encoded);
-    await delay(500 * secondsBetweenEntries);
+    await delay(1000 * secondsBetweenEntries);
   }
 
   wr.close();
