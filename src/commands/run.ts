@@ -109,7 +109,7 @@ const runCommand = new Command()
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
-      // if `terraform destroy` fails, exit with the code
+      // if `terraform apply` fails, exit with the code
       if (terraformApplyCommandOutput.code !== 0) {
         Deno.exit(terraformApplyCommandOutput.code);
       }
