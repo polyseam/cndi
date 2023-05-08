@@ -5,7 +5,7 @@ import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
 import { getPathToTerraformBinary } from "src/utils.ts";
 
-import { ccolors, Command, copy, path } from "deps";
+import { ccolors, Command, path } from "deps";
 
 const destroyLabel = ccolors.faded("\nsrc/commands/destroy.ts:");
 
@@ -72,9 +72,8 @@ const destroyCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
-      const ranTerraformInit = Deno.run({
-        cmd: [
-          pathToTerraformBinary,
+      const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
+        args: [
           `-chdir=${pathToTerraformResources}`,
           "init",
         ],
@@ -82,21 +81,18 @@ const destroyCommand = new Command()
         stdout: "piped",
       });
 
-      copy(ranTerraformInit.stdout, Deno.stdout);
-      copy(ranTerraformInit.stderr, Deno.stderr);
+      const terraformInitCommandOutput = await terraformInitCommand.output();
 
-      const initStatus = await ranTerraformInit.status();
+      await Deno.stdout.write(terraformInitCommandOutput.stdout);
+      await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
-      if (initStatus.code !== 0) {
+      if (terraformInitCommandOutput.code !== 0) {
         console.log(destroyLabel, ccolors.error("terraform init failed"));
-        Deno.exit(initStatus.code);
+        Deno.exit(terraformInitCommandOutput.code);
       }
 
-      ranTerraformInit.close();
-
-      const ranTerraformDestroy = Deno.run({
-        cmd: [
-          pathToTerraformBinary,
+      const terraformDestroyCommand = new Deno.Command(pathToTerraformBinary, {
+        args: [
           `-chdir=${pathToTerraformResources}`,
           "destroy",
           // "-auto-approve" is an option, but I don't think we want it for destroy calls
@@ -105,19 +101,19 @@ const destroyCommand = new Command()
         stdout: "piped",
       });
 
-      copy(ranTerraformDestroy.stdout, Deno.stdout);
-      copy(ranTerraformDestroy.stderr, Deno.stderr);
+      const terraformDestroyCommandOutput = await terraformDestroyCommand
+        .output();
 
-      const destroyStatus = await ranTerraformDestroy.status();
+      // print any terraform output to stdout/stderr
+      await Deno.stdout.write(terraformDestroyCommandOutput.stdout);
+      await Deno.stderr.write(terraformDestroyCommandOutput.stderr);
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
       // if `terraform destroy` fails, exit with the code
-      if (destroyStatus.code !== 0) {
-        Deno.exit(destroyStatus.code);
+      if (terraformDestroyCommandOutput.code !== 0) {
+        Deno.exit(terraformDestroyCommandOutput.code);
       }
-
-      ranTerraformDestroy.close();
     } catch (cndiDestroyError) {
       console.error(
         destroyLabel,

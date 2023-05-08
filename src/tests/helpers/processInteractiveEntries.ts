@@ -3,10 +3,6 @@ import { delay } from "deps";
 // This object needs to be ordered, and the number of keys needs to be exactly the number of prompts
 type InteractiveEntries = Record<string, string>;
 
-type InteractiveProcess = Deno.Process<
-  { stdout: "piped"; stdin: "piped"; stderr: "piped"; cmd: string[] }
->;
-
 /**
  * Processes a list of inputs and writes them to a series of prompts
  * @param p The interactive Deno.Process with piped stdin, stdout, and stderr
@@ -14,23 +10,28 @@ type InteractiveProcess = Deno.Process<
  * @returns status of the process after entries have been written
  */
 export default async function processInteractiveEntries(
-  p: InteractiveProcess,
+  p: Deno.ChildProcess,
   entries: InteractiveEntries,
   secondsBetweenEntries = 1,
 ) {
+  const INITIAL_WAIT = 1000;
+  await delay(INITIAL_WAIT);
   const encoder = new TextEncoder();
 
+  const wr = p.stdin.getWriter();
+
   for (const [_, value] of Object.entries(entries)) {
-    await p.stdin.write(encoder.encode(`${value}\n`));
-    await delay(1000 * secondsBetweenEntries);
+    const encoded = encoder.encode(`${value}\n`);
+    await wr.write(encoded);
+    await delay(500 * secondsBetweenEntries);
   }
 
-  p.stdin.close();
-  p.stdout.close();
-  p.stderr.close();
+  wr.close();
 
-  const status = await p.status();
-
-  p.close();
+  const output = await p.output();
+  const status = {
+    code: output.code,
+    success: output.code === 0,
+  };
   return status;
 }
