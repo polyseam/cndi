@@ -73,8 +73,10 @@ export const ccolors = {
   prompt: colors.cyan,
   success: colors.green,
   key_name: colors.cyan,
-  caught: (e: Error, num?: number) =>
-    `${colors.white(`E${num}`)}: ${colors.red(e.toString())}`,
+  caught: (e: Error, num?: number) => {
+    const errCode = num ? `E${num}` : `E`;
+    return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
+  },
 };
 
 // constants
