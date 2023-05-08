@@ -82,134 +82,6 @@ describe("cndi", () => {
       const readme = Deno.readTextFileSync(path.join(Deno.cwd(), `README.md`));
       assert(readme.startsWith(`# ${project_name}`));
     });
-
-    it(
-      "-i -t aws/basic should create all cndi project files and directories",
-      async () => {
-        const p = getRunningCNDIProcess("init", "-i", "-t", "aws/basic");
-
-        const status = await processInteractiveEntries(
-          p,
-          {
-            project_name: "acme-project",
-            GIT_USERNAME: "acmefella",
-            GIT_PASSWORD: "ghp_1234567890",
-            GIT_REPO: "https://github.com/acmeorg/acme-project",
-            AWS_REGION: "us-east-1",
-            AWS_ACCESS_KEY_ID: "AKIA1234567890",
-            AWS_SECRET_ACCESS_KEY: "1234567890",
-            argocdDomainName: "argocd.acme.org",
-            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
-          },
-        );
-
-        const initFileList = new Set([
-          "cndi-config.jsonc",
-          "README.md",
-          ".github",
-          ".gitignore",
-          ".env",
-          ".vscode",
-          "cndi",
-        ]);
-
-        // read the current directory entries after "cndi init" has ran
-        for (const afterDirEntry of Deno.readDirSync(".")) {
-          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
-        }
-
-        assert(status.success);
-        assert(initFileList.size === 0); // if the set is empty, all files were created
-      },
-    );
-
-    it(
-      "-i -t gcp/basic should create all cndi project files and directories",
-      async () => {
-        const p = getRunningCNDIProcess("init", "-i", "-t", "gcp/basic");
-
-        const tmpFile = Deno.makeTempFileSync();
-
-        Deno.writeTextFileSync(
-          tmpFile,
-          getPrettyJSONString(gcpKeyFile),
-        );
-
-        const status = await processInteractiveEntries(
-          p,
-          {
-            project_name: "acme-project-gcp",
-            GIT_USERNAME: "acmefella",
-            GIT_PASSWORD: "ghp_1234567890",
-            GIT_REPO: "https://github.com/acmeorg/acme-project",
-            GCP_REGION: "",
-            GOOGLE_CREDENTIALS: tmpFile,
-            argocdDomainName: "argocd.acme.org",
-            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
-          },
-        );
-
-        const initFileList = new Set([
-          "cndi-config.jsonc",
-          "README.md",
-          ".github",
-          ".gitignore",
-          ".env",
-          ".vscode",
-          "cndi",
-        ]);
-
-        // read the current directory entries after "cndi init" has ran
-        for (const afterDirEntry of Deno.readDirSync(".")) {
-          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
-        }
-
-        assert(status.success);
-        assert(initFileList.size === 0); // if the set is empty, all files were created
-      },
-    );
-
-    it(
-      "-i -t azure/basic should create all cndi project files and directories",
-      async () => {
-        const p = getRunningCNDIProcess("init", "-i", "-t", "azure/basic");
-
-        const status = await processInteractiveEntries(
-          p,
-          {
-            project_name: "acme-project-azure",
-            GIT_USERNAME: "acmefella",
-            GIT_PASSWORD: "ghp_1234567890",
-            GIT_REPO: "https://github.com/acmeorg/acme-project",
-            ARM_REGION: "eastus",
-            ARM_CLIENT_ID: "1234567890",
-            ARM_CLIENT_SECRET: "1234567890",
-            ARM_TENANT_ID: "1234567890",
-            ARM_SUBSCRIPTION_ID: "1234567890",
-            argocdDomainName: "argocd.acme.org",
-            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
-          },
-        );
-
-        const initFileList = new Set([
-          "cndi-config.jsonc",
-          "README.md",
-          ".github",
-          ".gitignore",
-          ".env",
-          ".vscode",
-          "cndi",
-        ]);
-
-        // read the current directory entries after "cndi init" has ran
-        for (const afterDirEntry of Deno.readDirSync(".")) {
-          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
-        }
-
-        assert(status.success);
-        assert(initFileList.size === 0); // if the set is empty, all files were created
-      },
-    );
   });
 
   describe("config validation", () => {
@@ -497,5 +369,134 @@ describe("cndi", () => {
         await ensureResoureNamesMatchFileNames();
       });
     });
+  });
+  describe("cndi init --interactive", () => {
+    it(
+      "-i -t aws/basic should create all cndi project files and directories",
+      async () => {
+        const p = getRunningCNDIProcess("init", "-i", "-t", "aws/basic");
+
+        const status = await processInteractiveEntries(
+          p,
+          {
+            project_name: "acme-project",
+            GIT_USERNAME: "acmefella",
+            GIT_PASSWORD: "ghp_1234567890",
+            GIT_REPO: "https://github.com/acmeorg/acme-project",
+            AWS_REGION: "us-east-1",
+            AWS_ACCESS_KEY_ID: "AKIA1234567890",
+            AWS_SECRET_ACCESS_KEY: "1234567890",
+            argocdDomainName: "argocd.acme.org",
+            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
+          },
+        );
+
+        const initFileList = new Set([
+          "cndi-config.jsonc",
+          "README.md",
+          ".github",
+          ".gitignore",
+          ".env",
+          ".vscode",
+          "cndi",
+        ]);
+
+        // read the current directory entries after "cndi init" has ran
+        for (const afterDirEntry of Deno.readDirSync(".")) {
+          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+        }
+
+        assert(status.success);
+        assert(initFileList.size === 0); // if the set is empty, all files were created
+      },
+    );
+
+    it(
+      "-i -t gcp/basic should create all cndi project files and directories",
+      async () => {
+        const p = getRunningCNDIProcess("init", "-i", "-t", "gcp/basic");
+
+        const tmpFile = Deno.makeTempFileSync();
+
+        Deno.writeTextFileSync(
+          tmpFile,
+          getPrettyJSONString(gcpKeyFile),
+        );
+
+        const status = await processInteractiveEntries(
+          p,
+          {
+            project_name: "acme-project-gcp",
+            GIT_USERNAME: "acmefella",
+            GIT_PASSWORD: "ghp_1234567890",
+            GIT_REPO: "https://github.com/acmeorg/acme-project",
+            GCP_REGION: "",
+            GOOGLE_CREDENTIALS: tmpFile,
+            argocdDomainName: "argocd.acme.org",
+            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
+          },
+        );
+
+        const initFileList = new Set([
+          "cndi-config.jsonc",
+          "README.md",
+          ".github",
+          ".gitignore",
+          ".env",
+          ".vscode",
+          "cndi",
+        ]);
+
+        // read the current directory entries after "cndi init" has ran
+        for (const afterDirEntry of Deno.readDirSync(".")) {
+          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+        }
+
+        assert(status.success);
+        assert(initFileList.size === 0); // if the set is empty, all files were created
+      },
+    );
+
+    it(
+      "-i -t azure/basic should create all cndi project files and directories",
+      async () => {
+        const p = getRunningCNDIProcess("init", "-i", "-t", "azure/basic");
+
+        const status = await processInteractiveEntries(
+          p,
+          {
+            project_name: "acme-project-azure",
+            GIT_USERNAME: "acmefella",
+            GIT_PASSWORD: "ghp_1234567890",
+            GIT_REPO: "https://github.com/acmeorg/acme-project",
+            ARM_REGION: "eastus",
+            ARM_CLIENT_ID: "1234567890",
+            ARM_CLIENT_SECRET: "1234567890",
+            ARM_TENANT_ID: "1234567890",
+            ARM_SUBSCRIPTION_ID: "1234567890",
+            argocdDomainName: "argocd.acme.org",
+            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
+          },
+        );
+
+        const initFileList = new Set([
+          "cndi-config.jsonc",
+          "README.md",
+          ".github",
+          ".gitignore",
+          ".env",
+          ".vscode",
+          "cndi",
+        ]);
+
+        // read the current directory entries after "cndi init" has ran
+        for (const afterDirEntry of Deno.readDirSync(".")) {
+          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+        }
+
+        assert(status.success);
+        assert(initFileList.size === 0); // if the set is empty, all files were created
+      },
+    );
   });
 });
