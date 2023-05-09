@@ -85,7 +85,7 @@
           "kind": "Cluster",
           "metadata": {
             "name": "{{ $.cndi.prompts.responses.postgresqlClusterName }}",
-            "namespace": "default",
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
             "annotations": {
               "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
             }
@@ -125,7 +125,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-cluster-superuser-auth-secret",
-            "namespace": "default"
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -138,7 +138,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-database-user-auth-secret",
-            "namespace": "default"
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
