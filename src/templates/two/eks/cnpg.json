@@ -68,9 +68,7 @@
             "name": "cnpg-cluster",
             "namespace": "default",
             "annotations": {
-              "argocd.argoproj.io/sync-options": {
-                "SkipDryRunOnMissingResource": true
-              }
+              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
             }
           },
           "spec": {
@@ -91,8 +89,8 @@
             },
             "bootstrap": {
               "initdb": {
-                "database": "https://{{ $.cndi.prompts.responses.postgresqlDb }}",
-                "owner": "https://{{ $.cndi.prompts.responses.postgresqlUser }}",
+                "database": "{{ $.cndi.prompts.responses.postgresqlDb }}",
+                "owner": "{{ $.cndi.prompts.responses.postgresqlUser }}",
                 "secret": {
                   "name": "cnpg-database-user-auth-secret"
                 }
@@ -239,12 +237,8 @@
           "value": "5432"
         },
         {
-          "name": "POSTGRESQL_SSLMODE",
-          "value": "disable"
-        },
-        {
           "name": "POSTGRESQL_CONNECTION_STRING",
-          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE"
+          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB"
         },
         {
           "name": "POSTGRESQL_CLUSTER_SUPERUSER",
