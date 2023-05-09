@@ -25,6 +25,18 @@
       "type": "Input"
     },
     {
+      "message": "Please enter your destination namespace for your pg Cluser:",
+      "default": "default",
+      "name": "pgNamespace",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the name for your postgresql cluster:",
+      "default": "my-pgcluster",
+      "name": "postgresqlClusterName",
+      "type": "Input"
+    },
+    {
       "message": "Please enter the email address you want to use for lets encrypt:",
       "default": "admin@example.com",
       "name": "letsEncryptClusterIssuerEmailAddress",
@@ -61,16 +73,21 @@
             "connection": "$.cndi.secrets.seal(POSTGRESQL_CONNECTION_STRING)"
           }
         },
+        "pg-namespace": {
+          "apiVersion": "v1",
+          "kind": "Namespace",
+          "metadata": {
+            "name": "{{ $.cndi.prompts.responses.pgNamespace }}"
+          }
+        },
         "cnpg-cluster": {
           "apiVersion": "postgresql.cnpg.io/v1",
           "kind": "Cluster",
           "metadata": {
-            "name": "cnpg-cluster",
-            "namespace": "default",
+            "name": "{{ $.cndi.prompts.responses.postgresqlClusterName }}",
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
             "annotations": {
-              "argocd.argoproj.io/sync-options": {
-                "SkipDryRunOnMissingResource": true
-              }
+              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
             }
           },
           "spec": {
@@ -91,8 +108,8 @@
             },
             "bootstrap": {
               "initdb": {
-                "database": "https://{{ $.cndi.prompts.responses.postgresqlDb }}",
-                "owner": "https://{{ $.cndi.prompts.responses.postgresqlUser }}",
+                "database": "{{ $.cndi.prompts.responses.postgresqlDb }}",
+                "owner": "{{ $.cndi.prompts.responses.postgresqlUser }}",
                 "secret": {
                   "name": "cnpg-database-user-auth-secret"
                 }
@@ -108,7 +125,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-cluster-superuser-auth-secret",
-            "namespace": "default"
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -121,7 +138,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "cnpg-database-user-auth-secret",
-            "namespace": "default"
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}"
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
@@ -232,19 +249,15 @@
         },
         {
           "name": "POSTGRESQL_HOST",
-          "value": "cnpg-cluster-rw"
+          "value": "{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw"
         },
         {
           "name": "POSTGRESQL_PORT",
           "value": "5432"
         },
         {
-          "name": "POSTGRESQL_SSLMODE",
-          "value": "disable"
-        },
-        {
           "name": "POSTGRESQL_CONNECTION_STRING",
-          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE"
+          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB"
         },
         {
           "name": "POSTGRESQL_CLUSTER_SUPERUSER",

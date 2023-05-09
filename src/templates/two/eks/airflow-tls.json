@@ -135,7 +135,7 @@
             "dags": {
               "gitSync": {
                 "enabled": true,
-                "repo": "$.cndi.prompts.responses.dagRepoUrl",
+                "repo": "{{ $.cndi.prompts.responses.dagRepoUrl }}",
                 "credentialsSecret": "airflow-git-credentials",
                 "branch": "main",
                 "wait": 40,
@@ -147,7 +147,7 @@
                 "expose_config": "True",
                 "instance_name": "Polyseam",
                 "enable_proxy_fix": "True",
-                "base_url": "https://$.cndi.prompts.responses.airflowDomainName"
+                "base_url": "https://{{ $.cndi.prompts.responses.airflowDomainName }}"
               },
               "operators": {
                 "default_owner": "Polyseam"
@@ -162,7 +162,7 @@
                 },
                 "hosts": [
                   {
-                    "name": "$.cndi.prompts.responses.airflowDomainName",
+                    "name": "{{ $.cndi.prompts.responses.airflowDomainName }}",
                     "tls": {
                       "secretName": "lets-encrypt-private-key",
                       "enabled": true
