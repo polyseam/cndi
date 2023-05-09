@@ -99,7 +99,7 @@
           "apiVersion": "postgresql.cnpg.io/v1",
           "kind": "Cluster",
           "metadata": {
-            "name": "cnpg-cluster",
+            "name": "cnpg-airflow-cluster",
             "namespace": "airflow",
             "annotations": {
               "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
@@ -326,7 +326,7 @@
         },
         {
           "name": "POSTGRESQL_HOST",
-          "value": "cnpg-cluster-rw"
+          "value": "cnpg-airflow-cluster-rw"
         },
         {
           "name": "POSTGRESQL_PORT",
