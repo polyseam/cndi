@@ -95,24 +95,31 @@ const destroyCommand = new Command()
         args: [
           `-chdir=${pathToTerraformResources}`,
           "destroy",
-          // "-auto-approve" is an option, but I don't think we want it for destroy calls
+          // "-auto-approve", // is an option, but I don't think we want it for destroy calls
         ],
+        stdin: "inherit",
         stderr: "piped",
         stdout: "piped",
       });
 
-      const terraformDestroyCommandOutput = await terraformDestroyCommand
-        .output();
+      const terraformDestroyChildProcess = terraformDestroyCommand
+        .spawn();
 
-      // print any terraform output to stdout/stderr
-      await Deno.stdout.write(terraformDestroyCommandOutput.stdout);
-      await Deno.stderr.write(terraformDestroyCommandOutput.stderr);
+      for await (const chunk of terraformDestroyChildProcess.stdout) {
+        Deno.stdout.write(chunk);
+      }
+
+      for await (const chunk of terraformDestroyChildProcess.stderr) {
+        Deno.stderr.write(chunk);
+      }
+
+      const status = await terraformDestroyChildProcess.status;
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
       // if `terraform destroy` fails, exit with the code
-      if (terraformDestroyCommandOutput.code !== 0) {
-        Deno.exit(terraformDestroyCommandOutput.code);
+      if (status.code !== 0) {
+        Deno.exit(status.code);
       }
     } catch (cndiDestroyError) {
       console.error(
