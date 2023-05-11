@@ -1,0 +1,258 @@
+{
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "hopwebDomainName",
+      "default": "hopweb.example.com",
+      "message": "Please enter the domain name you want hop web to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the hop server password you want to use for your hop server:",
+      "default": "password",
+      "name": "hopServerPassword",
+      "type": "Secret"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "hop-nodes",
+              "kind": "eks",
+              "instance_type": "t3.large",
+              "volume_size": 128,
+              "min_count": 1,
+              "max_count": 3
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "cert-manager-cluster-issuer": {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "lets-encrypt"
+          },
+          "spec": {
+            "acme": {
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
+              "server": "https://acme-v02.api.letsencrypt.org/directory",
+              "privateKeySecretRef": {
+                "name": "lets-encrypt-private-key"
+              },
+              "solvers": [
+                {
+                  "http01": {
+                    "ingress": {
+                      "ingressClassName": "public"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "hop-server-pvc": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "metadata": {
+            "name": "hop-server-pvc"
+          },
+          "spec": {
+            "accessModes": [
+              "ReadWriteOnce"
+            ],
+            "storageClassName": "hop-server-sc",
+            "resources": {
+              "requests": {
+                "storage": "1Gi"
+              }
+            }
+          }
+        },
+        "hop-server-sc": {
+          "apiVersion": "storage.k8s.io/v1",
+          "kind": "StorageClass",
+          "metadata": {
+            "name": "hop-server-sc"
+          },
+          "provisioner": "ebs.csi.aws.com",
+          "parameters": {
+            "type": "gp2",
+            "encrypted": "false"
+          },
+          "reclaimPolicy": "Delete",
+          "allowVolumeExpansion": true,
+          "volumeBindingMode": "WaitForFirstConsumer"
+        },
+        "hop-server-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "hop-server-secret",
+            "namespace": "hop"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "pass": "$.cndi.secrets.seal(HOP_SERVER_PASSWORD)"
+          }
+        },
+        "hop-web-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "hop-web-ingress",
+            "namespace": "hop",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.hopwebDomainName }}"
+                ],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.hopwebDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "hop-web",
+                          "port": {
+                            "name": "http"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "applications": {
+      "hop": {
+        "targetRevision": "HEAD",
+        "destinationNamespace": "hop",
+        "repoURL": "https://github.com/apache/hop.git",
+        "path": "helm/hop",
+        "values": {
+          "server": {
+            "persistence": {
+              "enabled": true,
+              "existingClaim": "hop-server-pvc"
+            }
+          },
+          "web": {
+            "ingress": {
+              "enabled": true,
+              "annotations": {
+                "cert-manager.io/cluster-issuer": "lets-encrypt"
+              },
+              "hosts": [
+                "{{ $.cndi.prompts.responses.hopwebDomainName }}"
+              ],
+              "tls": [
+                {
+                  "hosts": [
+                    "{{ $.cndi.prompts.responses.hopwebDomainName }}"
+                  ],
+                  "secretName": "lets-encrypt-private-key"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "entries": [
+        {
+          "type": "Comment",
+          "comment": "Hop server parameters"
+        },
+        {
+          "name": "HOP_SERVER_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.hopServerPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template": "## Apache Hop\n\nThis template deploys [Apache Hop](https://hop.apache.org/), the open-source data integration tool in a kubernetes cluster"
+    }
+  }
+}
