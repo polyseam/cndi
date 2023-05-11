@@ -23,7 +23,7 @@
               "name": "x-airflow-node",
               "kind": "azure",
               "role": "leader",
-              "machine_type": "n2-standard-2",
+              "instance_type": "Standard_D4s_v3",
               "volume_size": 128
             },
             {

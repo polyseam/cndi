@@ -45,7 +45,7 @@
               "name": "x-airflow-node",
               "kind": "ec2",
               "role": "leader",
-              "machine_type": "n2-standard-2",
+              "instance_type": "m5a.large",
               "volume_size": 128
             },
             {
