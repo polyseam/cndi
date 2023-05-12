@@ -1,5 +1,7 @@
 import { assert, beforeEach, describe, it, path } from "deps";
 
+import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
+
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
 
@@ -282,6 +284,29 @@ describe("cndi", () => {
       );
       assert(readme.indexOf(`## airflow-tls`) > -1);
       assert(status.success);
+    });
+
+    it("should replace all instances of a prompt slot with the appropriate value", () => {
+      const promptResponses = {
+        exampleA: "foo",
+        exampleB: "bar",
+      };
+
+      const cndiConfigStr = `{
+        "cluster_manifests": {
+          "exampleA": "{{ $.cndi.prompts.responses.exampleA }}",
+          "exampleB": "{{ $.cndi.prompts.responses.exampleB }}",
+          "title": "my-{{ $.cndi.prompts.responses.exampleA }}-{{ $.cndi.prompts.responses.exampleB }}-cluster"
+        }
+      }`;
+
+      const literalized = literalizeTemplateValuesInString(
+        promptResponses,
+        cndiConfigStr,
+      );
+      assert(literalized.indexOf(`"exampleA": "foo"`) > -1);
+      assert(literalized.indexOf(`"exampleB": "bar"`) > -1);
+      assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
     });
 
     describe("aws", () => {
