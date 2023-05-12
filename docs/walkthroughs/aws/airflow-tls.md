@@ -39,24 +39,12 @@ successfully:**
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download cndi:
+Run the following command within your terminal to download and install cndi:
 
 ```shell
 # this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
-
-> #### **Note** 💡
->
-> _If you are on Windows, you should run this command in a Git Bash terminal._
-
-## install cndi cli ⚙️
-
-```shell
-# This will setup CNDI locally by installing it's 2 dependencies and unpacking a couple assets
-cndi install
-```
-
 ## create your cndi repository 📂
 
 CNDI is designed around a GitOps workflow, so all of your cluster configuration
