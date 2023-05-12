@@ -72,6 +72,8 @@ const runCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
+      console.log(ccolors.faded('\n-- terraform init --\n'));
+
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
           `-chdir=${pathToTerraformResources}`,
@@ -90,6 +92,8 @@ const runCommand = new Command()
         console.log(runLabel, ccolors.error("terraform init failed"));
         Deno.exit(terraformInitCommandOutput.code);
       }
+
+      console.log(ccolors.faded('\n-- terraform apply --\n'));
 
       const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
