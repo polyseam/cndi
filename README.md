@@ -197,7 +197,7 @@ cluster using CNDI and evolve it over time!
 
 ### lifecycle: destroy 🗑️
 
-When it comes down time to teardown your cluster, there is just one step, just
+When it comes down time to teardown your cluster, there is only one step, just
 call:
 
 ```bash
