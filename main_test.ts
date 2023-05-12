@@ -290,12 +290,14 @@ describe("cndi", () => {
       const promptResponses = {
         exampleA: "foo",
         exampleB: "bar",
+        whiteSpaceIgnored: "true",
       };
 
       const cndiConfigStr = `{
         "cluster_manifests": {
-          "exampleA": "{{ $.cndi.prompts.responses.exampleA }}",
-          "exampleB": "{{ $.cndi.prompts.responses.exampleB }}",
+          "myExampleA": "{{ $.cndi.prompts.responses.exampleA }}",
+          "myExampleB": "{{ $.cndi.prompts.responses.exampleB }}",
+          "whitespaceIgnored": {{      $.cndi.prompts.responses.whiteSpaceIgnored              }},
           "title": "my-{{ $.cndi.prompts.responses.exampleA }}-{{ $.cndi.prompts.responses.exampleB }}-cluster"
         }
       }`;
@@ -304,9 +306,10 @@ describe("cndi", () => {
         promptResponses,
         cndiConfigStr,
       );
-      assert(literalized.indexOf(`"exampleA": "foo"`) > -1);
-      assert(literalized.indexOf(`"exampleB": "bar"`) > -1);
+      assert(literalized.indexOf(`"myExampleA": "foo"`) > -1);
+      assert(literalized.indexOf(`"myExampleB": "bar"`) > -1);
       assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
+      assert(literalized.indexOf(`"whitespaceIgnored": true,`) > -1);
     });
 
     describe("aws", () => {
