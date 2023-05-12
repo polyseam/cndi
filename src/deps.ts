@@ -49,10 +49,10 @@ export {
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
 
 //  - simple-git
-export { simpleGit } from "src/lib/simple-git.js";
+export { simpleGit } from "npm:simple-git@3.18.0";
 
 //  - crypto-js
-import CryptoJS from "src/lib/crypto-js.js";
+import CryptoJS from "npm:crypto-js@4.1.1";
 
 //  - spinners
 export {
