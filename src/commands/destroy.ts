@@ -72,6 +72,8 @@ const destroyCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
+      console.log(ccolors.faded("\n-- terraform init --\n"));
+
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
           `-chdir=${pathToTerraformResources}`,
@@ -90,6 +92,8 @@ const destroyCommand = new Command()
         console.log(destroyLabel, ccolors.error("terraform init failed"));
         Deno.exit(terraformInitCommandOutput.code);
       }
+
+      console.log(ccolors.faded("\n-- terraform destroy --\n"));
 
       const terraformDestroyCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
