@@ -72,7 +72,7 @@ const runCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
-      console.log(ccolors.faded('\n-- terraform init --\n'));
+      console.log(ccolors.faded("\n-- terraform init --\n"));
 
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
@@ -93,7 +93,7 @@ const runCommand = new Command()
         Deno.exit(terraformInitCommandOutput.code);
       }
 
-      console.log(ccolors.faded('\n-- terraform apply --\n'));
+      console.log(ccolors.faded("\n-- terraform apply --\n"));
 
       const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
