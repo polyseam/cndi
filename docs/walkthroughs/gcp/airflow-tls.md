@@ -178,10 +178,10 @@ successfully run the workflow.
 
 ![GitHub action](/docs/walkthroughs/gcp/img/github-action.png)
 
-It is common for `cndi-run` to take a fair amount of time, as is the case with
+It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into GCP to find
+Once `cndi run` has been completed, you should be ready to log into GCP to find
 the IP address of the load balancer that we created for you in the Network tab.
 
 ---
@@ -214,13 +214,13 @@ which will in turn route traffic into our cluster.
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
 
-Go to the Argocd domain URL that you specified in the interactive prompt
+Go to the ArgoCD domain URL that you specified in the interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
 You should now see a login page for Argocd, you will need the username is
-`admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the
-.env located in your CNDI project folder
+`admin` and the password which is the value of the `ARGOCD_ADMIN_PASSWORD` in
+the `.env` located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
