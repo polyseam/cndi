@@ -131,7 +131,7 @@ function replaceRange(
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
-function literalizeTemplateValuesInString(
+export function literalizeTemplateValuesInString(
   cndiConfigPromptResponses: CndiConfigPromptResponses,
   stringToLiteralize: string,
 ): string {
@@ -143,7 +143,12 @@ function literalizeTemplateValuesInString(
   // loop so long as there is '{{ something }}' in the string
   while (
     indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1 &&
-    indexOfClosingBraces > indexOfOpeningBraces
+    literalizedString.indexOf(
+        "$.cndi.prompts.responses.",
+      ) < indexOfClosingBraces &&
+    literalizedString.indexOf(
+        "$.cndi.prompts.responses.",
+      ) > indexOfOpeningBraces
   ) {
     const contentsOfFirstPair = literalizedString.substring(
       indexOfOpeningBraces + 2,
@@ -164,11 +169,9 @@ function literalizeTemplateValuesInString(
     }
     indexOfOpeningBraces = literalizedString.indexOf(
       "{{",
-      indexOfClosingBraces,
     );
     indexOfClosingBraces = literalizedString.indexOf(
       "}}",
-      indexOfClosingBraces,
     );
   }
 
