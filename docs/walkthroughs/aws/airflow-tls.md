@@ -277,5 +277,5 @@ Airflow and Argocd
 **If you want to take down the entire cluster run:**
 
 ```bash
-`cndi destroy`
+cndi destroy
 ```
