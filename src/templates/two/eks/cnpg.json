@@ -185,7 +185,7 @@
             "namespace": "ingress"
           },
           "data": {
-            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}"
+            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432"
           }
         },
         "ingress-service": {
