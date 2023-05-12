@@ -41,7 +41,7 @@ main() {
     # set shell profile for user shell
     case "$SHELL" in
         /bin/zsh) shell_profile=".zshrc" ;;
-        *) shell_profile=".bash_profile" ;;
+        *) shell_profile=".profile" ;;
     esac
     
     # if $cndi_install is not in $PATH
@@ -67,7 +67,7 @@ main() {
         . "$HOME/$shell_profile"
     fi
     
-    echo "Run 'cndi --help' to get started!"
+    echo "Please restart your terminal then run 'cndi --help' to get started!"
 }
 
 main "$@"

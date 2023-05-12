@@ -7,22 +7,24 @@ export interface RunCndiResult {
   stderror: Uint8Array;
 }
 
+const deno = "deno";
+
 const cmd = [
-  "deno",
   "run",
   "--allow-all",
   "--unstable",
   path.join(srcDir, "main.ts"),
 ];
 
-function getRunningCNDIProcess(...args: string[]) {
-  const p = Deno.run({
-    cmd: [...cmd, ...args],
+function getRunningCNDIProcess(...args: string[]): Deno.ChildProcess {
+  const cndiCommand = new Deno.Command(deno, {
+    args: [...cmd, ...args],
     stdout: "piped",
     stderr: "piped",
     stdin: "piped",
   });
-  return p;
+
+  return cndiCommand.spawn();
 }
 
 async function runCndi(...args: string[]) {
@@ -30,45 +32,52 @@ async function runCndi(...args: string[]) {
   const lastIndex = args.length - 1;
   if (args[lastIndex] === "--loud") {
     args.pop();
-    const p = Deno.run({
-      cmd: [...cmd, ...args],
+
+    const cndiCommand = new Deno.Command(deno, {
+      args: [...cmd, ...args],
       stdout: "inherit",
       stderr: "inherit",
     });
 
-    const status = await p.status();
-    p.close();
+    const output = await cndiCommand.output();
+
+    const status = {
+      code: output.code,
+      success: output.code === 0,
+    };
+
     return { status };
   } else {
-    const p = Deno.run({
-      cmd: [...cmd, ...args],
+    const cndiCommand = new Deno.Command(deno, {
+      args: [...cmd, ...args],
       stdout: "piped",
       stderr: "piped",
     });
 
-    const [status, output, stderrOutput] = await Promise.all([
-      p.status(),
-      p.output(),
-      p.stderrOutput(),
-    ]);
+    const output = await cndiCommand.output();
 
-    p.close();
+    const status = {
+      code: output.code,
+      success: output.code === 0,
+    };
 
     return {
       status,
-      output: decoder.decode(output),
-      stderrOutput: decoder.decode(stderrOutput),
+      output: decoder.decode(output.stdout),
+      stderrOutput: decoder.decode(output.stderr),
     };
   }
 }
 
 async function runCndiLoud(...args: string[]) {
-  const p = Deno.run({
-    cmd: [...cmd, ...args],
+  const cndiCommand = new Deno.Command(deno, {
+    args: [...cmd, ...args],
   });
-
-  const status = await p.status();
-  p.close();
+  const output = await cndiCommand.output();
+  const status = {
+    code: output.code,
+    success: output.code === 0,
+  };
   return { status };
 }
 

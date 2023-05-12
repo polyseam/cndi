@@ -188,7 +188,7 @@ export default async function stageTerraformResourcesForAWS(
     ]);
   } catch (e) {
     console.error(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e, 800));
     await emitExitEvent(800);
     Deno.exit(800);
   }

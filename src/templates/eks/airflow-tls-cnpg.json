@@ -54,6 +54,86 @@
             "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_SYNC_PASSWORD)"
           }
         },
+        "postgresql-connection-string-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "postgresql-connection-string-secret",
+            "namespace": "airflow"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "connection": "$.cndi.secrets.seal(POSTGRESQL_CONNECTION_STRING)"
+          }
+        },
+        "cnpg-cluster": {
+          "apiVersion": "postgresql.cnpg.io/v1",
+          "kind": "Cluster",
+          "metadata": {
+            "name": "cnpg-cluster",
+            "namespace": "airflow",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": {
+                "SkipDryRunOnMissingResource": true
+              }
+            }
+          },
+          "spec": {
+            "imageName": "ghcr.io/cloudnative-pg/postgresql:15.2",
+            "instances": 3,
+            "storage": {
+              "size": "1Gi"
+            },
+            "replicationSlots": {
+              "highAvailability": {
+                "enabled": true
+              }
+            },
+            "postgresql": {
+              "pg_hba": [
+                "host $.cndi.prompts.responses.POSTGRESQL_DB $.cndi.prompts.responses.POSTGRESQL_USER all password"
+              ]
+            },
+            "bootstrap": {
+              "initdb": {
+                "database": "https://$.cndi.prompts.responses.POSTGRESQL_DB",
+                "owner": "https://$.cndi.prompts.responses.POSTGRESQL_USER",
+                "secret": {
+                  "name": "cnpg-database-user-auth-secret"
+                }
+              }
+            },
+            "superuserSecret": {
+              "name": "cnpg-cluster-superuser-auth-secret"
+            }
+          }
+        },
+        "cnpg-cluster-superuser-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "cnpg-cluster-superuser-auth-secret",
+            "namespace": "airflow"
+          },
+          "type": "kubernetes.io/basic-auth",
+          "stringData": {
+            "username": "$.cndi.secrets.seal(POSTGRESQL_CLUSTER_SUPERUSER)",
+            "password": "$.cndi.secrets.seal(POSTGRESQL_PASSWORD)"
+          }
+        },
+        "cnpg-database-user-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "cnpg-database-user-auth-secret",
+            "namespace": "airflow"
+          },
+          "type": "kubernetes.io/basic-auth",
+          "stringData": {
+            "username": "$.cndi.secrets.seal(POSTGRESQL_USER)",
+            "password": "$.cndi.secrets.seal(POSTGRESQL_PASSWORD)"
+          }
+        },
         "cert-manager-cluster-issuer": {
           "apiVersion": "cert-manager.io/v1",
           "kind": "ClusterIssuer",
@@ -95,7 +175,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": [
+                  "$.cndi.prompts.responses.argocdDomainName"
+                ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
@@ -124,6 +206,12 @@
         }
       },
       "applications": {
+        "cnpg": {
+          "targetRevision": "0.18.0",
+          "destinationNamespace": "cnpg-system",
+          "repoURL": "https://cloudnative-pg.github.io/charts",
+          "chart": "cloudnative-pg"
+        },
         "airflow": {
           "targetRevision": "1.7.0",
           "destinationNamespace": "airflow",
@@ -131,6 +219,12 @@
           "chart": "airflow",
           "values": {
             "executor": "LocalKubernetesExecutor",
+            "data": {
+              "metadataSecretName": "postgresql-connection-string-secret"
+            },
+            "postgresql": {
+              "enabled": false
+            },
             "dags": {
               "gitSync": {
                 "enabled": true,
@@ -156,8 +250,7 @@
               "web": {
                 "enabled": true,
                 "annotations": {
-                  "cert-manager.io/cluster-issuer": "lets-encrypt",
-                  "kubernetes.io/ingress.class": "nginx"
+                  "cert-manager.io/cluster-issuer": "lets-encrypt"
                 },
                 "hosts": [
                   {
@@ -193,6 +286,64 @@
     "prompts": [
       {
         "type": "Comment",
+        "comment": "PostgreSQL connection parameters"
+      },
+      {
+        "message": "Please enter the name of the postgresql database",
+        "default": "cnpg-db",
+        "name": "POSTGRESQL_DB",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql user you want to use for your postgresql database:",
+        "default": "admin",
+        "name": "POSTGRESQL_USER",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql password you want to use for your postgresql database:",
+        "default": "password",
+        "name": "POSTGRESQL_PASSWORD",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql protocol you want to use for your postgresql database:",
+        "name": "POSTGRESQL_PROTOCOL",
+        "default": "postgresql",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql host you want to use for your postgresql database:",
+        "name": "POSTGRESQL_HOST",
+        "default": "cnpg-cluster-rw",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql port you want to use for your postgresql database:",
+        "name": "POSTGRESQL_PORT ",
+        "default": "5432",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql ssl mode you want to use for your postgresql database:",
+        "name": "POSTGRESQL_SSLMODE",
+        "default": "disable",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql connection string you want to use to connect your postgresql database:",
+        "name": "POSTGRESQL_CONNECTION_STRING",
+        "default": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB?$POSTGRESQL_SSLMODE",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the postgresql cluster superuser you want to use for your postgresql cluster:",
+        "name": "POSTGRESQL_CLUSTER_SUPERUSER",
+        "default": "postgres",
+        "type": "Input"
+      },
+      {
+        "type": "Comment",
         "comment": "airflow-git-credentials secret values for DAG Storage"
       },
       {
@@ -208,7 +359,7 @@
     ]
   },
   "readme": {
-    "extend_basic_readme": "eks",
-    "template": "## airflow-tls\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart). \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
+    "extend_basic_readme": "aws",
+    "template": "## airflow-tls-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
   }
 }

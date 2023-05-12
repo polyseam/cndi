@@ -15,9 +15,8 @@ const createSealedSecretsKeys = async (
   let sealed_secrets_private_key;
   let sealed_secrets_public_key;
 
-  const ranOpenSSLGenerateKeyPair = Deno.run({
-    cmd: [
-      pathToOpenSSL,
+  const openSSLGenerateKeyPairCommand = new Deno.Command(pathToOpenSSL, {
+    args: [
       "req",
       "-x509",
       "-nodes",
@@ -34,11 +33,11 @@ const createSealedSecretsKeys = async (
     stderr: "piped",
   });
 
-  const generateKeyPairStatus = await ranOpenSSLGenerateKeyPair.status();
-  const generateKeyPairStderr = await ranOpenSSLGenerateKeyPair.stderrOutput();
+  const openSSLGenerateKeyPairCommandOutput =
+    await openSSLGenerateKeyPairCommand.output();
 
-  if (generateKeyPairStatus.code !== 0) {
-    Deno.stdout.write(generateKeyPairStderr);
+  if (openSSLGenerateKeyPairCommandOutput.code !== 0) {
+    Deno.stdout.write(openSSLGenerateKeyPairCommandOutput.stderr);
     Deno.exit(251); // arbitrary exit code
   } else {
     sealed_secrets_private_key = await Deno.readTextFile(
@@ -49,8 +48,6 @@ const createSealedSecretsKeys = async (
     );
     Deno.removeSync(pathToKeys, { recursive: true });
   }
-
-  ranOpenSSLGenerateKeyPair.close();
 
   return {
     sealed_secrets_private_key,

@@ -39,13 +39,16 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     try {
       const response = await fetch(binaryUrl);
       if (response.body && response.status === 200) {
-        const cndiFile = await Deno.open(destinationPath, {
+        // write binary to fs then rename, executable can't be overwritten while it's executing
+        const cndiFile = await Deno.open(`${destinationPath}-new`, {
           create: true,
           write: true,
           mode: 0o777,
         });
         await response.body.pipeTo(cndiFile.writable, { preventClose: true });
         cndiFile.close();
+        await Deno.remove(destinationPath);
+        await Deno.rename(`${destinationPath}-new`, destinationPath);
       } else {
         spinner.stop();
         console.error(
