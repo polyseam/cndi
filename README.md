@@ -197,12 +197,12 @@ cluster using CNDI and evolve it over time!
 
 ### lifecycle: destroy 🗑️
 
-All changes to a cluster with CNDI are made the same way, and teardown is no exception. To destroy your cluster you just need to run
+All changes to a cluster with CNDI are made the same way, and teardown is no
+exception. To destroy your cluster you just need to run
 
 ```bash
 `cndi destroy`
 ```
-
 
 ---
 

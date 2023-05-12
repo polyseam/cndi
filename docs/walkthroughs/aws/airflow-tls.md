@@ -45,6 +45,7 @@ Run the following command within your terminal to download and install cndi:
 # this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
+
 ## create your cndi repository 📂
 
 CNDI is designed around a GitOps workflow, so all of your cluster configuration
@@ -213,7 +214,9 @@ Go to the Argocd domain URL that you specified in the interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
-You should now see a login page for Argocd, you will need the username is `admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the .env located in your CNDI project folder
+You should now see a login page for Argocd, you will need the username is
+`admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the
+.env located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 

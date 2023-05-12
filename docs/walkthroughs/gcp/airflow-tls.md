@@ -218,10 +218,11 @@ Go to the Argocd domain URL that you specified in the interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
-You should now see a login page for Argocd, you will need the username is `admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the .env located in your CNDI project folder
+You should now see a login page for Argocd, you will need the username is
+`admin` and the password which is the value of the ARGOCD_ADMIN_PASSWORD in the
+.env located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
-
 
 Notice that the `cluster_manifests` stored in the GitHub repository match the
 resources displayed in the ArgoCD UI
