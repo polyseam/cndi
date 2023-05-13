@@ -1,13 +1,13 @@
 import {
   ccolors,
   GithubProvider,
-  KUBESEAL_VERSION,
   SpinnerTypes,
   TerminalSpinner,
-  TERRAFORM_VERSION,
   UpgradeCommand,
   UpgradeOptions,
 } from "deps";
+
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
 
 import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
 

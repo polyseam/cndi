@@ -1,6 +1,6 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { AWSEC2NodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "deps";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSEC2NodeItemSpec,
