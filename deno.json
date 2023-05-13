@@ -9,5 +9,10 @@
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all",
     "test": "deno test --unstable --allow-all"
   },
-  "importMap": "import_map.json"
+  "imports": {
+    "src/": "./src/",
+    "deps": "./src/deps.ts",
+    "constants": "./src/constants.ts",
+    "test-deps": "./src/tests/deps.ts"
+  }
 }

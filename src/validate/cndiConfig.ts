@@ -1,4 +1,5 @@
-import { ccolors, nonMicrok8sNodeKinds } from "deps";
+import { ccolors } from "deps";
+import { nonMicrok8sNodeKinds } from "constants";
 import { CNDIConfig } from "src/types.ts";
 import { emitExitEvent } from "src/utils.ts";
 

@@ -1,6 +1,6 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { GCPNodeItemSpec } from "src/types.ts";
-import { DEFAULT_NODE_DISK_SIZE } from "deps";
+import { DEFAULT_NODE_DISK_SIZE } from "constants";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
