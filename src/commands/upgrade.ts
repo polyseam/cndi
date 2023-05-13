@@ -1,14 +1,13 @@
 import {
   ccolors,
   GithubProvider,
-  KUBESEAL_VERSION,
   SpinnerTypes,
   TerminalSpinner,
-  TERRAFORM_VERSION,
   UpgradeCommand,
   UpgradeOptions,
-  writableStreamFromWriter,
 } from "deps";
+
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
 
 import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
 
@@ -39,14 +38,26 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     );
     try {
       const response = await fetch(binaryUrl);
-      if (response.body) {
-        const cndiFile = await Deno.open(destinationPath, {
+      if (response.body && response.status === 200) {
+        // write binary to fs then rename, executable can't be overwritten while it's executing
+        const cndiFile = await Deno.open(`${destinationPath}-new`, {
           create: true,
           write: true,
           mode: 0o777,
         });
-        const cndiWritableStream = writableStreamFromWriter(cndiFile);
-        await response.body.pipeTo(cndiWritableStream);
+        await response.body.pipeTo(cndiFile.writable, { preventClose: true });
+        cndiFile.close();
+        await Deno.remove(destinationPath);
+        await Deno.rename(`${destinationPath}-new`, destinationPath);
+      } else {
+        spinner.stop();
+        console.error(
+          upgradeLabel,
+          ccolors.error(
+            `\nfailed to upgrade ${name} - http response status ${response.status}`,
+          ),
+        );
+        Deno.exit(1100);
       }
       spinner.stop();
       const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";

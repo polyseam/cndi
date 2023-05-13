@@ -1,6 +1,6 @@
 import { ccolors, path } from "deps";
 
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
 import {
   emitExitEvent,
   getLeaderNodeNameFromConfig,
@@ -94,7 +94,7 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.error("failed to parse service account key json from"),
         ccolors.user_input(`"${dotEnvPath}"`),
       );
-      console.log(ccolors.caught(parsingError));
+      console.log(ccolors.caught(parsingError, 805));
       await emitExitEvent(805);
       Deno.exit(805);
     }
@@ -107,7 +107,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
-      cndi_google_compute_instance(node, leaderNodeName),
+      cndi_google_compute_instance(node as GCPNodeItemSpec, leaderNodeName),
     )
   );
 
@@ -118,7 +118,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_disk_${node.name}.tf.json`,
       ),
-      cndi_google_compute_disk(node),
+      cndi_google_compute_disk(node as GCPNodeItemSpec),
     )
   );
 
@@ -219,7 +219,9 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_instance_group.tf.json",
         ),
-        cndi_google_compute_instance_group(config.infrastructure.cndi.nodes),
+        cndi_google_compute_instance_group(
+          config.infrastructure.cndi.nodes as Array<GCPNodeItemSpec>,
+        ),
       ),
 
       stageFile(
@@ -233,7 +235,7 @@ export default async function stageTerraformResourcesForGCP(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e, 802));
     await emitExitEvent(802);
     Deno.exit(802);
   }

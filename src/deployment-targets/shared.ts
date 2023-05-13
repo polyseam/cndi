@@ -98,12 +98,14 @@ const getCoreEnvLines = async (
       value: {
         SEALED_SECRETS_PUBLIC_KEY: sealedSecretsKeys.sealed_secrets_public_key,
       },
+      wrap: true,
     },
     {
       value: {
         SEALED_SECRETS_PRIVATE_KEY:
           sealedSecretsKeys.sealed_secrets_private_key,
       },
+      wrap: true,
     },
     { comment: "ArgoCD" },
     { value: { ARGOCD_ADMIN_PASSWORD } },

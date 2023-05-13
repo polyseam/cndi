@@ -1,5 +1,6 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { AzureNodeItemSpec } from "src/types.ts";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
@@ -7,15 +8,22 @@ export default function getAzureComputeInstanceTFJSON(
 ): string {
   const { name, role } = node;
   const DEFAULT_IMAGE = "0001-com-ubuntu-server-focal"; // The image from which to initialize this disk
-  const DEFAULT_MACHINE_TYPE = "Standard_DC2s_v2"; // The machine type to create.Standard_DC2s_v2 has 2cpu and 8g of ram
-  const DEFAULT_SIZE = 130; // The size of the image in gigabytes\
   const image = node?.image || DEFAULT_IMAGE;
+
   let machine_type = node?.machine_type || node?.instance_type ||
-    DEFAULT_MACHINE_TYPE;
-  let disk_size_gb = node?.disk_size_gb || node?.volume_size || DEFAULT_SIZE;
+    DEFAULT_INSTANCE_TYPES.azure;
+
+  let disk_size_gb = node?.disk_size_gb || node?.volume_size ||
+    DEFAULT_NODE_DISK_SIZE;
+
   const leaderComputeInstance =
     `azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}`;
-  if (node?.size && typeof node.size === "string") {
+
+  // azure uses 'size' to describe the machine type, oof
+  if (
+    node?.size && typeof node.size === "string" && !node?.machine_type &&
+    !node?.instance_type
+  ) {
     machine_type = node.size;
   }
 

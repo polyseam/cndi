@@ -1,6 +1,6 @@
 import { ccolors, path } from "deps";
 
-import { AWSNodeItemSpec, CNDIConfig } from "src/types.ts";
+import { AWSEC2NodeItemSpec, CNDIConfig } from "src/types.ts";
 import {
   emitExitEvent,
   getLeaderNodeNameFromConfig,
@@ -35,7 +35,11 @@ export default async function stageTerraformResourcesForAWS(
   const leader_node_ip =
     `\${aws_instance.cndi_aws_instance_${leaderNodeName}.private_ip}`;
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
+  const awsEC2Nodes = config.infrastructure.cndi.nodes as Array<
+    AWSEC2NodeItemSpec
+  >;
+
+  const stageNodes = awsEC2Nodes.map((node) =>
     stageFile(
       path.join(
         "cndi",
@@ -46,7 +50,7 @@ export default async function stageTerraformResourcesForAWS(
     )
   );
 
-  const stageLbTargetGroupAttachmentHTTP = config.infrastructure.cndi.nodes.map(
+  const stageLbTargetGroupAttachmentHTTP = awsEC2Nodes.map(
     (node) =>
       stageFile(
         path.join(
@@ -58,7 +62,7 @@ export default async function stageTerraformResourcesForAWS(
       ),
   );
 
-  const stageLbTargetGroupAttachmentHTTPS = config.infrastructure.cndi.nodes
+  const stageLbTargetGroupAttachmentHTTPS = awsEC2Nodes
     .map(
       (node) =>
         stageFile(
@@ -79,14 +83,14 @@ export default async function stageTerraformResourcesForAWS(
       ...stageLbTargetGroupAttachmentHTTPS,
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
-        data(config.infrastructure.cndi.nodes as Array<AWSNodeItemSpec>),
+        data(awsEC2Nodes),
       ),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
         cndi_aws_locals({
           leader_node_ip,
           aws_region,
-          nodes: config.infrastructure.cndi.nodes,
+          nodes: awsEC2Nodes,
         }),
       ),
       stageFile(
@@ -184,7 +188,7 @@ export default async function stageTerraformResourcesForAWS(
     ]);
   } catch (e) {
     console.error(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e, 800));
     await emitExitEvent(800);
     Deno.exit(800);
   }

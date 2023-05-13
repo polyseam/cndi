@@ -1,8 +1,8 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { AWSNodeItemSpec } from "src/types.ts";
+import { AWSEC2NodeItemSpec } from "src/types.ts";
 
 export default function getAWSComputeInstanceTargetGroupAttachmentTFJSON(
-  node: AWSNodeItemSpec,
+  node: AWSEC2NodeItemSpec,
 ): string {
   const { name } = node;
   const target_id = `\${aws_instance.cndi_aws_instance_${name}.id}`;

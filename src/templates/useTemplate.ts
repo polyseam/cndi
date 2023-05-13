@@ -1,4 +1,4 @@
-import { loadRemoteJSONC } from "src/utils.ts";
+import { getPrettyJSONString, loadRemoteJSONC } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -75,19 +75,33 @@ interface TemplatePrompt {
   validate?: (value: string) => boolean | string;
 }
 
+interface TemplateEnvEntry {
+  comment?: string;
+  name?: string;
+  value?: string;
+}
+
+interface TemplateEnvCommentEntry extends TemplateEnvEntry {
+  comment: string;
+}
+
+interface TemplateEnvValueEntry extends TemplateEnvEntry {
+  name: string;
+  value: string;
+}
+
 interface Template {
-  "cndi-config": {
-    prompts: Array<TemplatePrompt>;
-    template: CNDIConfig;
-  };
-  "env": {
-    prompts?: Array<TemplatePrompt>;
-    extend_basic_env: DeploymentTarget;
-  };
-  "readme": {
-    prompts?: Array<TemplatePrompt>;
-    extend_basic_readme: DeploymentTarget;
-    template?: string;
+  prompts: Array<TemplatePrompt>;
+  outputs: {
+    "cndi-config": CNDIConfig;
+    "env": {
+      entries?: Array<TemplateEnvCommentEntry | TemplateEnvValueEntry>;
+      extend_basic_env: DeploymentTarget;
+    };
+    "readme": {
+      extend_basic_readme: DeploymentTarget;
+      template_section?: string;
+    };
   };
 }
 
@@ -101,6 +115,67 @@ interface CNDIGeneratedValues {
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
+}
+
+interface CndiConfigPromptResponses {
+  [key: string]: string;
+}
+
+function replaceRange(
+  s: string,
+  start: number,
+  end: number,
+  substitute: string,
+) {
+  return s.substring(0, start) + substitute + s.substring(end);
+}
+
+// returns a string where templated values are replaced with their literal values from prompt responses
+export function literalizeTemplateValuesInString(
+  cndiConfigPromptResponses: CndiConfigPromptResponses,
+  stringToLiteralize: string,
+): string {
+  let literalizedString = stringToLiteralize;
+
+  let indexOfOpeningBraces = literalizedString.indexOf("{{");
+  let indexOfClosingBraces = literalizedString.indexOf("}}");
+
+  // loop so long as there is '{{ something }}' in the string
+  while (
+    indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1 &&
+    literalizedString.indexOf(
+        "$.cndi.prompts.responses.",
+      ) < indexOfClosingBraces &&
+    literalizedString.indexOf(
+        "$.cndi.prompts.responses.",
+      ) > indexOfOpeningBraces
+  ) {
+    const contentsOfFirstPair = literalizedString.substring(
+      indexOfOpeningBraces + 2,
+      indexOfClosingBraces,
+    );
+
+    const trimmedContents = contentsOfFirstPair.trim();
+    const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
+    const valueToSubstitute = cndiConfigPromptResponses[key];
+
+    if (key) {
+      literalizedString = replaceRange(
+        literalizedString,
+        indexOfOpeningBraces,
+        indexOfClosingBraces + 2,
+        `${valueToSubstitute}`,
+      );
+    }
+    indexOfOpeningBraces = literalizedString.indexOf(
+      "{{",
+    );
+    indexOfClosingBraces = literalizedString.indexOf(
+      "}}",
+    );
+  }
+
+  return literalizedString;
 }
 
 export default async function useTemplate(
@@ -129,18 +204,20 @@ export default async function useTemplate(
 
   const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,
-    templateObject.env.extend_basic_env,
+    templateObject.outputs.env.extend_basic_env,
     interactive,
   );
 
-  const cndiConfigPromptDefinitions = templateObject["cndi-config"].prompts ||
+  const cndiConfigPromptDefinitions = templateObject.prompts ||
     [];
 
   const defaultCndiConfigValues: Record<string, string> = {};
 
   const cndiConfigPrompts = cndiConfigPromptDefinitions.map(
     (promptDefinition) => {
-      defaultCndiConfigValues[promptDefinition.name] = promptDefinition.default;
+      defaultCndiConfigValues[promptDefinition.name] = promptDefinition?.default
+        ? promptDefinition.default
+        : "";
       return {
         ...promptDefinition,
         message: ccolors.prompt(promptDefinition.message),
@@ -149,52 +226,52 @@ export default async function useTemplate(
     },
   );
 
-  const cndiConfigValues = opt.interactive // deno-lint-ignore no-explicit-any
+  const cndiConfigPromptResponses = opt.interactive // deno-lint-ignore no-explicit-any
     ? await prompt(cndiConfigPrompts as unknown as any)
     : defaultCndiConfigValues;
 
-  let cndiConfigStringified = JSON.stringify(
-    templateObject["cndi-config"].template,
+  // pretty printing is required to play nice with {{ }} templating
+  const cndiConfigStringified = getPrettyJSONString(
+    templateObject.outputs["cndi-config"],
   );
 
-  for (const [key, value] of Object.entries(cndiConfigValues)) {
-    const stringToReplace = `$.cndi.prompts.responses.${key}`;
-    cndiConfigStringified = cndiConfigStringified.replaceAll(
-      stringToReplace,
-      `${value}`,
-    );
-  }
+  const literalizedCndiConfig = await literalizeTemplateValuesInString(
+    cndiConfigPromptResponses,
+    cndiConfigStringified,
+  );
 
   let cndiConfig;
 
   try {
-    cndiConfig = JSON.parse(cndiConfigStringified);
+    cndiConfig = JSON.parse(literalizedCndiConfig);
     cndiConfig.project_name = opt.project_name;
   } catch {
-    throw new Error("Invalid cndi-config.jsonc generated");
+    throw new Error("Invalid template['cndi-config'] generated");
   }
 
   const templateEnvLines = [];
 
-  const templateEnvPromptDefinitions: Array<TemplatePrompt> =
-    templateObject?.env?.prompts || [];
-
-  for (const p of templateEnvPromptDefinitions) {
-    if (p.type === "Comment") {
+  for (const p of templateObject?.outputs?.env?.entries || []) {
+    if (p.comment?.length) {
       const { comment } = p;
       templateEnvLines.push({ comment } as EnvCommentEntry);
       continue;
-    } else if (opt.interactive) {
-      // deno-lint-ignore no-explicit-any
-      const P = getPromptModuleForType(p.type) as any;
-      const v = await P?.prompt({
-        ...p,
-        message: ccolors.prompt(p.message),
-      });
-      templateEnvLines.push({ value: { [p.name]: v } } as EnvValueEntry);
     } else {
+      if (!p?.value || typeof p?.value !== "string") {
+        throw new Error(`Invalid env entry ${JSON.stringify(p)}`);
+      }
+
+      if (!p?.name || typeof p?.name !== "string") {
+        throw new Error(`Invalid env entry ${JSON.stringify(p)}`);
+      }
+
+      const value = literalizeTemplateValuesInString(
+        cndiConfigPromptResponses,
+        p.value,
+      );
+
       templateEnvLines.push(
-        { value: { [p.name]: p.default } } as EnvValueEntry,
+        { value: { [p.name]: value } } as EnvValueEntry,
       );
     }
   }
@@ -202,11 +279,16 @@ export default async function useTemplate(
   const env = [...coreEnvLines, ...templateEnvLines];
 
   const coreReadme = await getReadmeForProject({
-    deploymentTarget: templateObject.readme.extend_basic_readme,
+    nodeKind: templateObject.outputs.readme.extend_basic_readme,
     project_name: opt.project_name,
   });
 
-  const templateReadmeText = templateObject.readme?.template || "";
+  const templateReadmeText = templateObject.outputs?.readme?.template_section
+    ? literalizeTemplateValuesInString(
+      cndiConfigPromptResponses,
+      templateObject.outputs.readme.template_section,
+    )
+    : "";
 
   const readme = `${coreReadme}\n\n${templateReadmeText}`;
 

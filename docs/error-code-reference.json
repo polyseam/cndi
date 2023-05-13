@@ -148,6 +148,10 @@
     "message": "failed to stage gcp terraform objects"
   },
   {
+    "code": 806,
+    "message": "failed to stage eks terraform objects"
+  },
+  {
     "code": 803,
     "message": "'GOOGLE_CREDENTIALS' env var is not set during terraform staging"
   },
@@ -225,6 +229,10 @@
   },
   {
     "code": 1008,
-    "message": "failed to write tf state 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to write tf state, 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+  },
+  {
+    "code": 1100,
+    "message": "failed to upgrade cndi, release binary fetch not ok"
   }
 ]

@@ -1,20 +1,19 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { AWSNodeItemSpec } from "src/types.ts";
+import { AWSEC2NodeItemSpec } from "src/types.ts";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
 
 export default function getAWSComputeInstanceTFJSON(
-  node: AWSNodeItemSpec,
+  node: AWSEC2NodeItemSpec,
   leaderNodeName: string,
 ): string {
   const { name, role } = node;
-  const DEFAULT_AMI = "ami-0c1704bac156af62c";
-  const DEFAULT_INSTANCE_TYPE = "m5a.large";
-  const DEFAULT_VOLUME_SIZE = 100;
-  const ami = node?.ami || DEFAULT_AMI;
-  const instance_type = node?.instance_type || node?.machine_type ||
-    DEFAULT_INSTANCE_TYPE;
+  const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
+  const ami = node?.ami || DEFAULT_EC2_AMI;
+  const instance_type = node?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
   const delete_on_termination = false;
   const device_name = "/dev/sda1";
-  const volume_size = node?.volume_size || node?.size || DEFAULT_VOLUME_SIZE; //GiB
+  const volume_size = node?.volume_size || node?.disk_size || node?.size ||
+    node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
   const subnet_id = `\${aws_subnet.cndi_aws_subnet[0].id}`;
   const vpc_security_group_ids = [

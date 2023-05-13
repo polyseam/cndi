@@ -1,4 +1,4 @@
-import { DeploymentTarget } from "src/types.ts";
+import { NodeKind } from "src/types.ts";
 
 const coreReadmeSection = `
 This project was created with [CNDI](https://github.com/polyseam/cndi), and this README is to help show you the ropes.
@@ -62,8 +62,8 @@ If you've modified your nodes, the infrastructure should be updated with Terrafo
 
 export default function getReadmeForProject({
   project_name,
-  deploymentTarget,
-}: { project_name: string; deploymentTarget: DeploymentTarget }): string {
+  nodeKind,
+}: { project_name: string; nodeKind: NodeKind }): string {
   const linkToDashboards = {
     aws:
       "[AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
@@ -88,8 +88,7 @@ export default function getReadmeForProject({
 Once your cluster is deployed, you can log into ArgoCD to see the status of your cluster. This can be done by logging into the ArgoCD UI with the username "admin" and the password that has been set for you in the [.env](/.env) file as \`ARGOCD_ADMIN_PASSWORD\` at the domain name you configured for Argo's ingress above.
 `.trim();
 
-  const readmeSectionsForDeploymentTarget = {
-    aws: `
+  const ec2ReadmeSection = `
 ## aws
 
 This cluster will be deployed on [Amazon Web Services](https://aws.com).
@@ -97,7 +96,12 @@ When your cluster is initialized the next step is to go to your domain registrar
 Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.aws}.
 
 You can visit the ${linkToDashboards.aws} to see the status of the nodes that make up your cluster.
-`.trim(),
+`.trim();
+
+  const readmeSectionsForDeploymentTarget = {
+    ec2: ec2ReadmeSection,
+    aws: ec2ReadmeSection,
+    eks: ec2ReadmeSection, // TODO: README.md for EKS should be different than that of EC2
     gcp: `
 ## gcp
 
@@ -122,7 +126,7 @@ You can visit the ${linkToDashboards.azure} to see the status of the nodes that 
   const readmeContent = [
     `# ${project_name || "my-cndi-project"}`,
     coreReadmeSection,
-    readmeSectionsForDeploymentTarget[deploymentTarget],
+    readmeSectionsForDeploymentTarget[nodeKind],
     loggingIntoArgoCDSection,
   ].join("\n\n");
 

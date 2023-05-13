@@ -1,20 +1,9 @@
-import {
-  ccolors,
-  deepMerge,
-  DEFAULT_INSTANCE_TYPES,
-  homedir,
-  JSONC,
-  path,
-  platform,
-  walk,
-} from "deps";
+import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
 
 import {
   BaseNodeItemSpec,
   CNDIConfig,
   DeploymentTarget,
-  NODE_KIND,
-  NodeKind,
   TFBlocks,
 } from "src/types.ts";
 
@@ -72,7 +61,9 @@ async function getLeaderNodeNameFromConfig(
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
-  return config.infrastructure.cndi.nodes[0].kind;
+  const clusterKind = config.infrastructure.cndi.nodes[0].kind;
+  if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  return clusterKind;
 }
 
 function getTFResource(
@@ -91,7 +82,22 @@ function getTFResource(
     },
   };
 }
-
+function getTFData(
+  data_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_data_${data_type}`;
+  return {
+    data: {
+      [data_type]: {
+        [name]: {
+          ...content,
+        },
+      },
+    },
+  };
+}
 interface TFResourceFileObject {
   resource: {
     [key: string]: Record<string, unknown>;
@@ -252,6 +258,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       ccolors.error("error patching terraform files with config"),
     );
     console.log(ccolors.caught(error));
+    console.log("attempting to continue anyway...");
   }
 }
 
@@ -384,24 +391,6 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
-async function getDefaultVmTypeForKind(
-  kind: NodeKind,
-): Promise<[string, string]> {
-  switch (kind) {
-    // most recent 4vCPU/16GiB Ram VMs
-    case NODE_KIND.aws:
-      return ["instance_type", DEFAULT_INSTANCE_TYPES.aws];
-    case NODE_KIND.gcp:
-      return ["machine_type", DEFAULT_INSTANCE_TYPES.gcp];
-    case NODE_KIND.azure:
-      return ["machine_type", DEFAULT_INSTANCE_TYPES.azure];
-    default:
-      console.log("Unknown kind: " + kind);
-      await emitExitEvent(205);
-      Deno.exit(205);
-  }
-}
-
 function base10intToHex(decimal: number): string {
   // if the int8 in hex is less than 2 characters, prepend 0
   const hex = decimal.toString(16).padStart(2, "0");
@@ -430,7 +419,6 @@ export {
   checkInstalled,
   emitExitEvent,
   getCndiInstallPath,
-  getDefaultVmTypeForKind,
   getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
@@ -440,6 +428,7 @@ export {
   getPrettyJSONString,
   getSecretOfLength,
   getStagingDir,
+  getTFData,
   getTFResource,
   loadJSONC,
   loadRemoteJSONC,

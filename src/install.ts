@@ -1,10 +1,4 @@
-import {
-  ccolors,
-  path,
-  SpinnerTypes,
-  TerminalSpinner,
-  writableStreamFromWriter,
-} from "deps";
+import { ccolors, path, SpinnerTypes, TerminalSpinner } from "deps";
 
 import {
   checkInstalled,
@@ -62,8 +56,10 @@ export default async function installDependenciesIfRequired(
           write: true,
           mode: 0o777,
         });
-        const terraformWritableStream = writableStreamFromWriter(terraformFile);
-        await terraformFileResponse.body.pipeTo(terraformWritableStream);
+        await terraformFileResponse.body.pipeTo(terraformFile.writable, {
+          preventClose: true,
+        });
+        terraformFile.close();
         console.log("\n    terraform installed!\n");
       }
     } catch (terraformInstallError) {
@@ -71,7 +67,7 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install terraform, please try again"),
       );
-      console.log(ccolors.caught(terraformInstallError));
+      console.log(ccolors.caught(terraformInstallError, 300));
 
       await emitExitEvent(300);
       Deno.exit(300);
@@ -93,8 +89,10 @@ export default async function installDependenciesIfRequired(
           write: true,
           mode: 0o777,
         });
-        const kubesealWritableStream = writableStreamFromWriter(kubesealFile);
-        await kubesealFileResponse.body.pipeTo(kubesealWritableStream);
+        await kubesealFileResponse.body.pipeTo(kubesealFile.writable, {
+          preventClose: true,
+        });
+        kubesealFile.close();
         console.log("\n    kubeseal installed!\n");
       }
     } catch (kubesealInstallError) {
@@ -102,7 +100,7 @@ export default async function installDependenciesIfRequired(
         installLabel,
         ccolors.error("\nfailed to install kubeseal, please try again"),
       );
-      console.log(ccolors.caught(kubesealInstallError));
+      console.log(ccolors.caught(kubesealInstallError, 301));
       await emitExitEvent(301);
       Deno.exit(301);
     }
