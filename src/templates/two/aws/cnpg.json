@@ -178,7 +178,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "ingressClassName": "public"
+                      "class": "public"
                     }
                   }
                 }
@@ -190,42 +190,55 @@
           "apiVersion": "v1",
           "kind": "ConfigMap",
           "metadata": {
-            "name": "ingress-nginx-controller",
+            "name": "nginx-ingress-tcp-microk8s-conf",
             "namespace": "ingress"
           },
           "data": {
-            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}"
+            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}:5432"
           }
         },
-        "ingress-service": {
-          "apiVersion": "v1",
-          "kind": "Service",
+        "ingress-daemonset": {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
           "metadata": {
-            "name": "ingress-nginx-controller",
+            "name": "nginx-ingress-microk8s-controller",
             "namespace": "ingress"
           },
           "spec": {
-            "type": "LoadBalancer",
-            "ports": [
-              {
-                "name": "http",
-                "port": 80,
-                "targetPort": "http",
-                "protocol": "TCP"
-              },
-              {
-                "name": "https",
-                "port": 443,
-                "targetPort": "https",
-                "protocol": "TCP"
-              },
-              {
-                "name": "postgres",
-                "port": 5432,
-                "targetPort": 5432,
-                "protocol": "TCP"
+            "selector": {
+              "matchLabels": {
+                "name": "nginx-ingress-microk8s"
               }
-            ]
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "name": "nginx-ingress-microk8s"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
+                    "name": "nginx-ingress-microk8s",
+                    "ports": [
+                      {
+                        "containerPort": 80
+                      },
+                      {
+                        "containerPort": 443
+                      },
+                      {
+                        "name": "tcp-5432",
+                        "containerPort": 5432,
+                        "hostPort": 5432,
+                        "protocol": "TCP"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
           }
         },
         "cnpg-ingress": {
