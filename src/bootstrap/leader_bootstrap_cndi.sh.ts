@@ -64,7 +64,7 @@ echo "installing sealed-secrets\n"
 
 echo "installing sealed-secrets-controller"
 
-sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.19.1/controller.yaml 
+sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.21.0/controller.yaml 
 
 echo "writing sealed-secrets keypair to disk"
 
