@@ -79,8 +79,8 @@ const parseCndiSecret = async (
         console.error(
           sealedSecretManifestLabel,
           ccolors.error("Secret string literals are not supported.\nUse"),
-          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
-          ccolors.error("prefix to reference environment variables at"),
+          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
+          ccolors.error("to reference environment variables at"),
           ccolors.key_name(
             `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
           ),
@@ -132,9 +132,9 @@ const parseCndiSecret = async (
       } else {
         console.error(
           sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported\nUse"),
+          ccolors.error("Secret string literals are not supported.\nUse"),
           ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
-          ccolors.error("prefix to reference environment variables at"),
+          ccolors.error("to reference environment variables at"),
           ccolors.key_name(
             `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
