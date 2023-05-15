@@ -1,20 +1,25 @@
+import deno_json from "../deno.json" assert { type: "json" };
+
 import {
+  ccolors,
   Command,
   CompletionsCommand,
   HelpCommand,
-} from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
-import { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
-import * as path from "https://deno.land/std@0.173.0/path/mod.ts";
+  homedir,
+  path,
+} from "deps";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
+
+// commands
 import upgradeCommand from "src/commands/upgrade.ts";
 import runCommand from "src/commands/run.ts";
 import initCommand from "src/commands/init.ts";
 import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
-import deno_json from "../deno.json" assert { type: "json" };
-import { ccolors, KUBESEAL_VERSION, TERRAFORM_VERSION } from "src/deps.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
+
 import { emitExitEvent } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");

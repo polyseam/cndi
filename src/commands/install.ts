@@ -1,4 +1,5 @@
-import { Command, KUBESEAL_VERSION, TERRAFORM_VERSION } from "deps";
+import { Command } from "deps";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
 import install from "src/install.ts";
 
 /**

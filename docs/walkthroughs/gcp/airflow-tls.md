@@ -41,22 +41,11 @@ successfully:**
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download cndi:
+Run the following command within your terminal to download and install cndi:
 
 ```shell
 # this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
-```
-
-> #### **Note** 💡
->
-> _If you are on Windows, you should run this command in a Git Bash terminal._
-
-## install cndi cli ⚙️
-
-```shell
-# This will setup CNDI locally by installing it's 2 dependencies and unpacking a couple assets
-cndi install
 ```
 
 ## create your cndi repository 📂
@@ -189,10 +178,10 @@ successfully run the workflow.
 
 ![GitHub action](/docs/walkthroughs/gcp/img/github-action.png)
 
-It is common for `cndi-run` to take a fair amount of time, as is the case with
+It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into GCP to find
+Once `cndi run` has been completed, you should be ready to log into GCP to find
 the IP address of the load balancer that we created for you in the Network tab.
 
 ---
@@ -225,24 +214,15 @@ which will in turn route traffic into our cluster.
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
 
-In order to login to ArgoCD we have to get the password from within the cluster
-by runnig the following command on one of the newly deployed CNDI nodes shown:
+Go to the ArgoCD domain URL that you specified in the interactive prompt
 
-```bash
-# this command will print out the default ArgoCD password
-sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-```
+![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
-- Take note of that password and then go to the ArgoCD domain name that you just
-  updated in your registrar.
+You should now see a login page for Argocd, you will need the username is
+`admin` and the password which is the value of the `ARGOCD_ADMIN_PASSWORD` in
+the `.env` located in your CNDI project folder
 
-You should now see a login page for Argo, and a place to enter a username and
-password. The username is `admin` and the password is the text you copied in the
-previous step.
-
-![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-0.png)
-
-![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-1.png)
+![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
 Notice that the `cluster_manifests` stored in the GitHub repository match the
 resources displayed in the ArgoCD UI
@@ -296,9 +276,8 @@ Airflow and Argocd
 - Commit changes
 - Push your code changes to the repository
 
-**If you want to take down the entire cluster:**
+**If you want to take down the entire cluster run:**
 
-- Delete all the files in your cndi/terraform directory
-- Create an empty called destroy.tf in the cndi/terraform directory
-- Commit changes
-- Push your code changes to the repository
+```bash
+cndi destroy
+```

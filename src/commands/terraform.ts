@@ -78,17 +78,23 @@ const terraformCommand = new Command()
       stdout: "piped",
     });
 
-    const proxiedTerraformCommandOutput = await proxiedTerraformCommand
-      .output();
+    const proxiedTerraformCommandChildProcess = proxiedTerraformCommand
+      .spawn();
 
-    // print any terraform output to stdout/stderr
-    await Deno.stdout.write(proxiedTerraformCommandOutput.stdout);
-    await Deno.stderr.write(proxiedTerraformCommandOutput.stderr);
+    for await (const chunk of proxiedTerraformCommandChildProcess.stdout) {
+      Deno.stdout.write(chunk);
+    }
+
+    for await (const chunk of proxiedTerraformCommandChildProcess.stderr) {
+      Deno.stderr.write(chunk);
+    }
+
+    const status = await proxiedTerraformCommandChildProcess.status;
 
     await pushStateFromRun({ pathToTerraformResources, cmd });
 
-    if (proxiedTerraformCommandOutput.code !== 0) {
-      Deno.exit(proxiedTerraformCommandOutput.code);
+    if (status.code !== 0) {
+      Deno.exit(status.code);
     }
   });
 

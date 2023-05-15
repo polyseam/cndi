@@ -1,8 +1,0 @@
-{
-  "imports": {
-    "events": "https://deno.land/std@0.173.0/node/events.ts",
-    "child_process": "https://deno.land/std@0.173.0/node/child_process.ts",
-    "src/": "./src/",
-    "deps": "./src/deps.ts"
-  }
-}
