@@ -21,6 +21,10 @@ export default async function stageTerraformResourcesForConfig(
 
   const kind = config.infrastructure.cndi.nodes[0].kind;
 
+  const node_name_list = config.infrastructure.cndi.nodes.map(({ name }) =>
+    name
+  );
+
   switch (kind) {
     case "aws":
       console.log(
@@ -54,7 +58,10 @@ export default async function stageTerraformResourcesForConfig(
     // add global locals
     stageFile(
       path.join("cndi", "terraform", "global.locals.tf.json"),
-      global_locals({ cndi_project_name }),
+      global_locals({
+        cndi_project_name,
+        node_name_list,
+      }),
     ),
     // write the microk8s join token generator
     stageFile(
