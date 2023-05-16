@@ -22,7 +22,7 @@ export default async function stageTerraformResourcesForConfig(
   const kind = config.infrastructure.cndi.nodes[0].kind;
 
   const node_name_list = config.infrastructure.cndi.nodes.map((node) => {
-    return node.name ? node.name : '';
+    return node.name ? node.name : "";
   });
 
   switch (kind) {
