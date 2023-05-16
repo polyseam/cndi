@@ -94,52 +94,52 @@
                   }
                 ]
               }
-            }
-          },
-          "aws_lb_listener": {
-            "cndi_aws_lb_listener_postgres": {
-              "load_balancer_arn": "${aws_lb.cndi_aws_lb.arn}",
-              "port": 5432,
-              "protocol": "TCP",
-              "default_action": [
-                {
-                  "type": "forward",
-                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}"
+            },
+            "aws_lb_listener": {
+              "cndi_aws_lb_listener_postgres": {
+                "load_balancer_arn": "${aws_lb.cndi_aws_lb.arn}",
+                "port": 5432,
+                "protocol": "TCP",
+                "default_action": [
+                  {
+                    "type": "forward",
+                    "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}"
+                  }
+                ]
+              }
+            },
+            "aws_lb_target_group": {
+              "cndi_aws_lb_target_group_postgres": {
+                "port": 5432,
+                "protocol": "TCP",
+                "vpc_id": "${aws_vpc.cndi_aws_vpc.id}",
+                "tags": {
+                  "Name": "POSTGRESLBTargetGroup",
+                  "CNDIProject": "${local.cndi_project_name}"
                 }
-              ]
-            }
-          },
-          "aws_lb_target_group": {
-            "cndi_aws_lb_target_group_postgres": {
-              "port": 5432,
-              "protocol": "TCP",
-              "vpc_id": "${aws_vpc.cndi_aws_vpc.id}",
-              "tags": {
-                "Name": "POSTGRESLBTargetGroup",
-                "CNDIProject": "${local.cndi_project_name}"
-              }
-            }
-          },
-          "aws_lb_target_group_attachment": [
-            {
-              "cndi_aws_lb_target_group_attachment_x-cnpg-node": {
-                "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
-                "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
               }
             },
-            {
-              "cndi_aws_lb_target_group_attachment_y-cnpg-node": {
-                "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
-                "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
+            "aws_lb_target_group_attachment": [
+              {
+                "cndi_aws_lb_target_group_attachment_x-cnpg-node": {
+                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
+                  "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
+                }
+              },
+              {
+                "cndi_aws_lb_target_group_attachment_y-cnpg-node": {
+                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
+                  "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
+                }
+              },
+              {
+                "cndi_aws_lb_target_group_attachment_z-cnpg-node": {
+                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
+                  "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
+                }
               }
-            },
-            {
-              "cndi_aws_lb_target_group_attachment_z-cnpg-node": {
-                "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
-                "target_id": "${aws_instance.cndi_aws_instance_x-cnpg-node.id}"
-              }
-            }
-          ]
+            ]
+          }
         }
       },
       "cluster_manifests": {
