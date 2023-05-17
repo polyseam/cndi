@@ -39,16 +39,19 @@ export default async function stageTerraformResourcesForAWS(
     AWSEC2NodeItemSpec
   >;
 
-  const stageNodes = awsEC2Nodes.map((node) =>
-    stageFile(
+  const node_id_list: string[] = [];
+
+  const stageNodes = awsEC2Nodes.map((node) => {
+    node_id_list.push(`\${cndi_aws_instance_${node.name}.id}`);
+    return stageFile(
       path.join(
         "cndi",
         "terraform",
         `cndi_aws_instance_${node.name}.tf.json`,
       ),
       cndi_aws_instance(node, leaderNodeName),
-    )
-  );
+    );
+  });
 
   const stageLbTargetGroupAttachmentHTTP = awsEC2Nodes.map(
     (node) =>
@@ -88,6 +91,7 @@ export default async function stageTerraformResourcesForAWS(
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
         cndi_aws_locals({
+          node_id_list,
           leader_node_ip,
           aws_region,
           nodes: awsEC2Nodes,

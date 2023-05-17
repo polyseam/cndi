@@ -100,16 +100,19 @@ export default async function stageTerraformResourcesForGCP(
     }
   }
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
-    stageFile(
+  const node_id_list: string[] = [];
+
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
+    node_id_list.push(`\${cndi_google_compute_instance_${node.name}.id}`);
+    return stageFile(
       path.join(
         "cndi",
         "terraform",
         `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
       cndi_google_compute_instance(node as GCPNodeItemSpec, leaderNodeName),
-    )
-  );
+    );
+  });
 
   const stageDisks = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -129,7 +132,7 @@ export default async function stageTerraformResourcesForGCP(
       ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_google_locals({ gcp_region, leader_node_ip }),
+        cndi_google_locals({ gcp_region, leader_node_ip, node_id_list }),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
