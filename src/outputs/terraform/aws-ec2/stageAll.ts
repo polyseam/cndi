@@ -42,7 +42,7 @@ export default async function stageTerraformResourcesForAWS(
   const node_id_list: string[] = [];
 
   const stageNodes = awsEC2Nodes.map((node) => {
-    node_id_list.push(`\${cndi_aws_instance_${node.name}.id}`);
+    node_id_list.push(`\${aws_instance.cndi_aws_instance_${node.name}.id}`);
     return stageFile(
       path.join(
         "cndi",

@@ -103,7 +103,9 @@ export default async function stageTerraformResourcesForGCP(
   const node_id_list: string[] = [];
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
-    node_id_list.push(`\${cndi_google_compute_instance_${node.name}.id}`);
+    node_id_list.push(
+      `\${google_compute_instance.cndi_google_compute_instance_${node.name}.id}`,
+    );
     return stageFile(
       path.join(
         "cndi",

@@ -40,7 +40,9 @@ export default async function stageTerraformResourcesForAzure(
   const node_id_list: string[] = [];
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
-    node_id_list.push(`\${cndi_azurerm_linux_virtual_machine_${node.name}}.id`);
+    node_id_list.push(
+      `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${node.name}}.id`,
+    );
     return stageFile(
       path.join(
         "cndi",
