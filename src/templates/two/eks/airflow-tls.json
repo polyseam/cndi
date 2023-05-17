@@ -131,7 +131,7 @@
           "repoURL": "https://airflow.apache.org",
           "chart": "airflow",
           "values": {
-            "executor": "LocalKubernetesExecutor",
+            "executor": "KubernetesExecutor",
             "dags": {
               "gitSync": {
                 "enabled": true,

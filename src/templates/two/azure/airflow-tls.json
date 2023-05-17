@@ -150,6 +150,7 @@
           "repoURL": "https://airflow.apache.org",
           "chart": "airflow",
           "values": {
+            "executor": "KubernetesExecutor",
             "dags": {
               "gitSync": {
                 "enabled": true,
