@@ -120,10 +120,10 @@
               }
             },
             "aws_lb_target_group_attachment": {
-              "cndi_aws_lb_target_group_attachment": {
-                "count": "length(local.node_name_list)",
+              "cndi_aws_lb_target_group_attachment_postgres": {
+                "count": "${length(local.node_id_list)}",
                 "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
-                "target_id": "${aws_instance.cndi_aws_instance_${local.node_name_list[count.index]}.id"
+                "target_id": "${local.node_id_list[count.index]}"
               }
             }
           }
