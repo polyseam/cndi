@@ -81,7 +81,6 @@
                 "loadbalancer_id": "${azurerm_lb.cndi_azurerm_lb.id}",
                 "name": "cndi_load_balancer_postgres_health_probe",
                 "port": 5432,
-                "protocol": "Tcp"
               }
             },
             "azurerm_lb_rule": {
