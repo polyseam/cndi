@@ -446,7 +446,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "gcp",
       "template": "## cloudnative-pg\n\nThis template deploys a Standalone production ready [cloudnative-posgresql-database](https://github.com/cloudnative-pg/charts)"
     }
   }
