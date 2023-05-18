@@ -26,7 +26,8 @@ import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
 import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
-
+import cndi_aws_ebs_volume from "./cndi_aws_ebs_volume.tf.json.ts";
+import cndi_aws_volume_attachment from "./cndi_aws_volume_attachment.tf.json.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
@@ -53,6 +54,28 @@ export default async function stageTerraformResourcesForAWS(
     );
   });
 
+  const stageEbsVolume = awsEC2Nodes.map(
+    (node) =>
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_aws_ebs_volume_${node.name}.tf.json`,
+        ),
+        cndi_aws_ebs_volume(node),
+      ),
+  );
+  const stageEbsVolumeAttachment = awsEC2Nodes.map(
+    (node) =>
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_aws_volume_attachment_${node.name}.tf.json`,
+        ),
+        cndi_aws_volume_attachment(node),
+      ),
+  );
   const stageLbTargetGroupAttachmentHTTP = awsEC2Nodes.map(
     (node) =>
       stageFile(
@@ -84,6 +107,8 @@ export default async function stageTerraformResourcesForAWS(
       ...stageNodes,
       ...stageLbTargetGroupAttachmentHTTP,
       ...stageLbTargetGroupAttachmentHTTPS,
+      ...stageEbsVolume,
+      ...stageEbsVolumeAttachment,
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
         data(awsEC2Nodes),
