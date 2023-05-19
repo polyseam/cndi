@@ -8,7 +8,7 @@ export default function getAWSComputeInstanceTFJSON(
   const { name } = node;
   const size = node?.volume_size || node?.disk_size || node?.size ||
     node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; // the size of the drive in GiBs.
-  const type = "gp3"; // general purpose SSD
+  const type = "gp2"; // general purpose SSD
   const availability_zone = "${local.availability_zones[0]}"; // first availability zone in list
 
   const resource = getTFResource(
