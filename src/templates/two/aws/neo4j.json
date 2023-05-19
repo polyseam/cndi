@@ -1,392 +1,392 @@
 {
-    "cndi-config": {
-      "prompts": [
-        {
-          "name": "neo4jDomainName",
-          "default": "your.neo4j.something",
-          "message": "Please enter the domain name you want Neo4j to be accessible on:",
-          "type": "Input"
-        },
-        {
-          "name": "argocdDomainName",
-          "default": "your.argo.something",
-          "message": "Please enter the domain name you want argocd to be accessible on:",
-          "type": "Input"
-        },
-        {
-          "message": "Please enter the email address you want to use for lets encrypt:",
-          "default": "admin@example.com",
-          "name": "letsEncryptClusterIssuerEmailAddress",
-          "type": "Input"
-        }
-      ],
-      "template": {
-        "infrastructure": {
-          "cndi": {
-            "nodes": [
-              {
-                "name": "neo4j-main",
-                "kind": "aws",
-                "role": "leader",
-                "volume_size": 128
-              },
-              {
-                "name": "neo4j-a",
-                "kind": "aws",
-                "volume_size": 128
-              },
-              {
-                "name": "neo4j-b",
-                "kind": "aws",
-                "volume_size": 128
-              }
-            ]
-          },
-          "terraform": {
-            "resource": {
-              "aws_lb_listener": {
-                "cndi_aws_lb_listener_bolt": {
-                  "load_balancer_arn": "${aws_lb.cndi_aws_lb.arn}",
-                  "port": 7687,
-                  "protocol": "TCP",
-                  "default_action": [{
-                    "type": "forward",
-                    "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_bolt.arn}"
-                  }]
-                }
-              },
-              "aws_lb_target_group": {
-                "cndi_aws_lb_target_group_bolt": {
-                  "port": 7687,
-                  "protocol": "TCP",
-                  "vpc_id": "${aws_vpc.cndi_aws_vpc.id}",
-                  "tags": {
-                    "Name": "BOLTLBTargetGroup",
-                    "CNDIProject": "${local.cndi_project_name}"
-                  }
-                }
-              },
-              "aws_lb_target_group_attachment": {
-                "cndi_aws_lb_target_group_attachment_bolt_neo4j-main": {
-                  "count": "${length(local.node_id_list)}",
-                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_bolt.arn}",
-                  "target_id": "${local.node_id_list[count.index]}"
-                }
-              },
-              "aws_security_group": {
-                "cndi_aws_security_group": {
-                  "ingress": [
-                    {
-                      "from_port": "7687",
-                      "to_port": "7687",
-                      "protocol": "tcp",
-                      "cidr_blocks": ["0.0.0.0/0"],
-                      "description": "port for BOLT",
-                      "ipv6_cidr_blocks": [],
-                      "prefix_list_ids": [],
-                      "security_groups": [],
-                      "self": false
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "cluster_manifests": {
-          "cert-manager-cluster-issuer": {
-            "apiVersion": "cert-manager.io/v1",
-            "kind":"ClusterIssuer",
-            "metadata": {
-              "name": "lets-encrypt"
+  "cndi-config": {
+    "prompts": [
+      {
+        "name": "neo4jDomainName",
+        "default": "your.neo4j.something",
+        "message": "Please enter the domain name you want Neo4j to be accessible on:",
+        "type": "Input"
+      },
+      {
+        "name": "argocdDomainName",
+        "default": "your.argo.something",
+        "message": "Please enter the domain name you want argocd to be accessible on:",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the email address you want to use for lets encrypt:",
+        "default": "admin@example.com",
+        "name": "letsEncryptClusterIssuerEmailAddress",
+        "type": "Input"
+      }
+    ],
+    "template": {
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "neo4j-main",
+              "kind": "aws",
+              "role": "leader",
+              "volume_size": 128
             },
-            "spec": {
-              "acme": {
-                "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
-                "server": "https://acme-v02.api.letsencrypt.org/directory",
-                "privateKeySecretRef": {
-                  "name": "lets-encrypt-private-key"
-                },
-                "solvers": [
+            {
+              "name": "neo4j-a",
+              "kind": "aws",
+              "volume_size": 128
+            },
+            {
+              "name": "neo4j-b",
+              "kind": "aws",
+              "volume_size": 128
+            }
+          ]
+        },
+        "terraform": {
+          "resource": {
+            "aws_lb_listener": {
+              "cndi_aws_lb_listener_bolt": {
+                "load_balancer_arn": "${aws_lb.cndi_aws_lb.arn}",
+                "port": 7687,
+                "protocol": "TCP",
+                "default_action": [{
+                  "type": "forward",
+                  "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_bolt.arn}"
+                }]
+              }
+            },
+            "aws_lb_target_group": {
+              "cndi_aws_lb_target_group_bolt": {
+                "port": 7687,
+                "protocol": "TCP",
+                "vpc_id": "${aws_vpc.cndi_aws_vpc.id}",
+                "tags": {
+                  "Name": "BOLTLBTargetGroup",
+                  "CNDIProject": "${local.cndi_project_name}"
+                }
+              }
+            },
+            "aws_lb_target_group_attachment": {
+              "cndi_aws_lb_target_group_attachment_bolt_neo4j-main": {
+                "count": "${length(local.node_id_list)}",
+                "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_bolt.arn}",
+                "target_id": "${local.node_id_list[count.index]}"
+              }
+            },
+            "aws_security_group": {
+              "cndi_aws_security_group": {
+                "ingress": [
                   {
-                    "http01": {
-                      "ingress": {
-                        "class": "public"
-                      }
-                    }
+                    "from_port": "7687",
+                    "to_port": "7687",
+                    "protocol": "tcp",
+                    "cidr_blocks": ["0.0.0.0/0"],
+                    "description": "port for BOLT",
+                    "ipv6_cidr_blocks": [],
+                    "prefix_list_ids": [],
+                    "security_groups": [],
+                    "self": false
                   }
                 ]
               }
             }
-          },
-          "argo-ingress": {
-            "apiVersion": "networking.k8s.io/v1",
-            "kind": "Ingress",
-            "metadata": {
-              "name": "argocd-server-ingress",
-              "namespace": "argocd",
-              "annotations": {
-                "cert-manager.io/cluster-issuer": "lets-encrypt",
-                "kubernetes.io/tls-acme": "true",
-                "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
-                "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
-              }
-            },
-            "spec": {
-              "tls": [
-                {
-                  "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
-                  "secretName": "lets-encrypt-private-key"
-                }
-              ],
-              "rules": [
-                {
-                  "host": "$.cndi.prompts.responses.argocdDomainName",
-                  "http": {
-                    "paths": [
-                      {
-                        "path": "/",
-                        "pathType": "Prefix",
-                        "backend": {
-                          "service": {
-                            "name": "argocd-server",
-                            "port": {
-                              "name": "https"
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          "neo4j-ingress": {
-            "apiVersion": "networking.k8s.io/v1",
-            "kind": "Ingress",
-            "metadata": {
-              "name": "neo4j-ingress",
-              "namespace": "neo4j",
-              "annotations": {
-                "cert-manager.io/cluster-issuer": "lets-encrypt",
-                "kubernetes.io/tls-acme": "true",
-                "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-                "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
-              }
-            },
-            "spec": {
-              "tls": [
-                {
-                  "hosts": ["$.cndi.prompts.responses.neo4jDomainName"],
-                  "secretName": "lets-encrypt-private-key"
-                }
-              ],
-              "rules": [
-                {
-                  "host": "$.cndi.prompts.responses.neo4jDomainName",
-                  "http": {
-                    "paths": [
-                      {
-                        "path": "/",
-                        "pathType": "Prefix",
-                        "backend": {
-                          "service": {
-                            "name": "neo4j-kube-lb-neo4j",
-                            "port": {
-                              "name": "https"
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          "neo4j-ingress-configmap":{
-            "apiVersion": "v1",
-            "kind": "ConfigMap",
-            "metadata": {
-              "name": "nginx-ingress-tcp-microk8s-conf",
-              "namespace": "ingress"
-            },
-            "data": {
-              "7687": "neo4j/neo4j-kube-lb-neo4j:7687"
-            }
-          },
-          "ingress-controller-daemonset":{
-            "apiVersion": "apps/v1",
-            "kind": "DaemonSet",
-            "metadata": {
-                "labels": {
-                    "microk8s-application": "nginx-ingress-microk8s"
-                },
-                "name": "nginx-ingress-microk8s-controller",
-                "namespace": "ingress"
-            },
-            "spec": {
-                "selector": {
-                    "matchLabels": {
-                        "name": "nginx-ingress-microk8s"
-                    }
-                },
-                "template": {
-                    "metadata": {
-                        "labels": {
-                            "name": "nginx-ingress-microk8s"
-                        }
-                    },
-                    "spec": {
-                        "containers": [
-                            {
-                                "args": [
-                                    "/nginx-ingress-controller",
-                                    "--configmap=$(POD_NAMESPACE)/nginx-load-balancer-microk8s-conf",
-                                    "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
-                                    "--udp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-udp-microk8s-conf",
-                                    "--ingress-class=public",
-                                    " ",
-                                    "--publish-status-address=127.0.0.1"
-                                ],
-                                "env": [
-                                    {
-                                        "name": "POD_NAME",
-                                        "valueFrom": {
-                                            "fieldRef": {
-                                                "apiVersion": "v1",
-                                                "fieldPath": "metadata.name"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "name": "POD_NAMESPACE",
-                                        "valueFrom": {
-                                            "fieldRef": {
-                                                "apiVersion": "v1",
-                                                "fieldPath": "metadata.namespace"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
-                                "imagePullPolicy": "IfNotPresent",
-                                "lifecycle": {
-                                    "preStop": {
-                                        "exec": {
-                                            "command": [
-                                                "/wait-shutdown"
-                                            ]
-                                        }
-                                    }
-                                },
-                                "livenessProbe": {
-                                    "failureThreshold": 3,
-                                    "httpGet": {
-                                        "path": "/healthz",
-                                        "port": 10254,
-                                        "scheme": "HTTP"
-                                    },
-                                    "initialDelaySeconds": 10,
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "timeoutSeconds": 5
-                                },
-                                "name": "nginx-ingress-microk8s",
-                                "ports": [
-                                    {
-                                        "containerPort": 80,
-                                        "hostPort": 80,
-                                        "name": "http",
-                                        "protocol": "TCP"
-                                    },
-                                    {
-                                        "containerPort": 443,
-                                        "hostPort": 443,
-                                        "name": "https",
-                                        "protocol": "TCP"
-                                    },
-                                    {
-                                        "containerPort": 10254,
-                                        "hostPort": 10254,
-                                        "name": "health",
-                                        "protocol": "TCP"
-                                    },
-                                    {
-                                        "containerPort": 7687,
-                                        "hostPort": 7687,
-                                        "name": "neo4j-bolt-7687",
-                                        "protocol": "TCP"
-                                    }
-                                ],
-                                "readinessProbe": {
-                                    "failureThreshold": 3,
-                                    "httpGet": {
-                                        "path": "/healthz",
-                                        "port": 10254,
-                                        "scheme": "HTTP"
-                                    },
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "timeoutSeconds": 5
-                                },
-                                "resources": {},
-                                "securityContext": {
-                                    "capabilities": {
-                                        "add": [
-                                            "NET_BIND_SERVICE"
-                                        ],
-                                        "drop": [
-                                            "ALL"
-                                        ]
-                                    },
-                                    "runAsUser": 101
-                                },
-                                "terminationMessagePath": "/dev/termination-log",
-                                "terminationMessagePolicy": "File"
-                            }
-                        ],
-                        "dnsPolicy": "ClusterFirst",
-                        "restartPolicy": "Always",
-                        "schedulerName": "default-scheduler",
-                        "securityContext": {},
-                        "serviceAccount": "nginx-ingress-microk8s-serviceaccount",
-                        "serviceAccountName": "nginx-ingress-microk8s-serviceaccount",
-                        "terminationGracePeriodSeconds": 60
-                    }
-                },
-                "updateStrategy": {
-                    "rollingUpdate": {
-                        "maxSurge": 0,
-                        "maxUnavailable": 1
-                    },
-                    "type": "RollingUpdate"
-                }
-            },
-            "status": {
-                "currentNumberScheduled": 1,
-                "desiredNumberScheduled": 1,
-                "numberAvailable": 1,
-                "numberMisscheduled": 0,
-                "numberReady": 1,
-                "observedGeneration": 3,
-                "updatedNumberScheduled": 1
-            }
-        }
+          }
         }
       },
-      "applications": {
-        "neo4j": {
+      "cluster_manifests": {
+        "cert-manager-cluster-issuer": {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "lets-encrypt"
+          },
+          "spec": {
+            "acme": {
+              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "server": "https://acme-v02.api.letsencrypt.org/directory",
+              "privateKeySecretRef": {
+                "name": "lets-encrypt-private-key"
+              },
+              "solvers": [
+                {
+                  "http01": {
+                    "ingress": {
+                      "class": "public"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "neo4j-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "neo4j-ingress",
+            "namespace": "neo4j",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": ["$.cndi.prompts.responses.neo4jDomainName"],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "$.cndi.prompts.responses.neo4jDomainName",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "neo4j-kube-lb-neo4j",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "neo4j-ingress-configmap": {
+          "apiVersion": "v1",
+          "kind": "ConfigMap",
+          "metadata": {
+            "name": "nginx-ingress-tcp-microk8s-conf",
+            "namespace": "ingress"
+          },
+          "data": {
+            "7687": "neo4j/neo4j-kube-lb-neo4j:7687"
+          }
+        },
+        "ingress-controller-daemonset": {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
+          "metadata": {
+            "labels": {
+              "microk8s-application": "nginx-ingress-microk8s"
+            },
+            "name": "nginx-ingress-microk8s-controller",
+            "namespace": "ingress"
+          },
+          "spec": {
+            "selector": {
+              "matchLabels": {
+                "name": "nginx-ingress-microk8s"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "name": "nginx-ingress-microk8s"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "/nginx-ingress-controller",
+                      "--configmap=$(POD_NAMESPACE)/nginx-load-balancer-microk8s-conf",
+                      "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
+                      "--udp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-udp-microk8s-conf",
+                      "--ingress-class=public",
+                      " ",
+                      "--publish-status-address=127.0.0.1"
+                    ],
+                    "env": [
+                      {
+                        "name": "POD_NAME",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.name"
+                          }
+                        }
+                      },
+                      {
+                        "name": "POD_NAMESPACE",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.namespace"
+                          }
+                        }
+                      }
+                    ],
+                    "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
+                    "imagePullPolicy": "IfNotPresent",
+                    "lifecycle": {
+                      "preStop": {
+                        "exec": {
+                          "command": [
+                            "/wait-shutdown"
+                          ]
+                        }
+                      }
+                    },
+                    "livenessProbe": {
+                      "failureThreshold": 3,
+                      "httpGet": {
+                        "path": "/healthz",
+                        "port": 10254,
+                        "scheme": "HTTP"
+                      },
+                      "initialDelaySeconds": 10,
+                      "periodSeconds": 10,
+                      "successThreshold": 1,
+                      "timeoutSeconds": 5
+                    },
+                    "name": "nginx-ingress-microk8s",
+                    "ports": [
+                      {
+                        "containerPort": 80,
+                        "hostPort": 80,
+                        "name": "http",
+                        "protocol": "TCP"
+                      },
+                      {
+                        "containerPort": 443,
+                        "hostPort": 443,
+                        "name": "https",
+                        "protocol": "TCP"
+                      },
+                      {
+                        "containerPort": 10254,
+                        "hostPort": 10254,
+                        "name": "health",
+                        "protocol": "TCP"
+                      },
+                      {
+                        "containerPort": 7687,
+                        "hostPort": 7687,
+                        "name": "neo4j-bolt-7687",
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "readinessProbe": {
+                      "failureThreshold": 3,
+                      "httpGet": {
+                        "path": "/healthz",
+                        "port": 10254,
+                        "scheme": "HTTP"
+                      },
+                      "periodSeconds": 10,
+                      "successThreshold": 1,
+                      "timeoutSeconds": 5
+                    },
+                    "resources": {},
+                    "securityContext": {
+                      "capabilities": {
+                        "add": [
+                          "NET_BIND_SERVICE"
+                        ],
+                        "drop": [
+                          "ALL"
+                        ]
+                      },
+                      "runAsUser": 101
+                    },
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File"
+                  }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "nginx-ingress-microk8s-serviceaccount",
+                "serviceAccountName": "nginx-ingress-microk8s-serviceaccount",
+                "terminationGracePeriodSeconds": 60
+              }
+            },
+            "updateStrategy": {
+              "rollingUpdate": {
+                "maxSurge": 0,
+                "maxUnavailable": 1
+              },
+              "type": "RollingUpdate"
+            }
+          },
+          "status": {
+            "currentNumberScheduled": 1,
+            "desiredNumberScheduled": 1,
+            "numberAvailable": 1,
+            "numberMisscheduled": 0,
+            "numberReady": 1,
+            "observedGeneration": 3,
+            "updatedNumberScheduled": 1
+          }
+        }
+      }
+    },
+    "applications": {
+      "neo4j": {
         "targetRevision": "5.7.0",
         "destinationNamespace": "neo4j",
         "repoURL": "https://helm.neo4j.com/neo4j",
         "chart": "neo4j",
         "values": {
-         "nameOverride": "",
-         "fullnameOverride": "",
-         "disableLookups": false,
-         "neo4j": {
+          "nameOverride": "",
+          "fullnameOverride": "",
+          "disableLookups": false,
+          "neo4j": {
             "name": "neo4j-kube",
             "password": "my-password",
             "passwordFromSecret": "",
@@ -394,12 +394,12 @@
             "acceptLicenseAgreement": "yes",
             "offlineMaintenanceModeEnabled": false,
             "resources": {
-               "cpu": "1000m",
-               "memory": "4Gi"
+              "cpu": "1000m",
+              "memory": "4Gi"
             },
             "labels": null
-         },
-         "volumes": {
+          },
+          "volumes": {
             "data": {
               "mode": "defaultStorageClass",
               "defaultStorageClass": {
@@ -416,174 +416,173 @@
               }
             }
           },
-         "services": {
+          "services": {
             "default": {
-               "annotations": {}
+              "annotations": {}
             },
             "neo4j": {
-               "enabled": true,
-               "annotations": {},
-               "spec": {
-                  "type": "LoadBalancer"
-               },
-               "ports": {
-                  "http": {
-                     "enabled": false
-                  },
-                  "https": {
-                     "enabled": true
-                  },
-                  "bolt": {
-                     "enabled": true,
-                     "name": "neo4j-bolt-7687",
-                     "port": "7687",
-                     "protocol":"TCP",
-                     "targetPort": "7687"
-                  },
-                  "backup": {
-                     "enabled": false
-                  }
-               },
-               "selector": {
-                  "helm.neo4j.com/neo4j.loadbalancer": "include"
-               },
-               "multiCluster": false,
-               "cleanup": {
+              "enabled": true,
+              "annotations": {},
+              "spec": {
+                "type": "LoadBalancer"
+              },
+              "ports": {
+                "http": {
+                  "enabled": false
+                },
+                "https": {
+                  "enabled": true
+                },
+                "bolt": {
                   "enabled": true,
-                  "image": {
-                     "registry": "docker.io",
-                     "repository": "bitnami/kubectl",
-                     "tag": "",
-                     "digest": "",
-                     "imagePullPolicy": "IfNotPresent"
-                  }
-               }
+                  "name": "neo4j-bolt-7687",
+                  "port": "7687",
+                  "protocol": "TCP",
+                  "targetPort": "7687"
+                },
+                "backup": {
+                  "enabled": false
+                }
+              },
+              "selector": {
+                "helm.neo4j.com/neo4j.loadbalancer": "include"
+              },
+              "multiCluster": false,
+              "cleanup": {
+                "enabled": true,
+                "image": {
+                  "registry": "docker.io",
+                  "repository": "bitnami/kubectl",
+                  "tag": "",
+                  "digest": "",
+                  "imagePullPolicy": "IfNotPresent"
+                }
+              }
             },
             "admin": {
-               "enabled": true,
-               "annotations": {},
-               "spec": {
-                  "type": "ClusterIP"
-               }
+              "enabled": true,
+              "annotations": {},
+              "spec": {
+                "type": "ClusterIP"
+              }
             },
             "internals": {
-               "enabled": false,
-               "annotations": {}
+              "enabled": false,
+              "annotations": {}
             }
-         },
-         "config": {
-
-             "server.config.strict_validation.enabled": "true",
-             "server.directories.plugins": "/var/lib/neo4j/labs",
-             "dbms.security.procedures.unrestricted": "apoc.*",
-             "dbms.security.procedures.allowlist": "apoc.*",
-             "dbms.security.http_strict_transport_security":"false",
-             "server.http.enabled":"false",
-             "server.bolt.enabled":"true",
-             "server.bolt.tls_level":"REQUIRED",
-             "server.bolt.listen_address": "0.0.0.0:7687",
-             "server.bolt.thread_pool_keep_alive": "10m",
-             "server.bolt.advertised_address":"$.cndi.prompts.responses.neo4jDomainName:7687",
-             "server.https.listen_address":"0.0.0.0:7473",
-             "server.https.advertised_address":"$.cndi.prompts.responses.neo4jDomainName:7473",
-             "dbms.ssl.policy.bolt.enabled": "true",
-             "dbms.ssl.policy.bolt.client_auth": "NONE",
-             "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
-             "dbms.ssl.policy.bolt.private_key": "private.key",
-             "dbms.ssl.policy.bolt.public_certificate": "public.crt",
-             "server.https.enabled": "true",
-             "dbms.ssl.policy.https.enabled": "true",
-             "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
-             "dbms.ssl.policy.https.private_key": "private.key",
-             "dbms.ssl.policy.https.public_certificate": "public.crt",
-             "dbms.ssl.policy.https.client_auth": "NONE"
-         },
-         "apoc_config": {
+          },
+          "config": {
+            "server.config.strict_validation.enabled": "true",
+            "server.directories.plugins": "/var/lib/neo4j/labs",
+            "dbms.security.procedures.unrestricted": "apoc.*",
+            "dbms.security.procedures.allowlist": "apoc.*",
+            "dbms.security.http_strict_transport_security": "false",
+            "server.http.enabled": "false",
+            "server.bolt.enabled": "true",
+            "server.bolt.tls_level": "REQUIRED",
+            "server.bolt.listen_address": "0.0.0.0:7687",
+            "server.bolt.thread_pool_keep_alive": "10m",
+            "server.bolt.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7687",
+            "server.https.listen_address": "0.0.0.0:7473",
+            "server.https.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7473",
+            "dbms.ssl.policy.bolt.enabled": "true",
+            "dbms.ssl.policy.bolt.client_auth": "NONE",
+            "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
+            "dbms.ssl.policy.bolt.private_key": "private.key",
+            "dbms.ssl.policy.bolt.public_certificate": "public.crt",
+            "server.https.enabled": "true",
+            "dbms.ssl.policy.https.enabled": "true",
+            "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
+            "dbms.ssl.policy.https.private_key": "private.key",
+            "dbms.ssl.policy.https.public_certificate": "public.crt",
+            "dbms.ssl.policy.https.client_auth": "NONE"
+          },
+          "apoc_config": {
             "apoc.trigger.enabled": "true",
             "apoc.jdbc.neo4j.url": "jdbc:foo:bar",
             "apoc.import.file.enabled": "true"
           },
-         "ssl": {
+          "ssl": {
             "bolt": {
-               "privateKey": {
-                  "secretName": "lets-encrypt-private-key",
-                  "subPath": "tls.key"
-               },
-               "publicCertificate": {
-                  "secretName": "lets-encrypt-private-key",
-                  "subPath": "tls.crt"
-               },
-               "trustedCerts": {
-                  "sources": []
-               },
-               "revokedCerts": {
-                  "sources": []
-               }
+              "privateKey": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.key"
+              },
+              "publicCertificate": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.crt"
+              },
+              "trustedCerts": {
+                "sources": []
+              },
+              "revokedCerts": {
+                "sources": []
+              }
             },
             "https": {
-             "privateKey": {
-               "secretName": "lets-encrypt-private-key",
-               "subPath": "tls.key"
-            },
-            "publicCertificate": {
-               "secretName": "lets-encrypt-private-key",
-               "subPath": "tls.crt"
-            },
-            "trustedCerts": {
-               "sources": [{
-                "secret": {
-                  "name": "lets-encrypt-private-key",
-                  "items": [
-                    {
-                      "key": "tls.crt",
-                      "path": "public.crt"
-                    }
-                  ]
-                }
-               }]
-            },
-               "revokedCerts": {
-                  "sources": []
-               }
+              "privateKey": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.key"
+              },
+              "publicCertificate": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.crt"
+              },
+              "trustedCerts": {
+                "sources": [{
+                  "secret": {
+                    "name": "lets-encrypt-private-key",
+                    "items": [
+                      {
+                        "key": "tls.crt",
+                        "path": "public.crt"
+                      }
+                    ]
+                  }
+                }]
+              },
+              "revokedCerts": {
+                "sources": []
+              }
             },
             "cluster": {
-             "privateKey": {
-               "secretName": "lets-encrypt-private-key",
-               "subPath": "tls.key"
-            },
-            "publicCertificate": {
-               "secretName": "lets-encrypt-private-key",
-               "subPath": "tls.crt"
-            },
-            "trustedCerts": {
-               "sources": [{
-                "secret": {
-                  "name": "lets-encrypt-private-key",
-                  "items": [
-                    {
-                      "key": "tls.crt",
-                      "path": "public.crt"
-                    }
-                  ]
-                }
-               }]
-            },
-               "revokedCerts": {
-                  "sources": []
-               }
+              "privateKey": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.key"
+              },
+              "publicCertificate": {
+                "secretName": "lets-encrypt-private-key",
+                "subPath": "tls.crt"
+              },
+              "trustedCerts": {
+                "sources": [{
+                  "secret": {
+                    "name": "lets-encrypt-private-key",
+                    "items": [
+                      {
+                        "key": "tls.crt",
+                        "path": "public.crt"
+                      }
+                    ]
+                  }
+                }]
+              },
+              "revokedCerts": {
+                "sources": []
+              }
             }
-         },
-         "clusterDomain": "cluster.local",
-         "image": {
+          },
+          "clusterDomain": "cluster.local",
+          "image": {
             "imagePullPolicy": "Always"
-         },
-         "statefulset": {
+          },
+          "statefulset": {
             "metadata": {
-               "annotations": null
+              "annotations": null
             }
-         },
-         "env": {},
-         "podSpec": {
+          },
+          "env": {},
+          "podSpec": {
             "annotations": {},
             "nodeAffinity": {},
             "podAntiAffinity": true,
@@ -594,42 +593,41 @@
             "terminationGracePeriodSeconds": 3600,
             "initContainers": [],
             "containers": []
-         },
-         "logInitialPassword": true,
-         "jvm": {
+          },
+          "logInitialPassword": true,
+          "jvm": {
             "useNeo4jDefaultJvmArguments": true,
             "additionalJvmArguments": []
-         },
-         "logging": {
+          },
+          "logging": {
             "serverLogsXml": "",
             "userLogsXml": ""
-         }
-      }
-      }
-
-     }
-    },
-    "env": {
-      "extend_basic_env": "aws",
-      "prompts": [
-        {
-          "type": "Comment",
-          "comment": "Please provide the necessary credentials"
-        },
-        {
-          "name": "NEO4J_USERNAME",
-          "message": "Please enteryour Neo4j username:",
-          "type": "Input"
-        },
-        {
-          "name": "NEO4J_PASSWORD",
-          "message": "Please enter your Neo4j password:",
-          "type": "Secret"
+          }
         }
-      ]
-    },
-    "readme": {
-      "extend_basic_readme": "aws",
-      "template": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
+      }
     }
+  },
+  "env": {
+    "extend_basic_env": "aws",
+    "prompts": [
+      {
+        "type": "Comment",
+        "comment": "Please provide the necessary credentials"
+      },
+      {
+        "name": "NEO4J_USERNAME",
+        "message": "Please enteryour Neo4j username:",
+        "type": "Input"
+      },
+      {
+        "name": "NEO4J_PASSWORD",
+        "message": "Please enter your Neo4j password:",
+        "type": "Secret"
+      }
+    ]
+  },
+  "readme": {
+    "extend_basic_readme": "aws",
+    "template": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
   }
+}
