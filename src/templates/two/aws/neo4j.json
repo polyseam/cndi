@@ -3,13 +3,13 @@
       "prompts": [
         {
           "name": "neo4jDomainName",
-          "default": "neo4j.datameshstack.com",
+          "default": "your.neo4j.something",
           "message": "Please enter the domain name you want Neo4j to be accessible on:",
           "type": "Input"
         },
         {
           "name": "argocdDomainName",
-          "default": "argocd.datameshstack.com",
+          "default": "your.argo.something",
           "message": "Please enter the domain name you want argocd to be accessible on:",
           "type": "Input"
         },
