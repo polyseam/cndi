@@ -405,7 +405,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "gcp",
       "entries": [
         {
           "type": "Comment",
