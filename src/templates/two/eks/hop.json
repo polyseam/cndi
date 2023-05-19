@@ -150,7 +150,8 @@
             "name": "hop-web-ingress",
             "namespace": "hop",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt"
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
             }
           },
           "spec": {
