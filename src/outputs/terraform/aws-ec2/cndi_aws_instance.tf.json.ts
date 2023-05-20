@@ -10,8 +10,7 @@ export default function getAWSComputeInstanceTFJSON(
   const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
   const ami = node?.ami || DEFAULT_EC2_AMI;
   const instance_type = node?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
-  const delete_on_termination = false;
-  const device_name = "/dev/sda1";
+  const delete_on_termination = true;
   const volume_size = node?.volume_size || node?.disk_size || node?.size ||
     node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
@@ -19,9 +18,8 @@ export default function getAWSComputeInstanceTFJSON(
   const vpc_security_group_ids = [
     "${aws_security_group.cndi_aws_security_group.id}",
   ];
-  const ebs_block_device = [
+  const root_block_device = [
     {
-      device_name,
       volume_size,
       volume_type,
       delete_on_termination,
@@ -45,7 +43,7 @@ export default function getAWSComputeInstanceTFJSON(
         CNDIProject: "${local.cndi_project_name}",
         CNDINodeRole: role,
       },
-      ebs_block_device,
+      root_block_device,
       subnet_id,
       vpc_security_group_ids,
       user_data,
