@@ -46,6 +46,7 @@ export default function getAWSComputeInstanceTFJSON(
       root_block_device,
       subnet_id,
       vpc_security_group_ids,
+      user_data_replace_on_change: true,
       user_data,
       depends_on,
     },
