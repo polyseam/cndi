@@ -129,7 +129,8 @@ const getRootApplicationYaml = (config: CNDIConfig) => {
 const getArgoCDSecretPatch = () => {
   return YAML.stringify({
     stringData: {
-      "admin.password": "$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')",
+      "admin.password":
+        "$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')",
       "admin.passwordMtime": "$(date +%FT%T%Z)",
     },
   });
