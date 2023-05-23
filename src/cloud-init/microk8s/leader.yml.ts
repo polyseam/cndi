@@ -182,7 +182,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
     `${WORKING_DIR}/sealed_secrets_public_key.crt`;
   const SEALED_SECRETS_SECRET_NAME = "cndi-sealed-secrets-key";
 
-  const PATH_TO_LAUNCH_CONFIG = "/root/snap/microk8s/common/.microk8s.yaml";
+  const PATH_TO_LAUNCH_CONFIG = `${WORKING_DIR}/launch-config.yaml`;
 
   const PATH_TO_NFS_DEFAULT_STORAGE_PATCH =
     `${PATH_TO_MANIFESTS}/nfs-default-storage-patch.yaml`;
@@ -248,6 +248,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       // the following used to retry every 180 seconds until success:
       `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`, // reads /root/snap/microk8s/common/.microk8s.yaml
 
+      `echo "Setting microk8s config"`,
+      `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
       `sudo usermod -a -G microk8s ubuntu`,
