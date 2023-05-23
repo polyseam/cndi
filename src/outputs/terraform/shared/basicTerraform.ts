@@ -25,10 +25,6 @@ export default function getTerraformTFJSON(deps: ProviderDependency) {
           source: "hashicorp/external",
           version: "2.2.2",
         },
-        cloudinit: {
-          source: "hashicorp/cloudinit",
-          version: "2.3.2",
-        },
         ...deps,
       },
       required_version: ">= 1.2.0",
