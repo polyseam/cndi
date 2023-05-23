@@ -83,8 +83,6 @@ const getFollowerCloudInitYaml = (
 
   const contentYaml = YAML.stringify(content);
 
-  return `#cloud-config
-  
-  ${contentYaml}`;
+  return `#cloud-config\n\n${contentYaml}`;
 };
 export default getFollowerCloudInitYaml;
