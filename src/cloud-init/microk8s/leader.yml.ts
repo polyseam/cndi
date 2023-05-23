@@ -274,9 +274,9 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "Restarting sealed-secrets-controller"`,
       `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
 
-      `echo "Removing Sealed Secrets Keys from disk"`,
-      `sudo rm ${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}`,
-      `sudo rm ${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}`,
+      // `echo "Removing Sealed Secrets Keys from disk"`,
+      // `sudo rm ${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}`,
+      // `sudo rm ${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}`,
 
       `echo "Creating argocd namespace"`,
       `sudo microk8s kubectl create namespace argocd`,
