@@ -1,4 +1,4 @@
-import { stringify } from "deps";
+import { YAML } from "deps";
 
 const cndiWorkflowObj = {
   name: "cndi",
@@ -90,5 +90,5 @@ const cndiWorkflowObj = {
   },
 };
 
-const getWorkflowYaml = () => stringify(cndiWorkflowObj);
+const getWorkflowYaml = () => YAML.stringify(cndiWorkflowObj);
 export default getWorkflowYaml;

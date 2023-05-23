@@ -30,6 +30,7 @@ export const COMMAND = {
 export const NODE_ROLE = {
   leader: "leader",
   controller: "controller",
+  worker: "worker",
 } as const;
 
 // NodeRole refers to the role of the node, e.g. leader, controller.. worker in the future?
@@ -121,6 +122,12 @@ interface DeploymentTargetConfiguration {
   azure: AzureDeploymentTargetConfiguration;
 }
 
+type Microk8sAddon = {
+  name: string;
+  enabled?: boolean;
+  args?: string[];
+};
+
 type TFBlocks = {
   terraform?: {
     [key: string]: unknown;
@@ -153,6 +160,19 @@ interface CNDIConfig {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
+      microk8s: {
+        addons: Array<Microk8sAddon>;
+        version?: string;
+        channel?: string;
+        "cloud-init": {
+          leader_before: Array<string>;
+          leader_after: Array<string>;
+        };
+      };
+      argocd: {
+        root_application: unknown;
+        install_url?: string;
+      };
     };
     terraform?: TFBlocks;
   };
@@ -232,6 +252,7 @@ export type {
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
+  Microk8sAddon,
   SealedSecretsKeys,
   TFBlocks,
 };
