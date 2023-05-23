@@ -61,9 +61,12 @@ const getFollowerCloudInitYaml = (
       `echo "------------------"`,
       `echo "cndi-platform begin"`,
       `echo "Installing microk8s"`,
+
       // the following used to retry every 180 seconds until success:
       `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`, // reads /root/snap/microk8s/common/.microk8s.yaml
 
+      `echo "Setting microk8s config"`,
+      `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
       `sudo usermod -a -G microk8s ubuntu`,

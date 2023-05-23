@@ -126,16 +126,6 @@ const getRootApplicationYaml = (config: CNDIConfig) => {
   return YAML.stringify(rootApplication);
 };
 
-const getArgoCDSecretPatch = () => {
-  return YAML.stringify({
-    stringData: {
-      "admin.password":
-        "$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')",
-      "admin.passwordMtime": "$(date +%FT%T%Z)",
-    },
-  });
-};
-
 const getLeaderCloudInitYaml = (config: CNDIConfig) => {
   const addons = getMicrok8sAddons(config);
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
@@ -176,19 +166,12 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
   const WORKING_DIR = "/home/ubuntu/.cndi-runtime";
   const PATH_TO_MANIFESTS = `${WORKING_DIR}/manifests`;
-  const PATH_TO_SEALED_SECRETS_PRIVATE_KEY =
-    `${WORKING_DIR}/sealed_secrets_private_key.key`;
-  const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
-    `${WORKING_DIR}/sealed_secrets_public_key.crt`;
-  const SEALED_SECRETS_SECRET_NAME = "cndi-sealed-secrets-key";
-
   const PATH_TO_LAUNCH_CONFIG = `${WORKING_DIR}/launch-config.yaml`;
+
+  const SEALED_SECRETS_SECRET_NAME = "cndi-sealed-secrets-key";
 
   const PATH_TO_NFS_DEFAULT_STORAGE_PATCH =
     `${PATH_TO_MANIFESTS}/nfs-default-storage-patch.yaml`;
-  const PATH_TO_ARGOCD_SECRET_PATCH =
-    `${PATH_TO_MANIFESTS}/argocd-secret-patch.yaml`;
-
   const PATH_TO_ROOT_APPLICATION_MANIFEST =
     `${PATH_TO_MANIFESTS}/root-application.yaml`;
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
@@ -207,16 +190,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
         path: PATH_TO_LAUNCH_CONFIG,
         content: microk8sLeaderLaunchConfigYaml,
       },
-      {
-        path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
-        content: "\${sealed_secrets_public_key}",
-      },
-      {
-        path: PATH_TO_SEALED_SECRETS_PRIVATE_KEY,
-        content: "\${sealed_secrets_private_key}",
-      },
       // TODO: should we keep these files around?
-      // Should they ever be written to disk to begin with?
       {
         path: PATH_TO_ROOT_APPLICATION_MANIFEST,
         content: getRootApplicationYaml(config),
@@ -228,10 +202,6 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       {
         path: PATH_TO_NFS_DEFAULT_STORAGE_PATCH,
         content: getNFSDefaultStoragePatchYaml(),
-      },
-      {
-        path: PATH_TO_ARGOCD_SECRET_PATCH,
-        content: getArgoCDSecretPatch(),
       },
     ],
     runcmd: [
@@ -247,6 +217,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "Installing microk8s"`,
       // the following used to retry every 180 seconds until success:
       `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`, // reads /root/snap/microk8s/common/.microk8s.yaml
+      `echo "microk8s installed"`,
 
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
@@ -263,23 +234,33 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
       `echo "Installing sealed-secrets-controller"`,
       `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
+      `echo "sealed-secrets-controller installed"`,
 
       `echo "Setting NFS as default storage class"`,
       `sudo microk8s kubectl patch storageclass nfs --patch-file ${PATH_TO_NFS_DEFAULT_STORAGE_PATCH}`,
+      `echo "NFS is now the default storage class"`,
+
+      `echo "Writing Sealed-Secrets keys to disk"`,
+      `echo "\${sealed_secrets_public_key}" > public.crt`,
+      `echo "\${sealed_secrets_private_key}" > private.key`,
+      `echo "Sealed-Secrets keys written to disk"`,
 
       `echo "Importing Sealed Secrets Keys"`,
-      `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
+      `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="./public.crt" --key="./private.key"`,
       `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
+      `echo "Sealed Secrets Keys imported"`,
 
       `echo "Restarting sealed-secrets-controller"`,
       `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
 
-      // `echo "Removing Sealed Secrets Keys from disk"`,
-      // `sudo rm ${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}`,
-      // `sudo rm ${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}`,
+      `echo "Removing Sealed Secrets Keys from disk"`,
+      `sudo rm ./public.crt`,
+      `sudo rm ./private.key`,
+      `echo "Sealed Secrets Keys removed from disk"`,
 
       `echo "Creating argocd namespace"`,
       `sudo microk8s kubectl create namespace argocd`,
+      `echo "ArgoCD namespace created"`,
 
       `echo "Installing ArgoCD"`,
       `sudo microk8s kubectl apply -n argocd -f ${argocdInstallUrl}`,
@@ -287,10 +268,19 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
       `echo "Configuring ArgoCD Root App Manifest"`,
       `sudo microk8s kubectl apply -n argocd -f ${PATH_TO_ROOT_APPLICATION_MANIFEST}`,
+      `echo "ArgoCD Root App Manifest Configured"`,
 
       `echo "Configuring ArgoCD Cluster Repo Secret"`,
       `sudo microk8s kubectl apply -n argocd -f ${PATH_TO_CLUSTER_REPO_SECRET_MANIFEST}`,
-      `sudo microk8s kubectl patch secret argocd-secret -n argocd --patch-file ${PATH_TO_ARGOCD_SECRET_PATCH}`,
+      `echo "ArgoCD Cluster Repo Secret Configured"`,
+
+      `echo "Setting ArgoCD admin password"`,
+      `sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\": {\"admin.password\":\"$(htpasswd -bnBC 10 "" \${argocd_admin_password} | tr -d ':\n')\",\"admin.passwordMtime\": \"$(date +%FT%T%Z)\"}}"`,
+      `echo "ArgoCD admin password set"`,
+
+      `echo "Cleaning CNDI Runtime Files"`,
+      `sudo rm -rf ${WORKING_DIR}`,
+      `echo "CNDI Runtime Files Cleaned"`,
 
       `echo "cndi-platform end"`,
       `echo "------------------"`,
