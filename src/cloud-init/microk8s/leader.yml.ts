@@ -244,7 +244,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "cndi-user-before end"`,
       `echo "------------------"`,
       `echo "cndi-platform begin"`,
-      `echo "Installing microk8s`,
+      `echo "Installing microk8s"`,
       // the following used to retry every 180 seconds until success:
       `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`, // reads /root/snap/microk8s/common/.microk8s.yaml
 
