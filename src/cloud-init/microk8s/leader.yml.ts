@@ -84,15 +84,15 @@ const rootApplication = {
       directory: {
         recurse: true,
       },
-      syncPolicy: {
-        automated: {
-          prune: true,
-          selfHeal: true,
-        },
-        syncOptions: [
-          "CreateNamespace=false",
-        ],
+    },
+    syncPolicy: {
+      automated: {
+        prune: true,
+        selfHeal: true,
       },
+      syncOptions: [
+        "CreateNamespace=false",
+      ],
     },
   },
 };
@@ -127,13 +127,12 @@ const getRootApplicationYaml = (config: CNDIConfig) => {
 };
 
 const getArgoCDSecretPatch = () => {
-  return {
+  return YAML.stringify({
     stringData: {
-      "admin.password":
-        "$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')",
+      "admin.password": "$(htpasswd -bnBC 10 \"\" \${argocd_admin_password} | tr -d ':\\n')",
       "admin.passwordMtime": "$(date +%FT%T%Z)",
     },
-  };
+  });
 };
 
 const getLeaderCloudInitYaml = (config: CNDIConfig) => {
