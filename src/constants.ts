@@ -1,5 +1,5 @@
 export const TERRAFORM_VERSION = "1.4.6";
-export const KUBESEAL_VERSION = "0.21.0";
+export const KUBESEAL_VERSION = "0.19.1";
 export const DEFAULT_MICROK8S_VERSION = "1.27";
 
 export const DEFAULT_INSTANCE_TYPES = {

@@ -1,6 +1,6 @@
 import { YAML } from "deps";
 import { CNDIConfig, Microk8sAddon } from "src/types.ts";
-import { DEFAULT_MICROK8S_VERSION } from "constants";
+import { DEFAULT_MICROK8S_VERSION, KUBESEAL_VERSION } from "constants";
 
 const defaultAddons: Array<Microk8sAddon> = [
   {
@@ -262,7 +262,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "microk8s is ready"`,
 
       `echo "Installing sealed-secrets-controller"`,
-      `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.21.0/controller.yaml`,
+      `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
 
       `echo "Setting NFS as default storage class"`,
       `sudo microk8s kubectl patch storageclass nfs --patch-file ${PATH_TO_NFS_DEFAULT_STORAGE_PATCH}`,
