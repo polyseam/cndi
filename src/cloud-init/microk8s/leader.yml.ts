@@ -111,9 +111,9 @@ const getNFSDefaultStoragePatchYaml = () => {
 
 const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide opt-in for key-based auth
   if (useSshRepoAuth) {
-    return YAML.stringify(clusterRepoSecret);
-  } else {
     throw new Error("GIT_SSH_PRIVATE_KEY is not yet supported");
+  } else {
+    return YAML.stringify(clusterRepoSecret);
   }
 };
 
