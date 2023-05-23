@@ -235,7 +235,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       },
     ],
     runcmd: [
-      `echo "#cloud-init.runcmd"`,
+      `echo "cloud-init.runcmd"`,
       `echo "------------------"`,
       `echo "leader bootstrap initializing!"`,
       `echo "------------------"`,

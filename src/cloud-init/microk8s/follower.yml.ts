@@ -55,7 +55,7 @@ const getFollowerCloudInitYaml = (
       },
     ],
     runcmd: [
-      `echo "#cloud-init.runcmd"`,
+      `echo "cloud-init.runcmd"`,
       `echo "------------------"`,
       `echo "follower bootstrap initializing!"`,
       `echo "------------------"`,
