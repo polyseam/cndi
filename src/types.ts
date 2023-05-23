@@ -162,16 +162,16 @@ interface CNDIConfig {
       nodes: Array<BaseNodeItemSpec>;
       microk8s: {
         addons: Array<Microk8sAddon>;
-        version?: string;
-        channel?: string;
+        version?: string; // 1.27
+        channel?: string; // stable
         "cloud-init": {
-          leader_before: Array<string>;
+          leader_before: Array<string>; //
           leader_after: Array<string>;
         };
       };
       argocd: {
-        root_application: unknown;
-        install_url?: string;
+        root_application: unknown; //
+        install_url?: string; //
       };
     };
     terraform?: TFBlocks;

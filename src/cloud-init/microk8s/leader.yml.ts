@@ -177,6 +177,11 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
     `${PATH_TO_MANIFESTS}/cluster-repo-secret.yaml`;
 
+  const PATH_TO_SEALED_SECRETS_PRIVATE_KEY =
+    `${WORKING_DIR}/sealed_secrets_private_key.key`;
+  const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
+    `${WORKING_DIR}/sealed_secrets_public_key.crt`;
+
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
     package_update: true,
@@ -203,12 +208,25 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
         path: PATH_TO_NFS_DEFAULT_STORAGE_PATCH,
         content: getNFSDefaultStoragePatchYaml(),
       },
+      {
+        path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
+        content: "\${sealed_secrets_public_key}",
+        permissions: "0644",
+        owner: "ubuntu:ubuntu",
+      },
+      {
+        path: PATH_TO_SEALED_SECRETS_PRIVATE_KEY,
+        content: "\${sealed_secrets_private_key}",
+        permissions: "0600",
+        owner: "ubuntu:ubuntu",
+      },
     ],
     runcmd: [
       `echo "cloud-init.runcmd"`,
       `echo "------------------"`,
       `echo "leader bootstrap initializing!"`,
       `echo "------------------"`,
+      `echo "USER=$USER"`,
       `echo "cndi-user-before begin"`,
       ...userBefore,
       `echo "cndi-user-before end"`,
@@ -240,13 +258,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `sudo microk8s kubectl patch storageclass nfs --patch-file ${PATH_TO_NFS_DEFAULT_STORAGE_PATCH}`,
       `echo "NFS is now the default storage class"`,
 
-      `echo "Writing Sealed-Secrets keys to disk"`,
-      `echo "\${sealed_secrets_public_key}" > public.crt`,
-      `echo "\${sealed_secrets_private_key}" > private.key`,
-      `echo "Sealed-Secrets keys written to disk"`,
-
       `echo "Importing Sealed Secrets Keys"`,
-      `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="./public.crt" --key="./private.key"`,
+      `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
       `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
       `echo "Sealed Secrets Keys imported"`,
 
@@ -254,8 +267,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
 
       `echo "Removing Sealed Secrets Keys from disk"`,
-      `sudo rm ./public.crt`,
-      `sudo rm ./private.key`,
+      `sudo rm ${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}`,
+      `sudo rm ${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}`,
       `echo "Sealed Secrets Keys removed from disk"`,
 
       `echo "Creating argocd namespace"`,
