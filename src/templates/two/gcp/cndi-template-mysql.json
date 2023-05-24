@@ -290,7 +290,14 @@
           "targetRevision": "9.9.1",
           "repoURL": "https://charts.bitnami.com/bitnami",
           "destinationNamespace": "mysql",
-          "chart": "mysql"
+          "chart": "mysql",
+          "values": {
+            "auth": {
+              "username": "admin",
+              "password": "pass",
+              "rootPassword": "password"
+            }
+          }
         }
       }
     },
