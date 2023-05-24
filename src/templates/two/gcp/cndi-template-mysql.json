@@ -17,8 +17,25 @@
       "default": "admin@example.com",
       "name": "letsEncryptClusterIssuerEmailAddress",
       "type": "Input"
+    },
+    {
+      "message": "Please enter the username for your mysql admin:",
+      "default": "admin",
+      "name": "mysqlUser",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the mysql admin password ",
+      "default": "password",
+      "name": "mysqlPassword",
+      "type": "Secret"
+    },
+    {
+      "message": "Please enter the mysql root password ",
+      "default": "password",
+      "name": "mysqlRootPassword",
+      "type": "Secret"
     }
-    
   ],
   "outputs": {
     "cndi-config": {
@@ -101,7 +118,7 @@
         "argo-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
-          "metadata": {
+          "metadata": {POSTGRESQL_DB
             "name": "argocd-server-ingress",
             "namespace": "argocd",
             "annotations": {
@@ -301,6 +318,27 @@
         }
       }
     },
-    "project_name": "cndi-template-mysql"
+
+    "env": {
+      "extend_basic_env": "gcp",
+      "entries": [
+        {
+          "name": "username",
+          "value": "{{ $.cndi.prompts.responses.mysqlUser }}"
+        },
+        {
+          "name": "password",
+          "value": "{{ $.cndi.prompts.responses.mysqlpassword }}"
+        },
+        {
+          "name": "rootPassword",
+          "value": "{{ $.cndi.prompts.responses.mysqlRootPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "gcp",
+      "template": "## mysql \n\n This template deploys a Standalone mysql server using official bitnami helm chart [https://charts.bitnami.com/bitnami]"
+    }
   }
 }
