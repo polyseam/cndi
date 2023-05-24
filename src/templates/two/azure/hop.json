@@ -214,7 +214,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "azure",
       "entries": [
         {
           "type": "Comment",
@@ -227,7 +227,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "azure",
       "template": "## Apache Hop\n\nThis template deploys [Apache Hop](https://hop.apache.org/), a data processing tool that is widely used for ETL to extract transform and load processing. "
     }
   }
