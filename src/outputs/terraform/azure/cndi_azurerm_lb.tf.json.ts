@@ -5,7 +5,8 @@ export default function getAzureLbTFJSON(): string {
     frontend_ip_configuration: [
       {
         name: "cndi_azurerm_lb_frontend_ip_configuration",
-        public_ip_address_id: "${azurerm_public_ip.cndi_azurerm_public_ip_lb.id}",
+        public_ip_address_id:
+          "${azurerm_public_ip.cndi_azurerm_public_ip_lb.id}",
       },
     ],
     location: "${azurerm_resource_group.cndi_azurerm_resource_group.location}",

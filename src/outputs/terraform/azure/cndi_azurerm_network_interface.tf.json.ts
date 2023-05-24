@@ -14,7 +14,7 @@ export default function getAzureNetworkInterfaceTFJSON(
           private_ip_address_allocation: "Dynamic",
           subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
           public_ip_address_id:
-            `azurerm_public_ip.cndi_azurerm_public_ip_${name}.id`,
+            `\${azurerm_public_ip.cndi_azurerm_public_ip_${name}.id}`,
         },
       ],
       location:
