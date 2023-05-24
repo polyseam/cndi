@@ -328,7 +328,7 @@
         },
         {
           "name": "password",
-          "value": "{{ $.cndi.prompts.responses.mysqlpassword }}"
+          "value": "{{ $.cndi.prompts.responses.mysqlPassword }}"
         },
         {
           "name": "rootPassword",
