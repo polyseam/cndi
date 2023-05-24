@@ -56,14 +56,58 @@
         "cndi": {
           "nodes": [
             {
-              "name": "pg-nodes",
-              "kind": "eks",
-              "instance_type": "t3.large",
-              "volume_size": 128,
-              "min_count": 1,
-              "max_count": 3
+              "name": "x-airflow-node",
+              "kind": "gcp",
+              "role": "leader",
+              "instance_type": "n2-standard-2",
+              "volume_size": 128
+            },
+            {
+              "name": "y-airflow-node",
+              "kind": "gcp",
+              "volume_size": 128
+            },
+            {
+              "name": "z-airflow-node",
+              "kind": "gcp",
+              "volume_size": 128
             }
           ]
+        },
+        "terraform": {
+          "resource": {
+            "google_compute_forwarding_rule": {
+              "cndi_google_compute_forwarding_rule": {
+                "backend_service": "${google_compute_region_backend_service.cndi_google_compute_region_backend_service.self_link}",
+                "name": "cndi-forwarding-rule",
+                "network_tier": "STANDARD",
+                "ports": [
+                  "80",
+                  "443",
+                  "5432"
+                ]
+              }
+            },
+            "google_compute_firewall": {
+              "cndi_google_compute_firewall_external": {
+                "allow": [
+                  {
+                    "ports": [
+                      "5432"
+                    ],
+                    "protocol": "tcp"
+                  }
+                ],
+                "description": "Security firewall",
+                "direction": "INGRESS",
+                "name": "cndi-allow-external-traffic",
+                "network": "${google_compute_network.cndi_google_compute_network.self_link}",
+                "source_ranges": [
+                  "0.0.0.0/0"
+                ]
+              }
+            }
+          }
         }
       },
       "cluster_manifests": {
@@ -169,7 +213,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "ingressClassName": "public"
+                      "class": "public"
                     }
                   }
                 }
@@ -181,42 +225,85 @@
           "apiVersion": "v1",
           "kind": "ConfigMap",
           "metadata": {
-            "name": "ingress-nginx-controller",
+            "name": "nginx-ingress-tcp-microk8s-conf",
             "namespace": "ingress"
           },
           "data": {
             "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432"
           }
         },
-        "ingress-service": {
-          "apiVersion": "v1",
-          "kind": "Service",
+        "ingress-daemonset": {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
           "metadata": {
-            "name": "ingress-nginx-controller",
-            "namespace": "ingress"
+            "name": "nginx-ingress-microk8s-controller",
+            "namespace": "ingress",
+            "labels": {
+              "microk8s-application": "nginx-ingress-microk8s"
+            }
           },
           "spec": {
-            "type": "LoadBalancer",
-            "ports": [
-              {
-                "name": "http",
-                "port": 80,
-                "targetPort": "http",
-                "protocol": "TCP"
-              },
-              {
-                "name": "https",
-                "port": 443,
-                "targetPort": "https",
-                "protocol": "TCP"
-              },
-              {
-                "name": "postgres",
-                "port": 5432,
-                "targetPort": 5432,
-                "protocol": "TCP"
+            "selector": {
+              "matchLabels": {
+                "name": "nginx-ingress-microk8s"
               }
-            ]
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "name": "nginx-ingress-microk8s"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
+                    "name": "nginx-ingress-microk8s",
+                    "env": [
+                      {
+                        "name": "POD_NAME",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "fieldPath": "metadata.name"
+                          }
+                        }
+                      },
+                      {
+                        "name": "POD_NAMESPACE",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "fieldPath": "metadata.namespace"
+                          }
+                        }
+                      }
+                    ],
+                    "ports": [
+                      {
+                        "name": "http",
+                        "containerPort": 80,
+                        "hostPort": 80
+                      },
+                      {
+                        "name": "https",
+                        "containerPort": 443,
+                        "hostPort": 443
+                      },
+                      {
+                        "name": "postgres",
+                        "containerPort": 5432,
+                        "hostPort": 5432,
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "args": [
+                      "/nginx-ingress-controller",
+                      "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
+                      "--ingress-class=public"
+                    ]
+                  }
+                ]
+              }
+            }
           }
         },
         "cnpg-ingress": {
@@ -226,7 +313,8 @@
             "name": "cnpg-ingress",
             "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt"
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
             }
           },
           "spec": {
@@ -317,7 +405,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "gcp",
       "entries": [
         {
           "type": "Comment",
@@ -358,7 +446,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "gcp",
       "template": "## cloudnative-pg\n\nThis template deploys a Standalone production ready [cloudnative-posgresql-database](https://github.com/cloudnative-pg/charts)"
     }
   }
