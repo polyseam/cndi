@@ -197,11 +197,16 @@ cluster using CNDI and evolve it over time!
 
 ### lifecycle: destroy 🗑️
 
-All changes to a cluster with CNDI are made the same way, and teardown is no
-exception. To destroy your cluster you just need to delete all the files in your
-`cndi/terraform` directory, and add one called `destroy.tf`. This empty
-terraform file will signal to Terraform that the desired state of the cluster is
-nullified, so all that's left is to push that file up to your repository.
+When it comes down time to teardown your cluster, there is only one step, just
+call:
+
+```bash
+cndi destroy # in your project repo, and we will take care of the rest!
+```
+
+This will delete all of the infrastructure resources that CNDI created for you,
+and from there you can choose either to delete the repo or keep it around for
+later.
 
 ---
 

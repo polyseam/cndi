@@ -54,7 +54,9 @@ export default async function stageTerraformResourcesForConfig(
     // add global locals
     stageFile(
       path.join("cndi", "terraform", "global.locals.tf.json"),
-      global_locals({ cndi_project_name }),
+      global_locals({
+        cndi_project_name,
+      }),
     ),
     // write the microk8s join token generator
     stageFile(

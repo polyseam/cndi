@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { AWSEC2NodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES } from "deps";
+import { DEFAULT_INSTANCE_TYPES } from "constants";
 
 interface AWSTerraformEC2InstanceTypeOfferingsDataSource {
   [ec2_inst_type: string]: Array<{

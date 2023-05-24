@@ -37,16 +37,21 @@ export default async function stageTerraformResourcesForAzure(
   const leader_node_ip =
     `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}.private_ip_address}`;
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
-    stageFile(
+  const node_id_list: string[] = [];
+
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
+    node_id_list.push(
+      `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${node.name}.id}`,
+    );
+    return stageFile(
       path.join(
         "cndi",
         "terraform",
         `cndi_azurerm_linux_virtual_machine_${node.name}.tf.json`,
       ),
       cndi_azurerm_linux_virtual_machine(node, leaderNodeName),
-    )
-  );
+    );
+  });
 
   const stageNetworkInterface = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -83,7 +88,7 @@ export default async function stageTerraformResourcesForAzure(
       ),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_azurerm_locals({ azure_location, leader_node_ip }),
+        cndi_azurerm_locals({ azure_location, leader_node_ip, node_id_list }),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
