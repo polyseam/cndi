@@ -46,45 +46,28 @@
         "terraform": {
           "resource": {
             "google_compute_forwarding_rule": {
-              "cndi_gcp_forwarding_rule_bolt": {
-                "name": "cndi-gcp-forwarding-rule-bolt",
-                "load_balancing_scheme": "EXTERNAL",
-                "port_range": "7687",
-                "target": "${google_compute_target_pool.cndi_gcp_target_pool_bolt.self_link}",
-                "network": "${google_compute_network.cndi_gcp_network.self_link}"
-              }
-            },
-            "google_compute_target_pool": {
-              "cndi_gcp_target_pool_bolt": {
-                "name": "cndi-gcp-target-pool-bolt",
-                "instances": [
-                  "${google_compute_instance.cndi_gcp_instance.*.self_link}"
+              "cndi_google_compute_forwarding_rule": {
+                "backend_service": "${google_compute_region_backend_service.cndi_google_compute_region_backend_service.self_link}",
+                "name": "cndi-forwarding-rule",
+                "network_tier": "STANDARD",
+                "ports": [
+                  "80",
+                  "443",
+                  "7687"
                 ]
               }
             },
-            "google_compute_instance": {
-              "cndi_gcp_instance": {
-                "count": "${length(local.node_id_list)}",
-                "name": "cndi-gcp-instance-${count.index}",
-                "machine_type": "n1-standard-1",
-                "tags": ["BOLTLBTargetGroup", "${local.cndi_project_name}"],
-                "network_interface": {
-                  "network": "${google_compute_network.cndi_gcp_network.self_link}",
-                  "access_config": {}
-                }
-              }
-            },
             "google_compute_firewall": {
-              "cndi_gcp_firewall": {
-                "name": "cndi-gcp-firewall",
-                "network": "${google_compute_network.cndi_gcp_network.self_link}",
+              "cndi_google_compute_firewall_external": {
+                "name": "cndi-allow-external-traffic",
+                "network": "${google_compute_network.cndi_google_compute_network.self_link}",
                 "direction": "INGRESS",
-                "allow": {
+                "allow": [{
                   "protocol": "tcp",
                   "ports": ["7687"]
-                },
+                }],
                 "source_ranges": ["0.0.0.0/0"],
-                "description": "port for BOLT"
+                "description": "Security firewall"
               }
             }
           }
@@ -99,7 +82,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -132,13 +115,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -175,13 +158,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.neo4jDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.neo4jDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.neo4jDomainName",
+                "host": "{{ $.cndi.prompts.responses.neo4jDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -479,9 +462,9 @@
             "server.bolt.tls_level": "REQUIRED",
             "server.bolt.listen_address": "0.0.0.0:7687",
             "server.bolt.thread_pool_keep_alive": "10m",
-            "server.bolt.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7687",
+            "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7687 }}",
             "server.https.listen_address": "0.0.0.0:7473",
-            "server.https.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7473",
+            "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7473 }}",
             "dbms.ssl.policy.bolt.enabled": "true",
             "dbms.ssl.policy.bolt.client_auth": "NONE",
             "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
@@ -605,7 +588,7 @@
     }
   },
   "env": {
-    "extend_basic_env": "aws",
+    "extend_basic_env": "gcp",
     "prompts": [
       {
         "type": "Comment",
@@ -624,7 +607,7 @@
     ]
   },
   "readme": {
-    "extend_basic_readme": "aws",
+    "extend_basic_readme": "gcp",
     "template": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
   }
 }
