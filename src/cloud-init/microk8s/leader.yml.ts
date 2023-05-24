@@ -210,13 +210,13 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       },
       {
         path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
-        content: "\${sealed_secrets_public_key}",
+        content: `"\${sealed_secrets_public_key}"`,
         permissions: "0644",
         owner: "ubuntu:ubuntu",
       },
       {
         path: PATH_TO_SEALED_SECRETS_PRIVATE_KEY,
-        content: "\${sealed_secrets_private_key}",
+        content: `"\${sealed_secrets_private_key}"`,
         permissions: "0600",
         owner: "ubuntu:ubuntu",
       },
