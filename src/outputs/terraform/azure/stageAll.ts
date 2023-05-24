@@ -19,7 +19,8 @@ import cndi_azurerm_lb_rule_http from "./cndi_azurerm_lb_rule_http.tf.json.ts";
 import cndi_azurerm_lb_rule_https from "./cndi_azurerm_lb_rule_https.tf.json.ts";
 import cndi_azurerm_lb_rule_ssh from "./cndi_azurerm_lb_rule_ssh.tf.json.ts";
 import cndi_azurerm_network_security_group from "./cndi_azurerm_network_security_group.tf.json.ts";
-import cndi_azurerm_public_ip from "./cndi_azurerm_public_ip.tf.json.ts";
+import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
+import cndi_azurerm_public_ip_node from "./cndi_azurerm_public_ip_node.tf.json.ts";
 import cndi_azurerm_resource_group from "./cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_subnet from "./cndi_azurerm_subnet.tf.json.ts";
 import cndi_azurerm_subnet_network_security_group_association from "./cndi_azurerm_subnet_network_security_group_association.tf.json.ts";
@@ -82,6 +83,7 @@ export default async function stageTerraformResourcesForAzure(
       ...stageNodes,
       ...stageNetworkInterface,
       ...stageNetworkInterfaceBackendAddressPoolAssociation,
+      ...stageNodePublicIP,
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider(),
