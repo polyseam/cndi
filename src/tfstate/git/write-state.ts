@@ -45,23 +45,12 @@ export default async function pushStateFromRun({
   const originalBranch = (await git.branch()).current;
 
   const pathToState = path.join(pathToTerraformResources, "terraform.tfstate");
-  let state: string;
 
-  try {
-    state = Deno.readTextFileSync(pathToState);
-  } catch (errorReadingState) {
-    console.error(
-      gitWriteStateLabel,
-      ccolors.error("failed to read tfstate from disk"),
-    );
-    console.log(ccolors.caught(errorReadingState));
-    await emitExitEvent(1009);
-    Deno.exit(1009);
-  }
+  const state = Deno.readTextFileSync(pathToState);
 
   try {
     // this should throw an error if state is corrupted
-    JSON.parse(state!);
+    JSON.parse(state);
   } catch {
     console.log(
       gitWriteStateLabel,
@@ -86,7 +75,6 @@ export default async function pushStateFromRun({
   try {
     await git.checkout({ "--orphan": "_state" });
   } catch {
-    await git.fetch();
     await git.checkout("_state");
   }
 
@@ -107,7 +95,7 @@ export default async function pushStateFromRun({
     console.log(ccolors.caught(errorWritingState));
   }
   try {
-    await git.raw("add", pathToNewState, "--force"); // add the file regardless of if it is in .gitignore
+    await git.raw("add", pathToNewState, "--force");
     await git.commit(
       `automated commit from "${cmd}": ${Math.floor(Date.now() / 1000)}`,
       [pathToNewState],

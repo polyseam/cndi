@@ -1,8 +1,4 @@
-import {
-  getPrettyJSONString,
-  getTFResource,
-  getUserDataTemplateFileString,
-} from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { AWSEC2NodeItemSpec } from "src/types.ts";
 import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
 
@@ -30,7 +26,11 @@ export default function getAWSComputeInstanceTFJSON(
     },
   ];
   const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
-  const user_data = getUserDataTemplateFileString(role);
+  const leader_user_data =
+    '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${var.sealed_secrets_private_key}", "sealed_secrets_public_key": "${var.sealed_secrets_public_key}", "argocd_admin_password": "${var.argocd_admin_password}" })}';
+  const controller_user_data =
+    '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+  const user_data = role === "leader" ? leader_user_data : controller_user_data;
   const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
 
   const resource = getTFResource(
@@ -46,7 +46,6 @@ export default function getAWSComputeInstanceTFJSON(
       root_block_device,
       subnet_id,
       vpc_security_group_ids,
-      user_data_replace_on_change: true, // TODO: decide if this is the right default
       user_data,
       depends_on,
     },
