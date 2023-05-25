@@ -634,6 +634,6 @@
   },
   "readme": {
     "extend_basic_readme": "azure",
-    "template": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
+    "template_section": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
   }
 }
