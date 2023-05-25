@@ -202,7 +202,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
@@ -319,6 +321,10 @@
         {
           "name": "POSTGRESQL_USER",
           "value": "{{ $.cndi.prompts.responses.postgresqlUser }}"
+        },
+        {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.postgresqlPassword }}"
         },
         {
           "name": "POSTGRESQL_PROTOCOL",

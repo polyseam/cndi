@@ -331,6 +331,10 @@
           "value": "{{ $.cndi.prompts.responses.postgresqlUser }}"
         },
         {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.postgresqlPassword }}"
+        },
+        {
           "name": "POSTGRESQL_PROTOCOL",
           "value": "postgresql"
         },
