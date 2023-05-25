@@ -1,6 +1,9 @@
 import { YAML } from "deps";
 import { CNDIConfig } from "src/types.ts";
-import { DEFAULT_MICROK8S_VERSION } from "constants";
+import {
+  DEFAULT_MICROK8S_VERSION,
+  MICROK8S_INSTALL_RETRY_INTERVAL,
+} from "constants";
 
 type GetFollowerCloudInitOptions = {
   isWorker: boolean;
@@ -63,7 +66,7 @@ const getFollowerCloudInitYaml = (
       `echo "Installing microk8s"`,
 
       // the following used to retry every 180 seconds until success:
-      `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`, // reads /root/snap/microk8s/common/.microk8s.yaml
+      `while ! sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}; do echo 'microk8s failed to install, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
 
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,

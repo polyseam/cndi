@@ -17,3 +17,4 @@ export const NODE_DISK_SIZE_KEY = {
 };
 
 export const nonMicrok8sNodeKinds = ["eks"];
+export const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
