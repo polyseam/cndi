@@ -102,7 +102,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
@@ -135,13 +135,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.argocdDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.argocdDomainName",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -178,13 +178,13 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["$.cndi.prompts.responses.neo4jDomainName"],
+                "hosts": ["{{ $.cndi.prompts.responses.neo4jDomainName }}"],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "$.cndi.prompts.responses.neo4jDomainName",
+                "host": "{{ $.cndi.prompts.responses.neo4jDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -482,9 +482,9 @@
             "server.bolt.tls_level": "REQUIRED",
             "server.bolt.listen_address": "0.0.0.0:7687",
             "server.bolt.thread_pool_keep_alive": "10m",
-            "server.bolt.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7687",
+            "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7687 }}",
             "server.https.listen_address": "0.0.0.0:7473",
-            "server.https.advertised_address": "$.cndi.prompts.responses.neo4jDomainName:7473",
+            "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7473 }}",
             "dbms.ssl.policy.bolt.enabled": "true",
             "dbms.ssl.policy.bolt.client_auth": "NONE",
             "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
