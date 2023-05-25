@@ -3,7 +3,6 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
-      "open_ports": [],
       "nodes": [
         {
           "name": "x-node",
