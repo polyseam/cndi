@@ -169,8 +169,9 @@
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
-            "username": "$.cndi.secrets.seal(MYSQL_USERNAME)",
-            "password": "$.cndi.secrets.seal(MYSQL_ROOT_PASSWORD)"
+            "username": "$.cndi.secrets.seal(username)",
+            "mysql-password": "$.cndi.secrets.seal(userpassword)",
+            "mysql-root-password": "$.cndi.secrets.seal(rootPassword)"
           }
         },
         "mysql-ingress": {
@@ -310,9 +311,7 @@
           "chart": "mysql",
           "values": {
             "auth": {
-              "username": "admin",
-              "password": "pass",
-              "rootPassword": "password"
+              "existingSecret": "mysql-secret"
             }
           }
         }
@@ -327,7 +326,7 @@
           "value": "{{ $.cndi.prompts.responses.mysqlUser }}"
         },
         {
-          "name": "password",
+          "name": "userpassword",
           "value": "{{ $.cndi.prompts.responses.mysqlPassword }}"
         },
         {
