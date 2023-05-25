@@ -4,7 +4,7 @@ export { copy } from "https://deno.land/std@0.180.0/streams/copy.ts";
 export { SEP } from "https://deno.land/std@0.180.0/path/mod.ts";
 export { homedir } from "https://deno.land/std@0.173.0/node/os.ts?s=homedir";
 export * as path from "https://deno.land/std@0.180.0/path/mod.ts";
-export { stringify } from "https://deno.land/std@0.180.0/encoding/yaml.ts";
+export * as YAML from "https://deno.land/std@0.180.0/encoding/yaml.ts";
 export { deepMerge } from "https://deno.land/std@0.180.0/collections/deep_merge.ts";
 export { platform } from "https://deno.land/std@0.173.0/node/os.ts";
 export { walk } from "https://deno.land/std@0.180.0/fs/mod.ts";
