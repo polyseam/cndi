@@ -226,7 +226,6 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "------------------"`,
       `echo "leader bootstrap initializing!"`,
       `echo "------------------"`,
-      `echo "USER=$USER"`,
       `echo "cndi-user-before begin"`,
       ...userBefore,
       `echo "cndi-user-before end"`,
@@ -239,6 +238,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
+      
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
       `sudo usermod -a -G microk8s ubuntu`,
