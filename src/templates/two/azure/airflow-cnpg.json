@@ -348,7 +348,7 @@
         },
         {
           "name": "POSTGRESQL_CONNECTION_STRING",
-          "value": "postgresql://{{ $.cndi.prompts.responses.postgresqlUser }}:{{ $.cndi.prompts.responses.postgresqlPassword }}@{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432/{{ $.cndi.prompts.responses.postgresqlDb }}"
+          "value": "postgresql://{{ $.cndi.prompts.responses.postgresqlUser }}:{{ $.cndi.prompts.responses.postgresqlPassword }}@cnpg-airflow-cluster-rw:5432/{{ $.cndi.prompts.responses.postgresqlDb }}"
         },
         {
           "name": "POSTGRESQL_CLUSTER_SUPERUSER",
