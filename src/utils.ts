@@ -4,6 +4,7 @@ import {
   BaseNodeItemSpec,
   CNDIConfig,
   DeploymentTarget,
+  NodeRole,
   TFBlocks,
 } from "src/types.ts";
 
@@ -397,6 +398,17 @@ function base10intToHex(decimal: number): string {
   return hex;
 }
 
+function getUserDataTemplateFileString(role?: NodeRole) {
+  switch (role) {
+    case "leader":
+      return '${templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})}';
+    case "worker":
+      return '${templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+    default:
+      return '${templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+  }
+}
+
 function getSecretOfLength(len = 32): string {
   if (len % 2) {
     throw new Error("password length must be even");
@@ -430,6 +442,7 @@ export {
   getStagingDir,
   getTFData,
   getTFResource,
+  getUserDataTemplateFileString,
   loadJSONC,
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,
