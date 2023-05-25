@@ -211,13 +211,13 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       {
         path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
         content: `\${sealed_secrets_public_key}`,
-        encoding: 'b64',
+        encoding: "b64",
         permissions: "0644",
       },
       {
         path: PATH_TO_SEALED_SECRETS_PRIVATE_KEY,
         content: `\${sealed_secrets_private_key}`,
-        encoding: 'b64',
+        encoding: "b64",
         permissions: "0600",
       },
     ],
@@ -290,11 +290,11 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "Setting ArgoCD admin password"`,
       `ARGOCD_ADMIN_PASSWORD_HASHED="$(htpasswd \-bnBC 10 "" \${argocd_admin_password} | tr \-d '\:\\n')"`,
       `NOW="$(date +%FT%T%Z)"`,
-      `sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\"\: {\"admin.password\"\:\"$ARGOCD_ADMIN_PASSWORD_HASHED\",\"admin.passwordMtime\"\: \"$NOW\"}}"`,
+      `sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\\"stringData\\"\: {\\"admin.password\\"\:\\"$ARGOCD_ADMIN_PASSWORD_HASHED\\",\\"admin.passwordMtime\\"\: \\"$NOW\\"}}"`,
       `echo "ArgoCD admin password set"`,
 
       `echo "Cleaning CNDI Runtime Files"`,
-      // `sudo rm -rf ${WORKING_DIR}`,
+      `sudo rm -rf ${WORKING_DIR}`,
       `echo "CNDI Runtime Files Cleaned"`,
 
       `echo "cndi-platform end"`,
