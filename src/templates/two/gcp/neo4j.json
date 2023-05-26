@@ -354,238 +354,237 @@
             "updatedNumberScheduled": 1
           }
         }
-      }
-    ,
-    "applications": {
-      "neo4j": {
-        "targetRevision": "5.7.0",
-        "destinationNamespace": "neo4j",
-        "repoURL": "https://helm.neo4j.com/neo4j",
-        "chart": "neo4j",
-        "values": {
-          "nameOverride": "",
-          "fullnameOverride": "",
-          "disableLookups": false,
-          "neo4j": {
-            "name": "neo4j-kube",
-            "password": "my-password",
-            "passwordFromSecret": "",
-            "edition": "community",
-            "acceptLicenseAgreement": "yes",
-            "offlineMaintenanceModeEnabled": false,
-            "resources": {
-              "cpu": "1000m",
-              "memory": "4Gi"
-            },
-            "labels": null
-          },
-          "volumes": {
-            "data": {
-              "mode": "defaultStorageClass",
-              "defaultStorageClass": {
-                "accessModes": ["ReadWriteOnce"],
-                "requests": {
-                  "storage": "10Gi"
-                }
-              }
-            },
-            "plugins": {
-              "mode": "share",
-              "share": {
-                "name": "data"
-              }
-            }
-          },
-          "services": {
-            "default": {
-              "annotations": {}
-            },
+      },
+      "applications": {
+        "neo4j": {
+          "targetRevision": "5.7.0",
+          "destinationNamespace": "neo4j",
+          "repoURL": "https://helm.neo4j.com/neo4j",
+          "chart": "neo4j",
+          "values": {
+            "nameOverride": "",
+            "fullnameOverride": "",
+            "disableLookups": false,
             "neo4j": {
-              "enabled": true,
-              "annotations": {},
-              "spec": {
-                "type": "LoadBalancer"
+              "name": "neo4j-kube",
+              "password": "my-password",
+              "passwordFromSecret": "",
+              "edition": "community",
+              "acceptLicenseAgreement": "yes",
+              "offlineMaintenanceModeEnabled": false,
+              "resources": {
+                "cpu": "1000m",
+                "memory": "4Gi"
               },
-              "ports": {
-                "http": {
-                  "enabled": false
-                },
-                "https": {
-                  "enabled": true
-                },
-                "bolt": {
-                  "enabled": true,
-                  "name": "neo4j-bolt-7687",
-                  "port": "7687",
-                  "protocol": "TCP",
-                  "targetPort": "7687"
-                },
-                "backup": {
-                  "enabled": false
+              "labels": null
+            },
+            "volumes": {
+              "data": {
+                "mode": "defaultStorageClass",
+                "defaultStorageClass": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "requests": {
+                    "storage": "10Gi"
+                  }
                 }
               },
-              "selector": {
-                "helm.neo4j.com/neo4j.loadbalancer": "include"
+              "plugins": {
+                "mode": "share",
+                "share": {
+                  "name": "data"
+                }
+              }
+            },
+            "services": {
+              "default": {
+                "annotations": {}
               },
-              "multiCluster": false,
-              "cleanup": {
+              "neo4j": {
                 "enabled": true,
-                "image": {
-                  "registry": "docker.io",
-                  "repository": "bitnami/kubectl",
-                  "tag": "",
-                  "digest": "",
-                  "imagePullPolicy": "IfNotPresent"
+                "annotations": {},
+                "spec": {
+                  "type": "LoadBalancer"
+                },
+                "ports": {
+                  "http": {
+                    "enabled": false
+                  },
+                  "https": {
+                    "enabled": true
+                  },
+                  "bolt": {
+                    "enabled": true,
+                    "name": "neo4j-bolt-7687",
+                    "port": "7687",
+                    "protocol": "TCP",
+                    "targetPort": "7687"
+                  },
+                  "backup": {
+                    "enabled": false
+                  }
+                },
+                "selector": {
+                  "helm.neo4j.com/neo4j.loadbalancer": "include"
+                },
+                "multiCluster": false,
+                "cleanup": {
+                  "enabled": true,
+                  "image": {
+                    "registry": "docker.io",
+                    "repository": "bitnami/kubectl",
+                    "tag": "",
+                    "digest": "",
+                    "imagePullPolicy": "IfNotPresent"
+                  }
+                }
+              },
+              "admin": {
+                "enabled": true,
+                "annotations": {},
+                "spec": {
+                  "type": "ClusterIP"
+                }
+              },
+              "internals": {
+                "enabled": false,
+                "annotations": {}
+              }
+            },
+            "config": {
+              "server.config.strict_validation.enabled": "true",
+              "server.directories.plugins": "/var/lib/neo4j/labs",
+              "dbms.security.procedures.unrestricted": "apoc.*",
+              "dbms.security.procedures.allowlist": "apoc.*",
+              "dbms.security.http_strict_transport_security": "false",
+              "server.http.enabled": "false",
+              "server.bolt.enabled": "true",
+              "server.bolt.tls_level": "REQUIRED",
+              "server.bolt.listen_address": "0.0.0.0:7687",
+              "server.bolt.thread_pool_keep_alive": "10m",
+              "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7687 }}",
+              "server.https.listen_address": "0.0.0.0:7473",
+              "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7473 }}",
+              "dbms.ssl.policy.bolt.enabled": "true",
+              "dbms.ssl.policy.bolt.client_auth": "NONE",
+              "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
+              "dbms.ssl.policy.bolt.private_key": "private.key",
+              "dbms.ssl.policy.bolt.public_certificate": "public.crt",
+              "server.https.enabled": "true",
+              "dbms.ssl.policy.https.enabled": "true",
+              "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
+              "dbms.ssl.policy.https.private_key": "private.key",
+              "dbms.ssl.policy.https.public_certificate": "public.crt",
+              "dbms.ssl.policy.https.client_auth": "NONE"
+            },
+            "apoc_config": {
+              "apoc.trigger.enabled": "true",
+              "apoc.jdbc.neo4j.url": "jdbc:foo:bar",
+              "apoc.import.file.enabled": "true"
+            },
+            "ssl": {
+              "bolt": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                },
+                "trustedCerts": {
+                  "sources": []
+                },
+                "revokedCerts": {
+                  "sources": []
+                }
+              },
+              "https": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                },
+                "trustedCerts": {
+                  "sources": [{
+                    "secret": {
+                      "name": "lets-encrypt-private-key",
+                      "items": [
+                        {
+                          "key": "tls.crt",
+                          "path": "public.crt"
+                        }
+                      ]
+                    }
+                  }]
+                },
+                "revokedCerts": {
+                  "sources": []
+                }
+              },
+              "cluster": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                },
+                "trustedCerts": {
+                  "sources": [{
+                    "secret": {
+                      "name": "lets-encrypt-private-key",
+                      "items": [
+                        {
+                          "key": "tls.crt",
+                          "path": "public.crt"
+                        }
+                      ]
+                    }
+                  }]
+                },
+                "revokedCerts": {
+                  "sources": []
                 }
               }
             },
-            "admin": {
-              "enabled": true,
+            "clusterDomain": "cluster.local",
+            "image": {
+              "imagePullPolicy": "Always"
+            },
+            "statefulset": {
+              "metadata": {
+                "annotations": null
+              }
+            },
+            "env": {},
+            "podSpec": {
               "annotations": {},
-              "spec": {
-                "type": "ClusterIP"
-              }
+              "nodeAffinity": {},
+              "podAntiAffinity": true,
+              "tolerations": [],
+              "priorityClassName": "",
+              "loadbalancer": "include",
+              "serviceAccountName": "",
+              "terminationGracePeriodSeconds": 3600,
+              "initContainers": [],
+              "containers": []
             },
-            "internals": {
-              "enabled": false,
-              "annotations": {}
-            }
-          },
-          "config": {
-            "server.config.strict_validation.enabled": "true",
-            "server.directories.plugins": "/var/lib/neo4j/labs",
-            "dbms.security.procedures.unrestricted": "apoc.*",
-            "dbms.security.procedures.allowlist": "apoc.*",
-            "dbms.security.http_strict_transport_security": "false",
-            "server.http.enabled": "false",
-            "server.bolt.enabled": "true",
-            "server.bolt.tls_level": "REQUIRED",
-            "server.bolt.listen_address": "0.0.0.0:7687",
-            "server.bolt.thread_pool_keep_alive": "10m",
-            "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7687 }}",
-            "server.https.listen_address": "0.0.0.0:7473",
-            "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName:7473 }}",
-            "dbms.ssl.policy.bolt.enabled": "true",
-            "dbms.ssl.policy.bolt.client_auth": "NONE",
-            "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
-            "dbms.ssl.policy.bolt.private_key": "private.key",
-            "dbms.ssl.policy.bolt.public_certificate": "public.crt",
-            "server.https.enabled": "true",
-            "dbms.ssl.policy.https.enabled": "true",
-            "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
-            "dbms.ssl.policy.https.private_key": "private.key",
-            "dbms.ssl.policy.https.public_certificate": "public.crt",
-            "dbms.ssl.policy.https.client_auth": "NONE"
-          },
-          "apoc_config": {
-            "apoc.trigger.enabled": "true",
-            "apoc.jdbc.neo4j.url": "jdbc:foo:bar",
-            "apoc.import.file.enabled": "true"
-          },
-          "ssl": {
-            "bolt": {
-              "privateKey": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.key"
-              },
-              "publicCertificate": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.crt"
-              },
-              "trustedCerts": {
-                "sources": []
-              },
-              "revokedCerts": {
-                "sources": []
-              }
+            "logInitialPassword": true,
+            "jvm": {
+              "useNeo4jDefaultJvmArguments": true,
+              "additionalJvmArguments": []
             },
-            "https": {
-              "privateKey": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.key"
-              },
-              "publicCertificate": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.crt"
-              },
-              "trustedCerts": {
-                "sources": [{
-                  "secret": {
-                    "name": "lets-encrypt-private-key",
-                    "items": [
-                      {
-                        "key": "tls.crt",
-                        "path": "public.crt"
-                      }
-                    ]
-                  }
-                }]
-              },
-              "revokedCerts": {
-                "sources": []
-              }
-            },
-            "cluster": {
-              "privateKey": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.key"
-              },
-              "publicCertificate": {
-                "secretName": "lets-encrypt-private-key",
-                "subPath": "tls.crt"
-              },
-              "trustedCerts": {
-                "sources": [{
-                  "secret": {
-                    "name": "lets-encrypt-private-key",
-                    "items": [
-                      {
-                        "key": "tls.crt",
-                        "path": "public.crt"
-                      }
-                    ]
-                  }
-                }]
-              },
-              "revokedCerts": {
-                "sources": []
-              }
+            "logging": {
+              "serverLogsXml": "",
+              "userLogsXml": ""
             }
-          },
-          "clusterDomain": "cluster.local",
-          "image": {
-            "imagePullPolicy": "Always"
-          },
-          "statefulset": {
-            "metadata": {
-              "annotations": null
-            }
-          },
-          "env": {},
-          "podSpec": {
-            "annotations": {},
-            "nodeAffinity": {},
-            "podAntiAffinity": true,
-            "tolerations": [],
-            "priorityClassName": "",
-            "loadbalancer": "include",
-            "serviceAccountName": "",
-            "terminationGracePeriodSeconds": 3600,
-            "initContainers": [],
-            "containers": []
-          },
-          "logInitialPassword": true,
-          "jvm": {
-            "useNeo4jDefaultJvmArguments": true,
-            "additionalJvmArguments": []
-          },
-          "logging": {
-            "serverLogsXml": "",
-            "userLogsXml": ""
           }
         }
       }
-    }
     },
     "env": {
       "extend_basic_env": "gcp",
