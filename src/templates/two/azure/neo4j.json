@@ -381,7 +381,7 @@
           }
         }
       }
-    },
+    ,
     "applications": {
       "neo4j": {
         "targetRevision": "5.7.0",
@@ -611,7 +611,8 @@
           }
         }
       }
-    },
+    }
+  },
     "env": {
       "extend_basic_env": "azure",
       "prompts": [
