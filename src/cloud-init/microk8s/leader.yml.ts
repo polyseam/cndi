@@ -150,7 +150,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
   const microk8sLeaderLaunchConfig = {
     version: "0.1.0",
-    persistentClusterToken: "\${bootstrap_token}",
+    // persistentClusterToken: "\${bootstrap_token}", //TODO: figure out how to get this to be reused
     addons,
     addonRepositories: [
       {
@@ -185,6 +185,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
     `${WORKING_DIR}/sealed_secrets_private_key.key`;
   const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
     `${WORKING_DIR}/sealed_secrets_public_key.crt`;
+
+  const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
@@ -254,6 +256,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `sudo microk8s status --wait-ready`,
       `echo "microk8s is ready"`,
 
+      `sudo microk8s add-node --token \${bootstrap_token} -l ${MICROK8S_ADD_NODE_TOKEN_TTL}`,
+
       `echo "Installing sealed-secrets-controller"`,
       `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
       `echo "sealed-secrets-controller installed"`,
@@ -292,8 +296,12 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "ArgoCD Cluster Repo Secret Configured"`,
 
       `echo "Setting ArgoCD admin password"`,
-      `ARGOCD_ADMIN_PASSWORD_HASHED="$(htpasswd \-bnBC 10 "" \${argocd_admin_password} | tr \-d '\:\\n')"`,
+      `ARGOCD_ADMIN_PASSWORD_HASHED="$(htpasswd \-bnBC 10 \"\" \${argocd_admin_password} | tr \-d '\:\\n')"`,
+      `echo "ArgoCD admin password hashed"`,
+      `echo "$ARGOCD_ADMIN_PASSWORD_HASHED"`,
       `NOW="$(date +%FT%T%Z)"`,
+      `echo "ArgoCD admin password mtime"`,
+      `echo "$NOW"`,
       `sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\\"stringData\\"\: {\\"admin.password\\"\:\\"$ARGOCD_ADMIN_PASSWORD_HASHED\\",\\"admin.passwordMtime\\"\: \\"$NOW\\"}}"`,
       `echo "ArgoCD admin password set"`,
 

@@ -41,7 +41,8 @@ const getFollowerCloudInitYaml = (
   const microk8sChannel = config.infrastructure.cndi?.microk8s?.channel ||
     "stable";
 
-  const PATH_TO_LAUNCH_CONFIG = "/root/snap/microk8s/common/.microk8s.yaml";
+  const WORKING_DIR = "/home/ubuntu/.cndi-runtime";
+  const PATH_TO_LAUNCH_CONFIG = `${WORKING_DIR}/launch-config.yaml`;
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
