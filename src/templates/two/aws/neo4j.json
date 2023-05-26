@@ -1,26 +1,26 @@
 {
-  "cndi-config": {
-    "prompts": [
-      {
-        "name": "neo4jDomainName",
-        "default": "your.neo4j.something",
-        "message": "Please enter the domain name you want Neo4j to be accessible on:",
-        "type": "Input"
-      },
-      {
-        "name": "argocdDomainName",
-        "default": "your.argo.something",
-        "message": "Please enter the domain name you want argocd to be accessible on:",
-        "type": "Input"
-      },
-      {
-        "message": "Please enter the email address you want to use for lets encrypt:",
-        "default": "admin@example.com",
-        "name": "letsEncryptClusterIssuerEmailAddress",
-        "type": "Input"
-      }
-    ],
-    "template": {
+  "prompts": [
+    {
+      "name": "neo4jDomainName",
+      "default": "your.neo4j.something",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "argocdDomainName",
+      "default": "your.argo.something",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
       "infrastructure": {
         "cndi": {
           "nodes": [
@@ -605,29 +605,29 @@
           }
         }
       }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "prompts": [
+        {
+          "type": "Comment",
+          "comment": "Please provide the necessary credentials"
+        },
+        {
+          "name": "NEO4J_USERNAME",
+          "message": "Please enteryour Neo4j username:",
+          "type": "Input"
+        },
+        {
+          "name": "NEO4J_PASSWORD",
+          "message": "Please enter your Neo4j password:",
+          "type": "Secret"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template_section": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
     }
-  },
-  "env": {
-    "extend_basic_env": "aws",
-    "prompts": [
-      {
-        "type": "Comment",
-        "comment": "Please provide the necessary credentials"
-      },
-      {
-        "name": "NEO4J_USERNAME",
-        "message": "Please enteryour Neo4j username:",
-        "type": "Input"
-      },
-      {
-        "name": "NEO4J_PASSWORD",
-        "message": "Please enter your Neo4j password:",
-        "type": "Secret"
-      }
-    ]
-  },
-  "readme": {
-    "extend_basic_readme": "aws",
-    "template_section": "## neo4j-tls\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j). \n\nThe default credentials for Neo4j are: \n\nusername: `admin`\npassword: `admin`"
   }
 }
