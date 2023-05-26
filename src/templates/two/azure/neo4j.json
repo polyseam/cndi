@@ -21,6 +21,7 @@
   ],
   "outputs": {
     "cndi-config": {
+      "cndi_version": "v1.8.2",
       "infrastructure": {
         "cndi": {
           "nodes": [
