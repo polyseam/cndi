@@ -109,7 +109,7 @@
           },
           "spec": {
             "acme": {
-              "email": "$.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress",
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
                 "name": "lets-encrypt-private-key"
