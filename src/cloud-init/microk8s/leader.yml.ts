@@ -296,12 +296,9 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "ArgoCD Cluster Repo Secret Configured"`,
 
       `echo "Setting ArgoCD admin password"`,
+      // hash password then remove newlines and colons
       `ARGOCD_ADMIN_PASSWORD_HASHED="$(htpasswd \-bnBC 10 \"\" \${argocd_admin_password} | tr \-d '\:\\n')"`,
-      `echo "ArgoCD admin password hashed"`,
-      `echo "$ARGOCD_ADMIN_PASSWORD_HASHED"`,
       `NOW="$(date +%FT%T%Z)"`,
-      `echo "ArgoCD admin password mtime"`,
-      `echo "$NOW"`,
       `sudo microk8s kubectl -n argocd patch secret argocd-secret -p "{\\"stringData\\"\: {\\"admin.password\\"\:\\"$ARGOCD_ADMIN_PASSWORD_HASHED\\",\\"admin.passwordMtime\\"\: \\"$NOW\\"}}"`,
       `echo "ArgoCD admin password set"`,
 
