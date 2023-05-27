@@ -78,7 +78,7 @@ const rootApplication = {
   spec: {
     project: "default",
     destination: {
-      namespace: "default",
+      namespace: "argocd",
       server: "https://kubernetes.default.svc",
     },
     source: {
