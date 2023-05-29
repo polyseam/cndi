@@ -361,7 +361,7 @@
         },
         "readme": {
             "extend_basic_readme": "aws",
-            "template_section": "## mysql \n\n This template deploys a Standalone mysql server using official bitnami helm chart [https://charts.bitnami.com/bitnami]"
+            "template_section": "## mysql \n\n This template deploys a Standalone mysql server using bitnami helm chart [https://charts.bitnami.com/bitnami]"
         }
     }
 }
