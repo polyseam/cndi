@@ -169,9 +169,9 @@
           },
           "type": "kubernetes.io/basic-auth",
           "stringData": {
-            "username": "$.cndi.secrets.seal(username)",
-            "mysql-password": "$.cndi.secrets.seal(userpassword)",
-            "mysql-root-password": "$.cndi.secrets.seal(rootPassword)"
+            "username": "$.cndi.secrets.seal(USERNAME)",
+            "mysql-password": "$.cndi.secrets.seal(USERPASSWORD)",
+            "mysql-root-password": "$.cndi.secrets.seal(ROOTPASSWORD)"
           }
         },
         "mysql-ingress": {
@@ -322,22 +322,22 @@
       "extend_basic_env": "gcp",
       "entries": [
         {
-          "name": "username",
+          "name": "USERNAME",
           "value": "{{ $.cndi.prompts.responses.mysqlUser }}"
         },
         {
-          "name": "userpassword",
+          "name": "USERPASSWORD",
           "value": "{{ $.cndi.prompts.responses.mysqlPassword }}"
         },
         {
-          "name": "rootPassword",
+          "name": "ROOTPASSWORD",
           "value": "{{ $.cndi.prompts.responses.mysqlRootPassword }}"
         }
       ]
     },
     "readme": {
       "extend_basic_readme": "gcp",
-      "template": "## mysql \n\n This template deploys a Standalone mysql server using official bitnami helm chart [https://charts.bitnami.com/bitnami]"
+      "template_section": "## mysql \n\n This template deploys a Standalone mysql server using official bitnami helm chart [https://charts.bitnami.com/bitnami]"
     }
   }
 }
