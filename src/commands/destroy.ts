@@ -28,7 +28,10 @@ const destroyCommand = new Command()
   .env(
     "GIT_PASSWORD=<value:string>",
     "Personal access token ArgoCD will use to authenticate to your git repository.",
-    { required: true },
+  )
+  .env(
+    "GIT_SSH_PRIVATE_KEY=<value:string>",
+    "Private Key ArgoCD will use to authenticate to your git repository.",
   )
   .env(
     "GIT_REPO=<value:string>",

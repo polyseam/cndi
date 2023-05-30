@@ -1,4 +1,4 @@
-import { ccolors, Input, Secret } from "deps";
+import { ccolors, Input, Secret, Select } from "deps";
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
@@ -36,6 +36,8 @@ const getCoreEnvLines = async (
   let GIT_USERNAME = "";
   let GIT_REPO = "";
   let GIT_PASSWORD = "";
+  let GIT_SSH_PRIVATE_KEY = "";
+  let gitAuthMode = "GIT_PASSWORD";
 
   GIT_USERNAME = interactive
     ? await Input.prompt({
@@ -44,12 +46,32 @@ const getCoreEnvLines = async (
     })
     : GIT_USERNAME;
 
+  gitAuthMode = interactive
+    ? await Select.prompt({
+      message: ccolors.prompt(
+        "How would you like to connect your git repository?",
+      ),
+      options: [
+        { name: "Password / Personal Access Token", value: "GIT_PASSWORD" },
+        { name: "SSH Key", value: "GIT_SSH_PRIVATE_KEY" },
+      ],
+    })
+    : "GIT_PASSWORD";
+
+  if (gitAuthMode === "GIT_PASSWORD") {
+
   GIT_PASSWORD = interactive
     ? await Secret.prompt({
       message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
       default: GIT_PASSWORD,
     })
     : GIT_PASSWORD;
+
+  } else if (gitAuthMode === "GIT_SSH_PRIVATE_KEY") {
+    GIT_SSH_PRIVATE_KEY = interactive ? await Secret.prompt({
+      message: ccolors.prompt("Enter the path to your GitHub SSH private key:"),
+    }) : '';
+  }
 
   GIT_REPO = interactive
     ? await Input.prompt({

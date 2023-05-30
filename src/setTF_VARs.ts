@@ -15,14 +15,28 @@ export default async function setTF_VARs() {
   }
 
   const git_password = Deno.env.get("GIT_PASSWORD");
-  if (!git_password) {
+  const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
+
+  if (!git_password && !git_ssh_private_key) {
     console.error(
       setTF_VARsLabel,
+      ccolors.error("You must set either"),
       ccolors.key_name(`"GIT_PASSWORD"`),
-      ccolors.error("env var is not set"),
+      ccolors.error('or'),
+      ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
     );
     await emitExitEvent(101);
     Deno.exit(101);
+  } else if (git_password && git_ssh_private_key) {
+    console.error(
+      setTF_VARsLabel,
+      ccolors.error("You must set either"),
+      ccolors.key_name(`"GIT_PASSWORD"`),
+      ccolors.error('or'),
+      ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
+      ccolors.error('- not both'),
+    );
+    await emitExitEvent(106);
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
@@ -76,7 +90,8 @@ export default async function setTF_VARs() {
   }
 
   Deno.env.set("TF_VAR_git_username", git_username);
-  Deno.env.set("TF_VAR_git_password", git_password);
+  if(git_password) Deno.env.set("TF_VAR_git_password", git_password);
+  if(git_ssh_private_key) Deno.env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
   Deno.env.set("TF_VAR_git_repo", git_repo);
   Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
   Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);

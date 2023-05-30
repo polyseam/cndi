@@ -28,6 +28,10 @@
     "message": "'SEALED_SECRETS_PUBLIC_KEY' env var is not set for terraform"
   },
   {
+    "code": 106,
+    "message": "'GIT_PASSWORD' and 'GIT_SSH_PRIVATE_KEY' both set"
+  },
+  {
     "code": 200,
     "message": "No node with role 'leader' found in config"
   },

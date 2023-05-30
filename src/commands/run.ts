@@ -32,6 +32,10 @@ const runCommand = new Command()
     { required: true },
   )
   .env(
+    "GIT_SSH_PRIVATE_KEY=<value:string>",
+    "Private Key ArgoCD will use to authenticate to your git repository.",
+  )
+  .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
     { required: true },

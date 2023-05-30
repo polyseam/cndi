@@ -9,6 +9,12 @@ export default function getVariablesTFJSON(): string {
           type: "string",
         },
       ],
+      git_ssh_private_key: [
+        {
+          description: "private key for accessing the repositories",
+          type: "string",
+        }
+      ],
       git_username: [
         {
           description: "password for accessing the repositories",

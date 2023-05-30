@@ -60,6 +60,7 @@ const clusterRepoSecret = {
   stringData: {
     type: "git",
     password: "\${git_password}",
+    sshPrivateKey: "\${git_ssh_private_key}",
     username: "\${git_username}",
     url: "\${git_repo}",
   },
@@ -114,11 +115,23 @@ const getNFSDefaultStoragePatchYaml = () => {
   return YAML.stringify(NFS_DEFAULT_STORAGE_PATCH);
 };
 
-const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide opt-in for key-based auth
-  if (useSshRepoAuth) {
-    throw new Error("GIT_SSH_PRIVATE_KEY is not yet supported");
+const getClusterRepoSecretYaml = () => { // TODO: provide opt-in for key-based auth
+  if (clusterRepoSecret.stringData.sshPrivateKey) {
+    return YAML.stringify({
+      ...clusterRepoSecret,
+      stringData: {
+        ...clusterRepoSecret.stringData,
+        password: undefined 
+      },
+    });
   } else {
-    return YAML.stringify(clusterRepoSecret);
+    return YAML.stringify({
+      ...clusterRepoSecret,
+      stringData: { 
+        ...clusterRepoSecret.stringData,
+        sshPrivateKey: undefined 
+      },
+    });
   }
 };
 
