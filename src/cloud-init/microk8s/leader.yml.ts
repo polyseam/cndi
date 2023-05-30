@@ -103,6 +103,7 @@ const rootApplication = {
 
 const NFS_DEFAULT_STORAGE_PATCH = {
   metadata: {
+    name: "nfs",
     annotations: {
       "storageclass.kubernetes.io/is-default-class": "true",
     },
