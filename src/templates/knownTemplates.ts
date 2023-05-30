@@ -3,7 +3,7 @@ export const POLYSEAM_TEMPLATE_DIRECTORY =
 
 export default function getKnownTemplates() {
   const knownTemplates = [];
-  const templateNames = ["basic", "airflow-tls"];
+  const templateNames = ["basic", "airflow-cnpg", "cnpg"];
   const deploymentTargets = ["aws", "eks", "gcp", "azure"];
   for (const templateName of templateNames) {
     for (const deploymentTarget of deploymentTargets) {
