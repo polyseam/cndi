@@ -276,7 +276,7 @@ describe("cndi", () => {
       const { status } = await runCndi(
         "init",
         "-t",
-        "https://raw.githubusercontent.com/polyseam/example-cndi-templates/main/azure/airflow-cnpg.jsonc",
+        "https://raw.githubusercontent.com/polyseam/example-cndi-templates/main/azure/airflow-tls.jsonc",
       );
 
       // read the current directory entries after "cndi init" has ran
