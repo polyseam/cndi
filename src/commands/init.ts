@@ -154,7 +154,7 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-tls"
+    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-cnpg"
 
     if (options.interactive && !template) {
       template = await Select.prompt({
