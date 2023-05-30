@@ -52,6 +52,9 @@ const initCommand = new Command()
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
+  .option("-d, --debug", "Create a cndi project in debug mode.", {
+    hidden: true,
+  })
   .action(async (options) => {
     const pathToConfig = options.file;
     let template: string | undefined = options.template;
@@ -213,6 +216,13 @@ const initCommand = new Command()
           readme,
         );
       }
+    }
+
+    if (options?.debug) {
+      env.push(
+        { comment: "Telemetry Mode" },
+        { value: { CNDI_TELEMETRY: "debug" } },
+      );
     }
 
     await stageFile(".env", getEnvFileContents(env));

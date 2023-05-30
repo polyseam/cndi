@@ -49,6 +49,15 @@ describe("cndi", () => {
       );
     });
 
+    it("should add a .env file containing CNDI_TELEMETRY='debug' if -d is set", async () => {
+      const { status } = await runCndi("init", "-t", "aws/airflow-tls", "-d");
+      const dotenv = Deno.readTextFileSync(
+        path.join(Deno.cwd(), `.env`),
+      );
+      assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
+      assert(status.success);
+    });
+
     it(`should add correct files and directories when it succeeds`, async () => {
       const initFileList = new Set([
         "cndi-config.jsonc",
