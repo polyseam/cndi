@@ -104,7 +104,7 @@ After a few moments, the security principal is assigned the role at the selected
 ## Conclusion
 In the end you should have all the credentials for a cluster deployment on azure 
 
-- ARM_CLIENT_SECRET form Secret Value
+- ARM_CLIENT_SECRET from Secret Value
 ![Certificates-secrets](/docs/cloud-setup-guide/azure/img/certificates-secrets.png)
 
 - ARM_TENANT_ID & ARM_CLIENT_ID from App Overview
