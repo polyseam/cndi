@@ -54,6 +54,14 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "open_ports": [
+            {
+              "number": 5432,
+              "name": "postgres",
+              "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
+              "service": "{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw"
+            }
+          ],
           "nodes": [
             {
               "name": "x-cnpg-node",
@@ -73,60 +81,6 @@
               "volume_size": 128
             }
           ]
-        },
-        "terraform": {
-          "resource": {
-            "aws_security_group": {
-              "cndi_aws_security_group": {
-                "ingress": [
-                  {
-                    "description": "Port for postgres traffic",
-                    "from_port": "5432",
-                    "to_port": "5432",
-                    "protocol": "tcp",
-                    "cidr_blocks": [
-                      "0.0.0.0/0"
-                    ],
-                    "ipv6_cidr_blocks": [],
-                    "prefix_list_ids": [],
-                    "security_groups": [],
-                    "self": false
-                  }
-                ]
-              }
-            },
-            "aws_lb_listener": {
-              "cndi_aws_lb_listener_postgres": {
-                "load_balancer_arn": "${aws_lb.cndi_aws_lb.arn}",
-                "port": 5432,
-                "protocol": "TCP",
-                "default_action": [
-                  {
-                    "type": "forward",
-                    "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}"
-                  }
-                ]
-              }
-            },
-            "aws_lb_target_group": {
-              "cndi_aws_lb_target_group_postgres": {
-                "port": 5432,
-                "protocol": "TCP",
-                "vpc_id": "${aws_vpc.cndi_aws_vpc.id}",
-                "tags": {
-                  "Name": "POSTGRESLBTargetGroup",
-                  "CNDIProject": "${local.cndi_project_name}"
-                }
-              }
-            },
-            "aws_lb_target_group_attachment": {
-              "cndi_aws_lb_target_group_attachment_postgres": {
-                "count": "${length(local.node_id_list)}",
-                "target_group_arn": "${aws_lb_target_group.cndi_aws_lb_target_group_postgres.arn}",
-                "target_id": "${local.node_id_list[count.index]}"
-              }
-            }
-          }
         }
       },
       "cluster_manifests": {
@@ -237,91 +191,6 @@
                   }
                 }
               ]
-            }
-          }
-        },
-        "ingress-tcp-services-configmap": {
-          "apiVersion": "v1",
-          "kind": "ConfigMap",
-          "metadata": {
-            "name": "nginx-ingress-tcp-microk8s-conf",
-            "namespace": "ingress"
-          },
-          "data": {
-            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432"
-          }
-        },
-        "ingress-daemonset": {
-          "apiVersion": "apps/v1",
-          "kind": "DaemonSet",
-          "metadata": {
-            "name": "nginx-ingress-microk8s-controller",
-            "namespace": "ingress",
-            "labels": {
-              "microk8s-application": "nginx-ingress-microk8s"
-            }
-          },
-          "spec": {
-            "selector": {
-              "matchLabels": {
-                "name": "nginx-ingress-microk8s"
-              }
-            },
-            "template": {
-              "metadata": {
-                "labels": {
-                  "name": "nginx-ingress-microk8s"
-                }
-              },
-              "spec": {
-                "containers": [
-                  {
-                    "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
-                    "name": "nginx-ingress-microk8s",
-                    "env": [
-                      {
-                        "name": "POD_NAME",
-                        "valueFrom": {
-                          "fieldRef": {
-                            "fieldPath": "metadata.name"
-                          }
-                        }
-                      },
-                      {
-                        "name": "POD_NAMESPACE",
-                        "valueFrom": {
-                          "fieldRef": {
-                            "fieldPath": "metadata.namespace"
-                          }
-                        }
-                      }
-                    ],
-                    "ports": [
-                      {
-                        "name": "http",
-                        "containerPort": 80,
-                        "hostPort": 80
-                      },
-                      {
-                        "name": "https",
-                        "containerPort": 443,
-                        "hostPort": 443
-                      },
-                      {
-                        "name": "postgres",
-                        "containerPort": 5432,
-                        "hostPort": 5432,
-                        "protocol": "TCP"
-                      }
-                    ],
-                    "args": [
-                      "/nginx-ingress-controller",
-                      "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
-                      "--ingress-class=public"
-                    ]
-                  }
-                ]
-              }
             }
           }
         },

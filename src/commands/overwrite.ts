@@ -17,6 +17,8 @@ import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
+import getIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/ingress-tcp-services-configmap.ts";
+import getIngressDaemonsetManifest from "src/outputs/custom-port-manifests/ingress-daemonset.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -143,6 +145,37 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   );
 
   console.log(ccolors.success("staged terraform files"));
+
+  if (config?.infrastructure?.cndi?.open_ports) {
+    const deployment_target = config?.infrastructure.cndi.nodes[0].kind;
+
+    if (!deployment_target) {
+      console.error(
+        owLabel,
+        ccolors.error(`"deployment_target" is not set in cndi-config`),
+      );
+      throw new Error("no node kind???");
+    }
+
+    if (deployment_target === "aws" || deployment_target === "ec2") {
+      const open_ports = config?.infrastructure?.cndi?.open_ports;
+      if (open_ports) {
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.json",
+          ),
+          getIngressTcpServicesConfigMapManifest(open_ports),
+        );
+        stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
+          getIngressDaemonsetManifest(open_ports),
+        );
+        console.log(ccolors.success("staged open ports"));
+      }
+    }
+  }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   for (const key in cluster_manifests) {
