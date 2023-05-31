@@ -105,10 +105,12 @@ supplied for this project:
   will be hosted_
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt
   to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg database_
-
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/cndi-init-interactive.png)
 

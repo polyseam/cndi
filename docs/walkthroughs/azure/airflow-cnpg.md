@@ -7,9 +7,9 @@ in Microsoft Azure
 
 This walkthough uses `cndi` to customize and deploy our `azure/airflow-cnpg`
 Template. In just a few minutes we will be able to deploy a new Kubernetes
-cluster to Azure that has been optimally configured for Airflow, including GitOps
-with Secrets management, TLS and High Availibility right out-of-the-box. This
-framework will enable quick iteration of infrastructure, applications and
+cluster to Azure that has been optimally configured for Airflow, including
+GitOps with Secrets management, TLS and High Availibility right out-of-the-box.
+This framework will enable quick iteration of infrastructure, applications and
 manifests in a GitHub workflow you are already comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/azure/img/cndi-cluster-0.png)
@@ -22,14 +22,14 @@ successfully:**
 - **An Azure cloud account**: cndi will deploy infrastructure within Azure
 
 - **Your cloud credentials**: cndi will leverage your Azure web services's
-- ARM_CLIENT_SECRET 
-- ARM_TENANT_ID & ARM_CLIENT_ID 
-- ARM_SUBSCRIPTION_ID 
+- ARM_CLIENT_SECRET
+- ARM_TENANT_ID & ARM_CLIENT_ID
+- ARM_SUBSCRIPTION_ID
 
 - **A Domain Name**: Because the `azure/airflow-cnpg` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
-  access to the domain registrar so we can add a couple `A` records there
-  for our cluster ingresses.
+  access to the domain registrar so we can add a couple `A` records there for
+  our cluster ingresses.
 
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
@@ -86,23 +86,34 @@ supplied for this project:
 - **Cndi Project Name**: _name of project_
 - **Template**: _list of templates to choose from_
 - **GitHub Username**: _a user's handle on GitHub._
-- **GitHub Repository URL**: _the url for the GitHub repository that will hold all cluster configuration_
-- **GitHub Personal Access Token**: _the access token CNDI will use to access your repo for cluster creation and synchronization_
-- **Azure Subscription ID**: _access keys are long-term credentials for an IAM user_
+- **GitHub Repository URL**: _the url for the GitHub repository that will hold
+  all cluster configuration_
+- **GitHub Personal Access Token**: _the access token CNDI will use to access
+  your repo for cluster creation and synchronization_
+- **Azure Subscription ID**: _access keys are long-term credentials for an IAM
+  user_
 - **Azure Client ID**: _access keys are long-term credentials for an IAM user_
 - **Azure Client Secret**: _region where the infastructure is being created_
 - **Azure Tenant ID**: _access keys are long-term credentials for an IAM user_
 - **Azure Region**: _region where the infastructure is being created_
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs will be stored_
-- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will be hosted_
-- **Domain name you want Airflow to be accessible on**: _domain where Airflow will be hosted_
-- **Email address you want to use for lets encrypt:** _an email for lets encrypt to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg database_
-
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
+  synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to
+  synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
+  will be stored_
+- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
+  be hosted_
+- **Domain name you want Airflow to be accessible on**: _domain where Airflow
+  will be hosted_
+- **Email address you want to use for lets encrypt:** _an email for lets encrypt
+  to use when generating certificates_
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
 
 ![cndi-init](/docs/walkthroughs/azure/img/cndi-init-interactive-1.png)
 
@@ -150,7 +161,6 @@ gh secret set -f .env
 
 ![GitHub secrets](/docs/walkthroughs/azure/img/upload-git-secrets.png)
 
-
 ---
 
 ## deploy your templated cluster configration 🚀
@@ -180,22 +190,24 @@ successfully run the workflow.
 It is common for `cndi-run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into Azure to find
-the IP address of the load balancer that we created for you in the Network tab.
+Once `cndi-run` has been completed, you should be ready to log into Azure to
+find the IP address of the load balancer that we created for you in the Network
+tab.
 
 ---
 
 ## attach the load balancer to your domain 🌐
 
-- Go to [Azure console](https://portal.azure.com/#view/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/~/loadBalancers)
+- Go to
+  [Azure console](https://portal.azure.com/#view/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/~/loadBalancers)
 - In the navigation pane, choose **Load Balancers**
 - Select the **Load Balancer** thats attached to your azure instances
 - Copy that Load Balancer's **IP address**
 
 ![Azure nlb](/docs/walkthroughs/azure/img/azure-nlb.png)
 
-Go to your custom domain, you will need to add a A record for your domain
-and add the Ip Address of your load balancer to it
+Go to your custom domain, you will need to add a A record for your domain and
+add the Ip Address of your load balancer to it
 
 ![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
 

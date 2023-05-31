@@ -104,10 +104,12 @@ supplied for this project:
   will be hosted_
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt
   to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg database_
-
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
 
 ![AWS instances dashboard](/docs/walkthroughs/aws/img/cndi-init-interactive.png)
 
@@ -203,7 +205,8 @@ and add the DNS Name of your load balancer to it
 
 ![google domains](/docs/walkthroughs/aws/img/google-domains-cname.png)
 
-Wait 5 to 10 mins and then go to the Argocd domain URL that you specified in the interactive prompt
+Wait 5 to 10 mins and then go to the Argocd domain URL that you specified in the
+interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
