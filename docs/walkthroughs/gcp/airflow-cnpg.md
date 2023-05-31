@@ -105,6 +105,10 @@ supplied for this project:
   will be hosted_
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt
   to use when generating certificates_
+- **Username you want to use for airflow cnpg database:** _username you want to use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg database_
+
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/cndi-init-interactive.png)
 
@@ -127,7 +131,8 @@ The structure of the generated CNDI project will be as follows:
 │   └── 📁 terraform
 │       ├── x-airflow-node.cndi-node.tf.json
 │       ├── y-airflow-node.cndi-node.tf.json
-│       └── z-airflow-node.cndi-node.tf.json
+│       ├── z-airflow-node.cndi-node.tf.json
+│       └── etc 
 ├── cndi-config.jsonc
 ├── .env
 ├── .gitignore
@@ -206,13 +211,6 @@ which will in turn route traffic into our cluster.
 ![Google Domains](/docs/walkthroughs/gcp/img/google-domains-a-record.png)
 
 ---
-
-## Get Argo Credentials 🗝️
-
-- In the navigation pane, choose VM Instances.
-- Select a instance and click on the SSH button to connect
-
-![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
 
 Go to the ArgoCD domain URL that you specified in the interactive prompt
 

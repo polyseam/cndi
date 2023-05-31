@@ -99,9 +99,9 @@ supplied for this project:
 - **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will be hosted_
 - **Domain name you want Airflow to be accessible on**: _domain where Airflow will be hosted_
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt to use when generating certificates_
-- **Username you want to use for airflowcnpg   database:** _username you want to use for airflow database_
+- **Username you want to use for airflow cnpg database:** _username you want to use for airflow database_
 - **Password you want to use for airflow cnpg database:** _password you want to use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg databasee_
+- **Name of the postgresql database you want to use for airflow cnpg database:** _name of the postgresql database you want to use for airflow cnpg database_
 
 
 ![cndi-init](/docs/walkthroughs/azure/img/cndi-init-interactive-1.png)
