@@ -70,7 +70,9 @@ export default function getAWSSecurityGroupTFJSON(
       const portToRemove = ingress.findIndex((item) =>
         item.from_port === `${number}`
       );
-      ingress.splice(portToRemove, 1);
+      if (portToRemove > -1) {
+        ingress.splice(portToRemove, 1);
+      }
     } else {
       ingress.push({
         cidr_blocks: ["0.0.0.0/0"],
