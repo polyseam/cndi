@@ -398,14 +398,34 @@ function base10intToHex(decimal: number): string {
   return hex;
 }
 
-function getUserDataTemplateFileString(role?: NodeRole) {
+function getUserDataTemplateFileString(
+  role?: NodeRole,
+  doBase64Encode?: boolean,
+) {
+  let leaderString =
+    'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+  let workerString =
+    'templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+  let controllerString =
+    'templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+
+  if (doBase64Encode) {
+    leaderString = `\${base64encode(${leaderString})}`;
+    workerString = `\${base64encode(${workerString})}`;
+    controllerString = `\${base64encode(${controllerString})}`;
+  } else {
+    leaderString = `\${${leaderString}}`;
+    workerString = `\${${workerString}}`;
+    controllerString = `\${${controllerString}}`;
+  }
+
   switch (role) {
     case "leader":
-      return '${templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})}';
+      return leaderString;
     case "worker":
-      return '${templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+      return workerString;
     default:
-      return '${templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
+      return controllerString;
   }
 }
 

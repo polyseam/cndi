@@ -73,7 +73,7 @@ export default function getAzureComputeInstanceTFJSON(
     cndi_project_name: "${local.cndi_project_name}",
   };
 
-  const user_data = `\${base64encode(${getUserDataTemplateFileString(role)}}`;
+  const user_data = getUserDataTemplateFileString(role, true);
   const depends_on = role !== "leader" ? [leaderComputeInstance] : [];
 
   const resource = getTFResource(
