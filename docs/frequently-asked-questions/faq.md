@@ -74,9 +74,9 @@ gh secret set -f .env
 - Choose EC2 Instance Connect.
 - Verify the user name and choose Connect to open a terminal window
 
-![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-instances-ui.png)
+![Aws instances dashboard](/docs/frequently-asked-questions/img/aws-instances-ui.png)
 
-![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-connect.png)
+![Aws instances dashboard](/docs/frequently-asked-questions/img/aws-connect.png)
 
 --- 
 
@@ -86,7 +86,7 @@ gh secret set -f .env
 - In the navigation pane, choose VM Instances.
 - Select a instance and click on the SSH button to connect
 
-![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
+![GCP instances dashboard](/docs/frequently-asked-questions/img/gcp-instances-ui.png)
 
 ---
 
@@ -104,18 +104,25 @@ You can generate a new SSH key on your local machine. After you generate the key
 ```
 ssh-keygen -t rsa
 ```
-![Azure nlb](/docs/walkthroughs/azure/img/connect.png)
-- Click on reset your ssh key 
-- Copy the contents of the public key id_rsa.pub into SSH public key section 
-
-![Azure nlb](/docs/walkthroughs/azure/img/reset.png)
 Enter a file location to save the key to (by default it will save to your users directory)
+
 When you are prompted to type a passphrase, press Enter
 Once you've successfully created your private key will be saved in <your_chosen_directory>.ssh/id_rsa and your public key will be saved in <your_chosen_directory>.ssh/id_rsa.pub.
 
+![Azure nlb](/docs/frequently-asked-questions/img/connect.png)
+
+![Azure nlb](/docs/frequently-asked-questions/img/reset.png)
+- Choose `Reset SSH public key` 
+- Write `ubuntu` as the Username 
+- Copy the contents of the public key `id_rsa.pub` into SSH public key section
+- Click update
+- Now go to your local computer terminal 
+
 ```
-ssh -i id_rsa ubuntu@<ip_address_of_node>
+ssh -i <your_chosen_directory>.ssh/id_rsa ubuntu@<ip_address_of_node>
 ```
+You should now be connected to your instance
+
 **note**: Azure currently supports SSH protocol 2 (SSH-2) RSA public-private key pairs with a minimum length of 2048 bits. Other key formats such as ED25519 and ECDSA are not supported.
 
 --- 
