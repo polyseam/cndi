@@ -1,9 +1,9 @@
 export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/main/src/templates/two/";
+  "https://raw.githubusercontent.com/polyseam/cndi/main/src/templates/";
 
 export default function getKnownTemplates() {
   const knownTemplates = [];
-  const templateNames = ["basic", "airflow-tls"];
+  const templateNames = ["basic", "airflow-cnpg", "cnpg"];
   const deploymentTargets = ["aws", "eks", "gcp", "azure"];
   for (const templateName of templateNames) {
     for (const deploymentTarget of deploymentTargets) {

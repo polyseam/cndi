@@ -1,5 +1,6 @@
 export const TERRAFORM_VERSION = "1.4.6";
 export const KUBESEAL_VERSION = "0.21.0";
+export const DEFAULT_MICROK8S_VERSION = "1.27";
 
 export const DEFAULT_INSTANCE_TYPES = {
   aws: "m5a.large" as const,
@@ -16,3 +17,4 @@ export const NODE_DISK_SIZE_KEY = {
 };
 
 export const nonMicrok8sNodeKinds = ["eks"];
+export const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
