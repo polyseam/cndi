@@ -37,6 +37,8 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
+- [Here's a guide of how to set up your Amazon Web Services account](/docs/cloud-setup-guide/aws/aws-setup.md)
+
 ## download cndi ⬇️
 
 Run the following command within your terminal to download and install cndi:
