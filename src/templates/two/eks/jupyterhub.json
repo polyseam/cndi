@@ -9,7 +9,7 @@
     {
       "name": "jupyterhubDomainName",
       "default": "jupyterhub.example.com",
-      "message": "Please enter the domain name you want hop web to be accessible on:",
+      "message": "Please enter the domain name you want jupyterhub to be accessible on:",
       "type": "Input"
     },
     {
@@ -107,29 +107,29 @@
             ]
           }
         }
-      }
-    },
-    "applications": {
-      "jupyterhub": {
-        "targetRevision": "2.0.0",
-        "destinationNamespace": "jupyterhub",
-        "repoURL": "https://jupyterhub.github.io/helm-chart/",
-        "chart": "jupyterhub",
-        "values": {
-          "ingress": {
-            "enabled": true,
-            "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
-              "kubernetes.io/tls-acme": "true"
-            },
-            "hosts": [
-              {
-                "name": "{{ $.cndi.prompts.responses.jupyterhubDomainName }}",
-                "tls": {
-                  "secretName": "lets-encrypt-private-key"
+      },
+      "applications": {
+        "jupyterhub": {
+          "targetRevision": "2.0.0",
+          "destinationNamespace": "jupyterhub",
+          "repoURL": "https://jupyterhub.github.io/helm-chart/",
+          "chart": "jupyterhub",
+          "values": {
+            "ingress": {
+              "enabled": true,
+              "annotations": {
+                "cert-manager.io/cluster-issuer": "lets-encrypt",
+                "kubernetes.io/tls-acme": "true"
+              },
+              "hosts": [
+                {
+                  "name": "{{ $.cndi.prompts.responses.jupyterhubDomainName }}",
+                  "tls": {
+                    "secretName": "lets-encrypt-private-key"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       }
