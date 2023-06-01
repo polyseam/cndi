@@ -63,7 +63,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "ingressClassName": "public"
+                      "class": "public"
                     }
                   }
                 }
@@ -128,7 +128,8 @@
           "ingress": {
             "enabled": true,
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt"
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
             },
             "hosts": [
               {
