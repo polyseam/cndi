@@ -1,5 +1,6 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { ccolors, Command, path } from "deps";
+import { nonMicrok8sNodeKinds } from "constants";
 
 import {
   emitExitEvent,
@@ -157,7 +158,11 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       throw new Error("no node kind???");
     }
 
-    if (deployment_target === "aws" || deployment_target === "ec2") {
+    const isMicrok8sDeployment = !nonMicrok8sNodeKinds.includes(
+      deployment_target,
+    );
+
+    if (isMicrok8sDeployment) {
       const open_ports = config?.infrastructure?.cndi?.open_ports;
       if (open_ports) {
         stageFile(

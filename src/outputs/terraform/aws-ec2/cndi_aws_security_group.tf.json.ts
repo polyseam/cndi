@@ -65,8 +65,8 @@ export default function getAWSSecurityGroupTFJSON(
   ];
 
   ports.forEach((port) => {
-    const { number, name, enabled } = port;
-    if (enabled === false) {
+    const { number, name, disable } = port;
+    if (disable) {
       const portToRemove = ingress.findIndex((item) =>
         item.from_port === `${number}`
       );

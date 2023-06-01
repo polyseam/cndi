@@ -157,7 +157,7 @@ interface CNDIPort {
   service: string;
   namespace: string;
   number: number;
-  enabled?: boolean;
+  disable?: boolean;
 }
 
 // incomplete type, config will have more options
