@@ -18,8 +18,10 @@ import cndi_azurerm_lb_probe_https from "./cndi_azurerm_lb_probe_https.tf.json.t
 import cndi_azurerm_lb_rule_http from "./cndi_azurerm_lb_rule_http.tf.json.ts";
 import cndi_azurerm_lb_rule_https from "./cndi_azurerm_lb_rule_https.tf.json.ts";
 import cndi_azurerm_lb_rule_ssh from "./cndi_azurerm_lb_rule_ssh.tf.json.ts";
+import cndi_azurerm_lb_rule_kube_access from "./cndi_azurerm_lb_rule_kube_access.tf.json.ts";
 import cndi_azurerm_network_security_group from "./cndi_azurerm_network_security_group.tf.json.ts";
-import cndi_azurerm_public_ip from "./cndi_azurerm_public_ip.tf.json.ts";
+import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
+import cndi_azurerm_public_ip_node from "./cndi_azurerm_public_ip_node.tf.json.ts";
 import cndi_azurerm_resource_group from "./cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_subnet from "./cndi_azurerm_subnet.tf.json.ts";
 import cndi_azurerm_subnet_network_security_group_association from "./cndi_azurerm_subnet_network_security_group_association.tf.json.ts";
@@ -37,16 +39,21 @@ export default async function stageTerraformResourcesForAzure(
   const leader_node_ip =
     `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}.private_ip_address}`;
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
-    stageFile(
+  const node_id_list: string[] = [];
+
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
+    node_id_list.push(
+      `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${node.name}.id}`,
+    );
+    return stageFile(
       path.join(
         "cndi",
         "terraform",
         `cndi_azurerm_linux_virtual_machine_${node.name}.tf.json`,
       ),
       cndi_azurerm_linux_virtual_machine(node, leaderNodeName),
-    )
-  );
+    );
+  });
 
   const stageNetworkInterface = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -59,6 +66,17 @@ export default async function stageTerraformResourcesForAzure(
     )
   );
 
+  const stageNodePublicIP = config
+    .infrastructure.cndi.nodes.map((node) =>
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_azurerm_public_ip_${node.name}.tf.json`,
+        ),
+        cndi_azurerm_public_ip_node(node),
+      )
+    );
   const stageNetworkInterfaceBackendAddressPoolAssociation = config
     .infrastructure.cndi.nodes.map((node) =>
       stageFile(
@@ -77,13 +95,14 @@ export default async function stageTerraformResourcesForAzure(
       ...stageNodes,
       ...stageNetworkInterface,
       ...stageNetworkInterfaceBackendAddressPoolAssociation,
+      ...stageNodePublicIP,
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider(),
       ),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_azurerm_locals({ azure_location, leader_node_ip }),
+        cndi_azurerm_locals({ azure_location, leader_node_ip, node_id_list }),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
@@ -149,6 +168,14 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
+          "cndi_azurerm_lb_rule_kube_access.tf.json",
+        ),
+        cndi_azurerm_lb_rule_kube_access(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
           "cndi_azurerm_network_security_group.tf.json",
         ),
         cndi_azurerm_network_security_group(),
@@ -157,9 +184,9 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
-          "cndi_azurerm_public_ip.tf.json",
+          "cndi_azurerm_public_ip_lb.tf.json",
         ),
-        cndi_azurerm_public_ip(),
+        cndi_azurerm_public_ip_lb(),
       ),
       stageFile(
         path.join(

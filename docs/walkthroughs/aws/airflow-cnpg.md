@@ -1,11 +1,11 @@
-# aws/airflow-tls walkthrough
+# aws/airflow-cnpg walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
 in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `aws/airflow-tls`
+This walkthough uses `cndi` to customize and deploy our `aws/airflow-cnpg`
 Template. In just a few minutes we will be able to deploy a new Kubernetes
 cluster to AWS that has been optimally configured for Airflow, including GitOps
 with Secrets management, TLS and High Availibility right out-of-the-box. This
@@ -26,7 +26,7 @@ successfully:**
   [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
   to deploy resources.
 
-- **A Domain Name**: Because the `aws/airflow-tls` template sets up TLS
+- **A Domain Name**: Because the `aws/airflow-cnpg` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `CNAME` records there
   for our cluster Ingresses.
@@ -39,22 +39,11 @@ successfully:**
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download cndi:
+Run the following command within your terminal to download and install cndi:
 
 ```shell
 # this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
-```
-
-> #### **Note** 💡
->
-> _If you are on Windows, you should run this command in a Git Bash terminal._
-
-## install cndi cli ⚙️
-
-```shell
-# This will setup CNDI locally by installing it's 2 dependencies and unpacking a couple assets
-cndi install
 ```
 
 ## create your cndi repository 📂
@@ -79,14 +68,14 @@ cndi init -i
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `aws/airflow-tls` Template.
+For this project select the `aws/airflow-cnpg` Template.
 
 ```shell
 ? Pick a template
    aws/basic
    gcp/basic
- ❯ aws/airflow-tls
-   gcp/airflow-tls
+ ❯ aws/airflow-cnpg
+   gcp/airflow-cnpg
 ```
 
 Below is the list of all of the interactive prompt values that should be
@@ -221,21 +210,15 @@ and add the DNS Name of your load balancer to it
 
 ![Aws instances dashboard](/docs/walkthroughs/aws/img/aws-connect.png)
 
-In order to login to Argocd, we have to get the password from within the
-cluster. Run the command below in the terminal of one of the cluster nodes:
-
-```shell
-sudo microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-```
-
-save that password and then go to the Argocd domain URL that you specified in
-the interactive prompt
-
-You should now see a login page for Argocd, and a place to enter a username and
-password. The username is `admin` and the password is the text you copied in the
-previous step.
+Go to the Argocd domain URL that you specified in the interactive prompt
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
+
+You should now see a login page for ArgoCD, you will need the username is
+`admin` and the password which is the value of the `ARGOCD_ADMIN_PASSWORD` in
+the `.env` located in your CNDI project folder
+
+![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-1.png)
 
@@ -291,9 +274,8 @@ Airflow and Argocd
 - Commit changes
 - Push your code changes to the repository
 
-**If you want to take down the entire cluster:**
+**If you want to take down the entire cluster run:**
 
-- Delete all the files in your `cndi/terraform` directory
-- Create an empty called `destroy.tf` in the `cndi/terraform` directory
-- Commit changes
-- Push your code changes to the repository
+```bash
+cndi destroy
+```

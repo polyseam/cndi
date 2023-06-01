@@ -56,14 +56,78 @@
         "cndi": {
           "nodes": [
             {
-              "name": "pg-nodes",
-              "kind": "eks",
-              "instance_type": "t3.large",
-              "volume_size": 128,
-              "min_count": 1,
-              "max_count": 3
+              "name": "x-airflow-node",
+              "kind": "azure",
+              "role": "leader",
+              "instance_type": "Standard_D4s_v3",
+              "volume_size": 128
+            },
+            {
+              "name": "y-airflow-node",
+              "kind": "azure",
+              "volume_size": 128
+            },
+            {
+              "name": "z-airflow-node",
+              "kind": "azure",
+              "volume_size": 128
             }
           ]
+        },
+        "terraform": {
+          "resource": {
+            "azurerm_lb_probe": {
+              "cndi_azurerm_lb_probe_postgres": {
+                "loadbalancer_id": "${azurerm_lb.cndi_azurerm_lb.id}",
+                "name": "cndi_load_balancer_postgres_health_probe",
+                "port": 5432
+              }
+            },
+            "azurerm_lb_rule": {
+              "cndi_azurerm_lb_rule_postgres": {
+                "backend_address_pool_ids": [
+                  "${azurerm_lb_backend_address_pool.cndi_azurerm_lb_backend_address_pool.id}"
+                ],
+                "backend_port": 5432,
+                "frontend_ip_configuration_name": "cndi_azurerm_lb_frontend_ip_configuration",
+                "frontend_port": 5432,
+                "loadbalancer_id": "${azurerm_lb.cndi_azurerm_lb.id}",
+                "name": "postgres",
+                "probe_id": "${azurerm_lb_probe.cndi_azurerm_lb_probe_postgres.id}",
+                "protocol": "Tcp"
+              }
+            },
+            "azurerm_network_security_group": {
+              "cndi_azurerm_network_security_group": {
+                "location": "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
+                "name": "cndi_azurerm_network_security_group",
+                "resource_group_name": "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+                "security_rule": [
+                  {
+                    "access": "Allow",
+                    "description": "Allow inbound for postgres traffic",
+                    "destination_address_prefix": "*",
+                    "destination_address_prefixes": [],
+                    "destination_application_security_group_ids": [],
+                    "destination_port_range": "5432",
+                    "destination_port_ranges": [],
+                    "direction": "Inbound",
+                    "name": "Allowpostgres",
+                    "priority": 250,
+                    "protocol": "Tcp",
+                    "source_address_prefix": "*",
+                    "source_address_prefixes": [],
+                    "source_application_security_group_ids": [],
+                    "source_port_range": "*",
+                    "source_port_ranges": []
+                  }
+                ],
+                "tags": {
+                  "CNDIProject": "${local.cndi_project_name}"
+                }
+              }
+            }
+          }
         }
       },
       "cluster_manifests": {
@@ -169,7 +233,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "ingressClassName": "public"
+                      "class": "public"
                     }
                   }
                 }
@@ -181,42 +245,85 @@
           "apiVersion": "v1",
           "kind": "ConfigMap",
           "metadata": {
-            "name": "ingress-nginx-controller",
+            "name": "nginx-ingress-tcp-microk8s-conf",
             "namespace": "ingress"
           },
           "data": {
             "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432"
           }
         },
-        "ingress-service": {
-          "apiVersion": "v1",
-          "kind": "Service",
+        "ingress-daemonset": {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
           "metadata": {
-            "name": "ingress-nginx-controller",
-            "namespace": "ingress"
+            "name": "nginx-ingress-microk8s-controller",
+            "namespace": "ingress",
+            "labels": {
+              "microk8s-application": "nginx-ingress-microk8s"
+            }
           },
           "spec": {
-            "type": "LoadBalancer",
-            "ports": [
-              {
-                "name": "http",
-                "port": 80,
-                "targetPort": "http",
-                "protocol": "TCP"
-              },
-              {
-                "name": "https",
-                "port": 443,
-                "targetPort": "https",
-                "protocol": "TCP"
-              },
-              {
-                "name": "postgres",
-                "port": 5432,
-                "targetPort": 5432,
-                "protocol": "TCP"
+            "selector": {
+              "matchLabels": {
+                "name": "nginx-ingress-microk8s"
               }
-            ]
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "name": "nginx-ingress-microk8s"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "image": "registry.k8s.io/ingress-nginx/controller:v1.5.1",
+                    "name": "nginx-ingress-microk8s",
+                    "env": [
+                      {
+                        "name": "POD_NAME",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "fieldPath": "metadata.name"
+                          }
+                        }
+                      },
+                      {
+                        "name": "POD_NAMESPACE",
+                        "valueFrom": {
+                          "fieldRef": {
+                            "fieldPath": "metadata.namespace"
+                          }
+                        }
+                      }
+                    ],
+                    "ports": [
+                      {
+                        "name": "http",
+                        "containerPort": 80,
+                        "hostPort": 80
+                      },
+                      {
+                        "name": "https",
+                        "containerPort": 443,
+                        "hostPort": 443
+                      },
+                      {
+                        "name": "postgres",
+                        "containerPort": 5432,
+                        "hostPort": 5432,
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "args": [
+                      "/nginx-ingress-controller",
+                      "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
+                      "--ingress-class=public"
+                    ]
+                  }
+                ]
+              }
+            }
           }
         },
         "cnpg-ingress": {
@@ -226,7 +333,8 @@
             "name": "cnpg-ingress",
             "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt"
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
             }
           },
           "spec": {
@@ -317,7 +425,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "azure",
       "entries": [
         {
           "type": "Comment",
@@ -358,7 +466,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "azure",
       "template_section": "## cloudnative-pg\n\nThis template deploys a Standalone production ready [cloudnative-posgresql-database](https://github.com/cloudnative-pg/charts)"
     }
   }

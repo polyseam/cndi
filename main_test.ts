@@ -1,4 +1,8 @@
-import { assert, beforeEach, describe, it, path } from "deps";
+import { assert, beforeEach, describe, it } from "test-deps";
+
+import { path } from "deps";
+
+import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
@@ -43,6 +47,15 @@ describe("cndi", () => {
           assert(!status.success);
         }),
       );
+    });
+
+    it("should add a .env file containing CNDI_TELEMETRY=debug if -d is set", async () => {
+      const { status } = await runCndi("init", "-t", "aws/airflow-cnpg", "-d");
+      const dotenv = Deno.readTextFileSync(
+        path.join(Deno.cwd(), `.env`),
+      );
+      assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
+      assert(status.success);
     });
 
     it(`should add correct files and directories when it succeeds`, async () => {
@@ -276,17 +289,43 @@ describe("cndi", () => {
     });
 
     it("should add an template specific readme section", async () => {
-      const { status } = await runCndi("init", "-t", "aws/airflow-tls");
+      const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
       const readme = Deno.readTextFileSync(
         path.join(Deno.cwd(), `README.md`),
       );
-      assert(readme.indexOf(`## airflow-tls`) > -1);
+      assert(readme.indexOf(`## airflow-cnpg`) > -1);
       assert(status.success);
+    });
+
+    it("should replace all instances of a prompt slot with the appropriate value", () => {
+      const promptResponses = {
+        exampleA: "foo",
+        exampleB: "bar",
+        whiteSpaceIgnored: "true",
+      };
+
+      const cndiConfigStr = `{
+        "cluster_manifests": {
+          "myExampleA": "{{ $.cndi.prompts.responses.exampleA }}",
+          "myExampleB": "{{ $.cndi.prompts.responses.exampleB }}",
+          "whitespaceIgnored": {{      $.cndi.prompts.responses.whiteSpaceIgnored              }},
+          "title": "my-{{ $.cndi.prompts.responses.exampleA }}-{{ $.cndi.prompts.responses.exampleB }}-cluster"
+        }
+      }`;
+
+      const literalized = literalizeTemplateValuesInString(
+        promptResponses,
+        cndiConfigStr,
+      );
+      assert(literalized.indexOf(`"myExampleA": "foo"`) > -1);
+      assert(literalized.indexOf(`"myExampleB": "bar"`) > -1);
+      assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
+      assert(literalized.indexOf(`"whitespaceIgnored": true,`) > -1);
     });
 
     describe("aws", () => {
       it("should add an aws specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-tls");
+        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -295,7 +334,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing AWS env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-tls");
+        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -307,7 +346,7 @@ describe("cndi", () => {
       });
 
       it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-tls");
+        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });
@@ -315,7 +354,7 @@ describe("cndi", () => {
 
     describe("gcp", () => {
       it("should add an gcp specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-tls");
+        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -324,7 +363,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing GCP env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-tls");
+        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -334,7 +373,7 @@ describe("cndi", () => {
         assert(status.success);
       });
       it(`should create a set of terraform files where the resource name is the filename for gcp`, async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-tls");
+        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });
@@ -342,7 +381,7 @@ describe("cndi", () => {
 
     describe("azure", () => {
       it("should add an azure specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-tls");
+        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -351,7 +390,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing Azure env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-tls");
+        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -364,7 +403,7 @@ describe("cndi", () => {
         assert(status.success);
       });
       it(`should create a set of terraform files where the resource name is the filename for azure`, async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-tls");
+        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });

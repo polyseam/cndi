@@ -202,7 +202,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
@@ -321,6 +323,10 @@
           "value": "{{ $.cndi.prompts.responses.postgresqlUser }}"
         },
         {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.postgresqlPassword }}"
+        },
+        {
           "name": "POSTGRESQL_PROTOCOL",
           "value": "postgresql"
         },
@@ -334,7 +340,7 @@
         },
         {
           "name": "POSTGRESQL_CONNECTION_STRING",
-          "value": "$POSTGRESQL_PROTOCOL://$POSTGRESQL_USER:$POSTGRESQL_PASSWORD@$POSTGRESQL_HOST:$POSTGRESQL_PORT/$POSTGRESQL_DB"
+          "value": "postgresql://{{ $.cndi.prompts.responses.postgresqlUser }}:{{ $.cndi.prompts.responses.postgresqlPassword }}@cnpg-airflow-cluster-rw:5432/{{ $.cndi.prompts.responses.postgresqlDb }}"
         },
         {
           "name": "POSTGRESQL_CLUSTER_SUPERUSER",
@@ -356,7 +362,7 @@
     },
     "readme": {
       "extend_basic_readme": "aws",
-      "template": "## airflow-tls-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
+      "template_section": "## airflow-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
     }
   }
 }

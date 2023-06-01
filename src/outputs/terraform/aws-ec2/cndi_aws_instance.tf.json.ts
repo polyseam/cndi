@@ -1,6 +1,10 @@
-import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import {
+  getPrettyJSONString,
+  getTFResource,
+  getUserDataTemplateFileString,
+} from "src/utils.ts";
 import { AWSEC2NodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "deps";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSEC2NodeItemSpec,
@@ -10,8 +14,7 @@ export default function getAWSComputeInstanceTFJSON(
   const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
   const ami = node?.ami || DEFAULT_EC2_AMI;
   const instance_type = node?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
-  const delete_on_termination = false;
-  const device_name = "/dev/sda1";
+  const delete_on_termination = true;
   const volume_size = node?.volume_size || node?.disk_size || node?.size ||
     node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
@@ -19,20 +22,15 @@ export default function getAWSComputeInstanceTFJSON(
   const vpc_security_group_ids = [
     "${aws_security_group.cndi_aws_security_group.id}",
   ];
-  const ebs_block_device = [
+  const root_block_device = [
     {
-      device_name,
       volume_size,
       volume_type,
       delete_on_termination,
     },
   ];
   const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
-  const leader_user_data =
-    '${templatefile("leader_bootstrap_cndi.sh.tftpl",{ "bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${var.sealed_secrets_private_key}", "sealed_secrets_public_key": "${var.sealed_secrets_public_key}", "argocd_admin_password": "${var.argocd_admin_password}" })}';
-  const controller_user_data =
-    '${templatefile("controller_bootstrap_cndi.sh.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})}';
-  const user_data = role === "leader" ? leader_user_data : controller_user_data;
+  const user_data = getUserDataTemplateFileString(role);
   const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
 
   const resource = getTFResource(
@@ -45,9 +43,10 @@ export default function getAWSComputeInstanceTFJSON(
         CNDIProject: "${local.cndi_project_name}",
         CNDINodeRole: role,
       },
-      ebs_block_device,
+      root_block_device,
       subnet_id,
       vpc_security_group_ids,
+      user_data_replace_on_change: true, // TODO: decide if this is the right default
       user_data,
       depends_on,
     },

@@ -1,4 +1,4 @@
-import { stringify } from "deps";
+import { YAML } from "deps";
 
 const cndiWorkflowObj = {
   name: "cndi",
@@ -50,6 +50,9 @@ const cndiWorkflowObj = {
         {
           name: "cndi install",
           run: "cndi install",
+          env: {
+            CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+          },
         },
         {
           name: "cndi run",
@@ -73,6 +76,7 @@ const cndiWorkflowObj = {
             ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
             ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
             ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+            CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
           },
           run: "cndi run",
         },
@@ -90,5 +94,5 @@ const cndiWorkflowObj = {
   },
 };
 
-const getWorkflowYaml = () => stringify(cndiWorkflowObj);
+const getWorkflowYaml = () => YAML.stringify(cndiWorkflowObj);
 export default getWorkflowYaml;

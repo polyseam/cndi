@@ -72,6 +72,8 @@ const runCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
+      console.log(ccolors.faded("\n-- terraform init --\n"));
+
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
           `-chdir=${pathToTerraformResources}`,
@@ -91,6 +93,8 @@ const runCommand = new Command()
         Deno.exit(terraformInitCommandOutput.code);
       }
 
+      console.log(ccolors.faded("\n-- terraform apply --\n"));
+
       const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
           `-chdir=${pathToTerraformResources}`,
@@ -101,17 +105,24 @@ const runCommand = new Command()
         stdout: "piped",
       });
 
-      const terraformApplyCommandOutput = await terraformApplyCommand.output();
+      const terraformApplyChildProcess = terraformApplyCommand
+        .spawn();
 
-      // print any terraform output to stdout/stderr
-      await Deno.stdout.write(terraformApplyCommandOutput.stdout);
-      await Deno.stderr.write(terraformApplyCommandOutput.stderr);
+      for await (const chunk of terraformApplyChildProcess.stdout) {
+        Deno.stdout.write(chunk);
+      }
+
+      for await (const chunk of terraformApplyChildProcess.stderr) {
+        Deno.stderr.write(chunk);
+      }
+
+      const status = await terraformApplyChildProcess.status;
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
       // if `terraform apply` fails, exit with the code
-      if (terraformApplyCommandOutput.code !== 0) {
-        Deno.exit(terraformApplyCommandOutput.code);
+      if (status.code !== 0) {
+        Deno.exit(status.code);
       }
     } catch (err) {
       console.log(

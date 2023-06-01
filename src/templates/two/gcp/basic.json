@@ -23,7 +23,7 @@
               "name": "x-node",
               "kind": "gcp",
               "role": "leader",
-              "machine_type": "n2-standard-2",
+              "instance_type": "n2-standard-2",
               "volume_size": 128
             },
             {

@@ -115,7 +115,7 @@ required for every deployment. For example, you always need to have
 
 Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
-some are only required for certain Templates, for example all `airflow-tls`
+some are only required for certain Templates, for example all `airflow-cnpg`
 templates require `GIT_SYNC_PASSWORD` for accessing repos that hold Airflow
 DAGs.
 
@@ -197,19 +197,24 @@ cluster using CNDI and evolve it over time!
 
 ### lifecycle: destroy 🗑️
 
-All changes to a cluster with CNDI are made the same way, and teardown is no
-exception. To destroy your cluster you just need to delete all the files in your
-`cndi/terraform` directory, and add one called `destroy.tf`. This empty
-terraform file will signal to Terraform that the desired state of the cluster is
-nullified, so all that's left is to push that file up to your repository.
+When it comes down time to teardown your cluster, there is only one step, just
+call:
+
+```bash
+cndi destroy # in your project repo, and we will take care of the rest!
+```
+
+This will delete all of the infrastructure resources that CNDI created for you,
+and from there you can choose either to delete the repo or keep it around for
+later.
 
 ---
 
 ### Walkthroughs 🥾
 
 We've got a couple of walkthroughs you can follow if you'd like, currently we
-have one for our [aws/airflow-tls](docs/walkthroughs/aws/airflow-tls.md) and
-[gcp/airflow-tls](docs/walkthroughs/gcp/airflow-tls.md) Templates. If you are
+have one for our [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md) and
+[gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md) Templates. If you are
 interested in using CNDI, these walkthroughs will be entirely transferrable to
 other applications that aren't Airflow.
 
