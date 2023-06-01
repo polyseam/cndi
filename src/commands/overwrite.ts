@@ -179,6 +179,13 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         );
         console.log(ccolors.success("staged open ports"));
       }
+    } else {
+      console.log(
+        owLabel,
+        ccolors.error(
+          `open ports are not yet supported for deployment target "${deployment_target}"`,
+        ),
+      );
     }
   }
 

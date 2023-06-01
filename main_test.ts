@@ -18,14 +18,6 @@ import {
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
 
-// Key codes
-const _keys = {
-  up: "\x1B\x5B\x41",
-  down: "\x1B\x5B\x42",
-  enter: "\x0D",
-  space: "\x20",
-};
-
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
 beforeEach(() => {
@@ -224,6 +216,59 @@ describe("cndi", () => {
         await hasSameFilesAfter(async () => {
           const { status } = await runCndi("init");
           assert(!status.success);
+        }),
+      );
+    });
+
+    it(`should fail if a config file has invalid 'infrastructure.cndi.open_ports'`, async () => {
+      const stringOpenPortsConfig = {
+        ...basicAWSCndiConfig,
+        infrastructure: { cndi: { open_ports: "foo" } },
+      };
+
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString(stringOpenPortsConfig),
+      );
+
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(!status.success);
+        }),
+      );
+    });
+
+    it(`should succeed if a config file has valid 'infrastructure.cndi.open_ports'`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          ...basicAWSCndiConfig,
+          infrastructure: {
+            cndi: {
+              ...basicAWSCndiConfig.infrastructure.cndi,
+              open_ports: [
+                {
+                  name: "neo4j",
+                  number: 7687,
+                  service: "neo4j",
+                  namespace: "neo4j",
+                },
+                {
+                  name: "postgres",
+                  namespace: "postgresql",
+                  number: 5432,
+                  service: "postgres",
+                },
+              ],
+            },
+          },
+        }),
+      );
+      assert(
+        !await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(status.success);
         }),
       );
     });
