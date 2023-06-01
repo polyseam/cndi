@@ -54,7 +54,7 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
-          "open_ports":[
+          "open_ports": [
             {
               "number": 5432,
               "name": "postgres",
@@ -81,7 +81,7 @@
               "volume_size": 128
             }
           ]
-        },
+        }
       },
       "cluster_manifests": {
         "cnpg-namespace": {
