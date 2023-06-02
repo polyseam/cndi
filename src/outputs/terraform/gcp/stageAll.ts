@@ -9,7 +9,7 @@ import {
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
-
+import output from "./output.tf.json.ts";
 import cndi_google_compute_firewall_external from "./cndi_google_compute_firewall_external.tf.json.ts";
 import cndi_google_compute_firewall_internal from "./cndi_google_compute_firewall_internal.tf.json.ts";
 import cndi_google_compute_forwarding_rule from "./cndi_google_compute_forwarding_rule.tf.json.ts";
@@ -153,6 +153,9 @@ export default async function stageTerraformResourcesForGCP(
           "cndi_google_compute_region_backend_service.tf.json",
         ),
         cndi_google_compute_region_backend_service(),
+      ), stageFile(
+        path.join("cndi", "terraform", "output.tf.json"),
+        output(),
       ),
       stageFile(
         path.join(

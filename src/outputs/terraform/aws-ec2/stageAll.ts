@@ -7,6 +7,7 @@ import {
   stageFile,
 } from "src/utils.ts";
 
+import output from "./output.tf.json.ts";
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -26,6 +27,7 @@ import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
 import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
+
 
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
@@ -96,6 +98,10 @@ export default async function stageTerraformResourcesForAWS(
           aws_region,
           nodes: awsEC2Nodes,
         }),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "output.tf.json"),
+        output(),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
