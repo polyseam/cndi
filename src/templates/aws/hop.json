@@ -32,12 +32,21 @@
         "cndi": {
           "nodes": [
             {
-              "name": "hop-nodes",
-              "kind": "eks",
-              "instance_type": "t3.large",
-              "volume_size": 128,
-              "min_count": 1,
-              "max_count": 3
+              "name": "x-hop-node",
+              "kind": "ec2",
+              "role": "leader",
+              "instance_type": "m5a.large",
+              "volume_size": 128
+            },
+            {
+              "name": "y-hop-node",
+              "kind": "ec2",
+              "volume_size": 128
+            },
+            {
+              "name": "z-hop-node",
+              "kind": "ec2",
+              "volume_size": 128
             }
           ]
         }
@@ -90,7 +99,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "ingressClassName": "public"
+                      "class": "public"
                     }
                   }
                 }
