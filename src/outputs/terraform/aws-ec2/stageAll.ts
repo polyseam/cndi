@@ -18,6 +18,9 @@ import cndi_aws_lb_listener_http from "./cndi_aws_lb_listener_http.tf.json.ts";
 import cndi_aws_lb_listener_https from "./cndi_aws_lb_listener_https.tf.json.ts";
 import cndi_aws_lb_target_group_http from "./cndi_aws_lb_target_group_http.tf.json.ts";
 import cndi_aws_lb_target_group_https from "./cndi_aws_lb_target_group_https.tf.json.ts";
+import cndi_aws_lb_target_group_attachment_for_port from "./cndi_aws_lb_target_group_attachment_for_port.tf.json.ts";
+import cndi_aws_lb_listener_for_port from "./cndi_aws_lb_listener_for_port.tf.json.ts";
+import cndi_aws_lb_target_group_for_port from "./cndi_aws_lb_target_group_for_port.tf.json.ts";
 import cndi_aws_lb from "./cndi_aws_lb.tf.json.ts";
 import cndi_aws_route_table_association from "./cndi_aws_route_table_association.tf.json.ts";
 import cndi_aws_route_table from "./cndi_aws_route_table.tf.json.ts";
@@ -40,6 +43,43 @@ export default async function stageTerraformResourcesForAWS(
   >;
 
   const node_id_list: string[] = [];
+
+  const open_ports = config.infrastructure.cndi.open_ports || [];
+
+  const customListeners = open_ports.map((port) => {
+    return stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_aws_lb_listener_for_port_${port.name}.tf.json`,
+      ),
+      cndi_aws_lb_listener_for_port(port),
+    );
+  });
+
+  const customTargetGroups = open_ports.map((port) => {
+    return stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_aws_lb_target_group_for_port_${port.name}.tf.json`,
+      ),
+      cndi_aws_lb_target_group_for_port(port),
+    );
+  });
+
+  const targetGroupAttachments = awsEC2Nodes.flatMap((node) => { // TODO: what even is this
+    return open_ports.map((port) => {
+      return stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${node.name}.tf.json`,
+        ),
+        cndi_aws_lb_target_group_attachment_for_port(node, port),
+      );
+    });
+  });
 
   const stageNodes = awsEC2Nodes.map((node) => {
     node_id_list.push(`\${aws_instance.cndi_aws_instance_${node.name}.id}`);
@@ -84,6 +124,9 @@ export default async function stageTerraformResourcesForAWS(
       ...stageNodes,
       ...stageLbTargetGroupAttachmentHTTP,
       ...stageLbTargetGroupAttachmentHTTPS,
+      ...customListeners,
+      ...customTargetGroups,
+      ...targetGroupAttachments,
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
         data(awsEC2Nodes),
@@ -175,7 +218,7 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "cndi_aws_security_group.tf.json",
         ),
-        cndi_aws_security_group(),
+        cndi_aws_security_group(open_ports),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_subnet.tf.json"),
