@@ -64,19 +64,19 @@
           ],
           "nodes": [
             {
-              "name": "x-airflow-node",
+              "name": "x-cnpg-node",
               "kind": "gcp",
               "role": "leader",
               "instance_type": "n2-standard-2",
               "volume_size": 128
             },
             {
-              "name": "y-airflow-node",
+              "name": "y-cnpg-node",
               "kind": "gcp",
               "volume_size": 128
             },
             {
-              "name": "z-airflow-node",
+              "name": "z-cnpg-node",
               "kind": "gcp",
               "volume_size": 128
             }
