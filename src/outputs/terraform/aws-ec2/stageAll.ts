@@ -28,7 +28,6 @@ import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 
-
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {

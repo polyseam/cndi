@@ -153,7 +153,8 @@ export default async function stageTerraformResourcesForGCP(
           "cndi_google_compute_region_backend_service.tf.json",
         ),
         cndi_google_compute_region_backend_service(),
-      ), stageFile(
+      ),
+      stageFile(
         path.join("cndi", "terraform", "output.tf.json"),
         output(),
       ),
