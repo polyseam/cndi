@@ -20,19 +20,19 @@
         "cndi": {
           "nodes": [
             {
-              "name": "x-airflow-node",
+              "name": "x-node",
               "kind": "azure",
               "role": "leader",
               "instance_type": "Standard_D4s_v3",
               "volume_size": 128
             },
             {
-              "name": "y-airflow-node",
+              "name": "y-node",
               "kind": "azure",
               "volume_size": 128
             },
             {
-              "name": "z-airflow-node",
+              "name": "z-node",
               "kind": "azure",
               "volume_size": 128
             }
