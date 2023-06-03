@@ -115,7 +115,7 @@ required for every deployment. For example, you always need to have
 
 Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
-some are only required for certain Templates, for example all `airflow-tls`
+some are only required for certain Templates, for example all `airflow-cnpg`
 templates require `GIT_SYNC_PASSWORD` for accessing repos that hold Airflow
 DAGs.
 
@@ -213,8 +213,8 @@ later.
 ### Walkthroughs 🥾
 
 We've got a couple of walkthroughs you can follow if you'd like, currently we
-have one for our [aws/airflow-tls](docs/walkthroughs/aws/airflow-tls.md) and
-[gcp/airflow-tls](docs/walkthroughs/gcp/airflow-tls.md) Templates. If you are
+have one for our [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md) and
+[gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md) Templates. If you are
 interested in using CNDI, these walkthroughs will be entirely transferrable to
 other applications that aren't Airflow.
 

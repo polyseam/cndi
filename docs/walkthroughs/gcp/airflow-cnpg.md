@@ -1,11 +1,11 @@
-# gcp/airflow-tls walkthrough
+# gcp/airflow-cnpg walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
 in Google Cloud Platform
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `gcp/airflow-tls`
+This walkthough uses `cndi` to customize and deploy our `gcp/airflow-cnpg`
 Template. In just a few minutes we will be able to deploy a new Kubernetes
 cluster to GCP that has been optimally configured for Airflow, including GitOps
 with Secrets management, TLS and High Availibility right out-of-the-box. This
@@ -28,7 +28,7 @@ successfully:**
   [credentials](https://cloud.google.com/iam/docs/service-accounts) file to
   deploy resources.
 
-- **A Domain Name**: Because the `gcp/airflow-tls` template sets up TLS
+- **A Domain Name**: Because the `gcp/airflow-cnpg` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `A` records there for
   our cluster Ingresses.
@@ -70,14 +70,14 @@ cndi init -i
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `gcp/airflow-tls` Template.
+For this project select the `gcp/airflow-cnpg` Template.
 
 ```shell
 ? Pick a template
    aws/basic
    gcp/basic
-   aws/airflow-tls
- ❯ gcp/airflow-tls
+   aws/airflow-cnpg
+ ❯ gcp/airflow-cnpg
 ```
 
 Below is the list of all of the interactive prompt values that should be

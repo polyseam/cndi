@@ -18,8 +18,12 @@ import cndi_azurerm_lb_probe_https from "./cndi_azurerm_lb_probe_https.tf.json.t
 import cndi_azurerm_lb_rule_http from "./cndi_azurerm_lb_rule_http.tf.json.ts";
 import cndi_azurerm_lb_rule_https from "./cndi_azurerm_lb_rule_https.tf.json.ts";
 import cndi_azurerm_lb_rule_ssh from "./cndi_azurerm_lb_rule_ssh.tf.json.ts";
+import cndi_azurerm_lb_rule_kube_access from "./cndi_azurerm_lb_rule_kube_access.tf.json.ts";
+import cndi_azurerm_lb_rule_custom_port from "./cndi_azurerm_lb_rule_custom_port.tf.json.ts";
+import cndi_azurerm_lb_probe_custom_port from "./cndi_azurerm_lb_probe_custom_port.tf.json.ts";
 import cndi_azurerm_network_security_group from "./cndi_azurerm_network_security_group.tf.json.ts";
-import cndi_azurerm_public_ip from "./cndi_azurerm_public_ip.tf.json.ts";
+import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
+import cndi_azurerm_public_ip_node from "./cndi_azurerm_public_ip_node.tf.json.ts";
 import cndi_azurerm_resource_group from "./cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_subnet from "./cndi_azurerm_subnet.tf.json.ts";
 import cndi_azurerm_subnet_network_security_group_association from "./cndi_azurerm_subnet_network_security_group_association.tf.json.ts";
@@ -38,6 +42,30 @@ export default async function stageTerraformResourcesForAzure(
     `\${azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}.private_ip_address}`;
 
   const node_id_list: string[] = [];
+
+  const open_ports = config.infrastructure.cndi.open_ports || [];
+
+  const customLbRules = open_ports.map((port) =>
+    stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_azurerm_lb_rule_custom_port_${port.name}.tf.json`,
+      ),
+      cndi_azurerm_lb_rule_custom_port(port),
+    )
+  );
+
+  const customLbProbes = open_ports.map((port) =>
+    stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_azurerm_lb_probe_custom_port_${port.name}.tf.json`,
+      ),
+      cndi_azurerm_lb_probe_custom_port(port),
+    )
+  );
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     node_id_list.push(
@@ -64,6 +92,17 @@ export default async function stageTerraformResourcesForAzure(
     )
   );
 
+  const stageNodePublicIP = config
+    .infrastructure.cndi.nodes.map((node) =>
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_azurerm_public_ip_${node.name}.tf.json`,
+        ),
+        cndi_azurerm_public_ip_node(node),
+      )
+    );
   const stageNetworkInterfaceBackendAddressPoolAssociation = config
     .infrastructure.cndi.nodes.map((node) =>
       stageFile(
@@ -79,9 +118,12 @@ export default async function stageTerraformResourcesForAzure(
   // stage all the terraform files at once
   try {
     await Promise.all([
+      ...customLbRules,
+      ...customLbProbes,
       ...stageNodes,
       ...stageNetworkInterface,
       ...stageNetworkInterfaceBackendAddressPoolAssociation,
+      ...stageNodePublicIP,
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
         provider(),
@@ -154,17 +196,25 @@ export default async function stageTerraformResourcesForAzure(
         path.join(
           "cndi",
           "terraform",
-          "cndi_azurerm_network_security_group.tf.json",
+          "cndi_azurerm_lb_rule_kube_access.tf.json",
         ),
-        cndi_azurerm_network_security_group(),
+        cndi_azurerm_lb_rule_kube_access(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_azurerm_public_ip.tf.json",
+          "cndi_azurerm_network_security_group.tf.json",
         ),
-        cndi_azurerm_public_ip(),
+        cndi_azurerm_network_security_group(open_ports),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_azurerm_public_ip_lb.tf.json",
+        ),
+        cndi_azurerm_public_ip_lb(),
       ),
       stageFile(
         path.join(
