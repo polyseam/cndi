@@ -71,6 +71,49 @@
             }
           }
         },
+        "jupyterhub-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "jupyterhub-ingress",
+            "namespace": "jupyterhub",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.jupyterhubDomainName }}"
+                ],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.jupyterhubDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "proxy-public",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
         "argo-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
@@ -124,20 +167,10 @@
           "repoURL": "https://jupyterhub.github.io/helm-chart/",
           "chart": "jupyterhub",
           "values": {
-            "ingress": {
-              "enabled": true,
-              "annotations": {
-                "cert-manager.io/cluster-issuer": "lets-encrypt",
-                "kubernetes.io/tls-acme": "true"
-              },
-              "hosts": [
-                {
-                  "name": "{{ $.cndi.prompts.responses.jupyterhubDomainName }}",
-                  "tls": {
-                    "secretName": "lets-encrypt-private-key"
-                  }
-                }
-              ]
+            "proxy": {
+              "service": {
+                "type": "ClusterIP"
+              }
             }
           }
         }
