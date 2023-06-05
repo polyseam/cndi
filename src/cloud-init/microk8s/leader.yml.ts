@@ -101,19 +101,6 @@ const rootApplication = {
   },
 };
 
-const NFS_DEFAULT_STORAGE_PATCH = {
-  metadata: {
-    name: "nfs",
-    annotations: {
-      "storageclass.kubernetes.io/is-default-class": "true",
-    },
-  },
-};
-
-const getNFSDefaultStoragePatchYaml = () => {
-  return YAML.stringify(NFS_DEFAULT_STORAGE_PATCH);
-};
-
 const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide opt-in for key-based auth
   if (useSshRepoAuth) {
     throw new Error("GIT_SSH_PRIVATE_KEY is not yet supported");
@@ -175,8 +162,6 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
   const SEALED_SECRETS_SECRET_NAME = "cndi-sealed-secrets-key";
 
-  const PATH_TO_NFS_DEFAULT_STORAGE_PATCH =
-    `${PATH_TO_MANIFESTS}/nfs-default-storage-patch.yaml`;
   const PATH_TO_ROOT_APPLICATION_MANIFEST =
     `${PATH_TO_MANIFESTS}/root-application.yaml`;
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
@@ -210,10 +195,6 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       {
         path: PATH_TO_CLUSTER_REPO_SECRET_MANIFEST,
         content: getClusterRepoSecretYaml(),
-      },
-      {
-        path: PATH_TO_NFS_DEFAULT_STORAGE_PATCH,
-        content: getNFSDefaultStoragePatchYaml(),
       },
       {
         path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
@@ -264,7 +245,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "sealed-secrets-controller installed"`,
 
       `echo "Setting NFS as default storage class"`,
-      `sudo microk8s kubectl patch storageclass nfs --patch-file ${PATH_TO_NFS_DEFAULT_STORAGE_PATCH}`,
+      `sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'`,
       `echo "NFS is now the default storage class"`,
 
       `echo "Importing Sealed Secrets Keys"`,

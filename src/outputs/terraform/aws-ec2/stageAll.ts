@@ -7,6 +7,7 @@ import {
   stageFile,
 } from "src/utils.ts";
 
+import output from "./output.tf.json.ts";
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -96,6 +97,10 @@ export default async function stageTerraformResourcesForAWS(
           aws_region,
           nodes: awsEC2Nodes,
         }),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "output.tf.json"),
+        output(),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),

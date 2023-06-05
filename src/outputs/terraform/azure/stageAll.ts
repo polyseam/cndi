@@ -6,7 +6,7 @@ import {
   getLeaderNodeNameFromConfig,
   stageFile,
 } from "src/utils.ts";
-
+import output from "./output.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
 import cndi_azurerm_network_interface from "./cndi_azurerm_network_interface.tf.json.ts";
@@ -107,6 +107,10 @@ export default async function stageTerraformResourcesForAzure(
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "output.tf.json"),
+        output(),
       ),
       stageFile(
         path.join(
