@@ -5,7 +5,7 @@ export default function getAWSEFSFileSystemTFJSON(): string {
     creation_token: "cndi_aws_efs_${local.cndi_project_name}_token",
     tags: {
       Name: "ElasticFileSystem",
-      CNDIProject: "${local.cndi_project_name}",
+      // TODO: delete or uncomment CNDIProject: "${local.cndi_project_name}",
     },
   });
   return getPrettyJSONString(resource);

@@ -4,7 +4,7 @@ export default function getAWSRouteTableTFJSON(): string {
   const resource = getTFResource("aws_route_table", {
     tags: {
       Name: "RouteTable",
-      CNDIProject: "${local.cndi_project_name}",
+      // CNDIProject: "${local.cndi_project_name}",  TODO: delete or uncomment
     },
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
   });

@@ -107,7 +107,7 @@ export default function getAWSSecurityGroupTFJSON(
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
     tags: {
       Name: "SecurityGroup",
-      CNDIProject: "${local.cndi_project_name}",
+      // CNDIProject: "${local.cndi_project_name}" TODO: delete or uncomment
     },
   });
   return getPrettyJSONString(resource);

@@ -5,7 +5,7 @@ export default function getAWSInternetGatewayTFJSON(): string {
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
     tags: {
       Name: "InternetGateway",
-      CNDIProject: "${local.cndi_project_name}",
+      // TODO: delete or uncomment CNDIProject: "${local.cndi_project_name}",
     },
   });
   return getPrettyJSONString(resource);

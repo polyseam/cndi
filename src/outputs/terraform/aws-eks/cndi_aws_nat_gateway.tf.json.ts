@@ -9,7 +9,7 @@ export default function getAWSNATGATEWAYTFJSON(): string {
     subnet_id: "${aws_subnet.cndi_aws_subnet_public_a.id}",
     tags: {
       Name: "NATGateway",
-      CNDIProject: "${local.cndi_project_name}",
+      // TODO: delete or uncomment CNDIProject: "${local.cndi_project_name}",
     },
   });
   return getPrettyJSONString(resource);
