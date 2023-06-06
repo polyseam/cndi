@@ -22,6 +22,7 @@ import cndi_aws_lb_target_group_attachment_for_port from "./cndi_aws_lb_target_g
 import cndi_aws_lb_listener_for_port from "./cndi_aws_lb_listener_for_port.tf.json.ts";
 import cndi_aws_lb_target_group_for_port from "./cndi_aws_lb_target_group_for_port.tf.json.ts";
 import cndi_aws_lb from "./cndi_aws_lb.tf.json.ts";
+import cndi_aws_resourcegroups_group from "./cndi_aws_resourcegroups_group.tf.json.ts";
 import cndi_aws_route_table_association from "./cndi_aws_route_table_association.tf.json.ts";
 import cndi_aws_route_table from "./cndi_aws_route_table.tf.json.ts";
 import cndi_aws_route from "./cndi_aws_route.tf.json.ts";
@@ -34,6 +35,8 @@ export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
+  const project_name = config?.project_name;
+
   const leaderNodeName = await getLeaderNodeNameFromConfig(config);
   const leader_node_ip =
     `\${aws_instance.cndi_aws_instance_${leaderNodeName}.private_ip}`;
@@ -127,6 +130,10 @@ export default async function stageTerraformResourcesForAWS(
       ...customListeners,
       ...customTargetGroups,
       ...targetGroupAttachments,
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_resourcegroups_group.tf.json"),
+        cndi_aws_resourcegroups_group(project_name),
+      ),
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
         data(awsEC2Nodes),
