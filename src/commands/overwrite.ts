@@ -149,17 +149,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   const open_ports = config?.infrastructure?.cndi?.open_ports;
 
   if (open_ports) {
-    // assumes there is only one node kind
-    const deployment_target = config?.infrastructure.cndi.nodes[0].kind;
-
-    if (!deployment_target) {
-      console.error(
-        owLabel,
-        ccolors.error(`"deployment_target" is not set in cndi-config`),
-      );
-      throw new Error("no node kind???");
-    }
-
     await Promise.all([
       stageFile(
         path.join(
