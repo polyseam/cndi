@@ -146,7 +146,10 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   console.log(ccolors.success("staged terraform files"));
 
-  if (config?.infrastructure?.cndi?.open_ports) {
+  const open_ports = config?.infrastructure?.cndi?.open_ports;
+
+  if (open_ports) {
+    // assumes there is only one node kind
     const deployment_target = config?.infrastructure.cndi.nodes[0].kind;
 
     if (!deployment_target) {
@@ -157,9 +160,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       throw new Error("no node kind???");
     }
 
-    const open_ports = config?.infrastructure?.cndi?.open_ports;
-
-    if (open_ports) {
+    await Promise.all([
       stageFile(
         path.join(
           "cndi",
@@ -167,13 +168,13 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           "ingress-tcp-services-configmap.json",
         ),
         getIngressTcpServicesConfigMapManifest(open_ports),
-      );
+      ),
       stageFile(
         path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
         getIngressDaemonsetManifest(open_ports),
-      );
-      console.log(ccolors.success("staged open ports"));
-    }
+      ),
+    ]);
+    console.log(ccolors.success("staged open ports"));
   }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
