@@ -8,7 +8,7 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
         default_tags: {
           CNDIProject: "${local.cndi_project_name}",
           CNDIVersion: "v1",
-        }
+        },
       },
     },
   });
