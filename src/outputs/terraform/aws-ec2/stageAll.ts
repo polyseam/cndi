@@ -22,6 +22,7 @@ import cndi_aws_lb_target_group_attachment_for_port from "./cndi_aws_lb_target_g
 import cndi_aws_lb_listener_for_port from "./cndi_aws_lb_listener_for_port.tf.json.ts";
 import cndi_aws_lb_target_group_for_port from "./cndi_aws_lb_target_group_for_port.tf.json.ts";
 import cndi_aws_lb from "./cndi_aws_lb.tf.json.ts";
+import cndi_aws_resourcegroups_group from "./cndi_aws_resourcegroups_group.tf.json.ts";
 import cndi_aws_route_table_association from "./cndi_aws_route_table_association.tf.json.ts";
 import cndi_aws_route_table from "./cndi_aws_route_table.tf.json.ts";
 import cndi_aws_route from "./cndi_aws_route.tf.json.ts";
@@ -127,6 +128,10 @@ export default async function stageTerraformResourcesForAWS(
       ...customListeners,
       ...customTargetGroups,
       ...targetGroupAttachments,
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_resourcegroups_group.tf.json"),
+        cndi_aws_resourcegroups_group(),
+      ),
       stageFile(
         path.join("cndi", "terraform", "data.tf.json"),
         data(awsEC2Nodes),

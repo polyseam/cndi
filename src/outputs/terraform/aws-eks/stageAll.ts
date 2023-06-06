@@ -36,6 +36,7 @@ import cndi_aws_subnet_private_a from "./cndi_aws_subnet_private_a.tf.json.ts";
 import cndi_aws_subnet_private_b from "./cndi_aws_subnet_private_b.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
+import cndi_aws_resourcegroups_group from "./cndi_aws_resourcegroups_group.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 // import cndi_local_file_kubeconfig from "./cndi_local_file_kubeconfig.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
@@ -89,6 +90,10 @@ export default async function stageTerraformResourcesForAWS(
   try {
     await Promise.all([
       ...stageNodes,
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_resourcegroups_group.tf.json"),
+        cndi_aws_resourcegroups_group(),
+      ),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
         cndi_aws_locals({
