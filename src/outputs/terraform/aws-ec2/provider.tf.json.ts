@@ -6,8 +6,10 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
       aws: {
         region: "${local.aws_region}",
         default_tags: {
-          CNDIProject: "${local.cndi_project_name}",
-          CNDIVersion: "v1",
+          tags: {
+            CNDIProject: "${local.cndi_project_name}",
+            CNDIVersion: "v1",
+          },
         },
       },
     },
