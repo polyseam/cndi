@@ -1,6 +1,5 @@
 import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { ccolors, Command, path } from "deps";
-import { nonMicrok8sNodeKinds } from "constants";
 
 import {
   emitExitEvent,
@@ -147,46 +146,24 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   console.log(ccolors.success("staged terraform files"));
 
-  if (config?.infrastructure?.cndi?.open_ports) {
-    const deployment_target = config?.infrastructure.cndi.nodes[0].kind;
+  const open_ports = config?.infrastructure?.cndi?.open_ports;
 
-    if (!deployment_target) {
-      console.error(
-        owLabel,
-        ccolors.error(`"deployment_target" is not set in cndi-config`),
-      );
-      throw new Error("no node kind???");
-    }
-
-    const isMicrok8sDeployment = !nonMicrok8sNodeKinds.includes(
-      deployment_target,
-    );
-
-    if (isMicrok8sDeployment) {
-      const open_ports = config?.infrastructure?.cndi?.open_ports;
-      if (open_ports) {
-        stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "ingress-tcp-services-configmap.json",
-          ),
-          getIngressTcpServicesConfigMapManifest(open_ports),
-        );
-        stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
-          getIngressDaemonsetManifest(open_ports),
-        );
-        console.log(ccolors.success("staged open ports"));
-      }
-    } else {
-      console.log(
-        owLabel,
-        ccolors.error(
-          `open ports are not yet supported for deployment target "${deployment_target}"`,
+  if (open_ports) {
+    await Promise.all([
+      stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "ingress-tcp-services-configmap.json",
         ),
-      );
-    }
+        getIngressTcpServicesConfigMapManifest(open_ports),
+      ),
+      stageFile(
+        path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
+        getIngressDaemonsetManifest(open_ports),
+      ),
+    ]);
+    console.log(ccolors.success("staged open ports"));
   }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
