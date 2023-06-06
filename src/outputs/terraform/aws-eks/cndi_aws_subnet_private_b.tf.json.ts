@@ -8,7 +8,7 @@ export default function getAWSSubnetPrivateBTFJSON(): string {
     map_public_ip_on_launch: true,
     tags: {
       Name: "PrivateSubnetB",
-      // TODO: delete or uncomment CNDIProject: "${local.cndi_project_name}",
+      CNDIProject: "${local.cndi_project_name}",
       "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
       "kubernetes.io/role/internal-elb": 1,
     },

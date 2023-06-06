@@ -6,8 +6,7 @@ export default function getAWSVPCTFJSON(): string {
     enable_dns_hostnames: true,
     enable_dns_support: true,
     tags: {
-      Name:
-        "VPC", /*, TODO: delete or uncomment CNDIProject: "${local.cndi_project_name}"*/
+      Name: "VPC",
     },
   });
   return getPrettyJSONString(resource);

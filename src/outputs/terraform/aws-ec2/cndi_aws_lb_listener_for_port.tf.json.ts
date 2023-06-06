@@ -16,7 +16,7 @@ export default function getAWSLbListenerForPortTFJSON(port: CNDIPort): string {
     protocol: "TCP",
     tags: {
       Name: `UserPortLBListener-${name}`,
-      // CNDIProject: "${local.cndi_project_name}", TODO: uncomment or delete
+      CNDIProject: "${local.cndi_project_name}",
     },
   }, `cndi_aws_lb_listener_${name}`);
   return getPrettyJSONString(resource);
