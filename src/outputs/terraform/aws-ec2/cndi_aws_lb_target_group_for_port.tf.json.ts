@@ -8,7 +8,7 @@ export default function getAWSLbTargetGroupForPortTFJSON(
   const resource = getTFResource("aws_lb_target_group", {
     tags: {
       Name: `UserPortLBTargetGroup-${name}`,
-      CNDIProject: "${local.cndi_project_name}",
+      // CNDIProject: "${local.cndi_project_name}", TODO: uncomment or delete
     },
     port: number,
     protocol: "TCP",

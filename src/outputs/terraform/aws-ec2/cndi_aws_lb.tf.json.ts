@@ -7,7 +7,7 @@ export default function getAWSLbTFJSON(): string {
     subnets: "${aws_subnet.cndi_aws_subnet[*].id}",
     tags: {
       Name: "NetworkLB",
-      CNDIProject: "${local.cndi_project_name}",
+      // TODO: uncomment or delete CNDIProject: "${local.cndi_project_name}",
     },
   });
   return getPrettyJSONString(resource);
