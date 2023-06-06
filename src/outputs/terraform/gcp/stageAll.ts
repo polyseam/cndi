@@ -102,6 +102,8 @@ export default async function stageTerraformResourcesForGCP(
 
   const node_id_list: string[] = [];
 
+  const open_ports = config.infrastructure.cndi.open_ports || [];
+
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     node_id_list.push(
       `\${google_compute_instance.cndi_google_compute_instance_${node.name}.id}`,
@@ -192,7 +194,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_firewall_external.tf.json",
         ),
-        cndi_google_compute_firewall_external(),
+        cndi_google_compute_firewall_external(open_ports),
       ),
       stageFile(
         path.join(
@@ -220,7 +222,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_forwarding_rule.tf.json",
         ),
-        cndi_google_compute_forwarding_rule(),
+        cndi_google_compute_forwarding_rule(open_ports),
       ),
       stageFile(
         path.join(
@@ -230,6 +232,7 @@ export default async function stageTerraformResourcesForGCP(
         ),
         cndi_google_compute_instance_group(
           config.infrastructure.cndi.nodes as Array<GCPNodeItemSpec>,
+          open_ports,
         ),
       ),
 

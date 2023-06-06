@@ -245,7 +245,7 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `echo "sealed-secrets-controller installed"`,
 
       `echo "Setting NFS as default storage class"`,
-      `sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'`,
+      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
       `echo "NFS is now the default storage class"`,
 
       `echo "Importing Sealed Secrets Keys"`,
