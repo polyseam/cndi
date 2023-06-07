@@ -28,7 +28,6 @@ export default function getAWSEKSClusterTFJSON(): string {
     ],
     tags: {
       Name: "EKSClusterControlPlane",
-      CNDIProject: "${local.cndi_project_name}",
       "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
     },
     depends_on: [

@@ -14,7 +14,6 @@ export default function getAWSLbListenerHTTPSTFJSON(): string {
     protocol: "TCP",
     tags: {
       Name: "HTTPSLBListener",
-      CNDIProject: "${local.cndi_project_name}",
     },
   }, "cndi_aws_lb_listener_https");
   return getPrettyJSONString(resource);
