@@ -5,7 +5,6 @@ export default function getAWSElasticIPTFJSON(): string {
     vpc: true,
     tags: {
       Name: "ElasticIP",
-      CNDIProject: "${local.cndi_project_name}",
     },
     depends_on: ["aws_internet_gateway.cndi_aws_internet_gateway"],
   });
