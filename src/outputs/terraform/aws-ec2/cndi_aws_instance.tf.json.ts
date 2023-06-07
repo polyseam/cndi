@@ -40,7 +40,6 @@ export default function getAWSComputeInstanceTFJSON(
       instance_type,
       tags: {
         Name: name,
-        CNDIProject: "${local.cndi_project_name}",
         CNDINodeRole: role,
       },
       root_block_device,
