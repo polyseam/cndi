@@ -1,0 +1,197 @@
+{
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "kafka-nodes",
+              "kind": "eks",
+              "instance_type": "t3.large",
+              "volume_size": 128,
+              "min_count": 1,
+              "max_count": 3
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "kafka-namespace": {
+          "apiVersion": "v1",
+          "kind": "Namespace",
+          "metadata": {
+            "name": "kafka"
+          }
+        },
+        "kafka-cluster": {
+          "apiVersion": "kafka.strimzi.io/v1beta2",
+          "kind": "Kafka",
+          "metadata": {
+            "name": "my-cluster",
+            "namespace": "kafka"
+          },
+          "spec": {
+            "kafka": {
+              "replicas": 3,
+              "version": "3.2.0",
+              "logging": {
+                "type": "inline",
+                "loggers": {
+                  "kafka.root.logger.level": "INFO"
+                }
+              },
+              "config": {
+                "auto.create.topics.enable": "false",
+                "offsets.topic.replication.factor": 3,
+                "transaction.state.log.replication.factor": 3,
+                "transaction.state.log.min.isr": 2,
+                "default.replication.factor": 3,
+                "min.insync.replicas": 2,
+                "inter.broker.protocol.version": "3.2"
+              },
+              "listeners": [
+                {
+                  "name": "plain",
+                  "port": 9092,
+                  "type": "internal",
+                  "tls": false
+                },
+                {
+                  "name": "tls",
+                  "port": 9093,
+                  "type": "internal",
+                  "tls": true
+                }
+              ],
+              "storage": {
+                "type": "jbod",
+                "volumes": [
+                  {
+                    "id": 0,
+                    "type": "persistent-claim",
+                    "size": "30Gi",
+                    "deleteClaim": true
+                  }
+                ]
+              }
+            },
+            "zookeeper": {
+              "replicas": 3,
+              "storage": {
+                "type": "persistent-claim",
+                "size": "10Gi",
+                "deleteClaim": true
+              }
+            },
+            "entityOperator": {
+              "topicOperator": {},
+              "userOperator": {}
+            }
+          }
+        },
+        "cert-manager-cluster-issuer": {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "lets-encrypt"
+          },
+          "spec": {
+            "acme": {
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
+              "server": "https://acme-v02.api.letsencrypt.org/directory",
+              "privateKeySecretRef": {
+                "name": "lets-encrypt-private-key"
+              },
+              "solvers": [
+                {
+                  "http01": {
+                    "ingress": {
+                      "ingressClassName": "public"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "applications": {
+        "strimzi-kafka-operator": {
+          "targetRevision": "0.31.1",
+          "destinationNamespace": "strimzi-kafka-operator",
+          "repoURL": "https://strimzi.io/charts/",
+          "chart": "strimzi-kafka-operator",
+          "values": {}
+        }
+      }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "entries": []
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template_section": "## kafka\n\nThis template deploys a [Strimzi](https://https://strimzi.io/) production ready way to run an Apache Kafka cluster on Kubernetes in various deployment configurations"
+    }
+  }
+}
