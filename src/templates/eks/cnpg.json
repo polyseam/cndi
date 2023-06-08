@@ -54,6 +54,14 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "open_ports": [
+            {
+              "number": 5432,
+              "name": "postgres",
+              "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
+              "service": "{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw"
+            }
+          ],
           "nodes": [
             {
               "name": "pg-nodes",
@@ -175,48 +183,6 @@
                 }
               ]
             }
-          }
-        },
-        "ingress-tcp-services-configmap": {
-          "apiVersion": "v1",
-          "kind": "ConfigMap",
-          "metadata": {
-            "name": "ingress-nginx-controller",
-            "namespace": "ingress"
-          },
-          "data": {
-            "5432": "{{ $.cndi.prompts.responses.pgNamespace }}/{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw:5432"
-          }
-        },
-        "ingress-service": {
-          "apiVersion": "v1",
-          "kind": "Service",
-          "metadata": {
-            "name": "ingress-nginx-controller",
-            "namespace": "ingress"
-          },
-          "spec": {
-            "type": "LoadBalancer",
-            "ports": [
-              {
-                "name": "http",
-                "port": 80,
-                "targetPort": "http",
-                "protocol": "TCP"
-              },
-              {
-                "name": "https",
-                "port": 443,
-                "targetPort": "https",
-                "protocol": "TCP"
-              },
-              {
-                "name": "postgres",
-                "port": 5432,
-                "targetPort": 5432,
-                "protocol": "TCP"
-              }
-            ]
           }
         },
         "cnpg-ingress": {

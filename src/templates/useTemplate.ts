@@ -243,8 +243,10 @@ export default async function useTemplate(
   let cndiConfig;
 
   try {
-    cndiConfig = JSON.parse(literalizedCndiConfig);
-    cndiConfig.project_name = opt.project_name;
+    cndiConfig = {
+      project_name: opt.project_name,
+      ...JSON.parse(literalizedCndiConfig),
+    };
   } catch {
     throw new Error("Invalid template['cndi-config'] generated");
   }
