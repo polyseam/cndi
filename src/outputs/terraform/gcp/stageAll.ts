@@ -25,6 +25,7 @@ import cndi_google_project_service_compute from "./cndi_google_project_service_c
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
 import cndi_google_compute_region_backend_service from "./cndi_google_compute_region_backend_service.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
+import cndi_outputs from "./cndi_outputs.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
   "\nsrc/outputs/terraform/gcp/stageAll.ts:",
@@ -143,6 +144,10 @@ export default async function stageTerraformResourcesForGCP(
         provider({
           project_id: parsedJSONServiceAccountKey.project_id,
         }),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_outputs.tf.json"),
+        cndi_outputs(),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
