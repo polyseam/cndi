@@ -5,7 +5,6 @@ export default function getAWSEFSAccessPointTFJSON(): string {
     file_system_id: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",
     tags: {
       Name: "ElasticFileSystemAccessPoint",
-      CNDIProject: "${local.cndi_project_name}",
     },
   });
   return getPrettyJSONString(
