@@ -64,7 +64,7 @@ Now that we have a repo, let's use `cndi` to generate all of our Infrastructure
 as Code and Cluster Configuration:
 
 ```shell
-cndi init -i
+cndi init --interactive
 ```
 
 You will get an interactive prompt where you'll name your project, then one to
@@ -76,10 +76,10 @@ For this project select the `azure/airflow-cnpg` Template.
 ? Pick a template
    azure/basic
    gcp/basic
-   azure/basic
-   azure/airflow-cnpg
-   gcp/airflow-cnpg
+   aws/basic
+   aws/airflow-cnpg
  ❯ azure/airflow-cnpg
+   gcp/airflow-cnpg
 ```
 
 Below is the list of all of the interactive prompt values that should be
@@ -87,27 +87,42 @@ supplied for this project:
 
 - **Cndi Project Name**: _name of project_
 - **Template**: _list of templates to choose from_
+
+---
+
 - **GitHub Username**: _a user's handle on GitHub._
 - **GitHub Repository URL**: _the url for the GitHub repository that will hold
   all cluster configuration_
 - **GitHub Personal Access Token**: _the access token CNDI will use to access
   your repo for cluster creation and synchronization_
+
+---
+
 - **Azure Subscription ID**: _access keys are long-term credentials for an IAM
   user_
 - **Azure Client ID**: _access keys are long-term credentials for an IAM user_
 - **Azure Client Secret**: _region where the infastructure is being created_
 - **Azure Tenant ID**: _access keys are long-term credentials for an IAM user_
 - **Azure Region**: _region where the infastructure is being created_
+
+---
+
 - **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
   synchronize Airflow DAGs_
 - **Git Password for Airflow DAG Storage**: _a personal access token used to
   synchronize Airflow DAGs_
 - **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
   will be stored_
+
+---
+
 - **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
   be hosted_
 - **Domain name you want Airflow to be accessible on**: _domain where Airflow
   will be hosted_
+
+---
+
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt
   to use when generating certificates_
 - **Username you want to use for airflow cnpg database:** _username you want to
@@ -121,7 +136,7 @@ supplied for this project:
 
 This process will generate a `cndi-config.json` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
-configuration It will also store all the values in a file called `.env` at the
+configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
 
 The structure of the generated CNDI project will be something like this:
@@ -151,14 +166,15 @@ For a breakdown of all of these files, checkout the
 
 ## upload environment variables to GitHub ⬆️
 
-GitHub actions is responsible for calling the `cndi run` command to deploy our
-cluster, so it is important that our secrets are available in the actions
+GitHub Actions is responsible for calling the `cndi run` command to deploy our
+cluster, so it is important that our secrets are available in the Actions
 runtime. However we don't want these to be visible in our source code, so we
-will use GitHub secrets to store them. The [gh](https://github.com/cli/cli) CLI
-makes this very easy.
+will use GitHub Actions Secrets to store them. The
+[gh](https://github.com/cli/cli) CLI makes this very easy.
 
 ```shell
 gh secret set -f .env
+# if this does not complete the first time, try running it again!
 ```
 
 ![GitHub secrets](/docs/walkthroughs/azure/img/upload-git-secrets.png)
@@ -177,7 +193,7 @@ git commit -m "initial commit"
 git push --set-upstream origin main
 ```
 
-You should now see the cluster configuration has loaded to GitHub:
+You should now see the cluster configuration has been uploaded to GitHub:
 
 ![GitHub repo](/docs/walkthroughs/azure/img/github-repo.png)
 
@@ -189,10 +205,10 @@ successfully run the workflow.
 
 ![GitHub action](/docs/walkthroughs/azure/img/github-action.png)
 
-It is common for `cndi-run` to take a fair amount of time, as is the case with
+It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi-run` has been completed, you should be ready to log into Azure to
+Once `cndi run` has been completed, you should be ready to log into Azure to
 find the IP address of the load balancer that we created for you in the Network
 tab.
 
@@ -208,25 +224,25 @@ tab.
 
 ![Azure nlb](/docs/walkthroughs/azure/img/azure-nlb.png)
 
-Go to your custom domain, you will need to add a A record for your domain and
-add the Ip Address of your load balancer to it
+- Create an `A` record to route traffic to the load balancer IP address for
+  Airflow at the domain you provided.
+- Create an `A` record to route traffic to the load balancer IP address for
+  ArgoCD at the domain you provided.
+  ![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
 
-![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
-
-Go to the Argocd domain URL that you specified in the interactive prompt
+Open the domain name you've assigned for ArgoCD in your browser to see the Argo
+Login page.
 
 ![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-0.png)
 
-You should now see a login page for ArgoCD, you will need the username is
-`admin` and the password which is the value of the `ARGOCD_ADMIN_PASSWORD` in
-the `.env` located in your CNDI project folder
-
+To log in, use the username `admin` and the password which is the value of the
+`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 ![.env file](/docs/walkthroughs/azure/img/argocd-admin-password.png)
 
 ![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-1.png)
 
-Notice that the cluster_manifests in the GitHub repository matches config in the
-Argocd UI
+Notice that the `cluster_manifests` in the GitHub repository matches config in
+the ArgoCD UI
 
 ```shell
 └── 📁 cndi
@@ -239,7 +255,7 @@ Argocd UI
 ```
 
 Verify all applications and manifests in the GitHub repository are present and
-their status is healthy in the Argocd UI
+their status is healthy in the ArgoCD UI
 
 ![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-2.png)
 
@@ -256,17 +272,17 @@ make sure the previous steps were was done correctly.
 
 ## verify Airflow is connected to the private DAG repository 🧐
 
-Verify that Airflow is connected to the private dag repository. If correct, the
-private dags should be visible on the Airflow UI. If not,you should go back and
-make sure that the private dag repository is properly connected to Airflow with
-the correct credentials
+Verify that Airflow is connected to the private DAG repository. If correct, the
+private DAGs should be visible on the Airflow UI. If not,you should go back and
+make sure that the private DAG repository is properly connected to Airflow with
+the correct credentials:
 
 ![Airflow UI](/docs/walkthroughs/azure/img/airflow-ui-1.png)
 
 ## and you are done! ⚡️
 
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
-Airflow and Argocd
+Airflow and ArgoCD.
 
 ## destroying resources in the cluster! 💣
 

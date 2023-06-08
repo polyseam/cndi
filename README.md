@@ -213,15 +213,15 @@ later.
 ### Walkthroughs 🥾
 
 We've got a couple of walkthroughs you can follow if you'd like, one for each
-deployment target that deploys a production grade Airflow cluster using a
-template
+deployment target. The walkthroughs demonstrate how to deploy a production grade
+Airflow cluster using CNDI's `airflow-cnpg` Template.
 
 - [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md)
 - [gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md)
 - [azure/airflow-cnpg](docs/walkthroughs/azure/airflow-cnpg.md)
 
 If you are interested in using CNDI, these walkthroughs will be entirely
-transferrable to other applications that aren't Airflow.
+transferrable to other applications beyond Airflow.
 
 ---
 
