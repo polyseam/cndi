@@ -212,11 +212,16 @@ later.
 
 ### Walkthroughs 🥾
 
-We've got a couple of walkthroughs you can follow if you'd like, currently we
-have one for our [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md) and
-[gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md) Templates. If you are
-interested in using CNDI, these walkthroughs will be entirely transferrable to
-other applications that aren't Airflow.
+We've got a couple of walkthroughs you can follow if you'd like, one for each
+deployment target. The walkthroughs demonstrate how to deploy a production grade
+Airflow cluster using CNDI's `airflow-cnpg` Template.
+
+- [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md)
+- [gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md)
+- [azure/airflow-cnpg](docs/walkthroughs/azure/airflow-cnpg.md)
+
+If you are interested in using CNDI, these walkthroughs will be entirely
+transferrable to other applications beyond Airflow.
 
 ---
 
@@ -542,6 +547,11 @@ source code as if it were the regular CLI, without colliding with the released
 alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
 ```
 
-If you have any issues please message [Matt](https://github.com/johnstonmatt) or
+We're continually improving CNDI, but if you have an issue, checkout
+[frequently-asked-questions](docs/frequently-asked-questions/faq.md) to get
+unblocked quickly.
+
+If you have any other issues or questions please message
+[Matt](https://github.com/johnstonmatt) or
 [Tamika](https://github.com/IamTamika) in the
 [Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).
