@@ -70,7 +70,7 @@ export default function getAzureComputeInstanceTFJSON(
   ];
 
   const tags = {
-    cndi_project_name: "${local.cndi_project_name}",
+    CNDIProject: "${local.cndi_project_name}",
   };
 
   const user_data = getUserDataTemplateFileString(role, true);
