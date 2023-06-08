@@ -28,6 +28,7 @@ import cndi_azurerm_subnet_network_security_group_association from "./cndi_azure
 import cndi_azurerm_virtual_network from "./cndi_azurerm_virtual_network.tf.json.ts";
 import cndi_azurerm_linux_virtual_machine from "./cndi_azurerm_linux_virtual_machine.tf.json.ts";
 import cndi_azurerm_locals from "./locals.tf.json.ts";
+import cndi_outputs from "./cndi_outputs.tf.json.ts";
 
 export default async function stageTerraformResourcesForAzure(
   config: CNDIConfig,
@@ -119,6 +120,10 @@ export default async function stageTerraformResourcesForAzure(
           "cndi_azurerm_lb.tf.json",
         ),
         cndi_azurerm_lb(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_outputs.tf.json"),
+        cndi_outputs(),
       ),
       stageFile(
         path.join(

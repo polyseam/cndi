@@ -7,7 +7,6 @@ export default function getAWSVPCTFJSON(): string {
     enable_dns_support: true,
     tags: {
       Name: "VPC",
-      CNDIProject: "${local.cndi_project_name}",
       "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
     },
   });

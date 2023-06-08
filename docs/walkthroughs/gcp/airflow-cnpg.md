@@ -39,6 +39,8 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
+- [Here's a guide of how to set up your Google Cloud account](/docs/cloud-setup-guide/gcp/gcp-setup.md)
+
 ## download cndi ⬇️
 
 Run the following command within your terminal to download and install cndi:
@@ -64,7 +66,7 @@ Now that we have a repo, let's use `cndi` to generate all of our Infrastructure
 as Code and Cluster Configuration:
 
 ```shell
-cndi init -i
+cndi init --interactive
 ```
 
 You will get an interactive prompt where you'll name your project, then one to
@@ -76,7 +78,9 @@ For this project select the `gcp/airflow-cnpg` Template.
 ? Pick a template
    aws/basic
    gcp/basic
+   azure/basic
    aws/airflow-cnpg
+   azure/airflow-cnpg
  ❯ gcp/airflow-cnpg
 ```
 
@@ -85,26 +89,47 @@ supplied for this project:
 
 - **Cndi Project Name**: _name of project_
 - **Template**: _list of templates to choose from_
+
+---
+
 - **GitHub Username**: _a user's handle on GitHub._
 - **GitHub Repository URL**: _the url for the GitHub repository that will hold
   all cluster configuration_
 - **GitHub Personal Access Token**: _the access token CNDI will use to access
   your repo for cluster creation and synchronization_
+
+---
+
 - **GCP Region**: _region where the infastructure is being created_
 - **Path to GCP service account key json**: _path to JSON credentials file for
   GCP Service Account_
+
+---
+
 - **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
   synchronize Airflow DAGs_
 - **Git Password for Airflow DAG Storage**: _a personal access token used to
   synchronize Airflow DAGs_
 - **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
   will be stored_
+
+---
+
 - **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
   be hosted_
 - **Domain name you want Airflow to be accessible on**: _domain where Airflow
   will be hosted_
+
+---
+
 - **Email address you want to use for lets encrypt:** _an email for lets encrypt
   to use when generating certificates_
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/cndi-init-interactive.png)
 
@@ -127,7 +152,8 @@ The structure of the generated CNDI project will be as follows:
 │   └── 📁 terraform
 │       ├── x-airflow-node.cndi-node.tf.json
 │       ├── y-airflow-node.cndi-node.tf.json
-│       └── z-airflow-node.cndi-node.tf.json
+│       ├── z-airflow-node.cndi-node.tf.json
+│       └── etc 
 ├── cndi-config.jsonc
 ├── .env
 ├── .gitignore
@@ -140,14 +166,15 @@ For a breakdown of all of these files, checkout the
 
 ## upload environment variables to GitHub ⬆️
 
-GitHub actions is responsible for calling the `cndi run` command to deploy our
+GitHub Actions is responsible for calling the `cndi run` command to deploy our
 cluster, so it is important that our secrets are available in the actions
 runtime. However we don't want these to be visible in our source code, so we
-will use GitHub secrets to store them. The [gh](https://github.com/cli/cli) CLI
-makes this very easy.
+will use GitHub Actions Secrets to store them. The
+[gh](https://github.com/cli/cli) CLI makes this very easy.
 
 ```shell
 gh secret set -f .env
+# if this does not complete the first time, try running it again!
 ```
 
 ![GitHub secrets](/docs/walkthroughs/gcp/img/upload-git-secrets.png)
@@ -166,7 +193,7 @@ git commit -m "initial commit"
 git push --set-upstream origin main
 ```
 
-You should now see the cluster configuration has loaded to GitHub:
+You should now see the cluster configuration has been uploaded to GitHub:
 
 ![GitHub repo](/docs/walkthroughs/gcp/img/github-repo.png)
 
@@ -207,25 +234,18 @@ which will in turn route traffic into our cluster.
 
 ---
 
-## Get Argo Credentials 🗝️
-
-- In the navigation pane, choose VM Instances.
-- Select a instance and click on the SSH button to connect
-
-![GCP instances dashboard](/docs/walkthroughs/gcp/img/gcp-instances-ui.png)
-
-Go to the ArgoCD domain URL that you specified in the interactive prompt
+Open the domain name you've assigned for ArgoCD in your browser to see the Argo
+Login page.
 
 ![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
 
-You should now see a login page for Argocd, you will need the username is
-`admin` and the password which is the value of the `ARGOCD_ADMIN_PASSWORD` in
-the `.env` located in your CNDI project folder
+To log in, use the username `admin` and the password which is the value of the
+`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
 
-Notice that the `cluster_manifests` stored in the GitHub repository match the
-resources displayed in the ArgoCD UI
+Notice that the `cluster_manifests` in the GitHub repository matches config in
+the ArgoCD UI
 
 ```shell
 └── 📁 cndi
@@ -238,7 +258,7 @@ resources displayed in the ArgoCD UI
 ```
 
 Verify all applications and manifests in the GitHub repository are present and
-their status is healthy in the Argocd UI
+their status is healthy in the ArgoCD UI
 
 ![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-2.png)
 
@@ -255,17 +275,17 @@ make sure the previous steps were was done correctly.
 
 ## Verify Airflow is connected to the private DAG repository 🧐
 
-Verify that Airflow is connected to the private dag repository. If correct, the
-private dags should be visible on the Airflow UI. If not,you should go back and
-make sure that the private dag repository is properly connected to Airflow with
-the correct credentials
+Verify that Airflow is connected to the private DAG repository. If correct, the
+private DAGs should be visible on the Airflow UI. If not,you should go back and
+make sure that the private DAG repository is properly connected to Airflow with
+the correct credentials:
 
 ![Airflow UI](/docs/walkthroughs/gcp/img/airflow-ui-1.png)
 
 ## and you are done! ⚡️
 
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
-Airflow and Argocd
+Airflow and ArgoCD.
 
 ## destroying resources in the cluster! 💣
 
