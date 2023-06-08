@@ -137,13 +137,16 @@ export default async function stageTerraformResourcesForGCP(
       ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_google_locals({ gcp_region, leader_node_ip, node_id_list }),
+        cndi_google_locals({
+          gcp_region,
+          leader_node_ip,
+          node_id_list,
+          project_id: parsedJSONServiceAccountKey.project_id,
+        }),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
-        provider({
-          project_id: parsedJSONServiceAccountKey.project_id,
-        }),
+        provider(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_outputs.tf.json"),
