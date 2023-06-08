@@ -2,10 +2,9 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 export default function getOutputTFJSON(): string {
   const value = JSON.stringify({
-    public_host:
-      "${google_compute_forwarding_rule.cndi_google_compute_forwarding_rule.ip_address}",
+    public_host: "${aws_lb.cndi_aws_lb.dns_name}",
     resource_group:
-      "https://console.cloud.google.com/welcome?project=${local.project_id}",
+      "https://${local.aws_region}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${local.aws_region}",
   });
 
   return getPrettyJSONString({
