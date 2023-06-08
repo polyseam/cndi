@@ -11,7 +11,7 @@ export default function getGCPLocalsTFJSON({
   gcp_region,
   leader_node_ip,
   node_id_list,
-  project_id
+  project_id,
 }: GetGCPLocalsTFJSONArg): string {
   return getPrettyJSONString({
     locals: {

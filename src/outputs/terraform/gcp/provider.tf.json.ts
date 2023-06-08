@@ -1,8 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function getGCPComputeEngineProviderTFJSON(
-): string {
-
+export default function getGCPComputeEngineProviderTFJSON(): string {
   return getPrettyJSONString({
     provider: {
       google: {
