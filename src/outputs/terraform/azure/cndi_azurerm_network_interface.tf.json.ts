@@ -22,7 +22,7 @@ export default function getAzureNetworkInterfaceTFJSON(
       name: `cndi_azurerm_network_interface_${name}`,
       resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      tags: { cndi_project_name: "${local.cndi_project_name}" },
+      tags: { CNDIProject: "${local.cndi_project_name}" },
     },
     `cndi_azurerm_network_interface_${node.name}`,
   );
