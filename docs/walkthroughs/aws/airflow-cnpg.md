@@ -206,22 +206,22 @@ successfully run the workflow.
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi run` has been completed, at the end of the run will be  a link to `resource groups`, where you can view resources deployed by CNDI for this project.
-![cndi outputs](/docs/walkthroughs/aws/img/outputs.png)
+Once `cndi run` has been completed, at the end of the run will be a link to
+`resource groups`, where you can view resources deployed by CNDI for this
+project. ![cndi outputs](/docs/walkthroughs/aws/img/outputs.png)
 
 ![resource groups root page](/docs/walkthroughs/aws/img/resource-groups-root.png)
 
 ![current resource group](/docs/walkthroughs/aws/img/resource-groups.png)
 
-
 ## attach the load balancer to your domain 🌐
 
-At the end of the cndi run there is also an output called `public host` , which is the **DNS Name** (CNAME record) of the load Balancer thats attached to your EC2 instances.
+At the end of the cndi run there is also an output called `public host` , which
+is the **DNS Name** (CNAME record) of the load Balancer thats attached to your
+Azure instances.
 
-![cndi outputs](/docs/walkthroughs/aws/img/outputs.png)
-Copy `public host`
-Go to your custom domain, 
-and add the `public host` to it
+![cndi outputs](/docs/walkthroughs/aws/img/outputs.png) Copy `public host` Go to
+your custom domain, and add the `public host` to it
 
 ![google domains](/docs/walkthroughs/aws/img/google-domains-cname.png)
 
@@ -261,8 +261,8 @@ After setting up your Airflow application on the chosen domain, it is necessary
 to verify that Airflow is accessible. To do this, the user can simply go to the
 chosen domain and see if they can see Airflow's login page. The default username
 is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Airflow. If not, the user wait, should go back and
-make sure the previous steps were was done correctly.
+can log in and begin using Airflow. If not, the user should go back and make
+sure the previous steps were done correctly.
 
 ![Airflow UI](/docs/walkthroughs/aws/img/airflow-ui-0.png)
 
@@ -287,11 +287,15 @@ Airflow and Argocd
 ![cndi config](/docs/walkthroughs/aws/img/cndi-config.png)
 
 - Go to the `cndi-config.jsonc`
-- In the `infrastructure.cndi.nodes` section, add a new airflow node and save the file
+- In the `infrastructure.cndi.nodes` section, add a new airflow node and save
+  the file
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
- 
+
+![cndi-run action](/docs/walkthroughs/aws/img/add-node.png)
+![aws instances](/docs/walkthroughs/aws/img/ow.png)
+
 ## destroying resources in the cluster! 💣
 
 **If you just want to take down any of your individual applications:**
