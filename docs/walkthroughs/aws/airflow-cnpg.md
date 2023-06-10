@@ -206,22 +206,22 @@ successfully run the workflow.
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi run` has been completed, you should be ready to log into AWS to find
-the IP address of the load balancer that we created for you in the Network tab.
+Once `cndi run` has been completed, at the end of the run will be  a link to `resource groups`, where you can view resources deployed by CNDI for this project.
+![cndi outputs](/docs/walkthroughs/aws/img/outputs.png)
 
----
+![resource groups root page](/docs/walkthroughs/aws/img/resource-groups-root.png)
+
+![current resource group](/docs/walkthroughs/aws/img/resource-groups.png)
+
 
 ## attach the load balancer to your domain 🌐
 
-- Go to [AWS EC2 console](https://console.aws.amazon.com/ec2/)
-- In the navigation pane, choose **Load Balancers**
-- Select the **Load Balancer** thats attached to your EC2 instances
-- Copy that Load Balancer's **DNS Name** (CNAME record)
+At the end of the cndi run there is also an output called `public host` , which is the **DNS Name** (CNAME record) of the load Balancer thats attached to your EC2 instances.
 
-![AWS nlb](/docs/walkthroughs/aws/img/aws-nlb.png)
-
-Go to your custom domain, you will need to add a CNAME record for your domain
-and add the DNS Name of your load balancer to it
+![cndi outputs](/docs/walkthroughs/aws/img/outputs.png)
+Copy `public host`
+Go to your custom domain, 
+and add the `public host` to it
 
 ![google domains](/docs/walkthroughs/aws/img/google-domains-cname.png)
 
@@ -280,6 +280,18 @@ the correct credentials:
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
 Airflow and Argocd
 
+## modifying the cluster! 🛠️
+
+**To add another a node to the cluster:**
+
+![cndi config](/docs/walkthroughs/aws/img/cndi-config.png)
+
+- Go to the `cndi-config.jsonc`
+- In the `infrastructure.cndi.nodes` section, add a new airflow node and save the file
+- Run `cndi ow`
+- Commit changes
+- Push your code changes to the repository
+ 
 ## destroying resources in the cluster! 💣
 
 **If you just want to take down any of your individual applications:**
