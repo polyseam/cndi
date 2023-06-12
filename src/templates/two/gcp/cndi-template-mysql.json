@@ -52,7 +52,7 @@
             }
           ]
         },
-        "terraform": { 
+        "terraform": {
           "resource": {
             "google_compute_forwarding_rule": {
               "cndi_google_compute_forwarding_rule": {
@@ -132,7 +132,7 @@
             "tls": [
               {
                 "hosts": [
-                    "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
@@ -189,7 +189,7 @@
             "tls": [
               {
                 "hosts": [
-                    "{{ $.cndi.prompts.responses.mysqlDomainName }}"
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
@@ -236,17 +236,14 @@
             "namespace": "ingress"
           },
           "spec": {
-            
             "selector": {
               "matchLabels": {
-                
                 "name": "nginx-ingress-microk8s"
               }
             },
             "template": {
               "metadata": {
                 "labels": {
-                  
                   "name": "nginx-ingress-microk8s"
                 }
               },
@@ -317,7 +314,6 @@
         }
       }
     },
-
     "env": {
       "extend_basic_env": "gcp",
       "entries": [
