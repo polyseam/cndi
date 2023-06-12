@@ -53,7 +53,7 @@ const cndiWorkflowObj = {
         },
         {
           name: "cndi install",
-          run: "cndi install",
+          run: "cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
         },
         {
           name: "cndi run",
