@@ -218,7 +218,10 @@ const initCommand = new Command()
       }
     }
 
-    if (options?.debug) {
+    const inDebugEnv =
+      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
+
+    if (options?.debug || inDebugEnv) {
       env.push(
         { comment: "Telemetry Mode" },
         { value: { CNDI_TELEMETRY: "debug" } },
