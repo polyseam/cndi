@@ -58,8 +58,8 @@
       },
       "applications": {
         "milvus": {
-          "repoURL": "https://milvus-io.github.io/milvus-helm/",
-          "chart": "milvus",
+          "repoURL": "https://milvus-io.github.io/milvus-operator/",
+          "chart": "milvus-operator",
           "destinationNamespace": "milvus",
           "targetRevision": "4.0.24",
           "values": {
