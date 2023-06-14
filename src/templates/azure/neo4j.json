@@ -175,7 +175,7 @@
           "values": {
             "nameOverride": "",
             "fullnameOverride": "",
-            "disableLookups": false,
+            "disableLookups": true,
             "neo4j": {
               "name": "neo4j-kube",
               "password": "my-password",
