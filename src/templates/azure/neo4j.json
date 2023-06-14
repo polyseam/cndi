@@ -7,6 +7,18 @@
       "type": "Input"
     },
     {
+      "name": "neo4jUsername",
+      "default": "neo4j",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "neo4jPassword",
+      "default": "letmein",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
       "name": "argocdDomainName",
       "default": "argocd.example.com",
       "message": "Please enter the domain name you want argocd to be accessible on:",
@@ -403,20 +415,22 @@
     },
     "env": {
       "extend_basic_env": "azure",
-      "prompts": [
+      "entries": [
         {
           "type": "Comment",
-          "comment": "Please provide the necessary credentials"
+          "comment": "Neo4j Credentials"
         },
         {
           "name": "NEO4J_USERNAME",
-          "message": "Please enteryour Neo4j username:",
-          "type": "Input"
+          "value": "{{ $.cndi.prompts.responses.neo4jUsername }}"
+        },
+        {
+          "type": "Comment",
+          "comment": "'neo4j/' prefix is required for the password"
         },
         {
           "name": "NEO4J_PASSWORD",
-          "message": "Please enter your Neo4j password:",
-          "type": "Secret"
+          "value": "neo4j/{{ $.cndi.prompts.responses.neo4jPassword }}"
         }
       ]
     },
