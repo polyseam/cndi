@@ -21,7 +21,7 @@
   ],
   "outputs": {
     "cndi-config": {
-      "cndi_version": "v1.8.2",
+      "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
           "open_ports": [
