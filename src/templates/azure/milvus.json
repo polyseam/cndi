@@ -187,10 +187,10 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws"
+      "extend_basic_env": "azure"
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "azure",
       "template_section": "# milvus\n\nTo get started with milvus..."
     }
   }
