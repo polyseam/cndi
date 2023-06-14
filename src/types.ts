@@ -3,6 +3,8 @@ type ObjectValues<T> = T[keyof T];
 
 export const NODE_KIND = {
   aws: "aws",
+  eks: "eks",
+  ec2: "ec2",
   gcp: "gcp",
   azure: "azure",
 } as const;
@@ -28,6 +30,7 @@ export const COMMAND = {
 export const NODE_ROLE = {
   leader: "leader",
   controller: "controller",
+  worker: "worker",
 } as const;
 
 // NodeRole refers to the role of the node, e.g. leader, controller.. worker in the future?
@@ -47,28 +50,39 @@ interface BaseNodeItemSpec {
   name: string;
   kind: NodeKind;
   role?: NodeRole; // default: controller
-  volume_size?: number; // we use this when writing config regardless of the provider, but support provider-native keys too
+  volume_size?: number;
+  size?: number | string;
+  disk_size_gb?: number;
+  instance_type?: string;
+  machine_type?: string;
 }
 
 // cndi-config.jsonc["nodes"][kind==="azure"]
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
-  size?: number;
+  size?: number | string;
   volume_size?: number;
   disk_size_gb?: number;
   instance_type?: string;
 }
 
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSNodeItemSpec extends BaseNodeItemSpec {
+interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
   volume_size?: number;
   size?: number;
+  disk_size?: number;
   machine_type?: string;
 }
+
+// cndi-config.jsonc["nodes"]["entries"][kind==="eks"]
+type AWSEKSNodeItemSpec = Omit<AWSEC2NodeItemSpec, "ami"> & {
+  min_count: number;
+  max_count: number;
+};
 
 // cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
 interface GCPNodeItemSpec extends BaseNodeItemSpec {
@@ -84,6 +98,7 @@ interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
+  size?: number;
 }
 
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
@@ -91,23 +106,11 @@ interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
   image?: string;
   machine_type?: string;
   disk_size_gb?: number;
-  size?: number | string;
+  size?: number | string; // this can be a string if it refers to a machine type which azure named "size"
 }
 
 // cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
 interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
-  machine_type?: string;
-  image?: string;
-  size?: number;
-}
-
-// incomplete type, nodes will have more options
-interface CNDINode {
-  name: string;
-  role: NodeRole;
-  kind: NodeKind;
-  instance_type?: string;
-  ami?: string;
   machine_type?: string;
   image?: string;
   size?: number;
@@ -118,6 +121,12 @@ interface DeploymentTargetConfiguration {
   gcp: GCPDeploymentTargetConfiguration;
   azure: AzureDeploymentTargetConfiguration;
 }
+
+type Microk8sAddon = {
+  name: string;
+  enabled?: boolean;
+  args?: string[];
+};
 
 type TFBlocks = {
   terraform?: {
@@ -143,6 +152,14 @@ type TFBlocks = {
   };
 };
 
+interface CNDIPort {
+  name: string;
+  service: string;
+  namespace: string;
+  number: number;
+  disable?: boolean;
+}
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
@@ -151,6 +168,20 @@ interface CNDIConfig {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
+      microk8s: {
+        addons: Array<Microk8sAddon>;
+        version?: string; // 1.27
+        channel?: string; // stable
+        "cloud-init": {
+          leader_before: Array<string>; //
+          leader_after: Array<string>;
+        };
+      };
+      argocd: {
+        root_application: unknown; //
+        install_url?: string; //
+      };
+      open_ports?: Array<CNDIPort>;
     };
     terraform?: TFBlocks;
   };
@@ -186,6 +217,7 @@ interface EnvCommentEntry {
 }
 interface EnvValueEntry {
   value: { [key: string]: string };
+  wrap?: boolean;
 }
 
 type EnvLines = Array<EnvCommentEntry | EnvValueEntry>;
@@ -213,13 +245,14 @@ interface SealedSecretsKeys {
 
 export type {
   AWSDeploymentTargetConfiguration,
-  AWSNodeItemSpec,
+  AWSEC2NodeItemSpec,
+  AWSEKSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,
   BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIConfig,
-  CNDINode,
+  CNDIPort,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,
@@ -229,6 +262,7 @@ export type {
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
+  Microk8sAddon,
   SealedSecretsKeys,
   TFBlocks,
 };

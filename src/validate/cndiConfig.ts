@@ -1,4 +1,5 @@
 import { ccolors } from "deps";
+import { nonMicrok8sNodeKinds } from "constants";
 import { CNDIConfig } from "src/types.ts";
 import { emitExitEvent } from "src/utils.ts";
 
@@ -32,6 +33,82 @@ export default async function validateConfig(
     );
     await emitExitEvent(901);
     Deno.exit(901);
+  }
+
+  const open_ports = config?.infrastructure?.cndi?.open_ports;
+
+  if (open_ports) {
+    if (Array.isArray(open_ports)) {
+      open_ports.forEach(async (port, index) => {
+        if (!port.number) {
+          console.error(
+            cndiConfigLabel,
+            ccolors.error("cndi-config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+            ),
+            ccolors.key_name('"number"'),
+            ccolors.error("key"),
+          );
+          await emitExitEvent(912);
+          Deno.exit(912);
+        }
+        if (!port.name) {
+          console.error(
+            cndiConfigLabel,
+            ccolors.error("cndi-config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+            ),
+            ccolors.key_name('"name"'),
+            ccolors.error("key"),
+          );
+          await emitExitEvent(911);
+          Deno.exit(911);
+        }
+        if (!port.service) {
+          console.error(
+            cndiConfigLabel,
+            ccolors.error("cndi-config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+            ),
+            ccolors.key_name('"service"'),
+            ccolors.error("key"),
+          );
+          await emitExitEvent(910);
+          Deno.exit(910);
+        }
+        if (!port.namespace) {
+          console.error(
+            cndiConfigLabel,
+            ccolors.error("cndi-config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+            ),
+            ccolors.key_name('"namespace"'),
+            ccolors.error("key"),
+          );
+          await emitExitEvent(909);
+          Deno.exit(909);
+        }
+      });
+    } else {
+      console.error(
+        cndiConfigLabel,
+        ccolors.error("cndi-config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but"),
+        ccolors.key_name('"infrastructure.cndi.open_ports"'),
+        ccolors.error("must be an array of objects"),
+      );
+      await emitExitEvent(908);
+      Deno.exit(908);
+    }
   }
 
   if (!config?.infrastructure?.cndi?.nodes?.[0]) {
@@ -137,7 +214,11 @@ export default async function validateConfig(
       ({ role }) => role === "leader",
     ).length;
 
-  if (numberOfNodesWithRoleLeader !== 1) {
+  const isMicrok8sCluster = !nonMicrok8sNodeKinds.includes(
+    config?.infrastructure?.cndi?.nodes[0]?.kind,
+  );
+
+  if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
     console.error(
       cndiConfigLabel,
       ccolors.error("cndi-config file found was at"),
@@ -148,7 +229,9 @@ export default async function validateConfig(
       ccolors.key_name('"role"'),
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node."),
+      ccolors.error(
+        "There must be exactly one leader node when using microk8s based clusters.",
+      ),
     );
     await emitExitEvent(907);
     Deno.exit(907);

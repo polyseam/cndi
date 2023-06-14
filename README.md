@@ -2,7 +2,7 @@
   <br>
   <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
   <h1>cndi</h1>
-  <div>Deploy <strong>Cloud-Native Data Infratructure</strong> in Minutes</div>
+  <div>Deploy <strong>Cloud-Native Data Infrastructure</strong> in Minutes</div>
 </div>
 <br>
 <p align="center">
@@ -115,7 +115,7 @@ required for every deployment. For example, you always need to have
 
 Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
-some are only required for certain Templates, for example all `airflow-tls`
+some are only required for certain Templates, for example all `airflow-cnpg`
 templates require `GIT_SYNC_PASSWORD` for accessing repos that hold Airflow
 DAGs.
 
@@ -197,21 +197,31 @@ cluster using CNDI and evolve it over time!
 
 ### lifecycle: destroy 🗑️
 
-All changes to a cluster with CNDI are made the same way, and teardown is no
-exception. To destroy your cluster you just need to delete all the files in your
-`cndi/terraform` directory, and add one called `destroy.tf`. This empty
-terraform file will signal to Terraform that the desired state of the cluster is
-nullified, so all that's left is to push that file up to your repository.
+When it comes down time to teardown your cluster, there is only one step, just
+call:
+
+```bash
+cndi destroy # in your project repo, and we will take care of the rest!
+```
+
+This will delete all of the infrastructure resources that CNDI created for you,
+and from there you can choose either to delete the repo or keep it around for
+later.
 
 ---
 
 ### Walkthroughs 🥾
 
-We've got a couple of walkthroughs you can follow if you'd like, currently we
-have one for our [aws/airflow-tls](docs/walkthroughs/aws/airflow-tls.md) and
-[gcp/airflow-tls](docs/walkthroughs/gcp/airflow-tls.md) Templates. If you are
-interested in using CNDI, these walkthroughs will be entirely transferrable to
-other applications that aren't Airflow.
+We've got a couple of walkthroughs you can follow if you'd like, one for each
+deployment target. The walkthroughs demonstrate how to deploy a production grade
+Airflow cluster using CNDI's `airflow-cnpg` Template.
+
+- [aws/airflow-cnpg](docs/walkthroughs/aws/airflow-cnpg.md)
+- [gcp/airflow-cnpg](docs/walkthroughs/gcp/airflow-cnpg.md)
+- [azure/airflow-cnpg](docs/walkthroughs/azure/airflow-cnpg.md)
+
+If you are interested in using CNDI, these walkthroughs will be entirely
+transferrable to other applications beyond Airflow.
 
 ---
 
@@ -537,6 +547,11 @@ source code as if it were the regular CLI, without colliding with the released
 alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
 ```
 
-If you have any issues please message [Matt](https://github.com/johnstonmatt) or
+We're continually improving CNDI, but if you have an issue, checkout
+[frequently-asked-questions](docs/frequently-asked-questions/faq.md) to get
+unblocked quickly.
+
+If you have any other issues or questions please message
+[Matt](https://github.com/johnstonmatt) or
 [Tamika](https://github.com/IamTamika) in the
 [Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).

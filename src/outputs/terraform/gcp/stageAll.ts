@@ -1,6 +1,6 @@
 import { ccolors, path } from "deps";
 
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, GCPNodeItemSpec } from "src/types.ts";
 import {
   emitExitEvent,
   getLeaderNodeNameFromConfig,
@@ -25,6 +25,7 @@ import cndi_google_project_service_compute from "./cndi_google_project_service_c
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
 import cndi_google_compute_region_backend_service from "./cndi_google_compute_region_backend_service.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
+import cndi_outputs from "./cndi_outputs.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
   "\nsrc/outputs/terraform/gcp/stageAll.ts:",
@@ -94,22 +95,29 @@ export default async function stageTerraformResourcesForGCP(
         ccolors.error("failed to parse service account key json from"),
         ccolors.user_input(`"${dotEnvPath}"`),
       );
-      console.log(ccolors.caught(parsingError));
+      console.log(ccolors.caught(parsingError, 805));
       await emitExitEvent(805);
       Deno.exit(805);
     }
   }
 
-  const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
-    stageFile(
+  const node_id_list: string[] = [];
+
+  const open_ports = config.infrastructure.cndi.open_ports || [];
+
+  const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
+    node_id_list.push(
+      `\${google_compute_instance.cndi_google_compute_instance_${node.name}.id}`,
+    );
+    return stageFile(
       path.join(
         "cndi",
         "terraform",
         `cndi_google_compute_instance_${node.name}.tf.json`,
       ),
-      cndi_google_compute_instance(node, leaderNodeName),
-    )
-  );
+      cndi_google_compute_instance(node as GCPNodeItemSpec, leaderNodeName),
+    );
+  });
 
   const stageDisks = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -118,7 +126,7 @@ export default async function stageTerraformResourcesForGCP(
         "terraform",
         `cndi_google_compute_disk_${node.name}.tf.json`,
       ),
-      cndi_google_compute_disk(node),
+      cndi_google_compute_disk(node as GCPNodeItemSpec),
     )
   );
 
@@ -129,13 +137,20 @@ export default async function stageTerraformResourcesForGCP(
       ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_google_locals({ gcp_region, leader_node_ip }),
+        cndi_google_locals({
+          gcp_region,
+          leader_node_ip,
+          node_id_list,
+          project_id: parsedJSONServiceAccountKey.project_id,
+        }),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
-        provider({
-          project_id: parsedJSONServiceAccountKey.project_id,
-        }),
+        provider(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_outputs.tf.json"),
+        cndi_outputs(),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
@@ -183,7 +198,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_firewall_external.tf.json",
         ),
-        cndi_google_compute_firewall_external(),
+        cndi_google_compute_firewall_external(open_ports),
       ),
       stageFile(
         path.join(
@@ -211,7 +226,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_forwarding_rule.tf.json",
         ),
-        cndi_google_compute_forwarding_rule(),
+        cndi_google_compute_forwarding_rule(open_ports),
       ),
       stageFile(
         path.join(
@@ -219,7 +234,10 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_instance_group.tf.json",
         ),
-        cndi_google_compute_instance_group(config.infrastructure.cndi.nodes),
+        cndi_google_compute_instance_group(
+          config.infrastructure.cndi.nodes as Array<GCPNodeItemSpec>,
+          open_ports,
+        ),
       ),
 
       stageFile(
@@ -233,7 +251,7 @@ export default async function stageTerraformResourcesForGCP(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e));
+    console.log(ccolors.caught(e, 802));
     await emitExitEvent(802);
     Deno.exit(802);
   }

@@ -79,8 +79,8 @@ const parseCndiSecret = async (
         console.error(
           sealedSecretManifestLabel,
           ccolors.error("Secret string literals are not supported.\nUse"),
-          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}"`),
-          ccolors.error("prefix to reference environment variables at"),
+          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
+          ccolors.error("to reference environment variables at"),
           ccolors.key_name(
             `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
           ),
@@ -132,9 +132,9 @@ const parseCndiSecret = async (
       } else {
         console.error(
           sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported\nUse"),
+          ccolors.error("Secret string literals are not supported.\nUse"),
           ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
-          ccolors.error("prefix to reference environment variables at"),
+          ccolors.error("to reference environment variables at"),
           ccolors.key_name(
             `"cndi-config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
           ),
@@ -211,31 +211,24 @@ const getSealedSecretManifest = async (
     },
   );
 
-  const cmd = [
-    pathToKubeseal,
-    `--cert=${publicKeyFilePath}`,
-    `--secret-file=${secretPath}`,
-    `--scope=cluster-wide`,
-  ];
-
-  const ranKubeseal = Deno.run({
-    cmd,
-    stdout: "piped",
+  const kubesealCommand = new Deno.Command(pathToKubeseal, {
+    args: [
+      `--cert=${publicKeyFilePath}`,
+      `--secret-file=${secretPath}`,
+      `--scope=cluster-wide`,
+    ],
     stderr: "piped",
-    stdin: "piped",
+    stdout: "piped",
   });
 
-  const ranKubesealStatus = await ranKubeseal.status();
-  const ranKubesealOutput = await ranKubeseal.output();
-  const ranKubesealStderr = await ranKubeseal.stderrOutput();
+  const kubesealCommandOutput = await kubesealCommand.output();
 
-  if (ranKubesealStatus.code !== 0) {
+  if (kubesealCommandOutput.code !== 0) {
     console.log("kubeseal failed");
-    Deno.stdout.write(ranKubesealStderr);
+    Deno.stdout.write(kubesealCommandOutput.stderr);
     Deno.exit(332); // arbitrary exit code
   } else {
-    // Deno.stdout.write(ranKubesealOutput);
-    sealed = new TextDecoder().decode(ranKubesealOutput);
+    sealed = new TextDecoder().decode(kubesealCommandOutput.stdout);
   }
   return sealed;
 };

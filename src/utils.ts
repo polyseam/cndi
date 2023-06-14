@@ -1,20 +1,10 @@
-import {
-  ccolors,
-  deepMerge,
-  DEFAULT_INSTANCE_TYPES,
-  homedir,
-  JSONC,
-  path,
-  platform,
-  walk,
-} from "deps";
+import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
 
 import {
   BaseNodeItemSpec,
   CNDIConfig,
   DeploymentTarget,
-  NODE_KIND,
-  NodeKind,
+  NodeRole,
   TFBlocks,
 } from "src/types.ts";
 
@@ -72,7 +62,9 @@ async function getLeaderNodeNameFromConfig(
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
-  return config.infrastructure.cndi.nodes[0].kind;
+  const clusterKind = config.infrastructure.cndi.nodes[0].kind;
+  if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  return clusterKind;
 }
 
 function getTFResource(
@@ -91,7 +83,22 @@ function getTFResource(
     },
   };
 }
-
+function getTFData(
+  data_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_data_${data_type}`;
+  return {
+    data: {
+      [data_type]: {
+        [name]: {
+          ...content,
+        },
+      },
+    },
+  };
+}
 interface TFResourceFileObject {
   resource: {
     [key: string]: Record<string, unknown>;
@@ -252,6 +259,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       ccolors.error("error patching terraform files with config"),
     );
     console.log(ccolors.caught(error));
+    console.log("attempting to continue anyway...");
   }
 }
 
@@ -384,28 +392,41 @@ const getPathToOpenSSLForPlatform = () => {
   return path.join("/", "usr", "bin", "openssl");
 };
 
-async function getDefaultVmTypeForKind(
-  kind: NodeKind,
-): Promise<[string, string]> {
-  switch (kind) {
-    // most recent 4vCPU/16GiB Ram VMs
-    case NODE_KIND.aws:
-      return ["instance_type", DEFAULT_INSTANCE_TYPES.aws];
-    case NODE_KIND.gcp:
-      return ["machine_type", DEFAULT_INSTANCE_TYPES.gcp];
-    case NODE_KIND.azure:
-      return ["machine_type", DEFAULT_INSTANCE_TYPES.azure];
-    default:
-      console.log("Unknown kind: " + kind);
-      await emitExitEvent(205);
-      Deno.exit(205);
-  }
-}
-
 function base10intToHex(decimal: number): string {
   // if the int8 in hex is less than 2 characters, prepend 0
   const hex = decimal.toString(16).padStart(2, "0");
   return hex;
+}
+
+function getUserDataTemplateFileString(
+  role?: NodeRole,
+  doBase64Encode?: boolean,
+) {
+  let leaderString =
+    'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+  let workerString =
+    'templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+  let controllerString =
+    'templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+
+  if (doBase64Encode) {
+    leaderString = `\${base64encode(${leaderString})}`;
+    workerString = `\${base64encode(${workerString})}`;
+    controllerString = `\${base64encode(${controllerString})}`;
+  } else {
+    leaderString = `\${${leaderString}}`;
+    workerString = `\${${workerString}}`;
+    controllerString = `\${${controllerString}}`;
+  }
+
+  switch (role) {
+    case "leader":
+      return leaderString;
+    case "worker":
+      return workerString;
+    default:
+      return controllerString;
+  }
 }
 
 function getSecretOfLength(len = 32): string {
@@ -430,7 +451,6 @@ export {
   checkInstalled,
   emitExitEvent,
   getCndiInstallPath,
-  getDefaultVmTypeForKind,
   getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
@@ -440,7 +460,9 @@ export {
   getPrettyJSONString,
   getSecretOfLength,
   getStagingDir,
+  getTFData,
   getTFResource,
+  getUserDataTemplateFileString,
   loadJSONC,
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,

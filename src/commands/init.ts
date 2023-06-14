@@ -52,6 +52,9 @@ const initCommand = new Command()
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
+  .option("-d, --debug", "Create a cndi project in debug mode.", {
+    hidden: true,
+  })
   .action(async (options) => {
     const pathToConfig = options.file;
     let template: string | undefined = options.template;
@@ -151,7 +154,7 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-tls"
+    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-cnpg"
 
     if (options.interactive && !template) {
       template = await Select.prompt({
@@ -183,9 +186,10 @@ const initCommand = new Command()
       readme = templateResult.readme;
       env = templateResult.env;
     } else {
+      const nodeKind = cndiConfig!.infrastructure.cndi.nodes[0].kind;
       readme = getReadmeForProject({
         project_name,
-        deploymentTarget: getDeploymentTargetFromConfig(cndiConfig!),
+        nodeKind,
       });
 
       env = await getCoreEnvLines(
@@ -212,6 +216,16 @@ const initCommand = new Command()
           readme,
         );
       }
+    }
+
+    const inDebugEnv =
+      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
+
+    if (options?.debug || inDebugEnv) {
+      env.push(
+        { comment: "Telemetry Mode" },
+        { value: { CNDI_TELEMETRY: "debug" } },
+      );
     }
 
     await stageFile(".env", getEnvFileContents(env));
