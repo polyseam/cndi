@@ -47,18 +47,18 @@
           "nodes": [
             {
               "name": "neo4j-main",
-              "kind": "aws",
+              "kind": "ec2",
               "role": "leader",
               "volume_size": 128
             },
             {
               "name": "neo4j-a",
-              "kind": "aws",
+              "kind": "ec2",
               "volume_size": 128
             },
             {
               "name": "neo4j-b",
-              "kind": "aws",
+              "kind": "ec2",
               "volume_size": 128
             }
           ]
