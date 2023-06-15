@@ -176,6 +176,18 @@
               }
             ]
           }
+        },
+        "neo4j-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "neo4j-auth-secret",
+            "namespace": "neo4j"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "NEO4J_AUTH": "$.cndi.secrets.seal(NEO4J_PASSWORD)"
+          }
         }
       },
       "applications": {
@@ -185,13 +197,11 @@
           "repoURL": "https://helm.neo4j.com/neo4j",
           "chart": "neo4j",
           "values": {
-            "nameOverride": "",
-            "fullnameOverride": "",
             "disableLookups": true,
             "neo4j": {
               "name": "neo4j-kube",
-              "password": "my-password",
-              "passwordFromSecret": "",
+              "password": "",
+              "passwordFromSecret": "neo4j-auth-secret",
               "edition": "community",
               "acceptLicenseAgreement": "yes",
               "offlineMaintenanceModeEnabled": false,
@@ -219,12 +229,8 @@
               }
             },
             "services": {
-              "default": {
-                "annotations": {}
-              },
               "neo4j": {
                 "enabled": true,
-                "annotations": {},
                 "spec": {
                   "type": "LoadBalancer"
                 },
@@ -260,21 +266,10 @@
                     "imagePullPolicy": "IfNotPresent"
                   }
                 }
-              },
-              "admin": {
-                "enabled": true,
-                "annotations": {},
-                "spec": {
-                  "type": "ClusterIP"
-                }
-              },
-              "internals": {
-                "enabled": false,
-                "annotations": {}
               }
             },
             "config": {
-              "server.config.strict_validation.enabled": "true",
+              "server.config.strict_validation.enabled": "false",
               "server.directories.plugins": "/var/lib/neo4j/labs",
               "dbms.security.procedures.unrestricted": "apoc.*",
               "dbms.security.procedures.allowlist": "apoc.*",
@@ -313,12 +308,6 @@
                 "publicCertificate": {
                   "secretName": "lets-encrypt-private-key",
                   "subPath": "tls.crt"
-                },
-                "trustedCerts": {
-                  "sources": []
-                },
-                "revokedCerts": {
-                  "sources": []
                 }
               },
               "https": {
@@ -344,9 +333,6 @@
                       }
                     }
                   ]
-                },
-                "revokedCerts": {
-                  "sources": []
                 }
               },
               "cluster": {
@@ -372,42 +358,8 @@
                       }
                     }
                   ]
-                },
-                "revokedCerts": {
-                  "sources": []
                 }
               }
-            },
-            "clusterDomain": "cluster.local",
-            "image": {
-              "imagePullPolicy": "Always"
-            },
-            "statefulset": {
-              "metadata": {
-                "annotations": null
-              }
-            },
-            "env": {},
-            "podSpec": {
-              "annotations": {},
-              "nodeAffinity": {},
-              "podAntiAffinity": true,
-              "tolerations": [],
-              "priorityClassName": "",
-              "loadbalancer": "include",
-              "serviceAccountName": "",
-              "terminationGracePeriodSeconds": 3600,
-              "initContainers": [],
-              "containers": []
-            },
-            "logInitialPassword": true,
-            "jvm": {
-              "useNeo4jDefaultJvmArguments": true,
-              "additionalJvmArguments": []
-            },
-            "logging": {
-              "serverLogsXml": "",
-              "userLogsXml": ""
             }
           }
         }
