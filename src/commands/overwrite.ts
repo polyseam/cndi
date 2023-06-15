@@ -190,7 +190,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         ),
       ]);
     }
-    console.log(ccolors.success("staged open ports"));
+    console.log(ccolors.success("staged open ports manifests"));
   }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
