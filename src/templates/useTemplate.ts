@@ -228,7 +228,7 @@ export default async function useTemplate(
       );
     }
     templateUrl = new URL(
-      `${templateLocation}.jsonc`,
+      `${templateLocation}.json`,
       POLYSEAM_TEMPLATE_DIRECTORY,
     );
   }
