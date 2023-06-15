@@ -4,14 +4,14 @@ import { getPrettyJSONString } from "src/utils.ts";
 import { CNDIPort } from "src/types.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
-  "\nsrc/outputs/custom-port-manifests/ingress-tcp-services-configmap.ts:",
+  "\nsrc/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts:",
 );
 
 interface IngressTCPServicesConfigMap {
   apiVersion: string;
   kind: "ConfigMap";
   metadata: {
-    name: "nginx-ingress-tcp-microk8s-conf";
+    name: "ingress-nginx-controller";
     namespace: "ingress";
   };
   data: {
@@ -26,7 +26,7 @@ const getIngressTcpServicesConfigMapManifest = (
     "apiVersion": "v1",
     "kind": "ConfigMap",
     "metadata": {
-      "name": "nginx-ingress-tcp-microk8s-conf",
+      "name": "ingress-nginx-controller",
       "namespace": "ingress",
     },
     "data": {},
