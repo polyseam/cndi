@@ -5,7 +5,7 @@ export default function getOutputTFJSON(): string {
     output: {
       resource_group: {
         value:
-          "https://${local.aws_region}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${local.aws_region}",
+          "https://${upper(local.aws_region)}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${upper(local.aws_region)}",
       },
     },
   });

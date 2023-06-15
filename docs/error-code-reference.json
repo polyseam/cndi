@@ -234,5 +234,17 @@
   {
     "code": 1100,
     "message": "failed to upgrade cndi, release binary fetch not ok"
+  },
+  {
+    "code": 1200,
+    "message": "the template name specified does not exist"
+  },
+  {
+    "code": 1201,
+    "message": "failed to fetch template"
+  },
+  {
+    "code": 1202,
+    "message": "failed to parse template JSONC"
   }
 ]
