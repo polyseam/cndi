@@ -59,6 +59,21 @@
               "enum": ["aws", "gcp", "azure"]
             }
           }
+        },
+        "readme": {
+          "type": "object",
+          "description": "used to configure how the cluster README.md is generated",
+          "additionalProperties": false,
+          "properties": {
+            "extend_basic_readme": {
+              "type": "string",
+              "enum": ["aws", "gcp", "azure"]
+            },
+            "template_section": {
+              "type": "string",
+              "description": "A section of the readme which applies specifically to this template"
+            }
+          }
         }
       }
     },
