@@ -20,6 +20,10 @@ export default function getKnownTemplates() {
       name: "ec2/cnpg",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/cnpg.json`,
     },
+    {
+      name: "ec2/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/neo4j.json`,
+    },
     // eks
     {
       name: "eks/basic",
@@ -50,6 +54,10 @@ export default function getKnownTemplates() {
       name: "gcp/hop",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/hop.json`,
     },
+    {
+      name: "gcp/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/neo4j.json`,
+    },
     // azure
     {
       name: "azure/basic",
@@ -66,6 +74,10 @@ export default function getKnownTemplates() {
     {
       name: "azure/hop",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/hop.json`,
+    },
+    {
+      name: "azure/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/neo4j.json`,
     },
   ];
   return knownTemplates;
