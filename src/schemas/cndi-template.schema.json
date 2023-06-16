@@ -24,7 +24,35 @@
           "description": "The path to the env file",
           "properties": {
             "entries": {
-              "type": "array"
+              "type": "array",
+              "description": "An array of lines to be added to the .env file",
+              "items": {
+                "type": "object",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": { "const": "Comment" },
+                      "comment": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
             },
             "extend_basic_env": {
               "type": "string",
