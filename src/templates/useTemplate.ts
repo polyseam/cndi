@@ -1,4 +1,4 @@
-import { getPrettyJSONString, loadRemoteJSONC } from "src/utils.ts";
+import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -15,6 +15,7 @@ import {
   Checkbox,
   Confirm,
   Input,
+  JSONC,
   List,
   Number,
   prompt,
@@ -25,6 +26,10 @@ import {
 
 import getReadmeForProject from "src/outputs/readme.ts";
 import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
+
+const useTemplateLabel = ccolors.faded(
+  "\nsrc/templates/useTemplate.ts:",
+);
 
 type TemplatePromptTypeNames =
   | "Input"
@@ -193,14 +198,71 @@ export default async function useTemplate(
     templateUrl = new URL(templateLocation);
   } catch {
     // if it's not a valid URL, assume it's a Polyseam named template
+    const validTargets = [
+      { name: "aws", aliasFor: "ec2" },
+      { name: "ec2" },
+      { name: "eks" },
+      { name: "azure" },
+      { name: "gcp" },
+    ];
+
+    const validTarget = validTargets.find((target) => {
+      return templateLocation.startsWith(target.name);
+    });
+
+    if (
+      !validTarget
+    ) {
+      // it's not a valid template target
+      console.error(
+        useTemplateLabel,
+        ccolors.key_name(`"${templateLocation}"`),
+        ccolors.error("is not a valid template name"),
+      );
+      await emitExitEvent(1200);
+      Deno.exit(1200);
+    } else if (validTarget?.aliasFor) {
+      templateLocation = templateLocation.replace(
+        validTarget.name,
+        validTarget.aliasFor,
+      );
+    }
     templateUrl = new URL(
       `${templateLocation}.json`,
       POLYSEAM_TEMPLATE_DIRECTORY,
     );
   }
-  const templateObject = await loadRemoteJSONC(
-    templateUrl,
-  ) as unknown as Template;
+
+  let templateObject: Template;
+  let templateText: string;
+  let response: Response;
+
+  try {
+    response = await fetch(templateUrl);
+    templateText = await response.text();
+  } catch (fetchError) {
+    console.error(
+      useTemplateLabel,
+      ccolors.error("could not fetch template from"),
+      ccolors.user_input(`"${templateUrl}"`),
+    );
+    console.log(ccolors.caught(fetchError, 1201));
+    await emitExitEvent(1201);
+    Deno.exit(1201);
+  }
+
+  try {
+    templateObject = JSONC.parse(templateText) as unknown as Template;
+  } catch (parseError) {
+    console.error(
+      useTemplateLabel,
+      ccolors.user_input(`"${templateUrl}"`),
+      ccolors.error("did not contain valid JSONC for Template"),
+    );
+    console.log(ccolors.caught(parseError, 1202));
+    await emitExitEvent(1202);
+    Deno.exit(1202);
+  }
 
   const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,

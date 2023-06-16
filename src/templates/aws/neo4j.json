@@ -1,0 +1,393 @@
+{
+  "prompts": [
+    {
+      "name": "neo4jDomainName",
+      "default": "neo4j.example.com",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "neo4jUsername",
+      "default": "neo4j",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "neo4jPassword",
+      "default": "letmein",
+      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the email address you want to use for lets encrypt:",
+      "default": "admin@example.com",
+      "name": "letsEncryptClusterIssuerEmailAddress",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "open_ports": [
+            {
+              "name": "neo4j-bolt",
+              "number": 7687,
+              "service": "neo4j-kube-lb-neo4j",
+              "namespace": "neo4j"
+            }
+          ],
+          "nodes": [
+            {
+              "name": "neo4j-main",
+              "kind": "ec2",
+              "role": "leader",
+              "volume_size": 128
+            },
+            {
+              "name": "neo4j-a",
+              "kind": "ec2",
+              "volume_size": 128
+            },
+            {
+              "name": "neo4j-b",
+              "kind": "ec2",
+              "volume_size": 128
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "cert-manager-cluster-issuer": {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "lets-encrypt"
+          },
+          "spec": {
+            "acme": {
+              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
+              "server": "https://acme-v02.api.letsencrypt.org/directory",
+              "privateKeySecretRef": {
+                "name": "lets-encrypt-private-key"
+              },
+              "solvers": [
+                {
+                  "http01": {
+                    "ingress": {
+                      "class": "public"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "neo4j-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "neo4j-ingress",
+            "namespace": "neo4j",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": ["{{ $.cndi.prompts.responses.neo4jDomainName }}"],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.neo4jDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "neo4j-kube-lb-neo4j",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "neo4j-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "neo4j-auth-secret",
+            "namespace": "neo4j"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "NEO4J_AUTH": "$.cndi.secrets.seal(NEO4J_PASSWORD)"
+          }
+        }
+      },
+      "applications": {
+        "neo4j": {
+          "targetRevision": "5.7.0",
+          "destinationNamespace": "neo4j",
+          "repoURL": "https://helm.neo4j.com/neo4j",
+          "chart": "neo4j",
+          "values": {
+            "disableLookups": true,
+            "neo4j": {
+              "name": "neo4j-kube",
+              "password": "",
+              "passwordFromSecret": "neo4j-auth-secret",
+              "edition": "community",
+              "acceptLicenseAgreement": "yes",
+              "offlineMaintenanceModeEnabled": false,
+              "resources": {
+                "cpu": "1000m",
+                "memory": "4Gi"
+              },
+              "labels": null
+            },
+            "volumes": {
+              "data": {
+                "mode": "defaultStorageClass",
+                "defaultStorageClass": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "requests": {
+                    "storage": "10Gi"
+                  }
+                }
+              },
+              "plugins": {
+                "mode": "share",
+                "share": {
+                  "name": "data"
+                }
+              }
+            },
+            "services": {
+              "neo4j": {
+                "enabled": true,
+                "spec": {
+                  "type": "LoadBalancer"
+                },
+                "ports": {
+                  "http": {
+                    "enabled": false
+                  },
+                  "https": {
+                    "enabled": true
+                  },
+                  "bolt": {
+                    "enabled": true,
+                    "name": "neo4j-bolt-7687",
+                    "port": "7687",
+                    "protocol": "TCP",
+                    "targetPort": "7687"
+                  },
+                  "backup": {
+                    "enabled": false
+                  }
+                },
+                "selector": {
+                  "helm.neo4j.com/neo4j.loadbalancer": "include"
+                },
+                "multiCluster": false,
+                "cleanup": {
+                  "enabled": true,
+                  "image": {
+                    "registry": "docker.io",
+                    "repository": "bitnami/kubectl",
+                    "tag": "",
+                    "digest": "",
+                    "imagePullPolicy": "IfNotPresent"
+                  }
+                }
+              }
+            },
+            "config": {
+              "server.config.strict_validation.enabled": "false",
+              "server.directories.plugins": "/var/lib/neo4j/labs",
+              "dbms.security.procedures.unrestricted": "apoc.*",
+              "dbms.security.procedures.allowlist": "apoc.*",
+              "dbms.security.http_strict_transport_security": "false",
+              "server.http.enabled": "false",
+              "server.bolt.enabled": "true",
+              "server.bolt.tls_level": "REQUIRED",
+              "server.bolt.listen_address": "0.0.0.0:7687",
+              "server.bolt.thread_pool_keep_alive": "10m",
+              "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName }}:7687",
+              "server.https.listen_address": "0.0.0.0:7473",
+              "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName }}:7473",
+              "dbms.ssl.policy.bolt.enabled": "true",
+              "dbms.ssl.policy.bolt.client_auth": "NONE",
+              "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
+              "dbms.ssl.policy.bolt.private_key": "private.key",
+              "dbms.ssl.policy.bolt.public_certificate": "public.crt",
+              "server.https.enabled": "true",
+              "dbms.ssl.policy.https.enabled": "true",
+              "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
+              "dbms.ssl.policy.https.private_key": "private.key",
+              "dbms.ssl.policy.https.public_certificate": "public.crt",
+              "dbms.ssl.policy.https.client_auth": "NONE"
+            },
+            "apoc_config": {
+              "apoc.trigger.enabled": "true",
+              "apoc.jdbc.neo4j.url": "jdbc:foo:bar",
+              "apoc.import.file.enabled": "true"
+            },
+            "ssl": {
+              "bolt": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                }
+              },
+              "https": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                },
+                "trustedCerts": {
+                  "sources": [
+                    {
+                      "secret": {
+                        "name": "lets-encrypt-private-key",
+                        "items": [
+                          {
+                            "key": "tls.crt",
+                            "path": "public.crt"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "cluster": {
+                "privateKey": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "lets-encrypt-private-key",
+                  "subPath": "tls.crt"
+                },
+                "trustedCerts": {
+                  "sources": [
+                    {
+                      "secret": {
+                        "name": "lets-encrypt-private-key",
+                        "items": [
+                          {
+                            "key": "tls.crt",
+                            "path": "public.crt"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "env": {
+      "extend_basic_env": "aws",
+      "entries": [
+        {
+          "type": "Comment",
+          "comment": "Neo4j Credentials"
+        },
+        {
+          "name": "NEO4J_USERNAME",
+          "value": "{{ $.cndi.prompts.responses.neo4jUsername }}"
+        },
+        {
+          "type": "Comment",
+          "comment": "'neo4j/' prefix is required for the password"
+        },
+        {
+          "name": "NEO4J_PASSWORD",
+          "value": "neo4j/{{ $.cndi.prompts.responses.neo4jPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "aws",
+      "template_section": "## neo4j\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j)."
+    }
+  }
+}

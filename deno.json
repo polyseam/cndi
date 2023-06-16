@@ -1,5 +1,5 @@
 {
-  "version": "1.8.5",
+  "version": "1.9.3",
   "tasks": {
     "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
     "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
