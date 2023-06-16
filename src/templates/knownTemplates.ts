@@ -37,6 +37,10 @@ export default function getKnownTemplates() {
       name: "eks/hop",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/hop.json`,
     },
+    {
+      name: "eks/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/neo4j.json`,
+    },
     // gcp
     {
       name: "gcp/basic",
