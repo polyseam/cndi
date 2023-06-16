@@ -17,13 +17,18 @@ import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
-import getIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/ingress-tcp-services-configmap.ts";
-import getIngressDaemonsetManifest from "src/outputs/custom-port-manifests/ingress-daemonset.ts";
+
+import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
+import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
+
+import getEKSIngressServiceManifest from "src/outputs/custom-port-manifests/eks/ingress-service.ts";
+import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/eks/ingress-tcp-services-configmap.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
+import { nonMicrok8sNodeKinds } from "../constants.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -147,23 +152,45 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   console.log(ccolors.success("staged terraform files"));
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
+  const isNotMicrok8sCluster = nonMicrok8sNodeKinds.includes(
+    config?.infrastructure?.cndi?.nodes?.[0]?.kind,
+  );
 
   if (open_ports) {
-    await Promise.all([
-      stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap.json",
+    if (
+      isNotMicrok8sCluster // currently only EKS
+    ) {
+      await Promise.all([
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.json",
+          ),
+          getEKSIngressTcpServicesConfigMapManifest(open_ports),
         ),
-        getIngressTcpServicesConfigMapManifest(open_ports),
-      ),
-      stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
-        getIngressDaemonsetManifest(open_ports),
-      ),
-    ]);
-    console.log(ccolors.success("staged open ports"));
+        stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-service.json"),
+          getEKSIngressServiceManifest(open_ports),
+        ),
+      ]);
+    } else {
+      await Promise.all([
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.json",
+          ),
+          getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+        ),
+        stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
+          getMicrok8sIngressDaemonsetManifest(open_ports),
+        ),
+      ]);
+    }
+    console.log(ccolors.success("staged open ports manifests"));
   }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
