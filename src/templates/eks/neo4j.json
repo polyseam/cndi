@@ -356,7 +356,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "azure",
+      "extend_basic_env": "aws",
       "entries": [
         {
           "type": "Comment",
