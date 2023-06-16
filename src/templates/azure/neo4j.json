@@ -9,13 +9,13 @@
     {
       "name": "neo4jUsername",
       "default": "neo4j",
-      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "message": "Please enter the username you will use to connect to Neo4j:",
       "type": "Input"
     },
     {
       "name": "neo4jPassword",
       "default": "letmein",
-      "message": "Please enter the domain name you want Neo4j to be accessible on:",
+      "message": "Please enter the password you will use to connect to Neo4j:",
       "type": "Input"
     },
     {
