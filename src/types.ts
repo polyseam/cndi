@@ -30,6 +30,7 @@ export const COMMAND = {
 export const NODE_ROLE = {
   leader: "leader",
   controller: "controller",
+  worker: "worker",
 } as const;
 
 // NodeRole refers to the role of the node, e.g. leader, controller.. worker in the future?
@@ -121,6 +122,12 @@ interface DeploymentTargetConfiguration {
   azure: AzureDeploymentTargetConfiguration;
 }
 
+type Microk8sAddon = {
+  name: string;
+  enabled?: boolean;
+  args?: string[];
+};
+
 type TFBlocks = {
   terraform?: {
     [key: string]: unknown;
@@ -145,6 +152,14 @@ type TFBlocks = {
   };
 };
 
+interface CNDIPort {
+  name: string;
+  service: string;
+  namespace: string;
+  number: number;
+  disable?: boolean;
+}
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
@@ -153,6 +168,20 @@ interface CNDIConfig {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
+      microk8s: {
+        addons: Array<Microk8sAddon>;
+        version?: string; // 1.27
+        channel?: string; // stable
+        "cloud-init": {
+          leader_before: Array<string>; //
+          leader_after: Array<string>;
+        };
+      };
+      argocd: {
+        root_application: unknown; //
+        install_url?: string; //
+      };
+      open_ports?: Array<CNDIPort>;
     };
     terraform?: TFBlocks;
   };
@@ -223,6 +252,7 @@ export type {
   BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIConfig,
+  CNDIPort,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,
@@ -232,6 +262,7 @@ export type {
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
+  Microk8sAddon,
   SealedSecretsKeys,
   TFBlocks,
 };

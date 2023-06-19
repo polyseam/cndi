@@ -24,6 +24,10 @@ export default function getNginxControllerTFJSON(): string {
         "name": "controller.ingressClassResource.name",
         "value": "public",
       },
+      {
+        "name": "controller.extraArgs.tcp-services-configmap",
+        "value": "ingress/ingress-nginx-controller",
+      },
     ],
     version: "4.6.0",
   }, "cndi_nginx_controller_helm_chart");

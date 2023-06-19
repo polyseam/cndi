@@ -11,7 +11,6 @@ export default function getAWSLbListenerHTTPTFJSON(): string {
     ],
     tags: {
       Name: "HTTPLBListener",
-      CNDIProject: "${local.cndi_project_name}",
     },
     load_balancer_arn: "${aws_lb.cndi_aws_lb.arn}",
     port: 80,

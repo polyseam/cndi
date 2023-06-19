@@ -1,4 +1,4 @@
-import { stringify } from "deps";
+import { YAML } from "deps";
 
 const cndiWorkflowObj = {
   name: "cndi",
@@ -10,6 +10,10 @@ const cndiWorkflowObj = {
   jobs: {
     "cndi-run": {
       "runs-on": "ubuntu-20.04",
+      env: {
+        GIT_REPO: "https://github.com/${{ github.repository }}",
+        CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+      },
       steps: [
         {
           name: "welcome",
@@ -49,12 +53,11 @@ const cndiWorkflowObj = {
         },
         {
           name: "cndi install",
-          run: "cndi install",
+          run: "cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
         },
         {
           name: "cndi run",
           env: {
-            GIT_REPO: "https://github.com/${{ github.repository }}",
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
             TERRAFORM_STATE_PASSPHRASE:
@@ -73,6 +76,7 @@ const cndiWorkflowObj = {
             ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
             ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
             ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+            CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
           },
           run: "cndi run",
         },
@@ -90,5 +94,5 @@ const cndiWorkflowObj = {
   },
 };
 
-const getWorkflowYaml = () => stringify(cndiWorkflowObj);
+const getWorkflowYaml = () => YAML.stringify(cndiWorkflowObj);
 export default getWorkflowYaml;

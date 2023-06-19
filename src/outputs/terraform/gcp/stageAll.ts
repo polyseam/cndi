@@ -25,6 +25,7 @@ import cndi_google_project_service_compute from "./cndi_google_project_service_c
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
 import cndi_google_compute_region_backend_service from "./cndi_google_compute_region_backend_service.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
+import cndi_outputs from "./cndi_outputs.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
   "\nsrc/outputs/terraform/gcp/stageAll.ts:",
@@ -102,6 +103,8 @@ export default async function stageTerraformResourcesForGCP(
 
   const node_id_list: string[] = [];
 
+  const open_ports = config.infrastructure.cndi.open_ports || [];
+
   const stageNodes = config.infrastructure.cndi.nodes.map((node) => {
     node_id_list.push(
       `\${google_compute_instance.cndi_google_compute_instance_${node.name}.id}`,
@@ -134,13 +137,20 @@ export default async function stageTerraformResourcesForGCP(
       ...stageDisks,
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
-        cndi_google_locals({ gcp_region, leader_node_ip, node_id_list }),
+        cndi_google_locals({
+          gcp_region,
+          leader_node_ip,
+          node_id_list,
+          project_id: parsedJSONServiceAccountKey.project_id,
+        }),
       ),
       stageFile(
         path.join("cndi", "terraform", "provider.tf.json"),
-        provider({
-          project_id: parsedJSONServiceAccountKey.project_id,
-        }),
+        provider(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_outputs.tf.json"),
+        cndi_outputs(),
       ),
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
@@ -188,7 +198,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_firewall_external.tf.json",
         ),
-        cndi_google_compute_firewall_external(),
+        cndi_google_compute_firewall_external(open_ports),
       ),
       stageFile(
         path.join(
@@ -216,7 +226,7 @@ export default async function stageTerraformResourcesForGCP(
           "terraform",
           "cndi_google_compute_forwarding_rule.tf.json",
         ),
-        cndi_google_compute_forwarding_rule(),
+        cndi_google_compute_forwarding_rule(open_ports),
       ),
       stageFile(
         path.join(
@@ -226,6 +236,7 @@ export default async function stageTerraformResourcesForGCP(
         ),
         cndi_google_compute_instance_group(
           config.infrastructure.cndi.nodes as Array<GCPNodeItemSpec>,
+          open_ports,
         ),
       ),
 
