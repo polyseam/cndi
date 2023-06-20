@@ -204,14 +204,14 @@
             "tls": [
               {
                 "hosts": [
-                  "mysql.datameshshack.com"
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "mysql.datameshshack.com",
+                "host": "{{ $.cndi.prompts.responses.mysqlDomainName }}",
                 "http": {
                   "paths": [
                     {

@@ -251,7 +251,7 @@
     },
     "readme": {
       "extend_basic_readme": "azure",
-      "template_section": "## mysql \n\n This template deploys a mysql Innodb Cluster server with three server instances and one router instance using helm chart. Repo Url: [https://mysql.github.io/mysql-operator/]"
+      "template_section": "## mysql \n\n This template deploys a Mysql Innodb cluster server with three server instances and one router instance using helm chart. Repo Url: [https://mysql.github.io/mysql-operator/]"
     }
   }
 }

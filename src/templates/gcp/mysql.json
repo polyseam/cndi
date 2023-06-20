@@ -52,10 +52,20 @@
           ],
           "nodes": [
             {
-              "name": "mysql-node",
+              "name": "x-mysql-node",
               "kind": "gcp",
               "role": "leader",
               "instance_type": "n2-standard-2",
+              "volume_size": 128
+            },
+            {
+              "name": "y-mysql-node",
+              "kind": "gcp",
+              "volume_size": 128
+            },
+            {
+              "name": "z-mysql-node",
+              "kind": "gcp",
               "volume_size": 128
             }
           ]
@@ -155,14 +165,14 @@
             "tls": [
               {
                 "hosts": [
-                  "argocd.datameshstack.com"
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "argocd.datameshstack.com",
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
                 "http": {
                   "paths": [
                     {
@@ -200,14 +210,14 @@
             "tls": [
               {
                 "hosts": [
-                  "mysql.datameshshack.com"
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "mysql.datameshshack.com",
+                "host": "{{ $.cndi.prompts.responses.mysqlDomainName }}",
                 "http": {
                   "paths": [
                     {
