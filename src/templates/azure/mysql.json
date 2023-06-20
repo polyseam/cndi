@@ -46,10 +46,20 @@
           ],
           "nodes": [
             {
-              "name": "mysql-node",
+              "name": "x-mysql-node",
               "kind": "azure",
               "role": "leader",
               "instance_type": "Standard_D4s_v3",
+              "volume_size": 128
+            },
+            {
+              "name": "y-mysql-node",
+              "kind": "azure",
+              "volume_size": 128
+            },
+            {
+              "name": "z-mysql-node",
+              "kind": "azure",
               "volume_size": 128
             }
           ]
