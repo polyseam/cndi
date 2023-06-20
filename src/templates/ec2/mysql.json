@@ -46,7 +46,7 @@
           ],
           "nodes": [
             {
-              "name": "mysql-node",
+              "name": "x-mysql-node",
               "kind": "ec2",
               "role": "leader",
               "instance_type": "m5a.large",
