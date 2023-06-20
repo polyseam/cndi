@@ -233,7 +233,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "azure",
       "entries": [
         {
           "name": "ROOT_USER",
@@ -250,7 +250,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "azure",
       "template_section": "## mysql \n\n This template deploys a mysql Innodb Cluster server with three server instances and one router instance using helm chart. Repo Url: [https://mysql.github.io/mysql-operator/]"
     }
   }
