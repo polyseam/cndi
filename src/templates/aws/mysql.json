@@ -46,7 +46,7 @@
           ],
           "nodes": [
             {
-              "name": "mysql-node",
+              "name": "x-mysql-node",
               "kind": "ec2",
               "role": "leader",
               "instance_type": "m5a.large",
@@ -204,14 +204,14 @@
             "tls": [
               {
                 "hosts": [
-                  "mysql.datameshshack.com"
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
                 "secretName": "lets-encrypt-private-key"
               }
             ],
             "rules": [
               {
-                "host": "mysql.datameshshack.com",
+                "host": "{{ $.cndi.prompts.responses.mysqlDomainName }}",
                 "http": {
                   "paths": [
                     {
