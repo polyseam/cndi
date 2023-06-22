@@ -51,7 +51,7 @@
           "open_ports": [
             {
               "number": 3306,
-              "name": "clusterport",
+              "name": "mysql",
               "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}",
               "service": "{{ $.cndi.prompts.responses.clusterServiceName}}"
             }
