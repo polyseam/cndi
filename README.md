@@ -60,7 +60,7 @@ gh repo create cndi-example --private --clone && cd cndi-example
 
 Now that we have a Git repository, we can initialize a new CNDI project.
 
-We can do this in 2 different ways, either by using the interactive cli, or by
+We can do this in 2 different ways, either by using the interactive CLI, or by
 writing or forking a "cndi-config" file you got from someone else, often named
 `cndi-config.jsonc`.
 
