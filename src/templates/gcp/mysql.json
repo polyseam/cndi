@@ -39,7 +39,7 @@
           "open_ports": [
             {
               "number": 3306,
-              "name": "clusterport",
+              "name": "mysql",
               "namespace": "myinnodbcluster",
               "service": "mycluster"
             },
