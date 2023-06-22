@@ -39,7 +39,7 @@
           "open_ports": [
             {
               "number": 3306,
-              "name": "mysqlclusterservice",
+              "name": "ms-cluster-srv",
               "namespace": "myinnodbcluster",
               "service": "mycluster"
             }
