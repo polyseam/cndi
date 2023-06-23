@@ -24,6 +24,10 @@ export default function getKnownTemplates() {
       name: "ec2/neo4j",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/neo4j.jsonc`,
     },
+    {
+      name: "ec2/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/mysql.jsonc`,
+    },
     // eks
     {
       name: "eks/basic",
@@ -40,6 +44,10 @@ export default function getKnownTemplates() {
     {
       name: "eks/neo4j",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/neo4j.jsonc`,
+    },
+    {
+      name: "eks/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.jsonc`,
     },
     // gcp
     {
@@ -62,6 +70,10 @@ export default function getKnownTemplates() {
       name: "gcp/neo4j",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/neo4j.jsonc`,
     },
+    {
+      name: "gcp/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/mysql.jsonc`,
+    },
     // azure
     {
       name: "azure/basic",
@@ -82,6 +94,10 @@ export default function getKnownTemplates() {
     {
       name: "azure/neo4j",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/neo4j.jsonc`,
+    },
+    {
+      name: "azure/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/mysql.jsonc`,
     },
   ];
   return knownTemplates;
