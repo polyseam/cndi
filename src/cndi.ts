@@ -1,5 +1,5 @@
 import deno_json from "../deno.json" assert { type: "json" };
-
+import "https://deno.land/std@0.192.0/dotenv/load.ts";
 import {
   ccolors,
   Command,
@@ -8,7 +8,7 @@ import {
   homedir,
   path,
 } from "deps";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
 // commands
 import upgradeCommand from "src/commands/upgrade.ts";

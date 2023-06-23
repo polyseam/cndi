@@ -1,4 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { Command, path } from "deps";
 
 import pullStateForRun from "src/tfstate/git/read-state.ts";

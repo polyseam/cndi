@@ -1,5 +1,5 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 import { AWSEKSNodeItemSpec } from "src/types.ts";
 
 export default function getAWSEKServiceNodeGroupTFJSON(
