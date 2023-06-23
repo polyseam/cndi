@@ -4,7 +4,7 @@ import {
   DEFAULT_MICROK8S_VERSION,
   KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
-} from "constants";
+} from "consts";
 
 const defaultAddons: Array<Microk8sAddon> = [
   {

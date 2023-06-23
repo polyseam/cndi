@@ -1,20 +1,31 @@
-export const TERRAFORM_VERSION = "1.4.6";
-export const KUBESEAL_VERSION = "0.21.0";
-export const DEFAULT_MICROK8S_VERSION = "1.27";
+const TERRAFORM_VERSION = "1.4.6";
+const KUBESEAL_VERSION = "0.21.0";
+const DEFAULT_MICROK8S_VERSION = "1.27";
 
-export const DEFAULT_INSTANCE_TYPES = {
+const DEFAULT_INSTANCE_TYPES = {
   aws: "m5a.large" as const,
   gcp: "n2-standard-2" as const,
   azure: "Standard_D4s_v3" as const,
 };
 
-export const DEFAULT_NODE_DISK_SIZE = 100;
+const DEFAULT_NODE_DISK_SIZE = 100;
 
-export const NODE_DISK_SIZE_KEY = {
+const NODE_DISK_SIZE_KEY = {
   aws: "volume_size" as const,
   gcp: "size" as const,
   azure: "disk_size_gb" as const,
 };
 
-export const nonMicrok8sNodeKinds = ["eks"];
-export const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
+const NON_MICROK8S_NODE_KINDS = ["eks"];
+const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
+
+export {
+  DEFAULT_INSTANCE_TYPES,
+  DEFAULT_MICROK8S_VERSION,
+  DEFAULT_NODE_DISK_SIZE,
+  KUBESEAL_VERSION,
+  MICROK8S_INSTALL_RETRY_INTERVAL,
+  NODE_DISK_SIZE_KEY,
+  NON_MICROK8S_NODE_KINDS,
+  TERRAFORM_VERSION,
+};

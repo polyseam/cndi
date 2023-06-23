@@ -13,7 +13,7 @@
   "imports": {
     "src/": "./src/",
     "deps": "./src/deps.ts",
-    "constants": "./src/constants.ts",
+    "consts": "./src/constants.ts",
     "test-deps": "./src/tests/deps.ts"
   }
 }

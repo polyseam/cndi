@@ -8,7 +8,7 @@ import {
   homedir,
   path,
 } from "deps";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
 // commands
 import upgradeCommand from "src/commands/upgrade.ts";
