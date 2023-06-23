@@ -1,5 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
-
 import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {

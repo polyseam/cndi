@@ -1,5 +1,5 @@
 import deno_json from "../deno.json" assert { type: "json" };
-
+import "https://deno.land/std@0.192.0/dotenv/load.ts";
 import {
   ccolors,
   Command,

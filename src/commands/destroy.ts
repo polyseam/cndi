@@ -1,5 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
-
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
