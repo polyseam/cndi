@@ -5,12 +5,12 @@ in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `aws/airflow`
-Template. In just a few minutes we will be able to deploy a new Kubernetes
-cluster to AWS that has been optimally configured for Airflow, including GitOps
-with Secrets management, TLS and High Availibility right out-of-the-box. This
-framework will enable quick iteration of infrastructure, applications and
-manifests in a GitHub workflow you are already comfortable with.
+This walkthough uses `cndi` to customize and deploy our `aws/airflow` Template.
+In just a few minutes we will be able to deploy a new Kubernetes cluster to AWS
+that has been optimally configured for Airflow, including GitOps with Secrets
+management, TLS and High Availibility right out-of-the-box. This framework will
+enable quick iteration of infrastructure, applications and manifests in a GitHub
+workflow you are already comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/aws/img/cndi-cluster-0.png)
 
