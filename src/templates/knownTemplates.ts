@@ -9,8 +9,8 @@ export default function getKnownTemplates() {
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/basic.jsonc`,
     },
     {
-      name: "ec2/airflow-cnpg",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/airflow-cnpg.jsonc`,
+      name: "ec2/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/airflow.jsonc`,
     },
     {
       name: "ec2/hop",
@@ -31,7 +31,7 @@ export default function getKnownTemplates() {
     },
     {
       name: "eks/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/airflow-cnpg.jsonc`,
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/airflow.jsonc`,
     },
     {
       name: "eks/hop",
@@ -47,7 +47,7 @@ export default function getKnownTemplates() {
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/basic.jsonc`,
     },
     {
-      name: "gcp/airflow-cnpg",
+      name: "gcp/airflow",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/airflow.jsonc`,
     },
     {
@@ -69,7 +69,7 @@ export default function getKnownTemplates() {
     },
     {
       name: "azure/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/airflow-cnpg.jsonc`,
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/airflow.jsonc`,
     },
     {
       name: "azure/cnpg",

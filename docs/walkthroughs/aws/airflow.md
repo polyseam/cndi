@@ -1,11 +1,11 @@
-# aws/airflow-cnpg walkthrough
+# aws/airflow walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
 in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `aws/airflow-cnpg`
+This walkthough uses `cndi` to customize and deploy our `aws/airflow`
 Template. In just a few minutes we will be able to deploy a new Kubernetes
 cluster to AWS that has been optimally configured for Airflow, including GitOps
 with Secrets management, TLS and High Availibility right out-of-the-box. This
@@ -26,7 +26,7 @@ successfully:**
   [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
   to deploy resources.
 
-- **A Domain Name**: Because the `aws/airflow-cnpg` template sets up TLS
+- **A Domain Name**: Because the `aws/airflow` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `CNAME` records there
   for our cluster Ingresses.
@@ -70,16 +70,16 @@ cndi init --interactive
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `aws/airflow-cnpg` Template.
+For this project select the `aws/airflow` Template.
 
 ```shell
 ? Pick a template
    aws/basic
    gcp/basic
    azure/basic
- ❯ aws/airflow-cnpg
-   azure/airflow-cnpg
-   gcp/airflow-cnpg
+ ❯ aws/airflow
+   azure/airflow
+   gcp/airflow
 ```
 
 Below is the list of all of the interactive prompt values that should be
