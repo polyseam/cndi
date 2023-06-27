@@ -10,10 +10,13 @@ import {
   SealedSecretsKeys,
 } from "src/types.ts";
 
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
+
 import {
   ccolors,
   Checkbox,
   Confirm,
+  deepMerge,
   Input,
   JSONC,
   List,
@@ -25,7 +28,6 @@ import {
 } from "deps";
 
 import getReadmeForProject from "src/outputs/readme.ts";
-import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
 
 const useTemplateLabel = ccolors.faded(
   "\nsrc/templates/useTemplate.ts:",
@@ -110,7 +112,7 @@ interface Template {
   };
 }
 
-interface TemplateResult {
+export interface TemplateResult {
   "cndiConfig": CNDIConfig;
   "env": EnvLines;
   "readme": string;
@@ -183,86 +185,155 @@ export function literalizeTemplateValuesInString(
   return literalizedString;
 }
 
-export default async function useTemplate(
-  templateLocation: string,
+async function fetchAndCombineTemplateObjects(
+  templateURLs: Array<URL>,
+): Promise<Template> {
+  let templateObject: Template;
+
+  for (const tURL of templateURLs) {
+    let tFetchResponse: Response;
+    let tText: string;
+    let tObj: Template;
+
+    try {
+      tFetchResponse = await fetch(tURL);
+      tText = await tFetchResponse.text();
+    } catch (fetchError) {
+      console.error(
+        useTemplateLabel,
+        ccolors.error("could not fetch template from"),
+        ccolors.user_input(`"${tURL}"`),
+      );
+      console.log(ccolors.caught(fetchError, 1201));
+      await emitExitEvent(1201);
+      Deno.exit(1201);
+    }
+
+    try {
+      tObj = JSONC.parse(tText) as unknown as Template;
+    } catch (parseError) {
+      console.error(
+        useTemplateLabel,
+        ccolors.user_input(`"${tURL}"`),
+        ccolors.error("did not contain valid JSONC for Template"),
+      );
+      console.log(ccolors.caught(parseError, 1202));
+      await emitExitEvent(1202);
+      Deno.exit(1202);
+    }
+
+    // @deno-lint-ignore
+    if (!templateObject!) {
+      templateObject = tObj;
+    }
+
+    // combine prompts
+    templateObject.prompts = templateObject.prompts.map((prompt) => {
+      const indexOfMutual = tObj.prompts.findIndex((
+        p,
+      ) => (p.name === prompt.name));
+      if (indexOfMutual === -1) return prompt;
+      return tObj.prompts[indexOfMutual] = prompt;
+    });
+
+    // combine outputs.cndi-config
+    const tCndiConfig = tObj.outputs["cndi-config"];
+
+    templateObject.outputs["cndi-config"] = deepMerge({
+      ...templateObject.outputs["cndi-config"],
+    }, {
+      ...tCndiConfig,
+    });
+
+    // combine outputs.env
+    const tEnv = tObj.outputs["env"];
+    templateObject.outputs.env.entries?.map((entry) => {
+      const indexOfMutual = tEnv.entries?.findIndex((
+        e,
+      ) => (e.name === entry.name));
+
+      if (tEnv.entries && indexOfMutual && indexOfMutual > -1) {
+        return tEnv?.entries[indexOfMutual];
+      }
+      return entry;
+    });
+    if (tEnv.extend_basic_env) {
+      templateObject.outputs.env.extend_basic_env = tEnv.extend_basic_env;
+    }
+
+    // combine outputs.readme
+    const tReadme = tObj.outputs["readme"];
+    if (tReadme.extend_basic_readme) {
+      templateObject.outputs.readme.extend_basic_readme =
+        tReadme.extend_basic_readme;
+    }
+    if (tReadme.template_section) {
+      templateObject.outputs.readme.template_section +=
+        tReadme.template_section;
+    }
+  }
+
+  return templateObject!;
+}
+
+export default async function useTemplates(
+  templateLocations: string[],
   opt: {
     project_name: string;
     cndiGeneratedValues: CNDIGeneratedValues;
     interactive: boolean;
   },
 ): Promise<TemplateResult> {
-  let templateUrl: URL;
+  const templateURLs: Array<URL> = [];
+
   const { cndiGeneratedValues, interactive } = opt;
 
-  try {
-    templateUrl = new URL(templateLocation);
-  } catch {
-    // if it's not a valid URL, assume it's a Polyseam named template
-    const validTargets = [
-      { name: "aws", aliasFor: "ec2" },
-      { name: "ec2" },
-      { name: "eks" },
-      { name: "azure" },
-      { name: "gcp" },
-    ];
+  for (let templateLocation of templateLocations) {
+    try {
+      const templateUrl = new URL(templateLocation);
+      templateURLs.push(templateUrl);
+    } catch {
+      // if it's not a valid URL, assume it's a Polyseasm named template
+      const validTargets = [
+        { name: "aws", aliasFor: "ec2" },
+        { name: "ec2" },
+        { name: "eks" },
+        { name: "azure" },
+        { name: "gcp" },
+      ];
 
-    const validTarget = validTargets.find((target) => {
-      return templateLocation.startsWith(target.name);
-    });
+      const validTarget = validTargets.find((target) => {
+        return templateLocation.startsWith(target.name);
+      });
 
-    if (
-      !validTarget
-    ) {
-      // it's not a valid template target
-      console.error(
-        useTemplateLabel,
-        ccolors.key_name(`"${templateLocation}"`),
-        ccolors.error("is not a valid template name"),
-      );
-      await emitExitEvent(1200);
-      Deno.exit(1200);
-    } else if (validTarget?.aliasFor) {
-      templateLocation = templateLocation.replace(
-        validTarget.name,
-        validTarget.aliasFor,
+      if (
+        !validTarget
+      ) {
+        // it's not a valid template target
+        console.error(
+          useTemplateLabel,
+          ccolors.key_name(`"${templateLocation}"`),
+          ccolors.error("is not a valid template name"),
+        );
+        await emitExitEvent(1200);
+        Deno.exit(1200);
+      } else if (validTarget?.aliasFor) {
+        templateLocation = templateLocation.replace(
+          validTarget.name,
+          validTarget.aliasFor,
+        );
+      }
+      templateURLs.push(
+        new URL(
+          `${templateLocation}.jsonc`,
+          POLYSEAM_TEMPLATE_DIRECTORY,
+        ),
       );
     }
-    templateUrl = new URL(
-      `${templateLocation}.jsonc`,
-      POLYSEAM_TEMPLATE_DIRECTORY,
-    );
   }
 
-  let templateObject: Template;
-  let templateText: string;
-  let response: Response;
-
-  try {
-    response = await fetch(templateUrl);
-    templateText = await response.text();
-  } catch (fetchError) {
-    console.error(
-      useTemplateLabel,
-      ccolors.error("could not fetch template from"),
-      ccolors.user_input(`"${templateUrl}"`),
-    );
-    console.log(ccolors.caught(fetchError, 1201));
-    await emitExitEvent(1201);
-    Deno.exit(1201);
-  }
-
-  try {
-    templateObject = JSONC.parse(templateText) as unknown as Template;
-  } catch (parseError) {
-    console.error(
-      useTemplateLabel,
-      ccolors.user_input(`"${templateUrl}"`),
-      ccolors.error("did not contain valid JSONC for Template"),
-    );
-    console.log(ccolors.caught(parseError, 1202));
-    await emitExitEvent(1202);
-    Deno.exit(1202);
-  }
+  const templateObject = await fetchAndCombineTemplateObjects(templateURLs);
+  console.log("templateObject", templateObject);
 
   const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,

@@ -1,4 +1,4 @@
-import { ccolors, Command, Input, path, Select, SEP } from "deps";
+import { ccolors, Command, Input, List, path, SEP } from "deps";
 
 import {
   checkInitialized,
@@ -16,7 +16,7 @@ import { overwriteAction } from "src/commands/overwrite.ts";
 
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
-import useTemplate from "src/templates/useTemplate.ts";
+import useTemplates from "src/templates/useTemplates.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
@@ -34,6 +34,27 @@ import validateConfig from "src/validate/cndiConfig.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
+function printTemplateList(templateNamesList: string[]) {
+  const rowLen = 20; //chars
+  const colsPerRow = 4;
+  const bar = ccolors.faded(" | ");
+  console.log();
+  console.log(
+    templateNamesList.map((name, index) => {
+      const pad = " ".repeat(rowLen - name.length);
+      // weird on the first row
+      if (!index) return `${bar}${ccolors.key_name(name)}${pad}`;
+      // new row
+      if (index % colsPerRow === 0) {
+        return `${ccolors.key_name(name)}${pad}\n`;
+      }
+      // same row
+      return `${ccolors.key_name(name)}${pad}`;
+    }).join(bar),
+  );
+  console.log();
+}
+
 /**
  * COMMAND cndi init
  * Creates a CNDI cluster by reading the contents of ./cndi
@@ -49,19 +70,19 @@ const initCommand = new Command()
     { default: Deno.cwd() },
   )
   .option("-i, --interactive", "Run in interactive mode.")
-  .option("-t, --template <template:string>", "CNDI Template to use.")
+  .option("-t, --templates [templates...:string]", "CNDI Template to use.")
   .option("-d, --debug", "Create a cndi project in debug mode.", {
     hidden: true,
   })
   .action(async (options) => {
     const pathToConfig = options.file;
-    let template: string | undefined = options.template;
+    let templates: string[] | undefined | true = options.templates;
     let cndiConfig: CNDIConfig;
     let env: EnvLines;
     let readme: string;
     let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
     // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-    const useCNDIConfigFile = !options.interactive && !template;
+    const useCNDIConfigFile = !options.interactive && !templates;
 
     if (useCNDIConfigFile) {
       console.log(`cndi init --file "${pathToConfig}"\n`);
@@ -98,7 +119,7 @@ const initCommand = new Command()
       }
     }
 
-    if (options.template === "true") {
+    if (options.templates === true) {
       console.error(
         initLabel,
         ccolors.error(`--template (-t) flag requires a value`),
@@ -107,16 +128,18 @@ const initCommand = new Command()
       Deno.exit(401);
     }
 
-    if (options.interactive && !template) {
+    if (options.interactive && !templates) {
       console.log("cndi init --interactive\n");
     }
 
-    if (options.interactive && template) {
-      console.log(`cndi init --interactive --template ${template}\n`);
+    if (options.interactive && Array.isArray(templates)) {
+      console.log(
+        `cndi init --interactive --templates ${templates.join(" ")}\n`,
+      );
     }
 
-    if (!options.interactive && template) {
-      console.log(`cndi init --template ${template}\n`);
+    if (!options.interactive && Array.isArray(templates)) {
+      console.log(`cndi init --template ${templates.join(" ")}\n`);
     }
 
     const directoryContainsCNDIFiles = await checkInitialized(options.output);
@@ -154,10 +177,11 @@ const initCommand = new Command()
 
     //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow"
 
-    if (options.interactive && !template) {
-      template = await Select.prompt({
-        message: ccolors.prompt("Pick a template"),
-        options: templateNamesList,
+    if (options.interactive && !templates) {
+      printTemplateList(templateNamesList);
+      templates = await List.prompt({
+        message: ccolors.prompt("Pick one or more templates:"),
+        suggestions: templateNamesList,
       });
     }
 
@@ -167,9 +191,9 @@ const initCommand = new Command()
       argoUIAdminPassword,
     };
 
-    if (template) {
-      const templateResult = await useTemplate(
-        template!,
+    if (templates && Array.isArray(templates)) {
+      const templateResult = await useTemplates(
+        templates!,
         {
           project_name,
           cndiGeneratedValues,
@@ -211,7 +235,7 @@ const initCommand = new Command()
       if (e instanceof Deno.errors.NotFound) {
         await stageFile(
           "README.md",
-          readme,
+          readme!,
         );
       }
     }
@@ -220,13 +244,13 @@ const initCommand = new Command()
       Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
 
     if (options?.debug || inDebugEnv) {
-      env.push(
+      env!.push(
         { comment: "Telemetry Mode" },
         { value: { CNDI_TELEMETRY: "debug" } },
       );
     }
 
-    await stageFile(".env", getEnvFileContents(env));
+    await stageFile(".env", getEnvFileContents(env!));
 
     await stageFile(
       path.join(".vscode", "settings.json"),
@@ -240,7 +264,7 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    if (template) {
+    if (templates) {
       await persistStagedFiles(options.output);
 
       // because there is no "pathToConfig" when using a template, we need to set it here

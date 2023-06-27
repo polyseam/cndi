@@ -8,7 +8,6 @@ export { deepMerge } from "https://deno.land/std@0.192.0/collections/deep_merge.
 export { walk } from "https://deno.land/std@0.192.0/fs/mod.ts";
 export * as JSONC from "https://deno.land/std@0.192.0/jsonc/mod.ts";
 export { delay } from "https://deno.land/std@0.192.0/async/delay.ts";
-
 // Third party
 //  - cliffy
 export {
@@ -24,6 +23,7 @@ export {
 
 import { UpgradeOptions } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+export { Table } from "https://deno.land/x/cliffy@v0.25.7/table/mod.ts";
 
 export {
   Checkbox,

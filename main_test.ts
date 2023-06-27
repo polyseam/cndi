@@ -2,7 +2,7 @@ import { assert, beforeEach, describe, it } from "test-deps";
 
 import { path } from "deps";
 
-import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
+import { literalizeTemplateValuesInString } from "src/templates/useTemplates.ts";
 
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
