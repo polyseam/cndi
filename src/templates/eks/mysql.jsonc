@@ -19,6 +19,18 @@
       "type": "Input"
     },
     {
+      "message": "Please enter Innodb cluster namespace name:",
+      "default": "myinnodbcluster",
+      "name": "innodbNamespace",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter cluster service name:",
+      "default": "mycluster",
+      "name": "clusterServiceName",
+      "type": "Input"
+    },
+    {
       "message": "Please enter root username",
       "default": "root",
       "name": "rootUser",
@@ -39,33 +51,73 @@
           "open_ports": [
             {
               "number": 3306,
-              "name": "mysqlclusterservice",
-              "namespace": "myinnodbcluster",
-              "service": "mycluster"
+              "name": "mysql",
+              "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}",
+              "service": "{{ $.cndi.prompts.responses.clusterServiceName}}"
             }
           ],
           "nodes": [
             {
-              "name": "x-mysql-node",
-              "kind": "ec2",
-              "role": "leader",
-              "instance_type": "m5a.large",
-              "volume_size": 128
-            },
-            {
-              "name": "y-mysql-node",
-              "kind": "ec2",
-              "volume_size": 128
-            },
-            {
-              "name": "z-mysql-node",
-              "kind": "ec2",
-              "volume_size": 128
+              "name": "my-nodes",
+              "kind": "eks",
+              "volume_size": 128,
+              "max_count": 3
             }
           ]
         }
       },
       "cluster_manifests": {
+        "mysql-innodb-ns": {
+          "apiVersion": "v1",
+          "kind": "Namespace",
+          "metadata": {
+            "name": "{{ $.cndi.prompts.responses.innodbNamespace }}"
+          }
+        },
+        "mycluster-sa": {
+          "apiVersion": "v1",
+          "kind": "ServiceAccount",
+          "metadata": {
+            "name": "{{ $.cndi.prompts.responses.clusterServiceName}}-sa",
+            "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}"
+          }
+        },
+        "mycluster-innodbcluster": {
+          "apiVersion": "mysql.oracle.com/v2",
+          "kind": "InnoDBCluster",
+          "metadata": {
+            "name": "{{ $.cndi.prompts.responses.clusterServiceName}}",
+            "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
+            }
+          },
+          "spec": {
+            "instances": 3,
+            "tlsUseSelfSigned": true,
+            "router": {
+              "instances": 1
+            },
+            "secretName": "mysql-secret",
+            "imagePullPolicy": "IfNotPresent",
+            "baseServerId": 1000,
+            "version": "8.0.33",
+            "serviceAccountName": "{{ $.cndi.prompts.responses.clusterServiceName}}-sa"
+          }
+        },
+        "mycluster-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "mysql-secret",
+            "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}"
+          },
+          "stringData": {
+            "rootUser": "$.cndi.secrets.seal(ROOT_USER)",
+            "rootHost": "$.cndi.secrets.seal(ROOT_HOST)",
+            "rootPassword": "$.cndi.secrets.seal(ROOT_PASSWORD)"
+          }
+        },
         "cert-manager-cluster-issuer": {
           "apiVersion": "cert-manager.io/v1",
           "kind": "ClusterIssuer",
@@ -83,7 +135,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "class": "public"
+                      "ingressClassName": "public"
                     }
                   }
                 }
@@ -136,63 +188,12 @@
             ]
           }
         },
-        "mysql-innodb-ns": {
-          "apiVersion": "v1",
-          "kind": "Namespace",
-          "metadata": {
-            "name": "myinnodbcluster"
-          }
-        },
-        "mycluster-sa": {
-          "apiVersion": "v1",
-          "kind": "ServiceAccount",
-          "metadata": {
-            "name": "mycluster-sa",
-            "namespace": "myinnodbcluster"
-          }
-        },
-        "mycluster-innodbcluster": {
-          "apiVersion": "mysql.oracle.com/v2",
-          "kind": "InnoDBCluster",
-          "metadata": {
-            "name": "mycluster",
-            "namespace": "myinnodbcluster",
-            "annotations": {
-              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
-            }
-          },
-          "spec": {
-            "instances": 3,
-            "tlsUseSelfSigned": true,
-            "router": {
-              "instances": 1
-            },
-            "secretName": "mysql-secret",
-            "imagePullPolicy": "IfNotPresent",
-            "baseServerId": 1000,
-            "version": "8.0.33",
-            "serviceAccountName": "mycluster-sa"
-          }
-        },
-        "mycluster-secret": {
-          "apiVersion": "v1",
-          "kind": "Secret",
-          "metadata": {
-            "name": "mysql-secret",
-            "namespace": "myinnodbcluster"
-          },
-          "stringData": {
-            "rootUser": "$.cndi.secrets.seal(ROOT_USER)",
-            "rootHost": "$.cndi.secrets.seal(ROOT_HOST)",
-            "rootPassword": "$.cndi.secrets.seal(ROOT_PASSWORD)"
-          }
-        },
         "mysql-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
           "metadata": {
             "name": "mysql-ingress",
-            "namespace": "myinnodbcluster",
+            "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}",
             "annotations": {
               "cert-manager.io/cluster-issuer": "lets-encrypt",
               "kubernetes.io/tls-acme": "true",
@@ -261,7 +262,7 @@
     },
     "readme": {
       "extend_basic_readme": "aws",
-      "template_section": "## mysql \n\n This template deploys a mysql Innodb Cluster server with three server instances and one router instance using helm chart. Repo Url: [https://mysql.github.io/mysql-operator/]"
+      "template_section": "## mysql \n\n This template deploys mysql operator, mysql Innodb Cluster server with three server instances and one router instance using helm chart. Repo Url: [https://mysql.github.io/mysql-operator/]."
     }
   }
 }

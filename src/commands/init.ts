@@ -1,5 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
-
 import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {
@@ -154,7 +152,7 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow-cnpg"
+    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow"
 
     if (options.interactive && !template) {
       template = await Select.prompt({

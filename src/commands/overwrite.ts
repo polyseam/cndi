@@ -1,4 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { ccolors, Command, path } from "deps";
 
 import {
@@ -28,7 +27,7 @@ import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerrafo
 
 import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
-import { nonMicrok8sNodeKinds } from "../constants.ts";
+import { NON_MICROK8S_NODE_KINDS } from "consts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -152,7 +151,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   console.log(ccolors.success("staged terraform files"));
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
-  const isNotMicrok8sCluster = nonMicrok8sNodeKinds.includes(
+  const isNotMicrok8sCluster = NON_MICROK8S_NODE_KINDS.includes(
     config?.infrastructure?.cndi?.nodes?.[0]?.kind,
   );
 

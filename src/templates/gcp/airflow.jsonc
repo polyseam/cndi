@@ -61,19 +61,19 @@
           "nodes": [
             {
               "name": "x-airflow-node",
-              "kind": "ec2",
+              "kind": "gcp",
               "role": "leader",
-              "instance_type": "m5a.large",
+              "instance_type": "n2-standard-2",
               "volume_size": 128
             },
             {
               "name": "y-airflow-node",
-              "kind": "ec2",
+              "kind": "gcp",
               "volume_size": 128
             },
             {
               "name": "z-airflow-node",
-              "kind": "ec2",
+              "kind": "gcp",
               "volume_size": 128
             }
           ]
@@ -316,7 +316,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "gcp",
       "entries": [
         {
           "type": "Comment",
@@ -369,8 +369,8 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
-      "template_section": "## airflow-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
+      "extend_basic_readme": "gcp",
+      "template_section": "## airflow\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
     }
   }
 }

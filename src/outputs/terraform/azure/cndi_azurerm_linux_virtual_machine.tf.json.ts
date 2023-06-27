@@ -4,7 +4,7 @@ import {
   getUserDataTemplateFileString,
 } from "src/utils.ts";
 import { AzureNodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
