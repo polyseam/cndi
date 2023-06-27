@@ -224,7 +224,7 @@ async function fetchAndCombineTemplateObjects(
 
     // @deno-lint-ignore
     if (!templateObject!) {
-      templateObject = tObj;
+      templateObject = { ...tObj };
     }
 
     // combine prompts
@@ -244,7 +244,7 @@ async function fetchAndCombineTemplateObjects(
     }, {
       ...tCndiConfig,
     });
-
+    
     // combine outputs.env
     const tEnv = tObj.outputs["env"];
     templateObject.outputs.env.entries?.map((entry) => {
@@ -284,6 +284,7 @@ export default async function useTemplates(
     interactive: boolean;
   },
 ): Promise<TemplateResult> {
+  console.log("templateLocations", templateLocations.length);
   const templateURLs: Array<URL> = [];
 
   const { cndiGeneratedValues, interactive } = opt;
@@ -332,8 +333,9 @@ export default async function useTemplates(
     }
   }
 
+  console.log("templateURLs", templateURLs.length);
   const templateObject = await fetchAndCombineTemplateObjects(templateURLs);
-  console.log("templateObject", templateObject);
+  // console.log("nodes", templateObject.outputs["cndi-config"].infrastructure.cndi.nodes);
 
   const coreEnvLines = await getCoreEnvLines(
     cndiGeneratedValues,
