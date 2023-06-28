@@ -176,11 +176,11 @@ export default async function validateConfig(
           'value of "dev". Only one node can be deployed when doing dev deployments.',
         ),
       );
+      Deno.exit(908);
     }
-    Deno.exit(908);
   }
 
-  if (!config.cndi_version) {
+  if (!config?.cndi_version) {
     console.log(
       cndiConfigLabel,
       ccolors.warn(`You haven't specified a`),

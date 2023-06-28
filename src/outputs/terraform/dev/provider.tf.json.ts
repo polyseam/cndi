@@ -5,5 +5,5 @@ export default function getDevProviderTFJSON() {
     multipass: {},
   };
 
-  return getPrettyJSONString(provider);
+  return getPrettyJSONString({ provider });
 }
