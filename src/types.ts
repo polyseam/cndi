@@ -154,6 +154,14 @@ type TFBlocks = {
   };
 };
 
+interface CNDIPort {
+  name: string;
+  service: string;
+  namespace: string;
+  number: number;
+  disable?: boolean;
+}
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
@@ -175,6 +183,7 @@ interface CNDIConfig {
         root_application: unknown; //
         install_url?: string; //
       };
+      open_ports?: Array<CNDIPort>;
     };
     terraform?: TFBlocks;
   };
@@ -245,6 +254,7 @@ export type {
   BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIConfig,
+  CNDIPort,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,

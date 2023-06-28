@@ -24,11 +24,54 @@
           "description": "The path to the env file",
           "properties": {
             "entries": {
-              "type": "array"
+              "type": "array",
+              "description": "An array of lines to be added to the .env file",
+              "items": {
+                "type": "object",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": { "const": "Comment" },
+                      "comment": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
             },
             "extend_basic_env": {
               "type": "string",
               "enum": ["aws", "gcp", "azure"]
+            }
+          }
+        },
+        "readme": {
+          "type": "object",
+          "description": "used to configure how the cluster README.md is generated",
+          "additionalProperties": false,
+          "properties": {
+            "extend_basic_readme": {
+              "type": "string",
+              "enum": ["aws", "gcp", "azure"]
+            },
+            "template_section": {
+              "type": "string",
+              "description": "A section of the readme which applies specifically to this template"
             }
           }
         }

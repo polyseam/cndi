@@ -1,5 +1,6 @@
 {
-  "version": "1.8.4",
+  "version": "1.11.0",
+  "deno_version": "1.34.3",
   "tasks": {
     "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
     "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
@@ -12,7 +13,7 @@
   "imports": {
     "src/": "./src/",
     "deps": "./src/deps.ts",
-    "constants": "./src/constants.ts",
+    "consts": "./src/constants.ts",
     "test-deps": "./src/tests/deps.ts"
   }
 }

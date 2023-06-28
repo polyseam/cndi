@@ -18,7 +18,7 @@
     },
     {
       "fileMatch": [
-        "src/templates/two/**/*.json*"
+        "src/templates/**/*.json*"
       ],
       "url": "/src/schemas/cndi-template.schema.json"
     }

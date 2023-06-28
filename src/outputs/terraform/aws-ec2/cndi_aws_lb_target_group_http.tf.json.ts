@@ -4,7 +4,6 @@ export default function getAWSLbTargetGroupHTTPTFJSON(): string {
   const resource = getTFResource("aws_lb_target_group", {
     tags: {
       Name: "HTTPLBTargetGroup",
-      CNDIProject: "${local.cndi_project_name}",
     },
     port: 80,
     protocol: "TCP",

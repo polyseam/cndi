@@ -1,4 +1,3 @@
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
 import { ccolors, Command, path } from "deps";
 
 import {
@@ -18,10 +17,17 @@ import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
 
+import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
+import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
+
+import getEKSIngressServiceManifest from "src/outputs/custom-port-manifests/eks/ingress-service.ts";
+import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/eks/ingress-tcp-services-configmap.ts";
+
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
+import { NON_MICROK8S_NODE_KINDS } from "consts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -143,6 +149,48 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   );
 
   console.log(ccolors.success("staged terraform files"));
+
+  const open_ports = config?.infrastructure?.cndi?.open_ports;
+  const isNotMicrok8sCluster = NON_MICROK8S_NODE_KINDS.includes(
+    config?.infrastructure?.cndi?.nodes?.[0]?.kind,
+  );
+
+  if (open_ports) {
+    if (
+      isNotMicrok8sCluster // currently only EKS
+    ) {
+      await Promise.all([
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.json",
+          ),
+          getEKSIngressTcpServicesConfigMapManifest(open_ports),
+        ),
+        stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-service.json"),
+          getEKSIngressServiceManifest(open_ports),
+        ),
+      ]);
+    } else {
+      await Promise.all([
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.json",
+          ),
+          getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+        ),
+        stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
+          getMicrok8sIngressDaemonsetManifest(open_ports),
+        ),
+      ]);
+    }
+    console.log(ccolors.success("staged open ports manifests"));
+  }
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   for (const key in cluster_manifests) {

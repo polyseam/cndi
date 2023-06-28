@@ -4,7 +4,7 @@ import {
   getUserDataTemplateFileString,
 } from "src/utils.ts";
 import { AWSEC2NodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "constants";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 
 export default function getAWSComputeInstanceTFJSON(
   node: AWSEC2NodeItemSpec,
@@ -40,7 +40,6 @@ export default function getAWSComputeInstanceTFJSON(
       instance_type,
       tags: {
         Name: name,
-        CNDIProject: "${local.cndi_project_name}",
         CNDINodeRole: role,
       },
       root_block_device,

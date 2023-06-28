@@ -10,6 +10,10 @@ const cndiWorkflowObj = {
   jobs: {
     "cndi-run": {
       "runs-on": "ubuntu-20.04",
+      env: {
+        GIT_REPO: "https://github.com/${{ github.repository }}",
+        CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+      },
       steps: [
         {
           name: "welcome",
@@ -49,15 +53,11 @@ const cndiWorkflowObj = {
         },
         {
           name: "cndi install",
-          run: "cndi install",
-          env: {
-            CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
-          },
+          run: "cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
         },
         {
           name: "cndi run",
           env: {
-            GIT_REPO: "https://github.com/${{ github.repository }}",
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
             TERRAFORM_STATE_PASSPHRASE:
