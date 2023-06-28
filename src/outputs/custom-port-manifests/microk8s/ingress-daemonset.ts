@@ -4,7 +4,7 @@ import { getPrettyJSONString } from "src/utils.ts";
 import { CNDIPort } from "src/types.ts";
 
 const _ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
-  "\nsrc/outputs/custom-port-manifests/ingress-tcp-services-configmap.ts:",
+  "\nsrc/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts:",
 );
 
 interface NginxIngressContainerPorts {
