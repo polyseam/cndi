@@ -1,26 +1,26 @@
-import {
-  getPrettyJSONString,
-  getTFResource,
-  getUserDataTemplateFileString,
-} from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
-type MultipassInstanceItemSpec = {
-  name: string;
-  cpus?: number;
-  disk?: string;
-  memory?: string;
-};
+import { MultipassNodeItemSpec } from "src/types.ts";
 
 export default function getMultipassInstanceTFJSON(
-  { name, cpus = 4, disk = "50GiB", memory = "4GiB" }:
-    MultipassInstanceItemSpec,
+  node: MultipassNodeItemSpec,
 ): string {
+  const { name } = node;
+  const DEFAULT_DEV_DISK_SIZE = 50;
+  const suffix = "GiB";
+  const cpus = 4;
+  const size = node?.volume_size || node?.disk_size || node?.disk_size_gb ||
+    DEFAULT_DEV_DISK_SIZE;
+  const ram = 4;
+  const disk = `${size}${suffix}`;
+  const memory = `${ram}${suffix}`;
   const resource = getTFResource("multipass_instance", {
     name,
-    cloudinit_file: getUserDataTemplateFileString("leader"),
+    cloudinit_file: "microk8s-cloud-init-leader-hardcoded-values.yml.tftpl",
     cpus,
     disk,
     memory,
+    depends_on: ["local_sensitive_file.cndi_local_sensitive_file"],
   });
 
   return getPrettyJSONString(resource);
