@@ -9,7 +9,7 @@ export default function getMultipassTerraformDataTFJSON(
     provisioner: {
       "local-exec": {
         "command":
-          `multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' >> leader_ip_address.txt`,
+          `multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '\n' > cndi/terraform/leader_ip_address.txt`,
       },
     },
   });
