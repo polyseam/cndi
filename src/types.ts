@@ -59,6 +59,17 @@ interface BaseNodeItemSpec {
   machine_type?: string;
 }
 
+// cndi-config.jsonc["nodes"][kind==="dev"]
+interface MultipassNodeItemSpec extends BaseNodeItemSpec {
+  name: string;
+  cpus?: number;
+  memory?: string;
+  disk?: number;
+  disk_size_gb?: number;
+  volume_size?: number;
+  disk_size?: number;
+}
+
 // cndi-config.jsonc["nodes"][kind==="azure"]
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
@@ -265,6 +276,7 @@ export type {
   KubernetesSecret,
   KubernetesSecretWithStringData,
   Microk8sAddon,
+  MultipassNodeItemSpec,
   SealedSecretsKeys,
   TFBlocks,
 };
