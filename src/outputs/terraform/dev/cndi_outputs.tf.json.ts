@@ -8,13 +8,16 @@ export default function getOutputTFJSON(node: MultipassNodeItemSpec): string {
         value:
           "Run the following command in your terminal to access the Argocd server",
       },
-      multi_pass_command: {
+      I: {
         value:
-          `multipass exec ${node.name} -- sudo microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 --address \${data.local_file.cndi_data_local_file.content}`,
+          `multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}'`,
       },
-      browser_command: {
+      II: {
         value:
-          "Then run https://${data.local_file.cndi_data_local_file.content}:8080 in your browser",
+          `multipass exec ${node.name} -- sudo microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 --address <ip address of node>`,
+      },
+      III: {
+        value: "Then run https://<ip address of node>:8080 in your browser",
       },
     },
   });
