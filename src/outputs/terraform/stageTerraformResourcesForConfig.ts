@@ -6,7 +6,7 @@ import stageTerraformResourcesForAWSEC2 from "src/outputs/terraform/aws-ec2/stag
 import stageTerraformResourcesForAWSEKS from "src/outputs/terraform/aws-eks/stageAll.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
-import stageTerraformResourcesForDev from "./dev/stageAll.ts";
+import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
 
 import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
 import variable from "src/outputs/terraform/shared/variable.tf.json.ts";
