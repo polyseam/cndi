@@ -4,7 +4,9 @@
   "title": "cndi-config",
   "$comment": "The root of the cndi config schema",
   "description": "A configuration file for CNDI that defines the hardware and software of your cluster",
-  "required": ["infrastructure"],
+  "required": [
+    "infrastructure"
+  ],
   "properties": {
     "project_name": {
       "type": "string",
@@ -20,7 +22,9 @@
     "infrastructure": {
       "type": "object",
       "description": "An object which defines the infrastructure resources CNDI should deploy.",
-      "required": ["cndi"],
+      "required": [
+        "cndi"
+      ],
       "properties": {
         "terraform": {
           "": {}
@@ -28,7 +32,9 @@
         "cndi": {
           "type": "object",
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
-          "required": ["nodes"],
+          "required": [
+            "nodes"
+          ],
           "properties": {
             "nodes": {
               "$comment": "An array of CNDI cluster nodes to deploy.",
@@ -37,7 +43,10 @@
               "items": {
                 "type": "object",
                 "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
-                "required": ["name", "kind"],
+                "required": [
+                  "name",
+                  "kind"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -46,12 +55,22 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "eks", "ec2", "gcp", "azure"]
+                    "enum": [
+                      "aws",
+                      "eks",
+                      "ec2",
+                      "gcp",
+                      "azure",
+                      "dev"
+                    ]
                   },
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
-                    "enum": ["leader", "controller"]
+                    "enum": [
+                      "leader",
+                      "controller"
+                    ]
                   },
                   "instance_type": {},
                   "volume_size": {}
@@ -70,7 +89,11 @@
         "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
           "type": "object",
           "description": "An object which represents a single manifest CNDI should apply to your cluster.",
-          "required": ["kind", "apiVersion", "metadata"],
+          "required": [
+            "kind",
+            "apiVersion",
+            "metadata"
+          ],
           "properties": {
             "kind": {
               "type": "string",
@@ -83,7 +106,9 @@
             "metadata": {
               "type": "object",
               "description": "The metadata of the Kubernetes resource to deploy.",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
                 "name": {
                   "type": "string",
@@ -107,7 +132,11 @@
       "patternProperties": {
         "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
           "type": "object",
-          "required": ["targetRevision", "destinationNamespace", "repoURL"],
+          "required": [
+            "targetRevision",
+            "destinationNamespace",
+            "repoURL"
+          ],
           "properties": {
             "targetRevision": {
               "type": "string",
