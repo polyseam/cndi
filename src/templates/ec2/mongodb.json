@@ -13,7 +13,13 @@
         "type": "Input"
       },
       {
-        "message": "Please enter the username for your mongodb admin:",
+        "message": "Please enter the number of ReplicaSet you want to deploy",
+        "default": 3,
+        "name": "mongodbReplicaSets",
+        "type": "Input"
+      },
+      {
+        "message": "Please enter the username for your mongodb admin",
         "default": "admin",
         "name": "mongodbUser",
         "type": "Input"
@@ -213,7 +219,7 @@
               "namespace": "mongodb"
             },
             "spec": {
-              "members": 3,
+              "members": "{{ $.cndi.prompts.responses.mongodbReplicaSets }}",
               "type": "ReplicaSet",
               "version": "4.4.0",
               "security": {
@@ -268,6 +274,10 @@
           {
             "name": "MONGODB_CONNECTION_STRING",
             "value": "mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{ $.cndi.prompts.responses.mongodbPassword }}@{{ $.cndi.prompts.responses.mongodbDomainName }}"
+          },
+          {
+            "name": "MONGODB_REPLICA_SETS",
+            "value": "{{ $.cndi.prompts.responses.mongodbReplicaSets }}"
           }
         ]
       },
