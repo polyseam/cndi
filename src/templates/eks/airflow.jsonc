@@ -60,21 +60,12 @@
         "cndi": {
           "nodes": [
             {
-              "name": "x-airflow-node",
-              "kind": "ec2",
-              "role": "leader",
-              "instance_type": "m5a.large",
-              "volume_size": 128
-            },
-            {
-              "name": "y-airflow-node",
-              "kind": "ec2",
-              "volume_size": 128
-            },
-            {
-              "name": "z-airflow-node",
-              "kind": "ec2",
-              "volume_size": 128
+              "name": "airflow-nodes",
+              "kind": "eks",
+              "instance_type": "t3.large",
+              "volume_size": 128,
+              "min_count": 1,
+              "max_count": 3
             }
           ]
         }
@@ -187,7 +178,7 @@
                 {
                   "http01": {
                     "ingress": {
-                      "class": "public"
+                      "ingressClassName": "public"
                     }
                   }
                 }
@@ -302,7 +293,8 @@
             "logs": {
               "persistence": {
                 "enabled": true,
-                "size": "15Gi"
+                "size": "15Gi",
+                "storageClassName": "efs"
               }
             },
             "createUserJob": {
@@ -370,7 +362,7 @@
     },
     "readme": {
       "extend_basic_readme": "aws",
-      "template_section": "## airflow-cnpg\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
+      "template_section": "## airflow\n\nThis template deploys a fully functional [Airflow](https://airflow.apache.org) cluster using the [official Airflow Helm chart](https://github.com/apache/airflow/tree/main/chart) and an external production ready posgresql database [cloudnative-pg](https://github.com/cloudnative-pg/charts) \n\nThe default credentials for Airflow are: \n\nusername: `admin`\npassword: `admin`"
     }
   }
 }

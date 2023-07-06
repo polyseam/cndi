@@ -31,6 +31,7 @@ import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
 import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
+import cndi_outputs from "./cndi_outputs.tf.json.ts";
 
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
@@ -159,6 +160,10 @@ export default async function stageTerraformResourcesForAWS(
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_outputs.tf.json"),
+        cndi_outputs(),
       ),
       stageFile(
         path.join(

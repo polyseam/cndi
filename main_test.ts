@@ -42,7 +42,7 @@ describe("cndi", () => {
     });
 
     it("should add a .env file containing CNDI_TELEMETRY=debug if -d is set", async () => {
-      const { status } = await runCndi("init", "-t", "aws/airflow-cnpg", "-d");
+      const { status } = await runCndi("init", "-t", "aws/airflow", "-d");
       const dotenv = Deno.readTextFileSync(
         path.join(Deno.cwd(), `.env`),
       );
@@ -334,11 +334,11 @@ describe("cndi", () => {
     });
 
     it("should add an template specific readme section", async () => {
-      const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
+      const { status } = await runCndi("init", "-t", "aws/airflow");
       const readme = Deno.readTextFileSync(
         path.join(Deno.cwd(), `README.md`),
       );
-      assert(readme.indexOf(`## airflow-cnpg`) > -1);
+      assert(readme.indexOf(`## airflow`) > -1);
       assert(status.success);
     });
 
@@ -370,7 +370,7 @@ describe("cndi", () => {
 
     describe("aws", () => {
       it("should add an aws specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "aws/airflow");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -379,7 +379,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing AWS env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "aws/airflow");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -391,7 +391,7 @@ describe("cndi", () => {
       });
 
       it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "aws/airflow");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });
@@ -399,7 +399,7 @@ describe("cndi", () => {
 
     describe("gcp", () => {
       it("should add an gcp specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "gcp/airflow");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -408,7 +408,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing GCP env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "gcp/airflow");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -418,7 +418,7 @@ describe("cndi", () => {
         assert(status.success);
       });
       it(`should create a set of terraform files where the resource name is the filename for gcp`, async () => {
-        const { status } = await runCndi("init", "-t", "gcp/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "gcp/airflow");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });
@@ -426,7 +426,7 @@ describe("cndi", () => {
 
     describe("azure", () => {
       it("should add an azure specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "azure/airflow");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
@@ -435,7 +435,7 @@ describe("cndi", () => {
       });
 
       it("should add a .env file containing Azure env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "azure/airflow");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -448,7 +448,7 @@ describe("cndi", () => {
         assert(status.success);
       });
       it(`should create a set of terraform files where the resource name is the filename for azure`, async () => {
-        const { status } = await runCndi("init", "-t", "azure/airflow-cnpg");
+        const { status } = await runCndi("init", "-t", "azure/airflow");
         assert(status.success);
         await ensureResoureNamesMatchFileNames();
       });

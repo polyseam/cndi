@@ -3,7 +3,7 @@ import { CNDIConfig } from "src/types.ts";
 import {
   DEFAULT_MICROK8S_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
-} from "constants";
+} from "consts";
 
 type GetFollowerCloudInitOptions = {
   isWorker: boolean;

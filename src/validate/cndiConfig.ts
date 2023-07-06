@@ -1,5 +1,5 @@
 import { ccolors } from "deps";
-import { nonMicrok8sNodeKinds } from "constants";
+import { NON_MICROK8S_NODE_KINDS } from "consts";
 import { CNDIConfig } from "src/types.ts";
 import { emitExitEvent } from "src/utils.ts";
 
@@ -214,7 +214,7 @@ export default async function validateConfig(
       ({ role }) => role === "leader",
     ).length;
 
-  const isMicrok8sCluster = !nonMicrok8sNodeKinds.includes(
+  const isMicrok8sCluster = !NON_MICROK8S_NODE_KINDS.includes(
     config?.infrastructure?.cndi?.nodes[0]?.kind,
   );
 

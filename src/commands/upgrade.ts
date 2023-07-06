@@ -7,7 +7,7 @@ import {
   UpgradeOptions,
 } from "deps";
 
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "constants";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
 import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
 
