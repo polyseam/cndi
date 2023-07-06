@@ -43,27 +43,15 @@
           "kind": "Kafka",
           "metadata": {
             "name": "my-cluster",
-            "namespace": "kafka"
+            "namespace": "kafka",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
+            }
           },
           "spec": {
             "kafka": {
+              "version": "3.2.3",
               "replicas": 3,
-              "version": "3.2.0",
-              "logging": {
-                "type": "inline",
-                "loggers": {
-                  "kafka.root.logger.level": "INFO"
-                }
-              },
-              "config": {
-                "auto.create.topics.enable": "false",
-                "offsets.topic.replication.factor": 3,
-                "transaction.state.log.replication.factor": 3,
-                "transaction.state.log.min.isr": 2,
-                "default.replication.factor": 3,
-                "min.insync.replicas": 2,
-                "inter.broker.protocol.version": "3.2"
-              },
               "listeners": [
                 {
                   "name": "plain",
@@ -78,29 +66,45 @@
                   "tls": true
                 }
               ],
+              "config": {
+                "offsets.topic.replication.factor": 1,
+                "transaction.state.log.replication.factor": 1,
+                "transaction.state.log.min.isr": 1,
+                "default.replication.factor": 1,
+                "min.insync.replicas": 1,
+                "inter.broker.protocol.version": "3.2"
+              },
               "storage": {
-                "type": "jbod",
-                "volumes": [
-                  {
-                    "id": 0,
-                    "type": "persistent-claim",
-                    "size": "30Gi",
-                    "deleteClaim": true
-                  }
-                ]
+                "type": "ephemeral"
               }
             },
             "zookeeper": {
               "replicas": 3,
               "storage": {
-                "type": "persistent-claim",
-                "size": "10Gi",
-                "deleteClaim": true
+                "type": "ephemeral"
               }
             },
             "entityOperator": {
               "topicOperator": {},
               "userOperator": {}
+            }
+          }
+        },
+        "kafka-topic": {
+          "apiVersion": "kafka.strimzi.io/v1beta2",
+          "kind": "KafkaTopic",
+          "metadata": {
+            "name": "samples",
+            "labels": {
+              "strimzi.io/cluster": "my-cluster"
+            }
+          },
+          "spec": {
+            "partitions": 1,
+            "replicas": 1,
+            "config": {
+              "retention.ms": 7200000,
+              "segment.bytes": 1073741824
             }
           }
         },

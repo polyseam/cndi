@@ -49,6 +49,10 @@ export default function getKnownTemplates() {
       name: "eks/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.jsonc`,
     },
+    {
+      name: "eks/kafka",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/kafka.jsonc`,
+    },
     // gcp
     {
       name: "gcp/basic",
