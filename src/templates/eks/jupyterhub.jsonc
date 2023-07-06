@@ -7,6 +7,12 @@
       "type": "Input"
     },
     {
+      "name": "jupyterhubDomainName",
+      "default": "jupyterhub.example.com",
+      "message": "Please enter the domain name you want jupyterhub to be accessible on:",
+      "type": "Input"
+    },
+    {
       "message": "Please enter the email address you want to use for lets encrypt:",
       "default": "admin@example.com",
       "name": "letsEncryptClusterIssuerEmailAddress",
@@ -20,7 +26,7 @@
         "cndi": {
           "nodes": [
             {
-              "name": "kafka-nodes",
+              "name": "jupyterhub-nodes",
               "kind": "eks",
               "instance_type": "t3.large",
               "volume_size": 128,
@@ -31,81 +37,47 @@
         }
       },
       "cluster_manifests": {
-        "kafka-namespace": {
-          "apiVersion": "v1",
-          "kind": "Namespace",
+        "jupyterhub-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
           "metadata": {
-            "name": "kafka"
-          }
-        },
-        "kafka-cluster": {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "kind": "Kafka",
-          "metadata": {
-            "name": "my-cluster",
-            "namespace": "kafka",
+            "name": "jupyterhub-ingress",
+            "namespace": "jupyterhub",
             "annotations": {
-              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
+              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "kubernetes.io/tls-acme": "true"
             }
           },
           "spec": {
-            "kafka": {
-              "version": "3.2.3",
-              "replicas": 3,
-              "listeners": [
-                {
-                  "name": "plain",
-                  "port": 9092,
-                  "type": "internal",
-                  "tls": false
-                },
-                {
-                  "name": "tls",
-                  "port": 9093,
-                  "type": "internal",
-                  "tls": true
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.jupyterhubDomainName }}"
+                ],
+                "secretName": "lets-encrypt-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.jupyterhubDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "proxy-publicr",
+                          "port": {
+                            "number": 80
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
-              ],
-              "config": {
-                "offsets.topic.replication.factor": 1,
-                "transaction.state.log.replication.factor": 1,
-                "transaction.state.log.min.isr": 1,
-                "default.replication.factor": 1,
-                "min.insync.replicas": 1,
-                "inter.broker.protocol.version": "3.2"
-              },
-              "storage": {
-                "type": "ephemeral"
               }
-            },
-            "zookeeper": {
-              "replicas": 3,
-              "storage": {
-                "type": "ephemeral"
-              }
-            },
-            "entityOperator": {
-              "topicOperator": {},
-              "userOperator": {}
-            }
-          }
-        },
-        "kafka-topic": {
-          "apiVersion": "kafka.strimzi.io/v1beta2",
-          "kind": "KafkaTopic",
-          "metadata": {
-            "name": "samples",
-            "labels": {
-              "strimzi.io/cluster": "my-cluster"
-            }
-          },
-          "spec": {
-            "partitions": 1,
-            "replicas": 1,
-            "config": {
-              "retention.ms": 7200000,
-              "segment.bytes": 1073741824
-            }
+            ]
           }
         },
         "cert-manager-cluster-issuer": {
@@ -180,12 +152,11 @@
         }
       },
       "applications": {
-        "strimzi-kafka-operator": {
-          "targetRevision": "0.31.1",
-          "destinationNamespace": "strimzi-kafka-operator",
-          "repoURL": "https://strimzi.io/charts/",
-          "chart": "strimzi-kafka-operator",
-          "values": {}
+        "jupyterhub": {
+          "targetRevision": "2.0.0",
+          "destinationNamespace": "jupyterhub",
+          "repoURL": "https://jupyterhub.github.io/helm-chart/",
+          "chart": "jupyterhub"
         }
       }
     },
@@ -195,7 +166,7 @@
     },
     "readme": {
       "extend_basic_readme": "aws",
-      "template_section": "## kafka\n\nThis template deploys a [Strimzi](https://https://strimzi.io/) production ready way to run an Apache Kafka cluster on Kubernetes in various deployment configurations"
+      "template_section": "## JupyterHub\n\nThis template deploys a Standalone production ready [JupyterHub] (https://jupyterhub.github.io/helm-chart/) enviroment"
     }
   }
 }

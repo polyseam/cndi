@@ -50,8 +50,8 @@ export default function getKnownTemplates() {
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.jsonc`,
     },
     {
-      name: "eks/kafka",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/kafka.jsonc`,
+      name: "eks/jupyterhub",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/jupyterhub.jsonc`,
     },
     // gcp
     {
