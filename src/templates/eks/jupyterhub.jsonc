@@ -69,7 +69,7 @@
                       "pathType": "Prefix",
                       "backend": {
                         "service": {
-                          "name": "proxy-publicr",
+                          "name": "proxy-public",
                           "port": {
                             "number": 80
                           }
