@@ -45,7 +45,9 @@
             "namespace": "jupyterhub",
             "annotations": {
               "cert-manager.io/cluster-issuer": "lets-encrypt",
-              "kubernetes.io/tls-acme": "true"
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
             }
           },
           "spec": {
@@ -79,85 +81,85 @@
               }
             ]
           }
+        }
+      },
+      "cert-manager-cluster-issuer": {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "ClusterIssuer",
+        "metadata": {
+          "name": "lets-encrypt"
         },
-        "cert-manager-cluster-issuer": {
-          "apiVersion": "cert-manager.io/v1",
-          "kind": "ClusterIssuer",
-          "metadata": {
-            "name": "lets-encrypt"
-          },
-          "spec": {
-            "acme": {
-              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
-              "server": "https://acme-v02.api.letsencrypt.org/directory",
-              "privateKeySecretRef": {
-                "name": "lets-encrypt-private-key"
-              },
-              "solvers": [
-                {
-                  "http01": {
-                    "ingress": {
-                      "ingressClassName": "public"
-                    }
+        "spec": {
+          "acme": {
+            "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
+            "server": "https://acme-v02.api.letsencrypt.org/directory",
+            "privateKeySecretRef": {
+              "name": "lets-encrypt-private-key"
+            },
+            "solvers": [
+              {
+                "http01": {
+                  "ingress": {
+                    "ingressClassName": "public"
                   }
-                }
-              ]
-            }
-          }
-        },
-        "argo-ingress": {
-          "apiVersion": "networking.k8s.io/v1",
-          "kind": "Ingress",
-          "metadata": {
-            "name": "argocd-server-ingress",
-            "namespace": "argocd",
-            "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
-              "kubernetes.io/tls-acme": "true",
-              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
-              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
-            }
-          },
-          "spec": {
-            "tls": [
-              {
-                "hosts": [
-                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
-                ],
-                "secretName": "lets-encrypt-private-key"
-              }
-            ],
-            "rules": [
-              {
-                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
-                "http": {
-                  "paths": [
-                    {
-                      "path": "/",
-                      "pathType": "Prefix",
-                      "backend": {
-                        "service": {
-                          "name": "argocd-server",
-                          "port": {
-                            "name": "https"
-                          }
-                        }
-                      }
-                    }
-                  ]
                 }
               }
             ]
           }
         }
       },
-      "applications": {
-        "jupyterhub": {
-          "targetRevision": "2.0.0",
-          "destinationNamespace": "jupyterhub",
-          "repoURL": "https://jupyterhub.github.io/helm-chart/",
-          "chart": "jupyterhub"
+      "argo-ingress": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "argocd-server-ingress",
+          "namespace": "argocd",
+          "annotations": {
+            "cert-manager.io/cluster-issuer": "lets-encrypt",
+            "kubernetes.io/tls-acme": "true",
+            "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+          }
+        },
+        "spec": {
+          "tls": [
+            {
+              "hosts": [
+                "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              ],
+              "secretName": "lets-encrypt-private-key"
+            }
+          ],
+          "rules": [
+            {
+              "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+              "http": {
+                "paths": [
+                  {
+                    "path": "/",
+                    "pathType": "Prefix",
+                    "backend": {
+                      "service": {
+                        "name": "argocd-server",
+                        "port": {
+                          "name": "https"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
+      }
+    },
+    "applications": {
+      "jupyterhub": {
+        "targetRevision": "2.0.0",
+        "destinationNamespace": "jupyterhub",
+        "repoURL": "https://jupyterhub.github.io/helm-chart/",
+        "chart": "jupyterhub"
       }
     },
     "env": {
@@ -166,7 +168,7 @@
     },
     "readme": {
       "extend_basic_readme": "aws",
-      "template_section": "## JupyterHub\n\nThis template deploys a Standalone production ready [JupyterHub] (https://jupyterhub.github.io/helm-chart/) enviroment"
+      "template_section": "## JupyterHub\n\nThis template deploys a Standalone production ready [JupyterHub](https://jupyterhub.github.io/helm-chart/) enviroment"
     }
   }
 }
