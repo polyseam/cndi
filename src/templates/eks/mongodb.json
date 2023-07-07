@@ -64,21 +64,12 @@
           ],
           "nodes": [
             {
-              "name": "x-mongodb-node",
-              "kind": "ec2",
-              "role": "leader",
-              "instance_type": "m5a.large",
-              "volume_size": 128
-            },
-            {
-              "name": "y-mongodb-node",
-              "kind": "ec2",
-              "volume_size": 128
-            },
-            {
-              "name": "z-mongodb-node",
-              "kind": "ec2",
-              "volume_size": 128
+              "name": "pg-nodes",
+              "kind": "eks",
+              "instance_type": "t3.large",
+              "volume_size": 128,
+              "min_count": 1,
+              "max_count": 3
             }
           ]
         }
@@ -252,8 +243,7 @@
           }
         }
       },
-      "applications": {
-      }
+      "applications": {}
     },
     "env": {
       "extend_basic_env": "aws",

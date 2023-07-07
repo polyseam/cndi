@@ -65,19 +65,19 @@
           "nodes": [
             {
               "name": "x-mongodb-node",
-              "kind": "ec2",
+              "kind": "azure",
               "role": "leader",
-              "instance_type": "m5a.large",
+              "instance_type": "Standard_D4s_v3",
               "volume_size": 128
             },
             {
               "name": "y-mongodb-node",
-              "kind": "ec2",
+              "kind": "azure",
               "volume_size": 128
             },
             {
               "name": "z-mongodb-node",
-              "kind": "ec2",
+              "kind": "azure",
               "volume_size": 128
             }
           ]
@@ -256,7 +256,7 @@
       }
     },
     "env": {
-      "extend_basic_env": "aws",
+      "extend_basic_env": "azure",
       "entries": [
         {
           "name": "MONGO_DBATABASE",
@@ -281,7 +281,7 @@
       ]
     },
     "readme": {
-      "extend_basic_readme": "aws",
+      "extend_basic_readme": "azure",
       "template_section": "## mongodb\n\nThis template deploys a Standalone production ready [mongodb-community-operator](https://github.com/mongodb/mongodb-kubernetes-operator)"
     }
   }
