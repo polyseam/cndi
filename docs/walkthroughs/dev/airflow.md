@@ -8,9 +8,9 @@ in Local DEV enviroment
 This walkthough uses `cndi` to customize and deploy our `dev/airflow` Template.
 In just a few minutes we will be able to deploy a new Kubernetes cluster to DEV
 that has been optimally configured for Airflow, including GitOps with Secrets
-management, right out-of-the-box. This framework will
-enable quick iteration of infrastructure, applications and manifests in a GitHub
-workflow you are already comfortable with.
+management, right out-of-the-box. This framework will enable quick iteration of
+infrastructure, applications and manifests in a GitHub workflow you are already
+comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/dev/img/cndi-cluster-0.png)
 
@@ -166,10 +166,12 @@ multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '
 
 In the terminal on your local machine, run the port forward command using the IP
 address obtained from the previous step:
+
 ```
 multipass exec ${node.name} -- sudo microk8s kubectl port-forward
 svc/argocd-server -n argocd 8080:443 --address <ip address of node>
 ```
+
 a web browser on your local machine and access Airflow by navigating to
 http://<ip address of node>:8080. You should now be able to access the Airflow
 web UI. Open the domain name you've assigned for ArgoCD in your browser to see
