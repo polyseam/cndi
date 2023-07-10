@@ -1,16 +1,16 @@
 # eks/jupyterhub walkthrough
 
-A guide for using CNDI to deploy a GitOps enabled Jupyterhub cluster on Kubernetes
-in Amazon Web Services
+A guide for using CNDI to deploy a GitOps enabled Jupyterhub cluster on
+Kubernetes in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `eks/jupyterhub` Template.
-In just a few minutes we will be able to deploy a new Kubernetes cluster to AWS
-that has been optimally configured for Jupyterhub, including GitOps with Secrets
-management, TLS and High Availibility right out-of-the-box. This framework will
-enable quick iteration of infrastructure, applications and manifests in a GitHub
-workflow you are already comfortable with.
+This walkthough uses `cndi` to customize and deploy our `eks/jupyterhub`
+Template. In just a few minutes we will be able to deploy a new Kubernetes
+cluster to AWS that has been optimally configured for Jupyterhub, including
+GitOps with Secrets management, TLS and High Availibility right out-of-the-box.
+This framework will enable quick iteration of infrastructure, applications and
+manifests in a GitHub workflow you are already comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/eks/img/cndi-cluster-0.png)
 
@@ -105,10 +105,12 @@ supplied for this project:
 
 ---
 
-- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will be hosted_
-- **Domain name you want Jupyterhub to be accessible on**: _domain where Jupyterhuh will be hosted_
-- **Email address you want to use for lets encrypt:** _an email for lets encrypt to use when generating certificates_
-
+- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
+  be hosted_
+- **Domain name you want Jupyterhub to be accessible on**: _domain where
+  Jupyterhuh will be hosted_
+- **Email address you want to use for lets encrypt:** _an email for lets encrypt
+  to use when generating certificates_
 
 ![AWS instances dashboard](/docs/walkthroughs/eks/img/cndi-init-interactive.png)
 
@@ -203,10 +205,9 @@ the IP address of the load balancer that we created for you in the Network tab.
 Go to your custom domain, you will need to add a CNAME record for your domain
 and add the DNS Name of your load balancer to it
 
-
-![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png)
-Open the domain name you've assigned for ArgoCD in your browser to see the Argo
-Login page.
+![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png) Open the
+domain name you've assigned for ArgoCD in your browser to see the Argo Login
+page.
 
 ![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
 
@@ -237,20 +238,21 @@ their status is healthy in the ArgoCD UI
 
 ## verify that Jupyterhub is accessible on the chosen domain 🧐
 
-After setting up your Jupyterhub application on the chosen domain, it is necessary
-to verify that Jupyterhub is accessible. To do this, the user can simply go to the
-chosen domain and see if they can see Jupyterhub's login page. The default username
-is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Jupyterhub. If not, the user wait, should go back and
-make sure the previous steps were was done correctly.
+After setting up your Jupyterhub application on the chosen domain, it is
+necessary to verify that Jupyterhub is accessible. To do this, the user can
+simply go to the chosen domain and see if they can see Jupyterhub's login page.
+The default username is `admin` and the password is `admin`. If the page is
+accessible, then the user can log in and begin using Jupyterhub. If not, the
+user wait, should go back and make sure the previous steps were was done
+correctly.
 
 ![Jupyterhub UI](/docs/walkthroughs/eks/img/jupyterhub-ui-1.png)
 ![Jupyterhub UI](/docs/walkthroughs/eks/img/jupyterhub-ui-2.png)
 
 ## and you are done! ⚡️
 
-You now have a fully-configured 3-node Kubernetes cluster with 
-Jupyterhub and Argocd
+You now have a fully-configured 3-node Kubernetes cluster with Jupyterhub and
+Argocd
 
 ## destroying resources in the cluster! 💣
 
