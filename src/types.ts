@@ -63,8 +63,8 @@ interface BaseNodeItemSpec {
 interface MultipassNodeItemSpec extends BaseNodeItemSpec {
   name: string;
   cpus?: number;
-  memory?: string;
-  disk?: number;
+  memory?: number | string; // if integer, assume G
+  disk?: number | string; // if integer, assume G
   disk_size_gb?: number;
   volume_size?: number;
   disk_size?: number;
