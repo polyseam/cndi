@@ -8,25 +8,29 @@ import {
 
 const defaultAddons: Array<Microk8sAddon> = [
   {
-    "name": "dns",
-    "args": ["1.1.1.1"],
+    name: "dns",
+    args: ["1.1.1.1"],
   },
   {
-    "name": "ingress",
+    name: "ingress",
   },
   {
-    "name": "community",
+    name: "community",
   },
   {
-    "name": "nfs",
-  },
-  {
-    "name": "cert-manager",
+    name: "cert-manager",
   },
 ];
 
+// addons that should not be enabled in "dev" cndi clusters
+const nonDevClusterAddons: Array<Microk8sAddon> = [{ name: "nfs" }];
+
 const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   const addons = defaultAddons;
+  const isDevCluster = config.infrastructure.cndi?.nodes?.[0].kind === "dev";
+  if (!isDevCluster) {
+    addons.push(...nonDevClusterAddons);
+  }
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
   if (userAddons) {
     for (const userAddon of userAddons) {
