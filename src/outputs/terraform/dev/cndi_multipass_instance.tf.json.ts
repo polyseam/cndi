@@ -2,6 +2,12 @@ import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 import { MultipassNodeItemSpec } from "src/types.ts";
 
+import { ccolors } from "deps";
+
+const cndiMultipassNodeInstanceLabel = ccolors.faded(
+  "\nsrc/outputs/terraform/dev/cndi_multipass_instance.tf.json.ts:",
+);
+
 const isValidMultipassCapacityString = (str: string): boolean => {
   const suffix = str.slice(-1);
   const number = str.slice(0, -1);
@@ -23,19 +29,24 @@ export default function getMultipassInstanceTFJSON(
   const cpus = node?.cpus || DEFAULT_CPUS;
 
   const userSpecifiedMemory = !!node?.memory;
-  const userMemoryIsInt = !Number.isNaN(parseInt(`${node?.memory!}`));
+  const userMemoryIsInt = !isNaN(Number(node?.memory!));
 
   let memory = `${DEFAULT_MEMORY}${suffix}`; // 4G
 
   if (userSpecifiedMemory) {
     if (userMemoryIsInt) {
+      console.log("userMemoryIsInt", userMemoryIsInt);
       memory = `${node.memory}${suffix}`; // assume G
     } else {
       if (isValidMultipassCapacityString(`${node.memory!}`)) {
         memory = `${node.memory!}`; // eg. 500G | 5000M | 100000K
       } else {
         // TODO: fail validation here?
-        console.warn(`Invalid multipass node memory value: ${node.memory!}`);
+        console.log(
+          cndiMultipassNodeInstanceLabel,
+          ccolors.warn(`Invalid multipass node memory value:`),
+          ccolors.user_input(`"${node.memory!}"`),
+        );
       }
     }
   }
@@ -43,7 +54,7 @@ export default function getMultipassInstanceTFJSON(
   let disk = `${DEFAULT_DISK_SIZE}${suffix}`; // 128G
 
   const userSpecifiedDisk = !!node?.disk;
-  const userDiskIsInt = !Number.isNaN(parseInt(`${node?.disk!}`));
+  const userDiskIsInt = !isNaN(Number(node?.disk!));
 
   if (userSpecifiedDisk) {
     if (userDiskIsInt) {
@@ -53,7 +64,11 @@ export default function getMultipassInstanceTFJSON(
         disk = `${node.disk!}`;
       } else {
         // TODO: fail validation here?
-        console.warn(`Invalid multipass node disk value: ${node.memory!}`);
+        console.log(
+          cndiMultipassNodeInstanceLabel,
+          ccolors.warn(`Invalid multipass node disk value:`),
+          ccolors.user_input(`"${node.disk!}"`),
+        );
       }
     }
   }

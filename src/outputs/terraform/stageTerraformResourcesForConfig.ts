@@ -22,7 +22,7 @@ export default async function stageTerraformResourcesForConfig(
   const cndi_project_name = config.project_name!;
 
   const kind = config.infrastructure.cndi.nodes[0].kind;
-  console.log("kind", kind);
+
   switch (kind) {
     case "aws":
       console.log(
