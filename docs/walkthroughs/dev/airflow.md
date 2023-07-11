@@ -145,20 +145,24 @@ git add .
 git status # take a quick look and make sure these are all files you want to push
 git commit -m "initial commit"
 git push --set-upstream origin main
+cndi run
 ```
 
-You should now see the cluster configuration has been uploaded to GitHub:
+Two actions will take place
 
-![GitHub repo](/docs/walkthroughs/dev/img/github-repo.png)
+1. You should now see the cluster configuration has been uploaded to GitHub:
+   ![GitHub repo](/docs/walkthroughs/dev/img/github-repo.png)
 
----
+2. The terminal will show the clsuter being created and it will also output the
+   instructions on how to access the argocd ui
+   ![terraform outputs](/docs/walkthroughs/dev/img/terraform-outputs.png)
 
-## port-foward 🌐
+## Access the Argocd UI 🌐
 
-Now, you need to set up port forwarding to access the Airflow web server from
-your local machine. Open a new terminal on your local machine (not within the
-Multipass instance) and run the following command to display the IP address of
-the dev Multipass instance.
+Now, you need to set up port forwarding to access the argocd and airflow web
+server from your local machine. Open a new terminal on your local machine (not
+within the Multipass instance) and run the following command to display the IP
+address of the dev Multipass instance.
 
 ```
 multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '\\n'
@@ -172,10 +176,8 @@ multipass exec ${node.name} -- sudo microk8s kubectl port-forward
 svc/argocd-server -n argocd 8080:443 --address <ip address of node>
 ```
 
-a web browser on your local machine and access Airflow by navigating to
-http://<ip address of node>:8080. You should now be able to access the Airflow
-web UI. Open the domain name you've assigned for ArgoCD in your browser to see
-the Argo Login page.
+Using the web browser on your local machine, now access Argocd by navigating to
+http://<ip address of node>:8080
 
 ![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-0.png)
 
@@ -186,11 +188,8 @@ To log in, use the username `admin` and the password which is the value of the
 
 ![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-1.png)
 
-That's it! You have successfully set up port forwarding with Multipass Airflow,
-allowing you to access the Airflow web UI from your local machine
-
-Notice that the `cluster_manifests` in the GitHub repository matches config in
-the ArgoCD UI
+Notice once inside the Argocd UI that the `cluster_manifests` in the GitHub
+repository matches config in the ArgoCD UI
 
 ```shell
 └── 📁 cndi
@@ -205,14 +204,23 @@ their status is healthy in the ArgoCD UI
 
 ![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-2.png)
 
-## verify that Airflow is accessible on the chosen domain 🧐
+## verify that Airflow app is healthy 🧐
 
-After setting up your Airflow application on the chosen domain, it is necessary
-to verify that Airflow is accessible. To do this, the user can simply go to the
-chosen domain and see if they can see Airflow's login page. The default username
-is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Airflow. If not, the user wait, should go back and
-make sure the previous steps were was done correctly.
+To do this, the user can simply go to the go to the argocd UI and check Airflow
+status or they can can try to port forward the Airflow webserver and see if they
+can see Airflow's login page. The command to port forward the airflow ui is:
+
+```
+multipass exec ${node.name} -- sudo microk8s kubectl port-forward
+svc/airflow-webserver -n airflow 8081:8080 --address <ip address of node>
+```
+
+Using the web browser on your local machine, now access Airflow by navigating to
+http://<ip address of node>:8081
+
+The default username is `admin` and the password is `admin`. If the page is
+accessible, then the user can log in and begin using Airflow. If not, the user
+wait, should go back and make sure the previous steps were was done correctly.
 
 ![Airflow UI](/docs/walkthroughs/dev/img/airflow-ui-0.png)
 
