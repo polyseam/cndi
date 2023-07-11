@@ -22,18 +22,20 @@ const defaultAddons: Array<Microk8sAddon> = [
   },
 ];
 
-// addons that should not be enabled in "dev" cndi clusters
-const nonDevClusterAddons: Array<Microk8sAddon> = [{ name: "nfs" }];
-
 const isDevCluster = (config: CNDIConfig) => {
   return config.infrastructure.cndi?.nodes?.[0].kind === "dev";
 };
 
 const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   const addons = defaultAddons;
-  if (!isDevCluster(config)) {
-    addons.push(...nonDevClusterAddons);
+
+  if (isDevCluster(config)) {
+    addons.push({ name: "hostpath-storage" });
+  } else {
+    // dev cluster addons
+    addons.push({ name: "nfs" });
   }
+
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
   if (userAddons) {
     for (const userAddon of userAddons) {
