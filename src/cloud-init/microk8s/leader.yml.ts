@@ -25,10 +25,13 @@ const defaultAddons: Array<Microk8sAddon> = [
 // addons that should not be enabled in "dev" cndi clusters
 const nonDevClusterAddons: Array<Microk8sAddon> = [{ name: "nfs" }];
 
+const isDevCluster = (config: CNDIConfig) => {
+  return config.infrastructure.cndi?.nodes?.[0].kind === "dev";
+};
+
 const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   const addons = defaultAddons;
-  const isDevCluster = config.infrastructure.cndi?.nodes?.[0].kind === "dev";
-  if (!isDevCluster) {
+  if (!isDevCluster(config)) {
     addons.push(...nonDevClusterAddons);
   }
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
@@ -178,14 +181,28 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
 
   const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
+  let packages = ["apache2-utils", "nfs-common"];
+  let storageClassSetupCommands = [
+    `echo "Setting NFS as default storage class"`,
+    `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+    `echo "NFS is now the default storage class"`,
+  ];
+
+  if (isDevCluster(config)) {
+    packages = ["apache2-utils"]; // no nfs-common on dev clusters
+    storageClassSetupCommands = [
+      `echo "Setting hostpath-storage as default storage class"`,
+      // TODO: fix the next 2 lines
+      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+      `echo "hostpath-storage is now the default storage class"`,
+    ];
+  }
+
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
-    packages: [
-      "apache2-utils",
-      "nfs-common",
-    ],
+    packages,
     write_files: [
       {
         path: PATH_TO_LAUNCH_CONFIG,
@@ -248,9 +265,8 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
       `echo "sealed-secrets-controller installed"`,
 
-      `echo "Setting NFS as default storage class"`,
-      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
-      `echo "NFS is now the default storage class"`,
+      // storageClass depends on dev cluster or not
+      ...storageClassSetupCommands,
 
       `echo "Importing Sealed Secrets Keys"`,
       `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
