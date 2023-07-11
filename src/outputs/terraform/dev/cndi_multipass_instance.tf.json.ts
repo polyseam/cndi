@@ -35,7 +35,6 @@ export default function getMultipassInstanceTFJSON(
 
   if (userSpecifiedMemory) {
     if (userMemoryIsInt) {
-      console.log("userMemoryIsInt", userMemoryIsInt);
       memory = `${node.memory}${suffix}`; // assume G
     } else {
       if (isValidMultipassCapacityString(`${node.memory!}`)) {
