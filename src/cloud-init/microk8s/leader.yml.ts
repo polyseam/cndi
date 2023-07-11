@@ -193,9 +193,6 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
   if (isDevCluster(config)) {
     packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
-      `echo "Setting hostpath-storage as default storage class"`,
-      // TODO: fix the next 2 lines
-      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
       `echo "hostpath-storage is now the default storage class"`,
     ];
   }
