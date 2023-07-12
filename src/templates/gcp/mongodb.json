@@ -216,7 +216,10 @@
           "kind": "MongoDBCommunity",
           "metadata": {
             "name": "mongodb-replica-set",
-            "namespace": "mongodb"
+            "namespace": "mongodb",
+            "annotations": {
+              "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
+            }
           },
           "spec": {
             "members": "{{ $.cndi.prompts.responses.mongodbReplicaSets }}",
@@ -253,6 +256,12 @@
         }
       },
       "applications": {
+        "mongodb": {
+          "targetRevision": "0.8.0",
+          "destinationNamespace": "mongodb",
+          "repoURL": "https://mongodb.github.io/helm-charts",
+          "chart": "community-operator"
+        }
       }
     },
     "env": {
