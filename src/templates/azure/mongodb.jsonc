@@ -208,7 +208,7 @@
           },
           "type": "Opaque",
           "stringData": {
-            "password": "{{ $.cndi.prompts.responses.mongodbPassword }}"
+            "password": "$.cndi.secrets.seal(MONGODB_PASSWORD)"
           }
         },
         "mongodb-community-crd": {
