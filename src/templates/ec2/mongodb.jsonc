@@ -33,7 +33,7 @@
     {
       "message": "Please enter the name for the mongodb database you want to use:",
       "default": "my-mongodb-database",
-      "name": "mongoDatabase",
+      "name": "mongodbName",
       "type": "Input"
     },
     {
@@ -154,11 +154,11 @@
             ]
           }
         },
-        "mongo-ingress": {
+        "mongodb-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
           "metadata": {
-            "name": "mongo-server-ingress",
+            "name": "mongodb-server-ingress",
             "namespace": "mongodb",
             "annotations": {
               "cert-manager.io/cluster-issuer": "lets-encrypt",
@@ -235,18 +235,18 @@
             "users": [
               {
                 "name": "{{ $.cndi.prompts.responses.mongodbUser }}",
-                "db": "{{ $.cndi.prompts.responses.mongoDatabase }}",
+                "db": "{{ $.cndi.prompts.responses.mongodbName }}",
                 "passwordSecretRef": {
                   "name": "my-user-password"
                 },
                 "roles": [
                   {
                     "name": "clusterAdmin",
-                    "db": "{{ $.cndi.prompts.responses.mongoDatabase }}"
+                    "db": "{{ $.cndi.prompts.responses.mongodbName }}"
                   },
                   {
                     "name": "userAdminAnyDatabase",
-                    "db": "{{ $.cndi.prompts.responses.mongoDatabase }}"
+                    "db": "{{ $.cndi.prompts.responses.mongodbName }}"
                   }
                 ],
                 "scramCredentialsSecretName": "my-scram"
@@ -268,8 +268,8 @@
       "extend_basic_env": "aws",
       "entries": [
         {
-          "name": "MONGO_DBATABASE",
-          "value": "{{ $.cndi.prompts.responses.mongoDatabase }}"
+          "name": "MONGODB_DATABASE",
+          "value": "{{ $.cndi.prompts.responses.mongodbName }}"
         },
         {
           "name": "MONGODB_USER",
