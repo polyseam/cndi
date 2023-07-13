@@ -169,7 +169,7 @@ export function literalizeTemplateValuesInString(
         literalizedString,
         indexOfOpeningBraces,
         indexOfClosingBraces + 2,
-        `${valueToSubstitute}`,
+        valueToSubstitute,
       );
     }
     indexOfOpeningBraces = literalizedString.indexOf(
