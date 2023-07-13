@@ -70,14 +70,14 @@
           "apiVersion": "cert-manager.io/v1",
           "kind": "ClusterIssuer",
           "metadata": {
-            "name": "lets-encrypt"
+            "name": "cluster-issuer"
           },
           "spec": {
             "acme": {
               "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
               "server": "https://acme-v02.api.letsencrypt.org/directory",
               "privateKeySecretRef": {
-                "name": "lets-encrypt-private-key"
+                "name": "cluster-issuer-private-key"
               },
               "solvers": [
                 {
@@ -98,7 +98,7 @@
             "name": "argocd-server-ingress",
             "namespace": "argocd",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -110,7 +110,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.argocdDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [
@@ -194,7 +194,7 @@
             "name": "mysql-ingress",
             "namespace": "myinnodbcluster",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -206,7 +206,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [
