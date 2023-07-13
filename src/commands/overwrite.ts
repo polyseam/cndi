@@ -161,7 +161,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         path.join(
           "cndi",
           "cluster_manifests",
-          "cert-manager-cluster-issuer.yaml",
+          "cert-manager-cluster-issuer.json",
         ),
         getDevClusterIssuerManifest(),
       );
@@ -170,7 +170,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         path.join(
           "cndi",
           "cluster_manifests",
-          "cert-manager-cluster-issuer.yaml",
+          "cert-manager-cluster-issuer.json",
         ),
         getProductionClusterIssuerManifest(cert_manager?.email),
       );
