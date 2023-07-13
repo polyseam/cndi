@@ -20,6 +20,9 @@ import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
 
+import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
+import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
+
 import getEKSIngressServiceManifest from "src/outputs/custom-port-manifests/eks/ingress-service.ts";
 import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/eks/ingress-tcp-services-configmap.ts";
 
@@ -149,6 +152,30 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   );
 
   console.log(ccolors.success("staged terraform files"));
+
+  const cert_manager = config?.infrastructure?.cndi?.cert_manager;
+
+  if (cert_manager) {
+    if (cert_manager?.self_signed) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "cert-manager-cluster-issuer.yaml",
+        ),
+        getDevClusterIssuerManifest(),
+      );
+    } else {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "cert-manager-cluster-issuer.yaml",
+        ),
+        getProductionClusterIssuerManifest(cert_manager?.email),
+      );
+    }
+  }
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
   const isNotMicrok8sCluster = NON_MICROK8S_NODE_KINDS.includes(
