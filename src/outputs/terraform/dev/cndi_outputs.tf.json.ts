@@ -6,7 +6,7 @@ export default function getOutputTFJSON(node: MultipassNodeItemSpec): string {
     output: {
       I: {
         value:
-          "Argocd server UI instruction\n\nRun the following command in your terminal to access the Argocd server to get the IP address of the node",
+          "Argocd UI instructions - Run the following command in your terminal to access the Argocd server to get the IP address of the node",
       },
       II: {
         value:
