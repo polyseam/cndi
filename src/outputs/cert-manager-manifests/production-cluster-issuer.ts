@@ -12,14 +12,14 @@ const getProductionClusterIssuerManifest = (
     apiVersion: "cert-manager.io/v1",
     kind: "ClusterIssuer",
     metadata: {
-      name: "lets-encrypt",
+      name: "cluster-issuer",
     },
     spec: {
       acme: {
         email,
         server: "https://acme-v02.api.letsencrypt.org/directory",
         privateKeySecretRef: {
-          name: "lets-encrypt-private-key",
+          name: "cluster-issuer-private-key",
         },
         solvers: [
           {
