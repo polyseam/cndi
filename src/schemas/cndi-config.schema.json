@@ -34,6 +34,7 @@
               "$comment": "An array of CNDI cluster nodes to deploy.",
               "minItems": 1,
               "type": "array",
+              "uniqueItems": true,
               "items": {
                 "type": "object",
                 "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
@@ -46,7 +47,7 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "eks", "ec2", "gcp", "azure"]
+                    "enum": ["aws", "eks", "ec2", "gcp", "azure", "dev"]
                   },
                   "role": {
                     "type": "string",
@@ -54,7 +55,39 @@
                     "enum": ["leader", "controller"]
                   },
                   "instance_type": {},
-                  "volume_size": {}
+                  "volume_size": {
+                    "type": "number",
+                    "description": "The amount of disk to allocate to the node in G.",
+                    "minimum": 1
+                  },
+                  "disk": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "The amount of disk to allocate to the node.",
+                        "pattern": "^[0-9]+(?:G|M|K)$"
+                      },
+                      {
+                        "type": "number",
+                        "description": "The amount of disk to allocate to the node in G.",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "memory": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "The amount of memory to allocate to the node.",
+                        "pattern": "^[0-9]+(?:G|M|K)$"
+                      },
+                      {
+                        "type": "number",
+                        "description": "The amount of memory to allocate to the node in G.",
+                        "minimum": 1
+                      }
+                    ]
+                  }
                 }
               }
             }

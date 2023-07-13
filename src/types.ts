@@ -7,12 +7,14 @@ export const NODE_KIND = {
   ec2: "ec2",
   gcp: "gcp",
   azure: "azure",
+  dev: "dev",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
   aws: "aws",
   gcp: "gcp",
   azure: "azure",
+  dev: "dev",
 } as const;
 
 export const COMMAND = {
@@ -55,6 +57,17 @@ interface BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
   machine_type?: string;
+}
+
+// cndi-config.jsonc["nodes"][kind==="dev"]
+interface MultipassNodeItemSpec extends BaseNodeItemSpec {
+  name: string;
+  cpus?: number;
+  memory?: number | string; // if integer, assume G
+  disk?: number | string; // if integer, assume G
+  disk_size_gb?: number;
+  volume_size?: number;
+  disk_size?: number;
 }
 
 // cndi-config.jsonc["nodes"][kind==="azure"]
@@ -267,6 +280,7 @@ export type {
   KubernetesSecret,
   KubernetesSecretWithStringData,
   Microk8sAddon,
+  MultipassNodeItemSpec,
   SealedSecretsKeys,
   TFBlocks,
 };
