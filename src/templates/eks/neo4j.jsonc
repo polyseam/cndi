@@ -36,6 +36,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          },
           "nodes": [
             {
               "name": "my-nodes",
@@ -55,31 +58,6 @@
         }
       },
       "cluster_manifests": {
-        "cert-manager-cluster-issuer": {
-          "apiVersion": "cert-manager.io/v1",
-          "kind": "ClusterIssuer",
-          "metadata": {
-            "name": "cluster-issuer"
-          },
-          "spec": {
-            "acme": {
-              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
-              "server": "https://acme-v02.api.letsencrypt.org/directory",
-              "privateKeySecretRef": {
-                "name": "cluster-issuer-private-key"
-              },
-              "solvers": [
-                {
-                  "http01": {
-                    "ingress": {
-                      "class": "public"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
         "argo-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",

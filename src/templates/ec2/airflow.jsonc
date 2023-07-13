@@ -58,6 +58,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          },
           "nodes": [
             {
               "name": "x-airflow-node",

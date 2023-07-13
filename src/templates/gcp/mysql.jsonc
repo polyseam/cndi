@@ -36,6 +36,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          },
           "open_ports": [
             {
               "number": 3306,
@@ -121,31 +124,6 @@
             "rootUser": "$.cndi.secrets.seal(ROOT_USER)",
             "rootHost": "$.cndi.secrets.seal(ROOT_HOST)",
             "rootPassword": "$.cndi.secrets.seal(ROOT_PASSWORD)"
-          }
-        },
-        "cert-manager-cluster-issuer": {
-          "apiVersion": "cert-manager.io/v1",
-          "kind": "ClusterIssuer",
-          "metadata": {
-            "name": "cluster-issuer"
-          },
-          "spec": {
-            "acme": {
-              "email": "vipal.marwah@untribe.com",
-              "server": "https://acme-v02.api.letsencrypt.org/directory",
-              "privateKeySecretRef": {
-                "name": "cluster-issuer-private-key"
-              },
-              "solvers": [
-                {
-                  "http01": {
-                    "ingress": {
-                      "class": "public"
-                    }
-                  }
-                }
-              ]
-            }
           }
         },
         "argo-ingress": {
