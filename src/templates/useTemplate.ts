@@ -123,14 +123,14 @@ interface CNDIGeneratedValues {
 }
 
 interface CndiConfigPromptResponses {
-  [key: string]: string;
+  [key: string]: string | number;
 }
 
 function replaceRange(
   s: string,
   start: number,
   end: number,
-  substitute: string,
+  substitute: string | number,
 ) {
   return s.substring(0, start) + substitute + s.substring(end);
 }
