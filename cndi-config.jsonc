@@ -3,16 +3,6 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
-      "open_ports": [
-        {
-          "number": 80,
-          "disable": true
-        },
-        {
-          "number": 443,
-          "disable": true
-        }
-      ],
       "nodes": [
         {
           "name": "x-node",
