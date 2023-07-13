@@ -159,7 +159,7 @@
           "kind": "Ingress",
           "metadata": {
             "name": "mongodb-server-ingress",
-            "namespace": "mongodb",
+            "namespace": "{{ $.cndi.prompts.responses.mongodbNamespace }}",
             "annotations": {
               "cert-manager.io/cluster-issuer": "lets-encrypt",
               "kubernetes.io/tls-acme": "true",
@@ -204,7 +204,7 @@
           "kind": "Secret",
           "metadata": {
             "name": "my-user-password",
-            "namespace": "mongodb"
+            "namespace": "{{ $.cndi.prompts.responses.mongodbNamespace }}"
           },
           "type": "Opaque",
           "stringData": {
@@ -216,7 +216,7 @@
           "kind": "MongoDBCommunity",
           "metadata": {
             "name": "mongodb-replica-set",
-            "namespace": "mongodb",
+            "namespace": "{{ $.cndi.prompts.responses.mongodbNamespace }}",
             "annotations": {
               "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
             }
@@ -258,7 +258,7 @@
       "applications": {
         "mongodb": {
           "targetRevision": "0.8.0",
-          "destinationNamespace": "mongodb",
+          "destinationNamespace": "{{ $.cndi.prompts.responses.mongodbNamespace }}",
           "repoURL": "https://mongodb.github.io/helm-charts",
           "chart": "community-operator"
         }
@@ -286,6 +286,10 @@
         {
           "name": "MONGODB_REPLICA_SETS",
           "value": "{{ $.cndi.prompts.responses.mongodbReplicaSets }}"
+        },
+        {
+          "name": "MONGODB_NAMESPACE",
+          "value": "{{ $.cndi.prompts.responses.mongodbNamespace }}"
         }
       ]
     },
