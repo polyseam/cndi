@@ -298,28 +298,28 @@
             "ssl": {
               "bolt": {
                 "privateKey": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.key"
                 },
                 "publicCertificate": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.crt"
                 }
               },
               "https": {
                 "privateKey": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.key"
                 },
                 "publicCertificate": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.crt"
                 },
                 "trustedCerts": {
                   "sources": [
                     {
                       "secret": {
-                        "name": "lets-encrypt-private-key",
+                        "name": "cluster-issuer-private-key",
                         "items": [
                           {
                             "key": "tls.crt",
@@ -333,18 +333,18 @@
               },
               "cluster": {
                 "privateKey": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.key"
                 },
                 "publicCertificate": {
-                  "secretName": "lets-encrypt-private-key",
+                  "secretName": "cluster-issuer-private-key",
                   "subPath": "tls.crt"
                 },
                 "trustedCerts": {
                   "sources": [
                     {
                       "secret": {
-                        "name": "lets-encrypt-private-key",
+                        "name": "cluster-issuer-private-key",
                         "items": [
                           {
                             "key": "tls.crt",

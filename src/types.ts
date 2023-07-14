@@ -181,6 +181,10 @@ interface CNDIConfig {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
+      cert_manager?: {
+        email: string;
+        self_signed?: boolean;
+      };
       microk8s: {
         addons: Array<Microk8sAddon>;
         version?: string; // 1.27

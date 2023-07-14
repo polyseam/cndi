@@ -3,6 +3,10 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
+      "cert_manager": {
+        "self_signed": true, // disabled by default
+        "email": "john@appleseed.com"
+      },
       "nodes": [
         {
           "name": "x-node",

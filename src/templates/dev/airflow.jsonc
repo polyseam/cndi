@@ -187,13 +187,13 @@
               "web": {
                 "enabled": true,
                 "annotations": {
-                  "cert-manager.io/cluster-issuer": "lets-encrypt"
+                  "cert-manager.io/cluster-issuer": "cluster-issuer"
                 },
                 "hosts": [
                   {
                     "name": "{{ $.cndi.prompts.responses.airflowDomainName }}",
                     "tls": {
-                      "secretName": "lets-encrypt-private-key",
+                      "secretName": "cluster-issuer-private-key",
                       "enabled": true
                     }
                   }
