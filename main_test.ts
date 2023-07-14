@@ -239,6 +239,32 @@ describe("cndi", () => {
       );
     });
 
+    it(`should be possible to specify an open_port which does not create or modify corresponding manifests`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          ...basicAWSCndiConfig,
+          infrastructure: {
+            cndi: {
+              ...basicAWSCndiConfig.infrastructure.cndi,
+              open_ports: [
+                {
+                  name: "ssh",
+                  number: 22,
+                },
+              ],
+            },
+          },
+        }),
+      );
+      assert(
+        !await hasSameFilesAfter(async () => {
+          const { status } = await runCndiLoud("init");
+          assert(status.success);
+        }),
+      );
+    });
+
     it(`should succeed if a config file has valid 'infrastructure.cndi.open_ports'`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
