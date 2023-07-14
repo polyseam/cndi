@@ -259,7 +259,7 @@ describe("cndi", () => {
       );
       assert(
         !await hasSameFilesAfter(async () => {
-          const { status } = await runCndiLoud("init");
+          const { status } = await runCndi("init");
           assert(status.success);
         }),
       );
