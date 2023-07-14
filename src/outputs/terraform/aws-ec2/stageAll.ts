@@ -50,6 +50,16 @@ export default async function stageTerraformResourcesForAWS(
 
   const open_ports = config.infrastructure.cndi.open_ports || [];
 
+  const disabledPorts = open_ports.filter((port) => port.disable);
+
+  const shouldDisableHTTPPort = disabledPorts.some((port) =>
+    port.number === 80 || port.name === "http"
+  );
+
+  const shouldDisableHTTPSPort = disabledPorts.some((port) =>
+    port.number === 443 || port.name === "https"
+  );
+
   const customListeners = open_ports.map((port) => {
     return stageFile(
       path.join(
