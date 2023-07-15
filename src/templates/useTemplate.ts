@@ -137,7 +137,6 @@ function replaceRange(
   return typeof (substitute) === "string"
     ? s.substring(0, start) + substitute + s.substring(end)
     : s.substring(0, start - 1) + substitute + s.substring(end + 1);
-
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
