@@ -123,22 +123,16 @@ interface CNDIGeneratedValues {
 }
 
 interface CndiConfigPromptResponses {
-  [key: string]: string | number;
+  [key: string]: string;
 }
 
 function replaceRange(
   s: string,
   start: number,
   end: number,
-  substitute: string | number,
+  substitute: string,
 ) {
-
-  //For number type add 1 to end index and reduce 1 from start index to remove "".
-  //Instead of "3" it will return 3
-  return typeof(substitute) ==="number"?
-  s.substring(0, start -1) + substitute + s.substring(end + 1):
-  s.substring(0, start) + substitute + s.substring(end)
-
+  return s.substring(0, start) + substitute + s.substring(end);
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -169,12 +163,13 @@ export function literalizeTemplateValuesInString(
     const trimmedContents = contentsOfFirstPair.trim();
     const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
     const valueToSubstitute = cndiConfigPromptResponses[key];
+
     if (key) {
       literalizedString = replaceRange(
         literalizedString,
         indexOfOpeningBraces,
         indexOfClosingBraces + 2,
-        valueToSubstitute
+        `${valueToSubstitute}`,
       );
     }
     indexOfOpeningBraces = literalizedString.indexOf(
@@ -184,11 +179,11 @@ export function literalizeTemplateValuesInString(
       "}}",
     );
   }
+
   return literalizedString;
 }
 
 export default async function useTemplate(
-  //URL or absolute file path
   templateLocation: string,
   opt: {
     project_name: string;
@@ -294,7 +289,7 @@ export default async function useTemplate(
   );
 
   const cndiConfigPromptResponses = opt.interactive // deno-lint-ignore no-explicit-any
-    ? await prompt(cndiConfigPrompts as unknown as any, )
+    ? await prompt(cndiConfigPrompts as unknown as any)
     : defaultCndiConfigValues;
 
   // pretty printing is required to play nice with {{ }} templating
