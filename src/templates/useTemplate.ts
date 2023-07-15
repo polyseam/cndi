@@ -137,7 +137,8 @@ function replaceRange(
 
 // returns a string where templated values are replaced with their literal values from prompt responses
 export function literalizeTemplateValuesInString(
-  cndiConfigPromptResponses: CndiConfigPromptResponses,
+  // cndiConfigPromptResponses: CndiConfigPromptResponses,
+  cndiConfigPromptResponses: TemplatePrompt,
   stringToLiteralize: string,
 ): string {
   let literalizedString = stringToLiteralize;
@@ -184,6 +185,7 @@ export function literalizeTemplateValuesInString(
 }
 
 export default async function useTemplate(
+  //URL or absolute file path
   templateLocation: string,
   opt: {
     project_name: string;
@@ -288,8 +290,8 @@ export default async function useTemplate(
     },
   );
 
-  const cndiConfigPromptResponses = opt.interactive // deno-lint-ignore no-explicit-any
-    ? await prompt(cndiConfigPrompts as unknown as any)
+  const cndiConfigPromptResponses: TemplatePrompt = opt.interactive // deno-lint-ignore no-explicit-any
+    ? await prompt(cndiConfigPrompts as unknown as any, )
     : defaultCndiConfigValues;
 
   // pretty printing is required to play nice with {{ }} templating
