@@ -132,14 +132,19 @@ function replaceRange(
   end: number,
   substitute: string | number,
 ) {
-  return s.substring(0, start) + substitute + s.substring(end);
+
+  //For number type add 1 to end index and reduce 1 from start index to remove "".
+  //Instead of "3" it will return 3
+  return typeof(substitute) ==="number"?
+  s.substring(0, start -1) + substitute + s.substring(end + 1):
+  s.substring(0, start) + substitute + s.substring(end)
+
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
 export function literalizeTemplateValuesInString(
   cndiConfigPromptResponses: CndiConfigPromptResponses,
   stringToLiteralize: string,
-  cndiConfigPrompts: TemplatePrompt[] | undefined
 ): string {
   let literalizedString = stringToLiteralize;
 
@@ -164,15 +169,12 @@ export function literalizeTemplateValuesInString(
     const trimmedContents = contentsOfFirstPair.trim();
     const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
     const valueToSubstitute = cndiConfigPromptResponses[key];
-      //find the type of the key
-    let keyType = cndiConfigPrompts?.find((promptItem) => promptItem.name === key)
     if (key) {
       literalizedString = replaceRange(
         literalizedString,
         indexOfOpeningBraces,
         indexOfClosingBraces + 2,
-        //check if keytype is number then convert to number
-        keyType?.type === 'Number'? Number(valueToSubstitute): valueToSubstitute,
+        valueToSubstitute
       );
     }
     indexOfOpeningBraces = literalizedString.indexOf(
@@ -182,7 +184,6 @@ export function literalizeTemplateValuesInString(
       "}}",
     );
   }
-
   return literalizedString;
 }
 
@@ -304,7 +305,6 @@ export default async function useTemplate(
   const literalizedCndiConfig = await literalizeTemplateValuesInString(
     cndiConfigPromptResponses,
     cndiConfigStringified,
-    cndiConfigPrompts
   );
 
   let cndiConfig;
