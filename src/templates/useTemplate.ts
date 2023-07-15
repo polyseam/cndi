@@ -139,7 +139,7 @@ function replaceRange(
 export function literalizeTemplateValuesInString(
   cndiConfigPromptResponses: CndiConfigPromptResponses,
   stringToLiteralize: string,
-  cndiConfigPrompts: TemplatePrompt[]
+  cndiConfigPrompts: TemplatePrompt[] | undefined
 ): string {
   let literalizedString = stringToLiteralize;
 
