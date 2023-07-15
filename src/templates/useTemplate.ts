@@ -165,7 +165,7 @@ export function literalizeTemplateValuesInString(
     const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
     const valueToSubstitute = cndiConfigPromptResponses[key];
       //find the type of the key
-    let keyType = cndiConfigPrompts.find((promptItem) => promptItem.name === key)
+    let keyType = cndiConfigPrompts?.find((promptItem) => promptItem.name === key)
     if (key) {
       literalizedString = replaceRange(
         literalizedString,
