@@ -137,9 +137,9 @@ function replaceRange(
 
 // returns a string where templated values are replaced with their literal values from prompt responses
 export function literalizeTemplateValuesInString(
-  // cndiConfigPromptResponses: CndiConfigPromptResponses,
-  cndiConfigPromptResponses: TemplatePrompt,
+  cndiConfigPromptResponses: CndiConfigPromptResponses,
   stringToLiteralize: string,
+  cndiConfigPrompts: TemplatePrompt[]
 ): string {
   let literalizedString = stringToLiteralize;
 
@@ -164,13 +164,15 @@ export function literalizeTemplateValuesInString(
     const trimmedContents = contentsOfFirstPair.trim();
     const [_, key] = trimmedContents.split("$.cndi.prompts.responses.");
     const valueToSubstitute = cndiConfigPromptResponses[key];
-
+      //find the type of the key
+    let keyType = cndiConfigPrompts.find((promptItem) => promptItem.name === key)
     if (key) {
       literalizedString = replaceRange(
         literalizedString,
         indexOfOpeningBraces,
         indexOfClosingBraces + 2,
-        valueToSubstitute,
+        //check if keytype is number then convert to number
+        keyType?.type === 'Number'? Number(valueToSubstitute): valueToSubstitute,
       );
     }
     indexOfOpeningBraces = literalizedString.indexOf(
@@ -290,7 +292,7 @@ export default async function useTemplate(
     },
   );
 
-  const cndiConfigPromptResponses: TemplatePrompt = opt.interactive // deno-lint-ignore no-explicit-any
+  const cndiConfigPromptResponses = opt.interactive // deno-lint-ignore no-explicit-any
     ? await prompt(cndiConfigPrompts as unknown as any, )
     : defaultCndiConfigValues;
 
@@ -302,6 +304,7 @@ export default async function useTemplate(
   const literalizedCndiConfig = await literalizeTemplateValuesInString(
     cndiConfigPromptResponses,
     cndiConfigStringified,
+    cndiConfigPrompts
   );
 
   let cndiConfig;
