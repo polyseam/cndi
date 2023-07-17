@@ -15,6 +15,7 @@ import processInteractiveEntries from "src/tests/helpers/processInteractiveEntri
 
 import {
   ensureResoureNamesMatchFileNames,
+  getModuleDir,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
 
@@ -348,6 +349,42 @@ describe("cndi", () => {
         "init",
         "-t",
         "https://raw.githubusercontent.com/polyseam/example-cndi-templates/main/azure/airflow-tls.jsonc",
+      );
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
+    it(`should successfully execute file:// templates`, async () => {
+      const initFileList = new Set([
+        "cndi-config.jsonc",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      const pathToThisDirectory = getModuleDir(import.meta);
+      const absPathToTemplate = path.join(
+        pathToThisDirectory,
+        "src",
+        "templates",
+        "ec2",
+        "airflow.jsonc",
+      );
+
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        `file://${absPathToTemplate}`,
       );
 
       // read the current directory entries after "cndi init" has ran
