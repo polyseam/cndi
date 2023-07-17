@@ -3,9 +3,9 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
+      "open_ports": [{ "name": "http", "disable": true }],
       "cert_manager": {
-        "self_signed": true, // disabled by default
-        "email": "john@appleseed.com"
+        "email": "jane.doe@example.com"
       },
       "nodes": [
         {
