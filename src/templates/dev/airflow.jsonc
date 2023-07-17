@@ -59,7 +59,7 @@
       "infrastructure": {
         "cndi": {
           "cert_manager": {
-            "self-signed": true,
+            "self_signed": true,
             "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
           },
           "nodes": [
