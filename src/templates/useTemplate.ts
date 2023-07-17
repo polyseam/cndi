@@ -130,10 +130,10 @@ function replaceRange(
   s: string,
   start: number,
   end: number,
-  substitute: string,
+  substitute: string | number | boolean | Array<unknown>,
 ) {
-  //For type that are not string add 1 to end index and reduce 1 from start index to remove "".
-  //So instead of it returning "members": "3" it will return "members": 3
+  // For type that are not string add 1 to end index and reduce 1 from start index to remove "".
+  // So instead of it returning "members": "3" it will return "members": 3
   return typeof (substitute) === "string"
     ? s.substring(0, start) + substitute + s.substring(end)
     : s.substring(0, start - 1) + substitute + s.substring(end + 1);
