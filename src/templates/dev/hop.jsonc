@@ -1,0 +1,92 @@
+{
+  "prompts": [
+    {
+      "message": "Please enter the hop server password you want to use for hop:",
+      "name": "hopServerPassword",
+      "default": "admin",
+      "type": "Secret"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "hop-dev-node",
+              "kind": "dev",
+              "role": "leader",
+              "volume_size": 128
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "hop-server-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "hop-server",
+            "namespace": "hop"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "pass": "$.cndi.secrets.seal(HOP_SERVER_PASSWORD)"
+          }
+        },
+        "hop-server-pvc": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "metadata": {
+            "name": "hop-server-pvc",
+            "namespace": "hop"
+          },
+          "spec": {
+            "accessModes": [
+              "ReadWriteOnce"
+            ],
+            "resources": {
+              "requests": {
+                "storage": "1Gi"
+              }
+            }
+          }
+        }
+      },
+      "applications": {
+        "hop": {
+          "targetRevision": "HEAD",
+          "destinationNamespace": "hop",
+          "repoURL": "https://github.com/apache/hop.git",
+          "path": "helm/hop",
+          "values": {
+            "server": {
+              "persistence": {
+                "enabled": true,
+                "existingClaim": "hop-server-pvc"
+              }
+            }
+          }
+        }
+      }
+    },
+    "env": {
+      "extend_basic_env": "dev",
+      "entries": [
+        {
+          "type": "Comment",
+          "comment": "HOP parameters"
+        },
+        {
+          "name": "HOP_SERVER_PASSWORD",
+          "value": "{{ $.cndi.prompts.responses.hopServerPassword }}"
+        }
+      ]
+    },
+    "readme": {
+      "extend_basic_readme": "dev",
+      "template_section": "## Apache Hop\n\nThis template deploys [Apache Hop](https://hop.apache.org/), a data processing tool that is widely used for ETL to extract transform and load processing. "
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "prompts": [],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "nodes": [
+            {
+              "name": "dev-node",
+              "kind": "dev",
+              "role": "leader",
+              "volume_size": 128
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {},
+      "applications": {}
+    },
+    "env": {
+      "extend_basic_env": "dev"
+    },
+    "readme": {
+      "extend_basic_readme": "dev"
+    }
+  }
+}

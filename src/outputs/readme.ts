@@ -120,6 +120,20 @@ Both entries should point to the single load balancer that was created for your 
 
 You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
 `.trim(),
+    dev: `## dev
+  
+    This cluster will be deployed on your local machine.
+
+    1. Use the following multipass exec command to open a shell session into the machine and get its ip address
+    
+    multipass exec <name of node> -- ip route get 1.2.3.4 | awk '{print $7}'
+    
+    2. Use the following multipass exec command to open a shell session into the machine and port forward the argocd server 
+
+    multipass exec <add name of node here>  -- sudo microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 --address <ip address of node>
+    
+    3.Go to this url https://<ip address of node>:8080 in your browser to get the argocd UI
+   `,
   };
 
   const readmeContent = [

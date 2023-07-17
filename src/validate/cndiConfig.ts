@@ -171,7 +171,25 @@ export default async function validateConfig(
     Deno.exit(904);
   }
 
-  if (!config.cndi_version) {
+  if (config?.infrastructure?.cndi?.nodes?.[0]?.kind === "dev") {
+    if (config.infrastructure.cndi.nodes.length > 1) {
+      console.error(
+        cndiConfigLabel,
+        ccolors.error("cndi-config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it has multiple"),
+        ccolors.key_name('"infrastructure.cndi.nodes"'),
+        ccolors.error("entries with the"),
+        ccolors.key_name('"kind"'),
+        ccolors.error(
+          'value of "dev". Only one node can be deployed when doing dev deployments.',
+        ),
+      );
+      Deno.exit(908);
+    }
+  }
+
+  if (!config?.cndi_version) {
     console.log(
       cndiConfigLabel,
       ccolors.warn(`You haven't specified a`),
