@@ -295,7 +295,7 @@
     },
     "readme": {
       "extend_basic_readme": "gcp",
-      "template_section": "## mongodb\n\nThis template deploys a Standalone production ready [mongodb-community-operator](https://github.com/mongodb/mongodb-kubernetes-operator) \n\n##To test the connection you will need to [Install Mongo shell](https://www.mongodb.com/docs/mongodb-shell/install/).\n\nOnce the `mongosh` is installed, test Connection from terminal - `mongosh mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{ $.cndi.prompts.responses.mongodbPassword }}@{{ $.cndi.prompts.responses.mongodbDomainName }}`"
+      "template_section": "## mongodb\n\nThis template deploys a Standalone production ready [mongodb-community-operator](https://github.com/mongodb/mongodb-kubernetes-operator) \n\nTo test the connection you will need to [Install Mongo shell](https://www.mongodb.com/docs/mongodb-shell/install/).\n\nOnce the `mongosh` is installed, test the connection from terminal - `mongosh mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{ $.cndi.prompts.responses.mongodbPassword }}@{{ $.cndi.prompts.responses.mongodbDomainName }}`"
     }
   }
 }
