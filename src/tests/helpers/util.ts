@@ -7,6 +7,10 @@ function areSetsEqual(setA: Set<string>, setB: Set<string>) {
   return true;
 }
 
+function getModuleDir(importMeta: ImportMeta): string {
+  return path.resolve(path.dirname(path.fromFileUrl(importMeta.url)));
+}
+
 const assertSetEquality = (setA: Set<string>, setB: Set<string>) =>
   assert(areSetsEqual(setA, setB));
 
@@ -60,5 +64,6 @@ async function ensureResoureNamesMatchFileNames() {
 export {
   assertSetEquality,
   ensureResoureNamesMatchFileNames,
+  getModuleDir,
   hasSameFilesAfter,
 };

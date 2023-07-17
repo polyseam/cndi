@@ -157,6 +157,7 @@ const initCommand = new Command()
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
+        search: true,
         options: templateNamesList,
       });
     }

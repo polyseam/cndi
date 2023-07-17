@@ -228,7 +228,7 @@
     },
     "readme": {
       "extend_basic_readme": "gcp",
-      "template": "## Apache Hop\n\nThis template deploys [Apache Hop](https://hop.apache.org/), a data processing tool that is widely used for ETL to extract transform and load processing. "
+      "template_section": "## Apache Hop\n\nThis template deploys [Apache Hop](https://hop.apache.org/), a data processing tool that is widely used for ETL to extract transform and load processing. "
     }
   }
 }

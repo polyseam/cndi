@@ -57,18 +57,8 @@ const getIngressServiceManifest = (
       );
     }
 
-    if (!port?.namespace) {
-      console.error(
-        ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "namespace" property',
-      );
-    }
-
-    if (!port?.service) {
-      console.error(
-        ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "service" property',
-      );
+    if (!disable && !port?.namespace && !port?.service) {
+      return;
     }
 
     if (disable) {

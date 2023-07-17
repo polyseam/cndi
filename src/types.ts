@@ -154,8 +154,8 @@ type TFBlocks = {
 
 interface CNDIPort {
   name: string;
-  service: string;
-  namespace: string;
+  service?: string;
+  namespace?: string;
   number: number;
   disable?: boolean;
 }
