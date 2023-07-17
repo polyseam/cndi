@@ -7,6 +7,8 @@ import {
   stageFile,
 } from "src/utils.ts";
 
+import {DEFAULT_OPEN_PORTS} from "consts";
+
 import data from "./data.tf.json.ts";
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
