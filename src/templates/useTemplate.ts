@@ -130,9 +130,13 @@ function replaceRange(
   s: string,
   start: number,
   end: number,
-  substitute: string,
+  substitute: string | number | boolean | Array<unknown>,
 ) {
-  return s.substring(0, start) + substitute + s.substring(end);
+  // For type that are not string add 1 to end index and reduce 1 from start index to remove "".
+  // So instead of it returning "members": "3" it will return "members": 3
+  return typeof (substitute) === "string"
+    ? s.substring(0, start) + substitute + s.substring(end)
+    : s.substring(0, start - 1) + substitute + s.substring(end + 1);
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -169,7 +173,7 @@ export function literalizeTemplateValuesInString(
         literalizedString,
         indexOfOpeningBraces,
         indexOfClosingBraces + 2,
-        `${valueToSubstitute}`,
+        valueToSubstitute,
       );
     }
     indexOfOpeningBraces = literalizedString.indexOf(
