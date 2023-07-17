@@ -1,0 +1,52 @@
+name: Template
+description: A new type of CNDI Template which should be created for the framework
+title: "[Template]: "
+labels: ["enhancement", "template"]
+assignees:
+  - johnstonmatt
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve our CNDI!
+        If you are looking to request support for a new Template for the CNDI team to build, you're in the right spot!
+        Keep in mind, Templates can be invoked using URLs, and using them does not require any changes made by the CNDI Team.
+
+        That said, we do want to bring world class support to popular solutions and make them easy to deploy by adding them to our [Known Templates List](https://github.com/polyseam/cndi/blob/main/src/templates/knownTemplates.ts).
+
+  - type: checkboxes
+    id: searched-known-templates
+    attributes:
+      label: Please confirm that we don't have support planned for this Template already
+      description: |
+        We have a number of Templates we aim to support found [here](https://github.com/orgs/polyseam/projects/6/views/7).
+        If your target is on the list, please add an emoji reaction to the card to show your support!
+      options:
+        - label: I have checked the list and don't see the Template I want!
+          required: true
+
+  - type: textarea
+    id: template
+    attributes:
+      label: Which new Template should be added to CNDI?
+      description: 'Please tell us more about the Template you aim to deploy to and why:'
+      placeholder: I would like to be able to deploy Trackmania servers...
+    validations:
+      required: true
+
+  - type: textarea
+    id: template-exists
+    attributes:
+      label: Remote Template
+      description: |
+        Is there an existing Template for this solution? if yes, please provide a link to the source code.
+        If the remote Template could be improved, please add your suggestions here too.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/polyseam/cndi/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
