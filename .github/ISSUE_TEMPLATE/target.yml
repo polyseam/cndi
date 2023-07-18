@@ -1,5 +1,6 @@
 name: Target
-description: Request CNDI Deployment Target Support
+description: Request a new CNDI Deployment Target for the framework
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
 title: "[Target]: "
 labels: ["enhancement", "deployment target"]
 assignees:
