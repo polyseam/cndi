@@ -68,7 +68,17 @@ export default async function validateConfig(
           await emitExitEvent(911);
           Deno.exit(911);
         }
-        if (!port.service) {
+        if (!port.service && !port.namespace) {
+          console.log(
+            cndiConfigLabel,
+            ccolors.warn(`port`),
+            ccolors.user_input(`${port.number}`),
+            ccolors.warn(`is open but is not assigned to a`),
+            ccolors.key_name("service"),
+            ccolors.warn("or"),
+            ccolors.key_name("namespace"),
+          );
+        } else if (!port.service) {
           console.error(
             cndiConfigLabel,
             ccolors.error("cndi-config file found was at "),
@@ -81,8 +91,7 @@ export default async function validateConfig(
           );
           await emitExitEvent(910);
           Deno.exit(910);
-        }
-        if (!port.namespace) {
+        } else if (!port.namespace) {
           console.error(
             cndiConfigLabel,
             ccolors.error("cndi-config file found was at "),
