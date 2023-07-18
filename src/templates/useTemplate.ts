@@ -167,26 +167,11 @@ export function literalizeTemplateValuesInString(
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
-        let val;
-
-        if (Array.isArray(valueToSubstitute)) {
-          // if entries is a string array, wrap each entry in quotes
-          // otherwise, just use the entry as-is
-          const entries = valueToSubstitute.map((
-            v,
-          ) => (typeof v === "string" ? `"${v}"` : v));
-          // eg. ["a", "b", "c"]
-          val = `[${(entries).join(", ")}]`;
-        } else {
-          // valueToSubstitute is a boolean or number
-          val = valueToSubstitute;
-        }
-
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpenWrappingQuote,
           indexOfClosingWrappingQuoteInclusive,
-          `${val}`,
+          JSON.stringify(valueToSubstitute),
         );
       }
     }

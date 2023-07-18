@@ -427,13 +427,13 @@ describe("cndi", () => {
       assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
       assert(literalized.indexOf(`"numberExample": 1300`) > -1);
       assert(
-        literalized.indexOf(`"stringArrayExample": ["foo", "bar", "baz"]`) > -1,
+        literalized.indexOf(`"stringArrayExample": ["foo","bar","baz"]`) > -1,
       );
       assert(
-        literalized.indexOf(`"boolArrayExample": [true, false, true]`) > -1,
+        literalized.indexOf(`"boolArrayExample": [true,false,true]`) > -1,
       );
       assert(
-        literalized.indexOf(`"mixedArrayExample": [true, "foo", 1300]`) > -1,
+        literalized.indexOf(`"mixedArrayExample": [true,"foo",1300]`) > -1,
       );
       assert(literalized.indexOf(`"booleanExample": true`) > -1);
       assert(literalized.indexOf(`"whitespaceIgnored": true`) > -1);
