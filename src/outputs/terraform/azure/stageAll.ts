@@ -41,23 +41,23 @@ export default async function stageTerraformResourcesForAzure(
 
   const ports = resolveCNDIPorts(config);
 
-  const customLbRules = ports.map((port) =>
+  const lbRules = ports.map((port) =>
     stageFile(
       path.join(
         "cndi",
         "terraform",
-        `cndi_azurerm_lb_rule_port_${port.name}.tf.json`,
+        `cndi_azurerm_lb_rule_for_port_${port.name}.tf.json`,
       ),
       cndi_azurerm_lb_rule_port(port),
     )
   );
 
-  const customLbProbes = ports.map((port) =>
+  const lbProbes = ports.map((port) =>
     stageFile(
       path.join(
         "cndi",
         "terraform",
-        `cndi_azurerm_lb_probe_port_${port.name}.tf.json`,
+        `cndi_azurerm_lb_probe_for_port_${port.name}.tf.json`,
       ),
       cndi_azurerm_lb_probe_port(port),
     )
@@ -114,8 +114,8 @@ export default async function stageTerraformResourcesForAzure(
   // stage all the terraform files at once
   try {
     await Promise.all([
-      ...customLbRules,
-      ...customLbProbes,
+      ...lbRules,
+      ...lbProbes,
       ...stageNodes,
       ...stageNetworkInterface,
       ...stageNetworkInterfaceBackendAddressPoolAssociation,

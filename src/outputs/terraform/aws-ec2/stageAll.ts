@@ -45,7 +45,7 @@ export default async function stageTerraformResourcesForAWS(
 
   const ports = resolveCNDIPorts(config);
 
-  const customListeners = ports.map((port) => {
+  const listeners = ports.map((port) => {
     return stageFile(
       path.join(
         "cndi",
@@ -56,7 +56,7 @@ export default async function stageTerraformResourcesForAWS(
     );
   });
 
-  const customTargetGroups = ports.map((port) => {
+  const targetGroups = ports.map((port) => {
     return stageFile(
       path.join(
         "cndi",
@@ -96,8 +96,8 @@ export default async function stageTerraformResourcesForAWS(
   try {
     await Promise.all([
       ...stageNodes,
-      ...customListeners,
-      ...customTargetGroups,
+      ...listeners,
+      ...targetGroups,
       ...targetGroupAttachments,
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_resourcegroups_group.tf.json"),

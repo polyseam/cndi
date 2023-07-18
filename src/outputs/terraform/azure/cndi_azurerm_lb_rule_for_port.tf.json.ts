@@ -11,8 +11,9 @@ export default function getAzureLbRuleTFJSON(port: CNDIPort): string {
     frontend_port: port.number,
     loadbalancer_id: "${azurerm_lb.cndi_azurerm_lb.id}",
     name: port.name,
-    probe_id: `\${azurerm_lb_probe.cndi_azurerm_lb_probe_${port.name}.id}`,
+    probe_id:
+      `\${azurerm_lb_probe.cndi_azurerm_lb_probe_for_port_${port.name}.id}`,
     protocol: "Tcp",
-  }, `cndi_azurerm_lb_rule_${port.name}`);
+  }, `cndi_azurerm_lb_rule_for_port_${port.name}`);
   return getPrettyJSONString(resource);
 }
