@@ -1,4 +1,4 @@
-import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
+import { emitExitEvent, getPrettyJSONString, replaceRange } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -123,24 +123,7 @@ interface CNDIGeneratedValues {
 }
 
 interface CndiConfigPromptResponses {
-  [key: string]: string;
-}
-
-/**
- * Replaces a range in a string with a substituted value
- * @param s string which should be modified
- * @param start index of the first character to be replaced
- * @param end index of the last character to be replaced
- * @param substitute
- * @returns new string after substitution
- */
-function replaceRange(
-  s: string,
-  start: number,
-  end: number,
-  substitute: string | number | boolean | Array<unknown>,
-) {
-  return s.substring(0, start) + substitute + s.substring(end);
+  [key: string]: string | number | boolean | Array<unknown>;
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -174,20 +157,36 @@ export function literalizeTemplateValuesInString(
 
     if (key) {
       if (typeof valueToSubstitute === "string") {
+        const indexOfClosingBracesInclusive = indexOfClosingBraces + 2;
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpeningBraces,
-          indexOfClosingBraces + 2,
+          indexOfClosingBracesInclusive,
           valueToSubstitute,
         );
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
-        const indexOfClosingWrappingQuote = indexOfClosingBraces + 1;
+        const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+        let val;
+
+        if (Array.isArray(valueToSubstitute)) {
+          // if entries is a string array, wrap each entry in quotes
+          // otherwise, just use the entry as-is
+          const entries = valueToSubstitute.map((
+            v,
+          ) => (typeof v === "string" ? `"${v}"` : v));
+          // eg. ["a", "b", "c"]
+          val = `[${(entries).join(", ")}]`;
+        } else {
+          // valueToSubstitute is a boolean or number
+          val = valueToSubstitute;
+        }
+
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpenWrappingQuote,
-          indexOfClosingWrappingQuote,
-          valueToSubstitute,
+          indexOfClosingWrappingQuoteInclusive,
+          `${val}`,
         );
       }
     }
