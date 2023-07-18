@@ -1,0 +1,42 @@
+name: Target
+description: Request a new CNDI Deployment Target for the framework
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
+title: "[Target]: "
+labels: ["enhancement", "deployment target"]
+assignees:
+  - johnstonmatt
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve our CNDI!
+        If you are looking to request support for a new environment for CNDI to deploy to, you're in the right spot!
+
+  - type: checkboxes
+    id: searched-known-targets
+    attributes:
+      label: Please confirm that we don't have support planned for this Deployment Target already
+      description: |
+        We have a number of Deployment Targets we aim to support found [here](https://github.com/orgs/polyseam/projects/6/views/8).
+        If your desired Deployment Target is on the list, please add an emoji reaction to the card to show your support ❤️
+      options:
+        - label: I have checked the list and don't see the Deployment Target I want!
+          required: true
+
+  - type: textarea
+    id: deployment-target
+    attributes:
+      label: Which new environment should be added to CNDI?
+      description: 'Please tell us more about the environment you aim to deploy to and why:'
+      placeholder: I would like to be able to deploy CNDI to my smart fridge because...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/polyseam/cndi/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
