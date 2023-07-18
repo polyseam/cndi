@@ -1,5 +1,6 @@
 name: Template
-description: A new type of CNDI Template which should be created for the framework
+description: Request a New CNDI Template for the framework
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
 title: "[Template]: "
 labels: ["enhancement", "template"]
 assignees:

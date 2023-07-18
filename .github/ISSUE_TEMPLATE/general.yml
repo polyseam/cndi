@@ -1,5 +1,6 @@
 name: Enhancement
-description: Some improvement to the core CNDI functionality
+description: Propose some improvement to the core CNDI functionality
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
 title: "[Enhancement]: "
 labels: ["enhancement"]
 assignees:
