@@ -126,17 +126,21 @@ interface CndiConfigPromptResponses {
   [key: string]: string;
 }
 
+/**
+ * Replaces a range in a string with a substituted value
+ * @param s string which should be modified
+ * @param start index of the first character to be replaced
+ * @param end index of the last character to be replaced
+ * @param substitute
+ * @returns new string after substitution
+ */
 function replaceRange(
   s: string,
   start: number,
   end: number,
   substitute: string | number | boolean | Array<unknown>,
 ) {
-  // For type that are not string add 1 to end index and reduce 1 from start index to remove "".
-  // So instead of it returning "members": "3" it will return "members": 3
-  return typeof (substitute) === "string"
-    ? s.substring(0, start) + substitute + s.substring(end)
-    : s.substring(0, start - 1) + substitute + s.substring(end + 1);
+  return s.substring(0, start) + substitute + s.substring(end);
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -169,12 +173,23 @@ export function literalizeTemplateValuesInString(
     const valueToSubstitute = cndiConfigPromptResponses[key];
 
     if (key) {
-      literalizedString = replaceRange(
-        literalizedString,
-        indexOfOpeningBraces,
-        indexOfClosingBraces + 2,
-        valueToSubstitute,
-      );
+      if (typeof valueToSubstitute === "string") {
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpeningBraces,
+          indexOfClosingBraces + 2,
+          valueToSubstitute,
+        );
+      } else {
+        const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
+        const indexOfClosingWrappingQuote = indexOfClosingBraces + 1;
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpenWrappingQuote,
+          indexOfClosingWrappingQuote,
+          valueToSubstitute,
+        );
+      }
     }
     indexOfOpeningBraces = literalizedString.indexOf(
       "{{",
@@ -183,7 +198,6 @@ export function literalizeTemplateValuesInString(
       "}}",
     );
   }
-
   return literalizedString;
 }
 
@@ -208,6 +222,7 @@ export default async function useTemplate(
       { name: "eks" },
       { name: "azure" },
       { name: "gcp" },
+      { name: "dev" },
     ];
 
     const validTarget = validTargets.find((target) => {
