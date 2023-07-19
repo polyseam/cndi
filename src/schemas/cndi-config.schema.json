@@ -30,10 +30,68 @@
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
           "required": ["nodes"],
           "properties": {
+            "cert_manager": {
+              "properties": {
+                "self_signed": {
+                  "type": "boolean",
+                  "description": "Whether or not the certificate should be self-signed (insecure).\n Can only be true if \"email\" is not defined.",
+                  "default": false
+                },
+                "email": {
+                  "type": "string",
+                  "description": "The email address let's encrypt should attach to your certificates.\n Can only be used if \"self_signed\" is false or undefined."
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "self_signed": { "const": true },
+                    "email": {
+                      "not": {}
+                    }
+                  },
+                  "required": ["self_signed"],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "self_signed": { "enum": [false] },
+                    "email": {}
+                  },
+                  "required": ["email"],
+                  "additionalProperties": false
+                }
+              ],
+              "additionalProperties": false
+            },
+            "open_ports": {
+              "type": "array",
+              "description": "An array of ports to open on the cluster.",
+              "items": {
+                "type": "object",
+                "description": "A port to open or close on the cluster.",
+                "properties": {
+                  "number": {
+                    "type": "number",
+                    "description": "The port number to open or close.",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "disable": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            },
             "nodes": {
               "$comment": "An array of CNDI cluster nodes to deploy.",
               "minItems": 1,
               "type": "array",
+              "uniqueItems": true,
               "items": {
                 "type": "object",
                 "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
@@ -46,7 +104,7 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "eks", "ec2", "gcp", "azure"]
+                    "enum": ["aws", "eks", "ec2", "gcp", "azure", "dev"]
                   },
                   "role": {
                     "type": "string",
@@ -54,7 +112,39 @@
                     "enum": ["leader", "controller"]
                   },
                   "instance_type": {},
-                  "volume_size": {}
+                  "volume_size": {
+                    "type": "number",
+                    "description": "The amount of disk to allocate to the node in G.",
+                    "minimum": 1
+                  },
+                  "disk": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "The amount of disk to allocate to the node.",
+                        "pattern": "^[0-9]+(?:G|M|K)$"
+                      },
+                      {
+                        "type": "number",
+                        "description": "The amount of disk to allocate to the node in G.",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "memory": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "The amount of memory to allocate to the node.",
+                        "pattern": "^[0-9]+(?:G|M|K)$"
+                      },
+                      {
+                        "type": "number",
+                        "description": "The amount of memory to allocate to the node in G.",
+                        "minimum": 1
+                      }
+                    ]
+                  }
                 }
               }
             }

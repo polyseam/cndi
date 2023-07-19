@@ -4,19 +4,27 @@
   "title": "cndi-config",
   "$comment": "The root of the cndi config schema",
   "description": "An object used to configure the changelog generation for GitHub Releases",
-  "required": ["outputs"],
+  "required": [
+    "outputs"
+  ],
   "properties": {
     "outputs": {
       "type": "object",
       "description": "An object which defines the outputs of the cndi template",
-      "required": ["cndi-config", "env", "readme"],
+      "required": [
+        "cndi-config",
+        "env",
+        "readme"
+      ],
       "properties": {
         "cndi-config": {
           "type": "object",
           "description": "The path to the cndi-config file",
           "$ref": "./cndi-config.schema.json",
           "not": {
-            "required": ["project_name"]
+            "required": [
+              "project_name"
+            ]
           }
         },
         "env": {
@@ -45,7 +53,9 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                      "type": { "const": "Comment" },
+                      "type": {
+                        "const": "Comment"
+                      },
                       "comment": {
                         "type": "string"
                       }
@@ -56,7 +66,12 @@
             },
             "extend_basic_env": {
               "type": "string",
-              "enum": ["aws", "gcp", "azure"]
+              "enum": [
+                "aws",
+                "gcp",
+                "azure",
+                "dev"
+              ]
             }
           }
         },
@@ -67,7 +82,12 @@
           "properties": {
             "extend_basic_readme": {
               "type": "string",
-              "enum": ["aws", "gcp", "azure"]
+              "enum": [
+                "aws",
+                "gcp",
+                "azure",
+                "dev"
+              ]
             },
             "template_section": {
               "type": "string",
@@ -82,7 +102,11 @@
       "description": "An array of prompts to be presented to the user for configuration",
       "items": {
         "type": "object",
-        "required": ["name", "message", "type"],
+        "required": [
+          "name",
+          "message",
+          "type"
+        ],
         "description": "A prompt to be presented the user of a CNDI template so they can configure it",
         "properties": {
           "name": {
