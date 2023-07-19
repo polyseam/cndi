@@ -1,6 +1,18 @@
 {
   "prompts": [
     {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "mysqlDomainName",
+      "default": "mysql.example.com",
+      "message": "Please enter the domain name you want mysql to be accessible on:",
+      "type": "Input"
+    },
+    {
       "message": "Please enter root username",
       "default": "root",
       "name": "rootUser",
@@ -18,6 +30,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "self_signed": true
+          },
           "open_ports": [
             {
               "number": 3306,
@@ -86,6 +101,96 @@
             "rootUser": "$.cndi.secrets.seal(ROOT_USER)",
             "rootHost": "$.cndi.secrets.seal(ROOT_HOST)",
             "rootPassword": "$.cndi.secrets.seal(ROOT_PASSWORD)"
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "mysql-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "mysql-ingress",
+            "namespace": "myinnodbcluster",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.mysqlDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "mycluster",
+                          "port": {
+                            "number": 3306
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       },

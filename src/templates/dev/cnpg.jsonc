@@ -1,6 +1,18 @@
 {
   "prompts": [
     {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    },
+    {
+      "name": "postgresqlDomainName",
+      "default": "postgresql.example.com",
+      "message": "Please enter the domain name you want postgresql to be accessible on:",
+      "type": "Input"
+    },
+    {
       "message": "Please enter the username for your postgresql admin:",
       "default": "admin",
       "name": "postgresqlUser",
@@ -36,6 +48,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "self_signed": true
+          },
           "open_ports": [
             {
               "number": 5432,
@@ -126,6 +141,94 @@
           "stringData": {
             "username": "$.cndi.secrets.seal(POSTGRESQL_USER)",
             "password": "$.cndi.secrets.seal(POSTGRESQL_PASSWORD)"
+          }
+        },
+        "cnpg-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "cnpg-ingress",
+            "namespace": "{{ $.cndi.prompts.responses.pgNamespace }}",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.postgresqlDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.postgresqlDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw",
+                          "port": {
+                            "number": 5432
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         "cnpg-connection-string-secret": {

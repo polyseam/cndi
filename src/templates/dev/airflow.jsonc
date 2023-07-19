@@ -29,12 +29,6 @@
       "type": "Input"
     },
     {
-      "message": "Please enter the email address you want to use for lets encrypt:",
-      "default": "admin@example.com",
-      "name": "letsEncryptClusterIssuerEmailAddress",
-      "type": "Input"
-    },
-    {
       "message": "Please enter the username for your postgresql admin:",
       "default": "admin",
       "name": "postgresqlUser",
