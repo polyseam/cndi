@@ -70,7 +70,7 @@
               "name": "x-cnpg-node",
               "kind": "ec2",
               "role": "leader",
-              "instance_type": "m5a.large",
+              "instance_type": "t3.large",
               "volume_size": 128
             },
             {
