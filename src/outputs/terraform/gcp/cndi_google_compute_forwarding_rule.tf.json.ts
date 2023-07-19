@@ -2,13 +2,9 @@ import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { CNDIPort } from "../../../types.ts";
 
 export default function getGCPComputeInstanceForwardingRuleTFJSON(
-  user_ports: Array<CNDIPort>,
+  p: Array<CNDIPort>,
 ): string {
-  const ports = ["80", "443"];
-
-  user_ports.forEach((port) => {
-    ports.push(`${port.number}`);
-  });
+  const ports = p.map(({ number }) => `${number}`);
 
   const resource = getTFResource("google_compute_forwarding_rule", {
     backend_service:

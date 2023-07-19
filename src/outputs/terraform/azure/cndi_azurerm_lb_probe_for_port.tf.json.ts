@@ -6,6 +6,6 @@ export default function getAzureLbProbeTFJSON(port: CNDIPort): string {
     loadbalancer_id: "${azurerm_lb.cndi_azurerm_lb.id}",
     name: `cndi_load_balancer_${port.name}_health_probe`,
     port: port.number,
-  }, `cndi_azurerm_lb_probe_${port.name}`);
+  }, `cndi_azurerm_lb_probe_for_port_${port.name}`);
   return getPrettyJSONString(resource);
 }
