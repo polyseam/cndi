@@ -272,7 +272,7 @@
         },
         {
           "name": "MONGODB_CONNECTION_STRING",
-          "value": "mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{ $.cndi.prompts.responses.mongodbPassword }}@{{ $.cndi.prompts.responses.mongodbDomainName }}"
+          "value": "mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{ $.cndi.prompts.responses.mongodbPassword }}@{{ $.cndi.prompts.responses.mongodbDomainName }}/{{ $.cndi.prompts.responses.mongodbName }}"
         },
         {
           "name": "MONGODB_REPLICA_SETS",
