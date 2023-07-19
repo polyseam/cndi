@@ -39,18 +39,25 @@ const getIngressTcpServicesConfigMapManifest = (
         'custom port specs need "number" property',
       );
     }
+
+    if (!port?.namespace && !port?.service) {
+      return;
+    }
+
     if (!port?.namespace) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "namespace" property',
+        'custom port specs with "service" need "namespace" property',
       );
     }
+
     if (!port?.service) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "service" property',
+        'custom port specs with "namespace" need "service" property',
       );
     }
+
     manifest.data[`${port.number}`] =
       `${port.namespace}/${port.service}:${port.number}`;
   });

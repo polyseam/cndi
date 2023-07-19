@@ -7,7 +7,7 @@ import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
 
-import { getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString, replaceRange } from "src/utils.ts";
 
 import { getRunningCNDIProcess, runCndi } from "src/tests/helpers/run-cndi.ts";
 
@@ -15,6 +15,7 @@ import processInteractiveEntries from "src/tests/helpers/processInteractiveEntri
 
 import {
   ensureResoureNamesMatchFileNames,
+  getModuleDir,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
 
@@ -29,6 +30,18 @@ beforeEach(() => {
 describe("cndi", () => {
   it("should have a working test suite", () => {
     assert(true);
+  });
+
+  describe("replaceRange utility", () => {
+    it("should replace a range of text in a string", () => {
+      const str = "foo bar baz";
+      const replaced = replaceRange(str, 4, 7, "qux");
+      assert(replaced === "foo qux baz");
+
+      const str2 = "foo bar baz";
+      const replaced2 = replaceRange(str2, 0, 3, `230`);
+      assert(replaced2 === "230 bar baz");
+    });
   });
 
   describe("cndi init", () => {
@@ -239,6 +252,32 @@ describe("cndi", () => {
       );
     });
 
+    it(`should be possible to specify an open_port which does not create or modify corresponding manifests`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          ...basicAWSCndiConfig,
+          infrastructure: {
+            cndi: {
+              ...basicAWSCndiConfig.infrastructure.cndi,
+              open_ports: [
+                {
+                  name: "ssh",
+                  number: 22,
+                },
+              ],
+            },
+          },
+        }),
+      );
+      assert(
+        !await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(status.success);
+        }),
+      );
+    });
+
     it(`should succeed if a config file has valid 'infrastructure.cndi.open_ports'`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
@@ -333,6 +372,42 @@ describe("cndi", () => {
       assert(status.success);
     });
 
+    it(`should successfully execute file:// templates`, async () => {
+      const initFileList = new Set([
+        "cndi-config.jsonc",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      const pathToThisDirectory = getModuleDir(import.meta);
+      const absPathToTemplate = path.join(
+        pathToThisDirectory,
+        "src",
+        "templates",
+        "ec2",
+        "airflow.jsonc",
+      );
+
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        `file://${absPathToTemplate}`,
+      );
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
     it("should add an template specific readme section", async () => {
       const { status } = await runCndi("init", "-t", "aws/airflow");
       const readme = Deno.readTextFileSync(
@@ -346,14 +421,24 @@ describe("cndi", () => {
       const promptResponses = {
         exampleA: "foo",
         exampleB: "bar",
-        whiteSpaceIgnored: "true",
+        numberExample: 1300,
+        booleanExample: true,
+        stringArrayExample: ["foo", "bar", "baz"],
+        whiteSpaceIgnored: true,
+        boolArrayExample: [true, false, true],
+        mixedArrayExample: [true, "foo", 1300],
       };
 
       const cndiConfigStr = `{
         "cluster_manifests": {
           "myExampleA": "{{ $.cndi.prompts.responses.exampleA }}",
           "myExampleB": "{{ $.cndi.prompts.responses.exampleB }}",
-          "whitespaceIgnored": {{      $.cndi.prompts.responses.whiteSpaceIgnored              }},
+          "numberExample": "{{ $.cndi.prompts.responses.numberExample }}",
+          "booleanExample": "{{ $.cndi.prompts.responses.booleanExample }}",
+          "stringArrayExample": "{{ $.cndi.prompts.responses.stringArrayExample }}",
+          "whitespaceIgnored": "{{      $.cndi.prompts.responses.whiteSpaceIgnored              }}",
+          "boolArrayExample": "{{ $.cndi.prompts.responses.boolArrayExample }}",
+          "mixedArrayExample": "{{ $.cndi.prompts.responses.mixedArrayExample }}",
           "title": "my-{{ $.cndi.prompts.responses.exampleA }}-{{ $.cndi.prompts.responses.exampleB }}-cluster"
         }
       }`;
@@ -362,10 +447,22 @@ describe("cndi", () => {
         promptResponses,
         cndiConfigStr,
       );
+
       assert(literalized.indexOf(`"myExampleA": "foo"`) > -1);
       assert(literalized.indexOf(`"myExampleB": "bar"`) > -1);
       assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
-      assert(literalized.indexOf(`"whitespaceIgnored": true,`) > -1);
+      assert(literalized.indexOf(`"numberExample": 1300`) > -1);
+      assert(
+        literalized.indexOf(`"stringArrayExample": ["foo","bar","baz"]`) > -1,
+      );
+      assert(
+        literalized.indexOf(`"boolArrayExample": [true,false,true]`) > -1,
+      );
+      assert(
+        literalized.indexOf(`"mixedArrayExample": [true,"foo",1300]`) > -1,
+      );
+      assert(literalized.indexOf(`"booleanExample": true`) > -1);
+      assert(literalized.indexOf(`"whitespaceIgnored": true`) > -1);
     });
 
     describe("aws", () => {

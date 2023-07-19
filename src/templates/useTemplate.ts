@@ -1,4 +1,4 @@
-import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
+import { emitExitEvent, getPrettyJSONString, replaceRange } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -123,16 +123,7 @@ interface CNDIGeneratedValues {
 }
 
 interface CndiConfigPromptResponses {
-  [key: string]: string;
-}
-
-function replaceRange(
-  s: string,
-  start: number,
-  end: number,
-  substitute: string,
-) {
-  return s.substring(0, start) + substitute + s.substring(end);
+  [key: string]: string | number | boolean | Array<unknown>;
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -165,12 +156,24 @@ export function literalizeTemplateValuesInString(
     const valueToSubstitute = cndiConfigPromptResponses[key];
 
     if (key) {
-      literalizedString = replaceRange(
-        literalizedString,
-        indexOfOpeningBraces,
-        indexOfClosingBraces + 2,
-        `${valueToSubstitute}`,
-      );
+      if (typeof valueToSubstitute === "string") {
+        const indexOfClosingBracesInclusive = indexOfClosingBraces + 2;
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpeningBraces,
+          indexOfClosingBracesInclusive,
+          valueToSubstitute,
+        );
+      } else {
+        const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
+        const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpenWrappingQuote,
+          indexOfClosingWrappingQuoteInclusive,
+          JSON.stringify(valueToSubstitute),
+        );
+      }
     }
     indexOfOpeningBraces = literalizedString.indexOf(
       "{{",
@@ -179,7 +182,6 @@ export function literalizeTemplateValuesInString(
       "}}",
     );
   }
-
   return literalizedString;
 }
 
@@ -204,6 +206,7 @@ export default async function useTemplate(
       { name: "eks" },
       { name: "azure" },
       { name: "gcp" },
+      { name: "dev" },
     ];
 
     const validTarget = validTargets.find((target) => {
@@ -213,12 +216,26 @@ export default async function useTemplate(
     if (
       !validTarget
     ) {
+      const numberOfSlashes = templateLocation.split("/").length - 1;
+
       // it's not a valid template target
       console.error(
         useTemplateLabel,
-        ccolors.key_name(`"${templateLocation}"`),
+        ccolors.user_input(`"${templateLocation}"`),
         ccolors.error("is not a valid template name"),
       );
+
+      if (numberOfSlashes > 1) {
+        console.log(
+          useTemplateLabel,
+          ccolors.warn("Were you trying to use a local template file?"),
+          ccolors.warn("Try using the"),
+          ccolors.key_name("file://"),
+          ccolors.warn("prefix with an absolute file path to the template."),
+        );
+        console.log();
+      }
+
       await emitExitEvent(1200);
       Deno.exit(1200);
     } else if (validTarget?.aliasFor) {
@@ -247,6 +264,15 @@ export default async function useTemplate(
       ccolors.user_input(`"${templateUrl}"`),
     );
     console.log(ccolors.caught(fetchError, 1201));
+    if (templateUrl.protocol === "file:") {
+      console.log(
+        useTemplateLabel,
+        ccolors.user_input(templateLocation),
+        ccolors.warn(
+          "is not a valid file URL. Please ensure you are using an absolute path to the template file.",
+        ),
+      );
+    }
     await emitExitEvent(1201);
     Deno.exit(1201);
   }
