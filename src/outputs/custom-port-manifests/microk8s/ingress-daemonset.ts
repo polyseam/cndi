@@ -98,7 +98,7 @@ const getIngressDaemonSetManifest = (
     (port) => {
       if (port?.disable) {
         const portToRemove = ports.findIndex((item) =>
-          item.hostPort === port.number
+          (item.hostPort === port.number) || (item.name === port.name)
         );
         if (portToRemove > -1) {
           ports.splice(portToRemove, 1);
