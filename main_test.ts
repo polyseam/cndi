@@ -103,6 +103,30 @@ describe("cndi", () => {
   });
 
   describe("config validation", () => {
+    it(`should fail if there is more than one node if there is an entry with kind "dev"`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          project_name: "dev_project",
+          infrastructure: {
+            cndi: {
+              nodes: [
+                { kind: "dev" },
+                { kind: "dev" },
+              ],
+            },
+          },
+        }),
+      );
+
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(!status.success);
+        }),
+      );
+    });
+
     it(`should fail if a config file is supplied without a "project_name"`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),

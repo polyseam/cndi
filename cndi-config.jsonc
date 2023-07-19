@@ -3,6 +3,9 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
+      "cert_manager": {
+        "email": "jane.doe@example.com"
+      },
       "nodes": [
         {
           "name": "x-node",
