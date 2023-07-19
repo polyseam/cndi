@@ -19,13 +19,20 @@ const NODE_DISK_SIZE_KEY = {
 const NON_MICROK8S_NODE_KINDS = ["eks"];
 const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
 
-const DEFAULT_OPEN_PORTS = [{
-  name: "http",
-  number: 80,
-}, {
-  name: "https",
-  number: 443,
-}] as const;
+const DEFAULT_OPEN_PORTS = [
+  {
+    name: "http",
+    number: 80,
+  },
+  {
+    name: "https",
+    number: 443,
+  },
+  {
+    name: "ssh",
+    number: 22,
+  },
+] as const;
 
 export {
   DEFAULT_INSTANCE_TYPES,
