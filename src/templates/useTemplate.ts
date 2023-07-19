@@ -1,4 +1,4 @@
-import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
+import { emitExitEvent, getPrettyJSONString, replaceRange } from "src/utils.ts";
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
 import {
@@ -123,20 +123,7 @@ interface CNDIGeneratedValues {
 }
 
 interface CndiConfigPromptResponses {
-  [key: string]: string;
-}
-
-function replaceRange(
-  s: string,
-  start: number,
-  end: number,
-  substitute: string | number | boolean | Array<unknown>,
-) {
-  // For type that are not string add 1 to end index and reduce 1 from start index to remove "".
-  // So instead of it returning "members": "3" it will return "members": 3
-  return typeof (substitute) === "string"
-    ? s.substring(0, start) + substitute + s.substring(end)
-    : s.substring(0, start - 1) + substitute + s.substring(end + 1);
+  [key: string]: string | number | boolean | Array<unknown>;
 }
 
 // returns a string where templated values are replaced with their literal values from prompt responses
@@ -169,12 +156,24 @@ export function literalizeTemplateValuesInString(
     const valueToSubstitute = cndiConfigPromptResponses[key];
 
     if (key) {
-      literalizedString = replaceRange(
-        literalizedString,
-        indexOfOpeningBraces,
-        indexOfClosingBraces + 2,
-        valueToSubstitute,
-      );
+      if (typeof valueToSubstitute === "string") {
+        const indexOfClosingBracesInclusive = indexOfClosingBraces + 2;
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpeningBraces,
+          indexOfClosingBracesInclusive,
+          valueToSubstitute,
+        );
+      } else {
+        const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
+        const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpenWrappingQuote,
+          indexOfClosingWrappingQuoteInclusive,
+          JSON.stringify(valueToSubstitute),
+        );
+      }
     }
     indexOfOpeningBraces = literalizedString.indexOf(
       "{{",
@@ -183,7 +182,6 @@ export function literalizeTemplateValuesInString(
       "}}",
     );
   }
-
   return literalizedString;
 }
 
@@ -208,6 +206,7 @@ export default async function useTemplate(
       { name: "eks" },
       { name: "azure" },
       { name: "gcp" },
+      { name: "dev" },
     ];
 
     const validTarget = validTargets.find((target) => {

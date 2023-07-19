@@ -8,7 +8,8 @@
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "clean-dist": "rm dist/cndi-mac dist/cndi-linux dist/cndi-win.exe || true",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all",
-    "test": "deno test --unstable --allow-all"
+    "test": "deno test --unstable --allow-all",
+    "ft": "deno test --unstable --allow-all --fail-fast"
   },
   "imports": {
     "src/": "./src/",

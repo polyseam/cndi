@@ -524,7 +524,7 @@ served online. The solution depends on your "deployment target". We have a doc
 coming soon walking through setting up DNS for AWS and GCP coming soon, but in
 short you just need to point DNS to the load balancer we provisioned for you. In
 AWS this means using a `CNAME` record, or an `A` record for a cluster running on
-GCP.
+GCP or Azure.
 
 ---
 

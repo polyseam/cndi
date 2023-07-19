@@ -39,7 +39,8 @@ export default async function validateConfig(
 
   if (open_ports) {
     if (Array.isArray(open_ports)) {
-      open_ports.forEach(async (port, index) => {
+      let index = 0;
+      for (const port of open_ports) {
         if (!port.number) {
           console.error(
             cndiConfigLabel,
@@ -65,20 +66,10 @@ export default async function validateConfig(
             ccolors.key_name('"name"'),
             ccolors.error("key"),
           );
-          await emitExitEvent(911);
-          Deno.exit(911);
+          await emitExitEvent(913);
+          Deno.exit(913);
         }
-        if (!port.service && !port.namespace) {
-          console.log(
-            cndiConfigLabel,
-            ccolors.warn(`port`),
-            ccolors.user_input(`${port.number}`),
-            ccolors.warn(`is open but is not assigned to a`),
-            ccolors.key_name("service"),
-            ccolors.warn("or"),
-            ccolors.key_name("namespace"),
-          );
-        } else if (!port.service) {
+        if (!port.service && !!port?.namespace) {
           console.error(
             cndiConfigLabel,
             ccolors.error("cndi-config file found was at "),
@@ -91,7 +82,7 @@ export default async function validateConfig(
           );
           await emitExitEvent(910);
           Deno.exit(910);
-        } else if (!port.namespace) {
+        } else if (!port.namespace && !!port?.service) {
           console.error(
             cndiConfigLabel,
             ccolors.error("cndi-config file found was at "),
@@ -105,7 +96,8 @@ export default async function validateConfig(
           await emitExitEvent(909);
           Deno.exit(909);
         }
-      });
+        index++;
+      }
     } else {
       console.error(
         cndiConfigLabel,
@@ -171,7 +163,26 @@ export default async function validateConfig(
     Deno.exit(904);
   }
 
-  if (!config.cndi_version) {
+  if (config?.infrastructure?.cndi?.nodes?.[0]?.kind === "dev") {
+    if (config.infrastructure.cndi.nodes.length > 1) {
+      console.error(
+        cndiConfigLabel,
+        ccolors.error("cndi-config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it has multiple"),
+        ccolors.key_name('"infrastructure.cndi.nodes"'),
+        ccolors.error("entries with the"),
+        ccolors.key_name('"kind"'),
+        ccolors.error(
+          'value of "dev". Only one node can be deployed when doing dev deployments.',
+        ),
+      );
+      await emitExitEvent(911);
+      Deno.exit(911);
+    }
+  }
+
+  if (!config?.cndi_version) {
     console.log(
       cndiConfigLabel,
       ccolors.warn(`You haven't specified a`),

@@ -1,8 +1,10 @@
 import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+import { DEFAULT_OPEN_PORTS } from "consts";
 
 import {
   BaseNodeItemSpec,
   CNDIConfig,
+  CNDIPort,
   DeploymentTarget,
   NodeRole,
   TFBlocks,
@@ -283,6 +285,36 @@ function getPathToKubesealBinary() {
   return pathToKubesealBinary;
 }
 
+function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
+  const user_ports = config.infrastructure?.cndi?.open_ports ?? [];
+
+  const ports: CNDIPort[] = [
+    ...DEFAULT_OPEN_PORTS,
+  ];
+
+  user_ports.forEach(
+    (user_port) => {
+      if (user_port?.disable) {
+        const indexOfPortToRemove = ports.findIndex((port) =>
+          (user_port.number === port.number) || (user_port.name === port.name)
+        );
+        if (indexOfPortToRemove > -1) {
+          ports.splice(indexOfPortToRemove, 1);
+        }
+        return;
+      }
+
+      const { name, number } = user_port;
+
+      ports.push({
+        name,
+        number,
+      });
+    },
+  );
+  return ports;
+}
+
 async function stageFile(relativePath: string, fileContents: string) {
   const stagingPath = path.join(await getStagingDir(), relativePath);
   await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
@@ -429,6 +461,23 @@ function getUserDataTemplateFileString(
   }
 }
 
+/**
+ * Replaces a range in a string with a substituted value
+ * @param s string which should be modified
+ * @param start index of the first character to be replaced
+ * @param end index of the last character to be replaced
+ * @param substitute
+ * @returns new string after substitution
+ */
+function replaceRange(
+  s: string,
+  start: number,
+  end: number,
+  substitute: string,
+) {
+  return s.substring(0, start) + substitute + s.substring(end);
+}
+
 function getSecretOfLength(len = 32): string {
   if (len % 2) {
     throw new Error("password length must be even");
@@ -467,6 +516,8 @@ export {
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
+  replaceRange,
+  resolveCNDIPorts,
   sha256Digest,
   stageFile,
 };
