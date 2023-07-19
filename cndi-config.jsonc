@@ -3,7 +3,6 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
-      "open_ports": [{ "name": "http", "disable": true }],
       "cert_manager": {
         "email": "jane.doe@example.com"
       },

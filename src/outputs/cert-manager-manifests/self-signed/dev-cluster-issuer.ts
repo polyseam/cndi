@@ -10,7 +10,7 @@ const getDevClusterIssuerManifest = (): string => {
     apiVersion: "cert-manager.io/v1",
     kind: "ClusterIssuer",
     metadata: {
-      name: "selfsigned-cluster-issuer",
+      name: "cluster-issuer",
     },
     spec: {
       selfSigned: {},

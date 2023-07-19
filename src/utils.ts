@@ -461,6 +461,23 @@ function getUserDataTemplateFileString(
   }
 }
 
+/**
+ * Replaces a range in a string with a substituted value
+ * @param s string which should be modified
+ * @param start index of the first character to be replaced
+ * @param end index of the last character to be replaced
+ * @param substitute
+ * @returns new string after substitution
+ */
+function replaceRange(
+  s: string,
+  start: number,
+  end: number,
+  substitute: string,
+) {
+  return s.substring(0, start) + substitute + s.substring(end);
+}
+
 function getSecretOfLength(len = 32): string {
   if (len % 2) {
     throw new Error("password length must be even");
@@ -500,6 +517,7 @@ export {
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   resolveCNDIPorts,
+  replaceRange,
   sha256Digest,
   stageFile,
 };
