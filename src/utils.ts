@@ -404,6 +404,10 @@ function getUserDataTemplateFileString(
 ) {
   let leaderString =
     'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+  if (useSshRepoAuth()) {
+    leaderString =
+      'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_ssh_private_key": "${var.git_ssh_private_key}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+  }
   let workerString =
     'templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
   let controllerString =
@@ -456,6 +460,11 @@ function getSecretOfLength(len = 32): string {
   return Array.from(values, base10intToHex).join("");
 }
 
+function useSshRepoAuth(): boolean {
+  return !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
+    !Deno.env.get("GIT_PASSWORD");
+}
+
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
@@ -487,4 +496,5 @@ export {
   replaceRange,
   sha256Digest,
   stageFile,
+  useSshRepoAuth,
 };

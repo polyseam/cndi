@@ -60,6 +60,7 @@ const cndiWorkflowObj = {
           env: {
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
+            GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
             TERRAFORM_STATE_PASSPHRASE:
               "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
             SEALED_SECRETS_PRIVATE_KEY:

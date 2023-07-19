@@ -561,6 +561,7 @@ describe("cndi", () => {
           p,
           {
             project_name: "acme-project",
+            useSSH: 'n',
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",
@@ -608,6 +609,7 @@ describe("cndi", () => {
           p,
           {
             project_name: "acme-project-gcp",
+            useSSH: 'n',
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",
@@ -647,6 +649,7 @@ describe("cndi", () => {
           p,
           {
             project_name: "acme-project-azure",
+            useSSH: 'n',
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",

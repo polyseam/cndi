@@ -1,5 +1,10 @@
 import { YAML } from "deps";
 import { CNDIConfig, Microk8sAddon } from "src/types.ts";
+
+import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
+import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
+import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
+
 import {
   DEFAULT_MICROK8S_VERSION,
   KUBESEAL_VERSION,
@@ -47,78 +52,22 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   return addons;
 };
 
-const clusterRepoSecret = {
-  apiVersion: "v1",
-  kind: "Secret",
-  metadata: {
-    name: "private-repo",
-    namespace: "argocd",
-    labels: {
-      "argocd.argoproj.io/secret-type": "repository",
-    },
-  },
-  stringData: {
-    type: "git",
-    password: "\${git_password}",
-    username: "\${git_username}",
-    url: "\${git_repo}",
-  },
-};
-
-const rootApplication = {
-  apiVersion: "argoproj.io/v1alpha1",
-  kind: "Application",
-  metadata: {
-    name: "root-application", // TODO: name this with "cndi-" prefix ?
-    namespace: "argocd",
-    finalizers: [
-      "resources-finalizer.argocd.argoproj.io", // TODO: wut
-    ],
-  },
-  spec: {
-    project: "default",
-    destination: {
-      namespace: "argocd",
-      server: "https://kubernetes.default.svc",
-    },
-    source: {
-      path: "cndi/cluster_manifests",
-      repoURL: "\${git_repo}",
-      targetRevision: "HEAD",
-      directory: {
-        recurse: true,
-      },
-    },
-    syncPolicy: {
-      automated: {
-        prune: true,
-        selfHeal: true,
-      },
-      syncOptions: [
-        "CreateNamespace=false",
-      ],
-    },
-  },
-};
-
 const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide opt-in for key-based auth
   if (useSshRepoAuth) {
-    throw new Error("GIT_SSH_PRIVATE_KEY is not yet supported");
+    return getClusterRepoSecretSSHTemplate();
   } else {
-    return YAML.stringify(clusterRepoSecret);
+    return getClusterRepoSecretHTTPSTemplate();
   }
 };
 
-const getRootApplicationYaml = (config: CNDIConfig) => {
-  const userRootApplication = config.infrastructure.cndi?.argocd
-    ?.root_application;
-  if (userRootApplication) {
-    return YAML.stringify({ ...rootApplication, userRootApplication });
-  }
-  return YAML.stringify(rootApplication);
+type GetLeaderCloudInitYamlOptions = {
+  useSshRepoAuth?: boolean;
 };
 
-const getLeaderCloudInitYaml = (config: CNDIConfig) => {
+const getLeaderCloudInitYaml = (
+  config: CNDIConfig,
+  { useSshRepoAuth }: GetLeaderCloudInitYamlOptions,
+) => {
   const addons = getMicrok8sAddons(config);
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
     DEFAULT_MICROK8S_VERSION;
@@ -190,11 +139,11 @@ const getLeaderCloudInitYaml = (config: CNDIConfig) => {
       // TODO: should we keep these files around?
       {
         path: PATH_TO_ROOT_APPLICATION_MANIFEST,
-        content: getRootApplicationYaml(config),
+        content: getRootApplicationTemplate(),
       },
       {
         path: PATH_TO_CLUSTER_REPO_SECRET_MANIFEST,
-        content: getClusterRepoSecretYaml(),
+        content: getClusterRepoSecretYaml(useSshRepoAuth),
       },
       {
         path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,

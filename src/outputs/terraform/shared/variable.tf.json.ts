@@ -5,13 +5,19 @@ export default function getVariablesTFJSON(): string {
     variable: {
       git_password: [
         {
-          description: "password for accessing the repositories",
+          description: "password for accessing cluster repository",
+          type: "string",
+        },
+      ],
+      git_ssh_private_key: [
+        {
+          description: "ssh private key for accessing cluster repository",
           type: "string",
         },
       ],
       git_username: [
         {
-          description: "password for accessing the repositories",
+          description: "username for accessing cluster repository",
           type: "string",
         },
       ],
