@@ -1,6 +1,18 @@
 {
   "prompts": [
     {
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "type": "Input"
+    },
+    {
+      "message": "Please enter the domain name you want hop to be accessible on:",
+      "name": "hopwebDomainName",
+      "default": "hop.example.com",
+      "type": "Input"
+    },
+    {
       "message": "Please enter the hop server password you want to use for hop:",
       "name": "hopServerPassword",
       "default": "admin",
@@ -12,6 +24,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "self_signed": true
+          },
           "nodes": [
             {
               "name": "hop-dev-node",
@@ -51,6 +66,94 @@
                 "storage": "1Gi"
               }
             }
+          }
+        },
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "hop-web-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "hop-web-ingress",
+            "namespace": "hop",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.hopwebDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.hopwebDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "hop-web",
+                          "port": {
+                            "name": "http"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       },
