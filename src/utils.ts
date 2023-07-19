@@ -516,8 +516,8 @@ export {
   loadRemoteJSONC,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
-  resolveCNDIPorts,
   replaceRange,
+  resolveCNDIPorts,
   sha256Digest,
   stageFile,
 };
