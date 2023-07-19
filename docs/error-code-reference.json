@@ -196,6 +196,30 @@
     "message": "cndi-config does not have exactly 1 node with role 'leader'"
   },
   {
+    "code": 908,
+    "message": "cndi-config.infrastructure.cndi.open_ports must be an array"
+  },
+  {
+    "code": 909,
+    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"namespace\" key"
+  },
+  {
+    "code": 910,
+    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"service\" key"
+  },
+  {
+    "code": 911,
+    "message": "cndi-config can only have one node in clusters containing a \"dev\" node"
+  },
+  {
+    "code": 912,
+    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"number\" key"
+  },
+  {
+    "code": 913,
+    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"name\" key"
+  },
+  {
     "code": 1000,
     "message": "failed to decrypt tf state, 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
   },
