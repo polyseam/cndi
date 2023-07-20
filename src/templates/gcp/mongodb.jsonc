@@ -16,7 +16,7 @@
       "message": "Please enter the number of ReplicaSet you want to deploy",
       "default": 3,
       "name": "mongodbReplicaSets",
-      "type": "Input"
+      "type": "Number"
     },
     {
       "message": "Please enter the username for your mongodb admin",
