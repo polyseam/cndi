@@ -3,25 +3,26 @@
   "project_name": "my-cndi-project",
   "infrastructure": {
     "cndi": {
+      "cert_manager": {
+        "email": "jane.doe@example.com"
+      },
       "nodes": [
         {
           "name": "x-node",
           "kind": "ec2",
           "role": "leader",
-          "instance_type": "m5a.2xlarge",
+          "instance_type": "t3.2xlarge",
           "volume_size": 128
         },
         {
           "name": "y-node",
           "kind": "ec2",
           "role": "controller",
-          "instance_type": "m5a.large",
           "volume_size": 128
         },
         {
           "name": "z-node",
           "kind": "ec2",
-          "instance_type": "m5a.large",
           "volume_size": 128
         }
       ]

@@ -3,7 +3,7 @@ const KUBESEAL_VERSION = "0.21.0";
 const DEFAULT_MICROK8S_VERSION = "1.27";
 
 const DEFAULT_INSTANCE_TYPES = {
-  aws: "m5a.large" as const,
+  aws: "t3.large" as const,
   gcp: "n2-standard-2" as const,
   azure: "Standard_D4s_v3" as const,
 };
@@ -19,10 +19,26 @@ const NODE_DISK_SIZE_KEY = {
 const NON_MICROK8S_NODE_KINDS = ["eks"];
 const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
 
+const DEFAULT_OPEN_PORTS = [
+  {
+    name: "http",
+    number: 80,
+  },
+  {
+    name: "https",
+    number: 443,
+  },
+  {
+    name: "ssh",
+    number: 22,
+  },
+] as const;
+
 export {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_MICROK8S_VERSION,
   DEFAULT_NODE_DISK_SIZE,
+  DEFAULT_OPEN_PORTS,
   KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   NODE_DISK_SIZE_KEY,

@@ -10,9 +10,9 @@ export default function getAWSComputeInstanceTargetGroupAttachmentTFJSON(
 
   const resource = getTFResource("aws_lb_target_group_attachment", {
     target_group_arn:
-      `\${aws_lb_target_group.cndi_aws_lb_target_group_${port.name}.arn}`,
+      `\${aws_lb_target_group.cndi_aws_lb_target_group_for_port_${port.name}.arn}`,
     target_id,
-  }, `cndi_aws_lb_target_group_attachment_${port.name}_${name}`);
+  }, `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${name}`);
 
   return getPrettyJSONString(
     resource,

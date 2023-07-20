@@ -9,6 +9,7 @@ import {
 import { getAWSEnvLines } from "src/deployment-targets/aws.ts";
 import { getGCPEnvLines } from "src/deployment-targets/gcp.ts";
 import { getAzureEnvLines } from "src/deployment-targets/azure.ts";
+import { getDevEnvLines } from "src/deployment-targets/dev.ts";
 import { emitExitEvent } from "src/utils.ts";
 
 const deploymentTargetsSharedLabel = ccolors.faded(
@@ -124,6 +125,9 @@ const getCoreEnvLines = async (
       return [...coreEnvLines, ...(await getGCPEnvLines(interactive))];
     case DEPLOYMENT_TARGET.azure:
       return [...coreEnvLines, ...(await getAzureEnvLines(interactive))];
+    case DEPLOYMENT_TARGET.dev:
+      return [...coreEnvLines, ...(await getDevEnvLines())];
+
     default:
       console.error(
         ccolors.key_name(`"kind"`),

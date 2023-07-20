@@ -48,6 +48,9 @@
       "cndi_version": "v1",
       "infrastructure": {
         "cndi": {
+          "cert_manager": {
+            "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          },
           "open_ports": [
             {
               "number": 3306,
@@ -118,31 +121,6 @@
             "rootPassword": "$.cndi.secrets.seal(ROOT_PASSWORD)"
           }
         },
-        "cert-manager-cluster-issuer": {
-          "apiVersion": "cert-manager.io/v1",
-          "kind": "ClusterIssuer",
-          "metadata": {
-            "name": "lets-encrypt"
-          },
-          "spec": {
-            "acme": {
-              "email": "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}",
-              "server": "https://acme-v02.api.letsencrypt.org/directory",
-              "privateKeySecretRef": {
-                "name": "lets-encrypt-private-key"
-              },
-              "solvers": [
-                {
-                  "http01": {
-                    "ingress": {
-                      "ingressClassName": "public"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
         "argo-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
@@ -150,7 +128,7 @@
             "name": "argocd-server-ingress",
             "namespace": "argocd",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -162,7 +140,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.argocdDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [
@@ -195,7 +173,7 @@
             "name": "mysql-ingress",
             "namespace": "{{ $.cndi.prompts.responses.innodbNamespace }}",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -207,7 +185,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.mysqlDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [

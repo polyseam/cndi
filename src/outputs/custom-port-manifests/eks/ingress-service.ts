@@ -57,22 +57,14 @@ const getIngressServiceManifest = (
       );
     }
 
-    if (!port?.namespace) {
-      console.error(
-        ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "namespace" property',
-      );
-    }
-
-    if (!port?.service) {
-      console.error(
-        ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "service" property',
-      );
+    if (!disable && !port?.namespace && !port?.service) {
+      return;
     }
 
     if (disable) {
-      const portToRemove = ports.findIndex((item) => item.port === port.number);
+      const portToRemove = ports.findIndex((item) =>
+        (item.port === port.number) || (item.name === port.name)
+      );
       if (portToRemove > -1) {
         ports.splice(portToRemove, 1);
       }
