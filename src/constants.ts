@@ -3,7 +3,7 @@ const KUBESEAL_VERSION = "0.21.0";
 const DEFAULT_MICROK8S_VERSION = "1.27";
 
 const DEFAULT_INSTANCE_TYPES = {
-  aws: "m5a.large" as const,
+  aws: "t3.large" as const,
   gcp: "n2-standard-2" as const,
   azure: "Standard_D4s_v3" as const,
 };
