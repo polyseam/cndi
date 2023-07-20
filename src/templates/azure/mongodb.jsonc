@@ -94,7 +94,7 @@
             "name": "argocd-server-ingress",
             "namespace": "argocd",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -106,7 +106,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.argocdDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [
@@ -139,7 +139,7 @@
             "name": "mongodb-server-ingress",
             "namespace": "{{ $.cndi.prompts.responses.mongodbNamespace }}",
             "annotations": {
-              "cert-manager.io/cluster-issuer": "lets-encrypt",
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
               "kubernetes.io/tls-acme": "true",
               "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
               "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
@@ -151,7 +151,7 @@
                 "hosts": [
                   "{{ $.cndi.prompts.responses.mongodbDomainName }}"
                 ],
-                "secretName": "lets-encrypt-private-key"
+                "secretName": "cluster-issuer-private-key"
               }
             ],
             "rules": [
