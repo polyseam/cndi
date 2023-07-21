@@ -22,7 +22,7 @@ const runCommand = new Command()
   .env(
     "GIT_USERNAME=<value:string>",
     "Username ArgoCD will use to authenticate to your git repository.",
-    { required: true },
+    { required: false },
   )
   .env(
     "GIT_PASSWORD=<value:string>",
