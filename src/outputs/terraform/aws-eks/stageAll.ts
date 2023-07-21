@@ -1,7 +1,12 @@
 import { ccolors, path } from "deps";
 
 import { AWSEKSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import { emitExitEvent, resolveCNDIPorts, stageFile, useSshRepoAuth } from "src/utils.ts";
+import {
+  emitExitEvent,
+  resolveCNDIPorts,
+  stageFile,
+  useSshRepoAuth,
+} from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
