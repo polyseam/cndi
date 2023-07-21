@@ -3,8 +3,11 @@ import { emitExitEvent } from "src/utils.ts";
 const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
 export default async function setTF_VARs() {
+  const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
+  const git_password = Deno.env.get("GIT_PASSWORD");
   const git_username = Deno.env.get("GIT_USERNAME");
-  if (!git_username) {
+
+  if (!git_username && !git_ssh_private_key) {
     console.error(
       setTF_VARsLabel,
       ccolors.key_name(`"GIT_USERNAME"`),
@@ -14,9 +17,6 @@ export default async function setTF_VARs() {
     Deno.exit(100);
   }
 
-  const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
-
-  const git_password = Deno.env.get("GIT_PASSWORD");
   if (!git_password && !git_ssh_private_key) {
     console.error(
       setTF_VARsLabel,
@@ -83,7 +83,7 @@ export default async function setTF_VARs() {
   if (git_ssh_private_key) {
     Deno.env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
   } else {
-    Deno.env.set("TF_VAR_git_username", git_username);
+    Deno.env.set("TF_VAR_git_username", git_username!);
     Deno.env.set("TF_VAR_git_password", git_password!);
   }
 
