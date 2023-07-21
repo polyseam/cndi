@@ -34,7 +34,7 @@ const hasSameFilesAfter = async (
   return areSetsEqual(originalContents, afterContents);
 };
 
-async function ensureResoureNamesMatchFileNames() {
+async function ensureResourceNamesMatchFileNames() {
   //assert(status.success);
   for await (
     const afterDirEntry of (Deno.readDir(
@@ -63,7 +63,7 @@ async function ensureResoureNamesMatchFileNames() {
 
 export {
   assertSetEquality,
-  ensureResoureNamesMatchFileNames,
+  ensureResourceNamesMatchFileNames,
   getModuleDir,
   hasSameFilesAfter,
 };

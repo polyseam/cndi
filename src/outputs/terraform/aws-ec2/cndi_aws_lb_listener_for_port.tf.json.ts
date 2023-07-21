@@ -7,7 +7,7 @@ export default function getAWSLbListenerForPortTFJSON(port: CNDIPort): string {
     default_action: [
       {
         target_group_arn:
-          `\${aws_lb_target_group.cndi_aws_lb_target_group_${name}.arn}`,
+          `\${aws_lb_target_group.cndi_aws_lb_target_group_for_port_${name}.arn}`,
         type: "forward",
       },
     ],
@@ -17,6 +17,6 @@ export default function getAWSLbListenerForPortTFJSON(port: CNDIPort): string {
     tags: {
       Name: `UserPortLBListener-${name}`,
     },
-  }, `cndi_aws_lb_listener_${name}`);
+  }, `cndi_aws_lb_listener_for_port_${name}`);
   return getPrettyJSONString(resource);
 }

@@ -14,7 +14,7 @@ import { getRunningCNDIProcess, runCndi } from "src/tests/helpers/run-cndi.ts";
 import processInteractiveEntries from "src/tests/helpers/processInteractiveEntries.ts";
 
 import {
-  ensureResoureNamesMatchFileNames,
+  ensureResourceNamesMatchFileNames,
   getModuleDir,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
@@ -514,7 +514,7 @@ describe("cndi", () => {
       it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
         const { status } = await runCndi("init", "-t", "aws/airflow");
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
+        await ensureResourceNamesMatchFileNames();
       });
     });
 
@@ -541,7 +541,7 @@ describe("cndi", () => {
       it(`should create a set of terraform files where the resource name is the filename for gcp`, async () => {
         const { status } = await runCndi("init", "-t", "gcp/airflow");
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
+        await ensureResourceNamesMatchFileNames();
       });
     });
 
@@ -571,7 +571,7 @@ describe("cndi", () => {
       it(`should create a set of terraform files where the resource name is the filename for azure`, async () => {
         const { status } = await runCndi("init", "-t", "azure/airflow");
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
+        await ensureResourceNamesMatchFileNames();
       });
     });
   });

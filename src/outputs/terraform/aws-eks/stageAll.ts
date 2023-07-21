@@ -1,7 +1,7 @@
 import { ccolors, path } from "deps";
 
 import { AWSEKSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import { emitExitEvent, stageFile, useSshRepoAuth } from "src/utils.ts";
+import { emitExitEvent, resolveCNDIPorts, stageFile, useSshRepoAuth } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -62,6 +62,8 @@ export default async function stageTerraformResourcesForAWS(
 ) {
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
   const project_name = config?.project_name;
+
+  const ports = resolveCNDIPorts(config);
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
@@ -446,7 +448,7 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "cndi_aws_security_group.tf.json",
         ),
-        cndi_aws_security_group(),
+        cndi_aws_security_group(ports),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_subnet_public_a.tf.json"),
