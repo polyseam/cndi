@@ -21,12 +21,17 @@ const terraformCommand = new Command()
   .env(
     "GIT_USERNAME=<value:string>",
     "Username ArgoCD will use to authenticate to your git repository.",
-    { required: true },
+    { required: false },
   )
   .env(
     "GIT_PASSWORD=<value:string>",
     "Personal access token ArgoCD will use to authenticate to your git repository.",
-    { required: true },
+    { required: false },
+  )
+  .env(
+    "GIT_SSH_PRIVATE_KEY=<value:string>",
+    "SSH Private Key ArgoCD will use to authenticate to your git repository.",
+    { required: false },
   )
   .env(
     "GIT_REPO=<value:string>",
