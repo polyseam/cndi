@@ -1,4 +1,4 @@
-import { ccolors, Input, Secret } from "deps";
+import { ccolors, Confirm, homedir, Input, Secret } from "deps";
 import {
   DEPLOYMENT_TARGET,
   DeploymentTarget,
@@ -33,24 +33,62 @@ const getCoreEnvLines = async (
     argoUIAdminPassword,
   } = cndiGeneratedValues;
 
+  const DEFAULT_SSH_PRIVATE_KEY_PATH = "~/.ssh/id_rsa";
+
+  let useGitSSHAuth = false;
+
   // git
   let GIT_USERNAME = "";
   let GIT_REPO = "";
   let GIT_PASSWORD = "";
+  let GIT_SSH_PRIVATE_KEY = "";
 
-  GIT_USERNAME = interactive
-    ? await Input.prompt({
-      message: ccolors.prompt("Enter your GitHub username:"),
-      default: GIT_USERNAME,
+  useGitSSHAuth = interactive
+    ? await Confirm.prompt({
+      message: ccolors.prompt("Use SSH for git authentication?"),
+      default: useGitSSHAuth,
     })
-    : GIT_USERNAME;
+    : useGitSSHAuth;
 
-  GIT_PASSWORD = interactive
-    ? await Secret.prompt({
-      message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
-      default: GIT_PASSWORD,
-    })
-    : GIT_PASSWORD;
+  if (!useGitSSHAuth) {
+    GIT_USERNAME = interactive
+      ? await Input.prompt({
+        message: ccolors.prompt("Enter your GitHub username:"),
+        default: GIT_USERNAME,
+      })
+      : GIT_USERNAME;
+
+    GIT_PASSWORD = interactive
+      ? await Secret.prompt({
+        message: ccolors.prompt("Enter your GitHub Personal Access Token:"),
+        default: GIT_PASSWORD,
+      })
+      : GIT_PASSWORD;
+  } else {
+    const pathToSSHPrivateKey = (
+      (await Input.prompt({
+        message: ccolors.prompt("Enter the path to your SSH Private Key:"),
+        default: DEFAULT_SSH_PRIVATE_KEY_PATH,
+      })) as string
+    ).replace("~", homedir() || "~");
+
+    try {
+      GIT_SSH_PRIVATE_KEY = await Deno.readTextFile(pathToSSHPrivateKey);
+    } catch (errorReadingSSHPrivateKey) {
+      console.log(
+        `${deploymentTargetsSharedLabel} ${
+          ccolors.error(
+            `No SSH Private KEY found at ${
+              ccolors.user_input(
+                `"${pathToSSHPrivateKey}"`,
+              )
+            }`,
+          )
+        }`,
+      );
+      console.log(ccolors.caught(errorReadingSSHPrivateKey, 609)); // TODO: make error code
+    }
+  }
 
   GIT_REPO = interactive
     ? await Input.prompt({
@@ -93,6 +131,15 @@ const getCoreEnvLines = async (
     Deno.exit(605);
   }
 
+  const gitAuthLines: EnvLines = useGitSSHAuth
+    ? [
+      { value: { GIT_SSH_PRIVATE_KEY }, wrap: true },
+    ]
+    : [
+      { value: { GIT_USERNAME } },
+      { value: { GIT_PASSWORD } },
+    ];
+
   const coreEnvLines: EnvLines = [
     { comment: "Sealed Secrets keys for Kubeseal" },
     {
@@ -113,9 +160,8 @@ const getCoreEnvLines = async (
     { comment: "Passphrase for encrypting/decrypting terraform state" },
     { value: { TERRAFORM_STATE_PASSPHRASE } },
     { comment: "git credentials" },
-    { value: { GIT_USERNAME } },
+    ...gitAuthLines,
     { value: { GIT_REPO } },
-    { value: { GIT_PASSWORD } },
   ];
 
   switch (deploymentTarget) {

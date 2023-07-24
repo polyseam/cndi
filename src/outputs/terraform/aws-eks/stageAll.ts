@@ -1,7 +1,12 @@
 import { ccolors, path } from "deps";
 
 import { AWSEKSNodeItemSpec, CNDIConfig } from "src/types.ts";
-import { emitExitEvent, resolveCNDIPorts, stageFile } from "src/utils.ts";
+import {
+  emitExitEvent,
+  resolveCNDIPorts,
+  stageFile,
+  useSshRepoAuth,
+} from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -52,10 +57,11 @@ import cndi_ebs_driver_helm_chart from "./cndi_ebs_driver_helm_chart.tf.json.ts"
 import cndi_efs_driver_helm_chart from "./cndi_efs_driver_helm_chart.tf.json.ts";
 import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
 import data from "./data.tf.json.ts";
-import getSealedSecretsKeyYamlTftpl from "./templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
-import getArgoAdminPasswordSecretManifestYamlTftpl from "./templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
-import getArgoPrivateRepoSecretYamlTftpl from "./templates/argocd_private_repo_secret_manifest.yaml.tftpl.ts";
-import getArgoRootApplicationManifestYamlTftpl from "./templates/argocd_root_application_manifest.yaml.tftpl.ts";
+import getSealedSecretsKeyYamlTftpl from "src/outputs/terraform/manifest-templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
+import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
+import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
+import getArgoPrivateRepoSecretSSHYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
+import getArgoRootApplicationManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
@@ -74,6 +80,10 @@ export default async function stageTerraformResourcesForAWS(
       cndi_aws_eks_node_group(node as AWSEKSNodeItemSpec),
     )
   );
+
+  const privateRepoSecret = useSshRepoAuth()
+    ? getArgoPrivateRepoSecretSSHYamlTftpl()
+    : getArgoPrivateRepoSecretHTTPSYamlTftpl();
 
   // stage all the terraform files at once
   try {
@@ -115,7 +125,7 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "argocd_private_repo_secret_manifest.yaml.tftpl",
         ),
-        getArgoPrivateRepoSecretYamlTftpl(),
+        privateRepoSecret,
       ),
       stageFile(
         path.join(
