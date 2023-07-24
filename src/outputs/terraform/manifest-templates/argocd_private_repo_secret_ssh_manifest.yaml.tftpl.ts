@@ -10,7 +10,7 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 data:
-  url: '\${git_repo}'
+  url: '\${git_repo_encoded}'
   sshPrivateKey: '\${git_ssh_private_key}'`;
 
   return clusterRepoSecretSSHYAML.trim();

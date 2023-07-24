@@ -11,7 +11,7 @@ const cndiWorkflowObj = {
     "cndi-run": {
       "runs-on": "ubuntu-20.04",
       env: {
-        GIT_REPO: "https://github.com/${{ github.repository }}",
+        GIT_REPO: "${{ secrets.GIT_REPO }}",
         CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
       },
       steps: [
