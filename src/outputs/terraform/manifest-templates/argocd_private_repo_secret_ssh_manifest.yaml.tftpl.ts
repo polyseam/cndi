@@ -1,4 +1,6 @@
 export default function getArgoPrivateRepoSecretSSHYamlTftpl() {
+  // this manifest uses b64 encoded `data` instead of stringData
+  // because it must in order to contain a multiline value
   const clusterRepoSecretSSHYAML = `
 apiVersion: v1
 kind: Secret
@@ -7,10 +9,9 @@ metadata:
   namespace: argocd
   labels:
     argocd.argoproj.io/secret-type: repository
-stringData:
-  type: git
-  sshPrivateKey: |-
-  	"\${git_ssh_private_key}"
-  url: "\${git_repo}"`;
+data:
+  url: '\${git_repo}'
+  sshPrivateKey: '\${git_ssh_private_key}'`;
+
   return clusterRepoSecretSSHYAML.trim();
 }
