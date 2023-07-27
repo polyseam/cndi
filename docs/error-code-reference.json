@@ -1,15 +1,17 @@
 [
   {
     "code": 1,
-    "message": "Could not create staging directory"
+    "message": "Could not create staging directory",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
   },
   {
     "code": 100,
-    "message": "'GIT_USERNAME' env var is not set for terraform"
+    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
   },
   {
     "code": 101,
-    "message": "'GIT_PASSWORD' env var is not set for terraform"
+    "message": "'GIT_PASSWORD' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform"
   },
   {
     "code": 102,
@@ -29,11 +31,7 @@
   },
   {
     "code": 200,
-    "message": "No node with role 'leader' found in config"
-  },
-  {
-    "code": 201,
-    "message": "No 'name' for node with role 'leader' found in config"
+    "message": "cndi-config.infrastructure.cndi.nodes does not contain exactly one node with role 'leader'"
   },
   {
     "code": 202,
@@ -41,234 +39,222 @@
   },
   {
     "code": 203,
-    "message": "Terraform block in config does not exist"
+    "message": "cndi-config.infrastructure.terraform contains unknown terraform block"
   },
   {
     "code": 204,
-    "message": "'HOME' env var is not set"
-  },
-  {
-    "code": 205,
-    "message": "Failed to get default VM type, invalid node 'kind'"
+    "message": "homedir() failed when looking up cndi install directory"
   },
   {
     "code": 300,
-    "message": "Failed to install terraform"
+    "message": "Failed to install cndi dependency 'terraform'"
   },
   {
     "code": 301,
-    "message": "Failed to install kubeseal"
+    "message": "Failed to install cndi depenedency 'kubeseal'"
   },
   {
     "code": 400,
-    "message": "cndi-config file not found"
+    "message": "cndi-config file not found during 'cndi init'"
   },
   {
     "code": 401,
-    "message": "cndi init called with an unspecified --template"
+    "message": "cndi init --template was called without a template name"
   },
   {
     "code": 500,
-    "message": "cndi-config not found during overwrite"
+    "message": "cndi-config not found during 'cndi overwrite'"
   },
   {
     "code": 501,
-    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' env vars not set during overwrite"
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' env vars not set during 'cndi overwrite'"
   },
   {
     "code": 502,
-    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set during overwrite"
+    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set during 'cndi overwrite'"
   },
   {
     "code": 503,
-    "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during overwrite"
+    "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during 'cndi overwrite'"
   },
   {
     "code": 509,
-    "message": "Failed to persist staged files during overwrite"
-  },
-  {
-    "code": 600,
-    "message": "'GIT_USERNAME' env var is not setialization"
-  },
-  {
-    "code": 601,
-    "message": "'GIT_PASSWORD' env var is not set during initialization"
-  },
-  {
-    "code": 602,
-    "message": "'GIT_REPO' env var is not set  during initialization"
+    "message": "Failed to persist staged files during 'cndi overwrite'"
   },
   {
     "code": 603,
-    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set during initialization"
+    "message": "'ARGOCD_ADMIN_PASSWORD' missing while building .env file during 'cndi init'"
   },
   {
     "code": 604,
-    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' env vars not set during overwrite"
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' missing while building .env file during 'cndi init'"
   },
   {
     "code": 605,
-    "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during overwrite"
+    "message": "'TERRAFORM_STATE_PASSPHRASE' missing while building .env file during 'cndi init'"
   },
   {
     "code": 606,
-    "message": "failed to generate .emv, invalid node 'kind'"
+    "message": "failed to generate .env invalid node 'kind'"
   },
   {
     "code": 607,
-    "message": "There was no GCP key JSON found at the path specified during initialization"
+    "message": "failed to generate .env because there was no GCP key JSON found at the path specified during 'cndi init'"
   },
   {
     "code": 608,
-    "message": "The file found at the GCP key JSON path specified during initialization was not a valid JSON file"
+    "message": "failed to generate .env because the GCP key JSON found at the path specified failed to parse during 'cndi init'"
   },
   {
     "code": 700,
-    "message": "Kubernetes secret manifest data was specified as a literal, secrets must be sealed"
+    "message": "Kubernetes Secret manifest 'data' was specified as a literal, Secrets must be sealed"
   },
   {
     "code": 701,
-    "message": "Kubernetes secret manifest stringData was specified as a literal, secrets must be sealed"
+    "message": "Kubernetes Secret manifest 'stringData' was specified as a literal, Secrets must be sealed"
   },
   {
     "code": 702,
-    "message": "Kubernetes secret manifest has no data or stringData, one of these must be specified"
+    "message": "Kubernetes Secret manifest has no 'data' or 'stringData', one of these must be specified"
   },
   {
     "code": 800,
-    "message": "failed to stage aws terraform objects"
+    "message": "failed to stage all aws terraform objects during 'cndi overwrite'"
   },
   {
     "code": 801,
-    "message": "failed to stage azure terraform objects"
+    "message": "failed to stage all azure terraform objects during 'cndi overwrite'"
   },
   {
     "code": 802,
-    "message": "failed to stage gcp terraform objects"
-  },
-  {
-    "code": 806,
-    "message": "failed to stage eks terraform objects"
+    "message": "failed to stage all gcp terraform objects during 'cndi overwrite'"
   },
   {
     "code": 803,
-    "message": "'GOOGLE_CREDENTIALS' env var is not set during terraform staging"
+    "message": "'GOOGLE_CREDENTIALS' env var is missing while staging terraform objects during 'cndi overwrite'"
   },
   {
     "code": 804,
-    "message": "'GOOGLE_CREDENTIALS' env var is set to placeholder during terraform staging"
+    "message": "'GOOGLE_CREDENTIALS' env var is set to placeholder while staging terraform objects during 'cndi overwrite'"
   },
   {
     "code": 805,
-    "message": "failed to parse 'GOOGLE_CREDENTIALS' JSON Key env var during terraform staging"
+    "message": "failed to parse 'GOOGLE_CREDENTIALS' JSON Key env var while staging terraform objects during 'cndi overwrite'"
+  },
+  {
+    "code": 806,
+    "message": "failed to stage all eks terraform objects during 'cndi overwrite'"
+  },
+  {
+    "code": 807,
+    "message": "failed to stage all dev terraform objects during 'cndi overwrite'"
   },
   {
     "code": 900,
-    "message": "cndi-config does not have 'project_name'"
+    "message": "cndi-config invalid: does not have 'project_name'"
   },
   {
     "code": 901,
-    "message": "cndi-config does not have 'infrastructure'"
+    "message": "cndi-config invalid: does not have 'infrastructure'"
   },
   {
     "code": 902,
-    "message": "cndi-config does not have any 'infrastructure.nodes'"
+    "message": "cndi-config invalid: does not have any 'infrastructure.nodes'"
   },
   {
     "code": 903,
-    "message": "cndi-config contains at least one node without a 'kind'"
+    "message": "cndi-config invalid: contains at least one node without a 'kind'"
   },
   {
     "code": 904,
-    "message": "cndi-config contains multiple node 'kind's"
+    "message": "cndi-config invalid: contains multiple node 'kind's"
   },
   {
     "code": 905,
-    "message": "cndi-config contains at least one node with a missing 'name'"
+    "message": "cndi-config invalid: contains at least one node with a missing 'name'"
   },
   {
     "code": 906,
-    "message": "cndi-config contains more than one node with the same 'name'"
+    "message": "cndi-config invalid: contains more than one node with the same 'name'"
   },
   {
     "code": 907,
-    "message": "cndi-config does not have exactly 1 node with role 'leader'"
+    "message": "cndi-config invalid: does not have exactly 1 node with role 'leader'"
   },
   {
     "code": 908,
-    "message": "cndi-config.infrastructure.cndi.open_ports must be an array"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports must be an array"
   },
   {
     "code": 909,
-    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"namespace\" key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key"
   },
   {
     "code": 910,
-    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"service\" key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key"
   },
   {
     "code": 911,
-    "message": "cndi-config can only have one node in clusters containing a \"dev\" node"
+    "message": "cndi-config invalid: can only have one node in clusters containing a 'dev' node"
   },
   {
     "code": 912,
-    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"number\" key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'number' key"
   },
   {
     "code": 913,
-    "message": "cndi-config.infrastructure.cndi.open_ports entry is missing the \"name\" key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key"
   },
   {
     "code": 1000,
-    "message": "failed to decrypt tf state, 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
+    "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
   },
   {
     "code": 1001,
-    "message": "failed to read tf state, executed outside of a git repository"
+    "message": "failed to read tf state: executed outside of a git repository"
   },
   {
     "code": 1002,
-    "message": "failed to read tf state, your repo must have atleast 1 commit"
+    "message": "failed to read tf state: your repo must have atleast 1 commit"
   },
   {
     "code": 1003,
-    "message": "failed to read tf state, your branch must be clean before executing"
+    "message": "failed to read tf state: your branch must be clean before executing"
   },
   {
     "code": 1004,
-    "message": "failed to read tf state, 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to read tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
   },
   {
     "code": 1005,
-    "message": "failed to write tf state, executed outside of a git repository"
+    "message": "failed to write tf state: executed outside of a git repository"
   },
   {
     "code": 1006,
-    "message": "failed to write tf state, your branch must be clean before executing"
+    "message": "failed to write tf state: your branch must be clean before executing"
   },
   {
     "code": 1007,
-    "message": "failed to write tf state, JSON failed to parse"
+    "message": "failed to write tf state: JSON failed to parse"
   },
   {
     "code": 1008,
-    "message": "failed to write tf state, 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
   },
   {
     "code": 1100,
-    "message": "failed to upgrade cndi, release binary fetch not ok"
+    "message": "cndi release binary fetch not ok during 'cndi upgrade'"
   },
   {
     "code": 1200,
-    "message": "the template name specified does not exist"
+    "message": "cndi template name specified does not point to a valid template during 'cndi init'"
   },
   {
     "code": 1201,
-    "message": "failed to fetch template"
+    "message": "failed to fetch template during 'cndi init'"
   },
   {
     "code": 1202,
-    "message": "failed to parse template JSONC"
+    "message": "failed to parse template JSONC during 'cndi init'"
   }
 ]

@@ -52,8 +52,8 @@ export default async function stageTerraformResourcesForDev(
       devStageAllLabel,
       ccolors.error("failed to stage 'dev' terraform resource"),
     );
-    console.log(ccolors.caught(e, 80002));
-    await emitExitEvent(80002);
-    Deno.exit(80002);
+    console.log(ccolors.caught(e, 807));
+    await emitExitEvent(807);
+    Deno.exit(807);
   }
 }
