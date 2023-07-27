@@ -354,7 +354,7 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_iam_role_web_identity.tf.json",
+          "cndi_aws_iam_role_web_identity_policy.tf.json",
         ),
         cndi_aws_iam_role_web_identity_policy(),
       ),

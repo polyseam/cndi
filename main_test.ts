@@ -380,7 +380,6 @@ describe("cndi", () => {
         "cndi",
       ]);
 
-      // cndi init should fail because there is no config file
       const { status } = await runCndi(
         "init",
         "-t",
@@ -490,17 +489,27 @@ describe("cndi", () => {
     });
 
     describe("aws", () => {
-      it("should add an aws specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      it("should add an ec2 specific readme section", async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
-        assert(readme.indexOf(`## aws`) > -1);
+        assert(readme.indexOf(`## aws ec2`) > -1);
         assert(status.success);
       });
 
-      it("should add a .env file containing AWS env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      // TODO: present dedicated readme section for eks
+      // it("should add an eks specific readme section", async () => {
+      //   const { status } = await runCndi("init", "-t", "eks/airflow");
+      //   const readme = Deno.readTextFileSync(
+      //     path.join(Deno.cwd(), `README.md`),
+      //   );
+      //   assert(readme.indexOf(`## aws eks`) > -1);
+      //   assert(status.success);
+      // });
+
+      it("should add a .env file containing AWS env var keys for ec2", async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -511,11 +520,30 @@ describe("cndi", () => {
         assert(status.success);
       });
 
-      it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      it("should add a .env file containing AWS env var keys for eks", async () => {
+        const { status } = await runCndi("init", "-t", "eks/airflow");
+        const dotenv = Deno.readTextFileSync(
+          path.join(Deno.cwd(), `.env`),
+        );
+        assert(dotenv.indexOf(`# AWS`) > -1);
+        assert(dotenv.indexOf(`AWS_REGION`) > -1);
+        assert(dotenv.indexOf(`AWS_SECRET_ACCESS_KEY`) > -1);
+        assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);
+        assert(status.success);
+      });
+
+      it(`should create a set of terraform files where the resource name is the filename for ec2`, async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
         assert(status.success);
         await ensureResourceNamesMatchFileNames();
       });
+
+      // TODO: fix cases where EKS's terraform resource names are not the same as the filename
+      // it(`should create a set of terraform files where the resource name is the filename for eks`, async () => {
+      //   const { status } = await runCndi("init", "-t", "eks/airflow");
+      //   assert(status.success);
+      //   await ensureResourceNamesMatchFileNames();
+      // });
     });
 
     describe("gcp", () => {
@@ -577,14 +605,55 @@ describe("cndi", () => {
   });
   describe("cndi init --interactive", () => {
     it(
-      "-i -t aws/basic should create all cndi project files and directories",
+      "-i -t ec2/basic should create all cndi project files and directories",
       async () => {
-        const p = getRunningCNDIProcess("init", "-i", "-t", "aws/basic");
+        const p = getRunningCNDIProcess("init", "-i", "-t", "ec2/basic");
 
         const status = await processInteractiveEntries(
           p,
           {
-            project_name: "acme-project",
+            project_name: "acme-ec2-project",
+            useSSH: "n",
+            GIT_USERNAME: "acmefella",
+            GIT_PASSWORD: "ghp_1234567890",
+            GIT_REPO: "https://github.com/acmeorg/acme-project",
+            AWS_REGION: "us-east-1",
+            AWS_ACCESS_KEY_ID: "AKIA1234567890",
+            AWS_SECRET_ACCESS_KEY: "1234567890",
+            argocdDomainName: "argocd.acme.org",
+            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
+          },
+        );
+
+        const initFileList = new Set([
+          "cndi-config.jsonc",
+          "README.md",
+          ".github",
+          ".gitignore",
+          ".env",
+          ".vscode",
+          "cndi",
+        ]);
+
+        // read the current directory entries after "cndi init" has ran
+        for (const afterDirEntry of Deno.readDirSync(".")) {
+          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+        }
+
+        assert(status.success);
+        assert(initFileList.size === 0); // if the set is empty, all files were created
+      },
+    );
+
+    it(
+      "-i -t eks/basic should create all cndi project files and directories",
+      async () => {
+        const p = getRunningCNDIProcess("init", "-i", "-t", "eks/basic");
+
+        const status = await processInteractiveEntries(
+          p,
+          {
+            project_name: "acme-eks-project",
             useSSH: "n",
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
