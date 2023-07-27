@@ -224,13 +224,14 @@ later.
 
 ### Walkthroughs 🥾
 
-We've got a couple of walkthroughs you can follow if you'd like, one for each
+We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. The walkthroughs demonstrate how to deploy a production grade
 Airflow cluster using CNDI's `airflow` Template.
 
 - [aws/airflow](docs/walkthroughs/aws/airflow.md)
 - [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
 - [azure/airflow](docs/walkthroughs/azure/airflow.md)
+- [dev/airflow](docs/walkthroughs/dev/airflow.md)
 
 If you are interested in using CNDI, these walkthroughs will be entirely
 transferrable to other applications beyond Airflow.
@@ -288,8 +289,8 @@ it to the array!
 // tip: we parse this file as JSONC so you can add comments!
 ```
 
-Currently we have support for `aws`, `azure` and `gcp` nodes. More deployment
-targets are on the way!
+Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
+clusters. More deployment targets are on the way!
 
 Just like every other component in CNDI, nodes can be updated in our
 `cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git
