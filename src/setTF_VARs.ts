@@ -83,8 +83,8 @@ export default async function setTF_VARs() {
   if (git_ssh_private_key) {
     Deno.env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
   } else {
-    Deno.env.set("TF_VAR_git_username", git_username!);
-    Deno.env.set("TF_VAR_git_password", git_password!);
+    git_username && Deno.env.set("TF_VAR_git_username", git_username);
+    git_password && Deno.env.set("TF_VAR_git_password", git_password);
   }
 
   Deno.env.set("TF_VAR_git_repo", git_repo);
