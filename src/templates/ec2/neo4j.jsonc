@@ -191,6 +191,37 @@
               }
             }
           },
+          "config": {
+            "server.config.strict_validation.enabled": "false",
+            "server.directories.plugins": "/var/lib/neo4j/labs",
+            "dbms.security.procedures.unrestricted": "apoc.*",
+            "dbms.security.procedures.allowlist": "apoc.*",
+            "dbms.security.http_strict_transport_security": "false",
+            "server.http.enabled": "false",
+            "server.bolt.enabled": "true",
+            "server.bolt.tls_level": "REQUIRED",
+            "server.bolt.listen_address": "0.0.0.0:7687",
+            "server.bolt.thread_pool_keep_alive": "10m",
+            "server.bolt.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName }}:7687",
+            "server.https.listen_address": "0.0.0.0:7473",
+            "server.https.advertised_address": "{{ $.cndi.prompts.responses.neo4jDomainName }}:7473",
+            "dbms.ssl.policy.bolt.enabled": "true",
+            "dbms.ssl.policy.bolt.client_auth": "NONE",
+            "dbms.ssl.policy.bolt.base_directory": "/var/lib/neo4j/certificates/bolt",
+            "dbms.ssl.policy.bolt.private_key": "private.key",
+            "dbms.ssl.policy.bolt.public_certificate": "public.crt",
+            "server.https.enabled": "true",
+            "dbms.ssl.policy.https.enabled": "true",
+            "dbms.ssl.policy.https.base_directory": "/var/lib/neo4j/certificates/https",
+            "dbms.ssl.policy.https.private_key": "private.key",
+            "dbms.ssl.policy.https.public_certificate": "public.crt",
+            "dbms.ssl.policy.https.client_auth": "NONE"
+          },
+          "apoc_config": {
+            "apoc.trigger.enabled": "true",
+            "apoc.jdbc.neo4j.url": "jdbc:foo:bar",
+            "apoc.import.file.enabled": "true"
+          },
           "ssl": {
             "bolt": {
               "privateKey": {
