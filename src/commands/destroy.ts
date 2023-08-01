@@ -57,6 +57,11 @@ const destroyCommand = new Command()
     "SSH Private Key ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
+  .option(
+    "-y, --auto-approve",
+    "Skip interactive approval of plan before applying.",
+    { default: false },
+  )
   .action(async (options) => {
     const cmd = "cndi destroy";
     console.log(`${cmd}\n`);
@@ -97,12 +102,17 @@ const destroyCommand = new Command()
 
       console.log(ccolors.faded("\n-- terraform destroy --\n"));
 
+      const destroyArgs = [
+        `-chdir=${pathToTerraformResources}`,
+        "destroy",
+      ];
+
+      if (options.autoApprove) {
+        destroyArgs.push("-auto-approve");
+      }
+
       const terraformDestroyCommand = new Deno.Command(pathToTerraformBinary, {
-        args: [
-          `-chdir=${pathToTerraformResources}`,
-          "destroy",
-          // "-auto-approve", // is an option, but I don't think we want it for destroy calls
-        ],
+        args: destroyArgs,
         stdin: "inherit",
         stderr: "piped",
         stdout: "piped",
