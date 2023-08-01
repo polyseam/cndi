@@ -96,49 +96,6 @@
             ]
           }
         },
-        "neo4j-ingress": {
-          "apiVersion": "networking.k8s.io/v1",
-          "kind": "Ingress",
-          "metadata": {
-            "name": "neo4j-ingress",
-            "namespace": "neo4j",
-            "annotations": {
-              "cert-manager.io/cluster-issuer": "cluster-issuer",
-              "kubernetes.io/tls-acme": "true",
-              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-              "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
-            }
-          },
-          "spec": {
-            "tls": [
-              {
-                "hosts": ["{{ $.cndi.prompts.responses.neo4jDomainName }}"],
-                "secretName": "cluster-issuer-private-key"
-              }
-            ],
-            "rules": [
-              {
-                "host": "{{ $.cndi.prompts.responses.neo4jDomainName }}",
-                "http": {
-                  "paths": [
-                    {
-                      "path": "/",
-                      "pathType": "Prefix",
-                      "backend": {
-                        "service": {
-                          "name": "neo4j",
-                          "port": {
-                            "name": "https"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
         "neo4j-auth-secret": {
           "apiVersion": "v1",
           "kind": "Secret",
@@ -174,37 +131,37 @@
               "neo4j": {
                 "enabled": false
               }
-            }
-          },
-          "ssl": {
-            "bolt": {
-              "privateKey": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.key"
-              },
-              "publicCertificate": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.crt"
-              }
             },
-            "https": {
-              "privateKey": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.key"
+            "ssl": {
+              "bolt": {
+                "privateKey": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.crt"
+                }
               },
-              "publicCertificate": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.crt"
-              }
-            },
-            "cluster": {
-              "privateKey": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.key"
+              "https": {
+                "privateKey": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.crt"
+                }
               },
-              "publicCertificate": {
-                "secretName": "cluster-issuer-private-key",
-                "subPath": "tls.crt"
+              "cluster": {
+                "privateKey": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.key"
+                },
+                "publicCertificate": {
+                  "secretName": "cluster-issuer-private-key",
+                  "subPath": "tls.crt"
+                }
               }
             }
           }
@@ -237,4 +194,4 @@
       "template_section": "## neo4j\n\nThis template deploys a fully functional [Neo4j](https://neo4j.com) cluster using the [official Neo4j Helm chart](https://helm.neo4j.com/neo4j)."
     }
   }
-}
+  }
