@@ -7,14 +7,15 @@ import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 import { basicAWSCndiConfig } from "src/tests/mocks/cndiConfigs.ts";
 import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
 
-import { getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString, replaceRange } from "src/utils.ts";
 
 import { getRunningCNDIProcess, runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import processInteractiveEntries from "src/tests/helpers/processInteractiveEntries.ts";
 
 import {
-  ensureResoureNamesMatchFileNames,
+  ensureResourceNamesMatchFileNames,
+  getModuleDir,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
 
@@ -29,6 +30,18 @@ beforeEach(() => {
 describe("cndi", () => {
   it("should have a working test suite", () => {
     assert(true);
+  });
+
+  describe("replaceRange utility", () => {
+    it("should replace a range of text in a string", () => {
+      const str = "foo bar baz";
+      const replaced = replaceRange(str, 4, 7, "qux");
+      assert(replaced === "foo qux baz");
+
+      const str2 = "foo bar baz";
+      const replaced2 = replaceRange(str2, 0, 3, `230`);
+      assert(replaced2 === "230 bar baz");
+    });
   });
 
   describe("cndi init", () => {
@@ -90,6 +103,30 @@ describe("cndi", () => {
   });
 
   describe("config validation", () => {
+    it(`should fail if there is more than one node if there is an entry with kind "dev"`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          project_name: "dev_project",
+          infrastructure: {
+            cndi: {
+              nodes: [
+                { kind: "dev" },
+                { kind: "dev" },
+              ],
+            },
+          },
+        }),
+      );
+
+      assert(
+        await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(!status.success);
+        }),
+      );
+    });
+
     it(`should fail if a config file is supplied without a "project_name"`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
@@ -239,6 +276,32 @@ describe("cndi", () => {
       );
     });
 
+    it(`should be possible to specify an open_port which does not create or modify corresponding manifests`, async () => {
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        getPrettyJSONString({
+          ...basicAWSCndiConfig,
+          infrastructure: {
+            cndi: {
+              ...basicAWSCndiConfig.infrastructure.cndi,
+              open_ports: [
+                {
+                  name: "ssh",
+                  number: 22,
+                },
+              ],
+            },
+          },
+        }),
+      );
+      assert(
+        !await hasSameFilesAfter(async () => {
+          const { status } = await runCndi("init");
+          assert(status.success);
+        }),
+      );
+    });
+
     it(`should succeed if a config file has valid 'infrastructure.cndi.open_ports'`, async () => {
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
@@ -317,11 +380,46 @@ describe("cndi", () => {
         "cndi",
       ]);
 
-      // cndi init should fail because there is no config file
       const { status } = await runCndi(
         "init",
         "-t",
         "https://raw.githubusercontent.com/polyseam/example-cndi-templates/main/azure/airflow-tls.jsonc",
+      );
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
+    it(`should successfully execute file:// templates`, async () => {
+      const initFileList = new Set([
+        "cndi-config.jsonc",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      const pathToThisDirectory = getModuleDir(import.meta);
+      const absPathToTemplate = path.join(
+        pathToThisDirectory,
+        "src",
+        "templates",
+        "ec2",
+        "airflow.jsonc",
+      );
+
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        `file://${absPathToTemplate}`,
       );
 
       // read the current directory entries after "cndi init" has ran
@@ -346,14 +444,24 @@ describe("cndi", () => {
       const promptResponses = {
         exampleA: "foo",
         exampleB: "bar",
-        whiteSpaceIgnored: "true",
+        numberExample: 1300,
+        booleanExample: true,
+        stringArrayExample: ["foo", "bar", "baz"],
+        whiteSpaceIgnored: true,
+        boolArrayExample: [true, false, true],
+        mixedArrayExample: [true, "foo", 1300],
       };
 
       const cndiConfigStr = `{
         "cluster_manifests": {
           "myExampleA": "{{ $.cndi.prompts.responses.exampleA }}",
           "myExampleB": "{{ $.cndi.prompts.responses.exampleB }}",
-          "whitespaceIgnored": {{      $.cndi.prompts.responses.whiteSpaceIgnored              }},
+          "numberExample": "{{ $.cndi.prompts.responses.numberExample }}",
+          "booleanExample": "{{ $.cndi.prompts.responses.booleanExample }}",
+          "stringArrayExample": "{{ $.cndi.prompts.responses.stringArrayExample }}",
+          "whitespaceIgnored": "{{      $.cndi.prompts.responses.whiteSpaceIgnored              }}",
+          "boolArrayExample": "{{ $.cndi.prompts.responses.boolArrayExample }}",
+          "mixedArrayExample": "{{ $.cndi.prompts.responses.mixedArrayExample }}",
           "title": "my-{{ $.cndi.prompts.responses.exampleA }}-{{ $.cndi.prompts.responses.exampleB }}-cluster"
         }
       }`;
@@ -362,24 +470,46 @@ describe("cndi", () => {
         promptResponses,
         cndiConfigStr,
       );
+
       assert(literalized.indexOf(`"myExampleA": "foo"`) > -1);
       assert(literalized.indexOf(`"myExampleB": "bar"`) > -1);
       assert(literalized.indexOf(`"title": "my-foo-bar-cluster"`) > -1);
-      assert(literalized.indexOf(`"whitespaceIgnored": true,`) > -1);
+      assert(literalized.indexOf(`"numberExample": 1300`) > -1);
+      assert(
+        literalized.indexOf(`"stringArrayExample": ["foo","bar","baz"]`) > -1,
+      );
+      assert(
+        literalized.indexOf(`"boolArrayExample": [true,false,true]`) > -1,
+      );
+      assert(
+        literalized.indexOf(`"mixedArrayExample": [true,"foo",1300]`) > -1,
+      );
+      assert(literalized.indexOf(`"booleanExample": true`) > -1);
+      assert(literalized.indexOf(`"whitespaceIgnored": true`) > -1);
     });
 
     describe("aws", () => {
-      it("should add an aws specific readme section", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      it("should add an ec2 specific readme section", async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
         const readme = Deno.readTextFileSync(
           path.join(Deno.cwd(), `README.md`),
         );
-        assert(readme.indexOf(`## aws`) > -1);
+        assert(readme.indexOf(`## aws ec2`) > -1);
         assert(status.success);
       });
 
-      it("should add a .env file containing AWS env var keys", async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      // TODO: present dedicated readme section for eks
+      // it("should add an eks specific readme section", async () => {
+      //   const { status } = await runCndi("init", "-t", "eks/airflow");
+      //   const readme = Deno.readTextFileSync(
+      //     path.join(Deno.cwd(), `README.md`),
+      //   );
+      //   assert(readme.indexOf(`## aws eks`) > -1);
+      //   assert(status.success);
+      // });
+
+      it("should add a .env file containing AWS env var keys for ec2", async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
         const dotenv = Deno.readTextFileSync(
           path.join(Deno.cwd(), `.env`),
         );
@@ -390,11 +520,30 @@ describe("cndi", () => {
         assert(status.success);
       });
 
-      it(`should create a set of terraform files where the resource name is the filename for aws`, async () => {
-        const { status } = await runCndi("init", "-t", "aws/airflow");
+      it("should add a .env file containing AWS env var keys for eks", async () => {
+        const { status } = await runCndi("init", "-t", "eks/airflow");
+        const dotenv = Deno.readTextFileSync(
+          path.join(Deno.cwd(), `.env`),
+        );
+        assert(dotenv.indexOf(`# AWS`) > -1);
+        assert(dotenv.indexOf(`AWS_REGION`) > -1);
+        assert(dotenv.indexOf(`AWS_SECRET_ACCESS_KEY`) > -1);
+        assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
       });
+
+      it(`should create a set of terraform files where the resource name is the filename for ec2`, async () => {
+        const { status } = await runCndi("init", "-t", "ec2/airflow");
+        assert(status.success);
+        await ensureResourceNamesMatchFileNames();
+      });
+
+      // TODO: fix cases where EKS's terraform resource names are not the same as the filename
+      // it(`should create a set of terraform files where the resource name is the filename for eks`, async () => {
+      //   const { status } = await runCndi("init", "-t", "eks/airflow");
+      //   assert(status.success);
+      //   await ensureResourceNamesMatchFileNames();
+      // });
     });
 
     describe("gcp", () => {
@@ -420,7 +569,7 @@ describe("cndi", () => {
       it(`should create a set of terraform files where the resource name is the filename for gcp`, async () => {
         const { status } = await runCndi("init", "-t", "gcp/airflow");
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
+        await ensureResourceNamesMatchFileNames();
       });
     });
 
@@ -450,20 +599,62 @@ describe("cndi", () => {
       it(`should create a set of terraform files where the resource name is the filename for azure`, async () => {
         const { status } = await runCndi("init", "-t", "azure/airflow");
         assert(status.success);
-        await ensureResoureNamesMatchFileNames();
+        await ensureResourceNamesMatchFileNames();
       });
     });
   });
   describe("cndi init --interactive", () => {
     it(
-      "-i -t aws/basic should create all cndi project files and directories",
+      "-i -t ec2/basic should create all cndi project files and directories",
       async () => {
-        const p = getRunningCNDIProcess("init", "-i", "-t", "aws/basic");
+        const p = getRunningCNDIProcess("init", "-i", "-t", "ec2/basic");
 
         const status = await processInteractiveEntries(
           p,
           {
-            project_name: "acme-project",
+            project_name: "acme-ec2-project",
+            useSSH: "n",
+            GIT_USERNAME: "acmefella",
+            GIT_PASSWORD: "ghp_1234567890",
+            GIT_REPO: "https://github.com/acmeorg/acme-project",
+            AWS_REGION: "us-east-1",
+            AWS_ACCESS_KEY_ID: "AKIA1234567890",
+            AWS_SECRET_ACCESS_KEY: "1234567890",
+            argocdDomainName: "argocd.acme.org",
+            letsEncryptClusterIssuerEmailAddress: "acmefella@acme.org",
+          },
+        );
+
+        const initFileList = new Set([
+          "cndi-config.jsonc",
+          "README.md",
+          ".github",
+          ".gitignore",
+          ".env",
+          ".vscode",
+          "cndi",
+        ]);
+
+        // read the current directory entries after "cndi init" has ran
+        for (const afterDirEntry of Deno.readDirSync(".")) {
+          initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+        }
+
+        assert(status.success);
+        assert(initFileList.size === 0); // if the set is empty, all files were created
+      },
+    );
+
+    it(
+      "-i -t eks/basic should create all cndi project files and directories",
+      async () => {
+        const p = getRunningCNDIProcess("init", "-i", "-t", "eks/basic");
+
+        const status = await processInteractiveEntries(
+          p,
+          {
+            project_name: "acme-eks-project",
+            useSSH: "n",
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",
@@ -511,6 +702,7 @@ describe("cndi", () => {
           p,
           {
             project_name: "acme-project-gcp",
+            useSSH: "n",
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",
@@ -550,6 +742,7 @@ describe("cndi", () => {
           p,
           {
             project_name: "acme-project-azure",
+            useSSH: "n",
             GIT_USERNAME: "acmefella",
             GIT_PASSWORD: "ghp_1234567890",
             GIT_REPO: "https://github.com/acmeorg/acme-project",

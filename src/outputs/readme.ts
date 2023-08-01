@@ -65,8 +65,10 @@ export default function getReadmeForProject({
   nodeKind,
 }: { project_name: string; nodeKind: NodeKind }): string {
   const linkToDashboards = {
-    aws:
+    ec2:
       "[AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
+    eks:
+      "[TODO: AWS EKS Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
     gcp:
       "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
     azure:
@@ -74,7 +76,9 @@ export default function getReadmeForProject({
   };
 
   const linkToLoadBalancers = {
-    aws:
+    ec2:
+      "[AWS Load Balancers Page](https://console.aws.amazon.com/ec2/v2/home?#LoadBalancers)",
+    eks:
       "[AWS Load Balancers Page](https://console.aws.amazon.com/ec2/v2/home?#LoadBalancers)",
     gcp:
       "[GCP Load Balancers Page](https://console.cloud.google.com/net-services/loadbalancing)",
@@ -89,19 +93,29 @@ Once your cluster is deployed, you can log into ArgoCD to see the status of your
 `.trim();
 
   const ec2ReadmeSection = `
-## aws
+## aws ec2
 
 This cluster will be deployed on [Amazon Web Services](https://aws.com).
 When your cluster is initialized the next step is to go to your domain registrar and create an CNAME record for ArgoCD.
-Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.aws}.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.ec2}.
 
-You can visit the ${linkToDashboards.aws} to see the status of the nodes that make up your cluster.
+You can visit the ${linkToDashboards.ec2} to see the status of the nodes that make up your cluster.
+`.trim();
+
+  const eksReadmeSection = `
+## TODO: aws eks
+
+This cluster will be deployed on [Amazon Web Services](https://aws.com).
+When your cluster is initialized the next step is to go to your domain registrar and create an CNAME record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.eks}.
+
+You can visit the ${linkToDashboards.eks} to see the status of the nodes that make up your cluster.
 `.trim();
 
   const readmeSectionsForDeploymentTarget = {
     ec2: ec2ReadmeSection,
     aws: ec2ReadmeSection,
-    eks: ec2ReadmeSection, // TODO: README.md for EKS should be different than that of EC2
+    eks: eksReadmeSection,
     gcp: `
 ## gcp
 
@@ -120,6 +134,20 @@ Both entries should point to the single load balancer that was created for your 
 
 You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
 `.trim(),
+    dev: `## dev
+  
+    This cluster will be deployed on your local machine.
+
+    1. Use the following multipass exec command to open a shell session into the machine and get its ip address
+    
+    multipass exec <name of node> -- ip route get 1.2.3.4 | awk '{print $7}'
+    
+    2. Use the following multipass exec command to open a shell session into the machine and port forward the argocd server 
+
+    multipass exec <add name of node here>  -- sudo microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 --address <ip address of node>
+    
+    3.Go to this url https://<ip address of node>:8080 in your browser to get the argocd UI
+   `,
   };
 
   const readmeContent = [

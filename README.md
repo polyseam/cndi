@@ -2,7 +2,6 @@
   <br>
   <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
   <h1>cndi</h1>
-  <div>Deploy <strong>Cloud-Native Data Infrastructure</strong> in Minutes</div>
 </div>
 <br>
 <p align="center">
@@ -83,20 +82,32 @@ project repo.
 
 **non-interactive mode**
 
-The other way to initialize a CNDI project is to use a `cndi-config.jsonc` file.
-There are only 2 reasons to use the non-interactive mode. The first is that you
-have a `cndi-config.jsonc` file you found somewhere online which meets your
-needs. The second reason to avoid interactive mode is the standard for CLIs: you
-are calling `cndi init` from a script, though we can't think of any good reason
-to do that.
+The other way to initialize a CNDI project is to use a CNDI Template file. This
+is done by calling `cndi init --template <template_location>`. When specifying a
+Template location you can choose to use Templates the CNDI team have built that
+are found in this repo at [src/templates](src/templates). To do this you pass in
+a Template "name". For example if you wanted to run the Airflow Template on EC2
+you would run:
 
-To use CNDI in non-interactive mode you need a `cndi-config` file and pass that
-into cndi. For more information about the structure of this file, checkout the
-[config section](#configuration-📝) of this README.
+For example if you wanted to run the Airflow Template on EC2 you would run:
 
 ```bash
-# if you run `cndi init` without -f we will look for a file named `cndi-config.jsonc` in the current directory
-cndi init -f cndi-config.jsonc
+cndi init --template ec2/airflow
+```
+
+Alternatively, you can also specify a Template URL. A Template URL resolves to a
+CNDI Template file, this means that you are not limited to only Templates the
+CNDI team has put together, you can point to any arbitrary template file that
+follows the [Template Schema](/src/schemas/cndi-template.schema.json).
+
+These Template URLs can be `file://` URLs which have an absolute path to the
+file locally, or typical remote or `https://` URLs over the net.
+
+```bash
+# file:// URLs must be absolute paths
+cndi init --template file:///absolute/path/to/template.jsonc
+# or
+cndi init --template https://example.com/path/to/template.jsonc
 ```
 
 ---
@@ -212,13 +223,14 @@ later.
 
 ### Walkthroughs 🥾
 
-We've got a couple of walkthroughs you can follow if you'd like, one for each
+We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. The walkthroughs demonstrate how to deploy a production grade
 Airflow cluster using CNDI's `airflow` Template.
 
 - [aws/airflow](docs/walkthroughs/aws/airflow.md)
 - [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
 - [azure/airflow](docs/walkthroughs/azure/airflow.md)
+- [dev/airflow](docs/walkthroughs/dev/airflow.md)
 
 If you are interested in using CNDI, these walkthroughs will be entirely
 transferrable to other applications beyond Airflow.
@@ -276,8 +288,8 @@ it to the array!
 // tip: we parse this file as JSONC so you can add comments!
 ```
 
-Currently we have support for `aws`, `azure` and `gcp` nodes. More deployment
-targets are on the way!
+Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
+clusters. More deployment targets are on the way!
 
 Just like every other component in CNDI, nodes can be updated in our
 `cndi-config.jsonc` and we can call `cndi ow` and push the changes to our git
@@ -512,7 +524,7 @@ served online. The solution depends on your "deployment target". We have a doc
 coming soon walking through setting up DNS for AWS and GCP coming soon, but in
 short you just need to point DNS to the load balancer we provisioned for you. In
 AWS this means using a `CNAME` record, or an `A` record for a cluster running on
-GCP.
+GCP or Azure.
 
 ---
 

@@ -1,10 +1,15 @@
 import { ccolors, path } from "deps";
 import { CNDIConfig } from "src/types.ts";
-import { patchAndStageTerraformFilesWithConfig, stageFile } from "src/utils.ts";
+import {
+  patchAndStageTerraformFilesWithConfig,
+  stageFile,
+  useSshRepoAuth,
+} from "src/utils.ts";
 import stageTerraformResourcesForAWSEC2 from "src/outputs/terraform/aws-ec2/stageAll.ts";
 import stageTerraformResourcesForAWSEKS from "src/outputs/terraform/aws-eks/stageAll.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
+import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
 
 import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
 import variable from "src/outputs/terraform/shared/variable.tf.json.ts";
@@ -44,6 +49,9 @@ export default async function stageTerraformResourcesForConfig(
     case "azure":
       await stageTerraformResourcesForAzure(config);
       break;
+    case "dev":
+      await stageTerraformResourcesForDev(config);
+      break;
     default:
       throw new Error(`Unknown kind: ${kind}`);
   }
@@ -67,7 +75,9 @@ export default async function stageTerraformResourcesForConfig(
     // write tftpl terraform template for the user_data bootstrap script
     stageFile(
       path.join("cndi", "terraform", "microk8s-cloud-init-leader.yml.tftpl"),
-      microk8sCloudInitLeaderTerraformTemplate(config),
+      microk8sCloudInitLeaderTerraformTemplate(config, {
+        useSshRepoAuth: useSshRepoAuth(),
+      }),
     ),
     // this file may be extra
     stageFile(

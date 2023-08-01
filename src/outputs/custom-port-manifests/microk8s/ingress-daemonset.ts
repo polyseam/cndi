@@ -80,25 +80,43 @@ const getIngressDaemonSetManifest = (
       "name": "http",
       "containerPort": 80,
       "hostPort": 80,
+      "protocol": "TCP",
     },
     {
       "name": "https",
       "containerPort": 443,
       "hostPort": 443,
+      "protocol": "TCP",
     },
   ];
 
   const ports = [
     ...default_ports,
-    ...user_ports.map(
-      (port) => ({
+  ];
+
+  user_ports.forEach(
+    (port) => {
+      if (port?.disable) {
+        const portToRemove = ports.findIndex((item) =>
+          (item.hostPort === port.number) || (item.name === port.name)
+        );
+        if (portToRemove > -1) {
+          ports.splice(portToRemove, 1);
+        }
+      }
+
+      if (!port?.service && !port?.namespace) {
+        return;
+      }
+
+      ports.push({
         name: port.name,
         containerPort: port.number,
         hostPort: port.number,
         protocol: "TCP",
-      }),
-    ),
-  ];
+      });
+    },
+  );
 
   const manifest: IngressDaemonSetManifest = {
     "apiVersion": "apps/v1",
