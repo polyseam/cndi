@@ -53,6 +53,62 @@
         }
       },
       "cluster_manifests": {
+        "neo4j-auth-secret": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "metadata": {
+            "name": "neo4j-auth-secret",
+            "namespace": "neo4j"
+          },
+          "type": "Opaque",
+          "stringData": {
+            "NEO4J_AUTH": "$.cndi.secrets.seal(NEO4J_PASSWORD)"
+          }
+        },
+        "neo4j-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "neo4j-ingress",
+            "namespace": "neo4j",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            // required for Bolt and secure Neo4j Web Browser
+            "tls": [
+              {
+                "hosts": ["{{ $.cndi.prompts.responses.neo4jDomainName }}"],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.neo4jDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "neo4j",
+                          "port": {
+                            "number": 7473
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
         "argo-ingress": {
           "apiVersion": "networking.k8s.io/v1",
           "kind": "Ingress",
@@ -94,18 +150,6 @@
                 }
               }
             ]
-          }
-        },
-        "neo4j-auth-secret": {
-          "apiVersion": "v1",
-          "kind": "Secret",
-          "metadata": {
-            "name": "neo4j-auth-secret",
-            "namespace": "neo4j"
-          },
-          "type": "Opaque",
-          "stringData": {
-            "NEO4J_AUTH": "$.cndi.secrets.seal(NEO4J_PASSWORD)"
           }
         }
       },
