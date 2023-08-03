@@ -146,9 +146,10 @@ The structure of the generated CNDI project will be as follows:
 │   │   │   └── airflow.application.json
 │   │   ├── argo-ingress.json
 │   │   ├── cert-manager-cluster-issuer.json
-│   │   └── git-credentials-secret.json
+│   │   ├── git-credentials-secret.json
+│   │   └── etc
 │   └── 📁 terraform
-│       ├── x-airflow-node.cndi-node.tf.json
+│       ├── airflow-nodes.cndi-node.tf.json
 │       └── etc 
 ├── cndi-config.jsonc
 ├── .env
@@ -174,8 +175,6 @@ gh secret set -f .env
 ```
 
 ![GitHub secrets](/docs/walkthroughs/eks/img/upload-git-secrets.png)
-
----
 
 ## deploy your templated cluster configration 🚀
 
@@ -208,23 +207,38 @@ Once `cndi run` has been completed, at the end of the run will be a link to
 `resource groups`, where you can view resources deployed by CNDI for this
 project. ![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
 
+Click on your project resource group
+
 ![resource groups root page](/docs/walkthroughs/eks/img/resource-groups-root.png)
+
+Click on your on eks cluster control plane
 
 ![current resource group](/docs/walkthroughs/eks/img/resource-groups.png)
 
 ## attach the load balancer to your domain 🌐
 
-At the end of the cndi run there is also an output called `public host` , which
-is the **DNS Name** (CNAME record) of the load Balancer thats attached to your
-Azure instances.
+Go to [AWS EKS console](https://console.aws.amazon.com/eks/) In the navigation
+pane, choose **resources**
 
-![cndi outputs](/docs/walkthroughs/eks/img/outputs.png) Copy `public host` Go to
-your custom domain, and add the `public host` to it
+Select the **Ingresses** section and click on the airflow and argocd ingress to
+get the loadblancer CNAME
 
-![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png)
+![google domains](/docs/walkthroughs/eks/img/my-cndi-cluster-eks-ui.png)
 
-Open the domain name you've assigned for ArgoCD in your browser to see the Argo
-Login page.
+![google domains](/docs/walkthroughs/eks/img/my-cndi-cluster-ingress.png)
+
+Copy that Load Balancer's **DNS Name** (CNAME record)
+
+![google domains](/docs/walkthroughs/eks/img/airflow-ingress.png)
+
+![google domains](/docs/walkthroughs/eks/img/argocd-ingress.png)
+
+Go to your custom domain, you will need to add a CNAME record for your domain
+and add the DNS Name of your load balancer to it
+
+![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png) Open the
+domain name you've assigned for ArgoCD in your browser to see the Argo Login
+page.
 
 ![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
 
@@ -233,10 +247,8 @@ To log in, use the username `admin` and the password which is the value of the
 
 ![.env file](/docs/walkthroughs/eks/img/argocd-admin-password.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-1.png)
-
-Notice that the `cluster_manifests` in the GitHub repository matches config in
-the ArgoCD UI
+![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-1.png) Notice that the
+`cluster_manifests` in the GitHub repository matches config in the ArgoCD UI
 
 ```shell
 └── 📁 cndi
@@ -245,7 +257,8 @@ the ArgoCD UI
        │   └── airflow.application.json
        ├────── git-credentials-secret.json
        ├────── cert-manager-cluster-issuer.json
-       └────── argo-ingress.json
+       ├────── argo-ingress.json
+       └────── etc
 ```
 
 Verify all applications and manifests in the GitHub repository are present and
@@ -285,14 +298,11 @@ Airflow and Argocd
 ![cndi config](/docs/walkthroughs/eks/img/cndi-config.png)
 
 - Go to the `cndi-config.jsonc`
-- In the `infrastructure.cndi.nodes` section, add a new airflow node and save
-  the file
+- In the `infrastructure.cndi.nodes` section, add increase the number of nodes
+  and save the file
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
-
-![cndi-run action](/docs/walkthroughs/eks/img/add-node.png)
-![eks instances](/docs/walkthroughs/eks/img/ow.png)
 
 ## destroying resources in the cluster! 💣
 
