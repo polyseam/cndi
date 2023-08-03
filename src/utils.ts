@@ -321,6 +321,11 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+async function moveDirectoryToStagingDir(relativePath: string) {
+  const stagingPath = path.join(await getStagingDir(), relativePath);
+  await Deno.rename(relativePath, stagingPath);
+}
+
 async function getStagingDir(): Promise<string> {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
@@ -525,6 +530,7 @@ export {
   getUserDataTemplateFileString,
   loadJSONC,
   loadRemoteJSONC,
+  moveDirectoryToStagingDir,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   replaceRange,

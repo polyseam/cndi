@@ -5,6 +5,7 @@ import {
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
+  moveDirectoryToStagingDir,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -120,11 +121,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   const cluster_manifests = config?.cluster_manifests || {};
 
   try {
+    // we preserve the contents of the cndi/cluster_manifests/no_overwrite folder
+    await moveDirectoryToStagingDir(path.join(pathToKubernetesManifests, 'no_overwrite'))
     // remove all files in cndi/cluster
     await Deno.remove(pathToKubernetesManifests, {
       recursive: true,
     });
-  } catch {
+  } catch (error) {
+    console.error(error)
     // folder did not exist
   }
 
