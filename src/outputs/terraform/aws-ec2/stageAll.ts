@@ -18,14 +18,21 @@ import cndi_aws_lb_listener_for_port from "./cndi_aws_lb_listener_for_port.tf.js
 import cndi_aws_lb_target_group_for_port from "./cndi_aws_lb_target_group_for_port.tf.json.ts";
 import cndi_aws_lb from "./cndi_aws_lb.tf.json.ts";
 import cndi_aws_resourcegroups_group from "./cndi_aws_resourcegroups_group.tf.json.ts";
-import cndi_aws_route_table_association from "./cndi_aws_route_table_association.tf.json.ts";
-import cndi_aws_route_table from "./cndi_aws_route_table.tf.json.ts";
-import cndi_aws_route from "./cndi_aws_route.tf.json.ts";
 import cndi_aws_security_group from "./cndi_aws_security_group.tf.json.ts";
-import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
+
+import cndi_aws_eip from "./cndi_aws_eip.tf.json.ts";
+import cndi_aws_nat_gateway from "./cndi_aws_nat_gateway.tf.json.ts";
+import cndi_aws_route_table_association_public from "./cndi_aws_route_table_association_public.tf.json.ts";
+import cndi_aws_route_table_association_private from "./cndi_aws_route_table_association_private.tf.json.ts";
+import cndi_aws_route_table_public from "./cndi_aws_route_table_public.tf.json.ts";
+import cndi_aws_route_table_private from "./cndi_aws_route_table_private.tf.json.ts";
+import cndi_aws_route_private from "./cndi_aws_route_private.tf.json.ts";
+import cndi_aws_route_public from "./cndi_aws_route_public.tf.json.ts";
+import cndi_aws_subnet_private from "./cndi_aws_subnet_private.tf.json.ts";
+import cndi_aws_subnet_public from "./cndi_aws_subnet_public.tf.json.ts";
 
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
@@ -148,33 +155,9 @@ export default async function stageTerraformResourcesForAWS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_aws_route_table_association.tf.json",
-        ),
-        cndi_aws_route_table_association(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_aws_route_table.tf.json",
-        ),
-        cndi_aws_route_table(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_route.tf.json"),
-        cndi_aws_route(),
-      ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
           "cndi_aws_security_group.tf.json",
         ),
         cndi_aws_security_group(ports),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_subnet.tf.json"),
-        cndi_aws_subnet(),
       ),
       stageFile(
         path.join(
@@ -183,6 +166,71 @@ export default async function stageTerraformResourcesForAWS(
           "cndi_aws_vpc.tf.json",
         ),
         cndi_aws_vpc(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_eip.tf.json",
+        ),
+        cndi_aws_eip(),
+      ),
+
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_nat_gateway.tf.json",
+        ),
+        cndi_aws_nat_gateway(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_route_table_association_public.tf.json",
+        ),
+        cndi_aws_route_table_association_public(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_route_table_association_private.tf.json",
+        ),
+        cndi_aws_route_table_association_private(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_route_table_private.tf.json",
+        ),
+        cndi_aws_route_table_private(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_route_table_public.tf.json",
+        ),
+        cndi_aws_route_table_public(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_route_private.tf.json"),
+        cndi_aws_route_private(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_route_public.tf.json"),
+        cndi_aws_route_public(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_subnet_public_a.tf.json"),
+        cndi_aws_subnet_public(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_aws_subnet_private_a.tf.json"),
+        cndi_aws_subnet_private(),
       ),
     ]);
   } catch (e) {

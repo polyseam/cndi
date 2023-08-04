@@ -18,7 +18,7 @@ export default function getAWSComputeInstanceTFJSON(
   const volume_size = node?.volume_size || node?.disk_size || node?.size ||
     node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; //GiB
   const volume_type = "gp3"; // general purpose SSD
-  const subnet_id = `\${aws_subnet.cndi_aws_subnet[0].id}`;
+  const subnet_id = `\${aws_subnet.cndi_aws_subnet_private.id}`;
   const vpc_security_group_ids = [
     "${aws_security_group.cndi_aws_security_group.id}",
   ];
