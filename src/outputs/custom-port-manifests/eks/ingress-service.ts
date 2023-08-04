@@ -62,7 +62,9 @@ const getIngressServiceManifest = (
     }
 
     if (disable) {
-      const portToRemove = ports.findIndex((item) => item.port === port.number);
+      const portToRemove = ports.findIndex((item) =>
+        (item.port === port.number) || (item.name === port.name)
+      );
       if (portToRemove > -1) {
         ports.splice(portToRemove, 1);
       }

@@ -1,13 +1,13 @@
 // Deno std lib
 export { homedir, platform } from "node:os";
-export { copy } from "https://deno.land/std@0.192.0/streams/copy.ts";
-export { SEP } from "https://deno.land/std@0.192.0/path/mod.ts";
-export * as path from "https://deno.land/std@0.192.0/path/mod.ts";
-export * as YAML from "https://deno.land/std@0.192.0/yaml/mod.ts";
-export { deepMerge } from "https://deno.land/std@0.192.0/collections/deep_merge.ts";
-export { walk } from "https://deno.land/std@0.192.0/fs/mod.ts";
-export * as JSONC from "https://deno.land/std@0.192.0/jsonc/mod.ts";
-export { delay } from "https://deno.land/std@0.192.0/async/delay.ts";
+export { copy } from "https://deno.land/std@0.196.0/streams/copy.ts";
+export { SEP } from "https://deno.land/std@0.196.0/path/mod.ts";
+export * as path from "https://deno.land/std@0.196.0/path/mod.ts";
+export * as YAML from "https://deno.land/std@0.196.0/yaml/mod.ts";
+export { deepMerge } from "https://deno.land/std@0.196.0/collections/deep_merge.ts";
+export { walk } from "https://deno.land/std@0.196.0/fs/mod.ts";
+export * as JSONC from "https://deno.land/std@0.196.0/jsonc/mod.ts";
+export { delay } from "https://deno.land/std@0.196.0/async/delay.ts";
 
 // Third party
 //  - cliffy

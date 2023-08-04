@@ -1,6 +1,6 @@
 {
-  "version": "1.11.0",
-  "deno_version": "1.34.3",
+  "version": "1.12.0",
+  "deno_version": "1.35.3",
   "tasks": {
     "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
     "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
@@ -8,7 +8,8 @@
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "clean-dist": "rm dist/cndi-mac dist/cndi-linux dist/cndi-win.exe || true",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all",
-    "test": "deno test --unstable --allow-all"
+    "test": "deno test --unstable --allow-all",
+    "ft": "deno test --unstable --allow-all --fail-fast"
   },
   "imports": {
     "src/": "./src/",

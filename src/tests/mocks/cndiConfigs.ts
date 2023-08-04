@@ -72,12 +72,30 @@ const basicAzureCndiConfig = {
   cluster_manifests: {},
   applications: {},
 };
-
+const basicDevCndiConfig = {
+  cndi_version: "v1",
+  project_name: "my-cndi-project-d",
+  infrastructure: {
+    cndi: {
+      nodes: [
+        {
+          "name": "dev-node",
+          "kind": "dev",
+          "role": "leader",
+          "volume_size": 128,
+        },
+      ],
+    },
+  },
+  cluster_manifests: {},
+  applications: {},
+};
 const emptyCndiConfig = {};
 
 export {
   basicAWSCndiConfig,
   basicAzureCndiConfig,
+  basicDevCndiConfig,
   basicGCPCndiConfig,
   emptyCndiConfig,
 };

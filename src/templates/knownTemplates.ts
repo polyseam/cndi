@@ -107,6 +107,31 @@ export default function getKnownTemplates() {
       name: "azure/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/mysql.jsonc`,
     },
+    // dev
+    {
+      name: "dev/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/basic.jsonc`,
+    },
+    {
+      name: "dev/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/airflow.jsonc`,
+    },
+    {
+      name: "dev/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/cnpg.jsonc`,
+    },
+    {
+      name: "dev/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/hop.jsonc`,
+    },
+    {
+      name: "dev/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/neo4j.jsonc`,
+    },
+    {
+      name: "dev/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/mysql.jsonc`,
+    },
   ];
   return knownTemplates;
 }

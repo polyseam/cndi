@@ -1,0 +1,41 @@
+name: Docs
+description: Propose some improvement to CNDI's documentation
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
+title: "[Docs]: "
+labels: ["documentation", "enhancement"]
+assignees:
+  - johnstonmatt
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve our CNDI!
+        If you are looking to improve documentation, you're in the right spot!
+
+  - type: textarea
+    id: version
+    attributes:
+      label: Version
+      description: |
+        What version of our software are you running?
+        You can find this information by running `cndi --version`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 'Please provide a summary of the improvement to our docs you are proposing:'
+      description: What would change about our documentation?
+      placeholder: "I think we should add a section about foo..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/polyseam/cndi/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

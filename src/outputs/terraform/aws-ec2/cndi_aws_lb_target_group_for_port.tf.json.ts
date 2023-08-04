@@ -12,6 +12,6 @@ export default function getAWSLbTargetGroupForPortTFJSON(
     port: number,
     protocol: "TCP",
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
-  }, `cndi_aws_lb_target_group_${name}`);
+  }, `cndi_aws_lb_target_group_for_port_${name}`);
   return getPrettyJSONString(resource);
 }

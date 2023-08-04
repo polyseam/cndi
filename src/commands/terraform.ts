@@ -19,16 +19,6 @@ const terraformCommand = new Command()
   })
   .arguments("<commands...>")
   .env(
-    "GIT_USERNAME=<value:string>",
-    "Username ArgoCD will use to authenticate to your git repository.",
-    { required: true },
-  )
-  .env(
-    "GIT_PASSWORD=<value:string>",
-    "Personal access token ArgoCD will use to authenticate to your git repository.",
-    { required: true },
-  )
-  .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
     { required: true },
@@ -52,6 +42,21 @@ const terraformCommand = new Command()
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
     { required: true },
+  )
+  .env(
+    "GIT_USERNAME=<value:string>",
+    "Username ArgoCD will use to authenticate to your git repository.",
+    { required: false },
+  )
+  .env(
+    "GIT_PASSWORD=<value:string>",
+    "Personal access token ArgoCD will use to authenticate to your git repository.",
+    { required: false },
+  )
+  .env(
+    "GIT_SSH_PRIVATE_KEY=<value:string>",
+    "SSH Private Key ArgoCD will use to authenticate to your git repository.",
+    { required: false },
   )
   .action(async (options) => {
     const args = Deno.args.slice(1);
