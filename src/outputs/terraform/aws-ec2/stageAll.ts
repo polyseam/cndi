@@ -225,11 +225,11 @@ export default async function stageTerraformResourcesForAWS(
         cndi_aws_route_public(),
       ),
       stageFile(
-        path.join("cndi", "terraform", "cndi_aws_subnet_public_a.tf.json"),
+        path.join("cndi", "terraform", "cndi_aws_subnet_public.tf.json"),
         cndi_aws_subnet_public(),
       ),
       stageFile(
-        path.join("cndi", "terraform", "cndi_aws_subnet_private_a.tf.json"),
+        path.join("cndi", "terraform", "cndi_aws_subnet_private.tf.json"),
         cndi_aws_subnet_private(),
       ),
     ]);
