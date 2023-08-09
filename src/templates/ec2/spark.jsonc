@@ -1,0 +1,242 @@
+{
+    "prompts": [
+        {
+            "name": "argocdDomainName",
+            "default": "argocd.example.com",
+            "message": "Please enter the domain name you want argocd to be accessible on:",
+            "type": "Input"
+        },
+        {
+            "name": "sparkDomainName",
+            "default": "myspark.example.com",
+            "message": "Please enter the domain name you want apache spark to be accessible on:",
+            "type": "Input"
+        },
+        {
+            "message": "Please enter the email address you want to use for lets encrypt:",
+            "default": "admin@example.com",
+            "name": "letsEncryptClusterIssuerEmailAddress",
+            "type": "Input"
+        },
+        {
+            "message": "Please enter the container port number where the web interface will listen on the master and worker over HTTPS:",
+            "default": "8480",
+            "name": "containerPort",
+            "type": "Input"
+        },
+        {
+            "message": "Please enter the https service port number for web user interface:",
+            "default": "8484",
+            "name": "servicePort",
+            "type": "Input"
+        }
+    ],
+    "outputs": {
+        "cndi-config": {
+            "cndi_version": "v1",
+            "infrastructure": {
+                "cndi": {
+                    "nodes": [
+                        {
+                            "name": "x-node-spark",
+                            "kind": "ec2",
+                            "role": "leader",
+                            "instance_type": "m5a.large",
+                            "volume_size": 128
+                        },
+                        {
+                            "name": "y-node-spark",
+                            "kind": "ec2",
+                            "volume_size": 128
+                        },
+                        {
+                            "name": "z-node-spark",
+                            "kind": "ec2",
+                            "volume_size": 128
+                        }
+                    ],
+                    // open the required ports on load balancer and security groups
+                    "open_ports": [
+                        {
+                            "number": "{{ $.cndi.prompts.responses.servicePort }}",
+                            "name": "masterhttps",
+                            "namespace": "myspark",
+                            "service": "apache-spark-master-svc"
+                        }
+                    ]
+                }
+            },
+            "cluster_manifests": {
+                "cert-manager-cluster-issuer": {
+                    "apiVersion": "cert-manager.io/v1",
+                    "kind": "ClusterIssuer",
+                    "metadata": {
+                        "name": "lets-encrypt"
+                    },
+                    "spec": {
+                        "acme": {
+                            "email": "vipal.marwah@untribe.com",
+                            "server": "https://acme-v02.api.letsencrypt.org/directory",
+                            "privateKeySecretRef": {
+                                "name": "lets-encrypt-private-key"
+                            },
+                            "solvers": [
+                                {
+                                    "http01": {
+                                        "ingress": {
+                                            "class": "public"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                //ingress code to communicate with argocd 
+                "argo-ingress": {
+                    "apiVersion": "networking.k8s.io/v1",
+                    "kind": "Ingress",
+                    "metadata": {
+                        "name": "argocd-server-ingress",
+                        "namespace": "argocd",
+                        "annotations": {
+                            "cert-manager.io/cluster-issuer": "lets-encrypt",
+                            "kubernetes.io/tls-acme": "true",
+                            "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+                            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+                        }
+                    },
+                    "spec": {
+                        "tls": [
+                            {
+                                "hosts": [
+                                    "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                                ],
+                                "secretName": "lets-encrypt-private-key"
+                            }
+                        ],
+                        "rules": [
+                            {
+                                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                                "http": {
+                                    "paths": [
+                                        {
+                                            "path": "/",
+                                            "pathType": "Prefix",
+                                            "backend": {
+                                                "service": {
+                                                    "name": "argocd-server",
+                                                    "port": {
+                                                        "name": "https"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                //ingress to communicate with spark cluster from load balancer
+                "apachespark-ingress": {
+                    "apiVersion": "networking.k8s.io/v1",
+                    "kind": "Ingress",
+                    "metadata": {
+                        "name": "apachespark-ingress",
+                        "namespace": "myspark",
+                        "annotations": {
+                            "cert-manager.io/cluster-issuer": "lets-encrypt",
+                            "kubernetes.io/tls-acme": "true",
+                            "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+                            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+                        }
+                    },
+                    "spec": {
+                        "tls": [
+                            {
+                                "hosts": [
+                                    "{{ $.cndi.prompts.responses.sparkDomainName }}"
+                                ],
+                                "secretName": "lets-encrypt-private-key"
+                            }
+                        ],
+                        "rules": [
+                            {
+                                "host": "{{ $.cndi.prompts.responses.sparkDomainName }}",
+                                "http": {
+                                    "paths": [
+                                        {
+                                            "path": "/",
+                                            "pathType": "Prefix",
+                                            "backend": {
+                                                "service": {
+                                                    "name": "apache-spark-master-svc",
+                                                    "port": {
+                                                        "number": "{{ $.cndi.prompts.responses.servicePort }}"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "applications": {
+                "apache-spark": {
+                    "repoURL": "https://charts.bitnami.com/bitnami",
+                    "targetRevision": "7.1.0",
+                    "chart": "spark",
+                    "destinationNamespace": "myspark",
+                    "values": {
+                        //settings for master node
+                        "master": {
+                            "containerPorts": {
+                                "https": "{{ $.cndi.prompts.responses.containerPort }}"
+                            }
+                        },
+                        //settings for worker nodes
+                        "worker": {
+                            "containerPorts": {
+                                "https": "{{ $.cndi.prompts.responses.containerPort }}"
+                            },
+                            "replicaCount": 2,
+                            //Autoscaling is disabled by default 
+                            "autoscaling": {
+                                "enabled": false,
+                                "minReplicas": "",
+                                "maxReplicas": 5,
+                                "targetCPU": 50,
+                                "targetMemory": ""
+                            }
+                        },
+                        // service block is to define port for web UI
+                        "service": {
+                            "type": "ClusterIP",
+                            "ports": {
+                                "https": "{{ $.cndi.prompts.responses.servicePort }}"
+                            }
+                        },
+                        "security": {
+                            "ssl": {
+                                "enabled": true,
+                                "autoGenerated": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "env": {
+            "extend_basic_env": "aws",
+            "entries": []
+        },
+        "readme": {
+            "extend_basic_readme": "aws",
+            "template_section": "## Apache Spark \n\n This template deploys a apache spark cluster with two worker nodes using helm chart. \n\n This will create a master service named: apache-spark-master-svc to receive jobs and access web ui"
+        }
+    }
+}
