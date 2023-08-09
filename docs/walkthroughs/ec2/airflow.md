@@ -1,35 +1,35 @@
-# azure/airflow walkthrough
+# ec2/airflow walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
-in Microsoft Azure
+in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `azure/airflow`
-Template. In just a few minutes we will be able to deploy a new Kubernetes
-cluster to Azure that has been optimally configured for Airflow, including
-GitOps with Secrets management, TLS and High Availibility right out-of-the-box.
-This framework will enable quick iteration of infrastructure, applications and
-manifests in a GitHub workflow you are already comfortable with.
+This walkthough uses `cndi` to customize and deploy our `aws/airflow` Template.
+In just a few minutes we will be able to deploy a new Kubernetes cluster that
+has been optimally configured for Airflow, including GitOps with Secrets
+management, TLS and High Availibility right out-of-the-box. This framework will
+enable quick iteration of infrastructure, applications and manifests in a GitHub
+workflow you are already comfortable with.
 
-![cndi cluster](/docs/walkthroughs/azure/img/cndi-cluster-0.png)
+![cndi cluster](/docs/walkthroughs/ec2/img/cndi-cluster-0.png)
 
 ## prerequisites ✅
 
 **You will need the following things to get up and running with cndi
 successfully:**
 
-- **An Azure cloud account**: cndi will deploy infrastructure within Azure
+- **An AWS cloud account**: cndi will deploy infrastructure within AWS
 
-- **Your cloud credentials**: cndi will leverage your Azure web services's
-- ARM_CLIENT_SECRET
-- ARM_TENANT_ID & ARM_CLIENT_ID
-- ARM_SUBSCRIPTION_ID
+- **Your cloud credentials**: cndi will leverage your amazon web services's
+  **AWS ACCESS KEY ID** and **AWS_SECRET_ACCESS_KEY**
+  [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
+  to deploy resources.
 
-- **A Domain Name**: Because the `azure/airflow` template sets up TLS
+- **A Domain Name**: Because the `ec2/airflow` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
-  access to the domain registrar so we can add a couple `A` records there for
-  our cluster ingresses.
+  access to the domain registrar so we can add a couple `CNAME` records there
+  for our cluster Ingresses.
 
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Here's a guide of how to set up your Microsoft Azure account](/docs/cloud-setup-guide/azure/azure-setup.md)
+- [Here's a guide of how to set up your Amazon Web Services account](/docs/cloud-setup-guide/ec2/aws-setup.md)
 
 ## download cndi ⬇️
 
@@ -70,15 +70,15 @@ cndi init --interactive
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `azure/airflow` Template.
+For this project select the `aws/airflow` Template.
 
 ```shell
 ? Pick a template
-   azure/basic
-   gcp/basic
    aws/basic
-   aws/airflow
- ❯ azure/airflow
+   gcp/basic
+   azure/basic
+ ❯ aws/airflow
+   azure/airflow
    gcp/airflow
 ```
 
@@ -98,12 +98,10 @@ supplied for this project:
 
 ---
 
-- **Azure Subscription ID**: _access keys are long-term credentials for an IAM
+- **AWS Access key ID**: _access keys are long-term credentials for an IAM user_
+- **AWS Secret Access key**: _access keys are long-term credentials for an IAM
   user_
-- **Azure Client ID**: _access keys are long-term credentials for an IAM user_
-- **Azure Client Secret**: _region where the infastructure is being created_
-- **Azure Tenant ID**: _access keys are long-term credentials for an IAM user_
-- **Azure Region**: _region where the infastructure is being created_
+- **AWS Region**: _region where the infastructure is being created_
 
 ---
 
@@ -132,14 +130,14 @@ supplied for this project:
 - **Name of the postgresql database you want to use for airflow cnpg database:**
   _name of the postgresql database you want to use for airflow cnpg database_
 
-![cndi-init](/docs/walkthroughs/azure/img/cndi-init-interactive-1.png)
+![AWS instances dashboard](/docs/walkthroughs/ec2/img/cndi-init-interactive.png)
 
 This process will generate a `cndi-config.json` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
 configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
 
-The structure of the generated CNDI project will be something like this:
+The structure of the generated CNDI project will be as follows:
 
 ```shell
 ├── 📁 cndi
@@ -167,7 +165,7 @@ For a breakdown of all of these files, checkout the
 ## upload environment variables to GitHub ⬆️
 
 GitHub Actions is responsible for calling the `cndi run` command to deploy our
-cluster, so it is important that our secrets are available in the Actions
+cluster, so it is important that our secrets are available in the actions
 runtime. However we don't want these to be visible in our source code, so we
 will use GitHub Actions Secrets to store them. The
 [gh](https://github.com/cli/cli) CLI makes this very easy.
@@ -177,7 +175,7 @@ gh secret set -f .env
 # if this does not complete the first time, try running it again!
 ```
 
-![GitHub secrets](/docs/walkthroughs/azure/img/upload-git-secrets.png)
+![GitHub secrets](/docs/walkthroughs/ec2/img/upload-git-secrets.png)
 
 ---
 
@@ -195,7 +193,7 @@ git push --set-upstream origin main
 
 You should now see the cluster configuration has been uploaded to GitHub:
 
-![GitHub repo](/docs/walkthroughs/azure/img/github-repo.png)
+![GitHub repo](/docs/walkthroughs/ec2/img/github-repo.png)
 
 Now, open your web browser and navigate to your project on GitHub. Click on the
 Actions tab, then click on the job that was triggered from your latest commit.
@@ -203,44 +201,41 @@ Actions tab, then click on the job that was triggered from your latest commit.
 You will see something like the image below, which shows that GitHub has
 successfully run the workflow.
 
-![GitHub action](/docs/walkthroughs/azure/img/github-action.png)
+![GitHub action](/docs/walkthroughs/ec2/img/github-action.png)
 
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
 Once `cndi run` has been completed, at the end of the run will be a link to
 `resource groups`, where you can view resources deployed by CNDI for this
-project.
+project. ![cndi outputs](/docs/walkthroughs/ec2/img/outputs.png)
 
-![current resource group](/docs/walkthroughs/azure/img/resource-groups.png)
+![resource groups root page](/docs/walkthroughs/ec2/img/resource-groups-root.png)
 
----
+![current resource group](/docs/walkthroughs/ec2/img/resource-groups.png)
 
 ## attach the load balancer to your domain 🌐
 
-At the end of the cndi run there is also an output called `public host`, which
-is the **IP address** (A record) of the load Balancer thats attached to your
-Azure instances.
+At the end of the cndi run there is also an output called `public host` , which
+is the **DNS Name** (CNAME record) of the load Balancer thats attached to your
+ec2 instances.
 
-![cndi outputs](/docs/walkthroughs/azure/img/outputs.png)
+![cndi outputs](/docs/walkthroughs/ec2/img/outputs.png) Copy `public host` Go to
+your custom domain, and add the `public host` to it
 
-- Copy `public host`
-- Go to your custom domain,
-- Create an A record to route traffic to the load balancer IP address
-  `public host` for Airflow and Argocd at the domain you provided.
+![google domains](/docs/walkthroughs/ec2/img/google-domains-cname.png)
 
-![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
+Open the domain name you've assigned for ArgoCD in your browser to see the Argo
+Login page.
 
-Wait 2 to 5 mins to open the domain name you've assigned for ArgoCD in your
-browser in order to see the Argocd UI Login page.
-
-![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-0.png)
+![Argocd UI](/docs/walkthroughs/ec2/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
-![.env file](/docs/walkthroughs/azure/img/argocd-admin-password.png)
 
-![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-1.png)
+![.env file](/docs/walkthroughs/ec2/img/argocd-admin-password.png)
+
+![Argocd UI](/docs/walkthroughs/ec2/img/argocd-ui-1.png)
 
 Notice that the `cluster_manifests` in the GitHub repository matches config in
 the ArgoCD UI
@@ -258,7 +253,7 @@ the ArgoCD UI
 Verify all applications and manifests in the GitHub repository are present and
 their status is healthy in the ArgoCD UI
 
-![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-2.png)
+![Argocd UI](/docs/walkthroughs/ec2/img/argocd-ui-2.png)
 
 ## verify that Airflow is accessible on the chosen domain 🧐
 
@@ -269,7 +264,7 @@ is `admin` and the password is `admin`. If the page is accessible, then the user
 can log in and begin using Airflow. If not, the user should go back and make
 sure the previous steps were done correctly.
 
-![Airflow UI](/docs/walkthroughs/azure/img/airflow-ui-0.png)
+![Airflow UI](/docs/walkthroughs/ec2/img/airflow-ui-0.png)
 
 ## verify Airflow is connected to the private DAG repository 🧐
 
@@ -278,18 +273,18 @@ private DAGs should be visible on the Airflow UI. If not,you should go back and
 make sure that the private DAG repository is properly connected to Airflow with
 the correct credentials:
 
-![Airflow UI](/docs/walkthroughs/azure/img/airflow-ui-1.png)
+![Airflow UI](/docs/walkthroughs/ec2/img/airflow-ui-1.png)
 
 ## and you are done! ⚡️
 
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
-Airflow and ArgoCD.
+Airflow and Argocd
 
 ## modifying the cluster! 🛠️
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/azure/img/cndi-config.png)
+![cndi config](/docs/walkthroughs/ec2/img/cndi-config.png)
 
 - Go to the `cndi-config.jsonc`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save
@@ -297,11 +292,10 @@ Airflow and ArgoCD.
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
-- You can confirm your resources are being created with the github actions or in
-  the google console
 
-![cndi-run action](/docs/walkthroughs/azure/img/add-node.png)
-![azure instances](/docs/walkthroughs/azure/img/ow.png)
+![cndi-run action](/docs/walkthroughs/ec2/img/add-node.png)
+
+![ec2 instances](/docs/walkthroughs/ec2/img/ow.png)
 
 ## destroying resources in the cluster! 💣
 
