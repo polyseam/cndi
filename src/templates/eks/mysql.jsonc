@@ -138,7 +138,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
                 "secretName": "cluster-issuer-private-key"
               }
             ],
@@ -181,7 +183,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.mysqlDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
+                ],
                 "secretName": "cluster-issuer-private-key"
               }
             ],
