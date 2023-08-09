@@ -105,7 +105,8 @@
             "imagePullPolicy": "IfNotPresent",
             "baseServerId": 1000,
             "version": "8.0.33",
-            "serviceAccountName": "{{ $.cndi.prompts.responses.clusterServiceName}}-sa"
+            "serviceAccountName": "{{ $.cndi.prompts.responses.clusterServiceName}}-sa",
+            "mycnf": "[mysqld]\n max_connections = 200 \n require_secure_transport = ON"
           }
         },
         "mycluster-secret": {
@@ -137,7 +138,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.argocdDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
                 "secretName": "cluster-issuer-private-key"
               }
             ],
@@ -180,7 +183,9 @@
           "spec": {
             "tls": [
               {
-                "hosts": ["{{ $.cndi.prompts.responses.mysqlDomainName }}"],
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.mysqlDomainName }}"
+                ],
                 "secretName": "cluster-issuer-private-key"
               }
             ],
@@ -211,7 +216,7 @@
       "applications": {
         "mysqloperator": {
           "repoURL": "https://mysql.github.io/mysql-operator/",
-          "targetRevision": "2.0.10",
+          "targetRevision": "2.1.0",
           "chart": "mysql-operator",
           "destinationNamespace": "mysql-operator"
         }
