@@ -100,7 +100,7 @@
             },
             "postgresql": {
               "pg_hba": [
-                "host {{ $.cndi.prompts.responses.postgresqlDb }} {{ $.cndi.prompts.responses.postgresqlUser }} all password"
+                "hostssl {{ $.cndi.prompts.responses.postgresqlDb }} {{ $.cndi.prompts.responses.postgresqlUser }} all password"
               ]
             },
             "bootstrap": {
