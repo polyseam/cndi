@@ -7,12 +7,11 @@
       "type": "Input"
     },
     {
-      "name": "pulsarlDomainName",
+      "name": "pulsarDomainName",
       "default": "pulsar.example.com",
       "message": "Please enter the domain name you want pulsar to be accessible on:",
       "type": "Input"
     },
-
     {
       "message": "Please enter the email address you want to use for lets encrypt:",
       "default": "admin@example.com",
