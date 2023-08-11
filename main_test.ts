@@ -119,7 +119,7 @@ describe("cndi", () => {
     it(`should create a README beginning with the "project_name" if a config file is supplied`, async () => {
       const project_name = "my-foo-project";
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi-config.yaml`),
         YAML.stringify({ ...basicAWSCndiConfig, project_name }),
       );
       const { status } = await runCndi("init");
