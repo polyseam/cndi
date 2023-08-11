@@ -316,13 +316,13 @@ export default async function useTemplate(
 
   // pretty printing is required to play nice with {{ }} templating
   const cndiConfigStringified = templateFormatIsYAML
-    ? getPrettyJSONString(templateObject.outputs["cndi-config"])
-    : YAML.stringify(
+    ? YAML.stringify(
       templateObject.outputs["cndi-config"] as unknown as Record<
         string,
         unknown
       >,
-    );
+    )
+    : getPrettyJSONString(templateObject.outputs["cndi-config"]);
 
   const literalizedCndiConfig = await literalizeTemplateValuesInString(
     cndiConfigPromptResponses,
@@ -341,6 +341,9 @@ export default async function useTemplate(
       ...cndiConfigData,
     };
   } catch {
+    console.log("templateFormatIsYAML", templateFormatIsYAML);
+    console.log("generated cndi-config:");
+    console.log(getPrettyJSONString(literalizedCndiConfig));
     throw new Error("Invalid template['cndi-config'] generated");
   }
 
