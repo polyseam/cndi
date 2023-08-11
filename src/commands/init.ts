@@ -9,6 +9,7 @@ import {
   loadYAML,
   persistStagedFiles,
   stageFile,
+  loadCndiConfig
 } from "src/utils.ts";
 
 import { CNDIConfig, EnvLines } from "src/types.ts";
@@ -41,13 +42,11 @@ const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
  */
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
-  .option("-f, --file <file:string>", "Path to your cndi-config.jsonc file.", {
-    default: path.join(Deno.cwd(), "cndi-config.jsonc"),
-  })
+  .option("-f, --file <file:string>", "Path to your cndi-config.yaml file.")
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
-    { default: Deno.cwd() },
+    { default: Deno.cwd() }
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
@@ -55,7 +54,6 @@ const initCommand = new Command()
     hidden: true,
   })
   .action(async (options) => {
-    const pathToConfig = options.file;
     let template: string | undefined = options.template;
     let cndiConfig: CNDIConfig;
     let env: EnvLines;
@@ -65,45 +63,19 @@ const initCommand = new Command()
     const useCNDIConfigFile = !options.interactive && !template;
 
     if (useCNDIConfigFile) {
-      console.log(`cndi init --file "${pathToConfig}"\n`);
-      try {
-        const suppliedConfigIsYAML = pathToConfig.endsWith(".yaml");
-        cndiConfig = suppliedConfigIsYAML
-          ? ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig)
-          : ((await loadYAML(pathToConfig)) as unknown as CNDIConfig);
+        const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
+        console.log(`cndi init --file "${pathToConfig}"\n`);
+        cndiConfig = loadedConfig;
 
         // validate config
         await validateConfig(cndiConfig, pathToConfig);
         project_name = cndiConfig.project_name as string;
-      } catch (e) {
-        if (e instanceof Deno.errors.NotFound) {
-          // if config is not found at 'pathToConfig' we want to throw an error
-          console.error(
-            initLabel,
-            ccolors.error(
-              `cndi-config file not found at ${
-                ccolors.user_input(
-                  `"${pathToConfig}"`,
-                )
-              }\n`,
-            ),
-          );
-
-          // and suggest a solution
-          console.log(
-            "if you don't have a cndi-config file try",
-            ccolors.prompt("cndi init --interactive"),
-          );
-          await emitExitEvent(400);
-          Deno.exit(400);
-        }
-      }
     }
 
     if (options.template === "true") {
       console.error(
         initLabel,
-        ccolors.error(`--template (-t) flag requires a value`),
+        ccolors.error(`--template (-t) flag requires a value`)
       );
       await emitExitEvent(401);
       Deno.exit(401);
@@ -125,14 +97,14 @@ const initCommand = new Command()
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
-        [
-          ccolors.warn(
-            "it looks like you have already initialized a cndi project in this directory:",
-          ),
-          ccolors.user_input(options.output),
-          ccolors.prompt("\n\noverwrite existing artifacts?"),
-        ].join(" "),
-      )
+          [
+            ccolors.warn(
+              "it looks like you have already initialized a cndi project in this directory:"
+            ),
+            ccolors.user_input(options.output),
+            ccolors.prompt("\n\noverwrite existing artifacts?"),
+          ].join(" ")
+        )
       : true;
 
     if (!shouldContinue) {
@@ -179,7 +151,7 @@ const initCommand = new Command()
       cndiConfig = templateResult.cndiConfig;
       await stageFile(
         "cndi-config.yaml",
-        YAML.stringify(cndiConfig as unknown as Record<string, unknown>),
+        YAML.stringify(cndiConfig as unknown as Record<string, unknown>)
       );
       readme = templateResult.readme;
       env = templateResult.env;
@@ -193,7 +165,7 @@ const initCommand = new Command()
       env = await getCoreEnvLines(
         cndiGeneratedValues,
         getDeploymentTargetFromConfig(cndiConfig!),
-        !!options.interactive,
+        !!options.interactive
       );
     }
 
@@ -205,7 +177,7 @@ const initCommand = new Command()
       console.log(
         initLabel,
         ccolors.user_input(`"${readmePath}"`),
-        ccolors.warn(`already exists, skipping generation`),
+        ccolors.warn(`already exists, skipping generation`)
       );
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
@@ -219,7 +191,7 @@ const initCommand = new Command()
     if (options?.debug || inDebugEnv) {
       env.push(
         { comment: "Telemetry Mode" },
-        { value: { CNDI_TELEMETRY: "debug" } },
+        { value: { CNDI_TELEMETRY: "debug" } }
       );
     }
 
@@ -227,12 +199,12 @@ const initCommand = new Command()
 
     await stageFile(
       path.join(".vscode", "settings.json"),
-      getPrettyJSONString(vscodeSettings),
+      getPrettyJSONString(vscodeSettings)
     );
 
     await stageFile(
       path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(),
+      getCndiRunGitHubWorkflowYamlContents()
     );
 
     await stageFile(".gitignore", getGitignoreContents());

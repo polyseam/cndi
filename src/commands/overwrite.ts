@@ -4,6 +4,7 @@ import {
   emitExitEvent,
   getPrettyJSONString,
   getStagingDir,
+  loadCndiConfig,
   loadJSONC,
   loadYAML,
   persistStagedFiles,
@@ -37,70 +38,24 @@ const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
 interface OverwriteActionArgs {
   output: string;
+  file?: string;
   initializing: boolean;
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
-  let pathToConfig;
-  let configIsYAML = true;
-  const isFile = true;
-  if (await exists(path.join(options.output, "cndi-config.yaml"), { isFile })) {
-    pathToConfig = path.join(options.output, "cndi-config.yaml");
-  } else if (
-    await exists(path.join(options.output, "cndi-config.yml"), { isFile })
-  ) {
-    pathToConfig = path.join(options.output, "cndi-config.yml");
-  } else if (
-    await exists(path.join(options.output, "cndi-config.jsonc"), { isFile })
-  ) {
-    pathToConfig = path.join(options.output, "cndi-config.jsonc");
-    configIsYAML = false;
-  } else if (
-    await exists(path.join(options.output, "cndi-config.json"), { isFile })
-  ) {
-    pathToConfig = path.join(options.output, "cndi-config.json");
-    configIsYAML = false;
-  } else {
-    console.error(
-      owLabel,
-      ccolors.error("there is no cndi-config file at"),
-      ccolors.user_input(`"${options.output}"`),
-    );
-    console.log(
-      "if you don't have a cndi-config file try",
-      ccolors.prompt("cndi init"),
-    );
-    await emitExitEvent(500);
-    Deno.exit(500);
-  }
-
   const pathToKubernetesManifests = path.join(
     options.output,
     "cndi",
     "cluster_manifests",
   );
+
   const pathToTerraformResources = path.join(
     options.output,
     "cndi",
     "terraform",
   );
 
-  let config;
-
-  try {
-    config = configIsYAML
-      ? ((await loadYAML(pathToConfig)) as unknown as CNDIConfig)
-      : ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig);
-  } catch {
-    console.error(
-      owLabel,
-      ccolors.error("your cndi config file at"),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("is not valid"),
-    );
-    await emitExitEvent(504);
-    Deno.exit(504);
-  }
+  const [config, pathToConfig] = await loadCndiConfig(options?.file);
 
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
@@ -333,7 +288,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 const overwriteCommand = new Command()
   .description(`Update cndi project files using cndi-config.jsonc file.`)
   .alias("ow")
-  .option("-o, --output <output:string>", "Path to your cndi git repository.", {
+  .option('-f, --file <file:string>',"Path to your cndi-config file.")
+  .option("-o, --output <output:string>", "Path to your cndi cluster git repository.", {
     default: Deno.cwd(),
   })
   .option(

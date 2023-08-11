@@ -1,6 +1,6 @@
 import { assert, beforeEach, describe, it } from "test-deps";
 
-import { path } from "deps";
+import { YAML, path } from "deps";
 
 import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 
@@ -63,7 +63,7 @@ describe("cndi", () => {
       assert(status.success);
     });
 
-    it(`should add correct files and directories when it succeeds`, async () => {
+    it(`should add correct files and directories when it succeeds with json`, async () => {
       const initFileList = new Set([
         "cndi-config.jsonc",
         "README.md",
@@ -89,11 +89,38 @@ describe("cndi", () => {
       assert(status.success);
     });
 
+    it(`should add correct files and directories when it succeeds with yaml`, async () => {
+      const initFileList = new Set([
+        "cndi-config.yaml",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.yaml`),
+        YAML.stringify(basicAWSCndiConfig),
+      );
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi("init");
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+      console.log(initFileList);
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
     it(`should create a README beginning with the "project_name" if a config file is supplied`, async () => {
       const project_name = "my-foo-project";
       Deno.writeTextFileSync(
         path.join(Deno.cwd(), `cndi-config.jsonc`),
-        getPrettyJSONString({ ...basicAWSCndiConfig, project_name }),
+        YAML.stringify({ ...basicAWSCndiConfig, project_name }),
       );
       const { status } = await runCndi("init");
       assert(status.success);
