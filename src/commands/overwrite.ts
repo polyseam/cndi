@@ -89,8 +89,8 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   try {
     config = configIsYAML
-      ? ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig)
-      : ((await loadYAML(pathToConfig)) as unknown as CNDIConfig);
+      ? ((await loadYAML(pathToConfig)) as unknown as CNDIConfig)
+      : ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig);
   } catch {
     console.error(
       owLabel,
