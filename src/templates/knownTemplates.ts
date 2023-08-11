@@ -1,5 +1,5 @@
 export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/yaml/src/templates/yaml/";
+  "https://raw.githubusercontent.com/polyseam/cndi/main/src/templates/";
 
 export default function getKnownTemplates() {
   const knownTemplates = [
