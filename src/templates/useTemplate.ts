@@ -22,14 +22,13 @@ import {
   Secret,
   Select,
   Toggle,
+  YAML,
 } from "deps";
 
 import getReadmeForProject from "src/outputs/readme.ts";
 import { POLYSEAM_TEMPLATE_DIRECTORY } from "src/templates/knownTemplates.ts";
 
-const useTemplateLabel = ccolors.faded(
-  "\nsrc/templates/useTemplate.ts:",
-);
+const useTemplateLabel = ccolors.faded("\nsrc/templates/useTemplate.ts:");
 
 type TemplatePromptTypeNames =
   | "Input"
@@ -42,9 +41,7 @@ type TemplatePromptTypeNames =
   | "Number"
   | "Comment";
 
-function getPromptModuleForType(
-  type: TemplatePromptTypeNames,
-) {
+function getPromptModuleForType(type: TemplatePromptTypeNames) {
   switch (type) {
     case "Input":
       return Input;
@@ -99,11 +96,11 @@ interface Template {
   prompts: Array<TemplatePrompt>;
   outputs: {
     "cndi-config": CNDIConfig;
-    "env": {
+    env: {
       entries?: Array<TemplateEnvCommentEntry | TemplateEnvValueEntry>;
       extend_basic_env: DeploymentTarget;
     };
-    "readme": {
+    readme: {
       extend_basic_readme: DeploymentTarget;
       template_section?: string;
     };
@@ -111,9 +108,9 @@ interface Template {
 }
 
 interface TemplateResult {
-  "cndiConfig": CNDIConfig;
-  "env": EnvLines;
-  "readme": string;
+  cndiConfig: CNDIConfig;
+  env: EnvLines;
+  readme: string;
 }
 
 interface CNDIGeneratedValues {
@@ -138,13 +135,12 @@ export function literalizeTemplateValuesInString(
 
   // loop so long as there is '{{ something }}' in the string
   while (
-    indexOfOpeningBraces !== -1 && indexOfClosingBraces !== -1 &&
-    literalizedString.indexOf(
-        "$.cndi.prompts.responses.",
-      ) < indexOfClosingBraces &&
-    literalizedString.indexOf(
-        "$.cndi.prompts.responses.",
-      ) > indexOfOpeningBraces
+    indexOfOpeningBraces !== -1 &&
+    indexOfClosingBraces !== -1 &&
+    literalizedString.indexOf("$.cndi.prompts.responses.") <
+      indexOfClosingBraces &&
+    literalizedString.indexOf("$.cndi.prompts.responses.") >
+      indexOfOpeningBraces
   ) {
     const contentsOfFirstPair = literalizedString.substring(
       indexOfOpeningBraces + 2,
@@ -175,12 +171,8 @@ export function literalizeTemplateValuesInString(
         );
       }
     }
-    indexOfOpeningBraces = literalizedString.indexOf(
-      "{{",
-    );
-    indexOfClosingBraces = literalizedString.indexOf(
-      "}}",
-    );
+    indexOfOpeningBraces = literalizedString.indexOf("{{");
+    indexOfClosingBraces = literalizedString.indexOf("}}");
   }
   return literalizedString;
 }
@@ -213,9 +205,7 @@ export default async function useTemplate(
       return templateLocation.startsWith(target.name);
     });
 
-    if (
-      !validTarget
-    ) {
+    if (!validTarget) {
       const numberOfSlashes = templateLocation.split("/").length - 1;
 
       // it's not a valid template target
@@ -245,7 +235,8 @@ export default async function useTemplate(
       );
     }
     templateUrl = new URL(
-      `${templateLocation}.jsonc`,
+      // use YAML templates by default now
+      `${templateLocation}.yaml`,
       POLYSEAM_TEMPLATE_DIRECTORY,
     );
   }
@@ -254,7 +245,12 @@ export default async function useTemplate(
   let templateText: string;
   let response: Response;
 
+  const templateFormatIsYAML: boolean =
+    templateUrl.pathname.endsWith(".yaml") ||
+    templateUrl.pathname.endsWith(".yml");
+
   try {
+    console.log("fetching", templateUrl.href);
     response = await fetch(templateUrl);
     templateText = await response.text();
   } catch (fetchError) {
@@ -278,8 +274,13 @@ export default async function useTemplate(
   }
 
   try {
-    templateObject = JSONC.parse(templateText) as unknown as Template;
+    templateObject = templateFormatIsYAML
+      ? (YAML.parse(templateText) as unknown as Template)
+      : (JSONC.parse(templateText) as unknown as Template);
+
+    console.log("templateObject", JSON.stringify(templateObject, null, 2));
   } catch (parseError) {
+    console.log("templateText", templateText);
     console.error(
       useTemplateLabel,
       ccolors.user_input(`"${templateUrl}"`),
@@ -296,8 +297,7 @@ export default async function useTemplate(
     interactive,
   );
 
-  const cndiConfigPromptDefinitions = templateObject.prompts ||
-    [];
+  const cndiConfigPromptDefinitions = templateObject.prompts || [];
 
   const defaultCndiConfigValues: Record<string, string> = {};
 
@@ -319,9 +319,14 @@ export default async function useTemplate(
     : defaultCndiConfigValues;
 
   // pretty printing is required to play nice with {{ }} templating
-  const cndiConfigStringified = getPrettyJSONString(
-    templateObject.outputs["cndi-config"],
-  );
+  const cndiConfigStringified = templateFormatIsYAML
+    ? getPrettyJSONString(templateObject.outputs["cndi-config"])
+    : YAML.stringify(
+      templateObject.outputs["cndi-config"] as unknown as Record<
+        string,
+        unknown
+      >,
+    );
 
   const literalizedCndiConfig = await literalizeTemplateValuesInString(
     cndiConfigPromptResponses,
@@ -331,9 +336,13 @@ export default async function useTemplate(
   let cndiConfig;
 
   try {
+    const cndiConfigData = templateFormatIsYAML
+      ? YAML.parse(literalizedCndiConfig)
+      : JSON.parse(literalizedCndiConfig);
+
     cndiConfig = {
       project_name: opt.project_name,
-      ...JSON.parse(literalizedCndiConfig),
+      ...cndiConfigData,
     };
   } catch {
     throw new Error("Invalid template['cndi-config'] generated");
@@ -360,9 +369,7 @@ export default async function useTemplate(
         p.value,
       );
 
-      templateEnvLines.push(
-        { value: { [p.name]: value } } as EnvValueEntry,
-      );
+      templateEnvLines.push({ value: { [p.name]: value } } as EnvValueEntry);
     }
   }
 

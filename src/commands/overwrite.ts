@@ -5,6 +5,7 @@ import {
   getPrettyJSONString,
   getStagingDir,
   loadJSONC,
+  loadYAML,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -31,6 +32,7 @@ import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerrafo
 import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 import { NON_MICROK8S_NODE_KINDS } from "consts";
+import { exists } from "https://deno.land/std@0.196.0/fs/mod.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -40,7 +42,38 @@ interface OverwriteActionArgs {
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
-  const pathToConfig = path.join(options.output, "cndi-config.jsonc");
+  let pathToConfig;
+  let configIsYAML = true;
+  const isFile = true;
+  if (await exists(path.join(options.output, "cndi-config.yaml"), { isFile })) {
+    pathToConfig = path.join(options.output, "cndi-config.yaml");
+  } else if (
+    await exists(path.join(options.output, "cndi-config.yml"), { isFile })
+  ) {
+    pathToConfig = path.join(options.output, "cndi-config.yml");
+  } else if (
+    await exists(path.join(options.output, "cndi-config.jsonc"), { isFile })
+  ) {
+    pathToConfig = path.join(options.output, "cndi-config.jsonc");
+    configIsYAML = false;
+  } else if (
+    await exists(path.join(options.output, "cndi-config.json"), { isFile })
+  ) {
+    pathToConfig = path.join(options.output, "cndi-config.json");
+    configIsYAML = false;
+  } else {
+    console.error(
+      owLabel,
+      ccolors.error("there is no cndi-config file at"),
+      ccolors.user_input(`"${options.output}"`),
+    );
+    console.log(
+      "if you don't have a cndi-config file try",
+      ccolors.prompt("cndi init"),
+    );
+    await emitExitEvent(500);
+    Deno.exit(500);
+  }
 
   const pathToKubernetesManifests = path.join(
     options.output,
@@ -56,21 +89,18 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   let config;
 
   try {
-    config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
+    config = configIsYAML
+      ? ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig)
+      : ((await loadYAML(pathToConfig)) as unknown as CNDIConfig);
   } catch {
     console.error(
       owLabel,
-      ccolors.error("there is no cndi-config file at"),
+      ccolors.error("your cndi config file at"),
       ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("is not valid"),
     );
-    console.log(
-      "if you don't have a cndi-config file try",
-      ccolors.prompt(
-        "cndi init --interactive",
-      ),
-    );
-    await emitExitEvent(500);
-    Deno.exit(500);
+    await emitExitEvent(504);
+    Deno.exit(504);
   }
 
   if (!options.initializing) {
@@ -146,10 +176,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  await stageTerraformResourcesForConfig(
-    config,
-    options,
-  );
+  await stageTerraformResourcesForConfig(config, options);
 
   console.log(ccolors.success("staged terraform files"));
 
@@ -284,9 +311,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   } catch (errorPersistingStagedFiles) {
     console.error(
       owLabel,
-      ccolors.error(
-        `failed to persist staged cndi files to`,
-      ),
+      ccolors.error(`failed to persist staged cndi files to`),
       ccolors.user_input(`${options.output}`),
     );
     console.log(ccolors.caught(errorPersistingStagedFiles));

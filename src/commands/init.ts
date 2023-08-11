@@ -1,4 +1,4 @@
-import { ccolors, Command, Input, path, Select, SEP } from "deps";
+import { ccolors, Command, Input, path, Select, SEP, YAML } from "deps";
 
 import {
   checkInitialized,
@@ -6,6 +6,7 @@ import {
   getDeploymentTargetFromConfig,
   getPrettyJSONString,
   loadJSONC,
+  loadYAML,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -66,7 +67,10 @@ const initCommand = new Command()
     if (useCNDIConfigFile) {
       console.log(`cndi init --file "${pathToConfig}"\n`);
       try {
-        cndiConfig = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
+        const suppliedConfigIsYAML = pathToConfig.endsWith(".yaml");
+        cndiConfig = suppliedConfigIsYAML
+          ? ((await loadJSONC(pathToConfig)) as unknown as CNDIConfig)
+          : ((await loadYAML(pathToConfig)) as unknown as CNDIConfig);
 
         // validate config
         await validateConfig(cndiConfig, pathToConfig);
@@ -88,9 +92,7 @@ const initCommand = new Command()
           // and suggest a solution
           console.log(
             "if you don't have a cndi-config file try",
-            ccolors.prompt(
-              "cndi init --interactive",
-            ),
+            ccolors.prompt("cndi init --interactive"),
           );
           await emitExitEvent(400);
           Deno.exit(400);
@@ -169,18 +171,15 @@ const initCommand = new Command()
     };
 
     if (template) {
-      const templateResult = await useTemplate(
-        template!,
-        {
-          project_name,
-          cndiGeneratedValues,
-          interactive: !!options.interactive,
-        },
-      );
+      const templateResult = await useTemplate(template!, {
+        project_name,
+        cndiGeneratedValues,
+        interactive: !!options.interactive,
+      });
       cndiConfig = templateResult.cndiConfig;
       await stageFile(
-        "cndi-config.jsonc",
-        getPrettyJSONString(cndiConfig),
+        "cndi-config.yaml",
+        YAML.stringify(cndiConfig as unknown as Record<string, unknown>),
       );
       readme = templateResult.readme;
       env = templateResult.env;
@@ -210,10 +209,7 @@ const initCommand = new Command()
       );
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
-        await stageFile(
-          "README.md",
-          readme,
-        );
+        await stageFile("README.md", readme);
       }
     }
 

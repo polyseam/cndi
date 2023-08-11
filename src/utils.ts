@@ -1,4 +1,13 @@
-import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+import {
+  ccolors,
+  deepMerge,
+  homedir,
+  JSONC,
+  path,
+  platform,
+  walk,
+  YAML,
+} from "deps";
 import { DEFAULT_OPEN_PORTS } from "consts";
 
 import {
@@ -24,15 +33,16 @@ async function sha256Digest(message: string): Promise<string> {
   return hashHex;
 }
 
+// TODO: the following 2 functions can fail in 2 ways
+
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
-const loadRemoteJSONC = async (url: URL) => {
-  const response = await fetch(url);
-  const text = await response.text();
-  return JSONC.parse(text);
+// helper function to load a YAML file
+const loadYAML = async (path: string) => {
+  return YAML.parse(await Deno.readTextFile(path));
 };
 
 function getPrettyJSONString(object: unknown) {
@@ -524,7 +534,7 @@ export {
   getTFResource,
   getUserDataTemplateFileString,
   loadJSONC,
-  loadRemoteJSONC,
+  loadYAML,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   replaceRange,
