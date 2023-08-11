@@ -291,7 +291,7 @@ cluster.
 
 ```yaml
 infrastructure:
-  cndi: {...}
+  cndi: {}
   terraform:
     resource:
       aws_s3_bucket:
