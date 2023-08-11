@@ -1,0 +1,41 @@
+cndi_version: v1
+project_name: my-cndi-project
+infrastructure:
+  cndi:
+    cert_manager:
+      email: jane.doe@example.com
+    nodes:
+      - name: x-node
+        kind: ec2
+        role: leader
+        instance_type: t3.2xlarge
+        volume_size: 128
+      - name: y-node
+        kind: ec2
+        role: controller
+        volume_size: 128
+      - name: z-node
+        kind: ec2
+        volume_size: 128
+cluster_manifests:
+  argo-ingress:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: argocd-server-ingress
+      namespace: argocd
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+    spec:
+      rules:
+        - http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: argocd-server
+                    port:
+                      name: https
+applications: {}

@@ -1,4 +1,14 @@
-import { ccolors, deepMerge, homedir, JSONC, path, platform, walk } from "deps";
+import {
+  ccolors,
+  deepMerge,
+  exists,
+  homedir,
+  JSONC,
+  path,
+  platform,
+  walk,
+  YAML,
+} from "deps";
 import { DEFAULT_OPEN_PORTS } from "consts";
 
 import {
@@ -24,15 +34,83 @@ async function sha256Digest(message: string): Promise<string> {
   return hashHex;
 }
 
+const loadYAMLorJSONC = async (
+  filePath: string,
+): Promise<JSONC.JsonValue | unknown> => {
+  if (filePath.endsWith(".yaml") || filePath.endsWith(".yml")) {
+    return await loadYAML(filePath);
+  }
+  if (filePath.endsWith(".jsonc") || filePath.endsWith(".json")) {
+    return await loadJSONC(filePath);
+  }
+};
+
+// attempts to find cndi-config.yaml or cndi-config.jsonc, then returns its value and location
+const loadCndiConfig = async (
+  providedPath?: string,
+): Promise<[CNDIConfig, string]> => {
+  let pathToConfig;
+  let configIsYAML = true;
+  const isFile = true;
+  const cwd = Deno.cwd();
+
+  // the user provided a direct path to a cndi-config file
+  if (providedPath) {
+    return [(await loadYAMLorJSONC(providedPath)) as CNDIConfig, providedPath];
+  }
+
+  if (await exists(path.join(cwd, "cndi-config.yaml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi-config.yaml");
+  } else if (await exists(path.join(cwd, "cndi-config.yml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi-config.yml");
+  } else if (await exists(path.join(cwd, "cndi-config.jsonc"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi-config.jsonc");
+    configIsYAML = false;
+  } else if (await exists(path.join(cwd, "cndi-config.json"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi-config.json");
+    configIsYAML = false;
+  } else {
+    console.error(
+      utilsLabel,
+      ccolors.error("there is no"),
+      ccolors.key_name('"cndi-config.yaml"'),
+      ccolors.error("file in your current directory"),
+    );
+    console.log(
+      "if you don't have a cndi-config file try",
+      ccolors.prompt("cndi init --interactive"),
+    );
+    await emitExitEvent(500);
+    Deno.exit(500);
+  }
+  try {
+    const config = configIsYAML
+      ? await loadYAML(pathToConfig)
+      : await loadJSONC(pathToConfig);
+    return [config as CNDIConfig, pathToConfig];
+  } catch (error) {
+    console.error(
+      utilsLabel,
+      ccolors.error("your cndi config file at"),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("is not valid"),
+    );
+    ccolors.caught(error, 504);
+    await emitExitEvent(504);
+    Deno.exit(504);
+  }
+};
+
+// TODO: the following 2 functions can fail in 2 ways
+
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
 };
 
-const loadRemoteJSONC = async (url: URL) => {
-  const response = await fetch(url);
-  const text = await response.text();
-  return JSONC.parse(text);
+// helper function to load a YAML file
+const loadYAML = async (path: string) => {
+  return YAML.parse(await Deno.readTextFile(path));
 };
 
 function getPrettyJSONString(object: unknown) {
@@ -112,13 +190,15 @@ async function patchAndStageTerraformResources(
 ) {
   const suffix = `.tf.json`;
   // resourceObj: { aws_s3_bucket: { cndi_aws_s3_bucket: { ... } } }
-  for (const tfResourceType in resourceObj) { // aws_s3_bucket
+  for (const tfResourceType in resourceObj) {
+    // aws_s3_bucket
     const resourceTypeBlock = resourceObj[tfResourceType] as Record<
       string,
       never
     >;
 
-    for (const resourceName in resourceTypeBlock) { // cndi_aws_s3_bucket
+    for (const resourceName in resourceTypeBlock) {
+      // cndi_aws_s3_bucket
       const filename = `${resourceName}${suffix}`;
 
       let originalContent: TFResourceFileObject = {
@@ -126,9 +206,9 @@ async function patchAndStageTerraformResources(
       };
 
       try {
-        originalContent = await loadJSONC(
+        originalContent = (await loadJSONC(
           path.join(await getStagingDir(), "cndi", "terraform", filename),
-        ) as unknown as TFResourceFileObject;
+        )) as unknown as TFResourceFileObject;
       } catch {
         // there was no pre-existing resource with this name
       }
@@ -152,10 +232,7 @@ async function patchAndStageTerraformResources(
 
       const newContentStr = getPrettyJSONString(newContent);
 
-      await stageFile(
-        path.join("cndi", "terraform", filename),
-        newContentStr,
-      );
+      await stageFile(path.join("cndi", "terraform", filename), newContentStr);
     }
   }
 }
@@ -193,17 +270,11 @@ async function mergeAndStageTerraformObj(
 
   let newBlock = {};
   try {
-    const originalBlock = await loadJSONC(
+    const originalBlock = (await loadJSONC(
       path.join(await getStagingDir(), pathToTFBlock),
-    ) as Record<
-      string,
-      unknown
-    >;
+    )) as Record<string, unknown>;
     const originalBlockContents = originalBlock?.[terraformBlockName];
-    newBlock = deepMerge(
-      originalBlockContents || {},
-      blockContentsPatch,
-    );
+    newBlock = deepMerge(originalBlockContents || {}, blockContentsPatch);
   } catch {
     // there was no pre-existing block with this name
     newBlock = blockContentsPatch;
@@ -221,7 +292,8 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   const terraformBlocks = config.infrastructure.terraform as TFBlocks;
   const workload: Array<Promise<void>> = [];
 
-  for (const tftype in terraformBlocks) { // terraform[key]: resource, data, provider, etc.\
+  for (const tftype in terraformBlocks) {
+    // terraform[key]: resource, data, provider, etc.\
     if (tftype === "resource") {
       const resources = config.infrastructure?.terraform?.resource;
 
@@ -229,14 +301,8 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
         Object.keys(resources).length &&
         typeof resources === "object";
 
-      if (
-        blockContainsResources
-      ) {
-        workload.push(
-          patchAndStageTerraformResources(
-            resources,
-          ),
-        );
+      if (blockContainsResources) {
+        workload.push(patchAndStageTerraformResources(resources));
       }
     } else {
       const t = tftype as keyof TFBlocks;
@@ -246,9 +312,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
         Object.keys(contentObj).length &&
         typeof contentObj === "object";
 
-      if (
-        blockContainsEntries
-      ) {
+      if (blockContainsEntries) {
         workload.push(mergeAndStageTerraformObj(tftype, contentObj));
       }
     }
@@ -288,30 +352,27 @@ function getPathToKubesealBinary() {
 function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
   const user_ports = config.infrastructure?.cndi?.open_ports ?? [];
 
-  const ports: CNDIPort[] = [
-    ...DEFAULT_OPEN_PORTS,
-  ];
+  const ports: CNDIPort[] = [...DEFAULT_OPEN_PORTS];
 
-  user_ports.forEach(
-    (user_port) => {
-      if (user_port?.disable) {
-        const indexOfPortToRemove = ports.findIndex((port) =>
-          (user_port.number === port.number) || (user_port.name === port.name)
-        );
-        if (indexOfPortToRemove > -1) {
-          ports.splice(indexOfPortToRemove, 1);
-        }
-        return;
+  user_ports.forEach((user_port) => {
+    if (user_port?.disable) {
+      const indexOfPortToRemove = ports.findIndex(
+        (port) =>
+          user_port.number === port.number || user_port.name === port.name,
+      );
+      if (indexOfPortToRemove > -1) {
+        ports.splice(indexOfPortToRemove, 1);
       }
+      return;
+    }
 
-      const { name, number } = user_port;
+    const { name, number } = user_port;
 
-      ports.push({
-        name,
-        number,
-      });
-    },
-  );
+    ports.push({
+      name,
+      number,
+    });
+  });
   return ports;
 }
 
@@ -401,9 +462,7 @@ const getCndiInstallPath = async (): Promise<string> => {
       utilsLabel,
       ccolors.error("cndi could not find your home directory!"),
     );
-    console.log(
-      'try setting the "HOME" environment variable on your system.',
-    );
+    console.log('try setting the "HOME" environment variable on your system.');
     await emitExitEvent(204);
     Deno.exit(204);
   }
@@ -495,8 +554,10 @@ function getSecretOfLength(len = 32): string {
 }
 
 function useSshRepoAuth(): boolean {
-  return !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
-    !Deno.env.get("GIT_PASSWORD");
+  return (
+    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
+    !Deno.env.get("GIT_PASSWORD")
+  );
 }
 
 async function emitExitEvent(exit_code: number) {
@@ -523,8 +584,9 @@ export {
   getTFData,
   getTFResource,
   getUserDataTemplateFileString,
+  loadCndiConfig,
   loadJSONC,
-  loadRemoteJSONC,
+  loadYAML,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
   replaceRange,

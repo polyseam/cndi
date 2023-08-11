@@ -132,7 +132,7 @@ supplied for this project:
 
 ![AWS instances dashboard](/docs/walkthroughs/ec2/img/cndi-init-interactive.png)
 
-This process will generate a `cndi-config.json` file, and `cndi` directory at
+This process will generate a `cndi-config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
 configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
@@ -152,7 +152,7 @@ The structure of the generated CNDI project will be as follows:
 │       ├── y-airflow-node.cndi-node.tf.json
 │       ├── z-airflow-node.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.jsonc
+├── cndi-config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -286,7 +286,7 @@ Airflow and Argocd
 
 ![cndi config](/docs/walkthroughs/ec2/img/cndi-config.png)
 
-- Go to the `cndi-config.jsonc`
+- Go to the `cndi-config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save
   the file
 - Run `cndi ow`
@@ -301,7 +301,7 @@ Airflow and Argocd
 
 **If you just want to take down any of your individual applications:**
 
-- Delete that application or manifest from your `cndi-config.jsonc`
+- Delete that application or manifest from your `cndi-config.yaml`
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository

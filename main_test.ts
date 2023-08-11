@@ -1,6 +1,6 @@
 import { assert, beforeEach, describe, it } from "test-deps";
 
-import { path } from "deps";
+import { path, YAML } from "deps";
 
 import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 
@@ -63,7 +63,7 @@ describe("cndi", () => {
       assert(status.success);
     });
 
-    it(`should add correct files and directories when it succeeds`, async () => {
+    it(`should add correct files and directories when it succeeds with json`, async () => {
       const initFileList = new Set([
         "cndi-config.jsonc",
         "README.md",
@@ -89,11 +89,38 @@ describe("cndi", () => {
       assert(status.success);
     });
 
+    it(`should add correct files and directories when it succeeds with yaml`, async () => {
+      const initFileList = new Set([
+        "cndi-config.yaml",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      Deno.writeTextFileSync(
+        path.join(Deno.cwd(), `cndi-config.yaml`),
+        YAML.stringify(basicAWSCndiConfig),
+      );
+      // cndi init should fail because there is no config file
+      const { status } = await runCndi("init");
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+      console.log(initFileList);
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
     it(`should create a README beginning with the "project_name" if a config file is supplied`, async () => {
       const project_name = "my-foo-project";
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
-        getPrettyJSONString({ ...basicAWSCndiConfig, project_name }),
+        path.join(Deno.cwd(), `cndi-config.yaml`),
+        YAML.stringify({ ...basicAWSCndiConfig, project_name }),
       );
       const { status } = await runCndi("init");
       assert(status.success);
@@ -369,9 +396,9 @@ describe("cndi", () => {
       );
     });
 
-    it(`should successfully execute remote templates`, async () => {
+    it(`should successfully execute remote jsonc templates`, async () => {
       const initFileList = new Set([
-        "cndi-config.jsonc",
+        "cndi-config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -395,9 +422,35 @@ describe("cndi", () => {
       assert(status.success);
     });
 
+    it(`should successfully execute remote yaml templates`, async () => {
+      const initFileList = new Set([
+        "cndi-config.yaml",
+        "README.md",
+        ".github",
+        ".gitignore",
+        ".env",
+        ".vscode",
+        "cndi",
+      ]);
+
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "https://raw.githubusercontent.com/polyseam/cndi/yaml/src/templates/yaml/azure/airflow.yaml",
+      );
+
+      // read the current directory entries after "cndi init" has ran
+      for await (const afterDirEntry of Deno.readDir(".")) {
+        initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
+      }
+
+      assert(initFileList.size === 0); // if the set is empty, all files were created
+      assert(status.success);
+    });
+
     it(`should successfully execute file:// templates`, async () => {
       const initFileList = new Set([
-        "cndi-config.jsonc",
+        "cndi-config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -411,8 +464,9 @@ describe("cndi", () => {
         pathToThisDirectory,
         "src",
         "templates",
+        "yaml",
         "ec2",
-        "airflow.jsonc",
+        "airflow.yaml",
       );
 
       // cndi init should fail because there is no config file
@@ -626,7 +680,7 @@ describe("cndi", () => {
         );
 
         const initFileList = new Set([
-          "cndi-config.jsonc",
+          "cndi-config.yaml",
           "README.md",
           ".github",
           ".gitignore",
@@ -667,7 +721,7 @@ describe("cndi", () => {
         );
 
         const initFileList = new Set([
-          "cndi-config.jsonc",
+          "cndi-config.yaml",
           "README.md",
           ".github",
           ".gitignore",
@@ -714,7 +768,7 @@ describe("cndi", () => {
         );
 
         const initFileList = new Set([
-          "cndi-config.jsonc",
+          "cndi-config.yaml",
           "README.md",
           ".github",
           ".gitignore",
@@ -757,7 +811,7 @@ describe("cndi", () => {
         );
 
         const initFileList = new Set([
-          "cndi-config.jsonc",
+          "cndi-config.yaml",
           "README.md",
           ".github",
           ".gitignore",

@@ -4,7 +4,7 @@ import {
   emitExitEvent,
   getPrettyJSONString,
   getStagingDir,
-  loadJSONC,
+  loadCndiConfig,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -28,7 +28,7 @@ import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-m
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 import { NON_MICROK8S_NODE_KINDS } from "consts";
 
@@ -36,42 +36,24 @@ const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
 interface OverwriteActionArgs {
   output: string;
+  file?: string;
   initializing: boolean;
 }
 
 const overwriteAction = async (options: OverwriteActionArgs) => {
-  const pathToConfig = path.join(options.output, "cndi-config.jsonc");
-
   const pathToKubernetesManifests = path.join(
     options.output,
     "cndi",
     "cluster_manifests",
   );
+
   const pathToTerraformResources = path.join(
     options.output,
     "cndi",
     "terraform",
   );
 
-  let config;
-
-  try {
-    config = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
-  } catch {
-    console.error(
-      owLabel,
-      ccolors.error("there is no cndi-config file at"),
-      ccolors.user_input(`"${pathToConfig}"`),
-    );
-    console.log(
-      "if you don't have a cndi-config file try",
-      ccolors.prompt(
-        "cndi init --interactive",
-      ),
-    );
-    await emitExitEvent(500);
-    Deno.exit(500);
-  }
+  const [config, pathToConfig] = await loadCndiConfig(options?.file);
 
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
@@ -146,10 +128,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  await stageTerraformResourcesForConfig(
-    config,
-    options,
-  );
+  await stageTerraformResourcesForConfig(config, options);
 
   console.log(ccolors.success("staged terraform files"));
 
@@ -284,9 +263,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   } catch (errorPersistingStagedFiles) {
     console.error(
       owLabel,
-      ccolors.error(
-        `failed to persist staged cndi files to`,
-      ),
+      ccolors.error(`failed to persist staged cndi files to`),
       ccolors.user_input(`${options.output}`),
     );
     console.log(ccolors.caught(errorPersistingStagedFiles));
@@ -309,9 +286,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 const overwriteCommand = new Command()
   .description(`Update cndi project files using cndi-config.jsonc file.`)
   .alias("ow")
-  .option("-o, --output <output:string>", "Path to your cndi git repository.", {
-    default: Deno.cwd(),
-  })
+  .option("-f, --file <file:string>", "Path to your cndi-config file.")
+  .option(
+    "-o, --output <output:string>",
+    "Path to your cndi cluster git repository.",
+    {
+      default: Deno.cwd(),
+    },
+  )
   .option(
     "--initializing <initializing:boolean>",
     'true if "cndi init" is the caller of this command',

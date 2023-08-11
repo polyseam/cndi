@@ -78,6 +78,10 @@
     "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during 'cndi overwrite'"
   },
   {
+    "code": 504,
+    "message": "cndi-config failed to parse during 'cndi overwrite'"
+  },
+  {
     "code": 509,
     "message": "Failed to persist staged files during 'cndi overwrite'"
   },
