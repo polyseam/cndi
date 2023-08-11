@@ -464,7 +464,6 @@ describe("cndi", () => {
         pathToThisDirectory,
         "src",
         "templates",
-        "yaml",
         "ec2",
         "airflow.yaml",
       );
