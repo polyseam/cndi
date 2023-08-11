@@ -1,6 +1,6 @@
 import { assert, beforeEach, describe, it } from "test-deps";
 
-import { YAML, path } from "deps";
+import { path, YAML } from "deps";
 
 import { literalizeTemplateValuesInString } from "src/templates/useTemplate.ts";
 

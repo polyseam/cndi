@@ -1,13 +1,13 @@
 import {
   ccolors,
   deepMerge,
+  exists,
   homedir,
   JSONC,
   path,
   platform,
   walk,
   YAML,
-  exists,
 } from "deps";
 import { DEFAULT_OPEN_PORTS } from "consts";
 
@@ -35,7 +35,7 @@ async function sha256Digest(message: string): Promise<string> {
 }
 
 const loadYAMLorJSONC = async (
-  filePath: string
+  filePath: string,
 ): Promise<JSONC.JsonValue | unknown> => {
   if (filePath.endsWith(".yaml") || filePath.endsWith(".yml")) {
     return await loadYAML(filePath);
@@ -47,7 +47,7 @@ const loadYAMLorJSONC = async (
 
 // attempts to find cndi-config.yaml or cndi-config.jsonc, then returns its value and location
 const loadCndiConfig = async (
-  providedPath?: string
+  providedPath?: string,
 ): Promise<[CNDIConfig, string]> => {
   let pathToConfig;
   let configIsYAML = true;
@@ -74,11 +74,11 @@ const loadCndiConfig = async (
       utilsLabel,
       ccolors.error("there is no"),
       ccolors.key_name('"cndi-config.yaml"'),
-      ccolors.error("file in your current directory")
+      ccolors.error("file in your current directory"),
     );
     console.log(
       "if you don't have a cndi-config file try",
-      ccolors.prompt("cndi init --interactive")
+      ccolors.prompt("cndi init --interactive"),
     );
     await emitExitEvent(500);
     Deno.exit(500);
@@ -93,7 +93,7 @@ const loadCndiConfig = async (
       utilsLabel,
       ccolors.error("your cndi config file at"),
       ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("is not valid")
+      ccolors.error("is not valid"),
     );
     ccolors.caught(error, 504);
     await emitExitEvent(504);
@@ -118,10 +118,10 @@ function getPrettyJSONString(object: unknown) {
 }
 
 async function getLeaderNodeNameFromConfig(
-  config: CNDIConfig
+  config: CNDIConfig,
 ): Promise<string> {
   const nodesWithRoleLeader = config.infrastructure.cndi.nodes.filter(
-    (node: BaseNodeItemSpec) => node.role === "leader"
+    (node: BaseNodeItemSpec) => node.role === "leader",
   );
   if (nodesWithRoleLeader.length !== 1) {
     console.error(
@@ -133,7 +133,7 @@ async function getLeaderNodeNameFromConfig(
       ccolors.key_name('"role"'),
       ccolors.error("is"),
       ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node.")
+      ccolors.error("There must be exactly one leader node."),
     );
     await emitExitEvent(200);
     Deno.exit(200);
@@ -150,7 +150,7 @@ function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
 function getTFResource(
   resource_type: string,
   content: Record<never, never>,
-  resourceName?: string
+  resourceName?: string,
 ) {
   const name = resourceName ? resourceName : `cndi_${resource_type}`;
   return {
@@ -166,7 +166,7 @@ function getTFResource(
 function getTFData(
   data_type: string,
   content: Record<never, never>,
-  resourceName?: string
+  resourceName?: string,
 ) {
   const name = resourceName ? resourceName : `cndi_data_${data_type}`;
   return {
@@ -186,7 +186,7 @@ interface TFResourceFileObject {
 }
 
 async function patchAndStageTerraformResources(
-  resourceObj: Record<string, unknown>
+  resourceObj: Record<string, unknown>,
 ) {
   const suffix = `.tf.json`;
   // resourceObj: { aws_s3_bucket: { cndi_aws_s3_bucket: { ... } } }
@@ -207,7 +207,7 @@ async function patchAndStageTerraformResources(
 
       try {
         originalContent = (await loadJSONC(
-          path.join(await getStagingDir(), "cndi", "terraform", filename)
+          path.join(await getStagingDir(), "cndi", "terraform", filename),
         )) as unknown as TFResourceFileObject;
       } catch {
         // there was no pre-existing resource with this name
@@ -250,13 +250,13 @@ const terraformBlockTypeNames = [
 
 async function mergeAndStageTerraformObj(
   terraformBlockName: string,
-  blockContentsPatch: Record<string, unknown>
+  blockContentsPatch: Record<string, unknown>,
 ) {
   if (!terraformBlockTypeNames.includes(terraformBlockName)) {
     console.error(
       utilsLabel,
       ccolors.error("there is no terraform block type named"),
-      ccolors.user_input(`"${terraformBlockName}"`)
+      ccolors.user_input(`"${terraformBlockName}"`),
     );
     await emitExitEvent(203);
     Deno.exit(203);
@@ -265,13 +265,13 @@ async function mergeAndStageTerraformObj(
   const pathToTFBlock = path.join(
     "cndi",
     "terraform",
-    `${terraformBlockName}.tf.json`
+    `${terraformBlockName}.tf.json`,
   );
 
   let newBlock = {};
   try {
     const originalBlock = (await loadJSONC(
-      path.join(await getStagingDir(), pathToTFBlock)
+      path.join(await getStagingDir(), pathToTFBlock),
     )) as Record<string, unknown>;
     const originalBlockContents = originalBlock?.[terraformBlockName];
     newBlock = deepMerge(originalBlockContents || {}, blockContentsPatch);
@@ -282,7 +282,7 @@ async function mergeAndStageTerraformObj(
 
   await stageFile(
     pathToTFBlock,
-    getPrettyJSONString({ [terraformBlockName]: newBlock })
+    getPrettyJSONString({ [terraformBlockName]: newBlock }),
   );
 }
 
@@ -297,8 +297,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
     if (tftype === "resource") {
       const resources = config.infrastructure?.terraform?.resource;
 
-      const blockContainsResources =
-        resources &&
+      const blockContainsResources = resources &&
         Object.keys(resources).length &&
         typeof resources === "object";
 
@@ -309,8 +308,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       const t = tftype as keyof TFBlocks;
       const contentObj = config.infrastructure?.terraform?.[t];
 
-      const blockContainsEntries =
-        contentObj &&
+      const blockContainsEntries = contentObj &&
         Object.keys(contentObj).length &&
         typeof contentObj === "object";
 
@@ -324,7 +322,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   } catch (error) {
     console.error(
       utilsLabel,
-      ccolors.error("error patching terraform files with config")
+      ccolors.error("error patching terraform files with config"),
     );
     console.log(ccolors.caught(error));
     console.log("attempting to continue anyway...");
@@ -336,7 +334,7 @@ function getPathToTerraformBinary() {
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
-    `terraform-${fileSuffixForPlatform}`
+    `terraform-${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -346,7 +344,7 @@ function getPathToKubesealBinary() {
   const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
-    `kubeseal-${fileSuffixForPlatform}`
+    `kubeseal-${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -360,7 +358,7 @@ function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
     if (user_port?.disable) {
       const indexOfPortToRemove = ports.findIndex(
         (port) =>
-          user_port.number === port.number || user_port.name === port.name
+          user_port.number === port.number || user_port.name === port.name,
       );
       if (indexOfPortToRemove > -1) {
         ports.splice(indexOfPortToRemove, 1);
@@ -390,7 +388,7 @@ async function getStagingDir(): Promise<string> {
     console.error(
       utilsLabel,
       `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
-      ccolors.error(`is not set!`)
+      ccolors.error(`is not set!`),
     );
     await emitExitEvent(202);
     Deno.exit(202);
@@ -405,7 +403,7 @@ async function persistStagedFiles(targetDirectory: string) {
       const fileContents = await Deno.readTextFile(entry.path);
       const destinationAbsPath = entry.path.replace(
         stagingDirectory,
-        targetDirectory
+        targetDirectory,
       );
 
       await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
@@ -418,7 +416,7 @@ async function persistStagedFiles(targetDirectory: string) {
 }
 
 async function checkInstalled(
-  CNDI_HOME: string = path.join(homedir() || "~", ".cndi")
+  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
 ) {
   try {
     // if any of these files/folders don't exist, return false
@@ -462,7 +460,7 @@ const getCndiInstallPath = async (): Promise<string> => {
   if (!homedir()) {
     console.error(
       utilsLabel,
-      ccolors.error("cndi could not find your home directory!")
+      ccolors.error("cndi could not find your home directory!"),
     );
     console.log('try setting the "HOME" environment variable on your system.');
     await emitExitEvent(204);
@@ -493,7 +491,7 @@ function base10intToHex(decimal: number): string {
 
 function getUserDataTemplateFileString(
   role?: NodeRole,
-  doBase64Encode?: boolean
+  doBase64Encode?: boolean,
 ) {
   let leaderString =
     'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
@@ -540,7 +538,7 @@ function replaceRange(
   s: string,
   start: number,
   end: number,
-  substitute: string
+  substitute: string,
 ) {
   return s.substring(0, start) + substitute + s.substring(end);
 }

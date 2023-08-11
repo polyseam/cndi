@@ -1,12 +1,10 @@
-import { ccolors, Command, exists, path } from "deps";
+import { ccolors, Command, path } from "deps";
 
 import {
   emitExitEvent,
   getPrettyJSONString,
   getStagingDir,
   loadCndiConfig,
-  loadJSONC,
-  loadYAML,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -30,7 +28,7 @@ import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-m
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 import { NON_MICROK8S_NODE_KINDS } from "consts";
 
@@ -288,10 +286,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 const overwriteCommand = new Command()
   .description(`Update cndi project files using cndi-config.jsonc file.`)
   .alias("ow")
-  .option('-f, --file <file:string>',"Path to your cndi-config file.")
-  .option("-o, --output <output:string>", "Path to your cndi cluster git repository.", {
-    default: Deno.cwd(),
-  })
+  .option("-f, --file <file:string>", "Path to your cndi-config file.")
+  .option(
+    "-o, --output <output:string>",
+    "Path to your cndi cluster git repository.",
+    {
+      default: Deno.cwd(),
+    },
+  )
   .option(
     "--initializing <initializing:boolean>",
     'true if "cndi init" is the caller of this command',
