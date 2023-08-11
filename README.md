@@ -60,8 +60,8 @@ gh repo create cndi-example --private --clone && cd cndi-example
 Now that we have a Git repository, we can initialize a new CNDI project.
 
 We can do this in 2 different ways, either by using the interactive CLI, or by
-writing or forking a "cndi-config" file you got from someone else, often named
-`cndi-config.jsonc`.
+writing or forking a "cndi-config" file you got from someone else, named
+`cndi-config.yaml` or `cndi-config.jsonc`.
 
 **interactive mode**
 
@@ -105,15 +105,15 @@ file locally, or typical remote or `https://` URLs over the net.
 
 ```bash
 # file:// URLs must be absolute paths
-cndi init --template file:///absolute/path/to/template.jsonc
+cndi init --template file:///absolute/path/to/template.yaml
 # or
-cndi init --template https://example.com/path/to/template.jsonc
+cndi init --template https://example.com/path/to/template.yaml
 ```
 
 ---
 
 Whether you've chosen to use interactive mode or not, CNDI has generated a few
-files and folders for us based on our `cndi-config.jsonc` file. If you want to
+files and folders for us based on our `cndi-config.yaml` file. If you want to
 learn about what CNDI is really creating, this is the best file to look at.
 
 We break down all of these generated files later in this document in the
@@ -185,9 +185,9 @@ changes can be `cluster_manifests` oriented, if you are making changes to the
 software running on your infrastructure, or they can be infrastructure oriented
 if you are horizontally or vertically scaling your cluster.
 
-In either case, the approach is the same. Open your `cndi-config.jsonc` file in
-your editor and make changes to your `"applications"`, `"cluster_manifests"`, or
-`"infrastructure"` then run:
+In either case, the approach is the same. Open your `cndi-config.yaml` file in
+your editor and make changes to your `applications`, `cluster_manifests`, or
+`infrastructure` then run:
 
 ```bash
 # shorthand for cndi overwrite
@@ -239,53 +239,41 @@ transferrable to other applications beyond Airflow.
 
 ## configuration 📝
 
-Let's run through the 3 parts of a `cndi-config.jsonc` file. This one file is
-the key to understanding CNDI, and it's really pretty simple.
+Let's run through the 3 parts of a `cndi-config.yaml` file. This one file is the
+key to understanding CNDI, and it's really pretty simple.
 
 ### infrastructure.cndi 🏗️
 
-The `"infrastructure"` section is used to define the infrastructure that will
+The `infrastructure` section is used to define the infrastructure that will
 power our cluster. The infrastructure section is broken out into 2 distinct
-categories. The first category is `"cndi"`, and it refers to infrastructure
+categories. The first category is `cndi`, and it refers to infrastructure
 abstractions our team has invented that CNDI exposes for you.
 
-Currently CNDI exposes only one abstraction, the `"nodes"` interface, and it's a
-wrapper that simplifies deploying Kubernetes cluster nodes. The CNDI `"nodes"`
+Currently CNDI exposes only one abstraction, the `nodes` interface, and it's a
+wrapper that simplifies deploying Kubernetes cluster nodes. The CNDI `nodes`
 interface wraps the compute resources from every deployment target we support.
 
-All `"nodes"` entries are nearly identical, the only difference is the `"kind"`
-field which is used to specify the deployment target. These `"node"` resources
-and their supporting infrastructure are ultimately provisioned by Terraform, but
-we've abstracted a lot of complexity through this interface.
+All `nodes` entries are nearly identical, the most substantial difference is the
+`kind` field which is used to specify the deployment target. These `node`
+resources and their supporting infrastructure are ultimately provisioned by
+Terraform, but we've abstracted a lot of complexity through this interface.
 
 Declaring a node is simple, we give it a name, we give it some specs, and we add
 it to the array!
 
-```jsonc
-{
-  "infrastructure": {
-    "cndi": {
-      "nodes": [
-        {
-          "name": "gcp-alpha",
-          "kind": "gcp",
-          "role": "leader",
-          "machine_type": "n2-standard-16"
-        },
-        {
-          "name": "gcp-beta",
-          "kind": "gcp"
-        },
-        {
-          "name": "gcp-charlie",
-          "kind": "gcp"
-        }
-      ]
-    }
-  },
-  ...
-}
-// tip: we parse this file as JSONC so you can add comments!
+```yaml
+# you could use JSON instead, but YAML is preferred
+infrastructure:
+  cndi:
+    nodes:
+    - name: gcp-alpha
+      kind: gcp
+      role: leader
+      machine_type: n2-standard-16
+    - name: gcp-beta
+      kind: gcp
+    - name: gcp-charlie
+      kind: gcp
 ```
 
 Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
@@ -297,63 +285,50 @@ remote to modify the cluster accordingly.
 
 ### infrastructure.terraform 🧱
 
-The second category within `"infrastructure"` is `"terraform"`, and in contrast
-to `"cndi"` the infrastructure in this category is not abstracted by CNDI. This
-is where you can define any Terraform resources you want to be provisioned
-alongside your cluster.
+The second category within `infrastructure` is `terraform`. This is where you
+can define any Terraform resources you want to be provisioned alongside your
+cluster.
 
-```jsonc
-{
-  "infrastructure": {
-    "cndi":{...},
-    "terraform": {
-      "resource": {
-        "aws_s3_bucket": {
-          "my-bucket": {
-            "acl": "public-read",
-            "bucket": "s3-website-test.hashicorp.com",
-            "cors_rule": [
-              {
-                "allowed_headers": ["*"],
-                "allowed_methods": ["PUT", "POST"],
-                "allowed_origins": ["https://s3-website-test.hashicorp.com"],
-                "expose_headers": ["ETag"],
-                "max_age_seconds": 3000
-              }
-            ]
-          }
-        }
-      }
-    }
-  }
-}
+```yaml
+infrastructure:
+  cndi: {...}
+  terraform:
+    resource:
+      aws_s3_bucket:
+        my-bucket:
+          acl: public-read
+          bucket: s3-website-test.hashicorp.com
+          cors_rule:
+          - allowed_headers:
+            - "*"
+            allowed_methods:
+            - PUT
+            - POST
+            allowed_origins:
+            - https://s3-website-test.hashicorp.com
+            expose_headers:
+            - ETag
+            max_age_seconds: 3000
 ```
 
 💡 You can also use this section to override any of the default Terraform
 objects that CNDI deploys.
 
-_Generally, you should be able to customize CNDI resources through the `"cndi"`
+_Generally, you should be able to customize CNDI resources through the `cndi`
 section instead._
 
 But, if you do need to patch a Terraform resource CNDI has created for you, you
 simply need to match the resource name we have used, and specify the fields you
 want to update.
 
-```jsonc
-{
-  "infrastructure": {
-    "cndi": {...},
-    "terraform": {
-      "resource": {
-        "aws_vpc": {
-          "cndi_aws_vpc": {
-            "cidr_block": "10.0.0.0/24"
-          }
-        }
-      }
-    }
-  }
-}
+```yaml
+infrastructure:
+  cndi: {}
+  terraform:
+    resource:
+      aws_vpc:
+        cndi_aws_vpc:
+          cidr_block: 10.0.0.0/24
 ```
 
 ### applications 💽
@@ -364,37 +339,28 @@ on the cluster. With CNDIv1 we focused on making it a breeze to deploy
 
 Lets see how we accomplish this here in this new and improved CNDI:
 
-```jsonc
-{
-  "infrastructure": {...},
-  "applications": {
-    "airflow": {
-      "targetRevision": "1.7.0", // version of Helm chart to use
-      "destinationNamespace": "airflow", // kubernetes namespace in which to install application
-      "repoURL": "https://airflow.apache.org",
-      "chart": "airflow",
-      "values": {
-        // where you configure your Helm chart values.yaml
-        "dags": {
-          "gitSync": {
-            "enabled": true,
-            "repo": "https://github.com/polyseam/demo-dag-bag",
-            "branch": "main",
-            "wait": 70,
-            "subPath": "dags"
-          }
-        },
-        // These options are required by Airflow in this context
-        "createUserJob": {
-          "useHelmHooks": false
-        },
-        "migrateDatabaseJob": {
-          "useHelmHooks": false
-        }
-      }
-    }
-  }
-}
+```yaml
+infrastructure: {}
+applications:
+  airflow:
+    targetRevision: 1.7.0 # version of Helm chart to use
+    destinationNamespace: airflow # kubernetes namespace in which to install application
+    repoURL: https://airflow.apache.org
+    chart: airflow
+    # where you configure your Helm chart values.yaml
+    values:
+      dags:
+        gitSync:
+          enabled: true
+          repo: https://github.com/polyseam/demo-dag-bag
+          branch: main
+          wait: 70
+          subPath: dags
+      # These options are required by Airflow in this context
+      createUserJob:
+        useHelmHooks: false
+      migrateDatabaseJob:
+        useHelmHooks: false
 ```
 
 This is built on top of ArgoCD's Application CRDs and Helm Charts. If you have a
@@ -402,29 +368,23 @@ Helm Chart, CNDI can deploy it!
 
 ### cluster_manifests 📑
 
-The third aspect of a `cndi-config` file is the `"cluster_manifests"` object.
-Any objects here will be used as Kubernetes Manifests and they'll be applied to
-your cluster through ArgoCD. This gives you full access to all the Kubernetes
-systems and APIs.
+The third aspect of a `cndi-config` file is the `cluster_manifests` object. Any
+objects here will be used as Kubernetes Manifests and they'll be applied to your
+cluster through ArgoCD. This gives you full access to all the Kubernetes systems
+and APIs.
 
-```jsonc
-{
-  "infrastructure": {...},
-  "applications": {...},
-  "cluster_manifests": {// inside the "cluster_manifests" object you can put all of your custom Kubernetes manifests
-    "ingress": {
-      "apiVersion": "networking.k8s.io/v1",
-      "kind": "Ingress",
-      "metadata": {
-        "name": "minimal-ingress",
-        "annotations": {
-          "nginx.ingress.kubernetes.io/rewrite-target": "/"
-        }
-      },
-      "spec": {...}
-    }
-  }
-}
+```yaml
+infrastructure: {}
+applications: {}
+cluster_manifests: # inside the "cluster_manifests" object you can put all of your custom Kubernetes manifests
+  ingress:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: minimal-ingress
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: "/"
+    spec: {}
 ```
 
 If you are new to Kubernetes and are unsure what any of that meant, don't sweat
@@ -438,32 +398,26 @@ cluster via GitOps, we make this possible by encrypting your secrets with
 [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) so they can
 live in your repo securely and be picked up by ArgoCD automatically. To add a
 secret to your cluster add the value to your `.env` file and then add a
-`"cluster_manifest"` entry like the one below. After that just call `cndi ow` to
+`cluster_manifest` entry like the one below. After that just call `cndi ow` to
 seal your secret.
 
 The example below results in sealing the environment variables `"GIT_USERNAME"`
 and `"GIT_PASSWORD"`, into the destination secret key names
 `"GIT_SYNC_USERNAME"` and `"GIT_SYNC_PASSWORD"` respectively.
 
-```jsonc
-{
-  "infrastructure": {...},
-  "applications": {...},
-  "cluster_manifests": {
-    "airflow-git-credentials-secret": {
-      "apiVersion": "v1",
-      "kind": "Secret",
-      "metadata": {
-        "name": "airflow-git-credentials",
-        "namespace": "airflow"
-      },
-      "stringData": {
-        "GIT_SYNC_USERNAME": "$.cndi.secrets.seal(GIT_USERNAME)",
-        "GIT_SYNC_PASSWORD": "$.cndi.secrets.seal(GIT_PASSWORD)"
-      }
-    }
-  }
-}
+```yaml
+infrastructure: {}
+applications: {}
+cluster_manifests:
+  airflow-git-credentials-secret:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: airflow-git-credentials
+      namespace: airflow
+    stringData:
+      GIT_SYNC_USERNAME: "$.cndi.secrets.seal(GIT_USERNAME)"
+      GIT_SYNC_PASSWORD: "$.cndi.secrets.seal(GIT_PASSWORD)"
 ```
 
 ---
@@ -472,7 +426,7 @@ and `"GIT_PASSWORD"`, into the destination secret key names
 
 When `cndi init` is called there are a few files that it produces:
 
-1. a `cndi-config.jsonc` - autogenerated in interactive mode only, described in
+1. a `cndi-config.yaml` - autogenerated in interactive mode only, described in
    the [configuration](#configuration) section above
 
 2. a `.github/workflows` folder, with a GitHub Action inside. The workflow is
@@ -486,15 +440,15 @@ When `cndi init` is called there are a few files that it produces:
 
 4. a `cndi/cluster_manifests` folder, containing Kubernetes manifests that will
    be installed on your new cluster when it is up and running. This includes
-   manifests like `Ingress` from the `"cluster_manifests"` section of your
+   manifests like `Ingress` from the `cluster_manifests` section of your
    `cndi-config.jsonc`.
 
 5. a `cndi/cluster_manifests/applications` folder, which contains a folder for
-   each application defined in the `"applications"` section of your
-   `cndi-config.jsonc`, and a generated ArgoCD Application CRD inside that
+   each application defined in the `applications` section of your
+   `cndi-config.yaml`, and a generated ArgoCD Application CRD inside that
    contains our expertly chosen defaults for that App, and the spefic parameters
-   you've specified yourself in the `"applications"` section of your
-   `cndi-config.jsonc`.
+   you've specified yourself in the `applications` section of your
+   `cndi-config.yaml`.
 
 6. a `.env` file which contains all of your environment variables that CNDI
    relies on, these values must be environment variables that are defined and
