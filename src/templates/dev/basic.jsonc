@@ -1,0 +1,84 @@
+{
+  "prompts": [
+    {
+      "name": "argocdDomainName",
+      "default": "argocd.example.com",
+      "message": "Please enter the domain name you want argocd to be accessible on:",
+      "type": "Input"
+    }
+  ],
+  "outputs": {
+    "cndi-config": {
+      "cndi_version": "v1",
+      "infrastructure": {
+        "cndi": {
+          "cert_manager": {
+            "self_signed": true
+          },
+          "nodes": [
+            {
+              "name": "dev-node",
+              "kind": "dev",
+              "role": "leader",
+              "volume_size": 128
+            }
+          ]
+        }
+      },
+      "cluster_manifests": {
+        "argo-ingress": {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "name": "argocd-server-ingress",
+            "namespace": "argocd",
+            "annotations": {
+              "cert-manager.io/cluster-issuer": "cluster-issuer",
+              "kubernetes.io/tls-acme": "true",
+              "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
+              "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+            }
+          },
+          "spec": {
+            "tls": [
+              {
+                "hosts": [
+                  "{{ $.cndi.prompts.responses.argocdDomainName }}"
+                ],
+                "secretName": "cluster-issuer-private-key"
+              }
+            ],
+            "rules": [
+              {
+                "host": "{{ $.cndi.prompts.responses.argocdDomainName }}",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "argocd-server",
+                          "port": {
+                            "name": "https"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "applications": {}
+    },
+    "env": {
+      "extend_basic_env": "dev"
+    },
+    "readme": {
+      "extend_basic_readme": "dev"
+    }
+  }
+}
