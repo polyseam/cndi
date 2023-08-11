@@ -1,4 +1,4 @@
-import { ccolors, Command, path } from "deps";
+import { ccolors, Command, exists, path } from "deps";
 
 import {
   emitExitEvent,
@@ -32,7 +32,6 @@ import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerrafo
 import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 import { NON_MICROK8S_NODE_KINDS } from "consts";
-import { exists } from "https://deno.land/std@0.196.0/fs/mod.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
