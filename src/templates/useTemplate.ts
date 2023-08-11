@@ -250,7 +250,6 @@ export default async function useTemplate(
     templateUrl.pathname.endsWith(".yml");
 
   try {
-    console.log("fetching", templateUrl.href);
     response = await fetch(templateUrl);
     templateText = await response.text();
   } catch (fetchError) {
@@ -277,10 +276,7 @@ export default async function useTemplate(
     templateObject = templateFormatIsYAML
       ? (YAML.parse(templateText) as unknown as Template)
       : (JSONC.parse(templateText) as unknown as Template);
-
-    console.log("templateObject", JSON.stringify(templateObject, null, 2));
   } catch (parseError) {
-    console.log("templateText", templateText);
     console.error(
       useTemplateLabel,
       ccolors.user_input(`"${templateUrl}"`),
