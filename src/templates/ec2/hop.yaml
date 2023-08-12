@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-template.schema.json
 prompts:
   - message: 'Please enter the domain name you want argocd to be accessible on:'
     name: argocdDomainName
