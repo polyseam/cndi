@@ -25,11 +25,12 @@
   </a>
 </p>
 
-Welcome to CNDI, it deploys an entire data stack in minutes!
+Start with a Template for a popular service and CNDI will help you deploy it on
+your own infrastructure, just as easily as you can sign up for a Platform as a
+Service.
 
-It's perfect for deploying data services consistently that are reliable,
-discoverable, maintainable, and interoperable, all while remaining flexible to
-the needs of each stack.
+Once your setup, manage the infrastructure and applications with ease using
+GitOps and Infrastructure as Code.
 
 ## installation 🥁
 
@@ -266,14 +267,14 @@ it to the array!
 infrastructure:
   cndi:
     nodes:
-    - name: gcp-alpha
-      kind: gcp
-      role: leader
-      machine_type: n2-standard-16
-    - name: gcp-beta
-      kind: gcp
-    - name: gcp-charlie
-      kind: gcp
+      - name: gcp-alpha
+        kind: gcp
+        role: leader
+        machine_type: n2-standard-16
+      - name: gcp-beta
+        kind: gcp
+      - name: gcp-charlie
+        kind: gcp
 ```
 
 Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
@@ -299,16 +300,16 @@ infrastructure:
           acl: public-read
           bucket: s3-website-test.hashicorp.com
           cors_rule:
-          - allowed_headers:
-            - "*"
-            allowed_methods:
-            - PUT
-            - POST
-            allowed_origins:
-            - https://s3-website-test.hashicorp.com
-            expose_headers:
-            - ETag
-            max_age_seconds: 3000
+            - allowed_headers:
+                - "*"
+              allowed_methods:
+                - PUT
+                - POST
+              allowed_origins:
+                - https://s3-website-test.hashicorp.com
+              expose_headers:
+                - ETag
+              max_age_seconds: 3000
 ```
 
 💡 You can also use this section to override any of the default Terraform
