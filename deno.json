@@ -1,6 +1,6 @@
 {
   "version": "1.13.1",
-  "deno_version": "1.35.3",
+  "deno_version": "1.36.1",
   "tasks": {
     "compile-win": "deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/cndi-win.exe main.ts",
     "compile-linux": "deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/cndi-linux main.ts",
