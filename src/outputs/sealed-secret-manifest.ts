@@ -1,4 +1,4 @@
-import { ccolors } from "deps";
+import { ccolors, platform } from "deps";
 import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
 import {
   emitExitEvent,
@@ -202,13 +202,19 @@ const getSealedSecretManifest = async (
     return null;
   }
 
+  const secretFileOptions: Deno.WriteFileOptions = {
+    create: true,
+  };
+
+  if (platform() !== "win32") {
+    // cndi.exe crashes if we do this
+    secretFileOptions.mode = 0o777;
+  }
+
   await Deno.writeTextFile(
     secretPath,
     getPrettyJSONString(secretWithStringData),
-    {
-      create: true,
-      mode: 0o777,
-    },
+    secretFileOptions,
   );
 
   const kubesealCommand = new Deno.Command(pathToKubeseal, {
