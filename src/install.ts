@@ -46,7 +46,9 @@ export default async function installDependenciesIfRequired(
       } else {
         console.error(
           installLabel,
-          ccolors.error("\nfailed to delete garbage binary, please try again"),
+          ccolors.error("\nfailed to delete old"),
+          ccolors.key_name("cndi"),
+          ccolors.error("binary, please try again"),
         );
         console.log(ccolors.caught(deletionError, 302));
         await emitExitEvent(302);
