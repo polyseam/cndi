@@ -44,9 +44,6 @@ export default async function installDependenciesIfRequired(
   if (force || !(await checkInstalled(CNDI_HOME))) {
     console.log(force ? "" : "cndi dependencies not installed!\n");
 
-    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
-    await Deno.mkdir(CNDI_HOME, { recursive: true });
-
     const fileSuffixForPlatform = getFileSuffixForPlatform();
 
     const spinner = new TerminalSpinner({

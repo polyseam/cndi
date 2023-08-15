@@ -421,7 +421,7 @@ async function persistStagedFiles(targetDirectory: string) {
 }
 
 async function checkInstalled(
-  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
+  CNDI_HOME: string,
 ) {
   try {
     // if any of these files/folders don't exist, return false

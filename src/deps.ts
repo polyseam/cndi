@@ -9,6 +9,7 @@ export { walk } from "https://deno.land/std@0.196.0/fs/mod.ts";
 export * as JSONC from "https://deno.land/std@0.196.0/jsonc/mod.ts";
 export { delay } from "https://deno.land/std@0.196.0/async/delay.ts";
 export { exists } from "https://deno.land/std@0.196.0/fs/mod.ts";
+export { existsSync } from "https://deno.land/std@0.196.0/fs/mod.ts";
 
 // Third party
 //  - cliffy
