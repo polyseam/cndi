@@ -38,7 +38,21 @@ export default async function installDependenciesIfRequired(
 
   // clean up garbage binary from previous release
   if (await exists(pathToGarbageBinary)) {
-    await Deno.remove(pathToGarbageBinary);
+    try {
+      await Deno.remove(pathToGarbageBinary);
+    } catch (deletionError) {
+      if (deletionError instanceof Deno.errors.NotFound) {
+        // garbage bin probably doesn't exist, thats fine
+      } else {
+        console.error(
+          installLabel,
+          ccolors.error("\nfailed to delete garbage binary, please try again"),
+        );
+        console.log(ccolors.caught(deletionError, 302));
+        await emitExitEvent(302);
+        Deno.exit(302);
+      }
+    }
   }
 
   if (force || !(await checkInstalled(CNDI_HOME))) {

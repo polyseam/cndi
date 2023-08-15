@@ -6,8 +6,7 @@
   },
   {
     "code": 100,
-    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
+    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform"
   },
   {
     "code": 101,
@@ -52,6 +51,10 @@
   {
     "code": 301,
     "message": "Failed to install cndi depenedency 'kubeseal'"
+  },
+  {
+    "code": 302,
+    "message": "Failed to delete past version of cndi binary"
   },
   {
     "code": 400,
