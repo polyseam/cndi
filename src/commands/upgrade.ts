@@ -102,15 +102,9 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       spinner.stop();
       console.error(
         upgradeLabel,
-        ccolors.error(`\nfailed to upgrade ${name}, please try again`),
+        ccolors.error(`\nfailed to upgrade ${name}`),
       );
       console.log(ccolors.caught(upgradeError));
-      console.log(
-        upgradeLabel,
-        ccolors.warn("Please make sure"),
-        ccolors.key_name("CNDI_HOME"),
-        ccolors.warn("points to the folder containing your cndi binary"),
-      );
       await emitExitEvent(1101);
       Deno.exit(1101);
     }

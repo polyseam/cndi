@@ -251,7 +251,7 @@
   },
   {
     "code": 1101,
-    "message": "cndi release binary fetch not ok during 'cndi upgrade'"
+    "message": "cndi binary and dependency upgrade failed"
   },
   {
     "code": 1200,
