@@ -32,7 +32,7 @@ export default async function cndi() {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
 
   const CNDI_VERSION = `${deno_json?.version}`;
-  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 

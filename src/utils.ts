@@ -331,7 +331,7 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
 
 function getPathToTerraformBinary() {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
-  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
 
   const fileSuffixForPlatform = getFileSuffixForPlatform();
   const pathToTerraformBinary = path.join(
@@ -344,7 +344,7 @@ function getPathToTerraformBinary() {
 
 function getPathToKubesealBinary() {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
-  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const fileSuffixForPlatform = getFileSuffixForPlatform();
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
@@ -463,7 +463,7 @@ const getFileSuffixForPlatform = () => {
 
 const getCndiInstallPath = (): string => {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
-  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   let suffix = "";
   if (platform() === "win32") {
     suffix = ".exe";
