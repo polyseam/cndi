@@ -41,6 +41,12 @@ can be done using the script below:
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
+If you'd prefer to use Windows we have a one-liner for that too described in
+this [short guide](docs/install.md).
+
+In either case once the script has finished running, the `cndi` binary and
+dependencies are installed to `~/.cndi/bin`.
+
 ## usage
 
 CNDI is a tool with which to deploy GitOps enabled Kubernetes application
