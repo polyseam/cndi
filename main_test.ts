@@ -111,7 +111,6 @@ describe("cndi", () => {
       for await (const afterDirEntry of Deno.readDir(".")) {
         initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
       }
-      console.log(initFileList);
       assert(initFileList.size === 0); // if the set is empty, all files were created
       assert(status.success);
     });
