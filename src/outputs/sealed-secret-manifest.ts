@@ -193,7 +193,7 @@ const getSealedSecretManifest = async (
   { publicKeyFilePath, dotEnvPath }: GetSealedSecretManifestOptions,
 ): Promise<string | null> => {
   let sealed = "";
-  const pathToKubeseal = await getPathToKubesealBinary();
+  const pathToKubeseal = getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
   const secretWithStringData = await parseCndiSecret(secret, dotEnvPath);
 

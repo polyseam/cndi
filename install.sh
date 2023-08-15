@@ -3,7 +3,7 @@
 set -e
 
 main() {
-    cndi_install="${CNDI_INSTALL:-$HOME/bin}"
+    cndi_install="${CNDI_INSTALL:-$HOME/.cndi/bin}"
     bin_suffix=""
     if [ "$OS" = "Windows_NT" ]; then
         bin_suffix=".exe"

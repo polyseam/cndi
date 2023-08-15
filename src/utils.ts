@@ -330,20 +330,25 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
 }
 
 function getPathToTerraformBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
+
   const fileSuffixForPlatform = getFileSuffixForPlatform();
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
+    "bin",
     `terraform-${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
 
 function getPathToKubesealBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
   const fileSuffixForPlatform = getFileSuffixForPlatform();
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
+    "bin",
     `kubeseal-${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
@@ -470,7 +475,7 @@ const getCndiInstallPath = async (): Promise<string> => {
   if (platform() === "win32") {
     suffix = ".exe";
   }
-  return path.join(homedir()!, "bin", `cndi${suffix}`);
+  return path.join(homedir()!, ".cndi", "bin", `cndi${suffix}`);
 };
 
 const getPathToOpenSSLForPlatform = () => {
