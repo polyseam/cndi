@@ -1,4 +1,4 @@
-import { ccolors, path, platform, SpinnerTypes, TerminalSpinner } from "deps";
+import { ccolors, SpinnerTypes, TerminalSpinner } from "deps";
 
 import {
   checkInstalled,
@@ -24,27 +24,6 @@ export default async function installDependenciesIfRequired(
   }: InstallDependenciesIfRequiredOptions,
   force?: boolean,
 ) {
-  const isWindows = platform() === "win32";
-  const pathToGarbageBinary = isWindows
-    ? path.join(CNDI_HOME, "bin", "cndi-old.exe")
-    : path.join(CNDI_HOME, "bin", "cndi-old");
-
-  try {
-    await Deno.remove(pathToGarbageBinary);
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error(
-        installLabel,
-        ccolors.error("\nfailed to delete old"),
-        ccolors.key_name("cndi"),
-        ccolors.error("binary, please try again"),
-      );
-      console.log(ccolors.caught(error, 302));
-      await emitExitEvent(302);
-      Deno.exit(302);
-    }
-  }
-
   if (force || !(await checkInstalled(CNDI_HOME))) {
     console.log(force ? "" : "cndi dependencies not installed!\n");
 

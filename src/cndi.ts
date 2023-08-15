@@ -21,7 +21,7 @@ import destroyCommand from "src/commands/destroy.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
 
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
 
@@ -40,6 +40,10 @@ export default async function cndi() {
   // ensure CNDI_HOME/bin directory exists before installing deps
   if (!existsSync(path.join(CNDI_HOME, "bin"), { isDirectory: true })) {
     Deno.mkdirSync(path.join(CNDI_HOME, "bin"), { recursive: true });
+  } else {
+    // if cndi was updated in the previous execution, remove the old unused binary
+    // this is necessary because Windows will not allow you to delete a binary while it is running
+    await removeOldBinaryIfRequired(CNDI_HOME);
   }
 
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
