@@ -32,14 +32,14 @@ export default async function installDependenciesIfRequired(
   force?: boolean,
 ) {
   const isWindows = platform() === "win32";
-  const pathToGarbageBinary = isWindows
+  const _pathToGarbageBinary = isWindows
     ? path.join(CNDI_HOME, "bin", "cndi-old.exe")
     : path.join(CNDI_HOME, "bin", "cndi-old");
 
   // clean up garbage binary from previous release
-  if (await exists(pathToGarbageBinary)) {
-    await Deno.remove(pathToGarbageBinary);
-  }
+  // if (await exists(pathToGarbageBinary)) {
+  //   await Deno.remove(pathToGarbageBinary);
+  // }
 
   if (force || !(await checkInstalled(CNDI_HOME))) {
     console.log(force ? "" : "cndi dependencies not installed!\n");
