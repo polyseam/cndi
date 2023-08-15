@@ -330,20 +330,25 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
 }
 
 function getPathToTerraformBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
+
   const fileSuffixForPlatform = getFileSuffixForPlatform();
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
+    "bin",
     `terraform-${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
 
 function getPathToKubesealBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const fileSuffixForPlatform = getFileSuffixForPlatform();
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
+    "bin",
     `kubeseal-${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
@@ -416,7 +421,7 @@ async function persistStagedFiles(targetDirectory: string) {
 }
 
 async function checkInstalled(
-  CNDI_HOME: string = path.join(homedir() || "~", ".cndi"),
+  CNDI_HOME: string,
 ) {
   try {
     // if any of these files/folders don't exist, return false
@@ -456,21 +461,14 @@ const getFileSuffixForPlatform = () => {
   return fileSuffixForPlatform[currentPlatform];
 };
 
-const getCndiInstallPath = async (): Promise<string> => {
-  if (!homedir()) {
-    console.error(
-      utilsLabel,
-      ccolors.error("cndi could not find your home directory!"),
-    );
-    console.log('try setting the "HOME" environment variable on your system.');
-    await emitExitEvent(204);
-    Deno.exit(204);
-  }
+const getCndiInstallPath = (): string => {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   let suffix = "";
   if (platform() === "win32") {
     suffix = ".exe";
   }
-  return path.join(homedir()!, "bin", `cndi${suffix}`);
+  return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 };
 
 const getPathToOpenSSLForPlatform = () => {

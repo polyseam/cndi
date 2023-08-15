@@ -4,6 +4,7 @@ import {
   ccolors,
   Command,
   CompletionsCommand,
+  existsSync,
   HelpCommand,
   homedir,
   path,
@@ -29,10 +30,17 @@ export default async function cndi() {
     throw new Error("deno.json is missing a version");
   }
 
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+
   const CNDI_VERSION = `${deno_json?.version}`;
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
+
+  // ensure CNDI_HOME/bin directory exists before installing deps
+  if (!existsSync(path.join(CNDI_HOME, "bin"), { isDirectory: true })) {
+    Deno.mkdirSync(path.join(CNDI_HOME, "bin"), { recursive: true });
+  }
 
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);

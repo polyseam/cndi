@@ -9,7 +9,11 @@ import gcpKeyFile from "src/tests/mocks/example-gcp-key.ts";
 
 import { getPrettyJSONString, replaceRange } from "src/utils.ts";
 
-import { getRunningCNDIProcess, runCndi } from "src/tests/helpers/run-cndi.ts";
+import {
+  getRunningCNDIProcess,
+  runCndi,
+  runCndiLoud,
+} from "src/tests/helpers/run-cndi.ts";
 
 import processInteractiveEntries from "src/tests/helpers/processInteractiveEntries.ts";
 
@@ -55,7 +59,8 @@ describe("cndi", () => {
     });
 
     it("should add a .env file containing CNDI_TELEMETRY=debug if -d is set", async () => {
-      const { status } = await runCndi("init", "-t", "aws/airflow", "-d");
+      const { status } = await runCndiLoud("init", "-t", "aws/airflow", "-d");
+      // console.log('status', status)
       const dotenv = Deno.readTextFileSync(
         path.join(Deno.cwd(), `.env`),
       );
@@ -111,7 +116,6 @@ describe("cndi", () => {
       for await (const afterDirEntry of Deno.readDir(".")) {
         initFileList.delete(afterDirEntry.name); // remove the file from the set if it exists
       }
-      console.log(initFileList);
       assert(initFileList.size === 0); // if the set is empty, all files were created
       assert(status.success);
     });

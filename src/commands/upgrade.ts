@@ -1,6 +1,7 @@
 import {
   ccolors,
   GithubProvider,
+  platform,
   SpinnerTypes,
   TerminalSpinner,
   UpgradeCommand,
@@ -9,7 +10,11 @@ import {
 
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
-import { getCndiInstallPath, getFileSuffixForPlatform } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getCndiInstallPath,
+  getFileSuffixForPlatform,
+} from "src/utils.ts";
 
 import installDependenciesIfRequired from "src/install.ts";
 
@@ -47,8 +52,21 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
         });
         await response.body.pipeTo(cndiFile.writable, { preventClose: true });
         cndiFile.close();
-        await Deno.remove(destinationPath);
-        await Deno.rename(`${destinationPath}-new`, destinationPath);
+        const isWindows = platform() === "win32";
+
+        // take existing cndi binary and put it aside
+        const oldBinaryDestination = isWindows
+          ? destinationPath.replace(".exe", "-old.exe")
+          : `${destinationPath}-old`;
+
+        await Deno.rename(destinationPath, oldBinaryDestination);
+
+        // take the freshly downloaded binary, and put it in the right spot
+        const newBinaryDestination = isWindows
+          ? destinationPath.replace("-new", ".exe")
+          : destinationPath;
+
+        await Deno.rename(`${destinationPath}-new`, newBinaryDestination);
       } else {
         spinner.stop();
         console.error(
@@ -62,23 +80,33 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       spinner.stop();
       const fromMsg = from ? ` from ${ccolors.warn(from)}` : "";
       console.log(
-        `Successfully upgraded ${ccolors.prompt(name)}${fromMsg} to version ${
-          ccolors.success(to)
-        }!\n\n${
-          ccolors.prompt(`https://github.com/polyseam/cndi/releases/${to}`)
+        `Successfully upgraded ${
+          ccolors.prompt(
+            name,
+          )
+        }${fromMsg} to version ${ccolors.success(to)}!\n\n${
+          ccolors.prompt(
+            `https://github.com/polyseam/cndi/releases/${to}`,
+          )
         }`,
       );
-      await installDependenciesIfRequired({
-        CNDI_HOME,
-        KUBESEAL_VERSION,
-        TERRAFORM_VERSION,
-      }, true);
+      await installDependenciesIfRequired(
+        {
+          CNDI_HOME,
+          KUBESEAL_VERSION,
+          TERRAFORM_VERSION,
+        },
+        true,
+      );
     } catch (upgradeError) {
+      spinner.stop();
       console.error(
         upgradeLabel,
-        ccolors.error(`\nfailed to upgrade ${name}, please try again`),
+        ccolors.error(`\nfailed to upgrade ${name}`),
       );
       console.log(ccolors.caught(upgradeError));
+      await emitExitEvent(1101);
+      Deno.exit(1101);
     }
   }
 }

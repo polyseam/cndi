@@ -250,6 +250,10 @@
     "message": "cndi release binary fetch not ok during 'cndi upgrade'"
   },
   {
+    "code": 1101,
+    "message": "cndi binary and dependency upgrade failed"
+  },
+  {
     "code": 1200,
     "message": "cndi template name specified does not point to a valid template during 'cndi init'"
   },
