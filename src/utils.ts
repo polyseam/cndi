@@ -461,21 +461,14 @@ const getFileSuffixForPlatform = () => {
   return fileSuffixForPlatform[currentPlatform];
 };
 
-const getCndiInstallPath = async (): Promise<string> => {
-  if (!homedir()) {
-    console.error(
-      utilsLabel,
-      ccolors.error("cndi could not find your home directory!"),
-    );
-    console.log('try setting the "HOME" environment variable on your system.');
-    await emitExitEvent(204);
-    Deno.exit(204);
-  }
+const getCndiInstallPath = (): string => {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") ?? DEFAULT_CNDI_HOME;
   let suffix = "";
   if (platform() === "win32") {
     suffix = ".exe";
   }
-  return path.join(homedir()!, ".cndi", "bin", `cndi${suffix}`);
+  return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 };
 
 const getPathToOpenSSLForPlatform = () => {
