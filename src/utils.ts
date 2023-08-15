@@ -45,6 +45,33 @@ const loadYAMLorJSONC = async (
   }
 };
 
+const removeOldBinaryIfRequired = async (
+  CNDI_HOME: string,
+): Promise<boolean> => {
+  const isWindows = platform() === "win32";
+  const pathToGarbageBinary = isWindows
+    ? path.join(CNDI_HOME, "bin", "cndi-old.exe")
+    : path.join(CNDI_HOME, "bin", "cndi-old");
+
+  try {
+    await Deno.remove(pathToGarbageBinary);
+  } catch (error) {
+    if (!(error instanceof Deno.errors.NotFound)) {
+      console.error(
+        utilsLabel,
+        ccolors.error("\nfailed to delete old"),
+        ccolors.key_name("cndi"),
+        ccolors.error("binary, please try again"),
+      );
+      console.log(ccolors.caught(error, 302));
+      await emitExitEvent(302);
+      Deno.exit(302);
+    }
+    return false;
+  }
+  return true;
+};
+
 // attempts to find cndi-config.yaml or cndi-config.jsonc, then returns its value and location
 const loadCndiConfig = async (
   providedPath?: string,
@@ -587,6 +614,7 @@ export {
   loadYAML,
   patchAndStageTerraformFilesWithConfig,
   persistStagedFiles,
+  removeOldBinaryIfRequired,
   replaceRange,
   resolveCNDIPorts,
   sha256Digest,
