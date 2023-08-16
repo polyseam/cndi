@@ -29,7 +29,7 @@ Start with a Template for a popular service and CNDI will help you deploy it on
 your own infrastructure, just as easily as you can sign up for a Platform as a
 Service.
 
-Once your cluster is setup, manage the infrastructure and applications with ease
+Once your cluster is set up, manage the infrastructure and applications with ease
 using GitOps and Infrastructure as Code.
 
 ## installation 🥁
