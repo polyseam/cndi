@@ -29,8 +29,8 @@ Start with a [Template](https://www.cndi.dev/templates) for a popular service
 and CNDI will help you deploy it on your own infrastructure, just as easily as
 you can sign up for a Platform as a Service.
 
-Once your cluster is set up, manage the infrastructure and applications with ease
-using GitOps and Infrastructure as Code.
+Once your cluster is set up, manage the infrastructure and applications with
+ease using GitOps and Infrastructure as Code.
 
 ## installation 🥁
 
@@ -234,7 +234,8 @@ We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. The walkthroughs demonstrate how to deploy a production grade
 Airflow cluster using CNDI's `airflow` Template.
 
-- [aws/airflow](docs/walkthroughs/aws/airflow.md)
+- [ec2/airflow](docs/walkthroughs/ec2/airflow.md)
+- [eks/airflow](docs/walkthroughs/eks/airflow.md)
 - [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
 - [azure/airflow](docs/walkthroughs/azure/airflow.md)
 - [dev/airflow](docs/walkthroughs/dev/airflow.md)
