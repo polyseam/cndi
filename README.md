@@ -25,9 +25,9 @@
   </a>
 </p>
 
-Start with a Template for a popular service and CNDI will help you deploy it on
-your own infrastructure, just as easily as you can sign up for a Platform as a
-Service.
+Start with a [Template](https://www.cndi.dev/templates) for a popular service
+and CNDI will help you deploy it on your own infrastructure, just as easily as
+you can sign up for a Platform as a Service.
 
 Once your cluster is setup, manage the infrastructure and applications with ease
 using GitOps and Infrastructure as Code.
