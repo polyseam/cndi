@@ -518,7 +518,7 @@ source code as if it were the regular CLI, without colliding with the released
 
 ```bash
 # make sure the path below is correct, pointing to the main.ts file in the repo
-alias cndi-next="deno run -A --unstable ~/dev/polyseam/cndi/main.ts"
+alias cndi-next="deno run -A ~/dev/polyseam/cndi/main.ts"
 ```
 
 We're continually improving CNDI, but if you have an issue, checkout
