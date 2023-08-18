@@ -12,7 +12,6 @@ const deno = "deno";
 const cmd = [
   "run",
   "--allow-all",
-  "--unstable",
   path.join(getProjectRootDir(), "main.ts"),
 ];
 
