@@ -1,5 +1,5 @@
 import { path } from "deps";
-const srcDir = Deno.cwd(); // this is the root of the project, runs on import (side-effect bad?)
+import getProjectRootDir from "get-project-root"; // this is the root of the project, runs on import (side-effect bad?)
 
 export interface RunCndiResult {
   status: Deno.ProcessStatus;
@@ -13,7 +13,7 @@ const cmd = [
   "run",
   "--allow-all",
   "--unstable",
-  path.join(srcDir, "main.ts"),
+  path.join(getProjectRootDir(), "main.ts"),
 ];
 
 function getRunningCNDIProcess(...args: string[]): Deno.ChildProcess {
