@@ -521,7 +521,7 @@ source code as if it were the regular CLI, without colliding with the released
 alias cndi-next="deno run -A ~/dev/polyseam/cndi/main.ts"
 ```
 
-We're continually improving CNDI, but if you have an issue, checkout
+We're continuously improving CNDI, but if you have an issue, checkout
 [frequently-asked-questions](docs/frequently-asked-questions/faq.md) to get
 unblocked quickly.
 
