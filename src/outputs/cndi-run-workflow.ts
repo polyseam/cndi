@@ -9,6 +9,8 @@ const cndiWorkflowObj = {
   },
   jobs: {
     "cndi-run": {
+      // TODO: determine min scope
+      permissions: "write-all",
       "runs-on": "ubuntu-20.04",
       env: {
         GIT_REPO: "${{ secrets.GIT_REPO }}",
