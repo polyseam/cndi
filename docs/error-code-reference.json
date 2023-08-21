@@ -41,10 +41,6 @@
     "message": "cndi-config.infrastructure.terraform contains unknown terraform block"
   },
   {
-    "code": 204,
-    "message": "homedir() failed when looking up cndi install directory"
-  },
-  {
     "code": 300,
     "message": "Failed to install cndi dependency 'terraform'"
   },
