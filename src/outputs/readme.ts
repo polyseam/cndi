@@ -117,6 +117,7 @@ You can visit the ${linkToDashboards.eks} to see the status of the nodes that ma
     aws: ec2ReadmeSection,
     eks: eksReadmeSection,
     gcp: `
+    
 ## gcp
 
 This cluster will be deployed on [Google Cloud Platform](https://cloud.google.com/gcp).
@@ -127,6 +128,15 @@ You can visit the ${linkToDashboards.gcp} to see the status of the nodes that ma
 `.trim(),
     azure: `
 ## azure
+
+This cluster will be deployed on [Microsoft Azure](https://azure.microsoft.com/en-ca/).
+When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.azure}.
+
+You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
+`.trim(),
+    aks: `
+## AKS
 
 This cluster will be deployed on [Microsoft Azure](https://azure.microsoft.com/en-ca/).
 When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
