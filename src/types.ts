@@ -7,6 +7,7 @@ export const NODE_KIND = {
   ec2: "ec2",
   gcp: "gcp",
   azure: "azure",
+  aks: "aks",
   dev: "dev",
 } as const;
 
@@ -79,7 +80,18 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
 }
-
+interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
+  agents_min_count?: number;
+  agents_max_count?: number;
+  agents_size?: string;
+  os_disk_size_gb?: number;
+  machine_type?: string;
+  image?: string;
+  size?: number | string;
+  volume_size?: number;
+  disk_size_gb?: number;
+  instance_type?: string;
+}
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   ami?: string;
@@ -264,6 +276,7 @@ export type {
   AWSDeploymentTargetConfiguration,
   AWSEC2NodeItemSpec,
   AWSEKSNodeItemSpec,
+  AzureAKSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,
   BaseNodeItemSpec,
