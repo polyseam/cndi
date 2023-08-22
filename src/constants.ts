@@ -16,7 +16,7 @@ const NODE_DISK_SIZE_KEY = {
   azure: "disk_size_gb" as const,
 };
 
-const NON_MICROK8S_NODE_KINDS = ["eks"];
+const NON_MICROK8S_NODE_KINDS = ["eks", "aks"];
 const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
 
 const DEFAULT_OPEN_PORTS = [
