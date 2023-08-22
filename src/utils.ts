@@ -190,6 +190,22 @@ function getTFResource(
     },
   };
 }
+function getTFModule(
+  module_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_${module_type}`;
+  return {
+    resource: {
+      [module_type]: {
+        [name]: {
+          ...content,
+        },
+      },
+    },
+  };
+}
 function getTFData(
   data_type: string,
   content: Record<never, never>,
