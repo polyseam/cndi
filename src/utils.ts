@@ -171,6 +171,7 @@ async function getLeaderNodeNameFromConfig(
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   const clusterKind = config.infrastructure.cndi.nodes[0].kind;
   if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  if (clusterKind === "aks" || clusterKind === "azure") return "azure";
   return clusterKind;
 }
 
