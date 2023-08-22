@@ -1,6 +1,6 @@
 import { ccolors } from "deps";
+import { getYAMLString } from "src/utils.ts";
 
-import { getPrettyJSONString } from "src/utils.ts";
 export interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -58,6 +58,7 @@ const manifestFramework = {
     source: {
       helm: {
         version: DEFAULT_HELM_VERSION,
+        values: {},
       },
     },
     destination: {
@@ -71,10 +72,7 @@ const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
-  // TODO: helm and argo require that values be passed into argocd as a string when using a helm chart repo instead of git
-  // This means that we need to have this very ugly string in the manifests that we generate
-  const values = JSON.stringify(applicationSpec.values ?? {});
-
+  const values = applicationSpec?.values || {};
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
 
@@ -109,7 +107,6 @@ const getApplicationManifest = (
         repoURL: applicationSpec.repoURL,
         path: applicationSpec.path,
         targetRevision: applicationSpec.targetRevision,
-        chart: applicationSpec.chart,
         helm: {
           ...manifestFramework.spec.source.helm,
           values,
@@ -121,7 +118,8 @@ const getApplicationManifest = (
       },
     },
   };
-  return [getPrettyJSONString(manifest), `${releaseName}.application.json`];
+
+  return [getYAMLString(manifest), `${releaseName}.application.yaml`];
 };
 
 export default getApplicationManifest;
