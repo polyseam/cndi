@@ -624,6 +624,7 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFData,
+  getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
   loadCndiConfig,
