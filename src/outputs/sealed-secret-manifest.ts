@@ -3,7 +3,7 @@ import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
 import {
   emitExitEvent,
   getPathToKubesealBinary,
-  getPrettyJSONString,
+  getYAMLString,
 } from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.seal(";
@@ -213,7 +213,7 @@ const getSealedSecretManifest = async (
 
   await Deno.writeTextFile(
     secretPath,
-    getPrettyJSONString(secretWithStringData),
+    getYAMLString(secretWithStringData),
     secretFileOptions,
   );
 

@@ -6,6 +6,7 @@ import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-te
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
 
 import {
+  ARGOCD_VERSION,
   DEFAULT_MICROK8S_VERSION,
   KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
@@ -84,7 +85,7 @@ const getLeaderCloudInitYaml = (
     "stable";
 
   const DEFAULT_ARGOCD_INSTALL_URL =
-    "https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.22/manifests/install.yaml";
+    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
 
   const userBefore =
     config.infrastructure.cndi?.microk8s?.["cloud-init"]?.leader_before || [];

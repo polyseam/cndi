@@ -1,7 +1,7 @@
 import { ccolors } from "deps";
 
-import { getPrettyJSONString } from "src/utils.ts";
 import { CNDIPort } from "src/types.ts";
+import { getYAMLString } from "src/utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
   "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:",
@@ -91,7 +91,7 @@ const getIngressServiceManifest = (
     },
   };
 
-  return getPrettyJSONString(manifest);
+  return getYAMLString(manifest);
 };
 
 export default getIngressServiceManifest;
