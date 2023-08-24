@@ -58,7 +58,6 @@ const manifestFramework = {
     source: {
       helm: {
         version: DEFAULT_HELM_VERSION,
-        valuesObject: {},
       },
     },
     destination: {
@@ -72,7 +71,7 @@ const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
-  const valuesObject = applicationSpec?.values || {};
+  const values = getYAMLString(applicationSpec?.values || {});
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
 
@@ -106,10 +105,11 @@ const getApplicationManifest = (
         ...manifestFramework.spec.source,
         repoURL: applicationSpec.repoURL,
         path: applicationSpec.path,
+        chart: applicationSpec.chart,
         targetRevision: applicationSpec.targetRevision,
         helm: {
           ...manifestFramework.spec.source.helm,
-          valuesObject,
+          values, // TODO: use valuesObject it's a bit more readable etc.
         },
       },
       destination: {
