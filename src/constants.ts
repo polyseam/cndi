@@ -1,6 +1,7 @@
 const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.21.0";
 const DEFAULT_MICROK8S_VERSION = "1.27";
+const ARGOCD_VERSION = "2.7.12";
 
 const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
@@ -35,6 +36,7 @@ const DEFAULT_OPEN_PORTS = [
 ] as const;
 
 export {
+  ARGOCD_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_MICROK8S_VERSION,
   DEFAULT_NODE_DISK_SIZE,
