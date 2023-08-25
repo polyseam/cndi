@@ -630,6 +630,18 @@ Deno.test(
 );
 
 Deno.test(
+  "'cndi init -t eks/neo4j' should generate terraform files such that the filenames and resource names are the same",
+  async (t) => {
+    await t.step(setup);
+    await t.step("test", async () => {
+      const { status } = await runCndi("init", "-t", "eks/neo4j");
+      assert(status.success);
+      await ensureResourceNamesMatchFileNames();
+    });
+  },
+);
+
+Deno.test(
   "'cndi init -t eks/airflow' should generate a .env file with AWS credentials",
   async (t) => {
     await t.step(setup);
