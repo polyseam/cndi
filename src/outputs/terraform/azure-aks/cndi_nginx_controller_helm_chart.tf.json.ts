@@ -12,12 +12,43 @@ export default function getNginxControllerTFJSON(): string {
     atomic: true,
     set: [
       {
-        name:
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-        value: "nlb",
+        "name":
+          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
+        "value": "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+      },
+      {
+        "name":
+          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
+        "value": "/healthz",
+      },
+      {
+        "name": "controller.service.enabled",
+        "value": "true",
+      },
+      {
+        "name":
+          "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
+        "value": "linux",
+      },
+      {
+        "name":
+          "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
+        "value": "linux",
+      },
+      {
+        "name": "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
+        "value": "linux",
+      },
+      {
+        "name": "controller.service.loadBalancerIP",
+        "value": "${azurerm_public_ip.cndi_azurerm_public_ip.ip_address}",
       },
       {
         "name": "controller.ingressClassResource.default",
+        "value": "true",
+      },
+      {
+        "name": "controller.ingressClassResource.enabled",
         "value": "true",
       },
       {
@@ -25,8 +56,16 @@ export default function getNginxControllerTFJSON(): string {
         "value": "public",
       },
       {
+        "name": "controller.ingressClass",
+        "value": "public",
+      },
+      {
         "name": "controller.extraArgs.tcp-services-configmap",
         "value": "ingress/ingress-nginx-controller",
+      },
+      {
+        "name": "rbac.create",
+        "value": "false",
       },
     ],
     version: "4.7.1",
