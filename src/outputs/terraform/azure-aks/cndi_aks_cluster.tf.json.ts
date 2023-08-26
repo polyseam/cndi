@@ -40,7 +40,7 @@ export default function getAzureAKSTFJSON(
   ) as string;
 
   const module = getTFModule(
-    "cndi_aks_cluster",
+    "aks_cluster",
     {
       agents_min_count: desired_size,
       agents_max_count: max_size,
