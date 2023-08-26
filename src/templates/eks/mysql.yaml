@@ -40,8 +40,9 @@ outputs:
             namespace: '{{ $.cndi.prompts.responses.innodbNamespace }}'
             service: '{{ $.cndi.prompts.responses.clusterServiceName}}'
         nodes:
-          - name: my-nodes
+          - name: mysql-nodes
             kind: eks
+            instance_type: t3.large
             volume_size: 128
             max_count: 3
     cluster_manifests:
