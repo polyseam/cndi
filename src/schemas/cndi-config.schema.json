@@ -118,7 +118,7 @@
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
-                    "enum": ["leader", "controller"]
+                    "enum": ["leader", "controller", "worker"]
                   },
                   "instance_type": {},
                   "volume_size": {

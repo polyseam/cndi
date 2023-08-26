@@ -276,12 +276,15 @@ infrastructure:
     nodes:
       - name: gcp-alpha
         kind: gcp
-        role: leader
+        role: leader # node responsible for instantiating the cluster
         machine_type: n2-standard-16
-      - name: gcp-beta
+      - name: gcp-beta # node runs the control plane by default
         kind: gcp
       - name: gcp-charlie
         kind: gcp
+      - name: gcp-delta
+        kind: gcp
+        role: worker # node does not run the control plane
 ```
 
 Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
@@ -521,7 +524,7 @@ source code as if it were the regular CLI, without colliding with the released
 alias cndi-next="deno run -A ~/dev/polyseam/cndi/main.ts"
 ```
 
-We're continually improving CNDI, but if you have an issue, checkout
+We're continuously improving CNDI, but if you have an issue, checkout
 [frequently-asked-questions](docs/frequently-asked-questions/faq.md) to get
 unblocked quickly.
 

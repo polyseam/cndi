@@ -1,10 +1,11 @@
-import { ccolors, Command, Input, path, Select, SEP, YAML } from "deps";
+import { ccolors, Command, Input, path, Select, SEP } from "deps";
 
 import {
   checkInitialized,
   emitExitEvent,
   getDeploymentTargetFromConfig,
   getPrettyJSONString,
+  getYAMLString,
   loadCndiConfig,
   persistStagedFiles,
   stageFile,
@@ -149,7 +150,7 @@ const initCommand = new Command()
       cndiConfig = templateResult.cndiConfig;
       await stageFile(
         "cndi-config.yaml",
-        YAML.stringify(cndiConfig as unknown as Record<string, unknown>),
+        getYAMLString(cndiConfig),
       );
       readme = templateResult.readme;
       env = templateResult.env;

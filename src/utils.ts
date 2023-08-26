@@ -24,6 +24,15 @@ import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");
 
+// YAML.stringify but easier to work with
+function getYAMLString(object: unknown, skipInvalid = true): string {
+  // if the object contains an undefined, skipInvalid will not write the key
+  // skipInvalid: true is most similar to JSON.stringify
+  return YAML.stringify(object as Record<string, unknown>, {
+    skipInvalid,
+  });
+}
+
 async function sha256Digest(message: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
   const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
@@ -464,9 +473,7 @@ async function persistStagedFiles(targetDirectory: string) {
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
-async function checkInstalled(
-  CNDI_HOME: string,
-) {
+async function checkInstalled(CNDI_HOME: string) {
   try {
     // if any of these files/folders don't exist, return false
     await Promise.all([
@@ -627,6 +634,7 @@ export {
   getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
+  getYAMLString,
   loadCndiConfig,
   loadJSONC,
   loadYAML,

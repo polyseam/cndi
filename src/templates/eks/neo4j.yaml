@@ -32,16 +32,11 @@ outputs:
             service: neo4j
             namespace: neo4j
         nodes:
-          - name: neo4j-main
+          - name: neo4j-nodes
             kind: eks
-            role: leader
+            instance_type: t3.large
             volume_size: 128
-          - name: neo4j-a
-            kind: eks
-            volume_size: 128
-          - name: neo4j-b
-            kind: eks
-            volume_size: 128
+            max_count: 3
     cluster_manifests:
       neo4j-auth-secret:
         apiVersion: v1

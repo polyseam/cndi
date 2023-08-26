@@ -2,104 +2,96 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 export default function getAWSDataTFJSON(): string {
   return getPrettyJSONString({
-    "data": {
-      "aws_eks_cluster": {
-        "cndi_aws_eks_cluster": {
-          "name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
+    data: {
+      aws_eks_cluster: {
+        cndi_aws_eks_cluster: {
+          name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
         },
       },
 
-      "aws_eks_cluster_auth": {
-        "cndi_aws_eks_cluster_auth": {
-          "name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
+      aws_eks_cluster_auth: {
+        cndi_aws_eks_cluster_auth: {
+          name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
         },
       },
 
-      "tls_certificate": {
-        "cndi_tls_certificate": {
-          "url":
+      tls_certificate: {
+        cndi_tls_certificate: {
+          url:
             "${aws_eks_cluster.cndi_aws_eks_cluster.identity[0].oidc[0].issuer}",
         },
       },
 
-      "aws_availability_zones": {
-        "cndi_aws_availability_zones": {
-          "state": "available",
+      aws_availability_zones: {
+        cndi_aws_availability_zones: {
+          state: "available",
         },
       },
 
-      "aws_eks_node_group": {
-        "cndi_aws_eks_node_group": {
-          "cluster_name": "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
-          "node_group_name":
-            "${aws_eks_node_group.cndi_aws_eks_node_group.node_group_name}",
-        },
-      },
+      // TODO: figure out why this was here
+      // aws_eks_node_group: {
+      //   cndi_aws_eks_node_group: {
+      //     cluster_name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
+      //     node_group_name: `\${aws_eks_node_group.${firstNodeGroupName}.node_group_name}`,
+      //   },
+      // },
 
-      "aws_caller_identity": {
-        "cndi_aws_caller_identity": {},
+      aws_caller_identity: {
+        cndi_aws_caller_identity: {},
       },
-      "aws_iam_policy_document": {
-        "cndi_aws_iam_policy_document_eks_ec2_role": {
-          "statement": [
+      aws_iam_policy_document: {
+        cndi_aws_iam_policy_document_eks_ec2_role: {
+          statement: [
             {
-              "actions": [
-                "sts:AssumeRole",
-              ],
-              "effect": "Allow",
-              "principals": [
+              actions: ["sts:AssumeRole"],
+              effect: "Allow",
+              principals: [
                 {
-                  "identifiers": [
-                    "eks.amazonaws.com",
-                  ],
-                  "type": "Service",
+                  identifiers: ["eks.amazonaws.com"],
+                  type: "Service",
                 },
                 {
-                  "identifiers": [
-                    "ec2.amazonaws.com",
-                  ],
-                  "type": "Service",
+                  identifiers: ["ec2.amazonaws.com"],
+                  type: "Service",
                 },
               ],
             },
           ],
         },
-        "cndi_aws_iam_policy_document_web_identity_policy": {
-          "depends_on": [
+        cndi_aws_iam_policy_document_web_identity_policy: {
+          depends_on: [
             "aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider",
           ],
-          "statement": [
+          statement: [
             {
-              "actions": [
-                "sts:AssumeRoleWithWebIdentity",
-              ],
-              "condition": [
+              actions: ["sts:AssumeRoleWithWebIdentity"],
+              condition: [
                 {
-                  "test": "StringEquals",
-                  "values": [
+                  test: "StringEquals",
+                  values: [
                     "system:serviceaccount:kube-system:efs-csi-controller-sa",
                     "system:serviceaccount:kube-system:ebs-csi-controller-sa",
                   ],
-                  "variable":
+                  variable:
                     '${replace(aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider.url, "https://", "")}:sub',
                 },
               ],
-              "effect": "Allow",
-              "principals": [
+              effect: "Allow",
+              principals: [
                 {
-                  "identifiers": [
+                  identifiers: [
                     "${aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider.arn}",
                   ],
-                  "type": "Federated",
+                  type: "Federated",
                 },
               ],
             },
           ],
         },
-        "cndi_aws_iam_policy_document_permissions": {
-          "statement": [
+        cndi_aws_iam_policy_document_permissions: {
+          statement: [
             {
-              "actions": [
+              actions: [
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeLaunchConfigurations",
@@ -123,100 +115,79 @@ export default function getAWSDataTFJSON(): string {
                 "elasticfilesystem:DescribeMountTargets",
                 "ec2:DescribeAvailabilityZones",
               ],
-              "effect": "Allow",
-              "resources": [
-                "*",
-              ],
+              effect: "Allow",
+              resources: ["*"],
             },
             {
-              "actions": [
-                "elasticfilesystem:CreateAccessPoint",
-              ],
-              "condition": [
+              actions: ["elasticfilesystem:CreateAccessPoint"],
+              condition: [
                 {
-                  "test": "StringLike",
-                  "values": [
-                    "true",
-                  ],
-                  "variable": "aws:RequestTag/efs.csi.aws.com/cluster",
+                  test: "StringLike",
+                  values: ["true"],
+                  variable: "aws:RequestTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
-                "*",
-              ],
+              effect: "Allow",
+              resources: ["*"],
             },
             {
-              "actions": [
-                "elasticfilesystem:TagResource",
-              ],
-              "condition": [
+              actions: ["elasticfilesystem:TagResource"],
+              condition: [
                 {
-                  "test": "StringLike",
-                  "values": [
-                    "true",
-                  ],
-                  "variable": "aws:ResourceTag/efs.csi.aws.com/cluster",
+                  test: "StringLike",
+                  values: ["true"],
+                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
-                "*",
-              ],
+              effect: "Allow",
+              resources: ["*"],
             },
             {
-              "actions": [
-                "elasticfilesystem:DeleteAccessPoint",
-              ],
-              "condition": [
+              actions: ["elasticfilesystem:DeleteAccessPoint"],
+              condition: [
                 {
-                  "test": "StringEquals",
-                  "values": [
-                    "true",
-                  ],
-                  "variable": "aws:ResourceTag/efs.csi.aws.com/cluster",
+                  test: "StringEquals",
+                  values: ["true"],
+                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
-                "*",
-              ],
+              effect: "Allow",
+              resources: ["*"],
             },
           ],
         },
       },
-      "template_file": {
-        "argocd_private_repo_secret_manifest": {
-          "template":
-            '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
-          "vars": {
-            "git_password": "${var.git_password}",
-            "git_repo": "${var.git_repo}",
-            "git_username": "${var.git_username}",
+      template_file: {
+        argocd_private_repo_secret_manifest: {
+          template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
+          vars: {
+            git_password: "${var.git_password}",
+            git_repo: "${var.git_repo}",
+            git_username: "${var.git_username}",
           },
         },
-        "sealed_secrets_secret_manifest": {
-          "template": '${file("sealed_secrets_secret_manifest.yaml.tftpl")}',
-          "vars": {
-            "sealed_secret_cert_pem":
+        sealed_secrets_secret_manifest: {
+          template: '${file("sealed_secrets_secret_manifest.yaml.tftpl")}',
+          vars: {
+            sealed_secret_cert_pem:
               "${base64encode(var.sealed_secrets_public_key)}",
-            "sealed_secret_private_key_pem":
+            sealed_secret_private_key_pem:
               "${base64encode(var.sealed_secrets_private_key)}",
           },
         },
-        "argocd_root_application_manifest": {
-          "template": '${file("argocd_root_application_manifest.yaml.tftpl")}',
-          "vars": {
-            "git_repo": "${var.git_repo}",
+        argocd_root_application_manifest: {
+          template: '${file("argocd_root_application_manifest.yaml.tftpl")}',
+          vars: {
+            git_repo: "${var.git_repo}",
           },
         },
-        "argocd_admin_password_secret_manifest": {
-          "template":
+        argocd_admin_password_secret_manifest: {
+          template:
             '${file("argocd_admin_password_secret_manifest.yaml.tftpl")}',
-          "vars": {
-            "admin_password_time":
+          vars: {
+            admin_password_time:
               '${time_static.cndi_time_static_admin_password_update.id}")}',
-            "argocd_admin_password":
+            argocd_admin_password:
               "${bcrypt_hash.cndi_bcrypt_hash_argocd_admin_password.id}",
           },
         },
