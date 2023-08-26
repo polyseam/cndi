@@ -14,7 +14,7 @@ export default function getArgoATFJSON(): string {
     namespace: "argocd",
     replace: true,
     repository: "https://argoproj.github.io/argo-helm",
-    version: "5.26.3",
+    version: "5.43.7",
   }, "cndi_argocd_helm_chart");
   return getPrettyJSONString(resource);
 }
