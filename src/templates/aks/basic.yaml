@@ -1,0 +1,56 @@
+prompts:
+  - name: argocdDomainName
+    default: argocd.example.com
+    message: "Please enter the domain name you want argocd to be accessible on:"
+    type: Input
+  - message: "Please enter the email address you want to use for lets encrypt:"
+    default: admin@example.com
+    name: letsEncryptClusterIssuerEmailAddress
+    type: Input
+outputs:
+  cndi-config:
+    cndi_version: v1
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+        nodes:
+          - name: my-nodes
+            kind: aks
+            instance_type: Standard_D4s_v3
+            volume_size: 128
+            agents_min_count: 1
+            agents_max_count: 3
+    cluster_manifests:
+      argo-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: argocd-server-ingress
+          namespace: argocd
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: argocd-server
+                        port:
+                          name: https
+    applications: {}
+  env:
+    extend_basic_env: azure
+  readme:
+    extend_basic_readme: azure
