@@ -208,7 +208,7 @@ function getTFModule(
   const name = resourceName ? resourceName : `cndi_${module_type}`;
   return {
     module: {
-      [module_type]: {
+      module_type: {
         [name]: {
           ...content,
         },
