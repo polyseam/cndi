@@ -8,7 +8,13 @@ export default function getAWSDataTFJSON(): string {
           name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
         },
       },
-
+      aws_lb: {
+        cndi_aws_lb: {
+          tags: {
+            "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
+          },
+        },
+      },
       aws_eks_cluster_auth: {
         cndi_aws_eks_cluster_auth: {
           name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
