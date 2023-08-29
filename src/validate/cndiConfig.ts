@@ -229,8 +229,8 @@ export default async function validateConfig(
     Deno.exit(906);
   }
 
-  const numberOfNodesWithRoleLeader =
-    config?.infrastructure?.cndi?.nodes?.filter(
+  const numberOfNodesWithRoleLeader = config?.infrastructure?.cndi?.nodes
+    ?.filter(
       ({ role }) => role === "leader",
     ).length;
 
