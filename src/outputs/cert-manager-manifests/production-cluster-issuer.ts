@@ -25,7 +25,7 @@ const getProductionClusterIssuerManifest = (
           {
             http01: {
               ingress: {
-                class: "public",
+                ingressClassName: "public",
               },
             },
           },
