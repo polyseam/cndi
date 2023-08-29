@@ -1,0 +1,192 @@
+prompts:
+  - name: argocdDomainName
+    default: argocd.example.com
+    message: 'Please enter the domain name you want argocd to be accessible on:'
+    type: Input
+  - name: tenantDomainName
+    default: tenant.example.com
+    message: 'Please enter the domain name you want the minio tenant to be accessible on:'
+    type: Input
+  - message: 'Please enter the number of tenant Servers you want to deploy:'
+    default: 4
+    name: tenantServers
+    type: Number
+  - message: 'Please enter the number of Volumes Per Server you want to deploy:'
+    default: 4
+    name: VolumesPerServer
+    type: Number
+  - message: 'Please enter access key for the tenant:'
+    default: tenantAccesskey
+    name: tenantAccesskey
+    type: Secret
+  - message: 'Please enter secret key for the tenant:'
+    default: tenantSecretkey
+    name: tenantSecretkey
+    type: Secret
+  - message: 'Please enter your destination namespace for your tenant:'
+    default: tenant-a
+    name: tenantNamespace
+    type: Input
+  - message: 'Please enter the name for your tenant:'
+    default: tenant-default
+    name: tenantName
+    type: Input
+  - message: 'Please enter the name for the bucket you want to create in tenant:'
+    default: my-bucket
+    name: bucketName
+    type: Input
+  - message: 'Please enter the email address you want to use for lets encrypt:'
+    default: admin@example.com
+    name: letsEncryptClusterIssuerEmailAddress
+    type: Input
+outputs:
+  cndi-config:
+    cndi_version: v1
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+        nodes:
+          - name: x-minio-node
+            kind: ec2
+            role: leader
+            instance_type: m5a.large
+            volume_size: 256
+          - name: y-minio-node
+            kind: ec2
+            volume_size: 256
+          - name: z-minio-node
+            kind: ec2
+            volume_size: 256
+    cluster_manifests:
+        tenant-crd-namespace:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: '{{ $.cndi.prompts.responses.tenantNamespace }}'
+      argo-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: argocd-server-ingress
+          namespace: argocd
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: argocd-server
+                        port:
+                          name: https
+      tenant-server-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: tenant-server-ingress
+          namespace: '{{ $.cndi.prompts.responses.tenantNamespace }}'
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+          - hosts:
+            - '{{ $.cndi.prompts.responses.tenantDomainName }}'
+            secretName: cluster-issuer-private-key
+          rules:
+          - host: '{{ $.cndi.prompts.responses.tenantDomainName }}'
+            http:
+              paths:
+              - path: "/"
+                pathType: Prefix
+                backend:
+                  service:
+                    name: minio
+                    port:
+                      name: https-minio
+      myminio-tenant-config:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: myminio-tenant-config
+          namespace: '{{ $.cndi.prompts.responses.tenantNamespace }}'
+          annotations:
+            sealedsecrets.bitnami.com/cluster-wide: "true"
+          labels:
+            argocd.argoproj.io/secret-type: cluster
+            app.kubernetes.io/instance: tenant
+        type: Opaque
+        stringData:
+          config.env: $.cndi.secrets.seal(MINIO_TENANT_CREDENTIALS)
+      tenant-crd:
+          apiVersion: minio.min.io/v2
+          kind: Tenant
+          metadata:
+            annotations:
+              argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              argocd.argoproj.io/hook: PostSync
+            name: '{{ $.cndi.prompts.responses.tenantName }}'
+            namespace: '{{ $.cndi.prompts.responses.tenantNamespace }}'
+            labels:
+              app: minio
+          spec:
+            configuration:
+              name: myminio-tenant-config
+            pools:
+              - servers: '{{ $.cndi.prompts.responses.tenantServers }}'
+                volumesPerServer: '{{ $.cndi.prompts.responses.VolumesPerServer }}'
+                volumeClaimTemplate:
+                  metadata:
+                    name: data
+                  spec:
+                    storageClassName: nfs
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 10Gi
+            buckets:
+              - name: '{{ $.cndi.prompts.responses.VolumesPerServer }}'
+    applications:
+      minio:
+        chart: operator
+        destinationNamespace: minio
+        repoURL: https://operator.min.io/
+        targetRevision: 5.0.6
+  env:
+    extend_basic_env: azure
+    entries:
+      - name: MINIO_TENANT_CREDENTIALS
+        value: "export MINIO_ROOT_USER='{{ $.cndi.prompts.responses.tenantAccessKey }}'
+                export MINIO_ROOT_PASSWORD='{{ $.cndi.prompts.responses.tenantSecretKey }}'"
+      - name: TENANT_DOMAIN_NAME
+        value: '{{ $.cndi.prompts.responses.tenantDomainName }}'
+  readme:
+    extend_basic_readme: azure
+    template_section: >-
+      ## Minio
+
+
+      This template deploys a Standalone production ready
+      [minio operator and tenant](https://github.com/minio/operator/tree/master)
+
+
+      To test the connection you can run the script in test-tenant.py.
+      Make sure to change the accessKey and secretKey fields in the script.
+
+
+      You can find the MINIO_TENANT_CREDENTIALS and TENANT_DOMAIN_NAME in the .env file.
