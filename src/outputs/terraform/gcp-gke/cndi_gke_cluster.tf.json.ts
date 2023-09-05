@@ -20,8 +20,8 @@ export default function getGCPComputeInstanceTFJSON(
     {
       create_service_account: false,
       depends_on: [
-        "google_project_service.enable_compute_service",
-        "google_project_service.enable_k8s_service",
+        "google_project_service.cndi_google_project_service_compute",
+        "google_project_service.cndi_google_project_service_k8s",
       ],
       horizontal_pod_autoscaling: true,
       ip_range_pods: "k8s-pod-range",
