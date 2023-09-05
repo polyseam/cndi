@@ -13,6 +13,9 @@ export default function getAWSDataTFJSON(): string {
           tags: {
             "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
           },
+          depends_on: [
+            "helm_release.cndi_nginx_controller_helm_chart",
+          ],
         },
       },
       aws_eks_cluster_auth: {
