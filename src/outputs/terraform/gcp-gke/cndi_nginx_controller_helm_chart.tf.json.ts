@@ -14,11 +14,6 @@ export default function getNginxControllerTFJSON(): string {
     atomic: true,
     set: [
       {
-        name:
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-        value: "nlb",
-      },
-      {
         "name": "controller.ingressClassResource.default",
         "value": "true",
       },
