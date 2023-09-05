@@ -1,7 +1,7 @@
 import { ccolors, path } from "deps";
 
 import { CNDIConfig, GKENodeItemSpec } from "src/types.ts";
-import { emitExitEvent, stageFile } from "src/utils.ts";
+import { emitExitEvent, stageFile, useSshRepoAuth } from "src/utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";
@@ -14,15 +14,36 @@ import cndi_google_project_service_compute from "./cndi_google_project_service_c
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
+import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
+import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
+
+import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_password_secret_manifest.tf.json.ts";
+import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
+import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
+import cndi_sealed_secrets_secret_manifest from "./cndi_sealed_secrets_secret_manifest.tf.json.ts";
+
+import getSealedSecretsKeyYamlTftpl from "src/outputs/terraform/manifest-templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
+import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
+import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
+import getArgoPrivateRepoSecretSSHYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
+import getArgoRootApplicationManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
+import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
+import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
+import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
+import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
-  "\nsrc/outputs/terraform/gcp/stageAll.ts:",
+  "\nsrc/outputs/terraform/gcp-gke/stageAll.ts:",
 );
 
-export default async function stageTerraformResourcesForGKE(
-  options: { output: string; initializing: boolean },
+export default async function stageTerraformResourcesForGCPGKE(
   config: CNDIConfig,
+  options: { output: string; initializing: boolean },
 ) {
+  const privateRepoSecret = useSshRepoAuth()
+    ? getArgoPrivateRepoSecretSSHYamlTftpl()
+    : getArgoPrivateRepoSecretHTTPSYamlTftpl();
+
   const dotEnvPath = path.join(options.output, ".env");
   const gcp_region = (Deno.env.get("GCP_REGION") as string) || "us-central1";
   const googleCredentials = Deno.env.get("GOOGLE_CREDENTIALS") as string; // project_id
@@ -163,6 +184,114 @@ export default async function stageTerraformResourcesForGKE(
           "cndi_google_compute_address.tf.json",
         ),
         cndi_google_compute_address(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_nginx_controller_helm_chart.tf.json",
+        ),
+        cndi_nginx_controller_helm_chart(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_cert_manager_helm_chart.tf.json",
+        ),
+        cndi_cert_manager_helm_chart(),
+      ),
+      stageFile(
+        path.join("cndi", "terraform", "cndi_argocd_helm_chart.tf.json"),
+        cndi_argocd_helm_chart(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "argocd_admin_password_secret_manifest.yaml.tftpl",
+        ),
+        getArgoAdminPasswordSecretManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "argocd_private_repo_secret_manifest.yaml.tftpl",
+        ),
+        privateRepoSecret,
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_sealed_secrets_helm_chart.tf.json",
+        ),
+        cndi_sealed_secrets_helm_chart(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "sealed_secrets_secret_manifest.yaml.tftpl",
+        ),
+        getSealedSecretsKeyYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_admin_password_secret_manifest.tf.json",
+        ),
+        cndi_argocd_admin_password_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_sealed_secrets_secret_manifest.tf.json",
+        ),
+        cndi_sealed_secrets_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_private_repo_secret_manifest.tf.json",
+        ),
+        cndi_argocd_private_repo_secret_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_argocd_root_application_manifest.tf.json",
+        ),
+        cndi_argocd_root_application_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_time_static_admin_password_update.tf.json",
+        ),
+        cndi_time_static_admin_password_update(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_bcrypt_hash_argocd_admin_password.tf.json",
+        ),
+        cndi_bcrypt_hash_argocd_admin_password(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "argocd_root_application_manifest.yaml.tftpl",
+        ),
+        getArgoRootApplicationManifestYamlTftpl(),
       ),
     ]);
   } catch (e) {
