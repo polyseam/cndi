@@ -54,5 +54,5 @@ export default function getGCPComputeInstanceTFJSON(
     },
   );
 
-  return getPrettyJSONString({ module });
+  return getPrettyJSONString(module);
 }
