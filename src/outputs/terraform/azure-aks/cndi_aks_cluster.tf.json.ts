@@ -58,7 +58,6 @@ export default function getAzureAKSTFJSON(
       sku_tier: "Free",
       prefix: "cndi",
       enable_auto_scaling: true,
-      enable_node_public_ip: true,
       kubernetes_version: "1.26",
       agents_pool_name: "workers",
       log_analytics_workspace_enabled: false,
