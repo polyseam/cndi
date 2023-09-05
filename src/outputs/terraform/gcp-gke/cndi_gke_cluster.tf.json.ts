@@ -26,7 +26,7 @@ export default function getGCPComputeInstanceTFJSON(
       horizontal_pod_autoscaling: true,
       ip_range_pods: "k8s-pod-range",
       ip_range_services: "k8s-service-range",
-      name: "${local.project_name}-cluster",
+      name: "${local.cndi_project_name}-cluster",
       network: "${google_compute_network.cndi_google_compute_network.name}",
       node_pools: [{
         auto_repair: true,
@@ -45,7 +45,7 @@ export default function getGCPComputeInstanceTFJSON(
         tags,
       }],
       project_id: "${local.project_id}",
-      region: "${local.region}",
+      region: "${local.gcp_region}",
       remove_default_node_pool: true,
       source: "terraform-google-modules/kubernetes-engine/google",
       subnetwork:
