@@ -48,7 +48,7 @@ outputs:
             service: redis-replication
             namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
     cluster_manifests:
-      sentinel-secret:
+      redis-secret:
         apiVersion: v1
         kind: Secret
         metadata:
@@ -138,7 +138,7 @@ outputs:
             imagePullPolicy: IfNotPresent
             redisSecret:
               name: redis-secret
-              key: '{{ $.cndi.prompts.responses.defaultUserPassword }}'
+              key: password
             resources:
               requests:
                 cpu: 101m
