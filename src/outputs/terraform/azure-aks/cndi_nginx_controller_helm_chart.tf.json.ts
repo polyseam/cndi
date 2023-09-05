@@ -4,7 +4,10 @@ export default function getNginxControllerTFJSON(): string {
   const resource = getTFResource("helm_release", {
     chart: "ingress-nginx",
     create_namespace: true,
-    depends_on: ["module.cndi_aks_cluster"],
+    depends_on: [
+      "module.cndi_aks_cluster",
+      "azurerm_public_ip.cndi_azurerm_public_ip_lb",
+    ],
     name: "ingress-nginx",
     namespace: "ingress",
     repository: "https://kubernetes.github.io/ingress-nginx",
@@ -68,7 +71,7 @@ export default function getNginxControllerTFJSON(): string {
         "value": "false",
       },
     ],
-    version: "4.7.1",
+    version: "4.6.0",
   }, "cndi_nginx_controller_helm_chart");
   return getPrettyJSONString(resource);
 }
