@@ -57,6 +57,7 @@ export default function getAzureAKSTFJSON(
       storage_profile_blob_driver_enabled: true,
       sku_tier: "Free",
       prefix: "cndi",
+      temporary_name_for_rotation: "temporary",
       enable_auto_scaling: true,
       kubernetes_version: "1.26",
       agents_pool_name: "workers",
