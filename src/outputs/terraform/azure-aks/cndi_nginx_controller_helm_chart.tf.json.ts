@@ -41,7 +41,7 @@ export default function getNginxControllerTFJSON(): string {
       },
       {
         "name": "controller.service.loadBalancerIP",
-        "value": "${azurerm_public_ip.cndi_azurerm_public_ip.ip_address}",
+        "value": "${azurerm_public_ip.cndi_azurerm_public_ip_lb.ip_address}",
       },
       {
         "name": "controller.ingressClassResource.default",
