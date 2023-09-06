@@ -29,7 +29,6 @@ export default function getGCPComputeEngineProviderTFJSON(): string {
             host: "https://${module.cndi_gke_cluster.endpoint}",
             token:
               "${data.google_client_config.cndi_google_client_config.access_token}",
-            load_config_file: false,
           },
         },
       },
@@ -40,7 +39,6 @@ export default function getGCPComputeEngineProviderTFJSON(): string {
           host: "https://${module.cndi_gke_cluster.endpoint}",
           token:
             "${data.google_client_config.cndi_google_client_config.access_token}",
-          load_config_file: false,
         },
       },
       { time: {} },
