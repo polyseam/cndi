@@ -28,7 +28,7 @@ export default function getGCPComputeInstanceTFJSON(
       ip_range_services: "k8s-service-range",
       name: "${local.cndi_project_name}-cluster",
       network: "${google_compute_network.cndi_google_compute_network.name}",
-      node_pools: [{
+      node_pools: {
         auto_repair: true,
         auto_upgrade: true,
         autoscaling: true,
@@ -43,7 +43,7 @@ export default function getGCPComputeInstanceTFJSON(
         name: "worker-nodes",
         service_account: "${local.client_email}",
         tags,
-      }],
+      },
       project_id: "${local.project_id}",
       region: "${local.gcp_region}",
       remove_default_node_pool: true,
