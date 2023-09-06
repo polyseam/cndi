@@ -12,7 +12,7 @@ export default function getSealedSecretsTFJSON(
     name: "sealed-secrets",
     namespace: "kube-system",
     repository: "https://bitnami-labs.github.io/sealed-secrets",
-    version: "2.7.0",
+    version: "2.12.0",
   }, "cndi_sealed_secrets_helm_chart");
   return getPrettyJSONString(resource);
 }
