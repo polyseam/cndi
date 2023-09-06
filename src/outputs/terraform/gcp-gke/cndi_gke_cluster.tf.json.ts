@@ -12,9 +12,7 @@ export default function getGCPComputeInstanceTFJSON(
   const max_size = node?.max_count || 3;
   const min_size = node?.min_count || 1;
   const desired_size = min_size;
-  const tags = {
-    CNDIProject: "${local.cndi_project_name}",
-  };
+
   const module = getTFModule(
     "gke_cluster",
     {
@@ -28,7 +26,7 @@ export default function getGCPComputeInstanceTFJSON(
       ip_range_services: "k8s-service-range",
       name: "${local.cndi_project_name}-cluster",
       network: "${google_compute_network.cndi_google_compute_network.name}",
-      node_pools: {
+      node_pools: [{
         auto_repair: true,
         auto_upgrade: true,
         autoscaling: true,
@@ -42,8 +40,8 @@ export default function getGCPComputeInstanceTFJSON(
         min_count: desired_size,
         name: "worker-nodes",
         service_account: "${local.client_email}",
-        tags,
-      },
+        tags: "${local.cndi_project_name}",
+      }],
       project_id: "${local.project_id}",
       region: "${local.gcp_region}",
       remove_default_node_pool: true,
