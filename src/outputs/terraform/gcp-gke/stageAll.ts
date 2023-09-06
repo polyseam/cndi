@@ -16,7 +16,7 @@ import cndi_google_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
-
+import data from "./data.tf.json.ts";
 import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_password_secret_manifest.tf.json.ts";
 import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
 import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
@@ -140,7 +140,7 @@ export default async function stageTerraformResourcesForGCPGKE(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
       ),
-
+      stageFile(path.join("cndi", "terraform", "data.tf.json"), data()),
       stageFile(
         path.join(
           "cndi",
