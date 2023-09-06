@@ -1,3 +1,21 @@
+node_spec: # airflow specific node size list
+  - name: foo
+    size:
+      aws: t3.medium
+      azure: Standard_D4s_v3
+      gcp: some-fancy-gpu-node
+    role: leader
+  - name: bar
+    size:
+      aws: t3.medium
+      azure: Standard_D4s_v3
+      gcp: some-fancy-gpu-node
+  - name: baz
+    size:
+      aws: t3.medium
+      azure: Standard_D4s_v3
+      gcp: some-fancy-gpu-node
+
 prompts:
   - name: dagRepoUrl
     default: 'https://github.com/polyseam/demo-dag-bag'
@@ -35,6 +53,11 @@ prompts:
     default: airflow-pg
     name: postgresqlDb
     type: Input
+  - message: 'Please enter the target'
+    default: aws
+    name: target
+    type: Input
+extends: '{{ $.cndi.prompts.responses.target }}'
 outputs:
   cndi-config:
     cndi_version: v1
@@ -42,18 +65,19 @@ outputs:
       cndi:
         cert_manager:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
-        nodes:
-          - name: x-airflow-node
-            kind: azure
-            role: leader
-            instance_type: Standard_D4s_v3
-            volume_size: 128
-          - name: y-airflow-node
-            kind: azure
-            volume_size: 128
-          - name: z-airflow-node
-            kind: azure
-            volume_size: 128
+        
+        # nodes:
+        #   - name: x-airflow-node
+        #     kind: azure
+        #     role: leader
+        #     instance_type: Standard_D4s_v3
+        #     volume_size: 128
+        #   - name: y-airflow-node
+        #     kind: azure
+        #     volume_size: 128
+        #   - name: z-airflow-node
+        #     kind: azure
+        #     volume_size: 128
     cluster_manifests:
       git-credentials-secret:
         apiVersion: v1
@@ -201,7 +225,6 @@ outputs:
           migrateDatabaseJob:
             useHelmHooks: false
   env:
-    extend_basic_env: azure
     entries:
       - type: Comment
         comment: PostgreSQL connection parameters
@@ -232,7 +255,6 @@ outputs:
       - name: GIT_SYNC_PASSWORD
         value: '{{ $.cndi.prompts.responses.gitSyncPassword }}'
   readme:
-    extend_basic_readme: azure
     template_section: >-
       ## airflow
 
