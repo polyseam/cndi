@@ -131,7 +131,7 @@ outputs:
           metadata:
             annotations:
               argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              argocd.argoproj.io/hook: PostSync
+              argocd.argoproj.io/hook: Sync
             name: '{{ $.cndi.prompts.responses.tenantName }}'
             namespace: '{{ $.cndi.prompts.responses.tenantNamespace }}'
             labels:
