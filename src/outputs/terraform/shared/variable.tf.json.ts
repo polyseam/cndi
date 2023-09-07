@@ -24,6 +24,17 @@ export default function getVariablesTFJSON(): string {
       description: "public key for encrypting sealed secrets",
       type: "string",
     },
+    // aks module requires cred be set explicitly
+    client_id: {
+      description:
+        "The Client ID (appId) for the Service Principal used for the AKS deployment",
+      type: "string",
+    },
+    client_secret: {
+      description:
+        "The Client Secret (password) for the Service Principal used for the AKS deployment",
+      type: "string",
+    },
   };
 
   if (useSshRepoAuth()) {

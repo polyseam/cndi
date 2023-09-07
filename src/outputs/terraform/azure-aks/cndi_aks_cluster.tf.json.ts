@@ -34,10 +34,6 @@ export default function getAzureAKSTFJSON(
   const tags = {
     CNDIProject: "${local.cndi_project_name}",
   };
-  const tf_var_client_id = Deno.env.get("TF_VAR_ARM_CLIENT_ID") as string;
-  const tf_var_client_secret = Deno.env.get(
-    "TF_VAR_ARM_CLIENT_SECRET",
-  ) as string;
 
   const module = getTFModule(
     "aks_cluster",
@@ -48,8 +44,8 @@ export default function getAzureAKSTFJSON(
       cluster_name: node?.name,
       resource_group_name: resource_group_name,
       os_disk_size_gb,
-      client_id: tf_var_client_id,
-      client_secret: tf_var_client_secret,
+      client_id: "${var.client_id}",
+      client_secret: "${var.client_secret}",
       depends_on: ["azurerm_resource_group.cndi_azurerm_resource_group"],
       tags,
       storage_profile_file_driver_enabled: true,
