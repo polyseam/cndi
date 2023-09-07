@@ -28,9 +28,6 @@ export default function getAzureAKSTFJSON(
   }
 
   const os_disk_size_gb = disk_size_gb;
-  const resource_group_name =
-    "${azurerm_resource_group.cndi_azurerm_resource_group.name}";
-
   const tags = {
     CNDIProject: "${local.cndi_project_name}",
   };
@@ -42,7 +39,9 @@ export default function getAzureAKSTFJSON(
       agents_max_count: max_size,
       agents_size: machine_type,
       cluster_name: node?.name,
-      resource_group_name: resource_group_name,
+      resource_group_name:
+        "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+      node_resource_group: "${local.cndi_project_name}-nodes",
       os_disk_size_gb,
       client_id: "${var.client_id}",
       client_secret: "${var.client_secret}",
