@@ -183,41 +183,18 @@ outputs:
       This template deploys a Standalone production ready
       [minio operator and tenant](https://github.com/minio/operator/tree/master)
 
+      To test the connection you can install the [MinIO CLient](https://min.io/docs/minio/linux/reference/minio-mc.html).
 
-      To test the connection you can run the script.
+      Create Alias
       ```
-      import os
-      from minio import Minio
-      from minio.error import S3Error
-      from dotenv import load_dotenv
-
-      def test_minio_connection(endpoint, access_key, secret_key):
-          client = Minio(
-              endpoint,
-              access_key=access_key,
-              secret_key=secret_key,
-              secure=True  # Set this to True if your MinIO server uses HTTPS
-          )
-
-          # Attempt to list buckets to test the connection
-          try:
-              buckets = client.list_buckets()
-              print("Connection Successful. Buckets List:")
-              # for bucket in buckets:
-              print(buckets)
-          except S3Error as err:
-              print("Connection Error:", err)
-          # client.fput_object(bucket_name='my-crd-bucket',file_path='./README.md', object_name="cndi")
-          #client.fget_object(bucket_name='my-crd-bucket',file_path='~/Documents/README.md',object_name="cndi",)
-
-      if __name__ == "__main__":
-          endpoint = 'tenant.url.com'  # Example: "localhost:9000"
-          access_key = 'username'
-          secret_key = 'password'
-
-          test_minio_connection(endpoint, access_key, secret_key)
+      bash +o history
+      mc alias set ALIAS TENANT_DOMAIN_NAME MINIO_ROOT_USER MINIO_ROOT_PASSWORD
+      bash -o history
       ```
-      Make sure to change the accessKey and secretKey fields in the script.
 
+      [Command](https://min.io/docs/minio/linux/reference/minio-mc/mc-cp.html) to copy object to or from Minio bucket.
+      ```
+      mc cp --recursive ~/mydata/ myminio/mydata/
+      ```
 
       You can find the MINIO_TENANT_CREDENTIALS and TENANT_DOMAIN_NAME in the .env file.
