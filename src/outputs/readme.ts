@@ -71,6 +71,8 @@ export default function getReadmeForProject({
       "[TODO: AWS EKS Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
     gcp:
       "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
+    gke:
+      "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
     azure:
       "[Azure Portal](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Compute%2FVirtualMachines)",
   };
@@ -81,6 +83,8 @@ export default function getReadmeForProject({
     eks:
       "[AWS Load Balancers Page](https://console.aws.amazon.com/ec2/v2/home?#LoadBalancers)",
     gcp:
+      "[GCP Load Balancers Page](https://console.cloud.google.com/net-services/loadbalancing)",
+    gke:
       "[GCP Load Balancers Page](https://console.cloud.google.com/net-services/loadbalancing)",
     azure:
       "[Azure Load Balancers Page](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Network%2FloadBalancers)",
@@ -124,6 +128,15 @@ When your cluster is initialized the next step is to go to your domain registrar
 Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.gcp}.
 
 You can visit the ${linkToDashboards.gcp} to see the status of the nodes that make up your cluster.
+`.trim(),
+    gke: `
+## gke
+
+This cluster will be deployed on [Google Cloud Platform](https://cloud.google.com/gke).
+When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
+Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.gke}.
+
+You can visit the ${linkToDashboards.gke} to see the status of the nodes that make up your cluster.
 `.trim(),
     azure: `
 ## azure
