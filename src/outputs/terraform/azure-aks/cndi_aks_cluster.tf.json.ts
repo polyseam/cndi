@@ -38,10 +38,11 @@ export default function getAzureAKSTFJSON(
       agents_min_count: desired_size,
       agents_max_count: max_size,
       agents_size: machine_type,
-      cluster_name: node?.name,
+      cluster_name: "${local.cndi_project_name}",
       resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      node_resource_group: "${local.cndi_project_name}-nodes",
+      node_resource_group:
+        "${azurerm_resource_group.cndi_azurerm_resource_group.name}-node-resources",
       os_disk_size_gb,
       client_id: "${var.client_id}",
       client_secret: "${var.client_secret}",
@@ -55,7 +56,7 @@ export default function getAzureAKSTFJSON(
       temporary_name_for_rotation: "temporary",
       enable_auto_scaling: true,
       kubernetes_version: "1.26",
-      agents_pool_name: "workers",
+      agents_pool_name: "nodepool",
       log_analytics_workspace_enabled: false,
       rbac_aad: false,
       network_plugin: "azure",
