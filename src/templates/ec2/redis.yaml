@@ -18,7 +18,7 @@ prompts:
   - message: 'Please enter the namespace for the cluster'
     default: redis-opr
     name: defaultNamespace
-    type: input
+    type: Input
   - message: 'Please enter the cluster size for Redis Replication'
     default: 3
     name: clusterSize
