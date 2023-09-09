@@ -1,40 +1,126 @@
+blocks:
+  argo_ingress: https://raw.githubusercontent.com/polyseam/cndi/main/src/templates/fragments/argo-ingress.yaml
+  
+  ec2_nodes:
+    - name: x-airflow-node
+      kind: ec2
+      role: leader
+      instance_type: t3.large
+      volume_size: 128
+    - name: y-airflow-node
+      kind: ec2
+      volume_size: 128
+    - name: z-airflow-node
+      kind: ec2
+      volume_size: 128
+
+  eks_nodes:
+      - name: airflow-nodes
+        kind: eks
+        instance_type: t3.large
+        volume_size: 128
+        min_count: 1
+        max_count: 3
+
+  gcp_nodes:
+      - name: x-airflow-node  
+        kind: gcp
+        role: leader
+        instance_type: n2-standard-2
+        volume_size: 128
+      - name: y-airflow-node
+        kind: gcp
+        volume_size: 128
+      - name: z-airflow-node
+        kind: gcp
+        volume_size: 128
+
+  azure_nodes:
+      - name: x-airflow-node
+        kind: azure
+        role: leader
+        instance_type: Standard_D2_v3
+        volume_size: 128
+      - name: y-airflow-node
+        kind: azure
+        volume_size: 128
+      - name: z-airflow-node
+        kind: azure
+        volume_size: 128
+
+
 prompts:
+  # because the "kind" is used in every template, it currently lives before this chronologically
+  - name: kind
+    default: ec2
+    message: 'Please enter the kind of node you want to use:'
+    type: Select
+    options:
+      - ec2
+      - eks
+      - gcp
+      - azure
+      - dev
+
   - name: dagRepoUrl
     default: 'https://github.com/polyseam/demo-dag-bag'
     message: 'Please enter the url of the git repo containing your dags:'
     type: Input
+    validator:
+      named: URL
+
+  # this enables the user to skip questions about dag credentials
+  - name: separateGitSyncCredentials
+    default: false
+    message: >-
+      Do you want to use separate git credentials for your DAG repo?
+    type: Confirm
+    next_prompt:
+      _if_:
+        response: separateGitSyncCredentials
+        is:
+          equal_to: false
+        then: argocdDomainName
+        # implicit else is the next prompt down
+
   - message: 'Please enter the username airflow should use to access your dag repo:'
     name: gitSyncUsername
     type: Input
+
   - message: 'Please enter the password airflow should use to access your dag repo:'
     name: gitSyncPassword
     type: Secret
+
   - name: argocdDomainName
     default: argocd.example.com
     message: 'Please enter the domain name you want argocd to be accessible on:'
     type: Input
+    validators:
+      - named: hostname
+
   - name: airflowDomainName
     default: airflow.example.com
     message: 'Please enter the domain name you want airflow to be accessible on:'
     type: Input
+    validators:
+      - named: hostname
+
   - message: 'Please enter the email address you want to use for lets encrypt:'
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
-  - message: 'Please enter the username for your postgresql admin:'
-    default: admin
-    name: postgresqlUser
-    type: Input
-  - message: >-
-      Please enter the postgresql password you want to use for your postgresql
-      database:
+    validators:
+      - named: email
+
+  - message: 'Please enter the postgresql password you want to use for your postgresql database:'
     default: password
     name: postgresqlPassword
     type: Secret
-  - message: 'Please enter the name for the postgresql database you want to use:'
-    default: airflow-pg
-    name: postgresqlDb
-    type: Input
+    validators:
+      - named: minLength
+        args:
+          min: 8
+
 outputs:
   cndi-config:
     cndi_version: v1
@@ -42,28 +128,40 @@ outputs:
       cndi:
         cert_manager:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+        
         nodes:
-          - name: x-airflow-node
-            kind: ec2
-            role: leader
-            instance_type: t3.large
-            volume_size: 128
-          - name: y-airflow-node
-            kind: ec2
-            volume_size: 128
-          - name: z-airflow-node
-            kind: ec2
-            volume_size: 128
+          _block_by_name_:
+            name: '$.cndi.blocks.{{ $.cndi.responses.kind }}_nodes'
+
     cluster_manifests:
       git-credentials-secret:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: airflow-git-credentials
-          namespace: airflow
-        stringData:
-          GIT_SYNC_USERNAME: $.cndi.secrets.seal(GIT_SYNC_USERNAME)
-          GIT_SYNC_PASSWORD: $.cndi.secrets.seal(GIT_SYNC_PASSWORD)
+      # the choice is made between two manifests based on the response to the prompt
+      # recursive '_if_'s can be avoided with some tolerance for repetition
+        _if_: 
+          response: separateGitSyncCredentials
+          is:
+            equal_to: true
+
+          then:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: airflow-git-credentials
+              namespace: airflow
+            stringData:
+              GIT_SYNC_USERNAME: $.cndi.secrets.seal(GIT_SYNC_USERNAME)
+              GIT_SYNC_PASSWORD: $.cndi.secrets.seal(GIT_SYNC_PASSWORD)
+
+          else:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: airflow-git-credentials
+              namespace: airflow
+            stringData:
+              GIT_SYNC_USERNAME: $.cndi.secrets.seal(GIT_USERNAME)
+              GIT_SYNC_PASSWORD: $.cndi.secrets.seal(GIT_PASSWORD)
+
       postgresql-connection-string-secret:
         apiVersion: v1
         kind: Secret
@@ -73,6 +171,7 @@ outputs:
         type: Opaque
         stringData:
           connection: $.cndi.secrets.seal(POSTGRESQL_CONNECTION_STRING)
+
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -92,16 +191,16 @@ outputs:
           postgresql:
             pg_hba:
               - >-
-                host {{ $.cndi.prompts.responses.postgresqlDb }} {{
-                $.cndi.prompts.responses.postgresqlUser }} all password
+                host airflow-pg admin all password
           bootstrap:
             initdb:
-              database: '{{ $.cndi.prompts.responses.postgresqlDb }}'
-              owner: '{{ $.cndi.prompts.responses.postgresqlUser }}'
+              database: 'airflow-pg'
+              owner: 'admin'
               secret:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
+
       cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -112,6 +211,7 @@ outputs:
         stringData:
           username: $.cndi.secrets.seal(POSTGRESQL_CLUSTER_SUPERUSER)
           password: $.cndi.secrets.seal(POSTGRESQL_PASSWORD)
+
       cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -122,33 +222,11 @@ outputs:
         stringData:
           username: $.cndi.secrets.seal(POSTGRESQL_USER)
           password: $.cndi.secrets.seal(POSTGRESQL_PASSWORD)
+
       argo-ingress:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: argocd-server-ingress
-          namespace: argocd
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          tls:
-            - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
-              secretName: cluster-issuer-private-key
-          rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: argocd-server
-                        port:
-                          name: https
+        _block_by_name_:
+          name: argo_ingress
+
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -206,9 +284,9 @@ outputs:
       - type: Comment
         comment: PostgreSQL connection parameters
       - name: POSTGRESQL_DB
-        value: '{{ $.cndi.prompts.responses.postgresqlDb }}'
+        value: 'airflow-pg'
       - name: POSTGRESQL_USER
-        value: '{{ $.cndi.prompts.responses.postgresqlUser }}'
+        value: 'admin'
       - name: POSTGRESQL_PASSWORD
         value: '{{ $.cndi.prompts.responses.postgresqlPassword }}'
       - name: POSTGRESQL_PROTOCOL
@@ -219,10 +297,9 @@ outputs:
         value: '5432'
       - name: POSTGRESQL_CONNECTION_STRING
         value: >-
-          postgresql://{{ $.cndi.prompts.responses.postgresqlUser }}:{{
+          postgresql://admin:{{
           $.cndi.prompts.responses.postgresqlPassword
-          }}@cnpg-airflow-cluster-rw:5432/{{
-          $.cndi.prompts.responses.postgresqlDb }}
+          }}@cnpg-airflow-cluster-rw:5432/airflow-pg
       - name: POSTGRESQL_CLUSTER_SUPERUSER
         value: postgres
       - type: Comment
