@@ -11,7 +11,7 @@ prompts:
     name: letsEncryptClusterIssuerEmailAddress
     default: admin@example.com
     type: Input
-  - message: 'Please enter default user password '
+  - message: 'Please enter Redis default user password '
     default: password
     name: defaultUserPassword
     type: Secret
