@@ -59,4 +59,3 @@ outputs:
     extend_basic_env: aws
   readme:
     extend_basic_readme: aws
-    
