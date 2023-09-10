@@ -52,11 +52,11 @@ outputs:
             role: leader
             volume_size: 256
     cluster_manifests:
-        tenant-crd-namespace:
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: '{{ $.cndi.prompts.responses.tenantNamespace }}'
+      tenant-crd-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: '{{ $.cndi.prompts.responses.tenantNamespace }}'
       argo-ingress:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
