@@ -196,7 +196,7 @@ export default async function stageTerraformResourcesForAzureAKS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_azurefile_csi_storage_class_manifest.yaml.tftpl",
+          "azurefile_csi_storage_class_manifest.yaml.tftpl",
         ),
         cndi_azurefile_csi_storage_class_manifest(),
       ),
