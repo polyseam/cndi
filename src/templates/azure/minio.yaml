@@ -159,7 +159,7 @@ outputs:
                       requests:
                         storage: 10Gi
             buckets:
-              - name: '{{ $.cndi.prompts.responses.VolumesPerServer }}'
+              - name: '{{ $.cndi.prompts.responses.bucketName }}'
     applications:
       minio:
         chart: operator
