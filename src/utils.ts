@@ -180,6 +180,7 @@ async function getLeaderNodeNameFromConfig(
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   const clusterKind = config.infrastructure.cndi.nodes[0].kind;
   if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
   return clusterKind;
 }
 
@@ -195,6 +196,20 @@ function getTFResource(
         [name]: {
           ...content,
         },
+      },
+    },
+  };
+}
+function getTFModule(
+  module_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_${module_type}`;
+  return {
+    module: {
+      [name]: {
+        ...content,
       },
     },
   };
@@ -614,6 +629,7 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFData,
+  getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
   getYAMLString,

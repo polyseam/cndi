@@ -8,6 +8,7 @@ export const NODE_KIND = {
   gcp: "gcp",
   azure: "azure",
   dev: "dev",
+  gke: "gke",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
@@ -103,6 +104,17 @@ interface GCPNodeItemSpec extends BaseNodeItemSpec {
   image?: string;
   size?: number;
   volume_size?: number;
+  instance_type?: string;
+}
+
+// cndi-config.jsonc["nodes"]["entries"][kind==="gke"]
+interface GKENodeItemSpec extends BaseNodeItemSpec {
+  min_count?: number;
+  max_count?: number;
+  machine_type?: string;
+  size?: number;
+  volume_size?: number;
+  disk_size_gb?: number;
   instance_type?: string;
 }
 
@@ -276,6 +288,7 @@ export type {
   EnvValueEntry,
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
+  GKENodeItemSpec,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,

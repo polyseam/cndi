@@ -124,6 +124,31 @@ export default function getKnownTemplates() {
       name: "dev/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/mysql.yaml`,
     },
+    // gke
+    {
+      name: "gke/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/basic.yaml`,
+    },
+    {
+      name: "gke/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/airflow.yaml`,
+    },
+    {
+      name: "gke/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/cnpg.yaml`,
+    },
+    {
+      name: "gke/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/hop.yaml`,
+    },
+    {
+      name: "gke/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/neo4j.yaml`,
+    },
+    {
+      name: "gke/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/mysql.yaml`,
+    },
   ];
   return knownTemplates;
 }
