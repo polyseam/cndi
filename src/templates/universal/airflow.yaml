@@ -279,7 +279,7 @@ outputs:
           migrateDatabaseJob:
             useHelmHooks: false
   env:
-    extend_basic_env: aws
+    extend_basic_env: '{{ $.cndi.prompts.responses.kind }}'
     entries:
       - type: Comment
         comment: PostgreSQL connection parameters
@@ -309,7 +309,7 @@ outputs:
       - name: GIT_SYNC_PASSWORD
         value: '{{ $.cndi.prompts.responses.gitSyncPassword }}'
   readme:
-    extend_basic_readme: aws
+    extend_basic_readme: '{{ $.cndi.prompts.responses.kind }}'
     template_section: >-
       ## airflow
 
