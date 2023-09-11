@@ -4,6 +4,10 @@ export default function getAKSDataTFJSON(): string {
   return getPrettyJSONString({
     data: {
       template_file: {
+        azurefile_csi_storage_class_manifest: {
+          template:
+            '${file("azurefile_csi_storage_class_manifest.yaml.tftpl")}',
+        },
         argocd_private_repo_secret_manifest: {
           template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
           vars: {
