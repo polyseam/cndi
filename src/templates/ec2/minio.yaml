@@ -131,7 +131,8 @@ outputs:
             app.kubernetes.io/instance: tenant
         type: Opaque
         stringData:
-          config.env: $.cndi.secrets.seal(MINIO_TENANT_CREDENTIALS)
+          config.env: |
+            $.cndi.secrets.seal(MINIO_TENANT_CREDENTIALS)
       tenant-crd:
           apiVersion: minio.min.io/v2
           kind: Tenant
@@ -171,8 +172,8 @@ outputs:
     entries:
       - name: MINIO_TENANT_CREDENTIALS
         value: |
-              "export MINIO_ROOT_USER={{ $.cndi.prompts.responses.tenantAccessKey }}
-               export MINIO_ROOT_PASSWORD={{ $.cndi.prompts.responses.tenantSecretKey }}"
+          "export MINIO_ROOT_USER={{ $.cndi.prompts.responses.tenantAccessKey }}
+           export MINIO_ROOT_PASSWORD={{ $.cndi.prompts.responses.tenantSecretKey }}"
 
       - name: TENANT_DOMAIN_NAME
         value: '{{ $.cndi.prompts.responses.tenantDomainName }}'
