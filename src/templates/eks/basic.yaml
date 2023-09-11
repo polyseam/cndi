@@ -17,6 +17,7 @@ outputs:
         nodes:
           - name: my-nodes
             kind: eks
+            instance_type: t3.large
             volume_size: 128
             max_count: 3
     cluster_manifests:

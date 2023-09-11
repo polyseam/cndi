@@ -51,7 +51,7 @@ export default function getEFSCSIDriverTFJSON(): string {
         value: "700",
       },
     ],
-    version: "2.4.1",
+    version: "2.4.9",
   }, "cndi_efs_driver_helm_chart");
   return getPrettyJSONString(resource);
 }

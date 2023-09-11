@@ -46,7 +46,7 @@ outputs:
             namespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
             service: mongodb-replica-set-svc
         nodes:
-          - name: pg-nodes
+          - name: mongodb-nodes
             kind: eks
             instance_type: t3.large
             volume_size: 128

@@ -1,5 +1,5 @@
 import { ccolors } from "deps";
-import { getPrettyJSONString } from "src/utils.ts";
+import { getYAMLString } from "src/utils.ts";
 
 const _productionClusterIssuerManifestLabel = ccolors.faded(
   "\nsrc/outputs/production-cluster-issuer.ts:",
@@ -25,7 +25,7 @@ const getProductionClusterIssuerManifest = (
           {
             http01: {
               ingress: {
-                class: "public",
+                ingressClassName: "public",
               },
             },
           },
@@ -34,7 +34,7 @@ const getProductionClusterIssuerManifest = (
     },
   };
 
-  return getPrettyJSONString(manifest);
+  return getYAMLString(manifest);
 };
 
 export default getProductionClusterIssuerManifest;

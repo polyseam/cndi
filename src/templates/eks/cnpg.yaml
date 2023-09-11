@@ -46,7 +46,7 @@ outputs:
             namespace: '{{ $.cndi.prompts.responses.pgNamespace }}'
             service: '{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw'
         nodes:
-          - name: pg-nodes
+          - name: cnpg-nodes
             kind: eks
             instance_type: t3.large
             volume_size: 128
