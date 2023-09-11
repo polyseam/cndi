@@ -11,7 +11,7 @@ import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
 import data from "./data.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
-
+import cndi_azurefile_csi_storage_class_manifest from "./cndi_azurefile_csi_storage_class_manifest.tf.json.ts";
 import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_password_secret_manifest.tf.json.ts";
 import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
 import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
@@ -191,6 +191,14 @@ export default async function stageTerraformResourcesForAzureAKS(
           "argocd_root_application_manifest.yaml.tftpl",
         ),
         getArgoRootApplicationManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_azurefile_csi_storage_class_manifest.yaml.tftpl",
+        ),
+        cndi_azurefile_csi_storage_class_manifest(),
       ),
     ]);
   } catch (e) {
