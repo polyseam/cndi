@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Guide for configuring Azure for a new CNDI cluster](/docs/cloud-setup-guide/azure/azure-setup.md)
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
 
 ## download cndi ⬇️
 
