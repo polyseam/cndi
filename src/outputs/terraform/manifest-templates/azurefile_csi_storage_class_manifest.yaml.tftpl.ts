@@ -3,12 +3,11 @@ export default function getStorageClassManifestYamlTftpl() {
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: azurefile-csi
-  annotations:
-    storageclass.kubernetes.io/is-default-class: 'true'
+  name: nfs
 provisioner: file.csi.azure.com
 parameters:
-  skuName: Standard_LRS
+  skuName: Premium_LRS
+  protocol: nfs
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
