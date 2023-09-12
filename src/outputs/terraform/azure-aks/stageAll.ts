@@ -9,6 +9,7 @@ import cndi_outputs from "./cndi_outputs.tf.json.ts";
 import cndi_aks_cluster from "./cndi_aks_cluster.tf.json.ts";
 import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
 import data from "./data.tf.json.ts";
+import variable from "./variable.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
 import cndi_azurefile_csi_storage_class_manifest from "./cndi_azurefile_csi_storage_class_manifest.tf.json.ts";
@@ -38,11 +39,7 @@ export default async function stageTerraformResourcesForAzureAKS(
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        `cndi_aks_cluster_${node.name}.tf.json`,
-      ),
+      path.join("cndi", "terraform", `cndi_aks_cluster_${node.name}.tf.json`),
       cndi_aks_cluster(node as AzureAKSNodeItemSpec),
     )
   );
@@ -52,9 +49,10 @@ export default async function stageTerraformResourcesForAzureAKS(
     await Promise.all([
       ...stageNodes,
       stageFile(
-        path.join("cndi", "terraform", "provider.tf.json"),
-        provider(),
+        path.join("cndi", "terraform", "variable.tf.json"),
+        variable(),
       ),
+      stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider()),
       stageFile(
         path.join("cndi", "terraform", "locals.tf.json"),
         cndi_azurerm_locals({ azure_location }),
@@ -64,11 +62,7 @@ export default async function stageTerraformResourcesForAzureAKS(
         terraform(),
       ),
       stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_azurerm_public_ip_lb.tf.json",
-        ),
+        path.join("cndi", "terraform", "cndi_azurerm_public_ip_lb.tf.json"),
         cndi_azurerm_public_ip_lb(),
       ),
       stageFile(
@@ -76,11 +70,7 @@ export default async function stageTerraformResourcesForAzureAKS(
         cndi_outputs(),
       ),
       stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_azurerm_resource_group.tf.json",
-        ),
+        path.join("cndi", "terraform", "cndi_azurerm_resource_group.tf.json"),
         cndi_azurerm_resource_group(),
       ),
       stageFile(path.join("cndi", "terraform", "data.tf.json"), data()),
@@ -93,11 +83,7 @@ export default async function stageTerraformResourcesForAzureAKS(
         cndi_nginx_controller_helm_chart(),
       ),
       stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_cert_manager_helm_chart.tf.json",
-        ),
+        path.join("cndi", "terraform", "cndi_cert_manager_helm_chart.tf.json"),
         cndi_cert_manager_helm_chart(),
       ),
       stageFile(
