@@ -76,8 +76,8 @@ const initCommand = new Command()
         initLabel,
         ccolors.error(`--template (-t) flag requires a value`),
       );
-      await emitExitEvent(401);
-      Deno.exit(401);
+      await emitExitEvent(400);
+      Deno.exit(400);
     }
 
     if (options.interactive && !template) {

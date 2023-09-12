@@ -6,63 +6,73 @@
   },
   {
     "code": 100,
-    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform"
+    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/457"
   },
   {
     "code": 101,
-    "message": "'GIT_PASSWORD' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform"
+    "message": "'GIT_PASSWORD' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/458"
   },
   {
     "code": 102,
-    "message": "'GIT_REPO' env var is not set for terraform"
+    "message": "'GIT_REPO' env var is not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/459"
   },
   {
     "code": 103,
-    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set for terraform"
+    "message": "'ARGOCD_ADMIN_PASSWORD' env var is not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/460"
   },
   {
     "code": 104,
-    "message": "'SEALED_SECRETS_PRIVATE_KEY' env var is not set for terraform"
+    "message": "'SEALED_SECRETS_PRIVATE_KEY' env var is not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/462"
   },
   {
     "code": 105,
-    "message": "'SEALED_SECRETS_PUBLIC_KEY' env var is not set for terraform"
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' env var is not set for terraform",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/461"
   },
   {
     "code": 200,
-    "message": "cndi-config.infrastructure.cndi.nodes does not contain exactly one node with role 'leader'"
+    "message": "cndi-config.infrastructure.cndi.nodes does not contain exactly one node with role 'leader'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/463"
   },
   {
     "code": 202,
-    "message": "'CNDI_STAGING_DIRECTORY' is not set"
+    "message": "'CNDI_STAGING_DIRECTORY' is not set",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/474"
   },
   {
     "code": 203,
-    "message": "cndi-config.infrastructure.terraform contains unknown terraform block"
+    "message": "cndi-config.infrastructure.terraform contains unknown terraform block",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/506"
   },
   {
     "code": 300,
-    "message": "Failed to install cndi dependency 'terraform'"
+    "message": "Failed to install cndi dependency 'terraform'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/476"
   },
   {
     "code": 301,
-    "message": "Failed to install cndi depenedency 'kubeseal'"
+    "message": "Failed to install cndi depenedency 'kubeseal'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/475"
   },
   {
     "code": 302,
-    "message": "Failed to delete past version of cndi binary"
+    "message": "Failed to delete past version of cndi binary",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/507"
   },
   {
     "code": 400,
-    "message": "cndi-config file not found during 'cndi init'"
-  },
-  {
-    "code": 401,
-    "message": "cndi init --template was called without a template name"
+    "message": "cndi init --template was called without a template name",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/505"
   },
   {
     "code": 500,
-    "message": "cndi-config not found during 'cndi overwrite'"
+    "message": "cndi-config not found during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/508"
   },
   {
     "code": 501,
