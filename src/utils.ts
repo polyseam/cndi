@@ -181,6 +181,7 @@ function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   const clusterKind = config.infrastructure.cndi.nodes[0].kind;
   if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
   if (clusterKind === "aks" || clusterKind === "azure") return "azure";
+  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
   return clusterKind;
 }
 

@@ -112,7 +112,8 @@
                       "gcp",
                       "azure",
                       "aks",
-                      "dev"
+                      "dev",
+                      "gke"
                     ]
                   },
                   "role": {

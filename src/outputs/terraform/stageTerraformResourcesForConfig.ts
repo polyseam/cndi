@@ -11,7 +11,7 @@ import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
 import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
-
+import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
 import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
 import variable from "src/outputs/terraform/shared/variable.tf.json.ts";
 import global_locals from "src/outputs/terraform/shared/global.locals.tf.json.ts";
@@ -43,6 +43,9 @@ export default async function stageTerraformResourcesForConfig(
       break;
     case "eks":
       await stageTerraformResourcesForAWSEKS(config);
+      break;
+    case "gke":
+      await stageTerraformResourcesForGCPGKE(config, options);
       break;
     case "gcp":
       await stageTerraformResourcesForGCP(config, options);

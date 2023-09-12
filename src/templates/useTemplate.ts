@@ -200,6 +200,7 @@ export default async function useTemplate(
       { name: "azure" },
       { name: "gcp" },
       { name: "dev" },
+      { name: "gke" },
     ];
 
     const validTarget = validTargets.find((target) => {
