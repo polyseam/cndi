@@ -13,7 +13,7 @@ import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/
 import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
 import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
 import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
-import variable from "src/outputs/terraform/shared/variable.tf.json.ts";
+import global_variable from "src/outputs/terraform/shared/global.variable.tf.json.ts";
 import global_locals from "src/outputs/terraform/shared/global.locals.tf.json.ts";
 
 import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
@@ -65,7 +65,10 @@ export default async function stageTerraformResourcesForConfig(
 
   await Promise.all([
     // add global variables
-    stageFile(path.join("cndi", "terraform", "variables.tf.json"), variable()),
+    stageFile(
+      path.join("cndi", "terraform", "global.variable.tf.json"),
+      global_variable(),
+    ),
     // add global locals
     stageFile(
       path.join("cndi", "terraform", "global.locals.tf.json"),
