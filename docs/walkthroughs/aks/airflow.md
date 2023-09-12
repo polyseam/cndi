@@ -26,7 +26,7 @@ successfully:**
 - ARM_TENANT_ID & ARM_CLIENT_ID
 - ARM_SUBSCRIPTION_ID
 
-- **A Domain Name**: Because the `azure/airflow` template sets up TLS
+- **A Domain Name**: Because the `aks/airflow` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `A` records there for
   our cluster ingresses.
@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Guide for configuring AKS for a new CNDI cluster](/docs/cloud-setup-guide/aks/azure-setup.md)
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
 
 ## download cndi ⬇️
 
