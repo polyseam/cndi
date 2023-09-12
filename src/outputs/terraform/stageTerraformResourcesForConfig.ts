@@ -9,6 +9,7 @@ import stageTerraformResourcesForAWSEC2 from "src/outputs/terraform/aws-ec2/stag
 import stageTerraformResourcesForAWSEKS from "src/outputs/terraform/aws-eks/stageAll.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
+import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
 import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
 import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
 import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
@@ -51,6 +52,9 @@ export default async function stageTerraformResourcesForConfig(
       break;
     case "azure":
       await stageTerraformResourcesForAzure(config);
+      break;
+    case "aks":
+      await stageTerraformResourcesForAzureAKS(config);
       break;
     case "dev":
       await stageTerraformResourcesForDev(config);
