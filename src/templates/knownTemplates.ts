@@ -74,6 +74,31 @@ export default function getKnownTemplates() {
       name: "gcp/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/mysql.yaml`,
     },
+    // aks
+    {
+      name: "aks/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/basic.yaml`,
+    },
+    {
+      name: "aks/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/airflow.yaml`,
+    },
+    {
+      name: "aks/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/cnpg.yaml`,
+    },
+    {
+      name: "aks/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/hop.yaml`,
+    },
+    {
+      name: "aks/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/neo4j.yaml`,
+    },
+    {
+      name: "aks/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/mysql.yaml`,
+    },
     // azure
     {
       name: "azure/basic",

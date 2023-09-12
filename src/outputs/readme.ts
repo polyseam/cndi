@@ -67,12 +67,13 @@ export default function getReadmeForProject({
   const linkToDashboards = {
     ec2:
       "[AWS EC2 Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
-    eks:
-      "[TODO: AWS EKS Dashboard](https://console.aws.amazon.com/ec2/home?#Instances:instanceState=running;v=3)",
+    eks: "[AWS EKS Dashboard](https://console.aws.amazon.com/eks/home?)",
     gcp:
       "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
     gke:
-      "[GCP Compute Engine Dashboard](https://console.cloud.google.com/compute/instances)",
+      "[GCP Compute Engine Dashboard](https://console.cloud.google.com/kubernetes)",
+    aks:
+      "[Azure Portal](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.ContainerService%2FmanagedClusters)",
     azure:
       "[Azure Portal](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Compute%2FVirtualMachines)",
   };
@@ -87,6 +88,8 @@ export default function getReadmeForProject({
     gke:
       "[GCP Load Balancers Page](https://console.cloud.google.com/net-services/loadbalancing)",
     azure:
+      "[Azure Load Balancers Page](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Network%2FloadBalancers)",
+    aks:
       "[Azure Load Balancers Page](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Network%2FloadBalancers)",
   };
 
@@ -128,7 +131,7 @@ This cluster will be deployed on [Google Cloud Platform](https://cloud.google.co
 When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
 Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.gcp}.
 
-You can visit the ${linkToDashboards.gcp} to see the status of the nodes that make up your cluster.
+You can visit the ${linkToDashboards.gke} to see the status of the nodes that make up your cluster.
 `.trim(),
     gke: `
 ## gke
@@ -146,7 +149,7 @@ This cluster will be deployed on [Microsoft Azure](https://azure.microsoft.com/e
 When your cluster is initialized the next step is to go to your domain registrar and create an A record for ArgoCD.
 Both entries should point to the single load balancer that was created for your cluster found on the ${linkToLoadBalancers.azure}.
 
-You can visit the ${linkToDashboards.azure} to see the status of the nodes that make up your cluster.
+You can visit the ${linkToDashboards.aks} to see the status of the nodes that make up your cluster.
 `.trim(),
     aks: `
 ## AKS
