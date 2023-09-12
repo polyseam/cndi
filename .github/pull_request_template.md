@@ -1,12 +1,11 @@
 # Related issue
 
 <!-- Please link the primary issue(s) related to this work and other relevant issues -->
-
 <!-- If you are an internal CNDI contributor, please ensure that the associated issue status is set throughout the lifecycle of this Pull Request -->
 <!-- It should be "In Progress" when this PR is submitted as a Draft -->
 <!-- It should be "In Review" when this PR is marked as ready for review -->
 
-[#33333](https://github.com/polyseam/cndi/issues/33333)
+Issue #
 
 # Description
 
