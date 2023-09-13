@@ -45,11 +45,11 @@ export { simpleGit } from "npm:simple-git@3.18.0";
 //  - crypto-js
 import CryptoJS from "npm:crypto-js@4.1.1";
 
-//  - spinners
+// spinners
 export {
-  SpinnerTypes,
-  TerminalSpinner,
-} from "https://deno.land/x/spinners@v1.1.2/mod.ts";
+  default as TerminalSpinner,
+  Spinners,
+} from "https://deno.land/x/kia@0.4.1/mod.ts";
 
 // import/export required
 export { CryptoJS };
