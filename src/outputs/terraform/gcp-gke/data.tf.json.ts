@@ -7,7 +7,7 @@ export default function getGKEDataTFJSON(): string {
         cndi_google_client_config: {},
       },
       template_file: {
-        firestore_csi_storage_class_manifestt: {
+        firestore_csi_storage_class_manifest: {
           template:
             '${file("firestore_csi_storage_class_manifest.yaml.tftpl")}',
         },
