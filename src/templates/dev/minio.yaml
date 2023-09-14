@@ -163,9 +163,9 @@ outputs:
     extend_basic_env: dev
     entries:
       - name: MINIO_TENANT_CREDENTIALS
-        value: |
-              "export MINIO_ROOT_USER='{{ $.cndi.prompts.responses.tenantAccessKey }}'
-               export MINIO_ROOT_PASSWORD='{{ $.cndi.prompts.responses.tenantSecretKey }}'"
+        value: >-
+          "export MINIO_ROOT_USER='{{ $.cndi.prompts.responses.tenantAccessKey }}'
+            export MINIO_ROOT_PASSWORD='{{ $.cndi.prompts.responses.tenantSecretKey }}'"
       - name: TENANT_DOMAIN_NAME
         value: '{{ $.cndi.prompts.responses.tenantDomainName }}'
   readme:
