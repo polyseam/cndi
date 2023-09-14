@@ -10,6 +10,9 @@ export default function getGKEDataTFJSON(): string {
         firestore_csi_storage_class_manifest: {
           template:
             '${file("firestore_csi_storage_class_manifest.yaml.tftpl")}',
+          vars: {
+            vpc_id: "${google_compute_network.cndi_google_compute_network.id}",
+          },
         },
         argocd_private_repo_secret_manifest: {
           template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',

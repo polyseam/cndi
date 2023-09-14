@@ -9,9 +9,10 @@ metadata:
 provisioner: filestore.csi.storage.gke.io
 parameters:
   tier: standard
-  network: default
+  network: '\${vpc_id}'
+  connect-mode: PRIVATE_SERVICE_ACCESS
 reclaimPolicy: Delete
 allowVolumeExpansion: true
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
 `.trim();
 }
