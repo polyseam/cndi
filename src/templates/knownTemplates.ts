@@ -49,30 +49,30 @@ export default function getKnownTemplates() {
       name: "eks/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.yaml`,
     },
-    // gcp
+    // gce
     {
-      name: "gcp/basic",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/basic.yaml`,
+      name: "gce/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/basic.yaml`,
     },
     {
-      name: "gcp/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/airflow.yaml`,
+      name: "gce/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/airflow.yaml`,
     },
     {
-      name: "gcp/cnpg",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/cnpg.yaml`,
+      name: "gce/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/cnpg.yaml`,
     },
     {
-      name: "gcp/hop",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/hop.yaml`,
+      name: "gce/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/hop.yaml`,
     },
     {
-      name: "gcp/neo4j",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/neo4j.yaml`,
+      name: "gce/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/neo4j.yaml`,
     },
     {
-      name: "gcp/mysql",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/mysql.yaml`,
+      name: "gce/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/mysql.yaml`,
     },
     // aks
     {
@@ -101,28 +101,28 @@ export default function getKnownTemplates() {
     },
     // azure
     {
-      name: "azure/basic",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/basic.yaml`,
+      name: "avm/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/basic.yaml`,
     },
     {
-      name: "azure/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/airflow.yaml`,
+      name: "avm/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/airflow.yaml`,
     },
     {
-      name: "azure/cnpg",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/cnpg.yaml`,
+      name: "avm/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/cnpg.yaml`,
     },
     {
-      name: "azure/hop",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/hop.yaml`,
+      name: "avm/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/hop.yaml`,
     },
     {
-      name: "azure/neo4j",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/neo4j.yaml`,
+      name: "avm/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/neo4j.yaml`,
     },
     {
-      name: "azure/mysql",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/mysql.yaml`,
+      name: "avm/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/mysql.yaml`,
     },
     // dev
     {
