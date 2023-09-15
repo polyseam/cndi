@@ -194,12 +194,13 @@ export default async function useTemplate(
     // if it's not a valid URL, assume it's a Polyseam named template
     const validTargets = [
       { name: "aws", aliasFor: "ec2" },
+      { name: "azure", aliasFor: "avm" },
+      { name: "gcp", aliasFor: "gce" },
       { name: "ec2" },
       { name: "eks" },
-      { name: "azure" },
-      { name: "gcp" },
-      { name: "dev" },
+      { name: "aks" },
       { name: "gke" },
+      { name: "dev" },
     ];
 
     const validTarget = validTargets.find((target) => {

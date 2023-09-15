@@ -95,6 +95,9 @@ groups, service principals, or managed identities at a particular scope.
    You can search for a role by name or by description. You can also filter
    roles by type and category.
 
+Add the Contributor Role and if your using a AKS cluster add the Network
+contributor role once you finish adding the Contributor role
+
 ![Add role assignment](/docs/cloud-setup-guide/azure/img/roles.png)
 
 9. Click Next.

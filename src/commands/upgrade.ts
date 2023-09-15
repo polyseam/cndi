@@ -2,7 +2,7 @@ import {
   ccolors,
   GithubProvider,
   platform,
-  SpinnerTypes,
+  Spinners,
   TerminalSpinner,
   UpgradeCommand,
   UpgradeOptions,
@@ -26,7 +26,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       text: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
       indent: 2,
-      spinner: SpinnerTypes.windows,
+      spinner: Spinners.windows,
       writer: Deno.stdout,
     });
 
