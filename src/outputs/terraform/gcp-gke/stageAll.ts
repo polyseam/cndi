@@ -32,6 +32,7 @@ import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
 import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
 import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
 import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
+import cndi_google_compute_firewall_internal from "./cndi_google_compute_firewall_internal.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
   "\nsrc/outputs/terraform/gcp-gke/stageAll.ts:",
@@ -309,6 +310,14 @@ export default async function stageTerraformResourcesForGCPGKE(
           "firestore_csi_storage_class_manifest.tf.json",
         ),
         cndi_firestore_csi_storage_class_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_google_compute_firewall_internal.tf.json",
+        ),
+        cndi_google_compute_firewall_internal(),
       ),
     ]);
   } catch (e) {

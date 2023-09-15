@@ -6,9 +6,11 @@ metadata:
   name: nfs
 provisioner: filestore.csi.storage.gke.io
 parameters:
-  tier: standard
+  tier: standard  
+  network: '\${vpc_id}'
+  connect-mode: PRIVATE_SERVICE_ACCESS
 reclaimPolicy: Delete
 allowVolumeExpansion: true
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
 `.trim();
 }
