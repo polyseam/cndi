@@ -6,7 +6,7 @@ metadata:
   name: nfs
 provisioner: filestore.csi.storage.gke.io
 parameters:
-  network: '\${vpc_id}'
+  network: cndi-vpc-network
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
