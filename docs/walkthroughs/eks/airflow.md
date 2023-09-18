@@ -233,6 +233,9 @@ instances.
 domain name you've assigned for ArgoCD in your browser to see the Argo Login
 page.
 
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your Azure Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](docs/walkthroughs/eks/port-forwarding.md)
+
 ![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
