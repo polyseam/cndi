@@ -21,8 +21,8 @@ import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_pass
 import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
 import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
 import cndi_sealed_secrets_secret_manifest from "./cndi_sealed_secrets_secret_manifest.tf.json.ts";
-import cndi_firestore_csi_storage_class_manifest from "./cndi_firestore_csi_storage_class_manifest.tf.json.ts";
-import getStorageClassManifestYamlTftpl from "src/outputs/terraform/manifest-templates/firestore_csi_storage_class_manifest.yaml.tftpl.ts";
+import cndi_filestore_csi_storage_class_manifest from "./cndi_filestore_csi_storage_class_manifest.tf.json.ts";
+import getStorageClassManifestYamlTftpl from "src/outputs/terraform/manifest-templates/filestore_csi_storage_class_manifest.yaml.tftpl.ts";
 import getSealedSecretsKeyYamlTftpl from "src/outputs/terraform/manifest-templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
 import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
@@ -299,7 +299,7 @@ export default async function stageTerraformResourcesForGCPGKE(
         path.join(
           "cndi",
           "terraform",
-          "firestore_csi_storage_class_manifest.yaml.tftpl",
+          "filestore_csi_storage_class_manifest.yaml.tftpl",
         ),
         getStorageClassManifestYamlTftpl(),
       ),
@@ -307,9 +307,9 @@ export default async function stageTerraformResourcesForGCPGKE(
         path.join(
           "cndi",
           "terraform",
-          "firestore_csi_storage_class_manifest.tf.json",
+          "filestore_csi_storage_class_manifest.tf.json",
         ),
-        cndi_firestore_csi_storage_class_manifest(),
+        cndi_filestore_csi_storage_class_manifest(),
       ),
       stageFile(
         path.join(

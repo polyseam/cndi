@@ -10,6 +10,6 @@ parameters:
   protocol: nfs
 reclaimPolicy: Delete
 allowVolumeExpansion: true
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
 `.trim();
 }

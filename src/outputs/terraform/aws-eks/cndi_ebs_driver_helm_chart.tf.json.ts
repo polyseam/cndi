@@ -20,6 +20,19 @@ export default function getEBSCSIDriverTFJSON(): string {
         name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
         value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
+      { name: "storageClasses[0].name", value: "gp3" },
+      { name: "storageClasses[0].provisioner", value: "ebs.csi.aws.com" },
+      { name: "storageClasses[0].allowVolumeExpansion", value: true },
+      {
+        name: "storageClasses[0].volumeBindingMode",
+        value: "WaitForFirstConsumer",
+      },
+      { name: "storageClasses[0].parameters.type", value: "gp3" },
+      {
+        name:
+          "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+        value: '"true"',
+      },
     ],
     version: "2.22.0",
   }, "cndi_ebs_driver_helm_chart");
