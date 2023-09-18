@@ -7,6 +7,10 @@ export default function getGKEDataTFJSON(): string {
         cndi_google_client_config: {},
       },
       template_file: {
+        filestore_csi_storage_class_manifest: {
+          template:
+            '${file("filestore_csi_storage_class_manifest.yaml.tftpl")}',
+        },
         argocd_private_repo_secret_manifest: {
           template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
           vars: {

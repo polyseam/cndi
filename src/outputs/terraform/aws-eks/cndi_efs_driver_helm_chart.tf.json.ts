@@ -20,12 +20,12 @@ export default function getEFSCSIDriverTFJSON(): string {
         name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
         value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
-      { name: "storageClasses[0].name", value: "efs" },
-      { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com " },
+      { name: "storageClasses[0].name", value: "nfs" },
+      { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com" },
       {
         name:
           "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-        value: '"true"',
+        value: '"false"',
       },
       {
         name: "storageClasses[0].parameters.provisioningMode",

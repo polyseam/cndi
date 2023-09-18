@@ -4,10 +4,9 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: nfs
-provisioner: file.csi.azure.com
+provisioner: filestore.csi.storage.gke.io
 parameters:
-  skuName: Premium_LRS
-  protocol: nfs
+  network: cndi-vpc-network
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer

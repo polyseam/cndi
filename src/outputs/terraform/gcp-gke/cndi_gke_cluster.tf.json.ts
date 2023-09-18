@@ -21,10 +21,11 @@ export default function getGCPComputeInstanceTFJSON(
         "google_project_service.cndi_google_project_service_compute",
         "google_project_service.cndi_google_project_service_k8s",
       ],
+      filestore_csi_driver: true,
       horizontal_pod_autoscaling: true,
       ip_range_pods: "k8s-pod-range",
       ip_range_services: "k8s-service-range",
-      name: "${local.cndi_project_name}-cluster",
+      name: "${local.cndi_project_name}",
       network: "${google_compute_network.cndi_google_compute_network.name}",
       node_pools: [{
         auto_repair: true,

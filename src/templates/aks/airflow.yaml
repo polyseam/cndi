@@ -191,6 +191,7 @@ outputs:
             persistence:
               enabled: true
               size: 15Gi
+              storageClassName: nfs
           createUserJob:
             useHelmHooks: false
           migrateDatabaseJob:

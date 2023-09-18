@@ -21,7 +21,8 @@ import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_pass
 import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
 import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
 import cndi_sealed_secrets_secret_manifest from "./cndi_sealed_secrets_secret_manifest.tf.json.ts";
-
+import cndi_filestore_csi_storage_class_manifest from "./cndi_filestore_csi_storage_class_manifest.tf.json.ts";
+import getStorageClassManifestYamlTftpl from "src/outputs/terraform/manifest-templates/filestore_csi_storage_class_manifest.yaml.tftpl.ts";
 import getSealedSecretsKeyYamlTftpl from "src/outputs/terraform/manifest-templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
 import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
@@ -31,6 +32,7 @@ import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
 import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
 import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
 import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
+import cndi_google_compute_firewall_internal from "./cndi_google_compute_firewall_internal.tf.json.ts";
 
 const gcpStageAllLable = ccolors.faded(
   "\nsrc/outputs/terraform/gcp-gke/stageAll.ts:",
@@ -292,6 +294,30 @@ export default async function stageTerraformResourcesForGCPGKE(
           "argocd_root_application_manifest.yaml.tftpl",
         ),
         getArgoRootApplicationManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "filestore_csi_storage_class_manifest.yaml.tftpl",
+        ),
+        getStorageClassManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "filestore_csi_storage_class_manifest.tf.json",
+        ),
+        cndi_filestore_csi_storage_class_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_google_compute_firewall_internal.tf.json",
+        ),
+        cndi_google_compute_firewall_internal(),
       ),
     ]);
   } catch (e) {

@@ -32,6 +32,9 @@ successfully:**
   access to the domain registrar so we can add a couple `A` records there for
   our cluster Ingresses.
 
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your Google Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](docs/walkthroughs/gke/port-forwarding.md)
+
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
@@ -223,6 +226,8 @@ instances.
   `public host` for Airflow and Argocd at the domain you provided.
 
 ![Google Domains](/docs/walkthroughs/gke/img/google-domains-a-record.png)
+
+- Optional[Port forwarding Argocd and the Airflow Web Server](docs/walkthroughs/gke/port-forwarding.md)
 
 ---
 
