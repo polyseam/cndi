@@ -30,7 +30,7 @@
 ![create service account](/docs/cloud-setup-guide/gcp/img/create-service-account-details.png)
 
 3. Now click `Create and Continue` and then add the following roles: Role:
-   `Compute Admin`,`Compute Network Admin`, `Compute Load Balancer Admin` and if
+   `Compute Admin`,`Compute Network Admin`, `Compute Load Balancer Admin`, `Quota Admin`, and if
    your using an GKE cluster add the `Kubernetes Engine Service Agent` role as
    well
 
