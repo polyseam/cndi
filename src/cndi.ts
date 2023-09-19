@@ -4,6 +4,7 @@ import {
   ccolors,
   Command,
   CompletionsCommand,
+  existsSync,
   HelpCommand,
   homedir,
   path,
@@ -20,7 +21,7 @@ import destroyCommand from "src/commands/destroy.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
 
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
 
@@ -29,10 +30,21 @@ export default async function cndi() {
     throw new Error("deno.json is missing a version");
   }
 
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+
   const CNDI_VERSION = `${deno_json?.version}`;
-  const CNDI_HOME = path.join(homedir() || "~", ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
+
+  // ensure CNDI_HOME/bin directory exists before installing deps
+  if (!existsSync(path.join(CNDI_HOME, "bin"), { isDirectory: true })) {
+    Deno.mkdirSync(path.join(CNDI_HOME, "bin"), { recursive: true });
+  } else {
+    // if cndi was updated in the previous execution, remove the old unused binary
+    // this is necessary because Windows will not allow you to delete a binary while it is running
+    await removeOldBinaryIfRequired(CNDI_HOME);
+  }
 
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);

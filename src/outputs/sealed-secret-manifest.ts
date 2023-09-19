@@ -1,9 +1,9 @@
-import { ccolors } from "deps";
+import { ccolors, platform } from "deps";
 import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
 import {
   emitExitEvent,
   getPathToKubesealBinary,
-  getPrettyJSONString,
+  getYAMLString,
 } from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$.cndi.secrets.seal(";
@@ -193,7 +193,7 @@ const getSealedSecretManifest = async (
   { publicKeyFilePath, dotEnvPath }: GetSealedSecretManifestOptions,
 ): Promise<string | null> => {
   let sealed = "";
-  const pathToKubeseal = await getPathToKubesealBinary();
+  const pathToKubeseal = getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
   const secretWithStringData = await parseCndiSecret(secret, dotEnvPath);
 
@@ -202,13 +202,19 @@ const getSealedSecretManifest = async (
     return null;
   }
 
+  const secretFileOptions: Deno.WriteFileOptions = {
+    create: true,
+  };
+
+  if (platform() !== "win32") {
+    // cndi.exe crashes if we do this
+    secretFileOptions.mode = 0o777;
+  }
+
   await Deno.writeTextFile(
     secretPath,
-    getPrettyJSONString(secretWithStringData),
-    {
-      create: true,
-      mode: 0o777,
-    },
+    getYAMLString(secretWithStringData),
+    secretFileOptions,
   );
 
   const kubesealCommand = new Deno.Command(pathToKubeseal, {

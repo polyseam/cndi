@@ -1,8 +1,12 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
-export default function getSecretSealedSecretsTFJSON(): string {
+export default function getSecretSealedSecretsTFJSON(
+  firstNodeGroupName: string,
+): string {
   const resource = getTFResource("kubectl_manifest", {
-    depends_on: ["aws_eks_node_group.cndi_aws_eks_node_group"],
+    depends_on: [
+      `aws_eks_node_group.cndi_aws_eks_node_group_${firstNodeGroupName}`,
+    ],
     yaml_body: "${data.template_file.sealed_secrets_secret_manifest.rendered}",
   }, "cndi_sealed_secrets_secret_manifest");
   return getPrettyJSONString(resource);

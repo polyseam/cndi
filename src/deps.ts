@@ -1,13 +1,15 @@
 // Deno std lib
 export { homedir, platform } from "node:os";
-export { copy } from "https://deno.land/std@0.196.0/streams/copy.ts";
-export { SEP } from "https://deno.land/std@0.196.0/path/mod.ts";
-export * as path from "https://deno.land/std@0.196.0/path/mod.ts";
+export { copy } from "https://deno.land/std@0.201.0/streams/copy.ts";
+export { SEP } from "https://deno.land/std@0.201.0/path/mod.ts";
+export * as path from "https://deno.land/std@0.201.0/path/mod.ts";
 export * as YAML from "https://deno.land/std@0.196.0/yaml/mod.ts";
-export { deepMerge } from "https://deno.land/std@0.196.0/collections/deep_merge.ts";
-export { walk } from "https://deno.land/std@0.196.0/fs/mod.ts";
-export * as JSONC from "https://deno.land/std@0.196.0/jsonc/mod.ts";
-export { delay } from "https://deno.land/std@0.196.0/async/delay.ts";
+export { deepMerge } from "https://deno.land/std@0.201.0/collections/deep_merge.ts";
+export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
+export * as JSONC from "https://deno.land/std@0.201.0/jsonc/mod.ts";
+export { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
+export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
+export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 
 // Third party
 //  - cliffy
@@ -43,11 +45,11 @@ export { simpleGit } from "npm:simple-git@3.18.0";
 //  - crypto-js
 import CryptoJS from "npm:crypto-js@4.1.1";
 
-//  - spinners
+// spinners
 export {
-  SpinnerTypes,
-  TerminalSpinner,
-} from "https://deno.land/x/spinners@v1.1.2/mod.ts";
+  default as TerminalSpinner,
+  Spinners,
+} from "https://deno.land/x/kia@0.4.1/mod.ts";
 
 // import/export required
 export { CryptoJS };

@@ -16,7 +16,7 @@ export default function getAWSEKServiceNodeGroupTFJSON(
     ami_type: "AL2_x86_64",
     disk_size,
     instance_types: [instance_type],
-    node_group_name: node?.name,
+    node_group_name: node.name,
     node_role_arn: "${aws_iam_role.cndi_aws_iam_role_eks_ec2.arn}",
     scaling_config: [{ desired_size, max_size, min_size }],
     capacity_type: "ON_DEMAND",
@@ -29,7 +29,7 @@ export default function getAWSEKServiceNodeGroupTFJSON(
       "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_eks_cni_policy",
       "aws_iam_role_policy_attachment.cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
     ],
-  });
+  }, `cndi_aws_eks_node_group_${node.name}`);
 
   return getPrettyJSONString(resource);
 }

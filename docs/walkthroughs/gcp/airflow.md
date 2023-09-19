@@ -39,7 +39,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Here's a guide of how to set up your Google Cloud account](/docs/cloud-setup-guide/gcp/gcp-setup.md)
+- [Here's a guide of how to set up your Google Cloud account including roles and permissions](/docs/cloud-setup-guide/gcp/gcp-setup.md)
 
 ## download cndi ⬇️
 
@@ -133,7 +133,7 @@ supplied for this project:
 
 ![GCP instances dashboard](/docs/walkthroughs/gcp/img/cndi-init-interactive.png)
 
-This process will generate a `cndi-config.jsonc` file, and `cndi` directory at
+This process will generate a `cndi-config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary cluster and
 infrastructure resources. It will also generate a `.env` file that will be used
 to store sensitive information that we don't want to commit to our repository as
@@ -154,7 +154,7 @@ The structure of the generated CNDI project will be as follows:
 │       ├── y-airflow-node.cndi-node.tf.json
 │       ├── z-airflow-node.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.jsonc
+├── cndi-config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -208,41 +208,36 @@ successfully run the workflow.
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi run` has been completed, you should be ready to log into GCP to find
-the IP address of the load balancer that we created for you in the Network tab.
-
----
+Once `cndi run` has been completed, at the end of the run will be a link to
+`resource group`, where you can view resources deployed by CNDI for this
+project. ![cndi outputs](/docs/walkthroughs/gcp/img/outputs.png)
 
 ## attach the load balancer to your domain 🌐
 
-- Go to [GCP network services console](https://cloud.google.com/net-services)
-- In the navigation pane, choose **Load Balancing**
-- Select the **Load Balancer** thats attached to your GCP Cluster
-- Copy that Load Balancer's IP in the **Addresses** section
+At the end of the cndi run there is also an output called `public host`, which
+is the **IP address** (A record) of the load Balancer thats attached to your GCP
+instances.
 
-![GCP nlb](/docs/walkthroughs/gcp/img/gcp-nlb.png)
+![cndi outputs](/docs/walkthroughs/gcp/img/outputs.png)
 
-Next we want to wire up DNS so that our domain points to the load balancer,
-which will in turn route traffic into our cluster.
-
-- Create an A record to route traffic to the load balancer IP address for
-  Airflow at the domain you provided.
-- Create an A record to route traffic to the load balancer IP address for ArgoCD
-  at the domain you provided.
+- Copy `public host`
+- Go to your custom domain,
+- Create an A record to route traffic to the load balancer IP address
+  `public host` for Airflow and Argocd at the domain you provided.
 
 ![Google Domains](/docs/walkthroughs/gcp/img/google-domains-a-record.png)
 
 ---
 
-Open the domain name you've assigned for ArgoCD in your browser to see the Argo
-Login page.
+Wait 2 to 5 mins to open the domain name you've assigned for ArgoCD in your
+browser in order to see the Argocd UI Login page.
 
-![Argocd UI](/docs/walkthroughs/aws/img/argocd-ui-0.png)
+![Argocd UI](/docs/walkthroughs/gcp/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 
-![.env file](/docs/walkthroughs/aws/img/argocd-admin-password.png)
+![.env file](/docs/walkthroughs/gcp/img/argocd-admin-password.png)
 
 Notice that the `cluster_manifests` in the GitHub repository matches config in
 the ArgoCD UI
@@ -268,8 +263,8 @@ After setting up your Airflow application on the chosen domain, it is necessary
 to verify that Airflow is accessible. To do this, the user can simply go to the
 chosen domain and see if they can see Airflow's login page. The default username
 is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Airflow. If not, the user wait, should go back and
-make sure the previous steps were was done correctly.
+can log in and begin using Airflow. If not, the user should go back and make
+sure the previous steps were done correctly.
 
 ![Airflow UI](/docs/walkthroughs/gcp/img/airflow-ui-0.png)
 
@@ -287,16 +282,32 @@ the correct credentials:
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
 Airflow and ArgoCD.
 
+## modifying the cluster! 🛠️
+
+**To add another a node to the cluster:**
+
+![cndi config](/docs/walkthroughs/gcp/img/cndi-config.png)
+
+- Go to the `cndi-config.yaml`
+- In the `infrastructure.cndi.nodes` section, add a new airflow node and save
+  the file
+- Run `cndi ow`
+- Commit changes
+- Push your code changes to the repository
+- You can confirm your resources are being created with the github actions or in
+  the google console ![Alt text](/docs/walkthroughs/gcp/img/add-node.png)
+  ![Alt text](/docs/walkthroughs/gcp/img/ow.png)
+
 ## destroying resources in the cluster! 💣
 
-**If you just want to take down any of your individual applications:**
+**If you just want to take down any of your `individual` applications:**
 
-- Delete that application or manifest from your cndi-config.jsonc
+- Delete that application or manifest from your `cndi-config.yaml`
 - Run cndi ow
 - Commit changes
 - Push your code changes to the repository
 
-**If you want to take down the entire cluster run:**
+**If you want to take down the `entire cluster` run:**
 
 ```bash
 cndi destroy

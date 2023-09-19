@@ -140,6 +140,22 @@ You should now be connected to your instance
 pairs with a minimum length of 2048 bits. Other key formats such as ED25519 and
 ECDSA are not supported.
 
+### How do I connect in my cluster in AKS
+
+[Here's a guide of how to connect to your Azure Kubernetes Cluster(AKS)](docs/walkthroughs/aks/port-forwarding.md)
+
+### How do I connect to my cluster in GKE
+
+[Here's a guide of how to connect to your Google Kubernetes Cluster(GKE)](docs/walkthroughs/gke/port-forwarding.md)
+
+### How do I connect to my cluster in EKS
+
+[Here's a guide of how to connect to your Amazon Kubernetes Cluster(EKS)](docs/walkthroughs/eks/port-forwarding.md)
+
+### how do I connect to my Kubernetes Cluster once its deployed and Port Forward
+
+Following our [port-forwarding doc](docs/port-forwarding.md).
+
 ---
 
 ## Conclusion

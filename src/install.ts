@@ -1,9 +1,11 @@
-import { ccolors, path, SpinnerTypes, TerminalSpinner } from "deps";
+import { ccolors, Spinners, TerminalSpinner } from "deps";
 
 import {
   checkInstalled,
   emitExitEvent,
   getFileSuffixForPlatform,
+  getPathToKubesealBinary,
+  getPathToTerraformBinary,
 } from "src/utils.ts";
 
 const installLabel = ccolors.faded("\nsrc/install.ts:");
@@ -25,16 +27,13 @@ export default async function installDependenciesIfRequired(
   if (force || !(await checkInstalled(CNDI_HOME))) {
     console.log(force ? "" : "cndi dependencies not installed!\n");
 
-    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
-    await Deno.mkdir(CNDI_HOME, { recursive: true });
-
     const fileSuffixForPlatform = getFileSuffixForPlatform();
 
     const spinner = new TerminalSpinner({
       text: "installing cndi dependencies...",
       color: "cyan",
       indent: 2,
-      spinner: SpinnerTypes.windows,
+      spinner: Spinners.windows,
       writer: Deno.stdout,
     });
 
@@ -43,10 +42,7 @@ export default async function installDependenciesIfRequired(
     const terraformBinaryURL =
       `https://cndi-binaries.s3.amazonaws.com/terraform/v${TERRAFORM_VERSION}/terraform-${fileSuffixForPlatform}`;
 
-    const terraformBinaryPath = path.join(
-      CNDI_HOME,
-      `terraform-${fileSuffixForPlatform}`,
-    );
+    const terraformBinaryPath = getPathToTerraformBinary();
 
     try {
       const terraformFileResponse = await fetch(terraformBinaryURL);
@@ -73,10 +69,7 @@ export default async function installDependenciesIfRequired(
       Deno.exit(300);
     }
 
-    const kubesealBinaryPath = path.join(
-      CNDI_HOME,
-      `kubeseal-${fileSuffixForPlatform}`,
-    );
+    const kubesealBinaryPath = getPathToKubesealBinary();
 
     const kubesealBinaryURL =
       `https://cndi-binaries.s3.amazonaws.com/kubeseal/v${KUBESEAL_VERSION}/kubeseal-${fileSuffixForPlatform}`;

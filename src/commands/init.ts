@@ -5,7 +5,8 @@ import {
   emitExitEvent,
   getDeploymentTargetFromConfig,
   getPrettyJSONString,
-  loadJSONC,
+  getYAMLString,
+  loadCndiConfig,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -40,9 +41,7 @@ const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
  */
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
-  .option("-f, --file <file:string>", "Path to your cndi-config.jsonc file.", {
-    default: path.join(Deno.cwd(), "cndi-config.jsonc"),
-  })
+  .option("-f, --file <file:string>", "Path to your cndi-config.yaml file.")
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
@@ -53,8 +52,14 @@ const initCommand = new Command()
   .option("-d, --debug", "Create a cndi project in debug mode.", {
     hidden: true,
   })
+  .option(
+    "-w, --workflow-ref <ref:string>",
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
+  )
   .action(async (options) => {
-    const pathToConfig = options.file;
     let template: string | undefined = options.template;
     let cndiConfig: CNDIConfig;
     let env: EnvLines;
@@ -64,38 +69,13 @@ const initCommand = new Command()
     const useCNDIConfigFile = !options.interactive && !template;
 
     if (useCNDIConfigFile) {
+      const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
       console.log(`cndi init --file "${pathToConfig}"\n`);
-      try {
-        cndiConfig = (await loadJSONC(pathToConfig)) as unknown as CNDIConfig;
+      cndiConfig = loadedConfig;
 
-        // validate config
-        await validateConfig(cndiConfig, pathToConfig);
-        project_name = cndiConfig.project_name as string;
-      } catch (e) {
-        if (e instanceof Deno.errors.NotFound) {
-          // if config is not found at 'pathToConfig' we want to throw an error
-          console.error(
-            initLabel,
-            ccolors.error(
-              `cndi-config file not found at ${
-                ccolors.user_input(
-                  `"${pathToConfig}"`,
-                )
-              }\n`,
-            ),
-          );
-
-          // and suggest a solution
-          console.log(
-            "if you don't have a cndi-config file try",
-            ccolors.prompt(
-              "cndi init --interactive",
-            ),
-          );
-          await emitExitEvent(400);
-          Deno.exit(400);
-        }
-      }
+      // validate config
+      await validateConfig(cndiConfig, pathToConfig);
+      project_name = cndiConfig.project_name as string;
     }
 
     if (options.template === "true") {
@@ -169,18 +149,15 @@ const initCommand = new Command()
     };
 
     if (template) {
-      const templateResult = await useTemplate(
-        template!,
-        {
-          project_name,
-          cndiGeneratedValues,
-          interactive: !!options.interactive,
-        },
-      );
+      const templateResult = await useTemplate(template!, {
+        project_name,
+        cndiGeneratedValues,
+        interactive: !!options.interactive,
+      });
       cndiConfig = templateResult.cndiConfig;
       await stageFile(
-        "cndi-config.jsonc",
-        getPrettyJSONString(cndiConfig),
+        "cndi-config.yaml",
+        getYAMLString(cndiConfig),
       );
       readme = templateResult.readme;
       env = templateResult.env;
@@ -210,10 +187,7 @@ const initCommand = new Command()
       );
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) {
-        await stageFile(
-          "README.md",
-          readme,
-        );
+        await stageFile("README.md", readme);
       }
     }
 
@@ -236,7 +210,7 @@ const initCommand = new Command()
 
     await stageFile(
       path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(),
+      getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
     );
 
     await stageFile(".gitignore", getGitignoreContents());

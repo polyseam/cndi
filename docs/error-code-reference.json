@@ -6,8 +6,7 @@
   },
   {
     "code": 100,
-    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
+    "message": "'GIT_USERNAME' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform"
   },
   {
     "code": 101,
@@ -54,6 +53,10 @@
     "message": "Failed to install cndi depenedency 'kubeseal'"
   },
   {
+    "code": 302,
+    "message": "Failed to delete past version of cndi binary"
+  },
+  {
     "code": 400,
     "message": "cndi-config file not found during 'cndi init'"
   },
@@ -76,6 +79,10 @@
   {
     "code": 503,
     "message": "'TERRAFORM_STATE_PASSPHRASE' env var is not set during 'cndi overwrite'"
+  },
+  {
+    "code": 504,
+    "message": "cndi-config failed to parse during 'cndi overwrite'"
   },
   {
     "code": 509,
@@ -244,6 +251,10 @@
   {
     "code": 1100,
     "message": "cndi release binary fetch not ok during 'cndi upgrade'"
+  },
+  {
+    "code": 1101,
+    "message": "cndi binary and dependency upgrade failed"
   },
   {
     "code": 1200,

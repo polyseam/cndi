@@ -5,6 +5,7 @@
   "$comment": "The root of the cndi config schema",
   "description": "A configuration file for CNDI that defines the hardware and software of your cluster",
   "required": ["infrastructure"],
+  "additionalProperties": false,
   "properties": {
     "project_name": {
       "type": "string",
@@ -104,12 +105,21 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "eks", "ec2", "gcp", "azure", "dev"]
+                    "enum": [
+                      "aws",
+                      "eks",
+                      "ec2",
+                      "gcp",
+                      "azure",
+                      "aks",
+                      "dev",
+                      "gke"
+                    ]
                   },
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
-                    "enum": ["leader", "controller"]
+                    "enum": ["leader", "controller", "worker"]
                   },
                   "instance_type": {},
                   "volume_size": {

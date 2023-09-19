@@ -21,7 +21,7 @@ export default function getEBSCSIDriverTFJSON(): string {
         value: "${aws_iam_role.cndi_aws_iam_role_web_identity_policy.arn}",
       },
     ],
-    version: "2.17.2",
+    version: "2.22.0",
   }, "cndi_ebs_driver_helm_chart");
   return getPrettyJSONString(resource);
 }

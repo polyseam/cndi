@@ -3,9 +3,9 @@
 set -e
 
 main() {
-    cndi_install="${CNDI_INSTALL:-$HOME/bin}"
+    cndi_install="${CNDI_INSTALL:-$HOME/.cndi/bin}"
     bin_suffix=""
-    if [ "$OS" = "Windows_NT" ]; then
+    if [ "$OS" = "Windows_NT" ]; then # WSL or Git Bash or Cygwin
         bin_suffix=".exe"
         target="win.exe"
     else

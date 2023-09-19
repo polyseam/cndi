@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Here's a guide of how to set up your Microsoft Azure account](/docs/cloud-setup-guide/azure/azure-setup.md)
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
 
 ## download cndi ⬇️
 
@@ -134,7 +134,7 @@ supplied for this project:
 
 ![cndi-init](/docs/walkthroughs/azure/img/cndi-init-interactive-1.png)
 
-This process will generate a `cndi-config.json` file, and `cndi` directory at
+This process will generate a `cndi-config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
 configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
@@ -154,7 +154,7 @@ The structure of the generated CNDI project will be something like this:
 │       ├── y-airflow-node.cndi-node.tf.json
 │       ├── z-airflow-node.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.jsonc
+├── cndi-config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -208,30 +208,31 @@ successfully run the workflow.
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
 
-Once `cndi run` has been completed, you should be ready to log into Azure to
-find the IP address of the load balancer that we created for you in the Network
-tab.
+Once `cndi run` has been completed, at the end of the run will be a link to
+`resource groups`, where you can view resources deployed by CNDI for this
+project.
+
+![current resource group](/docs/walkthroughs/azure/img/resource-groups.png)
 
 ---
 
 ## attach the load balancer to your domain 🌐
 
-- Go to
-  [Azure console](https://portal.azure.com/#view/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/~/loadBalancers)
-- In the navigation pane, choose **Load Balancers**
-- Select the **Load Balancer** thats attached to your azure instances
-- Copy that Load Balancer's **IP address**
+At the end of the cndi run there is also an output called `public host`, which
+is the **IP address** (A record) of the load Balancer thats attached to your
+Azure instances.
 
-![Azure nlb](/docs/walkthroughs/azure/img/azure-nlb.png)
+![cndi outputs](/docs/walkthroughs/azure/img/outputs.png)
 
-- Create an `A` record to route traffic to the load balancer IP address for
-  Airflow at the domain you provided.
-- Create an `A` record to route traffic to the load balancer IP address for
-  ArgoCD at the domain you provided.
-  ![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
+- Copy `public host`
+- Go to your custom domain,
+- Create an A record to route traffic to the load balancer IP address
+  `public host` for Airflow and Argocd at the domain you provided.
 
-Open the domain name you've assigned for ArgoCD in your browser to see the Argo
-Login page.
+![google domains](/docs/walkthroughs/azure/img/google-domains-a-record.png)
+
+Wait 2 to 5 mins to open the domain name you've assigned for ArgoCD in your
+browser in order to see the Argocd UI Login page.
 
 ![Argocd UI](/docs/walkthroughs/azure/img/argocd-ui-0.png)
 
@@ -265,8 +266,8 @@ After setting up your Airflow application on the chosen domain, it is necessary
 to verify that Airflow is accessible. To do this, the user can simply go to the
 chosen domain and see if they can see Airflow's login page. The default username
 is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Airflow. If not, the user wait, should go back and
-make sure the previous steps were was done correctly.
+can log in and begin using Airflow. If not, the user should go back and make
+sure the previous steps were done correctly.
 
 ![Airflow UI](/docs/walkthroughs/azure/img/airflow-ui-0.png)
 
@@ -284,11 +285,29 @@ the correct credentials:
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
 Airflow and ArgoCD.
 
+## modifying the cluster! 🛠️
+
+**To add another a node to the cluster:**
+
+![cndi config](/docs/walkthroughs/azure/img/cndi-config.png)
+
+- Go to the `cndi-config.yaml`
+- In the `infrastructure.cndi.nodes` section, add a new airflow node and save
+  the file
+- Run `cndi ow`
+- Commit changes
+- Push your code changes to the repository
+- You can confirm your resources are being created with the github actions or in
+  the google console
+
+![cndi-run action](/docs/walkthroughs/azure/img/add-node.png)
+![azure instances](/docs/walkthroughs/azure/img/ow.png)
+
 ## destroying resources in the cluster! 💣
 
 **If you just want to take down any of your individual applications:**
 
-- Delete that application or manifest from your `cndi-config.jsonc`
+- Delete that application or manifest from your `cndi-config.yaml`
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
