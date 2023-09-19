@@ -316,7 +316,7 @@ export default async function stageTerraformResourcesForGCPGKE(
         path.join(
           "cndi",
           "terraform",
-          "filestore_csi_storage_class_manifest.tf.json",
+          "cndi_filestore_csi_storage_class_manifest.tf.json",
         ),
         cndi_filestore_csi_storage_class_manifest(),
       ),
