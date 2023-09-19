@@ -60,7 +60,6 @@ const destroyCommand = new Command()
   .option(
     "-y, --auto-approve",
     "Skip interactive approval of plan before applying.",
-    { default: false },
   )
   .action(async (options) => {
     const cmd = "cndi destroy";
