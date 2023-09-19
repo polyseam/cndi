@@ -196,6 +196,8 @@ export default async function useTemplate(
       { name: "aws", aliasFor: "ec2" },
       { name: "azure", aliasFor: "avm" },
       { name: "gcp", aliasFor: "gce" },
+      { name: "avm" },
+      { name: "gce" },
       { name: "ec2" },
       { name: "eks" },
       { name: "aks" },
