@@ -190,7 +190,7 @@ export default async function stageTerraformResourcesForAzureAKS(
         path.join(
           "cndi",
           "terraform",
-          "azurefile_csi_storage_class_manifest.tf.json",
+          "cndi_azurefile_csi_storage_class_manifest.tf.json",
         ),
         cndi_azurefile_csi_storage_class_manifest(),
       ),
