@@ -11,6 +11,7 @@ import cndi_gke_cluster from "./cndi_gke_cluster.tf.json.ts";
 import cndi_google_compute_subnetwork from "./cndi_google_compute_subnetwork.tf.json.ts";
 import cndi_google_project_service_k8s from "./cndi_google_project_service_k8s.tf.json.ts";
 import cndi_google_project_service_compute from "./cndi_google_project_service_compute.tf.json.ts";
+import cndi_google_project_service_file from "./cndi_google_project_service_file.tf.json.ts";
 import cndi_google_project_service_cloudresourcemanager from "./cndi_google_project_service_cloudresourcemanager.tf.json.ts";
 import cndi_google_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
@@ -166,6 +167,14 @@ export default async function stageTerraformResourcesForGCPGKE(
           "cndi_google_project_service_k8s.tf.json",
         ),
         cndi_google_project_service_k8s(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_google_project_service_file.tf.json",
+        ),
+        cndi_google_project_service_file(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_google_compute_network.tf.json"),
