@@ -52,6 +52,13 @@ const initCommand = new Command()
   .option("-d, --debug", "Create a cndi project in debug mode.", {
     hidden: true,
   })
+  .option(
+    "-w, --workflow-ref <ref:string>",
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
+  )
   .action(async (options) => {
     let template: string | undefined = options.template;
     let cndiConfig: CNDIConfig;
@@ -203,7 +210,7 @@ const initCommand = new Command()
 
     await stageFile(
       path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(),
+      getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
     );
 
     await stageFile(".gitignore", getGitignoreContents());

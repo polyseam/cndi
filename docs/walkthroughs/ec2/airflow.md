@@ -37,7 +37,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Here's a guide of how to set up your Amazon Web Services account](/docs/cloud-setup-guide/ec2/aws-setup.md)
+- [Here's a guide of how to set up your Amazon Web Services account including roles and permissions](/docs/cloud-setup-guide/ec2/aws-setup.md)
 
 ## download cndi ⬇️
 

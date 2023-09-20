@@ -237,7 +237,9 @@ Airflow cluster using CNDI's `airflow` Template.
 - [ec2/airflow](docs/walkthroughs/ec2/airflow.md)
 - [eks/airflow](docs/walkthroughs/eks/airflow.md)
 - [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
+- [gke/airflow](docs/walkthroughs/gke/airflow.md)
 - [azure/airflow](docs/walkthroughs/azure/airflow.md)
+- [aks/airflow](docs/walkthroughs/aks/airflow.md)
 - [dev/airflow](docs/walkthroughs/dev/airflow.md)
 
 If you are interested in using CNDI, these walkthroughs will be entirely

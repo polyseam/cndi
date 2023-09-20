@@ -105,7 +105,16 @@
                   "kind": {
                     "type": "string",
                     "description": "The type of node to deploy.",
-                    "enum": ["aws", "eks", "ec2", "gcp", "azure", "dev", "gke"]
+                    "enum": [
+                      "aws",
+                      "eks",
+                      "ec2",
+                      "gcp",
+                      "azure",
+                      "aks",
+                      "dev",
+                      "gke"
+                    ]
                   },
                   "role": {
                     "type": "string",
