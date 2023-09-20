@@ -292,7 +292,7 @@ outputs:
           redis:
             enabled: false
   env:
-    extend_basic_env: aws
+    extend_basic_env: dev
     entries:
       - name: REDIS_HOST
         value: "{{ $.cndi.prompts.responses.redisServiceName }}-0.{{ $.cndi.prompts.responses.redisServiceName }}-headless.{{ $.cndi.prompts.responses.supersetNamespace }}.svc.cluster.local"
@@ -315,7 +315,7 @@ outputs:
       - name: POSTGRESQL_USER_PASSWORD
         value: "{{ $.cndi.prompts.responses.databaseUserPassword }}"
   readme:
-    extend_basic_readme: aws
+    extend_basic_readme: dev
     template_section: >-
       ## Apache Superset
 
@@ -323,8 +323,4 @@ outputs:
       This template deploys production ready Apache superset, a data visualization tool, it is fast, light weight,
       intuitive and loaded with options that make it easy for the users to explore and visualize their data, 
       from simple line charts to highly detailed geospatial charts. 
-      It also deploys cloud native postgress as database storage and redis as a database cache, in the same cluster. 
-
-
-
-
+      It also deploys cloud native postgress as database storage and redis as a database cache, in the same cluster.

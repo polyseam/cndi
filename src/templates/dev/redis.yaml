@@ -208,12 +208,12 @@ outputs:
         targetRevision: 0.15.0
         destinationNamespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
   env:
-    extend_basic_env: aws
+    extend_basic_env: dev
     entries:
       - name: REDISPASSWORD
         value: "{{ $.cndi.prompts.responses.defaultUserPassword }}"
   readme:
-    extend_basic_readme: aws
+    extend_basic_readme: dev
     template_section: |-
       ## Redis 
        This template deploys a Redis Operater along with Redis-Replication server with a user defined cluster size using helm chart. It also deploys Redis-Sentinel as a monitoring solution for Redis instances. Repo Url: [https://ot-container-kit.github.io/helm-charts]
