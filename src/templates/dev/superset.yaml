@@ -47,17 +47,13 @@ prompts:
     default: admin.example.com
     name: supersetadminemail
     type: Input
-  - message: "Please enter the email address you want to use for lets encrypt:"
-    default: admin@example.com
-    name: letsEncryptClusterIssuerEmailAddress
-    type: Input
 outputs:
   cndi-config:
     cndi_version: v1
     infrastructure:
       cndi:
         cert_manager:
-          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          self_signed: true
         nodes:
           - name: superset-dev-node
             kind: dev

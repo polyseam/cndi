@@ -7,10 +7,6 @@ prompts:
     name: redisDomainName
     default: redis.example.com
     type: Input
-  - message: "Please enter the email address you want to use for lets encrypt:"
-    name: letsEncryptClusterIssuerEmailAddress
-    default: admin@example.com
-    type: Input
   - message: "Please enter Redis default user password "
     default: password
     name: defaultUserPassword
@@ -29,7 +25,7 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+          self_signed: true
         nodes:
           - name: redis-dev-node
             kind: dev
