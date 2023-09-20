@@ -1,0 +1,330 @@
+prompts:
+  - name: argocdDomainName
+    default: argocd.example.com
+    message: "Please enter the domain name you want argocd to be accessible on:"
+    type: Input
+  - message: "Please enter the domain name you want superset to be accessible on:"
+    default: superset.example.com
+    name: supersetDomainName
+    type: Input
+  - message: "Please enter your destination namespace for your superset cluster:"
+    default: mysuperset
+    name: supersetNamespace
+    type: Input
+  - message: "Please enter the password for postgresql default admin user: postgres"
+    default: superset
+    name: superuserPassword
+    type: Secret
+  - message: "Please enter the name for the postgresql database user:"
+    default: superset
+    name: databaseUser
+    type: Input
+  - message: "Please enter the password for postgresql database user:"
+    default: superset
+    name: databaseUserPassword
+    type: Secret
+  - message: "Please enter the name for the postgresql database you want to use:"
+    default: superset
+    name: postgresqlDb
+    type: Input
+  - message: "Please enter the name for your postgresql cluster:"
+    default: cnpg-cluster
+    name: postgresqlClusterName
+    type: Input
+  - message: "Please enter service name for redis replication (default recommended):"
+    default: redis-replication
+    name: redisServiceName
+    type: Input
+  - message: "Please enter the password for redis default user:"
+    default: superset
+    name: defaultUserPassword
+    type: Secret
+  - message: "Please enter service name for redis sentinel (default recommended):"
+    default: redis-sentinel
+    name: sentinelServiceName
+    type: Input
+  - message: "Please enter email address you want to use for superset admin user:"
+    default: admin.example.com
+    name: supersetadminemail
+    type: Input
+  - message: "Please enter the email address you want to use for lets encrypt:"
+    default: admin@example.com
+    name: letsEncryptClusterIssuerEmailAddress
+    type: Input
+outputs:
+  cndi-config:
+    cndi_version: v1
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+        nodes:
+          - name: superset-dev-node
+            kind: dev
+            role: leader
+            volume_size: 128
+            memory: 5
+        open_ports:
+          - name: superset
+            number: 8088
+    cluster_manifests:
+      superset-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+      cnpg-cluster:
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Cluster
+        metadata:
+          name: "{{ $.cndi.prompts.responses.postgresqlClusterName }}"
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          imageName: "ghcr.io/cloudnative-pg/postgresql:15.2"
+          instances: 3
+          storage:
+            size: 1Gi
+          replicationSlots:
+            highAvailability:
+              enabled: true
+          bootstrap:
+            initdb:
+              database: "{{ $.cndi.prompts.responses.postgresqlDb }}"
+              owner: "{{ $.cndi.prompts.responses.databaseUser }}"
+              secret:
+                name: cnpg-database-user-auth-secret
+          superuserSecret:
+            name: cnpg-cluster-superuser-auth-secret
+      cnpg-cluster-superuser-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-cluster-superuser-auth-secret
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $.cndi.secrets.seal(POSTGRESQL_SUPERUSER)
+          password: $.cndi.secrets.seal(POSTGRESQL_SUPERUSER_PASSWORD)
+      cnpg-database-user-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-database-user-auth-secret
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $.cndi.secrets.seal(POSTGRESQL_USER)
+          password: $.cndi.secrets.seal(POSTGRESQL_USER_PASSWORD)
+      redis-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: redis-secret
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+        type: Opaque
+        stringData:
+          password: $.cndi.secrets.seal(REDISPASSWORD)
+      redis-replication:
+        apiVersion: redis.redis.opstreelabs.in/v1beta1
+        kind: RedisReplication
+        metadata:
+          name: "{{ $.cndi.prompts.responses.redisServiceName }}"
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          clusterSize: 3
+          podSecurityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+          kubernetesConfig:
+            image: quay.io/opstree/redis:v7.0.12
+            imagePullPolicy: IfNotPresent
+            redisSecret:
+              name: redis-secret
+              key: password
+            resources:
+              requests:
+                cpu: 201m
+                memory: 228Mi
+              limits:
+                cpu: 201m
+                memory: 228Mi
+          storage:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
+      redis-sentinel:
+        apiVersion: redis.redis.opstreelabs.in/v1beta1
+        kind: RedisSentinel
+        metadata:
+          name: "{{ $.cndi.prompts.responses.sentinelServiceName }}"
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          clusterSize: 3
+          podSecurityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+          redisSentinelConfig:
+            redisReplicationName: "{{ $.cndi.prompts.responses.redisServiceName }}"
+            redisPort: "6379"
+          kubernetesConfig:
+            image: quay.io/opstree/redis-sentinel:v7.0.7
+            imagePullPolicy: IfNotPresent
+            redisSecret:
+              name: redis-secret
+              key: password
+            resources:
+              requests:
+                cpu: 101m
+                memory: 228Mi
+              limits:
+                cpu: 101m
+                memory: 228Mi
+      superset-secrets:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: superset-secrets-env
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+          labels:
+            app: apache-superset
+        type: Opaque
+        stringData:
+          REDIS_HOST: $.cndi.secrets.seal(REDIS_HOST)
+          REDIS_PASSWORD: $.cndi.secrets.seal(REDISPASSWORD)
+          REDIS_PORT: $.cndi.secrets.seal(REDIS_PORT)
+          DB_HOST: $.cndi.secrets.seal(POSTGRESQL_HOST)
+          DB_PORT: $.cndi.secrets.seal(POSTGRESQL_PORT)
+          DB_USER: $.cndi.secrets.seal(POSTGRESQL_SUPERUSER)
+          DB_PASS: $.cndi.secrets.seal(POSTGRESQL_SUPERUSER_PASSWORD)
+          DB_NAME: $.cndi.secrets.seal(POSTGRESQL_DATABASE)
+      argo-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: argocd-server-ingress
+          namespace: argocd
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              secretName: cluster-issuer-argocd-key
+          rules:
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: argocd-server
+                        port:
+                          name: https
+      superset-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: superset-ingress
+          namespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTP
+        spec:
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.supersetDomainName }}"
+              secretName: cluster-issuer-superset-key
+          rules:
+            - host: "{{ $.cndi.prompts.responses.supersetDomainName }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: apache-superset
+                        port:
+                          number: 8088
+    applications:
+      cnpg:
+        targetRevision: 0.18.0
+        destinationNamespace: cnpg-system
+        repoURL: "https://cloudnative-pg.github.io/charts"
+        chart: cloudnative-pg
+      redis-opr:
+        repoURL: https://ot-container-kit.github.io/helm-charts
+        chart: redis-operator
+        targetRevision: 0.15.3
+        destinationNamespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+      apache-superset:
+        repoURL: https://apache.github.io/superset
+        targetRevision: 0.10.6
+        chart: superset
+        destinationNamespace: "{{ $.cndi.prompts.responses.supersetNamespace }}"
+        values:
+          envFromSecret: superset-secrets-env
+          supersetNode:
+            replicaCount: 1
+            connections:
+              redis_password: dummy
+          supersetWorker:
+            replicaCount: 1
+          init:
+            adminUser:
+              email: "{{ $.cndi.prompts.responses.supersetadminemail }}"
+          postgresql:
+            enabled: false
+          redis:
+            enabled: false
+  env:
+    extend_basic_env: aws
+    entries:
+      - name: REDIS_HOST
+        value: "{{ $.cndi.prompts.responses.redisServiceName }}-0.{{ $.cndi.prompts.responses.redisServiceName }}-headless.{{ $.cndi.prompts.responses.supersetNamespace }}.svc.cluster.local"
+      - name: REDISPASSWORD
+        value: "{{ $.cndi.prompts.responses.defaultUserPassword }}"
+      - name: REDIS_PORT
+        value: "6379"
+      - name: POSTGRESQL_HOST
+        value: "{{ $.cndi.prompts.responses.postgresqlClusterName }}-rw"
+      - name: POSTGRESQL_PORT
+        value: "5432"
+      - name: POSTGRESQL_SUPERUSER
+        value: postgres
+      - name: POSTGRESQL_SUPERUSER_PASSWORD
+        value: "{{ $.cndi.prompts.responses.superuserPassword }}"
+      - name: POSTGRESQL_DATABASE
+        value: "{{ $.cndi.prompts.responses.postgresqlDb }}"
+      - name: POSTGRESQL_USER
+        value: "{{ $.cndi.prompts.responses.databaseUser }}"
+      - name: POSTGRESQL_USER_PASSWORD
+        value: "{{ $.cndi.prompts.responses.databaseUserPassword }}"
+  readme:
+    extend_basic_readme: aws
+    template_section: >-
+      ## Apache Superset
+
+
+      This template deploys production ready Apache superset, a data visualization tool, it is fast, light weight,
+      intuitive and loaded with options that make it easy for the users to explore and visualize their data, 
+      from simple line charts to highly detailed geospatial charts. 
+      It also deploys cloud native postgress as database storage and redis as a database cache, in the same cluster. 
+
+
+
+
