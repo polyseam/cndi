@@ -277,6 +277,7 @@
   },
   {
     "code": 1202,
-    "message": "failed to parse template JSONC during 'cndi init'"
+    "message": "failed to parse template JSONC or YAML during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
   }
 ]

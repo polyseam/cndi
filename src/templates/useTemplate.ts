@@ -284,7 +284,7 @@ export default async function useTemplate(
     console.error(
       useTemplateLabel,
       ccolors.user_input(`"${templateUrl}"`),
-      ccolors.error("did not contain valid JSONC for Template"),
+      ccolors.error("did not contain valid JSONC or YAML for Template"),
     );
     console.log(ccolors.caught(parseError, 1202));
     await emitExitEvent(1202);
