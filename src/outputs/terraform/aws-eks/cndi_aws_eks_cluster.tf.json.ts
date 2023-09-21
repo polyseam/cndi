@@ -16,7 +16,6 @@ export default function getAWSEKSClusterTFJSON(
     cluster_name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
     cluster_endpoint_public_access: true,
     cluster_version: "1.27",
-    disk_size,
     manage_aws_auth_configmap: true,
     cluster_enabled_log_types: [
       "api",
@@ -29,6 +28,7 @@ export default function getAWSEKSClusterTFJSON(
       eks_nodes: {
         desired_capacity: desired_size,
         instance_type: instance_type,
+        disk_size: disk_size,
         max_capacity: max_size,
         min_capaicty: desired_size,
       },
