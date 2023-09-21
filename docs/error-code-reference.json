@@ -252,15 +252,17 @@
   {
     "code": 911,
     "message": "cndi-config invalid: can only have one node in clusters containing a 'dev' node",
-    "discussion_link":""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/577"
   },
   {
     "code": 912,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'number' key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'number' key",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/575"
   },
   {
     "code": 913,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/572"
   },
   {
     "code": 1000,
@@ -268,15 +270,18 @@
   },
   {
     "code": 1001,
-    "message": "failed to read tf state: executed outside of a git repository"
+    "message": "failed to read tf state: executed outside of a git repository",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/565"
   },
   {
     "code": 1002,
-    "message": "failed to read tf state: your repo must have atleast 1 commit"
+    "message": "failed to read tf state: your repo must have atleast 1 commit",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/558"
   },
   {
     "code": 1003,
-    "message": "failed to read tf state: your branch must be clean before executing"
+    "message": "failed to read tf state: your branch must be clean before executing",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/555"
   },
   {
     "code": 1004,
@@ -284,15 +289,18 @@
   },
   {
     "code": 1005,
-    "message": "failed to write tf state: executed outside of a git repository"
+    "message": "failed to write tf state: executed outside of a git repository",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/550"
   },
   {
     "code": 1006,
-    "message": "failed to write tf state: your branch must be clean before executing"
+    "message": "failed to write tf state: your branch must be clean before executing",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/547"
   },
   {
     "code": 1007,
-    "message": "failed to write tf state: JSON failed to parse"
+    "message": "failed to write tf state: JSON failed to parse",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/545"
   },
   {
     "code": 1008,
@@ -308,11 +316,13 @@
   },
   {
     "code": 1200,
-    "message": "cndi template name specified does not point to a valid template during 'cndi init'"
+    "message": "cndi template name specified does not point to a valid template during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/540"
   },
   {
     "code": 1201,
-    "message": "failed to fetch template during 'cndi init'"
+    "message": "failed to fetch template during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/537"
   },
   {
     "code": 1202,
