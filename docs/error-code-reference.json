@@ -212,42 +212,42 @@
   {
     "code": 903,
     "message": "cndi-config invalid: contains at least one node without a 'kind'",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/569"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/569"
   },
   {
     "code": 904,
     "message": "cndi-config invalid: contains multiple node 'kind's",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/570"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/570"
   },
   {
     "code": 905,
     "message": "cndi-config invalid: contains at least one node with a missing 'name'",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/571"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/571"
   },
   {
     "code": 906,
     "message": "cndi-config invalid: contains more than one node with the same 'name'",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/573"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/573"
   },
   {
     "code": 907,
     "message": "cndi-config invalid: does not have exactly 1 node with role 'leader'",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/574"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/574"
   },
   {
     "code": 908,
     "message": "cndi-config invalid: infrastructure.cndi.open_ports must be an array",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/576"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/576"
   },
   {
     "code": 909,
     "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/578"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/578"
   },
   {
     "code": 910,
     "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key",
-    "discussion_link":"https://github.com/orgs/polyseam/discussions/579"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/579"
   },
   {
     "code": 911,
