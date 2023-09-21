@@ -104,7 +104,9 @@ const getCoreEnvLines = async (
     console.log(
       deploymentTargetsSharedLabel,
       ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
-      ccolors.error(`is not set in environment`),
+      ccolors.error(`was not found while generating the`),
+      ccolors.key_name(`".env"`),
+      ccolors.error(`file for your cluster`),
     );
     await emitExitEvent(603);
     Deno.exit(603);
@@ -115,7 +117,9 @@ const getCoreEnvLines = async (
       ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
       ccolors.error(`and/or`),
       ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-      ccolors.error(`are not present in environment`),
+      ccolors.error(`were not found while generating the`),
+      ccolors.key_name(`".env"`),
+      ccolors.error(`file for your cluster`),
     );
     await emitExitEvent(604);
     Deno.exit(604);
@@ -125,7 +129,9 @@ const getCoreEnvLines = async (
     console.log(
       deploymentTargetsSharedLabel,
       ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-      ccolors.error(`is not set in environment`),
+      ccolors.error(`was not found while generating the`),
+      ccolors.key_name(`".env"`),
+      ccolors.error(`file for your cluster`),
     );
     await emitExitEvent(605);
     Deno.exit(605);

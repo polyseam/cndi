@@ -331,8 +331,8 @@ export default async function stageTerraformResourcesForGCPGKE(
     ]);
   } catch (e) {
     console.log(ccolors.error("failed to stage terraform resources"));
-    console.log(ccolors.caught(e, 802));
-    await emitExitEvent(802);
-    Deno.exit(802);
+    console.log(ccolors.caught(e, 809));
+    await emitExitEvent(809);
+    Deno.exit(809);
   }
 }

@@ -515,7 +515,7 @@ git clone https://github.com/polyseam/cndi
 
 Next let's [install deno](https://deno.land/#installation), though it can be
 installed with a package manager, I would recommend that you install it without
-one. Once deno is installed, make sure you add it to your PATH.
+one. Once Deno is installed, make sure you add it to your PATH.
 
 **3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno
 source code as if it were the regular CLI, without colliding with the released
