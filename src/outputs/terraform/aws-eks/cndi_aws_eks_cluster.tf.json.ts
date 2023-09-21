@@ -2,7 +2,9 @@ import { getPrettyJSONString, getTFModule } from "src/utils.ts";
 import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 import { AWSEKSNodeItemSpec } from "src/types.ts";
 
-export default function getAWSEKSClusterTFJSON(node: AWSEKSNodeItemSpec): string {
+export default function getAWSEKSClusterTFJSON(
+  node: AWSEKSNodeItemSpec,
+): string {
   const max_size = node?.max_count || 1;
   const min_size = node?.min_count || 1;
   const desired_size = min_size;
