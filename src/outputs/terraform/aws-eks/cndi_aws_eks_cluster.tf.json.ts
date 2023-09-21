@@ -17,8 +17,8 @@ export default function getAWSEKSClusterTFJSON(
     cluster_endpoint_public_access: true,
     cluster_version: "1.27",
     disk_size,
-    manage_aws_auth: false,
-    enabled_cluster_log_types: [
+    manage_aws_auth_configmap: true,
+    cluster_enabled_log_types: [
       "api",
       "audit",
       "authenticator",
@@ -29,13 +29,11 @@ export default function getAWSEKSClusterTFJSON(
       eks_nodes: {
         desired_capacity: desired_size,
         instance_type: instance_type,
-        disk_size: disk_size,
         max_capacity: max_size,
         min_capaicty: desired_size,
       },
     },
-    capacity_type: "ON_DEMAND",
-    subnets: [
+    subnet_ids: [
       "${aws_subnet.cndi_aws_subnet_private_a.id}",
     ],
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
