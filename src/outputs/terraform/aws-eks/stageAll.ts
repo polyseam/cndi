@@ -14,8 +14,7 @@ import cndi_aws_efs_access_point from "./cndi_aws_efs_access_point.tf.json.ts";
 import cndi_aws_efs_mount_target_a from "./cndi_aws_efs_mount_target_a.tf.json.ts";
 import cndi_aws_eip from "./cndi_aws_eip.tf.json.ts";
 import cndi_aws_iam_openid_connect_provider from "./cndi_aws_iam_openid_connect_provider.tf.json.ts";
-import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
-import cndi_aws_eks_node_group from "./cndi_aws_eks_node_group.tf.json.ts";
+import cndi_eks_cluster from "./cndi_eks_cluster.tf.json.ts";
 import cndi_aws_internet_gateway from "./cndi_aws_internet_gateway.tf.json.ts";
 import cndi_aws_nat_gateway from "./cndi_aws_nat_gateway.tf.json.ts";
 import cndi_aws_iam_role_web_identity_policy from "./cndi_aws_iam_role_web_identity_policy.tf.json.ts";
@@ -67,19 +66,13 @@ export default async function stageTerraformResourcesForAWS(
 ) {
   const aws_region = (Deno.env.get("AWS_REGION") as string) || "us-east-1";
   const project_name = config?.project_name;
-
-  const ports = resolveCNDIPorts(config);
-
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        `cndi_aws_eks_node_group_${node.name}.tf.json`,
-      ),
-      cndi_aws_eks_node_group(node as AWSEKSNodeItemSpec),
+      path.join("cndi", "terraform", `cndi_aks_cluster_${node.name}.tf.json`),
+      cndi_eks_cluster(node as AWSEKSNodeItemSpec),
     )
   );
+  const ports = resolveCNDIPorts(config);
 
   // we want all k8s manifests to wait until the first node group is ready
   // so we pull the node group name from the first entry in the nodes array
@@ -332,10 +325,6 @@ export default async function stageTerraformResourcesForAWS(
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_eip.tf.json"),
         cndi_aws_eip(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_eks_cluster.tf.json"),
-        cndi_aws_eks_cluster(),
       ),
       stageFile(
         path.join(
