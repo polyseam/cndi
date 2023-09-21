@@ -146,83 +146,113 @@
   },
   {
     "code": 800,
-    "message": "failed to stage all aws terraform objects during 'cndi overwrite'"
+    "message": "failed to stage all aws terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/551"
   },
   {
     "code": 801,
-    "message": "failed to stage all azure terraform objects during 'cndi overwrite'"
+    "message": "failed to stage all azure terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/552"
   },
   {
     "code": 802,
-    "message": "failed to stage all gcp terraform objects during 'cndi overwrite'"
+    "message": "failed to stage all gcp terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/554"
   },
   {
     "code": 803,
-    "message": "'GOOGLE_CREDENTIALS' env var is missing while staging terraform objects during 'cndi overwrite'"
+    "message": "'GOOGLE_CREDENTIALS' env var is missing while staging terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/556"
   },
   {
     "code": 804,
-    "message": "'GOOGLE_CREDENTIALS' env var is set to placeholder while staging terraform objects during 'cndi overwrite'"
+    "message": "'GOOGLE_CREDENTIALS' env var is set to placeholder while staging terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/557"
   },
   {
     "code": 805,
-    "message": "failed to parse 'GOOGLE_CREDENTIALS' JSON Key env var while staging terraform objects during 'cndi overwrite'"
+    "message": "failed to parse 'GOOGLE_CREDENTIALS' JSON Key env var while staging terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/559"
   },
   {
     "code": 806,
-    "message": "failed to stage all eks terraform objects during 'cndi overwrite'"
+    "message": "failed to stage all eks terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/560"
   },
   {
     "code": 807,
-    "message": "failed to stage all dev terraform objects during 'cndi overwrite'"
+    "message": "failed to stage all dev terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/562"
+  },
+  {
+    "code": 808,
+    "message": "failed to stage all aks terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/563"
+  },
+  {
+    "code": 809,
+    "message": "failed to stage all gke terraform objects during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/564"
   },
   {
     "code": 900,
-    "message": "cndi-config invalid: does not have 'project_name'"
+    "message": "cndi-config invalid: does not have 'project_name'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/566"
   },
   {
     "code": 901,
-    "message": "cndi-config invalid: does not have 'infrastructure'"
+    "message": "cndi-config invalid: does not have 'infrastructure'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/567"
   },
   {
     "code": 902,
-    "message": "cndi-config invalid: does not have any 'infrastructure.nodes'"
+    "message": "cndi-config invalid: does not have any 'infrastructure.nodes'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/568"
   },
   {
     "code": 903,
-    "message": "cndi-config invalid: contains at least one node without a 'kind'"
+    "message": "cndi-config invalid: contains at least one node without a 'kind'",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/569"
   },
   {
     "code": 904,
-    "message": "cndi-config invalid: contains multiple node 'kind's"
+    "message": "cndi-config invalid: contains multiple node 'kind's",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/570"
   },
   {
     "code": 905,
-    "message": "cndi-config invalid: contains at least one node with a missing 'name'"
+    "message": "cndi-config invalid: contains at least one node with a missing 'name'",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/571"
   },
   {
     "code": 906,
-    "message": "cndi-config invalid: contains more than one node with the same 'name'"
+    "message": "cndi-config invalid: contains more than one node with the same 'name'",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/573"
   },
   {
     "code": 907,
-    "message": "cndi-config invalid: does not have exactly 1 node with role 'leader'"
+    "message": "cndi-config invalid: does not have exactly 1 node with role 'leader'",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/574"
   },
   {
     "code": 908,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports must be an array"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports must be an array",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/576"
   },
   {
     "code": 909,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/578"
   },
   {
     "code": 910,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key"
+    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/579"
   },
   {
     "code": 911,
-    "message": "cndi-config invalid: can only have one node in clusters containing a 'dev' node"
+    "message": "cndi-config invalid: can only have one node in clusters containing a 'dev' node",
+    "discussion_link":""
   },
   {
     "code": 912,
