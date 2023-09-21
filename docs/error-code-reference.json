@@ -101,39 +101,48 @@
   },
   {
     "code": 603,
-    "message": "'ARGOCD_ADMIN_PASSWORD' missing while building .env file during 'cndi init'"
+    "message": "'ARGOCD_ADMIN_PASSWORD' missing while building .env file during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/534"
   },
   {
     "code": 604,
-    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' missing while building .env file during 'cndi init'"
+    "message": "'SEALED_SECRETS_PUBLIC_KEY' and/or 'SEALED_SECRETS_PRIVATE_KEY' missing while building .env file during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/535"
   },
   {
     "code": 605,
-    "message": "'TERRAFORM_STATE_PASSPHRASE' missing while building .env file during 'cndi init'"
+    "message": "'TERRAFORM_STATE_PASSPHRASE' missing while building .env file during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/536"
   },
   {
     "code": 606,
-    "message": "failed to generate .env invalid node 'kind'"
+    "message": "failed to generate .env invalid node 'kind'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/538"
   },
   {
     "code": 607,
-    "message": "failed to generate .env because there was no GCP key JSON found at the path specified during 'cndi init'"
+    "message": "failed to generate .env because there was no GCP key JSON found at the path specified during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/541"
   },
   {
     "code": 608,
-    "message": "failed to generate .env because the GCP key JSON found at the path specified failed to parse during 'cndi init'"
+    "message": "failed to generate .env because the GCP key JSON found at the path specified failed to parse during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/544"
   },
   {
     "code": 700,
-    "message": "Kubernetes Secret manifest 'data' was specified as a literal, Secrets must be sealed"
+    "message": "Kubernetes Secret manifest 'data' was specified as a literal, Secrets must be sealed",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/546"
   },
   {
     "code": 701,
-    "message": "Kubernetes Secret manifest 'stringData' was specified as a literal, Secrets must be sealed"
+    "message": "Kubernetes Secret manifest 'stringData' was specified as a literal, Secrets must be sealed",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/548"
   },
   {
     "code": 702,
-    "message": "Kubernetes Secret manifest has no 'data' or 'stringData', one of these must be specified"
+    "message": "Kubernetes Secret manifest has no 'data' or 'stringData', one of these must be specified",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/549"
   },
   {
     "code": 800,
