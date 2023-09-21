@@ -15,7 +15,6 @@ import cndi_aws_efs_mount_target_a from "./cndi_aws_efs_mount_target_a.tf.json.t
 import cndi_aws_eip from "./cndi_aws_eip.tf.json.ts";
 import cndi_aws_iam_openid_connect_provider from "./cndi_aws_iam_openid_connect_provider.tf.json.ts";
 import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
-import cndi_aws_eks_node_group from "./cndi_aws_eks_node_group.tf.json.ts";
 import cndi_aws_internet_gateway from "./cndi_aws_internet_gateway.tf.json.ts";
 import cndi_aws_nat_gateway from "./cndi_aws_nat_gateway.tf.json.ts";
 import cndi_aws_iam_role_web_identity_policy from "./cndi_aws_iam_role_web_identity_policy.tf.json.ts";
@@ -75,9 +74,9 @@ export default async function stageTerraformResourcesForAWS(
       path.join(
         "cndi",
         "terraform",
-        `cndi_aws_eks_node_group_${node.name}.tf.json`,
+        `cndi_aws_eks_cluster${node.name}.tf.json`,
       ),
-      cndi_aws_eks_node_group(node as AWSEKSNodeItemSpec),
+      cndi_aws_eks_cluster(node as AWSEKSNodeItemSpec),
     )
   );
 
@@ -159,7 +158,7 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "cndi_sealed_secrets_secret_manifest.tf.json",
         ),
-        cndi_sealed_secrets_secret_manifest(firstNodeGroupName),
+        cndi_sealed_secrets_secret_manifest(),
       ),
       stageFile(
         path.join(
@@ -179,7 +178,7 @@ export default async function stageTerraformResourcesForAWS(
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_argocd_helm_chart.tf.json"),
-        cndi_argocd_helm_chart(firstNodeGroupName),
+        cndi_argocd_helm_chart(),
       ),
       stageFile(
         path.join(
@@ -187,11 +186,11 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "cndi_sealed_secrets_helm_chart.tf.json",
         ),
-        cndi_sealed_secrets_helm_chart(firstNodeGroupName),
+        cndi_sealed_secrets_helm_chart(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_cert_manager_helm_chart.tf.json"),
-        cndi_cert_manager_helm_chart(firstNodeGroupName),
+        cndi_cert_manager_helm_chart(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_ebs_driver_helm_chart.tf.json"),
@@ -332,10 +331,6 @@ export default async function stageTerraformResourcesForAWS(
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_eip.tf.json"),
         cndi_aws_eip(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_eks_cluster.tf.json"),
-        cndi_aws_eks_cluster(),
       ),
       stageFile(
         path.join(

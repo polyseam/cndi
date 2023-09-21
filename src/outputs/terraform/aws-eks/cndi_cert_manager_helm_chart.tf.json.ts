@@ -1,13 +1,11 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
-export default function getCertManagerTFJSON(
-  firstNodeGroupName: string,
-): string {
+export default function getCertManagerTFJSON(): string {
   const resource = getTFResource("helm_release", {
     chart: "cert-manager",
     create_namespace: true,
     depends_on: [
-      `aws_eks_node_group.cndi_aws_eks_node_group_${firstNodeGroupName}`,
+      "module.cndi_eks_cluster",
     ],
     name: "cert-manager",
     namespace: "cert-manager",
