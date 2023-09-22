@@ -80,10 +80,6 @@ export default async function stageTerraformResourcesForAWS(
     )
   );
 
-  // we want all k8s manifests to wait until the first node group is ready
-  // so we pull the node group name from the first entry in the nodes array
-  const firstNodeGroupName = config.infrastructure.cndi.nodes[0].name;
-
   const privateRepoSecret = useSshRepoAuth()
     ? getArgoPrivateRepoSecretSSHYamlTftpl()
     : getArgoPrivateRepoSecretHTTPSYamlTftpl();
@@ -206,7 +202,7 @@ export default async function stageTerraformResourcesForAWS(
           "terraform",
           "cndi_nginx_controller_helm_chart.tf.json",
         ),
-        cndi_nginx_controller_helm_chart(firstNodeGroupName),
+        cndi_nginx_controller_helm_chart(),
       ),
 
       stageFile(
@@ -332,14 +328,7 @@ export default async function stageTerraformResourcesForAWS(
         path.join("cndi", "terraform", "cndi_aws_eip.tf.json"),
         cndi_aws_eip(),
       ),
-      stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_aws_iam_openid_connect_provider.tf.json",
-        ),
-        cndi_aws_iam_openid_connect_provider(),
-      ),
+
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_nat_gateway.tf.json"),
         cndi_aws_nat_gateway(),
