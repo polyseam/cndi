@@ -7,7 +7,7 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
         kubectl: {
           apply_retry_count: 5,
           cluster_ca_certificate:
-            "${module.cndi_aws_eks_cluster.cluster_certificate_authority_data}",
+            "${base64decode(module.cndi_aws_eks_cluster.cluster_certificate_authority_data)}",
           host: "${module.cndi_aws_eks_cluster.cluster_endpoint}",
           exec: {
             api_version: "client.authentication.k8s.io/v1beta1",
@@ -36,7 +36,7 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
         helm: {
           kubernetes: {
             cluster_ca_certificate:
-              "${module.cndi_aws_eks_cluster.cluster_certificate_authority_data}",
+              "${base64decode(module.cndi_aws_eks_cluster.cluster_certificate_authority_data)}",
             host: "${module.cndi_aws_eks_cluster.cluster_endpoint}",
             exec: {
               api_version: "client.authentication.k8s.io/v1beta1",
