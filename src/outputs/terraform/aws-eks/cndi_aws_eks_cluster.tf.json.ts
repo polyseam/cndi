@@ -35,6 +35,7 @@ export default function getAWSEKSClusterTFJSON(
     },
     subnet_ids: [
       "${aws_subnet.cndi_aws_subnet_private_a.id}",
+      "${aws_subnet.cndi_aws_subnet_private_b.id}",
     ],
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
     source: "terraform-aws-modules/eks/aws",
