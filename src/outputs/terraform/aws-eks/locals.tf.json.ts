@@ -10,8 +10,6 @@ export default function getAWSLocalsTFJSON(
   return getPrettyJSONString({
     locals: {
       aws_region,
-      cluster_ca_certificate:
-        "${module.cndi_aws_eks_cluster.certificate_authority_data}",
       cluster_endpoint: "${module.cndi_aws_eks_cluster.cluster_endpoint}",
       cluster_id:
         "${basename(module.cndi_aws_eks_cluster.cluster_oidc_issuer_url)}",

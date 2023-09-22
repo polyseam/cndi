@@ -6,7 +6,7 @@ export default function getArgoATFJSON(): string {
     cleanup_on_fail: true,
     create_namespace: "true",
     depends_on: [
-      "module.cndi_eks_cluster",
+      "module.cndi_aws_eks_cluster",
     ],
     timeout: "600",
     atomic: true,
