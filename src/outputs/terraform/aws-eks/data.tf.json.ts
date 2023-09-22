@@ -5,7 +5,7 @@ export default function getAWSDataTFJSON(): string {
     data: {
       aws_eks_cluster: {
         cndi_aws_eks_cluster: {
-          name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
+          name: "${module.cndi_aws_eks_cluster.cluster_name}",
         },
       },
       aws_lb: {
@@ -20,14 +20,13 @@ export default function getAWSDataTFJSON(): string {
       },
       aws_eks_cluster_auth: {
         cndi_aws_eks_cluster_auth: {
-          name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
+          name: "${module.cndi_aws_eks_cluster.cluster_name}",
         },
       },
 
       tls_certificate: {
         cndi_tls_certificate: {
-          url:
-            "${aws_eks_cluster.cndi_aws_eks_cluster.identity[0].oidc[0].issuer}",
+          url: "${module.cndi_aws_eks_cluster.cluster_oidc_issuer_url}",
         },
       },
 

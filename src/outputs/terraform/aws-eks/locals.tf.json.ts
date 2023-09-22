@@ -11,12 +11,12 @@ export default function getAWSLocalsTFJSON(
     locals: {
       aws_region,
       cluster_ca_certificate:
-        "${base64decode(aws_eks_cluster.cndi_aws_eks_cluster.certificate_authority.0.data)}",
-      cluster_endpoint: "${aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
+        "${module.cndi_aws_eks_cluster.certificate_authority_data}",
+      cluster_endpoint: "${module.cndi_aws_eks_cluster.cluster_endpoint}",
       cluster_id:
-        "${basename(aws_eks_cluster.cndi_aws_eks_cluster.identity[0].oidc[0].issuer)}",
-      cluster_name: "${aws_eks_cluster.cndi_aws_eks_cluster.name}",
-      cluster_user_arn: "${aws_eks_cluster.cndi_aws_eks_cluster.arn}",
+        "${basename(module.cndi_aws_eks_cluster.cluster_oidc_issuer_url)}",
+      cluster_name: "${module.cndi_aws_eks_cluster.cluster_name}",
+      cluster_user_arn: "${module.cndi_aws_eks_cluster.cluster_arn}",
       token: "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
     },
   });
