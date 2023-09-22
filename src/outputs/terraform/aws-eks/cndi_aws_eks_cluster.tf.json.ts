@@ -39,9 +39,6 @@ export default function getAWSEKSClusterTFJSON(
     vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
     source: "terraform-aws-modules/eks/aws",
     version: "19.16.0",
-    tags: {
-      "CNDIProject": "${local.cndi_project_name}",
-    },
   });
 
   return getPrettyJSONString(module);
