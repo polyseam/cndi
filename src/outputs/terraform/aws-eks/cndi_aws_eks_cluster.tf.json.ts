@@ -12,7 +12,7 @@ export default function getAWSEKSClusterTFJSON(
     node?.disk_size_gb || DEFAULT_NODE_DISK_SIZE; //GiB
   const instance_type = node?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
   // const node_group_name = node.name;
-  const module = getTFModule("eks_cluster", {
+  const module = getTFModule("aws_eks_cluster", {
     cluster_name: "${local.cndi_project_name}",
     cluster_endpoint_public_access: true,
     cluster_version: "1.27",
