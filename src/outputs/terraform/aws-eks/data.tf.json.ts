@@ -62,9 +62,7 @@ export default function getAWSDataTFJSON(): string {
           ],
         },
         cndi_aws_iam_policy_document_web_identity_policy: {
-          depends_on: [
-            "aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider",
-          ],
+          depends_on: [],
           statement: [
             {
               actions: ["sts:AssumeRoleWithWebIdentity"],
@@ -76,14 +74,14 @@ export default function getAWSDataTFJSON(): string {
                     "system:serviceaccount:kube-system:ebs-csi-controller-sa",
                   ],
                   variable:
-                    '${replace(aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider.url, "https://", "")}:sub',
+                    '${replace(module.cndi_aws_eks_cluster.cluster_oidc_issuer_url, "https://", "")}:sub',
                 },
               ],
               effect: "Allow",
               principals: [
                 {
                   identifiers: [
-                    "${aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider.arn}",
+                    "${module.cndi_aws_eks_cluster.oidc_provider_arn}",
                   ],
                   type: "Federated",
                 },
