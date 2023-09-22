@@ -3,11 +3,6 @@ import { getPrettyJSONString } from "src/utils.ts";
 export default function getAWSDataTFJSON(): string {
   return getPrettyJSONString({
     data: {
-      aws_eks_cluster: {
-        cndi_aws_eks_cluster: {
-          name: "${module.cndi_aws_eks_cluster.cluster_name}",
-        },
-      },
       aws_lb: {
         cndi_aws_lb: {
           tags: {
