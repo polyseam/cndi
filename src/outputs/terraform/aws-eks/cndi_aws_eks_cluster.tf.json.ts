@@ -16,7 +16,7 @@ export default function getAWSEKSClusterTFJSON(
     cluster_name: "${local.cndi_project_name}",
     cluster_endpoint_public_access: true,
     cluster_version: "1.27",
-    manage_aws_auth_configmap: true,
+    manage_aws_auth_configmap: false,
     cluster_enabled_log_types: [
       "api",
       "audit",
