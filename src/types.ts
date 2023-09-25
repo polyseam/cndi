@@ -7,7 +7,9 @@ export const NODE_KIND = {
   ec2: "ec2",
   gcp: "gcp",
   azure: "azure",
+  aks: "aks",
   dev: "dev",
+  gke: "gke",
 } as const;
 
 export const DEPLOYMENT_TARGET = {
@@ -79,7 +81,18 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
 }
-
+interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
+  agents_min_count?: number;
+  agents_max_count?: number;
+  agents_size?: string;
+  os_disk_size_gb?: number;
+  machine_type?: string;
+  image?: string;
+  size?: number | string;
+  volume_size?: number;
+  disk_size_gb?: number;
+  instance_type?: string;
+}
 // cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   ami?: string;
@@ -103,6 +116,17 @@ interface GCPNodeItemSpec extends BaseNodeItemSpec {
   image?: string;
   size?: number;
   volume_size?: number;
+  instance_type?: string;
+}
+
+// cndi-config.jsonc["nodes"]["entries"][kind==="gke"]
+interface GKENodeItemSpec extends BaseNodeItemSpec {
+  min_count?: number;
+  max_count?: number;
+  machine_type?: string;
+  size?: number;
+  volume_size?: number;
+  disk_size_gb?: number;
   instance_type?: string;
 }
 
@@ -264,6 +288,7 @@ export type {
   AWSDeploymentTargetConfiguration,
   AWSEC2NodeItemSpec,
   AWSEKSNodeItemSpec,
+  AzureAKSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,
   BaseNodeItemSpec,
@@ -276,6 +301,7 @@ export type {
   EnvValueEntry,
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
+  GKENodeItemSpec,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,

@@ -1,6 +1,7 @@
 const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.21.0";
 const DEFAULT_MICROK8S_VERSION = "1.27";
+const ARGOCD_VERSION = "2.7.12";
 
 const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
@@ -16,7 +17,7 @@ const NODE_DISK_SIZE_KEY = {
   azure: "disk_size_gb" as const,
 };
 
-const NON_MICROK8S_NODE_KINDS = ["eks"];
+const NON_MICROK8S_NODE_KINDS = ["eks", "gke", "aks"];
 const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
 
 const DEFAULT_OPEN_PORTS = [
@@ -34,7 +35,10 @@ const DEFAULT_OPEN_PORTS = [
   },
 ] as const;
 
+export { default as error_code_reference } from "../docs/error-code-reference.json" assert { type: "json" };
+
 export {
+  ARGOCD_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_MICROK8S_VERSION,
   DEFAULT_NODE_DISK_SIZE,

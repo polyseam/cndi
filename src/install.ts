@@ -1,4 +1,4 @@
-import { ccolors, SpinnerTypes, TerminalSpinner } from "deps";
+import { ccolors, Spinners, TerminalSpinner } from "deps";
 
 import {
   checkInstalled,
@@ -33,7 +33,7 @@ export default async function installDependenciesIfRequired(
       text: "installing cndi dependencies...",
       color: "cyan",
       indent: 2,
-      spinner: SpinnerTypes.windows,
+      spinner: Spinners.windows,
       writer: Deno.stdout,
     });
 

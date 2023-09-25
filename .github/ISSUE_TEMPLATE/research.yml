@@ -1,0 +1,31 @@
+name: Research
+description: Propose some space to investigate that may lead to a future improvement to CNDI
+# projects: ['polyseam/6'] - this is not supported, but is handled by workflows configured here: https://github.com/orgs/polyseam/projects/6/workflows
+title: "[Research]: "
+labels: ["research"]
+assignees:
+  - johnstonmatt
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve our CNDI!
+        If you are looking to improve suggest a topic for research, you're in the right spot!
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 'Please provide a summary of the area of research you suggest:'
+      description: What topic should be researched?
+      placeholder: "I think we should research using foo..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/polyseam/cndi/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

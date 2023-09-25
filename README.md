@@ -237,7 +237,9 @@ Airflow cluster using CNDI's `airflow` Template.
 - [ec2/airflow](docs/walkthroughs/ec2/airflow.md)
 - [eks/airflow](docs/walkthroughs/eks/airflow.md)
 - [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
+- [gke/airflow](docs/walkthroughs/gke/airflow.md)
 - [azure/airflow](docs/walkthroughs/azure/airflow.md)
+- [aks/airflow](docs/walkthroughs/aks/airflow.md)
 - [dev/airflow](docs/walkthroughs/dev/airflow.md)
 
 If you are interested in using CNDI, these walkthroughs will be entirely
@@ -276,12 +278,15 @@ infrastructure:
     nodes:
       - name: gcp-alpha
         kind: gcp
-        role: leader
+        role: leader # node responsible for instantiating the cluster
         machine_type: n2-standard-16
-      - name: gcp-beta
+      - name: gcp-beta # node runs the control plane by default
         kind: gcp
       - name: gcp-charlie
         kind: gcp
+      - name: gcp-delta
+        kind: gcp
+        role: worker # node does not run the control plane
 ```
 
 Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
@@ -510,7 +515,7 @@ git clone https://github.com/polyseam/cndi
 
 Next let's [install deno](https://deno.land/#installation), though it can be
 installed with a package manager, I would recommend that you install it without
-one. Once deno is installed, make sure you add it to your PATH.
+one. Once Deno is installed, make sure you add it to your PATH.
 
 **3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno
 source code as if it were the regular CLI, without colliding with the released

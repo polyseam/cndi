@@ -28,6 +28,14 @@ export default function getKnownTemplates() {
       name: "ec2/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/mysql.yaml`,
     },
+    {
+      name: "ec2/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/superset.yaml`,
+    },
+    {
+      name: "ec2/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/redis.yaml`,
+    },
     // eks
     {
       name: "eks/basic",
@@ -49,55 +57,116 @@ export default function getKnownTemplates() {
       name: "eks/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.yaml`,
     },
-    // gcp
     {
-      name: "gcp/basic",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/basic.yaml`,
+      name: "eks/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/cnpg.yaml`,
     },
     {
-      name: "gcp/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/airflow.yaml`,
+      name: "eks/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/superset.yaml`,
     },
     {
-      name: "gcp/cnpg",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/cnpg.yaml`,
+      name: "eks/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/redis.yaml`,
+    },
+    // gce
+    {
+      name: "gce/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/basic.yaml`,
     },
     {
-      name: "gcp/hop",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/hop.yaml`,
+      name: "gce/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/airflow.yaml`,
     },
     {
-      name: "gcp/neo4j",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/neo4j.yaml`,
+      name: "gce/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/cnpg.yaml`,
     },
     {
-      name: "gcp/mysql",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gcp/mysql.yaml`,
+      name: "gce/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/hop.yaml`,
+    },
+    {
+      name: "gce/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/neo4j.yaml`,
+    },
+    {
+      name: "gce/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/mysql.yaml`,
+    },
+    {
+      name: "gce/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/superset.yaml`,
+    },
+    {
+      name: "gce/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/redis.yaml`,
+    },
+    // aks
+    {
+      name: "aks/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/basic.yaml`,
+    },
+    {
+      name: "aks/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/airflow.yaml`,
+    },
+    {
+      name: "aks/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/cnpg.yaml`,
+    },
+    {
+      name: "aks/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/hop.yaml`,
+    },
+    {
+      name: "aks/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/neo4j.yaml`,
+    },
+    {
+      name: "aks/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/mysql.yaml`,
+    },
+    {
+      name: "aks/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/superset.yaml`,
+    },
+    {
+      name: "aks/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/redis.yaml`,
     },
     // azure
     {
-      name: "azure/basic",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/basic.yaml`,
+      name: "avm/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/basic.yaml`,
     },
     {
-      name: "azure/airflow",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/airflow.yaml`,
+      name: "avm/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/airflow.yaml`,
     },
     {
-      name: "azure/cnpg",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/cnpg.yaml`,
+      name: "avm/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/cnpg.yaml`,
     },
     {
-      name: "azure/hop",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/hop.yaml`,
+      name: "avm/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/hop.yaml`,
     },
     {
-      name: "azure/neo4j",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/neo4j.yaml`,
+      name: "avm/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/neo4j.yaml`,
     },
     {
-      name: "azure/mysql",
-      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/azure/mysql.yaml`,
+      name: "avm/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/mysql.yaml`,
+    },
+    {
+      name: "avm/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/superset.yaml`,
+    },
+    {
+      name: "avm/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/redis.yaml`,
     },
     // dev
     {
@@ -123,6 +192,47 @@ export default function getKnownTemplates() {
     {
       name: "dev/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/mysql.yaml`,
+    },
+    {
+      name: "dev/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/superset.yaml`,
+    },
+    {
+      name: "dev/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/redis.yaml`,
+    },
+    // gke
+    {
+      name: "gke/basic",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/basic.yaml`,
+    },
+    {
+      name: "gke/airflow",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/airflow.yaml`,
+    },
+    {
+      name: "gke/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/cnpg.yaml`,
+    },
+    {
+      name: "gke/hop",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/hop.yaml`,
+    },
+    {
+      name: "gke/neo4j",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/neo4j.yaml`,
+    },
+    {
+      name: "gke/mysql",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/mysql.yaml`,
+    },
+    {
+      name: "gke/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/superset.yaml`,
+    },
+    {
+      name: "gke/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/redis.yaml`,
     },
   ];
   return knownTemplates;

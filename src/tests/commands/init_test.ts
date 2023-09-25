@@ -22,6 +22,7 @@ import {
   // getModuleDir,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
+
 import getProjectRootDir from "get-project-root";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
@@ -630,6 +631,18 @@ Deno.test(
 );
 
 Deno.test(
+  "'cndi init -t eks/neo4j' should generate terraform files such that the filenames and resource names are the same",
+  async (t) => {
+    await t.step(setup);
+    await t.step("test", async () => {
+      const { status } = await runCndi("init", "-t", "eks/neo4j");
+      assert(status.success);
+      await ensureResourceNamesMatchFileNames();
+    });
+  },
+);
+
+Deno.test(
   "'cndi init -t eks/airflow' should generate a .env file with AWS credentials",
   async (t) => {
     await t.step(setup);
@@ -687,11 +700,23 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init -t gcp/neo4j' should generate terraform files such that the filenames and resource names are the same",
+  "'cndi init -t gce/neo4j' should generate terraform files such that the filenames and resource names are the same",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
-      const { status } = await runCndi("init", "-t", "gcp/neo4j");
+      const { status } = await runCndi("init", "-t", "gce/neo4j");
+      assert(status.success);
+      await ensureResourceNamesMatchFileNames();
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t gke/neo4j' should generate terraform files such that the filenames and resource names are the same",
+  async (t) => {
+    await t.step(setup);
+    await t.step("test", async () => {
+      const { status } = await runCndi("init", "-t", "gke/neo4j");
       assert(status.success);
       await ensureResourceNamesMatchFileNames();
     });
@@ -713,11 +738,11 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init -t azure/mongodb' should generate a .env file with Azure credentials",
+  "'cndi init -t avm/airflow' should generate a .env file with Azure credentials",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
-      const { status } = await runCndi("init", "-t", "azure/airflow");
+      const { status } = await runCndi("init", "-t", "avm/airflow");
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
       assert(dotenv.indexOf(`# Azure Resource Manager`) > -1);
       assert(dotenv.indexOf(`ARM_REGION`) > -1);
@@ -731,11 +756,41 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init -t azure/mongodb' should generate terraform files such that the filenames and resource names are the same",
+  "'cndi init -t aks/airflow' should generate a .env file with Azure credentials",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
-      const { status } = await runCndi("init", "-t", "azure/mongodb");
+      const { status } = await runCndi("init", "-t", "aks/airflow");
+      const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
+      assert(dotenv.indexOf(`# Azure Resource Manager`) > -1);
+      assert(dotenv.indexOf(`ARM_REGION`) > -1);
+      assert(dotenv.indexOf(`ARM_CLIENT_SECRET`) > -1);
+      assert(dotenv.indexOf(`ARM_CLIENT_ID`) > -1);
+      assert(dotenv.indexOf(`ARM_TENANT_ID`) > -1);
+      assert(dotenv.indexOf(`ARM_SUBSCRIPTION_ID`) > -1);
+      assert(status.success);
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t avm/mongodb' should generate terraform files such that the filenames and resource names are the same",
+  async (t) => {
+    await t.step(setup);
+    await t.step("test", async () => {
+      const { status } = await runCndi("init", "-t", "avm/mongodb");
+      assert(status.success);
+      await ensureResourceNamesMatchFileNames();
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t aks/airflow' should generate terraform files such that the filenames and resource names are the same",
+  async (t) => {
+    await t.step(setup);
+    await t.step("test", async () => {
+      const { status } = await runCndi("init", "-t", "aks/airflow");
       assert(status.success);
       await ensureResourceNamesMatchFileNames();
     });

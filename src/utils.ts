@@ -9,7 +9,7 @@ import {
   walk,
   YAML,
 } from "deps";
-import { DEFAULT_OPEN_PORTS } from "consts";
+import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
   BaseNodeItemSpec,
@@ -23,6 +23,15 @@ import {
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");
+
+// YAML.stringify but easier to work with
+function getYAMLString(object: unknown, skipInvalid = true): string {
+  // if the object contains an undefined, skipInvalid will not write the key
+  // skipInvalid: true is most similar to JSON.stringify
+  return YAML.stringify(object as Record<string, unknown>, {
+    skipInvalid,
+  });
+}
 
 async function sha256Digest(message: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
@@ -171,6 +180,8 @@ async function getLeaderNodeNameFromConfig(
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   const clusterKind = config.infrastructure.cndi.nodes[0].kind;
   if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  if (clusterKind === "aks" || clusterKind === "azure") return "azure";
+  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
   return clusterKind;
 }
 
@@ -186,6 +197,20 @@ function getTFResource(
         [name]: {
           ...content,
         },
+      },
+    },
+  };
+}
+function getTFModule(
+  module_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_${module_type}`;
+  return {
+    module: {
+      [name]: {
+        ...content,
       },
     },
   };
@@ -447,9 +472,7 @@ async function persistStagedFiles(targetDirectory: string) {
   await Deno.remove(stagingDirectory, { recursive: true });
 }
 
-async function checkInstalled(
-  CNDI_HOME: string,
-) {
+async function checkInstalled(CNDI_HOME: string) {
   try {
     // if any of these files/folders don't exist, return false
     await Promise.all([
@@ -585,9 +608,19 @@ function useSshRepoAuth(): boolean {
   );
 }
 
+const getErrorDiscussionLinkMessageForCode = (code: number): string => {
+  const codeObj = error_code_reference.find((e) => {
+    return e.code === code;
+  });
+  return codeObj?.discussion_link
+    ? `\ndiscussion: ${ccolors.prompt(codeObj.discussion_link)}`
+    : "";
+};
+
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (exit_code) console.log(getErrorDiscussionLinkMessageForCode(exit_code));
   if (isDebug) console.log("\nevent_uuid", event_uuid);
   console.log();
 }
@@ -607,8 +640,10 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFData,
+  getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
+  getYAMLString,
   loadCndiConfig,
   loadJSONC,
   loadYAML,

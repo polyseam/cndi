@@ -2,8 +2,8 @@ import { ccolors, Command, path } from "deps";
 
 import {
   emitExitEvent,
-  getPrettyJSONString,
   getStagingDir,
+  getYAMLString,
   loadCndiConfig,
   persistStagedFiles,
   stageFile,
@@ -140,7 +140,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         path.join(
           "cndi",
           "cluster_manifests",
-          "cert-manager-cluster-issuer.json",
+          "cert-manager-cluster-issuer.yaml",
         ),
         getDevClusterIssuerManifest(),
       );
@@ -149,7 +149,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
         path.join(
           "cndi",
           "cluster_manifests",
-          "cert-manager-cluster-issuer.json",
+          "cert-manager-cluster-issuer.yaml",
         ),
         getProductionClusterIssuerManifest(cert_manager?.email),
       );
@@ -170,12 +170,12 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           path.join(
             "cndi",
             "cluster_manifests",
-            "ingress-tcp-services-configmap.json",
+            "ingress-tcp-services-configmap.yaml",
           ),
           getEKSIngressTcpServicesConfigMapManifest(open_ports),
         ),
         stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-service.json"),
+          path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
           getEKSIngressServiceManifest(open_ports),
         ),
       ]);
@@ -185,12 +185,12 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           path.join(
             "cndi",
             "cluster_manifests",
-            "ingress-tcp-services-configmap.json",
+            "ingress-tcp-services-configmap.yaml",
           ),
           getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
         ),
         stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-daemonset.json"),
+          path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
           getMicrok8sIngressDaemonsetManifest(open_ports),
         ),
       ]);
@@ -204,7 +204,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
     if (manifestObj?.kind && manifestObj.kind === "Secret") {
       const secret = cluster_manifests[key] as KubernetesSecret;
-      const secretName = `${key}.json`;
+      const secretName = `${key}.yaml`;
       const sealedSecretManifest = await getSealedSecretManifest(secret, {
         publicKeyFilePath: tempPublicKeyFilePath,
         dotEnvPath,
@@ -222,10 +222,10 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       }
       continue;
     }
-    const manifestFilename = `${key}.json`;
+    const manifestFilename = `${key}.yaml`;
     await stageFile(
       path.join("cndi", "cluster_manifests", manifestFilename),
-      getPrettyJSONString(manifestObj),
+      getYAMLString(manifestObj),
     );
     console.log(
       ccolors.success("staged manifest:"),
@@ -240,7 +240,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   const { applications } = config;
 
-  // write the `cndi/cluster_manifests/applications/${applicationName}.application.json` file for each application
+  // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
   for (const releaseName in applications) {
     const applicationSpec = applications[releaseName];
     const [manifestContent, filename] = getApplicationManifest(
@@ -284,7 +284,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
 const overwriteCommand = new Command()
-  .description(`Update cndi project files using cndi-config.jsonc file.`)
+  .description(`Update cndi project files using cndi-config.yaml file.`)
   .alias("ow")
   .option("-f, --file <file:string>", "Path to your cndi-config file.")
   .option(

@@ -194,10 +194,14 @@ export default async function useTemplate(
     // if it's not a valid URL, assume it's a Polyseam named template
     const validTargets = [
       { name: "aws", aliasFor: "ec2" },
+      { name: "azure", aliasFor: "avm" },
+      { name: "gcp", aliasFor: "gce" },
+      { name: "avm" },
+      { name: "gce" },
       { name: "ec2" },
       { name: "eks" },
-      { name: "azure" },
-      { name: "gcp" },
+      { name: "aks" },
+      { name: "gke" },
       { name: "dev" },
     ];
 
@@ -280,7 +284,7 @@ export default async function useTemplate(
     console.error(
       useTemplateLabel,
       ccolors.user_input(`"${templateUrl}"`),
-      ccolors.error("did not contain valid JSONC for Template"),
+      ccolors.error("did not contain valid JSONC or YAML for Template"),
     );
     console.log(ccolors.caught(parseError, 1202));
     await emitExitEvent(1202);
