@@ -57,27 +57,6 @@ outputs:
         stringData:
           password: $.cndi.secrets.seal(REDISPASSWORD)
         type: Opaque
-      redis-issuer:
-        apiVersion: cert-manager.io/v1
-        kind: ClusterIssuer
-        metadata:
-          name: selfsigned-issuer
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
-        spec:
-          selfSigned: {}
-      redis-certificate:
-        apiVersion: cert-manager.io/v1
-        kind: Certificate
-        metadata:
-          name: redis-sentinel-cert
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
-        spec:
-          dnsNames:
-            - '{{ $.cndi.prompts.responses.redisDomainName }}'
-          secretName: myredis-secret
-          issuerRef:
-            kind: ClusterIssuer
-            name: selfsigned-issuer
       redis-rep:
         apiVersion: redis.redis.opstreelabs.in/v1beta1
         kind: RedisReplication
@@ -89,11 +68,11 @@ outputs:
         spec:
           clusterSize: '{{ $.cndi.prompts.responses.clusterSize }}'
           TLS:
-            ca: ca.crt
+            ca: tls.crt
             cert: tls.crt
             key: tls.key
             secret:
-              secretName: myredis-secret
+              secretName: cluster-issuer-redis-key
           podSecurityContext:
             runAsUser: 1000
             fsGroup: 1000
