@@ -12,7 +12,7 @@ prompts:
     name: tenantServers
     type: Number
   - message: 'Please enter the number of Volumes Per Server you want to deploy:'
-    default: 4
+    default: 2
     name: VolumesPerServer
     type: Number
   - message: 'Please enter access key for the tenant:'
