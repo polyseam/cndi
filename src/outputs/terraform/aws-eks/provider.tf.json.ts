@@ -8,7 +8,7 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
           apply_retry_count: 5,
           cluster_ca_certificate:
             "${base64decode(data.aws_eks_cluster.cndi_aws_eks_cluster.certificate_authority[0].data)}",
-          host: "${aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
+          host: "${data.aws_eks_cluster.cndi_aws_eks_cluster.endpoint}",
           exec: {
             api_version: "client.authentication.k8s.io/v1beta1",
             args: [
