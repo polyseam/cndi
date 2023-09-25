@@ -20,16 +20,16 @@ export default function getNginxControllerTFJSON(): string {
         value: "nlb",
       },
       {
-        "name": "controller.ingressClassResource.default",
-        "value": "true",
+        name: "controller.ingressClassResource.default",
+        value: "true",
       },
       {
-        "name": "controller.ingressClassResource.name",
-        "value": "public",
+        name: "controller.ingressClassResource.name",
+        value: "public",
       },
       {
-        "name": "controller.extraArgs.tcp-services-configmap",
-        "value": "ingress/ingress-nginx-controller",
+        name: "controller.extraArgs.tcp-services-configmap",
+        value: "ingress/ingress-nginx-controller",
       },
     ],
     version: "4.7.1",

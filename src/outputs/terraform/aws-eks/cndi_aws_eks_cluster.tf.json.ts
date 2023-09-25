@@ -20,9 +20,9 @@ export default function getAWSEKSClusterTFJSON(
     cluster_endpoint_private_access: true,
     cluster_addons: [
       {
-        coredns: [{ most_recent: true }],
-        "kube-proxy": [{ most_recent: true }],
-        "vpc-cni": [{ most_recent: true }],
+        coredns: {},
+        "kube-proxy": {},
+        "vpc-cni": {},
       },
     ],
     cluster_enabled_log_types: [
