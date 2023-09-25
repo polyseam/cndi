@@ -17,6 +17,7 @@ export default function getAWSEKSClusterTFJSON(
     cluster_endpoint_public_access: true,
     cluster_version: "1.27",
     manage_aws_auth_configmap: false,
+    cluster_endpoint_private_access: true,
     cluster_enabled_log_types: [
       "api",
       "audit",
