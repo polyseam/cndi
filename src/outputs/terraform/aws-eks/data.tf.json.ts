@@ -15,12 +15,12 @@ export default function getAWSDataTFJSON(): string {
       },
       aws_eks_cluster_auth: {
         cndi_aws_eks_cluster_auth: {
-          name: "${module.cndi_aws_eks_cluster.cluster_name}",
+          name: "${local.cluster_name}",
         },
       },
       aws_eks_cluster: {
         cndi_aws_eks_cluster: {
-          name: "${module.cndi_aws_eks_cluster.cluster_name}",
+          name: "${local.cluster_name}",
         },
       },
       tls_certificate: {
