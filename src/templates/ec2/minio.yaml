@@ -16,12 +16,12 @@ prompts:
     name: VolumesPerServer
     type: Number
   - message: 'Please enter access key for the tenant:'
-    default: tenantAccesskey
-    name: tenantAccesskey
+    default: accesskey
+    name: tenantAccessKey
     type: Secret
   - message: 'Please enter secret key for the tenant:'
-    default: tenantSecretkey
-    name: tenantSecretkey
+    default: secretkey
+    name: tenantSecretKey
     type: Secret
   - message: 'Please enter your destination namespace for your tenant:'
     default: tenant-a
@@ -172,8 +172,8 @@ outputs:
     entries:
       - name: MINIO_TENANT_CREDENTIALS
         value: |
-          "export MINIO_ROOT_USER={{ $.cndi.prompts.responses.tenantAccessKey }}
-           export MINIO_ROOT_PASSWORD={{ $.cndi.prompts.responses.tenantSecretKey }}"
+          "export MINIO_ROOT_USER='{{ $.cndi.prompts.responses.tenantAccessKey }}'
+          export MINIO_ROOT_PASSWORD='{{ $.cndi.prompts.responses.tenantSecretKey }}'"
 
       - name: TENANT_DOMAIN_NAME
         value: '{{ $.cndi.prompts.responses.tenantDomainName }}'
