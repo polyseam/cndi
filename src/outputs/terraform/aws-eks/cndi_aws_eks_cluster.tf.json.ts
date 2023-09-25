@@ -18,6 +18,13 @@ export default function getAWSEKSClusterTFJSON(
     cluster_version: "1.27",
     manage_aws_auth_configmap: false,
     cluster_endpoint_private_access: true,
+    cluster_addons: [
+      {
+        coredns: [{ most_recent: true }],
+        "kube-proxy": [{ most_recent: true }],
+        "vpc-cni": [{ most_recent: true }],
+      },
+    ],
     cluster_enabled_log_types: [
       "api",
       "audit",

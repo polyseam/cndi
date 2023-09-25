@@ -6,8 +6,8 @@ export default function getCertManagerTFJSON(): string {
     create_namespace: true,
     depends_on: [
       "module.cndi_aws_eks_cluster",
-      "helm_release.aws-efs-csi-driver",
-      "helm_release.aws-ebs-csi-driver",
+      "helm_release.cndi_ebs_driver_helm_chart",
+      "helm_release.cndi_efs_driver_helm_chart",
     ],
     name: "cert-manager",
     namespace: "cert-manager",
