@@ -28,6 +28,14 @@ export default function getKnownTemplates() {
       name: "ec2/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/mysql.yaml`,
     },
+    {
+      name: "ec2/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/superset.yaml`,
+    },
+    {
+      name: "ec2/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/redis.yaml`,
+    },
     // eks
     {
       name: "eks/basic",
@@ -48,6 +56,18 @@ export default function getKnownTemplates() {
     {
       name: "eks/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mysql.yaml`,
+    },
+    {
+      name: "eks/cnpg",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/cnpg.yaml`,
+    },
+    {
+      name: "eks/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/superset.yaml`,
+    },
+    {
+      name: "eks/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/redis.yaml`,
     },
     // gce
     {
@@ -74,6 +94,14 @@ export default function getKnownTemplates() {
       name: "gce/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/mysql.yaml`,
     },
+    {
+      name: "gce/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/superset.yaml`,
+    },
+    {
+      name: "gce/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/redis.yaml`,
+    },
     // aks
     {
       name: "aks/basic",
@@ -98,6 +126,14 @@ export default function getKnownTemplates() {
     {
       name: "aks/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/mysql.yaml`,
+    },
+    {
+      name: "aks/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/superset.yaml`,
+    },
+    {
+      name: "aks/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/redis.yaml`,
     },
     // azure
     {
@@ -124,6 +160,14 @@ export default function getKnownTemplates() {
       name: "avm/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/mysql.yaml`,
     },
+    {
+      name: "avm/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/superset.yaml`,
+    },
+    {
+      name: "avm/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/redis.yaml`,
+    },
     // dev
     {
       name: "dev/basic",
@@ -149,6 +193,14 @@ export default function getKnownTemplates() {
       name: "dev/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/mysql.yaml`,
     },
+    {
+      name: "dev/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/superset.yaml`,
+    },
+    {
+      name: "dev/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/redis.yaml`,
+    },
     // gke
     {
       name: "gke/basic",
@@ -173,6 +225,14 @@ export default function getKnownTemplates() {
     {
       name: "gke/mysql",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/mysql.yaml`,
+    },
+    {
+      name: "gke/superset",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/superset.yaml`,
+    },
+    {
+      name: "gke/redis",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/redis.yaml`,
     },
   ];
   return knownTemplates;

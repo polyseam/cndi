@@ -1,25 +1,25 @@
 prompts:
-  - message: 'Please enter the domain name you want argocd to be accessible on:'
+  - message: "Please enter the domain name you want argocd to be accessible on:"
     name: argocdDomainName
     default: argocd.example.com
     type: Input
-  - message: 'Please enter the domain name you want Redis to be accessible on:'
+  - message: "Please enter the domain name you want Redis to be accessible on:"
     name: redisDomainName
     default: redis.example.com
     type: Input
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     name: letsEncryptClusterIssuerEmailAddress
     default: admin@example.com
     type: Input
-  - message: 'Please enter Redis default user password '
+  - message: "Please enter Redis default user password "
     default: password
     name: defaultUserPassword
     type: Secret
-  - message: 'Please enter the namespace for the cluster'
+  - message: "Please enter the namespace for the cluster"
     default: redis-opr
     name: defaultNamespace
     type: Input
-  - message: 'Please enter the cluster size for Redis Replication'
+  - message: "Please enter the cluster size for Redis Replication"
     default: 3
     name: clusterSize
     type: Number
@@ -29,31 +29,26 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         nodes:
-          - name: x-redis-node
-            kind: azure
-            role: leader
+          - name: redis-nodes
+            kind: aks
             instance_type: Standard_D4s_v3
             volume_size: 128
-          - name: y-redis-node
-            kind: azure
-            volume_size: 128
-          - name: z-redis-node
-            kind: azure
-            volume_size: 128
+            agents_min_count: 1
+            agents_max_count: 3
         open_ports:
           - name: redisrep
             number: 6379
             service: redis-replication
-            namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+            namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
     cluster_manifests:
       redis-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: redis-secret
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         stringData:
           password: $.cndi.secrets.seal(REDISPASSWORD)
         type: Opaque
@@ -62,7 +57,7 @@ outputs:
         kind: ClusterIssuer
         metadata:
           name: selfsigned-issuer
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           selfSigned: {}
       redis-certificate:
@@ -70,10 +65,10 @@ outputs:
         kind: Certificate
         metadata:
           name: redis-sentinel-cert
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           dnsNames:
-            - '{{ $.cndi.prompts.responses.redisDomainName }}'
+            - "{{ $.cndi.prompts.responses.redisDomainName }}"
           secretName: myredis-secret
           issuerRef:
             kind: ClusterIssuer
@@ -83,11 +78,11 @@ outputs:
         kind: RedisReplication
         metadata:
           name: redis-replication
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          clusterSize: '{{ $.cndi.prompts.responses.clusterSize }}'
+          clusterSize: "{{ $.cndi.prompts.responses.clusterSize }}"
           TLS:
             ca: ca.crt
             cert: tls.crt
@@ -122,19 +117,19 @@ outputs:
         kind: RedisSentinel
         metadata:
           name: redis-sentinel
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          clusterSize: '{{ $.cndi.prompts.responses.clusterSize }}'
+          clusterSize: "{{ $.cndi.prompts.responses.clusterSize }}"
           podSecurityContext:
             runAsUser: 1000
             fsGroup: 1000
-          redisSentinelConfig: 
-            redisReplicationName : redis-replication
+          redisSentinelConfig:
+            redisReplicationName: redis-replication
             redisPort: "6379"
           kubernetesConfig:
-            image: quay.io/opstree/redis-sentinel:v7.0.7 
+            image: quay.io/opstree/redis-sentinel:v7.0.7
             imagePullPolicy: IfNotPresent
             redisSecret:
               name: redis-secret
@@ -161,16 +156,16 @@ outputs:
           namespace: argocd
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
                 paths:
                   - path: /
@@ -185,19 +180,19 @@ outputs:
         kind: Ingress
         metadata:
           name: redis-server-ingress
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.redisDomainName }}'
+                - "{{ $.cndi.prompts.responses.redisDomainName }}"
               secretName: cluster-issuer-redis-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.redisDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.redisDomainName }}"
               http:
                 paths:
                   - path: /
@@ -207,17 +202,17 @@ outputs:
                         name: redis-replication
                         port:
                           number: 6379
-    applications: 
+    applications:
       redis-opr:
         repoURL: https://ot-container-kit.github.io/helm-charts
         chart: redis-operator
         targetRevision: 0.15.0
-        destinationNamespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+        destinationNamespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
   env:
     extend_basic_env: azure
     entries:
       - name: REDISPASSWORD
-        value: '{{ $.cndi.prompts.responses.defaultUserPassword }}'
+        value: "{{ $.cndi.prompts.responses.defaultUserPassword }}"
   readme:
     extend_basic_readme: azure
     template_section: |-

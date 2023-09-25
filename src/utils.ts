@@ -9,7 +9,7 @@ import {
   walk,
   YAML,
 } from "deps";
-import { DEFAULT_OPEN_PORTS } from "consts";
+import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
   BaseNodeItemSpec,
@@ -608,9 +608,19 @@ function useSshRepoAuth(): boolean {
   );
 }
 
+const getErrorDiscussionLinkMessageForCode = (code: number): string => {
+  const codeObj = error_code_reference.find((e) => {
+    return e.code === code;
+  });
+  return codeObj?.discussion_link
+    ? `\ndiscussion: ${ccolors.prompt(codeObj.discussion_link)}`
+    : "";
+};
+
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (exit_code) console.log(getErrorDiscussionLinkMessageForCode(exit_code));
   if (isDebug) console.log("\nevent_uuid", event_uuid);
   console.log();
 }
