@@ -15,7 +15,6 @@ export default function getAWSLocalsTFJSON(
         "${basename(module.cndi_aws_eks_cluster.cluster_oidc_issuer_url)}",
       cluster_name: "${module.cndi_aws_eks_cluster.cluster_name}",
       cluster_user_arn: "${module.cndi_aws_eks_cluster.cluster_arn}",
-      token: "${data.aws_eks_cluster_auth.cndi_aws_eks_cluster_auth.token}",
     },
   });
 }
