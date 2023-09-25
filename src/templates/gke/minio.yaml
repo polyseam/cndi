@@ -47,17 +47,12 @@ outputs:
         cert_manager:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
         nodes:
-          - name: x-minio-node
-            kind: ec2
-            role: leader
-            instance_type: m5a.large
-            volume_size: 128
-          - name: y-minio-node
-            kind: ec2
-            volume_size: 128
-          - name: z-minio-node
-            kind: ec2
-            volume_size: 128
+        - name: minio-nodes
+          kind: gke
+          instance_type: n2-standard-2
+          volume_size: 128
+          min_count: 1
+          max_count: 3
     cluster_manifests:
       tenant-crd-namespace:
         apiVersion: v1

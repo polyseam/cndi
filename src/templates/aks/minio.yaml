@@ -47,17 +47,12 @@ outputs:
         cert_manager:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
         nodes:
-          - name: x-minio-node
-            kind: ec2
-            role: leader
-            instance_type: m5a.large
-            volume_size: 128
-          - name: y-minio-node
-            kind: ec2
-            volume_size: 128
-          - name: z-minio-node
-            kind: ec2
-            volume_size: 128
+        - name: minio-nodes
+          kind: aks
+          instance_type: Standard_D4s_v3
+          volume_size: 128
+          agents_min_count: 1
+          agents_max_count: 3
     cluster_manifests:
       tenant-crd-namespace:
         apiVersion: v1
@@ -167,7 +162,7 @@ outputs:
         repoURL: https://operator.min.io/
         targetRevision: 5.0.6
   env:
-    extend_basic_env: gcp
+    extend_basic_env: azure
     entries:
       - name: MINIO_TENANT_CREDENTIALS
         value: |
@@ -176,13 +171,14 @@ outputs:
       - name: TENANT_DOMAIN_NAME
         value: '{{ $.cndi.prompts.responses.tenantDomainName }}'
   readme:
-    extend_basic_readme: gcp
+    extend_basic_readme: azure
     template_section: >-
       ## Minio
 
 
       This template deploys a Standalone production ready
       [minio operator and tenant](https://github.com/minio/operator/tree/master)
+
 
       To test the connection you can install the [MinIO CLient](https://min.io/docs/minio/linux/reference/minio-mc.html).
 

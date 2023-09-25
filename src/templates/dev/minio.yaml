@@ -50,7 +50,7 @@ outputs:
           - name: x-minio-node
             kind: dev
             role: leader
-            volume_size: 256
+            volume_size: 128
     cluster_manifests:
       tenant-crd-namespace:
         apiVersion: v1
