@@ -49,6 +49,21 @@ export default function getAWSEKSClusterTFJSON(
         disk_size: disk_size,
         max_capacity: max_size,
         min_capaicty: desired_size,
+        iam_role_additional_policies: {
+          AmazonEC2ContainerRegistryReadOnly:
+            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+          AmazonEKSClusterPolicy:
+            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+          AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+          AmazonEKSServicePolicy:
+            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+          AmazonEKSVPCResourceController:
+            "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
+          AmazonEKSWorkerNodePolicy:
+            "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+          additional:
+            "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
+        },
       },
     },
     subnet_ids: [
