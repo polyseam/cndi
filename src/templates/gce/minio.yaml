@@ -48,15 +48,15 @@ outputs:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
         nodes:
           - name: x-minio-node
-            kind: gcp
+            kind: gce
             role: leader
             instance_type: n2-standard-2
             volume_size: 128
           - name: y-minio-node
-            kind: gcp
+            kind: gce
             volume_size: 128
           - name: z-minio-node
-            kind: gcp
+            kind: gce
             volume_size: 128
     cluster_manifests:
       tenant-crd-namespace:
