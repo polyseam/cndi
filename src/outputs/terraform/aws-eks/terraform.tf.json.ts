@@ -5,7 +5,7 @@ export default function getAWSTerraformTFJSON() {
   const terraform = getTerraform({
     aws: {
       source: "hashicorp/aws",
-      version: "~> 4.16",
+      version: "5.18.1",
     },
     bcrypt: { source: "viktorradnai/bcrypt", version: "0.1.2" },
     external: { source: "hashicorp/external", version: "2.2.2" },
