@@ -18,6 +18,14 @@ export default function getAWSDataTFJSON(): string {
           state: "available",
         },
       },
+      aws_iam_policy: {
+        cndi_aws_iam_policy_ec2: {
+          arn: "${aws_iam_role.cndi_aws_iam_role_ec2.arn}",
+        },
+        cndi_aws_iam_policy_eks: {
+          arn: "${aws_iam_role.cndi_aws_iam_role_eks.arn}",
+        },
+      },
       aws_iam_policy_document: {
         cndi_aws_iam_policy_document_role_ec2: {
           statement: [
