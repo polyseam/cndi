@@ -13,8 +13,6 @@ import terraform from "./terraform.tf.json.ts";
 import cndi_aws_efs_access_point from "./cndi_aws_efs_access_point.tf.json.ts";
 import cndi_aws_efs_mount_target_a from "./cndi_aws_efs_mount_target_a.tf.json.ts";
 import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
-import cndi_aws_iam_role_ec2 from "./cndi_aws_iam_role_ec2.tf.json.ts";
-import cndi_aws_iam_role_eks from "./cndi_aws_iam_role_eks.tf.json.ts";
 import cndi_aws_iam_role_web_identity from "./cndi_aws_iam_role_web_identity.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
@@ -199,14 +197,6 @@ export default async function stageTerraformResourcesForAWS(
           "cndi_bcrypt_hash_argocd_admin_password.tf.json",
         ),
         cndi_bcrypt_hash_argocd_admin_password(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_iam_role_ec2.tf.json"),
-        cndi_aws_iam_role_ec2(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_aws_iam_role_eks.tf.json"),
-        cndi_aws_iam_role_eks(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_efs_access_point.tf.json"),
