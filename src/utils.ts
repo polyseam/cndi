@@ -9,7 +9,7 @@ import {
   walk,
   YAML,
 } from "deps";
-import { DEFAULT_OPEN_PORTS } from "consts";
+import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
   BaseNodeItemSpec,
@@ -180,6 +180,8 @@ async function getLeaderNodeNameFromConfig(
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
   const clusterKind = config.infrastructure.cndi.nodes[0].kind;
   if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
+  if (clusterKind === "aks" || clusterKind === "azure") return "azure";
+  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
   return clusterKind;
 }
 
@@ -195,6 +197,20 @@ function getTFResource(
         [name]: {
           ...content,
         },
+      },
+    },
+  };
+}
+function getTFModule(
+  module_type: string,
+  content: Record<never, never>,
+  resourceName?: string,
+) {
+  const name = resourceName ? resourceName : `cndi_${module_type}`;
+  return {
+    module: {
+      [name]: {
+        ...content,
       },
     },
   };
@@ -592,9 +608,19 @@ function useSshRepoAuth(): boolean {
   );
 }
 
+const getErrorDiscussionLinkMessageForCode = (code: number): string => {
+  const codeObj = error_code_reference.find((e) => {
+    return e.code === code;
+  });
+  return codeObj?.discussion_link
+    ? `\ndiscussion: ${ccolors.prompt(codeObj.discussion_link)}`
+    : "";
+};
+
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (exit_code) console.log(getErrorDiscussionLinkMessageForCode(exit_code));
   if (isDebug) console.log("\nevent_uuid", event_uuid);
   console.log();
 }
@@ -614,6 +640,7 @@ export {
   getSecretOfLength,
   getStagingDir,
   getTFData,
+  getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
   getYAMLString,

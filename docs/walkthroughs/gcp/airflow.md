@@ -39,7 +39,7 @@ successfully:**
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- [Here's a guide of how to set up your Google Cloud account](/docs/cloud-setup-guide/gcp/gcp-setup.md)
+- [Here's a guide of how to set up your Google Cloud account including roles and permissions](/docs/cloud-setup-guide/gcp/gcp-setup.md)
 
 ## download cndi ⬇️
 
