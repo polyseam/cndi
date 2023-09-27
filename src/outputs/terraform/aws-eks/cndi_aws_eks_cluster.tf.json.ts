@@ -18,23 +18,6 @@ export default function getAWSEKSClusterTFJSON(
     cluster_version: "1.27",
     manage_aws_auth_configmap: false,
     cluster_endpoint_private_access: true,
-    iam_role_additional_policies: {
-      AmazonEC2ContainerRegistryReadOnly:
-        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-      AmazonEKSVPCResourceController:
-        "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
-      AmazonEKSWorkerNodePolicy:
-        "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-      additional: "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
-    },
-    cluster_addons: {
-      coredns: {},
-      "kube-proxy": {},
-      "vpc-cni": {},
-    },
     cluster_enabled_log_types: [
       "api",
       "audit",
@@ -42,40 +25,47 @@ export default function getAWSEKSClusterTFJSON(
       "controllerManager",
       "scheduler",
     ],
+    eks_managed_node_group_defaults: {
+      ami_type: "AL2_x86_64",
+    },
+    create_iam_role: false,
+    iam_role_arn: "${aws_iam_role_eks.cndi_aws_iam_role_eks.arn}",
+    iam_role_additional_policies: {
+      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+      WebId: "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
+    },
+
     eks_managed_node_groups: {
-      eks_nodes: {
-        desired_capacity: desired_size,
+      eks_node_group: {
+        name: node?.name,
         instance_type: instance_type,
         disk_size: disk_size,
         max_capacity: max_size,
         min_capaicty: desired_size,
+        create_iam_role: false,
+        iam_role_arn: "${aws_iam_role_ec2.cndi_aws_iam_role_ec2.arn}",
         iam_role_additional_policies: {
           AmazonEC2ContainerRegistryReadOnly:
             "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-          AmazonEKSClusterPolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
           AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-          AmazonEKSServicePolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-          AmazonEKSVPCResourceController:
-            "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
           AmazonEKSWorkerNodePolicy:
             "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-          additional:
+          AmazonEBSCSIDriverPolicy:
+            "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+          AmazonEFSCSIDriverPolicy:
+            "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
+          WebIdentity:
             "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
         },
       },
     },
-    subnet_ids: [
-      "${aws_subnet.cndi_aws_subnet_private_a.id}",
-      "${aws_subnet.cndi_aws_subnet_private_b.id}",
-    ],
-    vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
+    subnet_ids: "${module.cndi_aws_vpc.private_subnets}",
+    vpc_id: "${module.cndi_aws_vpc.id}",
     source: "terraform-aws-modules/eks/aws",
     version: "19.16.0",
     tags: {
-      Name: "EKSClusterControlPlane",
-      "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
+      CNDIProject: "${local.cndi_project_name}",
     },
   });
 

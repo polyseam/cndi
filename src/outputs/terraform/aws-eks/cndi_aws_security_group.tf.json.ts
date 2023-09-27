@@ -49,7 +49,7 @@ export default function getAWSSecurityGroupTFJSON(ports: CNDIPort[]): string {
       },
     ],
     ingress,
-    vpc_id: "${aws_vpc.cndi_aws_vpc.id}",
+    vpc_id: "${module.cndi_aws_vpc.id}",
     tags: {
       Name: "SecurityGroup",
     },

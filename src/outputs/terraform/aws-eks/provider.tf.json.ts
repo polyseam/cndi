@@ -4,6 +4,23 @@ export default function getAWSComputeEngineProviderTFJSON(): string {
   return getPrettyJSONString({
     provider: [
       {
+        kubernetes: {
+          cluster_ca_certificate:
+            "${base64decode(module.cndi_aws_eks_cluster.cluster_certificate_authority_data)}",
+          host: "${module.cndi_aws_eks_cluster.cluster_endpoint}",
+          exec: {
+            api_version: "client.authentication.k8s.io/v1beta1",
+            args: [
+              "eks",
+              "get-token",
+              "--cluster-name",
+              "${local.cndi_project_name}",
+            ],
+            command: "aws",
+          },
+        },
+      },
+      {
         kubectl: {
           apply_retry_count: 5,
           cluster_ca_certificate:
