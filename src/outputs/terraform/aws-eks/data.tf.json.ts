@@ -19,6 +19,34 @@ export default function getAWSDataTFJSON(): string {
         },
       },
       aws_iam_policy_document: {
+        cndi_aws_iam_policy_document_role_ec2: {
+          statement: [
+            {
+              actions: ["sts:AssumeRole"],
+              effect: "Allow",
+              principals: [
+                {
+                  identifiers: ["ec2.amazonaws.com"],
+                  type: "Service",
+                },
+              ],
+            },
+          ],
+        },
+        cndi_aws_iam_policy_document_role_eks: {
+          statement: [
+            {
+              actions: ["sts:AssumeRole"],
+              effect: "Allow",
+              principals: [
+                {
+                  identifiers: ["eks.amazonaws.com"],
+                  type: "Service",
+                },
+              ],
+            },
+          ],
+        },
         cndi_aws_iam_policy_document_web_identity_policy: {
           depends_on: [],
           statement: [
