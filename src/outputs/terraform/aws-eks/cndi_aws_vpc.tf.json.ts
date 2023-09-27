@@ -2,7 +2,8 @@ import { getPrettyJSONString, getTFModule } from "src/utils.ts";
 
 export default function getAWSVPCTFJSON(): string {
   const module = getTFModule("aws_vpc", {
-    azs: "${slice(data.aws_availability_zones.available.names, 0, 3)}",
+    azs:
+      "${slice(data.aws_availability_zones.cndi_aws_availability_zones.names, 0, 3)}",
     cidr: "10.0.0.0/16",
     enable_dns_hostnames: true,
     enable_nat_gateway: true,

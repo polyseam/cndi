@@ -47,7 +47,7 @@ export default function getAWSDataTFJSON(): string {
             },
           ],
         },
-        cndi_aws_iam_policy_document_web_identity_policy: {
+        cndi_aws_iam_policy_document_web_identity: {
           depends_on: [],
           statement: [
             {
