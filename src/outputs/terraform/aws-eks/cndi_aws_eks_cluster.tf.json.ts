@@ -32,7 +32,8 @@ export default function getAWSEKSClusterTFJSON(
     iam_role_additional_policies: {
       AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
       AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-      EKS: "${aws_iam_role.cndi_aws_iam_role_eks.arn}",
+      EKS:
+        "${data.aws_iam_policy_document.cndi_aws_iam_policy_document_role_eks.json}",
     },
 
     eks_managed_node_groups: {
@@ -53,7 +54,8 @@ export default function getAWSEKSClusterTFJSON(
             "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
           AmazonEFSCSIDriverPolicy:
             "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
-          EC2: "${aws_iam_role.cndi_aws_iam_role_ec2.arn}",
+          EC2:
+            "${data.aws_iam_policy_document.cndi_aws_iam_policy_document_role_ec2.json}",
         },
       },
     },
