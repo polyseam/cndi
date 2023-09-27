@@ -50,7 +50,7 @@ outputs:
           - name: x-minio-node
             kind: gcp
             role: leader
-            instance_type: m5a.large
+            instance_type: n2-standard-2
             volume_size: 128
           - name: y-minio-node
             kind: gcp

@@ -48,15 +48,15 @@ outputs:
           email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
         nodes:
           - name: x-minio-node
-            kind: ec2
+            kind: azure
             role: leader
-            instance_type: m5a.large
+            instance_type: Standard_D4s_v3
             volume_size: 128
           - name: y-minio-node
-            kind: ec2
+            kind: azure
             volume_size: 128
           - name: z-minio-node
-            kind: ec2
+            kind: azure
             volume_size: 128
     cluster_manifests:
       tenant-crd-namespace:
