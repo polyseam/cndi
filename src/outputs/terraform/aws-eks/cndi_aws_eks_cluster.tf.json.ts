@@ -29,11 +29,11 @@ export default function getAWSEKSClusterTFJSON(
       ami_type: "AL2_x86_64",
     },
     create_iam_role: false,
-    iam_role_arn: "${aws_iam_role_eks.cndi_aws_iam_role_eks.arn}",
+    iam_role_arn: "${aws_iam_role.cndi_aws_iam_role_eks.arn}",
     iam_role_additional_policies: {
       AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
       AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-      WebId: "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
+      WebId: "${aws_iam_policy.cndi_aws_iam_policy_web_identity_policy.arn}",
     },
 
     eks_managed_node_groups: {
@@ -44,7 +44,7 @@ export default function getAWSEKSClusterTFJSON(
         max_capacity: max_size,
         min_capaicty: desired_size,
         create_iam_role: false,
-        iam_role_arn: "${aws_iam_role_ec2.cndi_aws_iam_role_ec2.arn}",
+        iam_role_arn: "${aws_iam_role.cndi_aws_iam_role_ec2.arn}",
         iam_role_additional_policies: {
           AmazonEC2ContainerRegistryReadOnly:
             "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
@@ -56,12 +56,12 @@ export default function getAWSEKSClusterTFJSON(
           AmazonEFSCSIDriverPolicy:
             "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
           WebIdentity:
-            "${aws_iam_policy.cndi_aws_iam_role_web_identity_policy.arn}",
+            "${aws_iam_policy.cndi_aws_iam_policy_web_identity_policy.arn}",
         },
       },
     },
     subnet_ids: "${module.cndi_aws_vpc.private_subnets}",
-    vpc_id: "${module.cndi_aws_vpc.id}",
+    vpc_id: "${module.cndi_aws_vpc.vpc_id}",
     source: "terraform-aws-modules/eks/aws",
     version: "19.16.0",
     tags: {
