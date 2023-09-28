@@ -9,13 +9,13 @@ export default function getAWSVPCTFJSON(): string {
     enable_nat_gateway: true,
     name: "VPC",
     private_subnet_tags: {
-      "kubernetes.io/cluster/${local.cndi_project_name}": "shared",
+      "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
       "kubernetes.io/role/internal-elb": 1,
     },
 
     private_subnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
     public_subnet_tags: {
-      "kubernetes.io/cluster/${local.cndi_project_name}": "shared",
+      "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
       "kubernetes.io/role/elb": 1,
     },
 

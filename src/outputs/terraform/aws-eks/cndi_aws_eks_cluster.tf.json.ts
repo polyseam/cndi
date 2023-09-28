@@ -30,9 +30,12 @@ export default function getAWSEKSClusterTFJSON(
       "kube-proxy": {},
       "vpc-cni": {},
     },
-    eks_managed_node_group_defaults: {
-      ami_type: "AL2_x86_64",
-      instance_type: instance_type,
+    create_iam_role: true,
+    iam_role_additional_policies: {
+      "AmazonEKSClusterPolicy":
+        "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      "AmazonEKSServicePolicy":
+        "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
     },
     eks_managed_node_groups: {
       eks_node_group: {
@@ -41,12 +44,9 @@ export default function getAWSEKSClusterTFJSON(
         disk_size: disk_size,
         max_capacity: max_size,
         min_capaicty: desired_size,
+        desired_size: desired_size,
         create_iam_role: true,
         iam_role_additional_policies: {
-          AmazonEKSClusterPolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-          AmazonEKSServicePolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
           AmazonEC2ContainerRegistryReadOnly:
             "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
           AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
