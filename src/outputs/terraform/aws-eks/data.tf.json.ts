@@ -13,6 +13,9 @@ export default function getAWSDataTFJSON(): string {
           ],
         },
       },
+      aws_caller_identity: {
+        cndi_aws_caller_identity: {},
+      },
       aws_availability_zones: {
         cndi_aws_availability_zones: {
           state: "available",
@@ -83,7 +86,7 @@ export default function getAWSDataTFJSON(): string {
             },
           ],
         },
-        "cndi_aws_iam_policy_document_permissions": {
+        cndi_aws_iam_policy_document_permissions: {
           "statement": [
             {
               "actions": [
