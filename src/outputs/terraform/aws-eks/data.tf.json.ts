@@ -3,6 +3,14 @@ import { getPrettyJSONString } from "src/utils.ts";
 export default function getAWSDataTFJSON(): string {
   return getPrettyJSONString({
     data: {
+      aws_eks_cluster: {
+        cndi_aws_eks_cluster: {
+          name: "${module.cndi_aws_eks_cluster.cluster_name}",
+          depends_on: [
+            "module.cndi_aws_eks_cluster",
+          ],
+        },
+      },
       aws_lb: {
         cndi_aws_lb: {
           tags: {
@@ -19,14 +27,6 @@ export default function getAWSDataTFJSON(): string {
       aws_availability_zones: {
         cndi_aws_availability_zones: {
           state: "available",
-        },
-      },
-      aws_iam_policy: {
-        cndi_aws_iam_policy_ec2: {
-          arn: "${aws_iam_role.cndi_aws_iam_role_ec2.arn}",
-        },
-        cndi_aws_iam_policy_eks: {
-          arn: "${aws_iam_role.cndi_aws_iam_role_eks.arn}",
         },
       },
       aws_iam_policy_document: {
