@@ -16,6 +16,7 @@ import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment_web_identity from "./cndi_aws_iam_role_policy_attachment_web_identity.tf.json.ts";
 import cndi_aws_iam_role_ec2 from "./cndi_aws_iam_role_ec2.tf.json.ts";
 import cndi_aws_iam_role_eks from "./cndi_aws_iam_role_eks.tf.json.ts";
+import cndi_aws_iam_policy_web_identity from "./cndi_aws_iam_policy_web_identity.tf.json.ts";
 import cndi_aws_iam_role_web_identity from "./cndi_aws_iam_role_web_identity.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
@@ -151,6 +152,14 @@ export default async function stageTerraformResourcesForAWS(
           "cndi_argocd_root_application_manifest.tf.json",
         ),
         cndi_argocd_root_application_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_policy_web_identity.tf.json",
+        ),
+        cndi_aws_iam_policy_web_identity(),
       ),
       stageFile(
         path.join(
