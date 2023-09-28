@@ -30,6 +30,10 @@ export default function getAWSEKSClusterTFJSON(
       "kube-proxy": {},
       "vpc-cni": {},
     },
+    eks_managed_node_group_defaults: {
+      ami_type: "AL2_x86_64",
+      instance_type: instance_type,
+    },
     eks_managed_node_groups: {
       eks_node_group: {
         name: node?.name,
@@ -62,6 +66,9 @@ export default function getAWSEKSClusterTFJSON(
     tags: {
       CNDIProject: "${local.cndi_project_name}",
     },
+    depends_on: [
+      "module.cndi_aws_vpc",
+    ],
   });
 
   return getPrettyJSONString(module);

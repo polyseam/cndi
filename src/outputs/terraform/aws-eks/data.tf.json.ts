@@ -79,9 +79,9 @@ export default function getAWSDataTFJSON(): string {
           ],
         },
         cndi_aws_iam_policy_document_permissions: {
-          "statement": [
+          statement: [
             {
-              "actions": [
+              actions: [
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeLaunchConfigurations",
@@ -105,62 +105,62 @@ export default function getAWSDataTFJSON(): string {
                 "elasticfilesystem:DescribeMountTargets",
                 "ec2:DescribeAvailabilityZones",
               ],
-              "effect": "Allow",
-              "resources": [
+              effect: "Allow",
+              resources: [
                 "*",
               ],
             },
             {
-              "actions": [
+              actions: [
                 "elasticfilesystem:CreateAccessPoint",
               ],
-              "condition": [
+              condition: [
                 {
-                  "test": "StringLike",
-                  "values": [
+                  test: "StringLike",
+                  values: [
                     "true",
                   ],
                   "variable": "aws:RequestTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
+              effect: "Allow",
+              resources: [
                 "*",
               ],
             },
             {
-              "actions": [
+              actions: [
                 "elasticfilesystem:TagResource",
               ],
-              "condition": [
+              condition: [
                 {
-                  "test": "StringLike",
-                  "values": [
+                  test: "StringLike",
+                  values: [
                     "true",
                   ],
-                  "variable": "aws:ResourceTag/efs.csi.aws.com/cluster",
+                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
+              effect: "Allow",
+              resources: [
                 "*",
               ],
             },
             {
-              "actions": [
+              actions: [
                 "elasticfilesystem:DeleteAccessPoint",
               ],
-              "condition": [
+              condition: [
                 {
-                  "test": "StringEquals",
-                  "values": [
+                  test: "StringEquals",
+                  values: [
                     "true",
                   ],
-                  "variable": "aws:ResourceTag/efs.csi.aws.com/cluster",
+                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
                 },
               ],
-              "effect": "Allow",
-              "resources": [
+              effect: "Allow",
+              resources: [
                 "*",
               ],
             },
