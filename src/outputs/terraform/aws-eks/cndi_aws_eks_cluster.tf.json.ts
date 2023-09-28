@@ -30,10 +30,6 @@ export default function getAWSEKSClusterTFJSON(
       "kube-proxy": {},
       "vpc-cni": {},
     },
-    eks_managed_node_group_defaults: {
-      ami_type: "AL2_x86_64",
-      instance_type: instance_type,
-    },
     eks_managed_node_groups: {
       eks_node_group: {
         name: node?.name,
