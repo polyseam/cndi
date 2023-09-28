@@ -28,13 +28,6 @@ export default function getAWSEKSClusterTFJSON(
     eks_managed_node_group_defaults: {
       ami_type: "AL2_x86_64",
     },
-    create_iam_role: true,
-    iam_role_additional_policies: {
-      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-      EKS: "${data.aws_iam_policy.cndi_aws_iam_policy_eks.policy}",
-    },
-
     eks_managed_node_groups: {
       eks_node_group: {
         name: node?.name,
@@ -44,6 +37,10 @@ export default function getAWSEKSClusterTFJSON(
         min_capaicty: desired_size,
         create_iam_role: true,
         iam_role_additional_policies: {
+          AmazonEKSClusterPolicy:
+            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+          AmazonEKSServicePolicy:
+            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
           AmazonEC2ContainerRegistryReadOnly:
             "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
           AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
@@ -53,7 +50,6 @@ export default function getAWSEKSClusterTFJSON(
             "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
           AmazonEFSCSIDriverPolicy:
             "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
-          EC2: "${data.aws_iam_policy.cndi_aws_iam_policy_ec2.policy}",
         },
       },
     },
