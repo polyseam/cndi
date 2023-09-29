@@ -26,13 +26,16 @@ export default function getAWSEKSClusterTFJSON(
       "scheduler",
     ],
     cluster_addons: {
-      coredns: {},
-      "kube-proxy": {},
-      "vpc-cni": {},
+      "kube-proxy": { resolve_conflicts: "OVERWRITE" },
+      "vpc-cni": { resolve_conflicts: "OVERWRITE" },
     },
     eks_managed_node_group_defaults: {
       ami_type: "AL2_x86_64",
       instance_types: [instance_type],
+    },
+    iam_role_additional_policies: {
+      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
     },
     eks_managed_node_groups: {
       eks_node_group: {
@@ -43,10 +46,6 @@ export default function getAWSEKSClusterTFJSON(
         min_capaicty: desired_size,
         desired_size: desired_size,
         iam_role_additional_policies: {
-          AmazonEKSClusterPolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-          AmazonEKSServicePolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
           AmazonEC2ContainerRegistryReadOnly:
             "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
           AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
