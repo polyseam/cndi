@@ -16,7 +16,12 @@ import cndi_aws_eks_cluster from "./cndi_aws_eks_cluster.tf.json.ts";
 
 import cndi_aws_iam_role_ec2 from "./cndi_aws_iam_role_ec2.tf.json.ts";
 import cndi_aws_iam_role_eks from "./cndi_aws_iam_role_eks.tf.json.ts";
-
+import cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller from "./cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_cni_policy from "./cndi_aws_iam_role_policy_attachment_eks_cni_policy.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_worker_node_policy from "./cndi_aws_iam_role_policy_attachment_eks_worker_node_policy.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_service_policy from "./cndi_aws_iam_role_policy_attachment_eks_service_policy.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly from "./cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment_eks_cluster_policy from "./cndi_aws_iam_role_policy_attachment_eks_cluster_policy.tf.json.ts";
 import cndi_aws_iam_role_web_identity from "./cndi_aws_iam_role_web_identity.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
@@ -222,6 +227,54 @@ export default async function stageTerraformResourcesForAWS(
       stageFile(
         path.join("cndi", "terraform", "cndi_aws_security_group.tf.json"),
         cndi_aws_security_group(ports),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_eks_cluster_policy.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_eks_cluster_policy(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_eks_worker_node_policy(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_eks_service_policy.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_eks_service_policy(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_aws_iam_role_policy_attachment_eks_cni_policy.tf.json",
+        ),
+        cndi_aws_iam_role_policy_attachment_eks_cni_policy(),
       ),
       stageFile(
         path.join(
