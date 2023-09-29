@@ -30,21 +30,9 @@ export default function getAWSEKSClusterTFJSON(
       ami_type: "AL2_x86_64",
       instance_types: [instance_type],
     },
-    iam_role_arn: "${cndi_aws_iam_role_eks.aws_iam_role_eks}",
+    iam_role_arn: "${aws_iam_role.cndi_aws_iam_role_eks.arn}",
     create_iam_role: false,
-    iam_role_additional_policies: {
-      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-      AmazonEC2ContainerRegistryReadOnly:
-        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-      AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-      AmazonEKSWorkerNodePolicy:
-        "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-      AmazonEBSCSIDriverPolicy:
-        "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-      AmazonEFSCSIDriverPolicy:
-        "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
-    },
+
     eks_managed_node_groups: {
       eks_node_group: {
         name: node?.name,
@@ -54,22 +42,7 @@ export default function getAWSEKSClusterTFJSON(
         min_capaicty: desired_size,
         desired_size: desired_size,
         create_iam_role: false,
-        iam_role_arn: "${cndi_aws_iam_role_ec2.aws_iam_role_ec2}",
-        iam_role_additional_policies: {
-          AmazonEKSClusterPolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-          AmazonEKSServicePolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-          AmazonEC2ContainerRegistryReadOnly:
-            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-          AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-          AmazonEKSWorkerNodePolicy:
-            "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-          AmazonEBSCSIDriverPolicy:
-            "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-          AmazonEFSCSIDriverPolicy:
-            "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
-        },
+        iam_role_arn: "${aws_iam_role.cndi_aws_iam_role_ec2.arn}",
       },
     },
     subnet_ids: "${module.cndi_aws_vpc.private_subnets}",
