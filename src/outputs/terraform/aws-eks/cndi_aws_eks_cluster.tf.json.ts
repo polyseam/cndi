@@ -32,10 +32,8 @@ export default function getAWSEKSClusterTFJSON(
     },
     create_iam_role: true,
     iam_role_additional_policies: {
-      "AmazonEKSClusterPolicy":
-        "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      "AmazonEKSServicePolicy":
-        "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+      AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
     },
     eks_managed_node_group_defaults: {
       ami_type: "AL2_x86_64",
