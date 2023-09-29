@@ -25,10 +25,7 @@ export default function getAWSEKSClusterTFJSON(
       "controllerManager",
       "scheduler",
     ],
-    cluster_addons: {
-      "kube-proxy": { resolve_conflicts_on_create: "OVERWRITE" },
-      "vpc-cni": { resolve_conflicts_on_create: "OVERWRITE" },
-    },
+
     eks_managed_node_group_defaults: {
       ami_type: "AL2_x86_64",
       instance_types: [instance_type],
