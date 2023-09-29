@@ -30,7 +30,8 @@ export default function getAWSEKSClusterTFJSON(
       ami_type: "AL2_x86_64",
       instance_types: [instance_type],
     },
-    create_iam_role: true,
+    iam_role_arn: "${cndi_aws_iam_role_eks.aws_iam_role_eks}",
+    create_iam_role: false,
     iam_role_additional_policies: {
       AmazonEKSClusterPolicy: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
       AmazonEKSServicePolicy: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
@@ -52,7 +53,8 @@ export default function getAWSEKSClusterTFJSON(
         max_capacity: max_size,
         min_capaicty: desired_size,
         desired_size: desired_size,
-        create_iam_role: true,
+        create_iam_role: false,
+        iam_role_arn: "${cndi_aws_iam_role_ec2.aws_iam_role_ec2}",
         iam_role_additional_policies: {
           AmazonEKSClusterPolicy:
             "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
