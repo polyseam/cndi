@@ -32,7 +32,7 @@ export default function getAWSEKSClusterTFJSON(
     },
     eks_managed_node_group_defaults: {
       ami_type: "AL2_x86_64",
-      instance_type: instance_type,
+      instance_types: [instance_type],
     },
     eks_managed_node_groups: {
       eks_node_group: {
@@ -42,7 +42,6 @@ export default function getAWSEKSClusterTFJSON(
         max_capacity: max_size,
         min_capaicty: desired_size,
         desired_size: desired_size,
-        create_iam_role: true,
         iam_role_additional_policies: {
           AmazonEKSClusterPolicy:
             "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
@@ -67,9 +66,6 @@ export default function getAWSEKSClusterTFJSON(
     tags: {
       CNDIProject: "${local.cndi_project_name}",
     },
-    depends_on: [
-      "module.cndi_aws_vpc",
-    ],
   });
 
   return getPrettyJSONString(module);
