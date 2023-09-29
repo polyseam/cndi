@@ -29,9 +29,11 @@ export default function getAWSComputeInstanceTFJSON(
       delete_on_termination,
     },
   ];
+  const leaderNodePrivateIp = "10.0.0.50";
   const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
   const user_data = getUserDataTemplateFileString(role);
   const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
+  const private_ip = role !== "leader" ? leaderNodePrivateIp : "null";
 
   const resource = getTFResource(
     "aws_instance",
@@ -48,6 +50,7 @@ export default function getAWSComputeInstanceTFJSON(
       user_data_replace_on_change: false,
       user_data,
       depends_on,
+      private_ip,
     },
     `cndi_aws_instance_${node.name}`,
   ).resource;

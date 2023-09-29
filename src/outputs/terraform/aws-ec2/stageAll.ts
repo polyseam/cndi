@@ -26,7 +26,8 @@ import cndi_aws_subnet from "./cndi_aws_subnet.tf.json.ts";
 import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
-
+import cndi_aws_eip from "./cndi_aws_eip.tf.json.ts";
+import cndi_aws_eip_association from "./cndi_aws_eip_association.tf.json.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
@@ -79,7 +80,26 @@ export default async function stageTerraformResourcesForAWS(
       );
     });
   });
-
+  const stageEips = config.infrastructure.cndi.nodes.map((node) =>
+    stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_aws_eip_${node.name}.tf.json`,
+      ),
+      cndi_aws_eip(node as AWSEC2NodeItemSpec),
+    )
+  );
+  const stageEipAssociations = config.infrastructure.cndi.nodes.map((node) =>
+    stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        `cndi_aws_eip_association_${node.name}.tf.json`,
+      ),
+      cndi_aws_eip_association(node as AWSEC2NodeItemSpec),
+    )
+  );
   const stageNodes = awsEC2Nodes.map((node) => {
     node_id_list.push(`\${aws_instance.cndi_aws_instance_${node.name}.id}`);
     return stageFile(
@@ -95,6 +115,8 @@ export default async function stageTerraformResourcesForAWS(
   // stage all the terraform files at once
   try {
     await Promise.all([
+      ...stageEips,
+      ...stageEipAssociations,
       ...stageNodes,
       ...listeners,
       ...targetGroups,
