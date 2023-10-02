@@ -135,9 +135,8 @@ const getLeaderCloudInitYaml = (
 
   let packages = ["apache2-utils", "nfs-common"];
   let storageClassSetupCommands = [
-    `echo "Setting NFS as default storage class"`,
-    `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
-    `echo "NFS is now the default storage class"`,
+    `echo "Setting NFS as the readWriteMany storage class"`,
+    `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "false" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
   ];
 
   if (isDevCluster(config)) {
