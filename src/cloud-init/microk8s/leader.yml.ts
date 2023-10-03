@@ -26,6 +26,9 @@ const defaultAddons: Array<Microk8sAddon> = [
   {
     name: "cert-manager",
   },
+  {
+    name: "hostpath-storage",
+  },
 ];
 
 const isDevCluster = (config: CNDIConfig) => {
@@ -133,15 +136,15 @@ const getLeaderCloudInitYaml = (
 
   const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
-  let packages = ["apache2-utils", "nfs-common", "hostpath-storage"];
+  let packages = ["apache2-utils", "nfs-common"];
   let storageClassSetupCommands = [
     `echo "Setting NFS as the readWriteMany storage class"`,
     `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "false" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
-    `while ! sudo microk8s kubectl patch storageclass microk8s-hostpath -p '{ "volumeBindingMode": "WaitForFirstConsumer","allowVolumeExpansion": "true" }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+    `while ! sudo microk8s kubectl patch sorageclass microk8s-hostpath -p '{ "allowVolumeExpansion": true }'; do echo 'microk8s failed to install hostpath, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
   ];
 
   if (isDevCluster(config)) {
-    packages = ["apache2-utils", "hostpath-storage"]; // no nfs-common on dev clusters
+    packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
       `echo "hostpath-storage is now the default storage class"`,
     ];
