@@ -54,7 +54,7 @@ export default function getAWSComputeInstanceTFJSON(
           host: "${self.public_ip}",
           type: "ssh",
           user: "ubuntu",
-          timeout: "5m",
+          timeout: "2m",
         },
       ],
       provisioner: [
