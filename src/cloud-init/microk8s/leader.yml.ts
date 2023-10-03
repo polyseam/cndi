@@ -140,7 +140,7 @@ const getLeaderCloudInitYaml = (
   let storageClassSetupCommands = [
     `echo "Setting NFS as the readWriteMany storage class"`,
     `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "false" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
-    `while ! sudo microk8s kubectl patch sorageclass microk8s-hostpath -p '{ "allowVolumeExpansion": true }'; do echo 'microk8s failed to install hostpath, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+    `while ! sudo microk8s kubectl patch storageclass microk8s-hostpath -p '{ "allowVolumeExpansion": true }'; do echo 'microk8s failed to install hostpath, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
   ];
 
   if (isDevCluster(config)) {
