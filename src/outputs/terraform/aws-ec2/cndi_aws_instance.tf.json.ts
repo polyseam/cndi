@@ -49,6 +49,7 @@ export default function getAWSComputeInstanceTFJSON(
       vpc_security_group_ids,
       user_data_replace_on_change: false,
       user_data,
+      key_name: "${aws_key_pair.cndi_aws_key_pair.key_name}",
       connection: [
         {
           host: "${self.public_ip}",
@@ -65,6 +66,7 @@ export default function getAWSComputeInstanceTFJSON(
               inline: [
                 "sudo microk8s leave",
               ],
+              on_failure: "continue",
             },
           ],
         },
