@@ -64,11 +64,11 @@ For this project select the `dev/airflow` Template.
 ```shell
 ? Pick a template
    dev/basic
-   gcp/basic
-   azure/basic
+   gce/basic
+   avm/basic
  ❯ dev/airflow
-   azure/airflow
-   gcp/airflow
+   avm/airflow
+   gce/airflow
 ```
 
 Below is the list of all of the interactive prompt values that should be
