@@ -76,9 +76,9 @@ For this project select the `eks/airflow` Template.
 ? Pick a template
    aws/basic
    gce/basic
-   azure/basic
+   avm/basic
  ❯ eks/airflow
-   azure/airflow
+   avm/airflow
    gce/airflow
 ```
 

@@ -76,11 +76,11 @@ For this project select the `gce/airflow` Template.
 
 ```shell
 ? Pick a template
-   aws/basic
+   ec2/basic
    gce/basic
-   azure/basic
-   aws/airflow
-   azure/airflow
+   avm/basic
+   ec2/airflow
+   avm/airflow
  ❯ gce/airflow
 ```
 

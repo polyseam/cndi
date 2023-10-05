@@ -65,9 +65,9 @@ For this project select the `dev/airflow` Template.
 ? Pick a template
    dev/basic
    gce/basic
-   azure/basic
+   avm/basic
  ❯ dev/airflow
-   azure/airflow
+   avm/airflow
    gce/airflow
 ```
 
