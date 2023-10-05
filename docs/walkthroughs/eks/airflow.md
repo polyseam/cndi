@@ -75,11 +75,11 @@ For this project select the `eks/airflow` Template.
 ```shell
 ? Pick a template
    aws/basic
-   gcp/basic
+   gce/basic
    azure/basic
  ❯ eks/airflow
    azure/airflow
-   gcp/airflow
+   gce/airflow
 ```
 
 Below is the list of all of the interactive prompt values that should be

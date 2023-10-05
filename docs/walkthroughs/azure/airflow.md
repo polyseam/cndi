@@ -1,15 +1,15 @@
-# azure/airflow walkthrough
+# avm/airflow walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
-in Microsoft Azure
+using [Azure Vitural Machines]()
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `azure/airflow`
-Template. In just a few minutes we will be able to deploy a new Kubernetes
-cluster to Azure that has been optimally configured for Airflow, including
-GitOps with Secrets management, TLS and High Availibility right out-of-the-box.
-This framework will enable quick iteration of infrastructure, applications and
+This walkthough uses `cndi` to customize and deploy our `avm/airflow` Template.
+In just a few minutes we will be able to deploy a new Kubernetes cluster to
+Azure that has been optimally configured for Airflow, including GitOps with
+Secrets management, TLS and High Availibility right out-of-the-box. This
+framework will enable quick iteration of infrastructure, applications and
 manifests in a GitHub workflow you are already comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/azure/img/cndi-cluster-0.png)
@@ -75,11 +75,11 @@ For this project select the `azure/airflow` Template.
 ```shell
 ? Pick a template
    azure/basic
-   gcp/basic
+   gce/basic
    aws/basic
    aws/airflow
  ❯ azure/airflow
-   gcp/airflow
+   gce/airflow
 ```
 
 Below is the list of all of the interactive prompt values that should be
