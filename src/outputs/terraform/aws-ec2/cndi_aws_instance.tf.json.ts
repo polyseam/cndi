@@ -64,7 +64,7 @@ export default function getAWSComputeInstanceTFJSON(
             {
               when: "destroy",
               inline: [
-                "sudo microk8s leave",
+                'sudo microk8s remove-node ${replace(self.private_dns, ".ec2.internal", "")} --force',
               ],
               on_failure: "continue",
             },
