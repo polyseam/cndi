@@ -40,7 +40,7 @@ export default async function stageTerraformResourcesForDev(
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_local_sensitive_file.tf.json"),
-        cndi_local_sensitive_file(node.name),
+        cndi_local_sensitive_file(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_outputs.tf.json"),
