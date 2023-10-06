@@ -30,7 +30,10 @@ export default function getAWSComputeInstanceTFJSON(
     },
   ];
   const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
-  const user_data = getUserDataTemplateFileString(role);
+  const user_data = getUserDataTemplateFileString({
+    node_hostname: name,
+    role,
+  });
   const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
 
   const resource = getTFResource(
