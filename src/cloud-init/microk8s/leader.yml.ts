@@ -196,7 +196,7 @@ const getLeaderCloudInitYaml = (
 
       // because this next line uses interpolation at runtime
       // we install the nfs addon manually rather than declaritively
-      `sudo microk8s addon enable nfs -n "$(hostname)"`,
+      `sudo microk8s enable nfs -n "$(hostname)"`,
 
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
