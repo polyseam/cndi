@@ -46,6 +46,7 @@ const getFollowerCloudInitYaml = (
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
+    hostname: "${node_hostname}",
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages: [
