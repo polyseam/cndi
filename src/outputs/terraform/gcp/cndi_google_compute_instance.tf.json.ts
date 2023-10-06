@@ -37,10 +37,7 @@ export default function getGCPComputeInstanceTFJSON(
     },
   ];
 
-  const user_data = getUserDataTemplateFileString({
-    role,
-    node_hostname: name,
-  });
+  const user_data = getUserDataTemplateFileString(role);
   const depends_on = role !== "leader" ? [leaderComputeInstance] : [];
 
   const resource = getTFResource(

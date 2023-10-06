@@ -76,7 +76,7 @@ export default function getAzureComputeInstanceTFJSON(
   };
 
   const user_data = getUserDataTemplateFileString(
-    { node_hostname: name, role },
+    role,
     true,
   );
   const depends_on = role !== "leader" ? [leaderComputeInstance] : [];

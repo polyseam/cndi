@@ -37,9 +37,6 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
 
   if (isDevCluster(config)) {
     addons.push({ name: "hostpath-storage" });
-  } else {
-    // dev cluster addons
-    addons.push({ name: "nfs", args: ["-n", "${node_hostname}"] });
   }
 
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
@@ -149,7 +146,6 @@ const getLeaderCloudInitYaml = (
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
-    hostname: "${node_hostname}",
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages,
@@ -197,6 +193,10 @@ const getLeaderCloudInitYaml = (
 
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
+
+      // because this next line uses interpolation at runtime
+      // we install the nfs addon manually rather than declaritively
+      `sudo microk8s addon enable nfs -n "$(hostname)"`,
 
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
