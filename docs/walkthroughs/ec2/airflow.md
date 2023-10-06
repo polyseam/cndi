@@ -70,16 +70,16 @@ cndi init --interactive
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `aws/airflow` Template.
+For this project select the `ec2/airflow` Template.
 
 ```shell
 ? Pick a template
-   aws/basic
-   gcp/basic
-   azure/basic
- ❯ aws/airflow
-   azure/airflow
-   gcp/airflow
+   ec2/basic
+   gce/basic
+   avm/basic
+ ❯ ec2/airflow
+   avm/airflow
+   gce/airflow
 ```
 
 Below is the list of all of the interactive prompt values that should be

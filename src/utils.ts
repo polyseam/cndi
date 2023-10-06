@@ -537,12 +537,17 @@ function base10intToHex(decimal: number): string {
   return hex;
 }
 
+type UserDataNodeInfo = {
+  role?: NodeRole;
+  node_hostname: string;
+};
+
 function getUserDataTemplateFileString(
-  role?: NodeRole,
+  node_info: UserDataNodeInfo,
   doBase64Encode?: boolean,
 ) {
   let leaderString =
-    'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"node_hostname":"${node_info.node_hostname}","bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_password": "\${var.git_password}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   if (useSshRepoAuth()) {
     // this value contains base64 encoded values for git_repo and git_ssh_private_key
     // it's required in order to support multiline values in cloud-init
@@ -564,7 +569,7 @@ function getUserDataTemplateFileString(
     controllerString = `\${${controllerString}}`;
   }
 
-  switch (role) {
+  switch (node_info.role) {
     case "leader":
       return leaderString;
     case "worker":

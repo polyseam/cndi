@@ -4,9 +4,15 @@ import {
   getUserDataTemplateFileString,
 } from "src/utils.ts";
 
-export default function getMultipassLocalSensitiveFileTFJSON(): string {
+export default function getMultipassLocalSensitiveFileTFJSON(
+  node_hostname: string,
+): string {
   const resource = getTFResource("local_sensitive_file", {
-    content: getUserDataTemplateFileString("leader"),
+    // node_hostname is not consumed by multipass so it is empty
+    content: getUserDataTemplateFileString({
+      role: "leader",
+      node_hostname,
+    }),
     filename: "microk8s-cloud-init-leader-hardcoded-values.yml.tftpl",
   });
 

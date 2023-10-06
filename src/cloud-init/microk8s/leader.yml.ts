@@ -42,7 +42,7 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
     addons.push({ name: "hostpath-storage" });
   } else {
     // dev cluster addons
-    addons.push({ name: "nfs" });
+    addons.push({ name: "nfs", args: ["-n", "${node_hostname}"] });
   }
 
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
@@ -152,6 +152,7 @@ const getLeaderCloudInitYaml = (
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
+    hostname: "${node_hostname}",
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages,

@@ -159,10 +159,18 @@ Now we are ready for the next phase of the lifecycle!
 
 Now that we have initialized our project, CNDI has given us files that describe
 our infrastructure resources and files that describe what to run on that
-infrastructure. CNDI has also created a GitHub Action for us which is
-responsible for calling `cndi run`. The `run` command provided in the cndi
-binary is responsible for calling `terraform apply` to deploy our
 infrastructure.
+
+CNDI has also created a GitHub Action for us which is responsible for calling
+`cndi run`. The `run` command provided in the cndi binary is responsible for
+calling `terraform apply` to deploy our infrastructure. To trigger the process
+we just need to push our changes to repository:
+
+```bash
+git add .
+git commit -m "initial commit"
+git push
+```
 
 After `cndi run` has exited successfully you should be able to see new resources
 spinning up in the deployment target you selected. When the nodes come online in
@@ -234,13 +242,13 @@ We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. The walkthroughs demonstrate how to deploy a production grade
 Airflow cluster using CNDI's `airflow` Template.
 
-- [ec2/airflow](docs/walkthroughs/ec2/airflow.md)
-- [eks/airflow](docs/walkthroughs/eks/airflow.md)
-- [gcp/airflow](docs/walkthroughs/gcp/airflow.md)
-- [gke/airflow](docs/walkthroughs/gke/airflow.md)
-- [azure/airflow](docs/walkthroughs/azure/airflow.md)
-- [aks/airflow](docs/walkthroughs/aks/airflow.md)
-- [dev/airflow](docs/walkthroughs/dev/airflow.md)
+- [ec2/airflow](docs/walkthroughs/ec2/airflow.md) - AWS EC2
+- [eks/airflow](docs/walkthroughs/eks/airflow.md) - AWS EKS
+- [gce/airflow](docs/walkthroughs/gce/airflow.md) - GCP Compute Engine
+- [gke/airflow](docs/walkthroughs/gke/airflow.md) - GCP GKE
+- [avm/airflow](docs/walkthroughs/avm/airflow.md) - Azure Virtual Machines
+- [aks/airflow](docs/walkthroughs/aks/airflow.md) - Azure AKS
+- [dev/airflow](docs/walkthroughs/dev/airflow.md) - Local Development
 
 If you are interested in using CNDI, these walkthroughs will be entirely
 transferrable to other applications beyond Airflow.
@@ -277,19 +285,19 @@ infrastructure:
   cndi:
     nodes:
       - name: gcp-alpha
-        kind: gcp
+        kind: gce
         role: leader # node responsible for instantiating the cluster
         machine_type: n2-standard-16
       - name: gcp-beta # node runs the control plane by default
-        kind: gcp
+        kind: gce
       - name: gcp-charlie
-        kind: gcp
+        kind: gce
       - name: gcp-delta
-        kind: gcp
+        kind: gce
         role: worker # node does not run the control plane
 ```
 
-Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gcp`
+Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gce`
 clusters. More deployment targets are on the way!
 
 Just like every other component in CNDI, nodes can be updated in our
