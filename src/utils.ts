@@ -542,17 +542,17 @@ function getUserDataTemplateFileString(
   doBase64Encode?: boolean,
 ) {
   let leaderString =
-    'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo": "${var.git_repo}", "git_password": "${var.git_password}", "git_username": "${var.git_username}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_password": "\${var.git_password}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   if (useSshRepoAuth()) {
     // this value contains base64 encoded values for git_repo and git_ssh_private_key
     // it's required in order to support multiline values in cloud-init
     leaderString =
-      'templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "git_repo_encoded": "${base64encode(var.git_repo)}", "git_repo": "${var.git_repo}", "git_ssh_private_key": "${base64encode(var.git_ssh_private_key)}", "sealed_secrets_private_key": "${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "${var.argocd_admin_password}"})';
+      `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo_encoded": "\${base64encode(var.git_repo)}", "git_repo": "\${var.git_repo}", "git_ssh_private_key": "\${base64encode(var.git_ssh_private_key)}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   }
   let workerString =
-    'templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+    `templatefile("microk8s-cloud-init-worker.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "leader_node_ip": "\${local.leader_node_ip}"})`;
   let controllerString =
-    'templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "${local.bootstrap_token}", "leader_node_ip": "${local.leader_node_ip}"})';
+    `templatefile("microk8s-cloud-init-controller.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "leader_node_ip": "\${local.leader_node_ip}"})`;
 
   if (doBase64Encode) {
     leaderString = `\${base64encode(${leaderString})}`;

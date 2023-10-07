@@ -37,9 +37,6 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
 
   if (isDevCluster(config)) {
     addons.push({ name: "hostpath-storage" });
-  } else {
-    // dev cluster addons
-    addons.push({ name: "nfs" });
   }
 
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
@@ -85,7 +82,7 @@ const getLeaderCloudInitYaml = (
     "stable";
 
   const DEFAULT_ARGOCD_INSTALL_URL =
-    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
+    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/ha/install.yaml`;
 
   const userBefore =
     config.infrastructure.cndi?.microk8s?.["cloud-init"]?.leader_before || [];
@@ -197,6 +194,11 @@ const getLeaderCloudInitYaml = (
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
 
+      `echo "Installing nfs on host: $(hostname)"`,
+      // because this next line uses interpolation at runtime
+      // we install the nfs addon manually rather than declaritively
+      `while ! sudo microk8s enable nfs -n "$(hostname)"; do echo 'nfs failed to install, retrying in 180 seconds'; sleep 180; done`,
+      `echo "nfs installed"`,
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
       `sudo usermod -a -G microk8s ubuntu`,

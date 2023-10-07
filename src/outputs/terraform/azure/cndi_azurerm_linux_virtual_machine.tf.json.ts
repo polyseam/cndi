@@ -25,7 +25,9 @@ export default function getAzureComputeInstanceTFJSON(
 
   // azure uses 'size' to describe the machine type, oof
   if (
-    node?.size && typeof node.size === "string" && !node?.machine_type &&
+    node?.size &&
+    typeof node.size === "string" &&
+    !node?.machine_type &&
     !node?.instance_type
   ) {
     machine_type = node.size;
@@ -73,7 +75,10 @@ export default function getAzureComputeInstanceTFJSON(
     CNDIProject: "${local.cndi_project_name}",
   };
 
-  const user_data = getUserDataTemplateFileString(role, true);
+  const user_data = getUserDataTemplateFileString(
+    role,
+    true,
+  );
   const depends_on = role !== "leader" ? [leaderComputeInstance] : [];
 
   const resource = getTFResource(

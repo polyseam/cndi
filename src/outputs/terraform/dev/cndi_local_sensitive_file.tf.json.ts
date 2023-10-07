@@ -10,7 +10,5 @@ export default function getMultipassLocalSensitiveFileTFJSON(): string {
     filename: "microk8s-cloud-init-leader-hardcoded-values.yml.tftpl",
   });
 
-  return getPrettyJSONString(
-    resource,
-  );
+  return getPrettyJSONString(resource);
 }
