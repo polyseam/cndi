@@ -6,7 +6,6 @@ import {
 
 export default function getMultipassLocalSensitiveFileTFJSON(): string {
   const resource = getTFResource("local_sensitive_file", {
-    // node_hostname is not consumed by multipass so it is empty
     content: getUserDataTemplateFileString("leader"),
     filename: "microk8s-cloud-init-leader-hardcoded-values.yml.tftpl",
   });
