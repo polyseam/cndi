@@ -47,6 +47,28 @@ export default function getAWSComputeInstanceTFJSON(
       vpc_security_group_ids,
       user_data_replace_on_change: false,
       user_data,
+      key_name: "${aws_key_pair.cndi_aws_key_pair.key_name}",
+      connection: [
+        {
+          host: "${self.public_ip}",
+          type: "ssh",
+          user: "ubuntu",
+          timeout: "2m",
+        },
+      ],
+      provisioner: [
+        {
+          "remote-exec": [
+            {
+              when: "destroy",
+              inline: [
+                "sudo microk8s remove-node $(hostname) --force",
+              ],
+              on_failure: "continue",
+            },
+          ],
+        },
+      ],
       depends_on,
     },
     `cndi_aws_instance_${node.name}`,
