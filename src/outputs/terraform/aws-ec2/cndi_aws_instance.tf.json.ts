@@ -54,6 +54,8 @@ export default function getAWSComputeInstanceTFJSON(
           type: "ssh",
           user: "ubuntu",
           timeout: "2m",
+          private_key:
+            "${tls_private_key.cndi_tls_private_key.private_key_pem}",
         },
       ],
       provisioner: [
@@ -64,7 +66,6 @@ export default function getAWSComputeInstanceTFJSON(
               inline: [
                 "sudo microk8s remove-node $(hostname) --force",
               ],
-              on_failure: "continue",
             },
           ],
         },
