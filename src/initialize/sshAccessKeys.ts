@@ -14,7 +14,7 @@ const createSSHAccessKeys = async (
   const openSSHGenerateKeyPairCommand = new Deno.Command(pathToOpenSSH, {
     args: [
       "-t",
-      "rsa",
+      "ed25519",
       "-b",
       "4096",
       "-m",
