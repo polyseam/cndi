@@ -49,6 +49,7 @@ export default function getGCPComputeInstanceTFJSON(
       machine_type,
       metadata: {
         "user-data": user_data,
+        "ssh-keys": "ubuntu:${var.ssh_access_public_key}}",
       },
       name,
       network_interface,
