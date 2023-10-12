@@ -29,6 +29,8 @@ export default function getAWSLocalsTFJSON(
       bootstrap_token: "${random_password.cndi_join_token.result}",
       availability_zones,
       node_id_list,
+      cndi_tls_private_key:
+        "${tls_private_key.cndi_tls_private_key.private_key_pem}",
       // node_count: "", may be useful for az redundancy
       // availability_zones: this used to be in the locals, now it's in data.tf.json
     },

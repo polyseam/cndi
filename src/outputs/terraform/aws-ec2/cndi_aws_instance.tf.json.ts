@@ -48,24 +48,26 @@ export default function getAWSComputeInstanceTFJSON(
       user_data_replace_on_change: false,
       user_data,
       key_name: "${aws_key_pair.cndi_aws_key_pair.key_name}",
-      connection: [
-        {
-          host: "${self.public_ip}",
-          type: "ssh",
-          user: "ubuntu",
-          timeout: "2m",
-          private_key:
-            "${tls_private_key.cndi_tls_private_key.private_key_pem}",
-        },
-      ],
       provisioner: [
         {
-          "remote-exec": [
+          "local-exec": [
             {
+              interpreter: ["bash", "-c"],
+              command:
+                "echo '${tls_private_key.cndi_tls_private_key.private_key_pem}' > cndi_aws_key_pair.pem",
+              working_dir: "${path.module}",
+            },
+            {
+              interpreter: ["bash", "-c"],
+              command: "chmod 400 cndi_aws_key_pair.pem",
+              working_dir: "${path.module}",
+            },
+            {
+              interpreter: ["bash", "-c"],
               when: "destroy",
-              inline: [
-                "sudo microk8s remove-node $(hostname) --force",
-              ],
+              command:
+                "ssh -tt -i cndi_aws_key_pair.pem ubuntu@${self.public_dns} || sudo microk8s remove-node $(hostname) --force",
+              working_dir: "${path.module}",
             },
           ],
         },
