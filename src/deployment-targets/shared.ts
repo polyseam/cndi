@@ -162,7 +162,6 @@ const getCoreEnvLines = async (
     { comment: "SSH Authorized Key" },
     {
       value: { SSH_ACCESS_PUBLIC_KEY: sshAccessPublicKey },
-      wrap: true,
     },
     { comment: "Sealed Secrets keys for Kubeseal" },
     {
