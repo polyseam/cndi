@@ -25,8 +25,7 @@ const createSSHAccessKeys = async (
       ssh_access_private_key_path,
       "-q",
       "-N",
-      '""',
-      "-y"
+      '""'
     ],
     stdout: "piped",
     stderr: "piped",
