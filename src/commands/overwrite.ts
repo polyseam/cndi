@@ -85,9 +85,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     console.error(
       owLabel,
       ccolors.key_name(`"SSH_ACCESS_PUBLIC_KEY"`),
-      ccolors.error(`and/or`),
-      ccolors.key_name(`"SSH_ACCESS_PRIVATE_KEY"`),
-      ccolors.error(`are not present in environment`),
+      ccolors.error(`is not present in environment`),
     );
     await emitExitEvent(510);
     Deno.exit(501);

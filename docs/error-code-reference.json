@@ -109,7 +109,7 @@
   },
   {
     "code": 510,
-    "message": "'SSH_ACCESS_PUBLIC_KEY' and/or 'SSH_ACCESS_PRIVATE_KEY' env vars not set during 'cndi overwrite'"
+    "message": "'SSH_ACCESS_PUBLIC_KEY' env var not set during 'cndi overwrite'"
   },
   {
     "code": 603,
