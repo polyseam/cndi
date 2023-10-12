@@ -26,6 +26,7 @@ const createSSHAccessKeys = async (
       "-q",
       "-N",
       '""',
+      "-y"
     ],
     stdout: "piped",
     stderr: "piped",
