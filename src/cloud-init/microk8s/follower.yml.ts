@@ -48,6 +48,7 @@ const getFollowerCloudInitYaml = (
   const content = {
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
+    ssh_authorized_keys: ["\${ssh_access_public_key}"],
     packages: [
       "apache2-utils", // TODO: not needed on follower, oh well
       "nfs-common",
