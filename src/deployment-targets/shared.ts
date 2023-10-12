@@ -159,7 +159,7 @@ const getCoreEnvLines = async (
     { value: { ARGOCD_ADMIN_PASSWORD } },
     { comment: "Passphrase for encrypting/decrypting terraform state" },
     { value: { TERRAFORM_STATE_PASSPHRASE } },
-    { comment: "SSH keys for direct vm access (not recommended!)" },
+    { comment: "SSH Authorized Key" },
     {
       value: { SSH_ACCESS_PUBLIC_KEY: sshAccessPublicKey },
       wrap: true,
