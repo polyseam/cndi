@@ -80,6 +80,34 @@ export default async function setTF_VARs() {
     Deno.exit(105);
   }
 
+  // const ssh_access_private_key = Deno.env
+  // .get("SSH_ACCESS_PRIVATE_KEY")
+  // ?.trim();
+
+  // if (!ssh_access_private_key) {
+  //   console.error(
+  //     setTF_VARsLabel,
+  //     ccolors.key_name(`"SSH_ACCESS_PRIVATE_KEY"`),
+  //     ccolors.error("env var is not set"),
+  //   );
+  //   await emitExitEvent(106);
+  //   Deno.exit(106);
+  // }
+
+  const ssh_access_public_key = Deno.env
+    .get("SSH_ACCESS_PUBLIC_KEY")
+    ?.trim();
+
+  if (!ssh_access_public_key) {
+    console.error(
+      setTF_VARsLabel,
+      ccolors.key_name(`"SSH_ACCESS_PUBLIC_KEY"`),
+      ccolors.error("env var is not set"),
+    );
+    await emitExitEvent(107);
+    Deno.exit(107);
+  }
+
   if (git_ssh_private_key) {
     Deno.env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
   } else {
@@ -91,6 +119,8 @@ export default async function setTF_VARs() {
   Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
   Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);
   Deno.env.set("TF_VAR_sealed_secrets_private_key", sealed_secrets_private_key);
+  Deno.env.set("TF_VAR_ssh_access_public_key", ssh_access_public_key);
+  // Deno.env.set("TF_VAR_ssh_access_private_key", ssh_access_private_key);
 
   // aks module requires cred be set explicitly
   const az_client_id = Deno.env.get("ARM_CLIENT_ID") || "";

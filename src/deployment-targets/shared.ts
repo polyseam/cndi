@@ -17,6 +17,7 @@ const deploymentTargetsSharedLabel = ccolors.faded(
 );
 
 interface CNDIGeneratedValues {
+  sshAccessPublicKey: string;
   sealedSecretsKeys: SealedSecretsKeys;
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
@@ -31,6 +32,7 @@ const getCoreEnvLines = async (
     sealedSecretsKeys,
     terraformStatePassphrase,
     argoUIAdminPassword,
+    sshAccessPublicKey,
   } = cndiGeneratedValues;
 
   const DEFAULT_SSH_PRIVATE_KEY_PATH = "~/.ssh/id_rsa";
@@ -125,6 +127,17 @@ const getCoreEnvLines = async (
     Deno.exit(604);
   }
 
+  if (!sshAccessPublicKey) {
+    console.log(
+      ccolors.key_name(`"SSH_ACCESS_PUBLIC_KEY"`),
+      ccolors.error(`was not found while generating the`),
+      ccolors.key_name(`".env"`),
+      ccolors.error(`file for your cluster`),
+    );
+    await emitExitEvent(607);
+    Deno.exit(607);
+  }
+
   if (!TERRAFORM_STATE_PASSPHRASE) {
     console.log(
       deploymentTargetsSharedLabel,
@@ -138,15 +151,19 @@ const getCoreEnvLines = async (
   }
 
   const gitAuthLines: EnvLines = useGitSSHAuth
-    ? [
-      { value: { GIT_SSH_PRIVATE_KEY }, wrap: true },
-    ]
-    : [
-      { value: { GIT_USERNAME } },
-      { value: { GIT_PASSWORD } },
-    ];
+    ? [{ value: { GIT_SSH_PRIVATE_KEY }, wrap: true }]
+    : [{ value: { GIT_USERNAME } }, { value: { GIT_PASSWORD } }];
 
   const coreEnvLines: EnvLines = [
+    { comment: "ArgoCD" },
+    { value: { ARGOCD_ADMIN_PASSWORD } },
+    { comment: "Passphrase for encrypting/decrypting terraform state" },
+    { value: { TERRAFORM_STATE_PASSPHRASE } },
+    { comment: "SSH keys for direct vm access (not recommended!)" },
+    {
+      value: { SSH_ACCESS_PUBLIC_KEY: sshAccessPublicKey },
+      wrap: true,
+    },
     { comment: "Sealed Secrets keys for Kubeseal" },
     {
       value: {
@@ -161,10 +178,6 @@ const getCoreEnvLines = async (
       },
       wrap: true,
     },
-    { comment: "ArgoCD" },
-    { value: { ARGOCD_ADMIN_PASSWORD } },
-    { comment: "Passphrase for encrypting/decrypting terraform state" },
-    { value: { TERRAFORM_STATE_PASSPHRASE } },
     { comment: "git credentials" },
     ...gitAuthLines,
     { value: { GIT_REPO } },

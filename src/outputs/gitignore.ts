@@ -3,6 +3,7 @@ export default function getGitignore(): string {
 # cndi
 .env
 .keys/
+ssh_access_key.pem
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/

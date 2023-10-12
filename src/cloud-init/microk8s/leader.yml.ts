@@ -149,6 +149,7 @@ const getLeaderCloudInitYaml = (
     package_update: true,
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages,
+    ssh_authorized_keys: ["\${ssh_access_public_key}"],
     write_files: [
       {
         path: PATH_TO_LAUNCH_CONFIG,

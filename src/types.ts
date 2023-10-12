@@ -284,6 +284,11 @@ interface SealedSecretsKeys {
   sealed_secrets_public_key: string;
 }
 
+interface SSHAccessKeys {
+  ssh_access_private_key: string;
+  ssh_access_public_key: string;
+}
+
 export type {
   AWSDeploymentTargetConfiguration,
   AWSEC2NodeItemSpec,
@@ -308,5 +313,6 @@ export type {
   Microk8sAddon,
   MultipassNodeItemSpec,
   SealedSecretsKeys,
+  SSHAccessKeys,
   TFBlocks,
 };

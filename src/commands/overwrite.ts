@@ -10,6 +10,7 @@ import {
 } from "src/utils.ts";
 
 import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { loadSSHAccessPublicKey } from "src/initialize/sshAccessKeys.ts";
 import { loadTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
@@ -64,6 +65,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   await validateConfig(config, pathToConfig);
 
   const sealedSecretsKeys = loadSealedSecretsKeys();
+  const sshAccessPublicKey = loadSSHAccessPublicKey();
   const terraformStatePassphrase = loadTerraformStatePassphrase();
   const argoUIAdminPassword = loadArgoUIAdminPassword();
 
@@ -76,6 +78,18 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.error(`are not present in environment`),
     );
     await emitExitEvent(501);
+    Deno.exit(501);
+  }
+
+  if (!sshAccessPublicKey) {
+    console.error(
+      owLabel,
+      ccolors.key_name(`"SSH_ACCESS_PUBLIC_KEY"`),
+      ccolors.error(`and/or`),
+      ccolors.key_name(`"SSH_ACCESS_PRIVATE_KEY"`),
+      ccolors.error(`are not present in environment`),
+    );
+    await emitExitEvent(510);
     Deno.exit(501);
   }
 

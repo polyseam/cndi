@@ -20,6 +20,7 @@ import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 import useTemplate from "src/templates/useTemplate.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { createSSHAccessKeys } from "../initialize/sshAccessKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
@@ -129,6 +130,7 @@ const initCommand = new Command()
 
     // GENERATE ENV VARS
     const sealedSecretsKeys = await createSealedSecretsKeys(options.output);
+    const sshAccessPublicKey = await createSSHAccessKeys(options.output);
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
@@ -144,6 +146,7 @@ const initCommand = new Command()
 
     const cndiGeneratedValues = {
       sealedSecretsKeys,
+      sshAccessPublicKey,
       terraformStatePassphrase,
       argoUIAdminPassword,
     };

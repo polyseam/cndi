@@ -40,6 +40,16 @@ const runCommand = new Command()
     { required: true },
   )
   .env(
+    "SSH_ACCESS_PRIVATE_KEY=<value:string>",
+    "Private key used to connect to any cluster node.",
+    { required: true },
+  )
+  .env(
+    "SSH_ACCESS_PUBLIC_KEY=<value:string>",
+    "Public key used to connect to any cluster node.",
+    { required: true },
+  )
+  .env(
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
     { required: true },

@@ -115,6 +115,7 @@ interface TemplateResult {
 
 interface CNDIGeneratedValues {
   sealedSecretsKeys: SealedSecretsKeys;
+  sshAccessPublicKey: string;
   terraformStatePassphrase: string;
   argoUIAdminPassword: string;
 }

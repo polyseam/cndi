@@ -63,6 +63,7 @@ const cndiWorkflowObj = {
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
             GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
+            SSH_ACCESS_PUBLIC_KEY: "${{ secrets.SSH_ACCESS_PUBLIC_KEY }}",
             TERRAFORM_STATE_PASSPHRASE:
               "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
             SEALED_SECRETS_PRIVATE_KEY:
@@ -169,6 +170,7 @@ const getWorkflowYaml = (sourceRef?: string) => {
         GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
         GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
         TERRAFORM_STATE_PASSPHRASE: "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
+        SSH_ACCESS_PUBLIC_KEY: "${{ secrets.SSH_ACCESS_PUBLIC_KEY }}",
         SEALED_SECRETS_PRIVATE_KEY: "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
         SEALED_SECRETS_PUBLIC_KEY: "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
         ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",

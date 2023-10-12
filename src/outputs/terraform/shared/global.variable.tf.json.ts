@@ -24,6 +24,14 @@ export default function getVariablesTFJSON(): string {
       description: "public key for encrypting sealed secrets",
       type: "string",
     },
+    // ssh_access_private_key: {
+    //   description: "private key for accessing cluster nodes",
+    //   type: "string",
+    // },
+    ssh_access_public_key: {
+      description: "public key for accessing cluster nodes",
+      type: "string",
+    },
   };
 
   if (useSshRepoAuth()) {

@@ -6,11 +6,18 @@ import { getPathToOpenSSLForPlatform } from "src/utils.ts";
 const createSealedSecretsKeys = async (
   outputDir: string,
 ): Promise<SealedSecretsKeys> => {
-  const pathToKeys = path.join(outputDir, ".keys");
+  const pathToKeys = path.join(outputDir, ".sealed_secrets_keys");
   const pathToOpenSSL = getPathToOpenSSLForPlatform();
   Deno.mkdir(pathToKeys, { recursive: true });
-  const sealed_secrets_public_key_path = path.join(pathToKeys, "public.pem");
-  const sealed_secrets_private_key_path = path.join(pathToKeys, "private.pem");
+
+  const sealed_secrets_public_key_path = path.join(
+    pathToKeys,
+    "sealed-secrets-public.pem",
+  );
+  const sealed_secrets_private_key_path = path.join(
+    pathToKeys,
+    "sealed-secrets-private.pem",
+  );
 
   let sealed_secrets_private_key;
   let sealed_secrets_public_key;

@@ -50,6 +50,14 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/506"
   },
   {
+    "code": 251,
+    "message": "failed to generate SealedSecrets keypair"
+  },
+  {
+    "code": 252,
+    "message": "failed to generate SSH Access keypair"
+  },
+  {
     "code": 300,
     "message": "Failed to install cndi dependency 'terraform'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/476"
@@ -98,6 +106,10 @@
     "code": 509,
     "message": "Failed to persist staged files during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/514"
+  },
+  {
+    "code": 510,
+    "message": "'SSH_ACCESS_PUBLIC_KEY' and/or 'SSH_ACCESS_PRIVATE_KEY' env vars not set during 'cndi overwrite'"
   },
   {
     "code": 603,
