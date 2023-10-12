@@ -17,6 +17,8 @@ const createSSHAccessKeys = async (
       "rsa",
       "-b",
       "4096",
+      "-m",
+      "PEM",
       "-C",
       "ssh-access",
       "-f",
