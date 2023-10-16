@@ -15,17 +15,24 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
       {
         "local-exec": {
           interpreter: ["bash", "-c"],
-
+          when: "destroy",
           command:
-            "echo '${self.triggers.private_key_pem}' > cndi_key_pair.pem chmod 400 cndi_key_pair.pem",
+            "echo '${self.triggers.private_key_pem}' | sudo tee -a ssh_access_key.pem",
         },
       },
       {
         "local-exec": {
           interpreter: ["bash", "-c"],
-
+          when: "destroy",
+          command: "sudo chmod 400 ssh_access_key.pem",
+        },
+      },
+      {
+        "local-exec": {
+          interpreter: ["bash", "-c"],
+          when: "destroy",
           command:
-            "ssh -o StrictHostKeyChecking=no -i cndi_key_pair.pem ubuntu@${self.triggers.instance_public_dns} touch text.txt",
+            "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.triggers.instance_public_dns} sudo touch newnew.txt",
         },
       },
     ],

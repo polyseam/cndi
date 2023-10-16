@@ -28,6 +28,7 @@ import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
 import cndi_aws_key_pair from "./cndi_aws_key_pair.tf.json.ts";
 import cndi_null_resource_ssh_into from "./cndi_null_resource_ssh_into.tf.json.ts";
+import cndi_tls_private_key from "./cndi_tls_private_key.tf.json.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
@@ -203,6 +204,14 @@ export default async function stageTerraformResourcesForAWS(
           "cndi_aws_key_pair.tf.json",
         ),
         cndi_aws_key_pair(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_tls_private_key.tf.json",
+        ),
+        cndi_tls_private_key(),
       ),
     ]);
   } catch (e) {
