@@ -31,7 +31,9 @@ export default function getAWSComputeInstanceTFJSON(
   ];
   const leaderAWSInstance = `aws_instance.cndi_aws_instance_${leaderNodeName}`;
   const user_data = getUserDataTemplateFileString(role);
-  const depends_on = role !== "leader" ? [leaderAWSInstance] : [];
+  const depends_on = role !== "leader"
+    ? ["aws_internet_gateway.cndi_aws_internet_gateway", leaderAWSInstance]
+    : ["aws_internet_gateway.cndi_aws_internet_gateway"];
 
   const resource = getTFResource(
     "aws_instance",
@@ -48,18 +50,6 @@ export default function getAWSComputeInstanceTFJSON(
       user_data_replace_on_change: false,
       user_data,
       key_name: "${aws_key_pair.cndi_aws_key_pair.key_name}",
-      provisioner: [
-        {
-          "local-exec": [
-            {
-              interpreter: ["bash", "-c"],
-              when: "destroy",
-              command:
-                "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.public_dns} || sudo microk8s remove-node $(hostname) --force",
-            },
-          ],
-        },
-      ],
       depends_on,
     },
     `cndi_aws_instance_${node.name}`,
