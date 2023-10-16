@@ -25,7 +25,7 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
         "local-exec": {
           interpreter: ["bash", "-c"],
           when: "destroy",
-          command: "sudo chmod 600 ssh_access_key.pem",
+          command: "sudo chmod 644 ssh_access_key.pem",
         },
       },
       {
@@ -33,7 +33,7 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
           interpreter: ["bash", "-c"],
           when: "destroy",
           command:
-            "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.triggers.instance_public_dns} sudo microk8s remove-node $(hostname) --force",
+            "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.triggers.instance_public_dns} 'sudo microk8s remove-node $(hostname) --force'",
         },
       },
     ],
