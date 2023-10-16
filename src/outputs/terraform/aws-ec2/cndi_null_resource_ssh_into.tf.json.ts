@@ -32,7 +32,7 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
           interpreter: ["bash", "-c"],
           when: "destroy",
           command:
-            "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.triggers.instance_public_dns} sudo touch newnew.txt",
+            "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.triggers.instance_public_dns} sudo microk8s remove-node $(hostname) --force",
         },
       },
     ],
