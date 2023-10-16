@@ -55,7 +55,7 @@ export default function getAWSComputeInstanceTFJSON(
               interpreter: ["bash", "-c"],
               when: "destroy",
               command:
-                "ssh -y -i ssh_access_key.pem ubuntu@${self.public_dns} || sudo microk8s remove-node $(hostname) --force",
+                "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.public_dns} || sudo microk8s remove-node $(hostname) --force",
             },
           ],
         },

@@ -5,9 +5,11 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
   const { name } = node;
   const resource = getTFResource("null_resource", {
     triggers: {
-      instance_id: `aws_instance.cndi_aws_instance_${name}.id`,
-      instance_public_dns: `aws_instance.cndi_aws_instance_${name}.public_dns`,
-      private_key_pem: "tls_private_key.cndi_tls_private_key.private_key_pem",
+      instance_id: `\${aws_instance.cndi_aws_instance_${name}.id}`,
+      instance_public_dns:
+        `\${aws_instance.cndi_aws_instance_${name}.public_dns}`,
+      private_key_pem:
+        "${tls_private_key.cndi_tls_private_key.private_key_pem}",
     },
     provisioner: [
       {
