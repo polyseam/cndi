@@ -4,6 +4,7 @@ import { AWSEC2NodeItemSpec } from "src/types.ts";
 export default function getNullResource(node: AWSEC2NodeItemSpec): string {
   const { name } = node;
   const resource = getTFResource("null_resource", {
+    count: 0,
     triggers: {
       instance_id: `\${aws_instance.cndi_aws_instance_${name}.id}`,
       instance_public_dns:
@@ -24,7 +25,7 @@ export default function getNullResource(node: AWSEC2NodeItemSpec): string {
         "local-exec": {
           interpreter: ["bash", "-c"],
           when: "destroy",
-          command: "sudo chmod 400 ssh_access_key.pem",
+          command: "sudo chmod 600 ssh_access_key.pem",
         },
       },
       {
