@@ -27,7 +27,7 @@ import cndi_aws_vpc from "./cndi_aws_vpc.tf.json.ts";
 import cndi_aws_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
 import cndi_aws_key_pair from "./cndi_aws_key_pair.tf.json.ts";
-import cndi_null_resource_ssh_into from "./cndi_null_resource_ssh_into.tf.json.ts";
+import cndi_terraform_data from "./cndi_terraform_data.tf.json.ts";
 import cndi_tls_private_key from "./cndi_tls_private_key.tf.json.ts";
 export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
@@ -52,9 +52,9 @@ export default async function stageTerraformResourcesForAWS(
       path.join(
         "cndi",
         "terraform",
-        `cndi_null_resource_ssh_into_${node.name}.tf.json`,
+        `cndi_terraform_data_${node.name}.tf.json`,
       ),
-      cndi_null_resource_ssh_into(node),
+      cndi_terraform_data(node),
     );
   });
   const listeners = ports.map((port) => {
