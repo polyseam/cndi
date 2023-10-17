@@ -16,6 +16,7 @@ export default function getTerraformData(node: AWSEC2NodeItemSpec): string {
       {
         "local-exec": {
           interpreter: ["bash", "-c"],
+          when: "destroy",
           command:
             "echo '${self.input.private_key_pem}' | sudo tee -a ssh_access_key.pem",
         },
@@ -23,12 +24,14 @@ export default function getTerraformData(node: AWSEC2NodeItemSpec): string {
       {
         "local-exec": {
           interpreter: ["bash", "-c"],
+          when: "destroy",
           command: "sudo chmod 644 ssh_access_key.pem",
         },
       },
       {
         "local-exec": {
           interpreter: ["bash", "-c"],
+          when: "destroy",
           command:
             "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.input.instance_public_dns} 'sudo microk8s remove-node $(hostname) --force'",
         },
