@@ -8,6 +8,8 @@ export default function getTerraformData(node: AWSEC2NodeItemSpec): string {
     input: {
       instance_public_dns:
         `\${aws_instance.cndi_aws_instance_${name}.public_dns}`,
+      private_key_pem:
+        "${tls_private_key.cndi_tls_private_key.private_key_pem}",
     },
 
     provisioner: [
@@ -15,7 +17,7 @@ export default function getTerraformData(node: AWSEC2NodeItemSpec): string {
         "local-exec": {
           interpreter: ["bash", "-c"],
           command:
-            "echo '${tls_private_key.cndi_tls_private_key.private_key_pem}' | sudo tee -a ssh_access_key.pem",
+            "echo '${self.input.private_key_pem}' | sudo tee -a ssh_access_key.pem",
         },
       },
       {
