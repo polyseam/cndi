@@ -47,16 +47,6 @@ export default async function stageTerraformResourcesForAWS(
 
   const ports = resolveCNDIPorts(config);
 
-  const nullResources = awsEC2Nodes.map((node) => {
-    stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        `cndi_terraform_data_${node.name}.tf.json`,
-      ),
-      cndi_terraform_data(node),
-    );
-  });
   const listeners = ports.map((port) => {
     return stageFile(
       path.join(
@@ -108,7 +98,7 @@ export default async function stageTerraformResourcesForAWS(
   try {
     await Promise.all([
       ...stageNodes,
-      ...nullResources,
+
       ...listeners,
       ...targetGroups,
       ...targetGroupAttachments,
@@ -148,6 +138,14 @@ export default async function stageTerraformResourcesForAWS(
           "cndi_aws_internet_gateway.tf.json",
         ),
         cndi_aws_internet_gateway(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          `cndi_terraform_data.tf.json`,
+        ),
+        cndi_terraform_data(),
       ),
       stageFile(
         path.join(

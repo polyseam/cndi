@@ -52,6 +52,16 @@ export default function getAWSComputeInstanceTFJSON(
       user_data_replace_on_change: false,
       user_data,
       key_name: "${aws_key_pair.cndi_aws_key_pair.key_name}",
+      provisioner: [
+        {
+          "local-exec": {
+            interpreter: ["bash", "-c"],
+            when: "destroy",
+            command:
+              "ssh -o StrictHostKeyChecking=no -i ssh_access_key.pem ubuntu@${self.public_dns} 'sudo microk8s remove-node $(hostname) --force'",
+          },
+        },
+      ],
       depends_on,
     },
     `cndi_aws_instance_${node.name}`,
