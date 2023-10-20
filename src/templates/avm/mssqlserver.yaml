@@ -1,18 +1,18 @@
 prompts:
   - name: argocdDomainName
     default: argocd.example.com
-    message: 'Please enter the domain name you want argocd to be accessible on:'
+    message: "Please enter the domain name you want argocd to be accessible on:"
     type: Input
   - name: mssqlDomainName
     default: mssql.example.com
-    message: 'Please enter the domain name you want mssql to be accessible on:'
+    message: "Please enter the domain name you want mssql to be accessible on:"
     type: Input
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
-  - message: 'Please enter root password '
-    default: password
+  - message: "Please enter mssql root password "
+    default: Password123
     name: rootPassword
     type: Secret
 outputs:
@@ -21,17 +21,17 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         open_ports:
           - number: 1433
             name: mssql
-            namespace: mssql-azure
+            namespace: mssql
             service: mssql-0
         nodes:
           - name: x-mssql-node
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: y-mssql-node
             kind: azure
@@ -44,79 +44,13 @@ outputs:
         apiVersion: v1
         kind: Namespace
         metadata:
-          name: mssql-azure
-
-      argo-ingress:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: argocd-server-ingress
-          namespace: argocd
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          tls:
-            - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
-              secretName: cluster-issuer-private-key
-          rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: argocd-server
-                        port:
-                          name: https
-      mssql-ingress:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: mssql-0-ingress
-          namespace: mssql-azure
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          tls:
-            - hosts:
-                - '{{ $.cndi.prompts.responses.mssqlDomainName }}'
-              secretName: cluster-issuer-private-key
-          rules:
-            - host: '{{ $.cndi.prompts.responses.mssqlDomainName }}'
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: mssql-0
-                        port:
-                          number: 1433
-      mssql-storageclass:
-        kind: StorageClass
-        apiVersion: storage.k8s.io/v1
-        metadata:
-          name: azure-disk
-          namespace: mssql-azure
-        provisioner: kubernetes.io/azure-disk
-        parameters:
-          storageAccountType: Standard_LRS
-          kind: Managed
-
+          name: mssql
       mssql-service:
         apiVersion: v1
         kind: Service
         metadata:
           name: mssql-0
-          namespace: mssql-azure
+          namespace: mssql
         spec:
           selector:
             statefulset.kubernetes.io/pod-name: mssql-0
@@ -129,7 +63,7 @@ outputs:
         apiVersion: v1
         metadata:
           name: mssql
-          namespace: mssql-azure
+          namespace: mssql
         data:
           mssql.conf: |
             [EULA]
@@ -145,84 +79,220 @@ outputs:
 
             [language]
             lcid = 1033
+
+            [network]
+            tlscert = /var/opt/mssql/sslcert/tls.crt
+            tlskey = /var/opt/mssql/sslcert/tls.key
+            tlsprotocols = 1.2
+            forceencryption = 0
       mssql-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: mssql-secret
-          namespace: mssql-azure
+          namespace: mssql
           labels:
             argocd.argoproj.io/secret-type: cluster
         type: Opaque
         stringData:
           MSSQL_SA_PASSWORD: $.cndi.secrets.seal(MSSQL_SA_PASSWORD)
+      selfsigned-issuer:
+        apiVersion: cert-manager.io/v1
+        kind: ClusterIssuer
+        metadata:
+          name: selfsigned-issuer
+        spec:
+          selfSigned: {}
+      mssql-certs:
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: mssql-certs
+          namespace: mssql
+        spec:
+          secretName: mssql-certs-secret
+          duration: 2160h # 90d
+          renewBefore: 360h # 15d
+          issuerRef:
+            name: selfsigned-issuer
+            kind: ClusterIssuer
+          commonName: "{{ $.cndi.prompts.responses.mssqlDomainName }}"
+          dnsNames:
+            - "{{ $.cndi.prompts.responses.mssqlDomainName }}"
+            - "mssql-0.mssql.svc.cluster.local"
+          privateKey:
+            algorithm: RSA
+            encoding: PKCS1
+            size: 2048
       mssql-statefulset:
         apiVersion: apps/v1
         kind: StatefulSet
         metadata:
-          name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
-          namespace: mssql-azure
+          name: mssql
+          namespace: mssql
           labels:
             app: mssql
         spec:
-          serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
-          replicas: 1 # only one pod, with one SQL Server instance deployed.
+          serviceName: mssql
+          replicas: 1
           selector:
             matchLabels:
-              app: mssql  # this has to be the same as .spec.template.metadata.labels
+              app: mssql
           template:
             metadata:
               labels:
-                app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
+                app: mssql
             spec:
               securityContext:
                 fsGroup: 10001
               containers:
-              - name: mssql # container name within the pod.
-                # command:
-                #   - /bin/bash
-                #   - -c
-                #   - cp /var/opt/mssql/mssql.conf /var/opt/mssql/mssql.conf && /opt/mssql/bin/sqlservr
-                image: mcr.microsoft.com/mssql/server:2019-latest
-                ports:
-                - containerPort: 1433
-                  name: tcpsql
-                env:
-                - name: MSSQL_PID
-                  value: "Developer"
-                - name: ACCEPT_EULA
-                  value: "Y"
-                - name: MSSQL_AGENT_ENABLED
-                  value: "1"
-                - name: MSSQL_SA_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: mssql-secret
-                      key: MSSQL_SA_PASSWORD
-                # volumeMounts:
-                # - name: mssql
-                #   mountPath: "/var/opt/mssql"
+                - name: mssql
+                  command:
+                    - /bin/bash
+                    - -c
+                    # - cp /var/opt/config/mssql.conf /var/opt/mssql/mssql.conf && /opt/mssql/bin/sqlservr
+                  image: "mcr.microsoft.com/mssql/server:2019-latest"
+                  args:
+                    - |
+                      mkdir -p /var/opt/mssql/sslcert &&
+                      chown mssql /var/opt/mssql/sslcert &&
+                      chmod 700 /var/opt/mssql/sslcert &&
+                      cp /mnt/mssql-certs/tls.crt /var/opt/mssql/sslcert/tls.crt &&
+                      cp /mnt/mssql-certs/tls.key /var/opt/mssql/sslcert/tls.key &&
+                      chown mssql /var/opt/mssql/sslcert/tls.crt /var/opt/mssql/sslcert/tls.key &&
+                      chmod 600 /var/opt/mssql/sslcert/tls.crt /var/opt/mssql/sslcert/tls.key &&
+                      cp /var/opt/config/mssql.conf /var/opt/mssql/mssql.conf &&
+                      /opt/mssql/bin/sqlservr
+                  ports:
+                    - containerPort: 1433
+                      name: tcpsql
+                  env:
+                    - name: MSSQL_PID
+                      value: Developer
+                    - name: ACCEPT_EULA
+                      value: "Y"
+                    - name: MSSQL_AGENT_ENABLED
+                      value: "1"
+                    - name: MSSQL_SA_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mssql-secret
+                          key: MSSQL_SA_PASSWORD
+                  volumeMounts:
+                    - name: mssql-certs-volume
+                      mountPath: /mnt/mssql-certs
+                    - name: newmssql
+                      mountPath: "/var/opt/mssql"
+                    - name: userdata
+                      mountPath: "/var/opt/mssql/userdata"
+                    - name: userlog
+                      mountPath: "/var/opt/mssql/userlog"
+                    - name: tempdb
+                      mountPath: "/var/opt/mssql/tempdb"
+                    - name: mssql-config-volume
+                      mountPath: /var/opt/config
+              volumes:
+                - name: mssql-certs-volume
+                  secret:
+                    secretName: mssql-certs-secret
+                - name: mssql-config-volume
+                  configMap:
+                    name: mssql
           volumeClaimTemplates:
             - metadata:
-                name: mssql
+                name: newmssql
               spec:
                 accessModes:
-                - ReadWriteOnce
+                  - ReadWriteOnce
                 resources:
                   requests:
                     storage: 8Gi
-    applications:
+            - metadata:
+                name: userdata
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 8Gi
+            - metadata:
+                name: userlog
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 8Gi
+            - metadata:
+                name: tempdb
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 8Gi
+      argo-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: argocd-server-ingress
+          namespace: argocd
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: argocd-server
+                        port:
+                          name: https
+      mssql-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: mssql-0-ingress
+          namespace: mssql
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.mssqlDomainName }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $.cndi.prompts.responses.mssqlDomainName }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mssql-0
+                        port:
+                          number: 1433
   env:
     extend_basic_env: azure
     entries:
       - name: MSSQL_SA_PASSWORD
-        value: '{{ $.cndi.prompts.responses.rootPassword }}'
+        value: "{{ $.cndi.prompts.responses.rootPassword }}"
   readme:
     extend_basic_readme: azure
     template_section: |-
       ## mssql
 
        This template deploys a Mssql  cluster with one server instance.
-
-
-
