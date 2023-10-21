@@ -265,8 +265,6 @@ outputs:
           name: mssql-0-ingress
           namespace: mssql
           annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: "true"
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
@@ -285,6 +283,7 @@ outputs:
                         name: mssql-0
                         port:
                           number: 1433
+    applications:
   env:
     extend_basic_env: azure
     entries:
