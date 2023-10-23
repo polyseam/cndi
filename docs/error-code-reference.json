@@ -307,6 +307,11 @@
     "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
   },
   {
+    "code": 1009,
+    "message": "failed to write tf state: terraform.tfstate file not found",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/602"
+  },
+  {
     "code": 1100,
     "message": "cndi release binary fetch not ok during 'cndi upgrade'"
   },
