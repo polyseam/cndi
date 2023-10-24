@@ -1,6 +1,5 @@
 <div align="center">
   <br>
-  <img alt="CNDI" src="docs/img/cndi-logo.png" width="300px">
   <h1>cndi</h1>
 </div>
 <br>
@@ -31,6 +30,14 @@ you can sign up for a Platform as a Service.
 
 Once your cluster is set up, manage the infrastructure and applications with
 ease using GitOps and Infrastructure as Code.
+
+## demo video 🎥
+
+If you'd like to see a walkthrough for setting up an Airflow cluster using CNDI, checkout this demo:
+
+<a href="https://www.youtube.com/watch?v=k-Ua0nXhVVQ">
+  <img src="https://img.youtube.com/vi/k-Ua0nXhVVQ/0.jpg" alt="CNDI Airflow Walkthrough" width="360px"/>
+</a>
 
 ## installation 🥁
 
