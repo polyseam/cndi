@@ -82,7 +82,7 @@ const getLeaderCloudInitYaml = (
     "stable";
 
   const DEFAULT_ARGOCD_INSTALL_URL =
-    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/ha/install.yaml`;
+    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
 
   const userBefore =
     config.infrastructure.cndi?.microk8s?.["cloud-init"]?.leader_before || [];
