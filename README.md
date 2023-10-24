@@ -37,7 +37,7 @@ If you'd like to see a walkthrough for setting up an Airflow cluster using CNDI,
 checkout this demo:
 
 <a href="https://www.youtube.com/watch?v=k-Ua0nXhVVQ">
-  <img src="https://img.youtube.com/vi/k-Ua0nXhVVQ/0.jpg" alt="CNDI Airflow Walkthrough" width="360px"/>
+  <img src="/docs/img/demo-yt-thumb.png" alt="CNDI Airflow Walkthrough" width="360px"/>
 </a>
 
 ## installation 🥁
