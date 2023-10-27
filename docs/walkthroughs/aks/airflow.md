@@ -233,7 +233,8 @@ instances.
 
 ![google domains](/docs/walkthroughs/aks/img/google-domains-a-record.png)
 
-- Optional[Port forwarding Argocd and the Airflow Web Server](docs/walkthroughs/aks/port-forwarding.md)
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your AKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/aks/port-forwarding.md)
 
 Wait 2 to 5 mins to open the domain name you've assigned for ArgoCD in your
 browser in order to see the Argocd UI Login page.
