@@ -13,12 +13,13 @@ import variable from "./variable.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
 import cndi_time_static_admin_password_update from "./cndi_time_static_admin_password_update.tf.json.ts";
 import cndi_azurefile_csi_storage_class_manifest from "./cndi_azurefile_csi_storage_class_manifest.tf.json.ts";
+import cndi_azuredisk_csi_storage_class_manifest from "./cndi_azuredisk_csi_storage_class_manifest.tf.json.ts";
 import cndi_argocd_admin_password_secret_manifest from "./cndi_argocd_admin_password_secret_manifest.tf.json.ts";
 import cndi_argocd_private_repo_secret_manifest from "./cndi_argocd_private_repo_secret_manifest.tf.json.ts";
 import cndi_argocd_root_application_manifest from "./cndi_argocd_root_application_manifest.tf.json.ts";
 import cndi_sealed_secrets_secret_manifest from "./cndi_sealed_secrets_secret_manifest.tf.json.ts";
 import getSealedSecretsKeyYamlTftpl from "src/outputs/terraform/manifest-templates/sealed_secrets_secret_manifest.yaml.tftpl.ts";
-import getStorageClassManifestYamlTftpl from "src/outputs/terraform/manifest-templates/azurefile_csi_storage_class_manifest.yaml.tftpl.ts";
+import getAzureDiskDefaultManifestYamlTftpl from "src/outputs/terraform/manifest-templates/azuredisk_csi_storage_class_manifest.yaml.tftpl.ts";
 import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_admin_password_secret_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretSSHYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
@@ -193,6 +194,22 @@ export default async function stageTerraformResourcesForAzureAKS(
           "cndi_azurefile_csi_storage_class_manifest.tf.json",
         ),
         cndi_azurefile_csi_storage_class_manifest(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "azuredisk_csi_storage_class_manifest.yaml.tftpl",
+        ),
+        getAzureDiskDefaultManifestYamlTftpl(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_azuredisk_csi_storage_class_manifest.tf.json",
+        ),
+        cndi_azuredisk_csi_storage_class_manifest(),
       ),
     ]);
   } catch (e) {
