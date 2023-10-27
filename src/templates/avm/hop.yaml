@@ -1,17 +1,17 @@
 prompts:
-  - message: 'Please enter the domain name you want argocd to be accessible on:'
+  - message: "Please enter the domain name you want argocd to be accessible on:"
     name: argocdDomainName
     default: argocd.example.com
     type: Input
-  - message: 'Please enter the domain name you want hop to be accessible on:'
+  - message: "Please enter the domain name you want hop to be accessible on:"
     name: hopwebDomainName
     default: hop.example.com
     type: Input
-  - message: 'Please enter the hop server password you want to use for hop:'
+  - message: "Please enter the hop server password you want to use for hop:"
     name: hopServerPassword
     default: admin
     type: Secret
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
@@ -21,12 +21,12 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         nodes:
           - name: x-hop-node
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: y-hop-node
             kind: azure
@@ -64,16 +64,16 @@ outputs:
           namespace: argocd
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
                 paths:
                   - path: /
@@ -91,14 +91,14 @@ outputs:
           namespace: hop
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
+            kubernetes.io/tls-acme: "true"
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.hopwebDomainName }}'
+                - "{{ $.cndi.prompts.responses.hopwebDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.hopwebDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.hopwebDomainName }}"
               http:
                 paths:
                   - path: /
@@ -112,7 +112,7 @@ outputs:
       hop:
         targetRevision: HEAD
         destinationNamespace: hop
-        repoURL: 'https://github.com/apache/hop.git'
+        repoURL: "https://github.com/apache/hop.git"
         path: helm/hop
         values:
           server:
@@ -125,7 +125,7 @@ outputs:
       - type: Comment
         comment: HOP parameters
       - name: HOP_SERVER_PASSWORD
-        value: '{{ $.cndi.prompts.responses.hopServerPassword }}'
+        value: "{{ $.cndi.prompts.responses.hopServerPassword }}"
   readme:
     extend_basic_readme: azure
     template_section: >-
@@ -134,4 +134,4 @@ outputs:
 
       This template deploys [Apache Hop](https://hop.apache.org/), a data
       processing tool that is widely used for ETL to extract transform and load
-      processing. 
+      processing.

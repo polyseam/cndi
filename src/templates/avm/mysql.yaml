@@ -1,13 +1,13 @@
 prompts:
   - name: argocdDomainName
     default: argocd.example.com
-    message: 'Please enter the domain name you want argocd to be accessible on:'
+    message: "Please enter the domain name you want argocd to be accessible on:"
     type: Input
   - name: mysqlDomainName
     default: mysql.example.com
-    message: 'Please enter the domain name you want mysql to be accessible on:'
+    message: "Please enter the domain name you want mysql to be accessible on:"
     type: Input
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
@@ -15,7 +15,7 @@ prompts:
     default: root
     name: rootUser
     type: Input
-  - message: 'Please enter root password '
+  - message: "Please enter root password "
     default: password
     name: rootPassword
     type: Secret
@@ -25,7 +25,7 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         open_ports:
           - number: 3306
             name: mysql
@@ -35,7 +35,7 @@ outputs:
           - name: x-mysql-node
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: y-mysql-node
             kind: azure
@@ -95,16 +95,16 @@ outputs:
           namespace: argocd
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
                 paths:
                   - path: /
@@ -122,16 +122,16 @@ outputs:
           namespace: myinnodbcluster
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.mysqlDomainName }}'
+                - "{{ $.cndi.prompts.responses.mysqlDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.mysqlDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.mysqlDomainName }}"
               http:
                 paths:
                   - path: /
@@ -143,7 +143,7 @@ outputs:
                           number: 3306
     applications:
       mysqloperator:
-        repoURL: 'https://mysql.github.io/mysql-operator/'
+        repoURL: "https://mysql.github.io/mysql-operator/"
         targetRevision: 2.1.0
         chart: mysql-operator
         destinationNamespace: mysql-operator
@@ -151,11 +151,11 @@ outputs:
     extend_basic_env: azure
     entries:
       - name: ROOT_USER
-        value: '{{ $.cndi.prompts.responses.rootUser }}'
+        value: "{{ $.cndi.prompts.responses.rootUser }}"
       - name: ROOT_HOST
-        value: '%'
+        value: "%"
       - name: ROOT_PASSWORD
-        value: '{{ $.cndi.prompts.responses.rootPassword }}'
+        value: "{{ $.cndi.prompts.responses.rootPassword }}"
   readme:
     extend_basic_readme: azure
     template_section: |-

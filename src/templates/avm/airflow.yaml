@@ -46,7 +46,7 @@ outputs:
           - name: x-airflow-node
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: y-airflow-node
             kind: azure

@@ -1,21 +1,21 @@
 prompts:
   - name: neo4jDomainName
     default: neo4j.example.com
-    message: 'Please enter the domain name you want Neo4j to be accessible on:'
+    message: "Please enter the domain name you want Neo4j to be accessible on:"
     type: Input
   - name: neo4jUsername
     default: neo4j
-    message: 'Please enter the username you will use to connect to Neo4j:'
+    message: "Please enter the username you will use to connect to Neo4j:"
     type: Input
   - name: neo4jPassword
     default: letmein
-    message: 'Please enter the password you will use to connect to Neo4j:'
+    message: "Please enter the password you will use to connect to Neo4j:"
     type: Input
   - name: argocdDomainName
     default: argocd.example.com
-    message: 'Please enter the domain name you want argocd to be accessible on:'
+    message: "Please enter the domain name you want argocd to be accessible on:"
     type: Input
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
@@ -25,7 +25,7 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         open_ports:
           - name: neo4j-bolt
             number: 7687
@@ -35,7 +35,7 @@ outputs:
           - name: neo4j-main
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: neo4j-a
             kind: azure
@@ -61,16 +61,16 @@ outputs:
           namespace: neo4j
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.neo4jDomainName }}'
+                - "{{ $.cndi.prompts.responses.neo4jDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.neo4jDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.neo4jDomainName }}"
               http:
                 paths:
                   - path: /
@@ -88,16 +88,16 @@ outputs:
           namespace: argocd
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
                 paths:
                   - path: /
@@ -111,14 +111,14 @@ outputs:
       neo4j:
         targetRevision: 5.9.0
         destinationNamespace: neo4j
-        repoURL: 'https://helm.neo4j.com/neo4j'
+        repoURL: "https://helm.neo4j.com/neo4j"
         chart: neo4j
         values:
           disableLookups: true
           neo4j:
             name: neo4j
             passwordFromSecret: neo4j-auth-secret
-            acceptLicenseAgreement: 'yes'
+            acceptLicenseAgreement: "yes"
           volumes:
             data:
               mode: defaultStorageClass
@@ -153,11 +153,11 @@ outputs:
       - type: Comment
         comment: Neo4j Credentials
       - name: NEO4J_USERNAME
-        value: '{{ $.cndi.prompts.responses.neo4jUsername }}'
+        value: "{{ $.cndi.prompts.responses.neo4jUsername }}"
       - type: Comment
-        comment: '''neo4j/'' prefix is required for the password'
+        comment: "'neo4j/' prefix is required for the password"
       - name: NEO4J_PASSWORD
-        value: 'neo4j/{{ $.cndi.prompts.responses.neo4jPassword }}'
+        value: "neo4j/{{ $.cndi.prompts.responses.neo4jPassword }}"
   readme:
     extend_basic_readme: azure
     template_section: >-

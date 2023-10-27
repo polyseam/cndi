@@ -6,7 +6,7 @@ const ARGOCD_VERSION = "2.7.12";
 const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
   gcp: "n2-standard-2" as const,
-  azure: "Standard_D4s_v3" as const,
+  azure: "Standard_D2s_v3" as const,
 };
 
 const DEFAULT_NODE_DISK_SIZE = 100;
