@@ -31,7 +31,7 @@ export default function getAzureAKSTFJSON(
   const tags = {
     CNDIProject: "${local.cndi_project_name}",
   };
-  const agent_tags = {
+  const agents_tags = {
     CNDIProject: "${local.cndi_project_name}",
   };
   const module = getTFModule(
@@ -41,7 +41,7 @@ export default function getAzureAKSTFJSON(
       agents_max_count: max_size,
       agents_size: machine_type,
       agents_max_pods: 100,
-      agent_tags,
+      agents_tags,
       agents_pool_name: "nodepool",
       agents_availability_zones: ["1"],
       agents_count: null,
