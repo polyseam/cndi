@@ -1,11 +1,11 @@
 prompts:
   - name: argocdDomainName
     default: argocd.example.com
-    message: 'Please enter the domain name you want argocd to be accessible on:'
+    message: "Please enter the domain name you want argocd to be accessible on:"
     type: Input
   - name: mongodbDomainName
     default: mongodb.example.com
-    message: 'Please enter the domain name you want mongodb to be accessible on:'
+    message: "Please enter the domain name you want mongodb to be accessible on:"
     type: Input
   - message: Please enter the number of ReplicaSet you want to deploy
     default: 3
@@ -21,15 +21,15 @@ prompts:
     default: password
     name: mongodbPassword
     type: Secret
-  - message: 'Please enter the name for the mongodb database you want to use:'
+  - message: "Please enter the name for the mongodb database you want to use:"
     default: my-mongodb-database
     name: mongodbName
     type: Input
-  - message: 'Please enter your destination namespace for your mongoDb database:'
+  - message: "Please enter your destination namespace for your mongoDb database:"
     default: mongodb
     name: mongodbNamespace
     type: Input
-  - message: 'Please enter the email address you want to use for lets encrypt:'
+  - message: "Please enter the email address you want to use for lets encrypt:"
     default: admin@example.com
     name: letsEncryptClusterIssuerEmailAddress
     type: Input
@@ -39,17 +39,17 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
-          email: '{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}'
+          email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
         open_ports:
           - number: 27017
             name: mongodb
-            namespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
+            namespace: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
             service: mongodb-replica-set-svc
         nodes:
           - name: x-mongodb-node
             kind: azure
             role: leader
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
           - name: y-mongodb-node
             kind: azure
@@ -66,16 +66,16 @@ outputs:
           namespace: argocd
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.argocdDomainName }}'
+                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.argocdDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
                 paths:
                   - path: /
@@ -90,19 +90,19 @@ outputs:
         kind: Ingress
         metadata:
           name: mongodb-server-ingress
-          namespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
           tls:
             - hosts:
-                - '{{ $.cndi.prompts.responses.mongodbDomainName }}'
+                - "{{ $.cndi.prompts.responses.mongodbDomainName }}"
               secretName: cluster-issuer-private-key
           rules:
-            - host: '{{ $.cndi.prompts.responses.mongodbDomainName }}'
+            - host: "{{ $.cndi.prompts.responses.mongodbDomainName }}"
               http:
                 paths:
                   - path: /
@@ -117,7 +117,7 @@ outputs:
         kind: Secret
         metadata:
           name: my-user-password
-          namespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
         type: Opaque
         stringData:
           password: $.cndi.secrets.seal(MONGODB_PASSWORD)
@@ -126,11 +126,11 @@ outputs:
         kind: MongoDBCommunity
         metadata:
           name: mongodb-replica-set
-          namespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          members: '{{ $.cndi.prompts.responses.mongodbReplicaSets }}'
+          members: "{{ $.cndi.prompts.responses.mongodbReplicaSets }}"
           type: ReplicaSet
           version: 4.4.0
           security:
@@ -138,31 +138,31 @@ outputs:
               modes:
                 - SCRAM
           users:
-            - name: '{{ $.cndi.prompts.responses.mongodbUser }}'
-              db: '{{ $.cndi.prompts.responses.mongodbName }}'
+            - name: "{{ $.cndi.prompts.responses.mongodbUser }}"
+              db: "{{ $.cndi.prompts.responses.mongodbName }}"
               passwordSecretRef:
                 name: my-user-password
               roles:
                 - name: clusterAdmin
-                  db: '{{ $.cndi.prompts.responses.mongodbName }}'
+                  db: "{{ $.cndi.prompts.responses.mongodbName }}"
                 - name: userAdminAnyDatabase
-                  db: '{{ $.cndi.prompts.responses.mongodbName }}'
+                  db: "{{ $.cndi.prompts.responses.mongodbName }}"
               scramCredentialsSecretName: my-scram
     applications:
       mongodb:
         targetRevision: 0.8.0
-        destinationNamespace: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
-        repoURL: 'https://mongodb.github.io/helm-charts'
+        destinationNamespace: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
+        repoURL: "https://mongodb.github.io/helm-charts"
         chart: community-operator
   env:
     extend_basic_env: azure
     entries:
       - name: MONGODB_DATABASE
-        value: '{{ $.cndi.prompts.responses.mongodbName }}'
+        value: "{{ $.cndi.prompts.responses.mongodbName }}"
       - name: MONGODB_USER
-        value: '{{ $.cndi.prompts.responses.mongodbUser }}'
+        value: "{{ $.cndi.prompts.responses.mongodbUser }}"
       - name: MONGODB_PASSWORD
-        value: '{{ $.cndi.prompts.responses.mongodbPassword }}'
+        value: "{{ $.cndi.prompts.responses.mongodbPassword }}"
       - name: MONGODB_CONNECTION_STRING
         value: >-
           mongodb://{{ $.cndi.prompts.responses.mongodbUser }}:{{
@@ -170,9 +170,9 @@ outputs:
           $.cndi.prompts.responses.mongodbDomainName }}/{{
           $.cndi.prompts.responses.mongodbName }}
       - name: MONGODB_REPLICA_SETS
-        value: '{{ $.cndi.prompts.responses.mongodbReplicaSets }}'
+        value: "{{ $.cndi.prompts.responses.mongodbReplicaSets }}"
       - name: MONGODB_NAMESPACE
-        value: '{{ $.cndi.prompts.responses.mongodbNamespace }}'
+        value: "{{ $.cndi.prompts.responses.mongodbNamespace }}"
   readme:
     extend_basic_readme: azure
     template_section: >-

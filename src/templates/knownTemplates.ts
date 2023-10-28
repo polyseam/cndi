@@ -36,6 +36,10 @@ export default function getKnownTemplates() {
       name: "ec2/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/redis.yaml`,
     },
+    {
+      name: "ec2/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/ec2/mssqlserver.yaml`,
+    },
     // eks
     {
       name: "eks/basic",
@@ -68,6 +72,10 @@ export default function getKnownTemplates() {
     {
       name: "eks/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/redis.yaml`,
+    },
+    {
+      name: "eks/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/eks/mssqlserver.yaml`,
     },
     // gce
     {
@@ -102,6 +110,10 @@ export default function getKnownTemplates() {
       name: "gce/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/redis.yaml`,
     },
+    {
+      name: "gce/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gce/mssqlserver.yaml`,
+    },
     // aks
     {
       name: "aks/basic",
@@ -135,7 +147,11 @@ export default function getKnownTemplates() {
       name: "aks/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/redis.yaml`,
     },
-    // azure
+    {
+      name: "aks/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/aks/mssqlserver.yaml`,
+    },
+    // azures
     {
       name: "avm/basic",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/basic.yaml`,
@@ -167,6 +183,10 @@ export default function getKnownTemplates() {
     {
       name: "avm/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/redis.yaml`,
+    },
+    {
+      name: "avm/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/avm/mssqlserver.yaml`,
     },
     // dev
     {
@@ -201,6 +221,10 @@ export default function getKnownTemplates() {
       name: "dev/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/redis.yaml`,
     },
+    {
+      name: "dev/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/dev/mssqlserver.yaml`,
+    },
     // gke
     {
       name: "gke/basic",
@@ -233,6 +257,10 @@ export default function getKnownTemplates() {
     {
       name: "gke/redis",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/redis.yaml`,
+    },
+    {
+      name: "gke/mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/gke/mssqlserver.yaml`,
     },
   ];
   return knownTemplates;

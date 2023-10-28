@@ -61,7 +61,7 @@ outputs:
         nodes:
           - name: superset-nodes
             kind: aks
-            instance_type: Standard_D4s_v3
+            instance_type: Standard_D2s_v3
             volume_size: 128
             agents_min_count: 1
             agents_max_count: 3
@@ -324,8 +324,4 @@ outputs:
       This template deploys production ready Apache superset, a data visualization tool, it is fast, light weight,
       intuitive and loaded with options that make it easy for the users to explore and visualize their data, 
       from simple line charts to highly detailed geospatial charts. 
-      It also deploys cloud native postgress as database storage and redis as a database cache, in the same cluster. 
-
-
-
-
+      It also deploys cloud native postgress as database storage and redis as a database cache, in the same cluster.
