@@ -49,7 +49,7 @@ export default function getAzureAKSTFJSON(
       resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
       node_resource_group:
-        "${azurerm_resource_group.cndi_azurerm_resource_group.name}-cluster-resources",
+        "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
       os_disk_size_gb,
       os_sku: "Ubuntu",
       os_disk_type: "Managed",
