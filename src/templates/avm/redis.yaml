@@ -23,6 +23,10 @@ prompts:
     default: 3
     name: clusterSize
     type: Number
+  - message: "Please enter the common name for TLS certificate"
+    default: polyseam.io
+    name: commName
+    type: Input
 outputs:
   cndi-config:
     cndi_version: v1
@@ -59,25 +63,60 @@ outputs:
         type: Opaque
       redis-issuer:
         apiVersion: cert-manager.io/v1
-        kind: ClusterIssuer
+        kind: Issuer
         metadata:
           name: selfsigned-issuer
           namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           selfSigned: {}
-      redis-certificate:
+      redis-root-certificate:
         apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
-          name: redis-sentinel-cert
-          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
+          name: redis-root-cert
+          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
         spec:
+          isCA: true
+          commonName: "{{ $.cndi.prompts.responses.commName }}"
+          privateKey:
+            algorithm: RSA
+            encoding: PKCS1
+            size: 2048
           dnsNames:
             - "{{ $.cndi.prompts.responses.redisDomainName }}"
           secretName: myredis-secret
           issuerRef:
-            kind: ClusterIssuer
+            kind: Issuer
             name: selfsigned-issuer
+      redis-ca-issuer:
+        apiVersion: cert-manager.io/v1
+        kind: Issuer
+        metadata:
+          name: redis-ca-issuer
+          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+        spec:
+          ca:
+            secretName: myredis-secret
+      redis-signed-cert:
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: redis-signed-cert
+          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          secretName: redis-server-tls
+          isCA: false
+          commonName: "CName-{{ $.cndi.prompts.responses.commName }}"
+          usages:
+            - server auth
+            - client auth
+          dnsNames:
+            - "{{ $.cndi.prompts.responses.redisDomainName }}"
+          issuerRef:
+            name: redis-ca-issuer
+            kind: Issuer
       redis-rep:
         apiVersion: redis.redis.opstreelabs.in/v1beta1
         kind: RedisReplication
@@ -93,7 +132,7 @@ outputs:
             cert: tls.crt
             key: tls.key
             secret:
-              secretName: myredis-secret
+              secretName: redis-server-tls
           podSecurityContext:
             runAsUser: 1000
             fsGroup: 1000

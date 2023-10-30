@@ -227,7 +227,8 @@ instances.
 
 ![Google Domains](/docs/walkthroughs/gke/img/google-domains-a-record.png)
 
-- Optional[Port forwarding Argocd and the Airflow Web Server](docs/walkthroughs/gke/port-forwarding.md)
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your Google Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/gke/port-forwarding.md)
 
 ---
 
