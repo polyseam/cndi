@@ -6,6 +6,7 @@ export default function getAzureProviderTFJSON(): string {
       {
         azurerm: {
           features: {},
+          skip_provider_registration: "true",
         },
       },
       {
