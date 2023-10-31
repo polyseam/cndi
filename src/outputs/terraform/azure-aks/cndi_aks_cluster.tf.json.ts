@@ -31,39 +31,49 @@ export default function getAzureAKSTFJSON(
   const tags = {
     CNDIProject: "${local.cndi_project_name}",
   };
-
+  const agents_tags = {
+    CNDIProject: "${local.cndi_project_name}",
+  };
   const module = getTFModule(
     "aks_cluster",
     {
       agents_min_count: desired_size,
       agents_max_count: max_size,
       agents_size: machine_type,
+      agents_max_pods: 100,
+      agents_tags,
+      agents_pool_name: "nodepool",
+      agents_availability_zones: ["1"],
+      agents_count: null,
       cluster_name: "${local.cndi_project_name}",
       resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
       node_resource_group:
-        "${azurerm_resource_group.cndi_azurerm_resource_group.name}-node-resources",
+        "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
       os_disk_size_gb,
+      os_sku: "Ubuntu",
+      os_disk_type: "Managed",
       client_id: "${var.client_id}",
       client_secret: "${var.client_secret}",
       depends_on: ["azurerm_resource_group.cndi_azurerm_resource_group"],
       tags,
       storage_profile_file_driver_enabled: true,
       storage_profile_disk_driver_enabled: true,
-      storage_profile_blob_driver_enabled: true,
+      storage_profile_blob_driver_enabled: false,
       sku_tier: "Free",
       prefix: "cndi",
       temporary_name_for_rotation: "temporary",
       enable_auto_scaling: true,
-      kubernetes_version: "1.26",
-      agents_pool_name: "nodepool",
+      kubernetes_version: "1.27",
       log_analytics_workspace_enabled: false,
       rbac_aad: false,
+      rbac_aad_managed: false,
       network_plugin: "azure",
-      agents_count: null,
-      agents_max_pods: 100,
       source: "Azure/aks/azurerm",
-      version: "7.3.1",
+      version: "7.4.0",
+      private_cluster_enabled: false,
+      public_network_access_enabled: true,
+      ultra_ssd_enabled: false,
     },
   );
 
