@@ -479,7 +479,7 @@ async function literalizeTemplateWithBlocks(
             blockString = literalizeTemplateWithResponseValues(
               YAML.stringify(block),
               body.args || {},
-              "$cndi.get_arg(",
+              "$cndi.get_arg",
             );
           }
           if (shouldDisplay) {
