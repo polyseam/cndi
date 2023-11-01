@@ -52,7 +52,7 @@ Now that you have pushed to the \`"main"\` branch, the [/.github/workflows/cndi-
 
 Now that you have a cluster, you can update it by:
 
-1. modifying your [cndi-config.jsonc](/cndi-config.jsonc) file
+1. modifying your [cndi_config.jsonc](/cndi_config.jsonc) file
 2. running \`cndi ow\` 
 3. pushing all files to the \`"main"\` branch again
 

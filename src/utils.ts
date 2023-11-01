@@ -81,7 +81,7 @@ const removeOldBinaryIfRequired = async (
   return true;
 };
 
-// attempts to find cndi-config.yaml or cndi-config.jsonc, then returns its value and location
+// attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
   providedPath?: string,
 ): Promise<[CNDIConfig, string]> => {
@@ -90,30 +90,30 @@ const loadCndiConfig = async (
   const isFile = true;
   const cwd = Deno.cwd();
 
-  // the user provided a direct path to a cndi-config file
+  // the user provided a direct path to a cndi_config file
   if (providedPath) {
     return [(await loadYAMLorJSONC(providedPath)) as CNDIConfig, providedPath];
   }
 
-  if (await exists(path.join(cwd, "cndi-config.yaml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.yaml");
-  } else if (await exists(path.join(cwd, "cndi-config.yml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.yml");
-  } else if (await exists(path.join(cwd, "cndi-config.jsonc"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.jsonc");
+  if (await exists(path.join(cwd, "cndi_config.yaml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.yaml");
+  } else if (await exists(path.join(cwd, "cndi_config.yml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.yml");
+  } else if (await exists(path.join(cwd, "cndi_config.jsonc"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.jsonc");
     configIsYAML = false;
-  } else if (await exists(path.join(cwd, "cndi-config.json"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.json");
+  } else if (await exists(path.join(cwd, "cndi_config.json"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.json");
     configIsYAML = false;
   } else {
     console.error(
       utilsLabel,
       ccolors.error("there is no"),
-      ccolors.key_name('"cndi-config.yaml"'),
+      ccolors.key_name('"cndi_config.yaml"'),
       ccolors.error("file in your current directory"),
     );
     console.log(
-      "if you don't have a cndi-config file try",
+      "if you don't have a cndi_config file try",
       ccolors.prompt("cndi init --interactive"),
     );
     await emitExitEvent(500);
@@ -162,7 +162,7 @@ async function getLeaderNodeNameFromConfig(
   if (nodesWithRoleLeader.length !== 1) {
     console.error(
       utilsLabel,
-      ccolors.error("cndi-config exists"),
+      ccolors.error("cndi_config exists"),
       ccolors.error("but it does not have exactly 1"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
       ccolors.error("entry where"),

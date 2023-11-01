@@ -12,7 +12,7 @@ export default async function validateConfig(
   if (!config?.project_name) {
     console.log(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"project_name"'),
@@ -25,7 +25,7 @@ export default async function validateConfig(
   if (!config?.infrastructure) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"infrastructure"'),
@@ -44,10 +44,10 @@ export default async function validateConfig(
         if (!port.number) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"number"'),
             ccolors.error("key"),
@@ -58,10 +58,10 @@ export default async function validateConfig(
         if (!port.name) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"name"'),
             ccolors.error("key"),
@@ -72,10 +72,10 @@ export default async function validateConfig(
         if (!port.service && !!port?.namespace) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"service"'),
             ccolors.error("key"),
@@ -85,10 +85,10 @@ export default async function validateConfig(
         } else if (!port.namespace && !!port?.service) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"namespace"'),
             ccolors.error("key"),
@@ -101,7 +101,7 @@ export default async function validateConfig(
     } else {
       console.error(
         cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
+        ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but"),
         ccolors.key_name('"infrastructure.cndi.open_ports"'),
@@ -115,7 +115,7 @@ export default async function validateConfig(
   if (!config?.infrastructure?.cndi?.nodes?.[0]) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have any"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -132,7 +132,7 @@ export default async function validateConfig(
   if (nodeIsMissingKind) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it has atleast 1"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -151,7 +151,7 @@ export default async function validateConfig(
   if (!onlyOneNodeKind) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it has multiple"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -167,7 +167,7 @@ export default async function validateConfig(
     if (config.infrastructure.cndi.nodes.length > 1) {
       console.error(
         cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
+        ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it has multiple"),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -197,7 +197,7 @@ export default async function validateConfig(
     if (!node.name) {
       console.error(
         cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
+        ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it has at least one"),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -217,7 +217,7 @@ export default async function validateConfig(
   if (!nodeNamesAreUnique) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it has multiple "),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -241,7 +241,7 @@ export default async function validateConfig(
   if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at"),
+      ccolors.error("cndi_config file found was at"),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have exactly 1"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),

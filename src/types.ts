@@ -49,7 +49,7 @@ export type DeploymentTarget = ObjectValues<typeof DEPLOYMENT_TARGET>;
 // a map of all available commands in the cndi binary
 export type Command = ObjectValues<typeof COMMAND>;
 
-// cndi-config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
+// cndi_config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
 interface BaseNodeItemSpec {
   name: string;
   kind: NodeKind;
@@ -61,7 +61,7 @@ interface BaseNodeItemSpec {
   machine_type?: string;
 }
 
-// cndi-config.jsonc["nodes"][kind==="dev"]
+// cndi_config.jsonc["nodes"][kind==="dev"]
 interface MultipassNodeItemSpec extends BaseNodeItemSpec {
   name: string;
   cpus?: number;
@@ -72,7 +72,7 @@ interface MultipassNodeItemSpec extends BaseNodeItemSpec {
   disk_size?: number;
 }
 
-// cndi-config.jsonc["nodes"][kind==="azure"]
+// cndi_config.jsonc["nodes"][kind==="azure"]
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
@@ -93,7 +93,7 @@ interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
 }
-// cndi-config.jsonc["nodes"]["entries"][kind==="aws"]
+// cndi_config.jsonc["nodes"]["entries"][kind==="aws"]
 interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
@@ -104,13 +104,13 @@ interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][kind==="eks"]
+// cndi_config.jsonc["nodes"]["entries"][kind==="eks"]
 type AWSEKSNodeItemSpec = Omit<AWSEC2NodeItemSpec, "ami"> & {
   min_count: number;
   max_count: number;
 };
 
-// cndi-config.jsonc["nodes"]["entries"][kind==="gcp"]
+// cndi_config.jsonc["nodes"]["entries"][kind==="gcp"]
 interface GCPNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;
@@ -119,7 +119,7 @@ interface GCPNodeItemSpec extends BaseNodeItemSpec {
   instance_type?: string;
 }
 
-// cndi-config.jsonc["nodes"]["entries"][kind==="gke"]
+// cndi_config.jsonc["nodes"]["entries"][kind==="gke"]
 interface GKENodeItemSpec extends BaseNodeItemSpec {
   min_count?: number;
   max_count?: number;
@@ -130,7 +130,7 @@ interface GKENodeItemSpec extends BaseNodeItemSpec {
   instance_type?: string;
 }
 
-// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
+// cndi_config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
 interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   ami?: string;
   instance_type?: string;
@@ -138,7 +138,7 @@ interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
   size?: number;
 }
 
-// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
+// cndi_config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
 interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
   image?: string;
   machine_type?: string;
@@ -146,7 +146,7 @@ interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
   size?: number | string; // this can be a string if it refers to a machine type which azure named "size"
 }
 
-// cndi-config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
+// cndi_config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
 interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
   machine_type?: string;
   image?: string;

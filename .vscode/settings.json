@@ -11,13 +11,13 @@
   },
   "json.schemas": [
     {
-      "fileMatch": ["*cndi-config.json*"],
-      "url": "/src/schemas/cndi-config.schema.json"
+      "fileMatch": ["*cndi_config.json*"],
+      "url": "/src/schemas/cndi_config.schema.json"
     }
   ],
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-config.schema.json": [
-      "cndi-config.yaml"
+    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_config.schema.json": [
+      "cndi_config.yaml"
     ],
     "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-template.schema.json": [
       "src/templates/*/*.yaml"

@@ -38,11 +38,11 @@ const setup = {
   name: "setup",
 };
 
-Deno.test("'cndi init' with cndi-config.yaml", async (t) => {
+Deno.test("'cndi init' with cndi_config.yaml", async (t) => {
   await t.step(setup);
   await t.step("test", async () => {
     const initFileList = new Set([
-      "cndi-config.yaml",
+      "cndi_config.yaml",
       "README.md",
       ".github",
       ".gitignore",
@@ -52,7 +52,7 @@ Deno.test("'cndi init' with cndi-config.yaml", async (t) => {
     ]);
 
     Deno.writeTextFileSync(
-      path.join(Deno.cwd(), `cndi-config.yaml`),
+      path.join(Deno.cwd(), `cndi_config.yaml`),
       YAML.stringify(basicAWSCndiConfig),
     );
     // cndi init should fail because there is no config file
@@ -67,11 +67,11 @@ Deno.test("'cndi init' with cndi-config.yaml", async (t) => {
   });
 });
 
-Deno.test("'cndi init' with cndi-config.jsonc", async (t) => {
+Deno.test("'cndi init' with cndi_config.jsonc", async (t) => {
   await t.step(setup);
   await t.step("test", async () => {
     const initFileList = new Set([
-      "cndi-config.jsonc",
+      "cndi_config.jsonc",
       "README.md",
       ".github",
       ".gitignore",
@@ -81,7 +81,7 @@ Deno.test("'cndi init' with cndi-config.jsonc", async (t) => {
     ]);
 
     Deno.writeTextFileSync(
-      path.join(Deno.cwd(), `cndi-config.jsonc`),
+      path.join(Deno.cwd(), `cndi_config.jsonc`),
       getPrettyJSONString(basicAWSCndiConfig),
     );
     // cndi init should fail because there is no config file
@@ -131,7 +131,7 @@ Deno.test(
     await t.step("test", async () => {
       const project_name = "my-foo-project";
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.yaml`),
+        path.join(Deno.cwd(), `cndi_config.yaml`),
         YAML.stringify({ ...basicAWSCndiConfig, project_name }),
       );
       const { status } = await runCndi("init");
@@ -143,7 +143,7 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init' should fail if no cndi-config file or flags are present",
+  "'cndi init' should fail if no cndi_config file or flags are present",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -158,12 +158,12 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there are multiple nodes where kind=='dev'",
+  "cndi_config validation: should fail if there are multiple nodes where kind=='dev'",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString({
           project_name: "dev_project",
           infrastructure: {
@@ -185,12 +185,12 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there is no 'project_name'",
+  "cndi_config validation: should fail if there is no 'project_name'",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString({
           ...basicAWSCndiConfig,
           project_name: undefined,
@@ -208,7 +208,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there are no cndi nodes",
+  "cndi_config validation: should fail if there are no cndi nodes",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -217,7 +217,7 @@ Deno.test(
         infrastructure: { cndi: { nodes: [] } },
       };
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString(nodelessCndiConfig),
       );
       assert(
@@ -231,7 +231,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there are multiple different node kinds",
+  "cndi_config validation: should fail if there are multiple different node kinds",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -246,7 +246,7 @@ Deno.test(
       };
 
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString(multikindNodesConfig),
       );
 
@@ -261,7 +261,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there is no cndi node where role=='leader'",
+  "cndi_config validation: should fail if there is no cndi node where role=='leader'",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -276,7 +276,7 @@ Deno.test(
       };
 
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString(noLeaderConfig),
       );
 
@@ -291,7 +291,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there are more than one cndi node where role=='leader'",
+  "cndi_config validation: should fail if there are more than one cndi node where role=='leader'",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -306,7 +306,7 @@ Deno.test(
       };
 
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.yaml`),
+        path.join(Deno.cwd(), `cndi_config.yaml`),
         YAML.stringify(multipleLeaderConfig),
       );
 
@@ -321,7 +321,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if there are multiple cndi nodes with the same 'name'",
+  "cndi_config validation: should fail if there are multiple cndi nodes with the same 'name'",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -336,7 +336,7 @@ Deno.test(
       };
 
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString(duplicateNodeNameConfig),
       );
 
@@ -351,7 +351,7 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config validation: should fail if open_ports are not correctly specified",
+  "cndi_config validation: should fail if open_ports are not correctly specified",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
@@ -361,7 +361,7 @@ Deno.test(
       };
 
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString(stringOpenPortsConfig),
       );
 
@@ -376,12 +376,12 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config: should allow 'open_ports' for infrastructure only (no manifests)",
+  "cndi_config: should allow 'open_ports' for infrastructure only (no manifests)",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.jsonc`),
+        path.join(Deno.cwd(), `cndi_config.jsonc`),
         getPrettyJSONString({
           ...basicAWSCndiConfig,
           infrastructure: {
@@ -408,12 +408,12 @@ Deno.test(
 );
 
 Deno.test(
-  "cndi-config: 'open_ports' should work properly when fully specified",
+  "cndi_config: 'open_ports' should work properly when fully specified",
   async (t) => {
     await t.step(setup);
     await t.step("test", async () => {
       Deno.writeTextFileSync(
-        path.join(Deno.cwd(), `cndi-config.yaml`),
+        path.join(Deno.cwd(), `cndi_config.yaml`),
         YAML.stringify({
           ...basicAWSCndiConfig,
           infrastructure: {
@@ -500,7 +500,7 @@ Deno.test(
     await t.step(setup);
     await t.step("test", async () => {
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -532,7 +532,7 @@ Deno.test(
     await t.step(setup);
     await t.step("test", async () => {
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -564,7 +564,7 @@ Deno.test(
     await t.step(setup);
     await t.step("test", async () => {
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -821,7 +821,7 @@ Deno.test(
       });
 
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -863,7 +863,7 @@ Deno.test(
       });
 
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -904,7 +904,7 @@ Deno.test(
       });
 
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",
@@ -948,7 +948,7 @@ Deno.test(
       });
 
       const initFileList = new Set([
-        "cndi-config.yaml",
+        "cndi_config.yaml",
         "README.md",
         ".github",
         ".gitignore",

@@ -138,7 +138,7 @@ supplied for this project:
 
 ![cndi-init](/docs/walkthroughs/aks/img/cndi-init-interactive-1.png)
 
-This process will generate a `cndi-config.yaml` file, and `cndi` directory at
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
 configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
@@ -156,7 +156,7 @@ The structure of the generated CNDI project will be something like this:
 │   └── 📁 terraform
 │       ├── airflow-nodes.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.yaml
+├── cndi_config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -294,9 +294,9 @@ Airflow and ArgoCD.
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/aks/img/cndi-config.png)
+![cndi config](/docs/walkthroughs/aks/img/cndi_config.png)
 
-- Go to the `cndi-config.yaml`
+- Go to the `cndi_config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save
   the file
 - Run `cndi ow`
@@ -309,7 +309,7 @@ Airflow and ArgoCD.
 
 **If you just want to take down any of your individual applications:**
 
-- Delete that application or manifest from your `cndi-config.yaml`
+- Delete that application or manifest from your `cndi_config.yaml`
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository

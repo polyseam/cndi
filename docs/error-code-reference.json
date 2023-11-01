@@ -36,7 +36,7 @@
   },
   {
     "code": 200,
-    "message": "cndi-config.infrastructure.cndi.nodes does not contain exactly one node with role 'leader'",
+    "message": "cndi_config.infrastructure.cndi.nodes does not contain exactly one node with role 'leader'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/463"
   },
   {
@@ -46,7 +46,7 @@
   },
   {
     "code": 203,
-    "message": "cndi-config.infrastructure.terraform contains unknown terraform block",
+    "message": "cndi_config.infrastructure.terraform contains unknown terraform block",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/506"
   },
   {
@@ -71,7 +71,7 @@
   },
   {
     "code": 500,
-    "message": "cndi-config not found during 'cndi overwrite'",
+    "message": "cndi_config not found during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/508"
   },
   {
@@ -91,7 +91,7 @@
   },
   {
     "code": 504,
-    "message": "cndi-config failed to parse during 'cndi overwrite'",
+    "message": "cndi_config failed to parse during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/513"
   },
   {
@@ -196,72 +196,72 @@
   },
   {
     "code": 900,
-    "message": "cndi-config invalid: does not have 'project_name'",
+    "message": "cndi_config invalid: does not have 'project_name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/566"
   },
   {
     "code": 901,
-    "message": "cndi-config invalid: does not have 'infrastructure'",
+    "message": "cndi_config invalid: does not have 'infrastructure'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/567"
   },
   {
     "code": 902,
-    "message": "cndi-config invalid: does not have any 'infrastructure.nodes'",
+    "message": "cndi_config invalid: does not have any 'infrastructure.nodes'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/568"
   },
   {
     "code": 903,
-    "message": "cndi-config invalid: contains at least one node without a 'kind'",
+    "message": "cndi_config invalid: contains at least one node without a 'kind'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/569"
   },
   {
     "code": 904,
-    "message": "cndi-config invalid: contains multiple node 'kind's",
+    "message": "cndi_config invalid: contains multiple node 'kind's",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/570"
   },
   {
     "code": 905,
-    "message": "cndi-config invalid: contains at least one node with a missing 'name'",
+    "message": "cndi_config invalid: contains at least one node with a missing 'name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/571"
   },
   {
     "code": 906,
-    "message": "cndi-config invalid: contains more than one node with the same 'name'",
+    "message": "cndi_config invalid: contains more than one node with the same 'name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/573"
   },
   {
     "code": 907,
-    "message": "cndi-config invalid: does not have exactly 1 node with role 'leader'",
+    "message": "cndi_config invalid: does not have exactly 1 node with role 'leader'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/574"
   },
   {
     "code": 908,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports must be an array",
+    "message": "cndi_config invalid: infrastructure.cndi.open_ports must be an array",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/576"
   },
   {
     "code": 909,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key",
+    "message": "cndi_config invalid: infrastructure.cndi.open_ports entry is missing the 'namespace' key",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/578"
   },
   {
     "code": 910,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key",
+    "message": "cndi_config invalid: infrastructure.cndi.open_ports entry is missing the 'service' key",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/579"
   },
   {
     "code": 911,
-    "message": "cndi-config invalid: can only have one node in clusters containing a 'dev' node",
+    "message": "cndi_config invalid: can only have one node in clusters containing a 'dev' node",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/577"
   },
   {
     "code": 912,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'number' key",
+    "message": "cndi_config invalid: infrastructure.cndi.open_ports entry is missing the 'number' key",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/575"
   },
   {
     "code": 913,
-    "message": "cndi-config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key",
+    "message": "cndi_config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/572"
   },
   {

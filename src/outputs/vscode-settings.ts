@@ -4,14 +4,14 @@ const settings = {
   },
   "json.schemas": [
     {
-      fileMatch: ["*cndi-config.json*"],
+      fileMatch: ["*cndi_config.json*"],
       url:
-        "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-config.schema.json",
+        "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_config.schema.json",
     },
   ],
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-config.schema.json":
-      ["cndi-config.yaml"],
+    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_config.schema.json":
+      ["cndi_config.yaml"],
   },
 };
 export default settings;

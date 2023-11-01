@@ -41,7 +41,7 @@ const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
  */
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
-  .option("-f, --file <file:string>", "Path to your cndi-config.yaml file.")
+  .option("-f, --file <file:string>", "Path to your cndi_config.yaml file.")
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",

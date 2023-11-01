@@ -133,7 +133,7 @@ supplied for this project:
 
 ![GCP instances dashboard](/docs/walkthroughs/gce/img/cndi-init-interactive.png)
 
-This process will generate a `cndi-config.yaml` file, and `cndi` directory at
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary cluster and
 infrastructure resources. It will also generate a `.env` file that will be used
 to store sensitive information that we don't want to commit to our repository as
@@ -154,7 +154,7 @@ The structure of the generated CNDI project will be as follows:
 │       ├── y-airflow-node.cndi-node.tf.json
 │       ├── z-airflow-node.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.yaml
+├── cndi_config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -286,9 +286,9 @@ Airflow and ArgoCD.
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/gce/img/cndi-config.png)
+![cndi config](/docs/walkthroughs/gce/img/cndi_config.png)
 
-- Go to the `cndi-config.yaml`
+- Go to the `cndi_config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save
   the file
 - Run `cndi ow`
@@ -302,7 +302,7 @@ Airflow and ArgoCD.
 
 **If you just want to take down any of your `individual` applications:**
 
-- Delete that application or manifest from your `cndi-config.yaml`
+- Delete that application or manifest from your `cndi_config.yaml`
 - Run cndi ow
 - Commit changes
 - Push your code changes to the repository

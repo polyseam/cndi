@@ -105,7 +105,7 @@ supplied for this project:
 
 ![DEV instances dashboard](/docs/walkthroughs/dev/img/cndi-init-interactive.png)
 
-This process will generate a `cndi-config.yaml` file, and `cndi` directory at
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
 configuration. It will also store all the values in a file called `.env` at the
 root of your repository.
@@ -123,7 +123,7 @@ The structure of the generated CNDI project will be as follows:
 │   └── 📁 terraform
 │       ├── airflow-dev-node.cndi-node.tf.json
 │       └── etc 
-├── cndi-config.yaml
+├── cndi_config.yaml
 ├── .env
 ├── .gitignore
 ├── .github
@@ -242,7 +242,7 @@ Argocd
 
 **If you just want to take down any of your individual applications:**
 
-- Delete that application or manifest from your `cndi-config.yaml`
+- Delete that application or manifest from your `cndi_config.yaml`
 - Run `cndi ow`
 - Commit changes
 - Push your code changes to the repository
