@@ -3,13 +3,19 @@ export { homedir, platform } from "node:os";
 export { copy } from "https://deno.land/std@0.201.0/streams/copy.ts";
 export { SEP } from "https://deno.land/std@0.201.0/path/mod.ts";
 export * as path from "https://deno.land/std@0.201.0/path/mod.ts";
-export * as YAML from "https://deno.land/std@0.196.0/yaml/mod.ts";
+import * as yaml from "https://deno.land/std@0.196.0/yaml/mod.ts";
 export { deepMerge } from "https://deno.land/std@0.201.0/collections/deep_merge.ts";
 export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export * as JSONC from "https://deno.land/std@0.201.0/jsonc/mod.ts";
 export { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
 export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
+
+export const YAML = {
+  ...yaml,
+  // deno-lint-ignore no-explicit-any
+  stringify: (obj: any) => yaml.stringify(obj, { lineWidth: -1 }), // prevent auto line wrap
+};
 
 // Third party
 //  - cliffy
@@ -20,24 +26,44 @@ export {
   UpgradeCommand,
 } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
-export {
-  GithubProvider,
-} from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
+export { GithubProvider } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
 
 import { UpgradeOptions } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
 
-export {
+import {
   Checkbox,
   Confirm,
   Input,
   List,
   Number,
-  prompt,
   Secret,
   Select,
   Toggle,
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+
+export { prompt } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+
+// used to have keys, should not matter
+export const PromptTypes = {
+  Input,
+  Secret,
+  Confirm,
+  Toggle,
+  Select,
+  List,
+  Checkbox,
+  Number,
+  File: Input,
+} as const;
+
+//  - validator
+export * as validator from "npm:validator";
+
+// - lodash
+export { default as getValueFromKeyPath } from "npm:lodash.get@4.4.2";
+export { default as setValueForKeyPath } from "npm:lodash.set@4.3.2";
+export { default as unsetValueForKeyPath } from "npm:lodash.unset@4.5.2";
 
 //  - simple-git
 export { simpleGit } from "npm:simple-git@3.18.0";

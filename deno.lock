@@ -258,7 +258,11 @@
     "specifiers": {
       "@types/node": "@types/node@18.16.16",
       "crypto-js@4.1.1": "crypto-js@4.1.1",
-      "simple-git@3.18.0": "simple-git@3.18.0"
+      "lodash.get@4.4.2": "lodash.get@4.4.2",
+      "lodash.set@4.3.2": "lodash.set@4.3.2",
+      "lodash.unset@4.5.2": "lodash.unset@4.5.2",
+      "simple-git@3.18.0": "simple-git@3.18.0",
+      "validator": "validator@13.11.0"
     },
     "packages": {
       "@kwsites/file-exists@1.1.1": {
@@ -285,6 +289,18 @@
           "ms": "ms@2.1.2"
         }
       },
+      "lodash.get@4.4.2": {
+        "integrity": "sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==",
+        "dependencies": {}
+      },
+      "lodash.set@4.3.2": {
+        "integrity": "sha512-4hNPN5jlm/N/HLMCO43v8BXKq9Z7QdAGc/VGrRD61w8gN9g/6jF9A4L1pbUgBLCffi0w9VsXfTOij5x8iTyFvg==",
+        "dependencies": {}
+      },
+      "lodash.unset@4.5.2": {
+        "integrity": "sha512-bwKX88k2JhCV9D1vtE8+naDKlLiGrSmf8zi/Y9ivFHwbmRfA8RxS/aVJ+sIht2XOwqoNr4xUPUkGZpc1sHFEKg==",
+        "dependencies": {}
+      },
       "ms@2.1.2": {
         "integrity": "sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==",
         "dependencies": {}
@@ -296,6 +312,10 @@
           "@kwsites/promise-deferred": "@kwsites/promise-deferred@1.1.1",
           "debug": "debug@4.3.4"
         }
+      },
+      "validator@13.11.0": {
+        "integrity": "sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==",
+        "dependencies": {}
       }
     }
   }

@@ -1,4 +1,6 @@
-import { ccolors, Command, Input, path, Select, SEP } from "deps";
+import { ccolors, Command, path, PromptTypes, SEP } from "deps";
+
+const { Input, Select } = PromptTypes;
 
 import {
   checkInitialized,
@@ -17,13 +19,11 @@ import { overwriteAction } from "src/commands/overwrite.ts";
 
 import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
 
-import useTemplate from "src/templates/useTemplate.ts";
+import { getKnownTemplates, useTemplate } from "src/templates/templates.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
-
-import getKnownTemplates from "src/templates/knownTemplates.ts";
 
 import getEnvFileContents from "src/outputs/env.ts";
 import getGitignoreContents from "src/outputs/gitignore.ts";
@@ -61,22 +61,23 @@ const initCommand = new Command()
   )
   .action(async (options) => {
     let template: string | undefined = options.template;
-    let cndiConfig: CNDIConfig;
-    let env: EnvLines;
+    let cndi_config: string;
+    let env: string;
     let readme: string;
     let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
+
     // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-    const useCNDIConfigFile = !options.interactive && !template;
+    // const useCNDIConfigFile = !options.interactive && !template;
 
-    if (useCNDIConfigFile) {
-      const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
-      console.log(`cndi init --file "${pathToConfig}"\n`);
-      cndiConfig = loadedConfig;
+    // if (useCNDIConfigFile) {
+    //   const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
+    //   console.log(`cndi init --file "${pathToConfig}"\n`);
+    //   cndi_config = loadedConfig;
 
-      // validate config
-      await validateConfig(cndiConfig, pathToConfig);
-      project_name = cndiConfig.project_name as string;
-    }
+    //   // validate config
+    //   await validateConfig(cndi_config, pathToConfig);
+    //   project_name = cndi_config.project_name as string;
+    // }
 
     if (options.template === "true") {
       console.error(
@@ -132,8 +133,6 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow"
-
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
@@ -148,31 +147,27 @@ const initCommand = new Command()
       argoUIAdminPassword,
     };
 
+    const inDebugEnv =
+      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
+
     if (template) {
       const templateResult = await useTemplate(template!, {
         project_name,
         cndiGeneratedValues,
+        debug_telemetry: options?.debug || inDebugEnv,
         interactive: !!options.interactive,
       });
-      cndiConfig = templateResult.cndiConfig;
+      cndi_config = templateResult.cndi_config;
       await stageFile(
-        "cndi-config.yaml",
-        getYAMLString(cndiConfig),
+        "cndi_config.yaml",
+        getYAMLString(cndi_config),
       );
       readme = templateResult.readme;
       env = templateResult.env;
     } else {
-      const nodeKind = cndiConfig!.infrastructure.cndi.nodes[0].kind;
-      readme = getReadmeForProject({
-        project_name,
-        nodeKind,
-      });
-
-      env = await getCoreEnvLines(
-        cndiGeneratedValues,
-        getDeploymentTargetFromConfig(cndiConfig!),
-        !!options.interactive,
-      );
+      // uhh not sure bout dis
+      readme = "";
+      env = "";
     }
 
     // write a readme, extend via Template.readmeBlock if it exists
@@ -191,17 +186,7 @@ const initCommand = new Command()
       }
     }
 
-    const inDebugEnv =
-      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
-
-    if (options?.debug || inDebugEnv) {
-      env.push(
-        { comment: "Telemetry Mode" },
-        { value: { CNDI_TELEMETRY: "debug" } },
-      );
-    }
-
-    await stageFile(".env", getEnvFileContents(env));
+    await stageFile(".env", env);
 
     await stageFile(
       path.join(".vscode", "settings.json"),

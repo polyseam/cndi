@@ -1,0 +1,150 @@
+
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+      {}
+      
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to expose ArgoCD with an Ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: host_to_proxy
+    message: What is the hostname of the service you wish to proxy?
+    type: Input
+    default: external-service.example.com
+    validators:
+      - hostname
+
+  - name: proxy_host
+    message: What is the hostname you wish to deploy the proxy to?
+    type: Input
+    default: proxy.example.com
+    validators:
+      - hostname
+
+  - name: rate_limit_rpm
+    message: How many requests per minute should be allowed from a single IP?
+    type: Number
+    default: 100
+
+  - name: rate_limit_burst
+    message: How many requests should be allowed to burst above the rate limit?
+    type: Number
+    default: 200
+  
+  - name: rate_limit_status_code
+    message: What HTTP status code should be returned if the rate limit is exceeded?
+    type: Number
+    default: 429
+
+outputs:
+  cndi_config:
+    # source_control_platform: github ?
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a template comment
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        nodes:
+          - name: nginx-proxy-alpha
+            disk_size: 100
+
+    cluster_manifests:
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      rate-limited-service:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: rate-limited-service
+          namespace: rate-limiter
+        spec:
+          type: ExternalName
+          $cndi.comment(external_name): externalName is the service hostname you wish to proxy, should be the same value as specified for "nginx.ingress.kubernetes.io/upstream-vhost"
+          externalName: '{{ $cndi.get_prompt_response(host_to_proxy) }}'
+
+      rate-limiter:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: rate-limiter
+
+      rate-limiter-ing:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: rate-limiter-ingress
+          namespace: rate-limiter
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            $cndi.comment(nginx_annotation_link): "to learn more about available nginx annotations checkout https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations"
+            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+            nginx.ingress.kubernetes.io/limit-rpm: '{{ $cndi.get_prompt_response(rate_limit_rpm) }}' # rate limit in requests per minute
+            nginx.ingress.kubernetes.io/limit-burst-multiplier: '{{ $cndi.get_prompt_response(rate_limit_burst) }}' # burst multiplier
+            $cndi.comment(upstream_vhost): 'upstream-vhost is the hostname of the external service to proxy'
+            nginx.ingress.kubernetes.io/upstream-vhost: '{{ $cndi.get_prompt_response(host_to_proxy) }}'
+            $cndi.comment(limit_req_status):  'The status code returned if the rate limit is exceeded'
+            # the following string is printed without the required whitespace,
+            # the semi-colon can also be removed in similar expressions
+            nginx.ingress.kubernetes.io/configuration-snippet: limit_req_status {{ $cndi.get_prompt_response(rate_limit_status_code) }};
+        spec:
+          tls:
+            - hosts:
+                - '{{ $cndi.get_prompt_response(proxy_host) }}' # domain to deploy proxy to
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: '{{ $cndi.get_prompt_response(proxy_host) }}' # domain to deploy proxy to
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: rate-limited-service
+                        port:
+                          number: 443
+
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml): {}
+        
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml): {}
+
+  readme:
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md): {}
+    proxy_section: |
+      # nginx-proxy
+
+      This cluster hosts installs [ArgoCD](https://argo-cd.readthedocs.io) and [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/) to proxy external services with features like rate limiting
+
