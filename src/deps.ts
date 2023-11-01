@@ -58,7 +58,7 @@ export const PromptTypes = {
 } as const;
 
 //  - validator
-export * as validator from "npm:validator";
+export { default as validator } from "npm:validator";
 
 // - lodash
 export { default as getValueFromKeyPath } from "npm:lodash.get@4.4.2";
