@@ -2,25 +2,26 @@ import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 export default function getNginxControllerTFJSON(): string {
   const resource = getTFResource("helm_release", {
-    chart: "ingress-nginx",
+    chart: "ingress-nginx-internal",
     create_namespace: true,
     depends_on: [
       "module.cndi_aks_cluster",
     ],
-    name: "ingress-nginx",
-    namespace: "ingress",
+    name: "ingress-nginx-internal",
+    namespace: "ingress-internal",
     repository: "https://kubernetes.github.io/ingress-nginx",
     timeout: "300",
     atomic: true,
     set: [
       {
         "name":
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
-        "value": "/healthz",
+          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
+        "value": "true",
       },
       {
-        "name": "controller.service.enabled",
-        "value": "true",
+        "name":
+          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
+        "value": "/healthz",
       },
       {
         "name":
@@ -38,7 +39,7 @@ export default function getNginxControllerTFJSON(): string {
       },
       {
         "name": "controller.ingressClassResource.default",
-        "value": "true",
+        "value": "false",
       },
       {
         "name": "controller.ingressClassResource.enabled",
@@ -46,15 +47,15 @@ export default function getNginxControllerTFJSON(): string {
       },
       {
         "name": "controller.ingressClassResource.name",
-        "value": "public",
+        "value": "internal",
       },
       {
         "name": "controller.ingressClass",
-        "value": "public",
+        "value": "internal",
       },
       {
         "name": "controller.extraArgs.tcp-services-configmap",
-        "value": "ingress/ingress-nginx-controller",
+        "value": "ingress-internal/ingress-nginx-controller",
       },
       {
         "name": "rbac.create",
@@ -62,6 +63,6 @@ export default function getNginxControllerTFJSON(): string {
       },
     ],
     version: "4.8.3",
-  }, "cndi_nginx_controller_helm_chart");
+  }, "cndi_nginx_controller_helm_chart_internal");
   return getPrettyJSONString(resource);
 }
