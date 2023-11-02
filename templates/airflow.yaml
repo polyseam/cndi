@@ -82,9 +82,9 @@ prompts:
       Do you want to use your cluster credentials for Airflow's Git Sync?
     type: Confirm
     condition:
-      - "{{ $cndi.get_prompt_response(use_git_ssh) }}"
+      - "{{ $cndi.get_prompt_response(git_credentials_mode) }}"
       - ==
-      - false
+      - token
 
   - name: airflow_git_sync_username
     message: >-
