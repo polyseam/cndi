@@ -9,6 +9,7 @@ cndi/terraform/.terraform/
 .DS_Store
 cndi/terraform/microk8s-cloud-init-leader-hardcoded-values.yml.tftpl
 cndi/terraform/leader_ip_address.txt
+responses.yaml
 `;
   return gitignoreContents.trim();
 }
