@@ -8,10 +8,10 @@ import { CNDITemplatePromptResponsePrimitive } from "./templates.ts";
 function getObjectKeysRecursively<T extends object>(obj: T): string[] {
   const keys: string[] = [];
 
+  // deno-lint-ignore no-explicit-any
   function recurse(currObj: any, prefix = "") {
     for (const key in currObj) {
-      // deno-lint-ignore no-prototype-builtins
-      if (currObj.hasOwnProperty(key)) {
+      if (Object.hasOwn(currObj, key)) {
         const newPrefix = prefix ? `${prefix}.${key}` : key;
         keys.push(newPrefix);
         if (typeof currObj[key] === "object" && currObj[key] !== null) {

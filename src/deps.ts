@@ -14,7 +14,8 @@ export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export const YAML = {
   ...yaml,
   // deno-lint-ignore no-explicit-any
-  stringify: (obj: any) => yaml.stringify(obj, { lineWidth: -1 }), // prevent auto line wrap
+  stringify: (obj: any, opt = {}) =>
+    yaml.stringify(obj, { lineWidth: -1, ...opt }), // prevent auto line wrap
 };
 
 // Third party

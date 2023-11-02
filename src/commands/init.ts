@@ -1,39 +1,34 @@
-import { ccolors, Command, path, PromptTypes, SEP } from "deps";
+import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
 
 const { Input, Select } = PromptTypes;
 
 import {
   checkInitialized,
   emitExitEvent,
-  getDeploymentTargetFromConfig,
   getPrettyJSONString,
-  getYAMLString,
-  loadCndiConfig,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
 
-import { CNDIConfig, EnvLines } from "src/types.ts";
-
 import { overwriteAction } from "src/commands/overwrite.ts";
 
-import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
-
-import { getKnownTemplates, useTemplate } from "src/templates/templates.ts";
+import {
+  CNDITemplatePromptResponsePrimitive,
+  getKnownTemplates,
+  useTemplate,
+} from "src/templates/templates.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
-import getEnvFileContents from "src/outputs/env.ts";
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
-import getReadmeForProject from "src/outputs/readme.ts";
-
-import validateConfig from "src/validate/cndiConfig.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
+
+const defaultResponsesFilePath = path.join(Deno.cwd(), "responses.yaml");
 
 /**
  * COMMAND cndi init
@@ -53,6 +48,21 @@ const initCommand = new Command()
     hidden: true,
   })
   .option(
+    "-r, --responses-file <responses_file:string>",
+    "A path to a set of responses to supply to your template",
+    {
+      default: defaultResponsesFilePath,
+    },
+  )
+  .option(
+    `-s, --set <set>`,
+    `Override a response, usage: --set responseName=responseValue`,
+    {
+      collect: true,
+      equalsSign: true,
+    },
+  )
+  .option(
     "-w, --workflow-ref <ref:string>",
     "Specify a ref to build a cndi workflow with",
     {
@@ -61,23 +71,75 @@ const initCommand = new Command()
   )
   .action(async (options) => {
     let template: string | undefined = options.template;
+    let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
+    if (options.responsesFile === defaultResponsesFilePath) {
+      // attempting to load responses file from CWD, if it doesn't exist that's fine
+      try {
+        const responseFileText = Deno.readTextFileSync(options.responsesFile);
+        const responses = YAML.parse(responseFileText);
+        if (responses) {
+          overrides = responses as Record<
+            string,
+            CNDITemplatePromptResponsePrimitive
+          >;
+        }
+      } catch (_errorReadingResponsesFile) {
+        // we're not worried if the file isn't found if the user didn't specify a path
+      }
+    } else {
+      // attempting to load responses file from user specified path
+      let responseFileText = "";
+
+      try {
+        responseFileText = Deno.readTextFileSync(options.responsesFile);
+      } catch (errorReadingSuppliedResponseFile) {
+        console.log(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+
+        console.error(
+          initLabel,
+          ccolors.error(`Could not load responses file from provided path`),
+          ccolors.key_name(`"${options.responsesFile}"`),
+        );
+
+        await emitExitEvent(2000);
+        Deno.exit(2000);
+      }
+
+      try {
+        const responses = YAML.parse(responseFileText);
+        if (responses) {
+          overrides = responses as Record<
+            string,
+            CNDITemplatePromptResponsePrimitive
+          >;
+        }
+      } catch (errorParsingResponsesFile) {
+        console.log(ccolors.caught(errorParsingResponsesFile, 2001));
+
+        console.error(
+          initLabel,
+          ccolors.error(
+            `Could not parse file as responses YAML from provide path`,
+          ),
+          ccolors.key_name(`"${options.responsesFile}"`),
+        );
+        await emitExitEvent(2001);
+        Deno.exit(2001);
+      }
+    }
+
+    if (options.set) {
+      for (const set of options.set) {
+        const [key, value] = set.split("=");
+        overrides[key] = value;
+      }
+    }
+
     let cndi_config: string;
     let env: string;
     let readme: string;
     let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
-
-    // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-    // const useCNDIConfigFile = !options.interactive && !template;
-
-    // if (useCNDIConfigFile) {
-    //   const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
-    //   console.log(`cndi init --file "${pathToConfig}"\n`);
-    //   cndi_config = loadedConfig;
-
-    //   // validate config
-    //   await validateConfig(cndi_config, pathToConfig);
-    //   project_name = cndi_config.project_name as string;
-    // }
 
     if (options.template === "true") {
       console.error(
@@ -151,17 +213,18 @@ const initCommand = new Command()
       Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
 
     if (template) {
-      const templateResult = await useTemplate(template!, {
-        project_name,
-        cndiGeneratedValues,
-        debug_telemetry: options?.debug || inDebugEnv,
-        interactive: !!options.interactive,
-      });
-      cndi_config = templateResult.cndi_config;
-      await stageFile(
-        "cndi_config.yaml",
-        getYAMLString(cndi_config),
+      const templateResult = await useTemplate(
+        template!,
+        {
+          project_name,
+          cndiGeneratedValues,
+          debug_telemetry: options?.debug || inDebugEnv,
+          interactive: !!options.interactive,
+        },
+        overrides,
       );
+      cndi_config = templateResult.cndi_config;
+      await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
     } else {

@@ -7,7 +7,7 @@ import {
 type CNDIValidatorInput = {
   value: CNDITemplatePromptResponsePrimitive;
   type: PromptType;
-  arg?: any;
+  arg?: unknown;
 };
 
 type CNDIInvalidReason = string;
@@ -50,7 +50,7 @@ export const BuiltInValidators: Record<string, CNDIValidator> = {
     return `'${val}' is not a valid URL`;
   },
   min_length: ({ value, type, arg }: CNDIValidatorInput) => {
-    const len = arg;
+    const len = arg as number;
     if ((value as string).length >= len) {
       return null;
     }

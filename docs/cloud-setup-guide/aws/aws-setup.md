@@ -86,11 +86,9 @@ have access keys, you can create them from the AWS Management Console.
 
 In the end you should have all the credentials for a cluster deployment on AWS
 
-- **Access key ID** - Access keys pair
-  \
+- **Access key ID** - Access keys pair\
   Example access key ID : _AKIAIOSFODNN7EXAMPLEID_
-- **Secret access key** - Access keys pair
-  \
+- **Secret access key** - Access keys pair\
   Example secret access key: _wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_
 
 ## Conclusion
