@@ -8,6 +8,10 @@ export default function getAKSDataTFJSON(): string {
           template:
             '${file("azurefile_csi_storage_class_manifest.yaml.tftpl")}',
         },
+        azuredisk_csi_storage_class_manifest: {
+          template:
+            '${file("azuredisk_csi_storage_class_manifest.yaml.tftpl")}',
+        },
         argocd_private_repo_secret_manifest: {
           template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
           vars: {
