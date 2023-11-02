@@ -16,11 +16,6 @@ export default function getNginxControllerTFJSON(): string {
     set: [
       {
         "name":
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
-        "value": "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      },
-      {
-        "name":
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
         "value": "true",
       },
@@ -28,14 +23,6 @@ export default function getNginxControllerTFJSON(): string {
         "name":
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
         "value": "/healthz",
-      },
-      {
-        "name": "controller.service.internal.enabled",
-        "value": "true",
-      },
-      {
-        "name": "controller.service.enabled",
-        "value": "true",
       },
       {
         "name":
@@ -50,10 +37,6 @@ export default function getNginxControllerTFJSON(): string {
       {
         "name": "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
         "value": "linux",
-      },
-      {
-        "name": "controller.service.loadBalancerIP",
-        "value": "${azurerm_public_ip.cndi_azurerm_public_ip_lb.ip_address}",
       },
       {
         "name": "controller.ingressClassResource.default",
@@ -80,7 +63,7 @@ export default function getNginxControllerTFJSON(): string {
         "value": "false",
       },
     ],
-    version: "4.7.1",
+    version: "4.8.3",
   }, "cndi_nginx_controller_helm_chart");
   return getPrettyJSONString(resource);
 }

@@ -7,7 +7,6 @@ import cndi_azurerm_resource_group from "./cndi_azurerm_resource_group.tf.json.t
 import cndi_azurerm_locals from "./locals.tf.json.ts";
 import cndi_outputs from "./cndi_outputs.tf.json.ts";
 import cndi_aks_cluster from "./cndi_aks_cluster.tf.json.ts";
-import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
 import data from "./data.tf.json.ts";
 import variable from "./variable.tf.json.ts";
 import cndi_bcrypt_hash_argocd_admin_password from "./cndi_bcrypt_hash_argocd_admin_password.tf.json.ts";
@@ -62,10 +61,6 @@ export default async function stageTerraformResourcesForAzureAKS(
       stageFile(
         path.join("cndi", "terraform", "terraform.tf.json"),
         terraform(),
-      ),
-      stageFile(
-        path.join("cndi", "terraform", "cndi_azurerm_public_ip_lb.tf.json"),
-        cndi_azurerm_public_ip_lb(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_outputs.tf.json"),
