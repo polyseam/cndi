@@ -262,6 +262,7 @@ outputs:
           annotations:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+            nginx.ingress.kubernetes.io/internal: "true"
         spec:
           tls:
             - hosts:
