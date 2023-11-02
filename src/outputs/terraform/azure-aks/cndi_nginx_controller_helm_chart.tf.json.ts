@@ -11,18 +11,13 @@ export default function getNginxControllerTFJSON(): string {
     name: "ingress-nginx",
     namespace: "ingress",
     repository: "https://kubernetes.github.io/ingress-nginx",
-    timeout: "600",
+    timeout: "300",
     atomic: true,
     set: [
       {
         "name":
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
         "value": "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      },
-      {
-        "name":
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
-        "value": "true",
       },
       {
         "name":
