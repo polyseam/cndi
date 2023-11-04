@@ -41,6 +41,7 @@
         }
       },
       "spec": {
+        "ingressClassName": "public",
         "rules": [
           {
             "http": {
