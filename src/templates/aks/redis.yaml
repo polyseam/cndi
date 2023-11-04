@@ -61,7 +61,7 @@ outputs:
         kind: Issuer
         metadata:
           name: selfsigned-issuer
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           selfSigned: {}
       redis-root-certificate:
@@ -69,7 +69,7 @@ outputs:
         kind: Certificate
         metadata:
           name: redis-root-cert
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           isCA: true
           commonName: "{{ $.cndi.prompts.responses.commName }}"
@@ -88,7 +88,7 @@ outputs:
         kind: Issuer
         metadata:
           name: redis-ca-issuer
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
         spec:
           ca:
             secretName: myredis-secret
@@ -97,7 +97,7 @@ outputs:
         kind: Certificate
         metadata:
           name: redis-signed-cert
-          namespace: '{{ $.cndi.prompts.responses.defaultNamespace }}'
+          namespace: "{{ $.cndi.prompts.responses.defaultNamespace }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
@@ -199,6 +199,7 @@ outputs:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.argocdDomainName }}"
@@ -226,6 +227,7 @@ outputs:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.redisDomainName }}"

@@ -129,6 +129,7 @@ outputs:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.argocdDomainName }}"
@@ -180,6 +181,7 @@ outputs:
           ingress:
             web:
               enabled: true
+              ingressClassName: public
               annotations:
                 cert-manager.io/cluster-issuer: cluster-issuer
               hosts:

@@ -63,6 +63,7 @@ outputs:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.argocdDomainName }}"
@@ -88,6 +89,7 @@ outputs:
             cert-manager.io/cluster-issuer: cluster-issuer
             kubernetes.io/tls-acme: "true"
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.hopwebDomainName }}"

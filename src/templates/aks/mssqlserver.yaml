@@ -238,6 +238,7 @@ outputs:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.argocdDomainName }}"
@@ -262,8 +263,8 @@ outputs:
           annotations:
             nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-            nginx.ingress.kubernetes.io/internal: "true"
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $.cndi.prompts.responses.mssqlDomainName }}"
@@ -290,4 +291,4 @@ outputs:
     template_section: |-
       ## mssql
 
-       This template deploys a Mssql  cluster with one server instance.
+       This template deploys a Mssql cluster with one server instance.
