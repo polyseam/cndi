@@ -7,21 +7,12 @@ export default function getNginxControllerTFJSON(): string {
     depends_on: [
       "module.cndi_aks_cluster",
     ],
-    name: "ingress-nginx",
-    namespace: "ingress",
+    name: "ingress-nginx-public",
+    namespace: "ingress-public",
     repository: "https://kubernetes.github.io/ingress-nginx",
-    timeout: "300",
+    timeout: "600",
     atomic: true,
     set: [
-      {
-        "name":
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
-        "value": "/healthz",
-      },
-      {
-        "name": "controller.service.enabled",
-        "value": "true",
-      },
       {
         "name":
           "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
@@ -38,7 +29,11 @@ export default function getNginxControllerTFJSON(): string {
       },
       {
         "name": "controller.ingressClassResource.default",
-        "value": "true",
+        "value": "false",
+      },
+      {
+        "name": "controller.ingressClassResource.controllerValue",
+        "value": "k8s.io/public-nginx",
       },
       {
         "name": "controller.ingressClassResource.enabled",
@@ -49,12 +44,12 @@ export default function getNginxControllerTFJSON(): string {
         "value": "public",
       },
       {
-        "name": "controller.ingressClass",
-        "value": "public",
+        "name": "controller.electionID",
+        "value": "public-controller-leader",
       },
       {
         "name": "controller.extraArgs.tcp-services-configmap",
-        "value": "ingress/ingress-nginx-controller",
+        "value": "ingress-public/ingress-nginx-public-controller",
       },
       {
         "name": "rbac.create",

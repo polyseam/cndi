@@ -2,26 +2,21 @@ import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 
 export default function getNginxControllerTFJSON(): string {
   const resource = getTFResource("helm_release", {
-    chart: "ingress-nginx-internal",
+    chart: "ingress-nginx",
     create_namespace: true,
     depends_on: [
       "module.cndi_aks_cluster",
     ],
-    name: "ingress-nginx-internal",
-    namespace: "ingress-internal",
+    name: "ingress-nginx-private",
+    namespace: "ingress-private",
     repository: "https://kubernetes.github.io/ingress-nginx",
-    timeout: "300",
+    timeout: "600",
     atomic: true,
     set: [
       {
         "name":
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
         "value": "true",
-      },
-      {
-        "name":
-          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
-        "value": "/healthz",
       },
       {
         "name":
@@ -42,20 +37,24 @@ export default function getNginxControllerTFJSON(): string {
         "value": "false",
       },
       {
+        "name": "controller.ingressClassResource.controllerValue",
+        "value": "k8s.io/private-nginx",
+      },
+      {
         "name": "controller.ingressClassResource.enabled",
         "value": "true",
       },
       {
         "name": "controller.ingressClassResource.name",
-        "value": "internal",
+        "value": "private",
       },
       {
-        "name": "controller.ingressClass",
-        "value": "internal",
+        "name": "controller.electionID",
+        "value": "private-controller-leader",
       },
       {
         "name": "controller.extraArgs.tcp-services-configmap",
-        "value": "ingress-internal/ingress-nginx-controller",
+        "value": "ingress-private/ingress-nginx-private-controller",
       },
       {
         "name": "rbac.create",
@@ -63,6 +62,6 @@ export default function getNginxControllerTFJSON(): string {
       },
     ],
     version: "4.8.3",
-  }, "cndi_nginx_controller_helm_chart_internal");
+  }, "cndi_nginx_controller_helm_chart_private");
   return getPrettyJSONString(resource);
 }

@@ -24,10 +24,10 @@ import getArgoAdminPasswordSecretManifestYamlTftpl from "src/outputs/terraform/m
 import getArgoPrivateRepoSecretHTTPSYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getArgoPrivateRepoSecretSSHYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
 import getArgoRootApplicationManifestYamlTftpl from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
-import cndi_nginx_controller_helm_chart_internal from "./cndi_nginx_controller_helm_chart_internal.tf.json.ts";
+import cndi_nginx_controller_helm_chart_private from "./cndi_nginx_controller_helm_chart_private.tf.json.ts";
 import cndi_argocd_helm_chart from "./cndi_argocd_helm_chart.tf.json.ts";
 import cndi_sealed_secrets_helm_chart from "./cndi_sealed_secrets_helm_chart.tf.json.ts";
-import cndi_nginx_controller_helm_chart from "./cndi_nginx_controller_helm_chart.tf.json.ts";
+import cndi_nginx_controller_helm_chart_public from "./cndi_nginx_controller_helm_chart_public.tf.json.ts";
 import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json.ts";
 
 export default async function stageTerraformResourcesForAzureAKS(
@@ -75,17 +75,17 @@ export default async function stageTerraformResourcesForAzureAKS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_nginx_controller_helm_chart.tf.json",
+          "cndi_nginx_controller_helm_chart_public.tf.json",
         ),
-        cndi_nginx_controller_helm_chart(),
+        cndi_nginx_controller_helm_chart_public(),
       ),
       stageFile(
         path.join(
           "cndi",
           "terraform",
-          "cndi_nginx_controller_helm_chart_internal.tf.json",
+          "cndi_nginx_controller_helm_chart_private.tf.json",
         ),
-        cndi_nginx_controller_helm_chart_internal(),
+        cndi_nginx_controller_helm_chart_private(),
       ),
       stageFile(
         path.join("cndi", "terraform", "cndi_cert_manager_helm_chart.tf.json"),
