@@ -23,8 +23,10 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifest from "src/outputs/custom-port-manifests/eks/ingress-service.ts";
-import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/eks/ingress-tcp-services-configmap.ts";
+import getManagedk8sPrivateIngressServiceManifest from "src/outputs/custom-port-manifests/managedk8s/private-ingress-service.ts";
+import getManagedk8sPrivateIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/managedk8s/private-ingress-tcp-services-configmap.ts";
+import getManagedk8sPublicIngressServiceManifest from "src/outputs/custom-port-manifests/managedk8s/public-ingress-service.ts";
+import getManagedk8sPublicIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/managedk8s/public-ingress-tcp-services-configmap.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -170,13 +172,33 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
           path.join(
             "cndi",
             "cluster_manifests",
-            "ingress-tcp-services-configmap.yaml",
+            "private-ingress-tcp-services-configmap.yaml",
           ),
-          getEKSIngressTcpServicesConfigMapManifest(open_ports),
+          getManagedk8sPrivateIngressTcpServicesConfigMapManifest(open_ports),
         ),
         stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
-          getEKSIngressServiceManifest(open_ports),
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "private-ingress-service.yaml",
+          ),
+          getManagedk8sPrivateIngressServiceManifest(open_ports),
+        ),
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "public-ingress-tcp-services-configmap.yaml",
+          ),
+          getManagedk8sPublicIngressTcpServicesConfigMapManifest(open_ports),
+        ),
+        stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "public-ingress-service.yaml",
+          ),
+          getManagedk8sPublicIngressServiceManifest(open_ports),
         ),
       ]);
     } else {
