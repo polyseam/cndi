@@ -3,6 +3,20 @@ import { getPrettyJSONString } from "src/utils.ts";
 export default function getAKSDataTFJSON(): string {
   return getPrettyJSONString({
     data: {
+      azurerm_public_ips: {
+        public: {
+          name_prefix: "kubernetes",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+        },
+      },
+      azurerm_lb: {
+        private: {
+          name: "kubernetes-internal",
+          resource_group_name:
+            "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+        },
+      },
       template_file: {
         azurefile_csi_storage_class_manifest: {
           template:
