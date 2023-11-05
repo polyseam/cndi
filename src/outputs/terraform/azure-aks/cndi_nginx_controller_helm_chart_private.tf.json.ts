@@ -20,6 +20,11 @@ export default function getNginxControllerTFJSON(): string {
       },
       {
         "name":
+          "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
+        "value": "/healthz",
+      },
+      {
+        "name":
           "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
         "value": "linux",
       },
