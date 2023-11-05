@@ -62,6 +62,6 @@ export default function getNginxControllerTFJSON(): string {
       },
     ],
     version: "4.8.3",
-  }, "cndi_nginx_controller_helm_chart");
+  }, "cndi_nginx_controller_helm_chart_public");
   return getPrettyJSONString(resource);
 }
