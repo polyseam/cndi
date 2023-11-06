@@ -122,8 +122,7 @@ contributor role once you finish adding the Contributor role
 
 ![Assign role](/docs/cloud-setup-guide/azure/img/review-assign.png)
 
-6. Click Review + assign to assign the role.
-   \
+6. Click Review + assign to assign the role.\
    After a few moments, the security principal is assigned the role at the
    selected scope.
 
