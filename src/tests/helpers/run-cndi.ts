@@ -60,9 +60,6 @@ async function runCndi(...args: string[]) {
       success: output.code === 0,
     };
 
-    console.log(decoder.decode(output.stdout));
-    console.error(decoder.decode(output.stderr));
-
     return {
       status,
       output: decoder.decode(output.stdout),
