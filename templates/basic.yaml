@@ -33,6 +33,7 @@ outputs:
     infrastructure:
       cndi:
         cert_manager:
+          other: "{{ $cndi.get_prompt_response(cert_manager_other) }}"
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml): {}
