@@ -49,6 +49,9 @@ const createSealedSecretsKeys = async (
     Deno.removeSync(pathToKeys, { recursive: true });
   }
 
+  Deno.env.set("SEALED_SECRETS_PRIVATE_KEY", sealed_secrets_private_key);
+  Deno.env.set("SEALED_SECRETS_PUBLIC_KEY", sealed_secrets_public_key);
+
   return {
     sealed_secrets_private_key,
     sealed_secrets_public_key,

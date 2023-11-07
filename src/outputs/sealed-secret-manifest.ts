@@ -6,7 +6,7 @@ import {
   getYAMLString,
 } from "src/utils.ts";
 
-const CNDI_SECRETS_PREFIX = "$.cndi.secrets.seal(";
+const CNDI_SECRETS_PREFIX = "$cndi_on_ow.seal_secret_from_env_var(";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
 const sealedSecretManifestLabel = ccolors.faded(
@@ -36,7 +36,7 @@ const parseCndiSecret = async (
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
         const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
           .replace(")", "");
-        const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
+        const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
 
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
@@ -162,7 +162,7 @@ const parseCndiSecret = async (
 // if a user passes in a cndi_config file in non-interactive mode
 // we want to write placeholders for the $.cndi.secrets entries to the .env file
 function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
-  const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
+  const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
   const dotEnv = Deno.readTextFileSync(dotEnvPath);
   const dotEnvLines = dotEnv.split("\n");
 
@@ -185,17 +185,17 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
 
 type GetSealedSecretManifestOptions = {
   publicKeyFilePath: string;
-  dotEnvPath: string;
+  envPath: string;
 };
 
 const getSealedSecretManifest = async (
   secret: KubernetesSecret,
-  { publicKeyFilePath, dotEnvPath }: GetSealedSecretManifestOptions,
+  { publicKeyFilePath, envPath }: GetSealedSecretManifestOptions,
 ): Promise<string | null> => {
   let sealed = "";
   const pathToKubeseal = getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
-  const secretWithStringData = await parseCndiSecret(secret, dotEnvPath);
+  const secretWithStringData = await parseCndiSecret(secret, envPath);
 
   // if the secret is just a placeholder we don't want to seal it
   if (secretWithStringData.isPlaceholder) {

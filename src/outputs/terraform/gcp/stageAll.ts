@@ -68,7 +68,7 @@ export default async function stageTerraformResourcesForGCP(
   try {
     parsedJSONServiceAccountKey = JSON.parse(googleCredentials);
   } catch (parsingError) {
-    const placeholder = "GOOGLE_CREDENTIALS_PLACEHOLDER__";
+    const placeholder = "__GOOGLE_CREDENTIALS_PLACEHOLDER__";
     if (googleCredentials === placeholder) {
       console.log(
         gcpStageAllLable,

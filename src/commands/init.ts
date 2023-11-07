@@ -36,7 +36,6 @@ const defaultResponsesFilePath = path.join(Deno.cwd(), "responses.yaml");
  */
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
-  .option("-f, --file <file:string>", "Path to your cndi_config.yaml file.")
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
@@ -69,9 +68,25 @@ const initCommand = new Command()
       hidden: true,
     },
   )
+  .option(
+    "-l, --deployment-target-label <deployment_target_label:string>",
+    "Specify a deployment target",
+  )
   .action(async (options) => {
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
+    if (!template && !options.interactive) {
+      console.log("cndi init\n");
+      console.error(
+        initLabel,
+        ccolors.error(
+          `--interactive (-i) flag is required if no template is specified`,
+        ),
+      );
+      await emitExitEvent(400);
+      Deno.exit(400);
+    }
 
     if (options.responsesFile === defaultResponsesFilePath) {
       // attempting to load responses file from CWD, if it doesn't exist that's fine
@@ -162,6 +177,33 @@ const initCommand = new Command()
       console.log(`cndi init --template ${template}\n`);
     }
 
+    if (options.deploymentTargetLabel) {
+      const [deployment_target_provider, deployment_target_distribution] =
+        options.deploymentTargetLabel.split("/");
+      if (!deployment_target_distribution) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+          ),
+        );
+        await emitExitEvent(490);
+        Deno.exit(490);
+      }
+      if (!deployment_target_provider) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+          ),
+        );
+        await emitExitEvent(491);
+        Deno.exit(491);
+      }
+      overrides.deployment_target_provider = deployment_target_provider;
+      overrides.deployment_target_distribution = deployment_target_distribution;
+    }
+
     const directoryContainsCNDIFiles = await checkInitialized(options.output);
 
     const shouldContinue = directoryContainsCNDIFiles
@@ -216,12 +258,11 @@ const initCommand = new Command()
       const templateResult = await useTemplate(
         template!,
         {
-          project_name,
           cndiGeneratedValues,
           debug_telemetry: options?.debug || inDebugEnv,
           interactive: !!options.interactive,
         },
-        overrides,
+        { project_name, ...overrides },
       );
       cndi_config = templateResult.cndi_config;
       await stageFile("cndi_config.yaml", cndi_config);

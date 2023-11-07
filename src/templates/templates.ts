@@ -19,7 +19,7 @@ import {
 } from "./util.ts";
 
 export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/version-2/templates/";
+  "file:///Users/m/dev/polyseam/cndi/templates/";
 
 interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
@@ -146,33 +146,40 @@ function resolveCNDIPromptCondition(
 ): boolean {
   const [input, comparator, standard] = condition;
   const standardType = typeof standard;
-  console.log("input is");
-  console.log(typeof input);
+
+  let val = input;
 
   if (typeof input === "string") {
-    const valStr = literalizeTemplateWithResponseValues(input, responses);
-    let val: CNDITemplatePromptResponsePrimitive = valStr;
-    if (standardType === "number") {
-      val = parseInt(valStr);
-    } else if (standardType === "boolean") {
-      val = valStr === "true" ? true : false;
+    val = literalizeTemplateWithResponseValues(input, responses);
+
+    // console.log(`evaluating '${val}' ${comparator} ${standard}`);
+
+    if (val === undefined) {
+      console.log(`value for '${input}' is undefined`);
+      return false;
     }
+
+    if (standardType === "number") {
+      val = parseInt(input);
+    } else if (standardType === "boolean") {
+      val = val === "true" ? true : false;
+    }
+
     const verdict = CNDITemplateComparators[comparator](val, standard);
+    // console.log("verdict for string", verdict);
 
     return verdict || false;
-  }
-  console.error("failed to compute condition");
-  console.log("are you sure", comparator, "is a valid comparator?");
-  return (
-    CNDITemplateComparators[comparator](
-      input,
+  } else {
+    const verdict = CNDITemplateComparators[comparator](
+      val,
       standard as CNDITemplatePromptResponsePrimitive,
-    ) || false
-  );
+    );
+    return verdict || false;
+  }
 }
 
 type CliffyPrompt = {
-  type: typeof PromptTypes[keyof typeof PromptTypes];
+  type: (typeof PromptTypes)[keyof typeof PromptTypes];
   name: string;
   message: string;
   default?: string | number | boolean | Array<unknown>;
@@ -302,10 +309,6 @@ export function parseAsCNDIToken(token: string): CNDIToken | null {
   // given a string like $cndi.get_prompt_response(foo)
   // return {operation: 'get_prompt_response', param: 'foo'}
   if (!token) return null;
-  console.log(
-    "parsing possible token",
-    `${ccolors.user_input('"' + token + '"')}"`,
-  );
   const keyword = "$cndi.";
   const leftParen = token.indexOf("(");
   if (!token.startsWith(keyword)) return null;
@@ -326,7 +329,7 @@ export function parseAsCNDIToken(token: string): CNDIToken | null {
   return { operation, params };
 }
 
-function literalizeTemplateWithResponseValues(
+export function literalizeTemplateWithResponseValues(
   template: string,
   values: Record<string, CNDITemplatePromptResponsePrimitive>,
   funcName = "$cndi.get_prompt_response",
@@ -367,6 +370,9 @@ function literalizeTemplateWithResponseValues(
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+
+        // this block is important because it tells template authors
+        // when they depend on a variable that is not in scope
         if (valueToSubstitute === undefined) {
           const fn = fnName.split("$cndi.")[1].split("(")[0];
           console.log(
@@ -379,8 +385,8 @@ function literalizeTemplateWithResponseValues(
             ),
           );
           Deno.exit(1);
-          // if a prompt is not displayed, it's response is undefined
         }
+
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpenWrappingQuote,
@@ -467,31 +473,13 @@ async function literalizeTemplateWithBlocks(
           blocks,
         );
 
-        let blockString = literalizeTemplateWithResponseValues(
-          YAML.stringify(block),
-          responses,
-        );
+        let blockString;
 
         if (body) {
           if (body.condition) {
-            console.log(
-              `block ${ccolors.key_name(blockIdentifier)} is conditional`,
-            );
             shouldDisplay = resolveCNDIPromptCondition(
               body.condition,
               responses,
-            );
-            const failed = ccolors.error("failed");
-            const succeeded = ccolors.success("succeeded");
-            const status = shouldDisplay ? succeeded : failed;
-            console.log(
-              `condition ${status} for block`,
-              ccolors.key_name(blockIdentifier),
-            );
-          } else {
-            console.log(
-              "unconditionally rendering",
-              ccolors.key_name(blockIdentifier),
             );
           }
 
@@ -513,25 +501,30 @@ async function literalizeTemplateWithBlocks(
               "$cndi.get_arg",
             );
           }
-          if (shouldDisplay) {
-            // put the block in the slot
-            setValueForKeyPath(
-              parsedLitTemplate,
-              containing_slot_path,
-              YAML.parse(blockString),
-            );
-          } else {
-            // the block should not be displayed, set its value to null
-            setValueForKeyPath(parsedLitTemplate, slot, null);
-
-            // if every block in the slot is null, remove the slot
-            const containedKeys = Object.keys(contained_in_slot);
-            if (containedKeys.every((key) => !contained_in_slot[key])) {
-              unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
-            }
-          }
-          break;
         }
+
+        if (shouldDisplay) {
+          blockString = literalizeTemplateWithResponseValues(
+            YAML.stringify(block),
+            responses,
+          );
+          // put the block in the slot
+          setValueForKeyPath(
+            parsedLitTemplate,
+            containing_slot_path,
+            YAML.parse(blockString),
+          );
+        } else {
+          // the block should not be displayed, set its value to null
+          setValueForKeyPath(parsedLitTemplate, slot, null);
+
+          // if every block in the slot is null, remove the slot
+          const containedKeys = Object.keys(contained_in_slot);
+          if (containedKeys.every((key) => !contained_in_slot[key])) {
+            unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
+          }
+        }
+        break;
       }
     }
     i++;
@@ -577,7 +570,7 @@ async function parseCNDIConfigSection(
     cndi_spec,
     responses,
   );
-  console.log(lit_template);
+
   const lit_template_with_blocks = await literalizeTemplateWithBlocks(
     lit_template,
     blocks,
@@ -606,14 +599,13 @@ async function parseEnvSection(
   const envObj = YAML.parse(env_spec) as Record<string, unknown>;
 
   if (debug_telemetry) {
+    console.log("debug in env?");
     // is this broken?
     envObj["$cndi.comment(telemetry_mode)"] = "Telemetry Mode";
     envObj["CNDI_TELEMETRY"] = "debug";
   }
 
   for (const key in envObj) {
-    console.log("env key", key);
-    console.log("env val", envObj[key]);
     const value = envObj[key];
     const key_token = parseAsCNDIToken(key);
 
@@ -634,23 +626,28 @@ async function parseEnvSection(
         key_token.params[0],
         responses,
       );
+
       const blockWithoutResponses = await get_block(blockIdentifier, blocks);
-      const blockWithoutArgs = YAML.parse(
-        literalizeTemplateWithResponseValues(
-          YAML.stringify(blockWithoutResponses),
-          responses,
-        ),
-      ) as Record<string, unknown>;
 
       let blockWithArgs;
 
       let shouldWrite = true;
 
-      if (body) {
+      if (body && body.condition) {
         if (body.condition) {
           shouldWrite = resolveCNDIPromptCondition(body.condition, responses);
         }
-        if (body.args) {
+      }
+
+      if (shouldWrite) {
+        const blockWithoutArgs = YAML.parse(
+          literalizeTemplateWithResponseValues(
+            YAML.stringify(blockWithoutResponses),
+            responses,
+          ),
+        ) as Record<string, unknown>;
+
+        if (body && body.args) {
           for (const argName in body.args) {
             const argValue = body.args[argName];
             if (typeof argValue === "string") {
@@ -672,9 +669,7 @@ async function parseEnvSection(
         } else {
           blockWithArgs = blockWithoutArgs;
         }
-      }
 
-      if (shouldWrite) {
         for (const k in blockWithArgs) {
           const v = blockWithArgs[k];
           const toke = parseAsCNDIToken(k);
@@ -683,7 +678,7 @@ async function parseEnvSection(
           } else if (v) {
             env.push(`${k}=${v}`);
           } else {
-            env.push(`${k}=${k}_PLACEHOLDER__`);
+            env.push(`${k}=__${k}_PLACEHOLDER__`);
           }
         }
       }
@@ -699,6 +694,9 @@ async function parseReadmeSection(
   const readmeMap = YAML.parse(readme_spec) as Record<string, string>;
 
   const readmeSections = [];
+  if (responses.project_name) {
+    readmeSections.push(`# ${responses.project_name}\n\n`);
+  }
   for (const key in readmeMap) {
     const toke = parseAsCNDIToken(key);
     if (toke) {
@@ -732,7 +730,6 @@ async function parseReadmeSection(
 }
 
 async function get_string(identifier: string) {
-  console.log(`get_string(${identifier})`);
   if (isValidUrl(identifier)) {
     let blockResponse: Response;
 
@@ -761,7 +758,6 @@ async function get_block(
   identifier: string,
   blocks: Array<Block>,
 ): Promise<Record<string, unknown> | string> {
-  console.log(`get_block(${identifier})`);
   if (isValidUrl(identifier)) {
     let blockResponse: Response;
     let blockText: string;
@@ -820,10 +816,20 @@ async function get_block(
   }
 }
 
+function getDefaultResponsesFromCliffyPrompts(
+  cliffyPrompts: Array<CliffyPrompt>,
+): Record<string, CNDITemplatePromptResponsePrimitive> {
+  const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+  for (const prompt of cliffyPrompts) {
+    responses[prompt.name] = prompt
+      .default as CNDITemplatePromptResponsePrimitive;
+  }
+  return responses;
+}
+
 export async function useTemplate(
   templateIdentifier: string,
   opt: {
-    project_name: string;
     cndiGeneratedValues: CNDIGeneratedValues;
     interactive: boolean;
     debug_telemetry: boolean;
@@ -854,8 +860,9 @@ export async function useTemplate(
   }
 
   // parse the template file as YAML
-  const unparsedTemplateObject =
-    (await YAML.parse(templateContents)) as TemplateObject;
+  const unparsedTemplateObject = (await YAML.parse(
+    templateContents,
+  )) as TemplateObject;
 
   // prompts and outputs are required
   coarselyValidateTemplateObjectOrPanic(unparsedTemplateObject);
@@ -922,8 +929,10 @@ export async function useTemplate(
           ...responses,
         });
 
-        // deno-lint-ignore no-explicit-any
-        const blockResponses = await prompt(cliffyPromptsFromBlock as any);
+        const blockResponses = opt?.interactive
+          // deno-lint-ignore no-explicit-any
+          ? await prompt(cliffyPromptsFromBlock as any)
+          : getDefaultResponsesFromCliffyPrompts(cliffyPromptsFromBlock);
         for (const key in blockResponses) {
           responses[key] = blockResponses[key];
         }
@@ -937,20 +946,19 @@ export async function useTemplate(
 
   const cliffyPrompts = getCliffyPrompts(promptDefinitions, responses);
 
-  // deno-lint-ignore no-explicit-any
-  const tplResponses = await prompt(cliffyPrompts as any);
+  const tplResponses = opt?.interactive
+    // deno-lint-ignore no-explicit-any
+    ? await prompt(cliffyPrompts as any)
+    : getDefaultResponsesFromCliffyPrompts(cliffyPrompts);
 
   for (const response in tplResponses) {
     responses[response] = tplResponses[response];
   }
-
   console.log("---prompts-end---\n\n");
 
   console.log("\n\n---cndi_config-begin---");
-  const blocks = unparsedTemplateObject.blocks;
 
-  // this is a minor shenanigan
-  responses.project_name = opt.project_name;
+  const blocks = unparsedTemplateObject.blocks;
 
   // const parsed = YAML.parse(template_with_blocks) as ParsedTemplate;
   const cndi_config = await parseCNDIConfigSection(
