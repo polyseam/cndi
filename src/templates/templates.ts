@@ -150,12 +150,9 @@ function resolveCNDIPromptCondition(
   let val = input;
 
   if (typeof input === "string") {
-    val = literalizeTemplateWithResponseValues(
-      input,
-      responses,
-    );
+    val = literalizeTemplateWithResponseValues(input, responses);
 
-    console.log(`evaluating '${val}' ${comparator} ${standard}`);
+    // console.log(`evaluating '${val}' ${comparator} ${standard}`);
 
     if (val === undefined) {
       console.log(`value for '${input}' is undefined`);
@@ -169,18 +166,14 @@ function resolveCNDIPromptCondition(
     }
 
     const verdict = CNDITemplateComparators[comparator](val, standard);
-    console.log("verdict for string", verdict);
+    // console.log("verdict for string", verdict);
 
     return verdict || false;
   } else {
-    console.log(`evaluating ${val} ${comparator} ${standard}`);
     const verdict = CNDITemplateComparators[comparator](
       val,
       standard as CNDITemplatePromptResponsePrimitive,
     );
-
-    console.log("verdict for non-string", verdict);
-
     return verdict || false;
   }
 }
@@ -316,10 +309,6 @@ export function parseAsCNDIToken(token: string): CNDIToken | null {
   // given a string like $cndi.get_prompt_response(foo)
   // return {operation: 'get_prompt_response', param: 'foo'}
   if (!token) return null;
-  console.log(
-    "parsing possible token",
-    `${ccolors.user_input('"' + token + '"')}"`,
-  );
   const keyword = "$cndi.";
   const leftParen = token.indexOf("(");
   if (!token.startsWith(keyword)) return null;
@@ -381,6 +370,9 @@ function literalizeTemplateWithResponseValues(
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+
+        // this block is important because it tells template authors
+        // when they depend on a variable that is not in scope
         if (valueToSubstitute === undefined) {
           const fn = fnName.split("$cndi.")[1].split("(")[0];
           console.log(
@@ -394,6 +386,7 @@ function literalizeTemplateWithResponseValues(
           );
           Deno.exit(1);
         }
+
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpenWrappingQuote,
@@ -484,25 +477,9 @@ async function literalizeTemplateWithBlocks(
 
         if (body) {
           if (body.condition) {
-            console.log(
-              `block ${ccolors.key_name(blockIdentifier)} is conditional`,
-            );
             shouldDisplay = resolveCNDIPromptCondition(
               body.condition,
               responses,
-            );
-            const failed = ccolors.error("failed");
-            const succeeded = ccolors.success("succeeded");
-            const status = shouldDisplay ? succeeded : failed;
-            console.log(
-              `condition ${status} for block`,
-              ccolors.key_name(blockIdentifier),
-            );
-          } else {
-            console.log(
-              "no body.conditon",
-              "unconditionally rendering",
-              ccolors.key_name(blockIdentifier),
             );
           }
 
@@ -524,12 +501,6 @@ async function literalizeTemplateWithBlocks(
               "$cndi.get_arg",
             );
           }
-        } else {
-          console.log(
-            "no body",
-            "unconditionally rendering",
-            ccolors.key_name(blockIdentifier),
-          );
         }
 
         if (shouldDisplay) {
@@ -545,28 +516,12 @@ async function literalizeTemplateWithBlocks(
           );
         } else {
           // the block should not be displayed, set its value to null
-          console.log(`setting ${ccolors.key_name(slot.join("."))} to null`);
           setValueForKeyPath(parsedLitTemplate, slot, null);
 
           // if every block in the slot is null, remove the slot
           const containedKeys = Object.keys(contained_in_slot);
           if (containedKeys.every((key) => !contained_in_slot[key])) {
-            console.log(
-              `removing slot ${
-                ccolors.key_name(
-                  containing_slot_path.join("."),
-                )
-              }`,
-            );
             unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
-          } else {
-            console.log(
-              `slot ${
-                ccolors.key_name(
-                  containing_slot_path.join("."),
-                )
-              } still contains blocks`,
-            );
           }
         }
         break;
@@ -615,7 +570,7 @@ async function parseCNDIConfigSection(
     cndi_spec,
     responses,
   );
-  console.log(lit_template);
+
   const lit_template_with_blocks = await literalizeTemplateWithBlocks(
     lit_template,
     blocks,
@@ -650,8 +605,6 @@ async function parseEnvSection(
   }
 
   for (const key in envObj) {
-    console.log("env key", key);
-    console.log("env val", envObj[key]);
     const value = envObj[key];
     const key_token = parseAsCNDIToken(key);
 
@@ -724,7 +677,7 @@ async function parseEnvSection(
           } else if (v) {
             env.push(`${k}=${v}`);
           } else {
-            env.push(`${k}=${k}_PLACEHOLDER__`);
+            env.push(`${k}=__${k}_PLACEHOLDER__`);
           }
         }
       }
@@ -773,7 +726,6 @@ async function parseReadmeSection(
 }
 
 async function get_string(identifier: string) {
-  console.log(`get_string(${identifier})`);
   if (isValidUrl(identifier)) {
     let blockResponse: Response;
 
@@ -802,7 +754,6 @@ async function get_block(
   identifier: string,
   blocks: Array<Block>,
 ): Promise<Record<string, unknown> | string> {
-  console.log(`get_block(${identifier})`);
   if (isValidUrl(identifier)) {
     let blockResponse: Response;
     let blockText: string;
@@ -859,6 +810,17 @@ async function get_block(
     }
     throw new Error(`block "${identifier}" could not be resolved`);
   }
+}
+
+function getDefaultResponsesFromCliffyPrompts(
+  cliffyPrompts: Array<CliffyPrompt>,
+): Record<string, CNDITemplatePromptResponsePrimitive> {
+  const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+  for (const prompt of cliffyPrompts) {
+    responses[prompt.name] = prompt
+      .default as CNDITemplatePromptResponsePrimitive;
+  }
+  return responses;
 }
 
 export async function useTemplate(
@@ -964,8 +926,10 @@ export async function useTemplate(
           ...responses,
         });
 
-        // deno-lint-ignore no-explicit-any
-        const blockResponses = await prompt(cliffyPromptsFromBlock as any);
+        const blockResponses = opt?.interactive
+          // deno-lint-ignore no-explicit-any
+          ? await prompt(cliffyPromptsFromBlock as any)
+          : getDefaultResponsesFromCliffyPrompts(cliffyPromptsFromBlock);
         for (const key in blockResponses) {
           responses[key] = blockResponses[key];
         }
@@ -979,13 +943,14 @@ export async function useTemplate(
 
   const cliffyPrompts = getCliffyPrompts(promptDefinitions, responses);
 
-  // deno-lint-ignore no-explicit-any
-  const tplResponses = await prompt(cliffyPrompts as any);
+  const tplResponses = opt?.interactive
+    // deno-lint-ignore no-explicit-any
+    ? await prompt(cliffyPrompts as any)
+    : getDefaultResponsesFromCliffyPrompts(cliffyPrompts);
 
   for (const response in tplResponses) {
     responses[response] = tplResponses[response];
   }
-
   console.log("---prompts-end---\n\n");
 
   console.log("\n\n---cndi_config-begin---");
