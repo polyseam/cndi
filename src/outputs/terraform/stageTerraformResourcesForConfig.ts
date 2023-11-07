@@ -27,9 +27,9 @@ export default async function stageTerraformResourcesForConfig(
 
   const { distribution, provider } = config;
 
-  const kind = `${provider}/${distribution}`;
+  const label = `${provider}/${distribution}`;
 
-  switch (kind) {
+  switch (label) {
     case "aws/microk8s":
       console.log(
         ccolors.key_name('"kind"'),
@@ -59,7 +59,7 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformResourcesForDev(config);
       break;
     default:
-      throw new Error(`Unknown kind: ${kind}`);
+      throw new Error(`Unknown label: ${label}`);
   }
 
   await Promise.all([
