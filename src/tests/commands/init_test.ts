@@ -61,7 +61,7 @@ Deno.test("'cndi init' with cndi_config.yaml", async (t) => {
   });
 });
 
-Deno.test("'cndi init' with cndi-config.jsonc", async (t) => {
+Deno.test("'cndi init' with cndi_config.jsonc", async (t) => {
   let dir = "";
   await t.step("setup", async () => {
     dir = await Deno.makeTempDir();
