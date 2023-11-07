@@ -158,6 +158,7 @@ function resolveCNDIPromptCondition(
 
     if (val === undefined) {
       console.log(`value for '${input}' is undefined`);
+      return false;
     }
 
     if (standardType === "number") {
@@ -380,7 +381,6 @@ function literalizeTemplateWithResponseValues(
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
         if (valueToSubstitute === undefined) { // TODO: Missing responses can cause condition resolution to fail here
-          // maybe we should handle condition resolution without {{}}?
           const fn = fnName.split("$cndi.")[1].split("(")[0];
           console.log(
             ccolors.error(
@@ -391,7 +391,9 @@ function literalizeTemplateWithResponseValues(
               } value for "${ccolors.user_input(key)}"`,
             ),
           );
-          Deno.exit(1);
+          // Deno.exit(1);
+          console.log("returning", ccolors.warn("undefined"));
+
           // if a prompt is not displayed, it's response is undefined
         }
         literalizedString = replaceRange(
