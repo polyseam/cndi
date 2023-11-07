@@ -12,7 +12,6 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
-  BaseNodeItemSpec,
   CNDIConfig,
   CNDIPort,
   DeploymentTarget,
@@ -156,25 +155,17 @@ function getPrettyJSONString(object: unknown) {
 async function getLeaderNodeNameFromConfig(
   config: CNDIConfig,
 ): Promise<string> {
-  const nodesWithRoleLeader = config.infrastructure.cndi.nodes.filter(
-    (node: BaseNodeItemSpec) => node.role === "leader",
-  );
-  if (nodesWithRoleLeader.length !== 1) {
+  try {
+    return config.infrastructure.cndi.nodes[0].name;
+  } catch {
     console.error(
       utilsLabel,
       ccolors.error("cndi_config exists"),
-      ccolors.error("but it does not have exactly 1"),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entry where"),
-      ccolors.key_name('"role"'),
-      ccolors.error("is"),
-      ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node."),
+      ccolors.error("but we could not assign a named node as leader"),
     );
     await emitExitEvent(200);
     Deno.exit(200);
   }
-  return nodesWithRoleLeader[0].name;
 }
 
 function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {

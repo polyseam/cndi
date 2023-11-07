@@ -201,6 +201,8 @@ interface CNDIPort {
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
+  distribution: "microk8s" | "eks" | "gke" | "aks";
+  provider: "aws" | "azure" | "gcp" | "dev";
   infrastructure: {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;

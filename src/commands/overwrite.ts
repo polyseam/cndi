@@ -1,4 +1,4 @@
-import { ccolors, Command, path } from "deps";
+import { ccolors, Command, loadEnv, path } from "deps";
 
 import {
   emitExitEvent,
@@ -53,11 +53,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     "terraform",
   );
 
+  const envPath = path.join(options.output, ".env");
+
   const [config, pathToConfig] = await loadCndiConfig(options?.file);
 
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
   } else {
+    await loadEnv({ export: true, envPath });
     console.log();
   }
 
@@ -121,7 +124,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   // create temporary key for sealing secrets
   const tempPublicKeyFilePath = await Deno.makeTempFile();
-  const dotEnvPath = path.join(options.output, ".env");
 
   await Deno.writeTextFile(
     tempPublicKeyFilePath,
@@ -207,7 +209,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       const secretName = `${key}.yaml`;
       const sealedSecretManifest = await getSealedSecretManifest(secret, {
         publicKeyFilePath: tempPublicKeyFilePath,
-        dotEnvPath,
+        envPath,
       });
 
       if (sealedSecretManifest) {

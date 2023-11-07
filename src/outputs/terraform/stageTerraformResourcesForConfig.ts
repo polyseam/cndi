@@ -25,10 +25,12 @@ export default async function stageTerraformResourcesForConfig(
 ) {
   const cndi_project_name = config.project_name!;
 
-  const kind = config.infrastructure.cndi.nodes[0].kind;
+  const { distribution, provider } = config;
+
+  const kind = `${provider}/${distribution}`;
 
   switch (kind) {
-    case "aws":
+    case "aws/microk8s":
       console.log(
         ccolors.key_name('"kind"'),
         ccolors.warn("is"),
@@ -38,25 +40,22 @@ export default async function stageTerraformResourcesForConfig(
       );
       await stageTerraformResourcesForAWSEC2(config);
       break;
-    case "ec2":
-      await stageTerraformResourcesForAWSEC2(config);
-      break;
-    case "eks":
+    case "aws/eks":
       await stageTerraformResourcesForAWSEKS(config);
       break;
-    case "gke":
+    case "gcp/gke":
       await stageTerraformResourcesForGCPGKE(config, options);
       break;
-    case "gcp":
+    case "gcp/microk8s":
       await stageTerraformResourcesForGCP(config, options);
       break;
-    case "azure":
+    case "azure/microk8s":
       await stageTerraformResourcesForAzure(config);
       break;
-    case "aks":
+    case "azure/aks":
       await stageTerraformResourcesForAzureAKS(config);
       break;
-    case "dev":
+    case "dev/microk8s":
       await stageTerraformResourcesForDev(config);
       break;
     default:

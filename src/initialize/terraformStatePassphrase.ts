@@ -13,7 +13,9 @@ const loadTerraformStatePassphrase = (): string | null => {
 };
 
 const createTerraformStatePassphrase = (): string => {
-  return getSecretOfLength(32);
+  const secret = getSecretOfLength(32);
+  Deno.env.set("TERRAFORM_STATE_PASSPHRASE", secret);
+  return secret;
 };
 
 export { createTerraformStatePassphrase, loadTerraformStatePassphrase };

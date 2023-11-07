@@ -329,7 +329,7 @@ export function parseAsCNDIToken(token: string): CNDIToken | null {
   return { operation, params };
 }
 
-function literalizeTemplateWithResponseValues(
+export function literalizeTemplateWithResponseValues(
   template: string,
   values: Record<string, CNDITemplatePromptResponsePrimitive>,
   funcName = "$cndi.get_prompt_response",
@@ -599,6 +599,7 @@ async function parseEnvSection(
   const envObj = YAML.parse(env_spec) as Record<string, unknown>;
 
   if (debug_telemetry) {
+    console.log("debug in env?");
     // is this broken?
     envObj["$cndi.comment(telemetry_mode)"] = "Telemetry Mode";
     envObj["CNDI_TELEMETRY"] = "debug";
@@ -693,6 +694,9 @@ async function parseReadmeSection(
   const readmeMap = YAML.parse(readme_spec) as Record<string, string>;
 
   const readmeSections = [];
+  if (responses.project_name) {
+    readmeSections.push(`# ${responses.project_name}\n\n`);
+  }
   for (const key in readmeMap) {
     const toke = parseAsCNDIToken(key);
     if (toke) {
@@ -826,7 +830,6 @@ function getDefaultResponsesFromCliffyPrompts(
 export async function useTemplate(
   templateIdentifier: string,
   opt: {
-    project_name: string;
     cndiGeneratedValues: CNDIGeneratedValues;
     interactive: boolean;
     debug_telemetry: boolean;
@@ -954,10 +957,8 @@ export async function useTemplate(
   console.log("---prompts-end---\n\n");
 
   console.log("\n\n---cndi_config-begin---");
-  const blocks = unparsedTemplateObject.blocks;
 
-  // this is a minor shenanigan
-  responses.project_name = opt.project_name;
+  const blocks = unparsedTemplateObject.blocks;
 
   // const parsed = YAML.parse(template_with_blocks) as ParsedTemplate;
   const cndi_config = await parseCNDIConfigSection(
