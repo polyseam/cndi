@@ -19,7 +19,7 @@ import {
 } from "./util.ts";
 
 export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/version-2/templates/";
+  "file:///Users/m/dev/polyseam/cndi/templates/";
 
 interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
@@ -154,6 +154,7 @@ function resolveCNDIPromptCondition(
       input,
       responses,
     );
+
     console.log(`evaluating '${val}' ${comparator} ${standard}`);
 
     if (val === undefined) {
@@ -380,7 +381,7 @@ function literalizeTemplateWithResponseValues(
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
-        if (valueToSubstitute === undefined) { // TODO: Missing responses can cause condition resolution to fail here
+        if (valueToSubstitute === undefined) {
           const fn = fnName.split("$cndi.")[1].split("(")[0];
           console.log(
             ccolors.error(
@@ -391,10 +392,7 @@ function literalizeTemplateWithResponseValues(
               } value for "${ccolors.user_input(key)}"`,
             ),
           );
-          // Deno.exit(1);
-          console.log("returning", ccolors.warn("undefined"));
-
-          // if a prompt is not displayed, it's response is undefined
+          Deno.exit(1);
         }
         literalizedString = replaceRange(
           literalizedString,
@@ -482,10 +480,7 @@ async function literalizeTemplateWithBlocks(
           blocks,
         );
 
-        let blockString = literalizeTemplateWithResponseValues(
-          YAML.stringify(block),
-          responses,
-        );
+        let blockString;
 
         if (body) {
           if (body.condition) {
@@ -505,6 +500,7 @@ async function literalizeTemplateWithBlocks(
             );
           } else {
             console.log(
+              "no body.conditon",
               "unconditionally rendering",
               ccolors.key_name(blockIdentifier),
             );
@@ -528,42 +524,52 @@ async function literalizeTemplateWithBlocks(
               "$cndi.get_arg",
             );
           }
-
-          if (shouldDisplay) {
-            // put the block in the slot
-            setValueForKeyPath(
-              parsedLitTemplate,
-              containing_slot_path,
-              YAML.parse(blockString),
-            );
-          } else {
-            // the block should not be displayed, set its value to null
-            console.log(`setting ${ccolors.key_name(slot.join("."))} to null`);
-            setValueForKeyPath(parsedLitTemplate, slot, null);
-
-            // if every block in the slot is null, remove the slot
-            const containedKeys = Object.keys(contained_in_slot);
-            if (containedKeys.every((key) => !contained_in_slot[key])) {
-              console.log(
-                `removing slot ${
-                  ccolors.key_name(
-                    containing_slot_path.join("."),
-                  )
-                }`,
-              );
-              unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
-            } else {
-              console.log(
-                `slot ${
-                  ccolors.key_name(
-                    containing_slot_path.join("."),
-                  )
-                } still contains blocks`,
-              );
-            }
-          }
-          break;
+        } else {
+          console.log(
+            "no body",
+            "unconditionally rendering",
+            ccolors.key_name(blockIdentifier),
+          );
         }
+
+        if (shouldDisplay) {
+          blockString = literalizeTemplateWithResponseValues(
+            YAML.stringify(block),
+            responses,
+          );
+          // put the block in the slot
+          setValueForKeyPath(
+            parsedLitTemplate,
+            containing_slot_path,
+            YAML.parse(blockString),
+          );
+        } else {
+          // the block should not be displayed, set its value to null
+          console.log(`setting ${ccolors.key_name(slot.join("."))} to null`);
+          setValueForKeyPath(parsedLitTemplate, slot, null);
+
+          // if every block in the slot is null, remove the slot
+          const containedKeys = Object.keys(contained_in_slot);
+          if (containedKeys.every((key) => !contained_in_slot[key])) {
+            console.log(
+              `removing slot ${
+                ccolors.key_name(
+                  containing_slot_path.join("."),
+                )
+              }`,
+            );
+            unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
+          } else {
+            console.log(
+              `slot ${
+                ccolors.key_name(
+                  containing_slot_path.join("."),
+                )
+              } still contains blocks`,
+            );
+          }
+        }
+        break;
       }
     }
     i++;
@@ -666,23 +672,28 @@ async function parseEnvSection(
         key_token.params[0],
         responses,
       );
+
       const blockWithoutResponses = await get_block(blockIdentifier, blocks);
-      const blockWithoutArgs = YAML.parse(
-        literalizeTemplateWithResponseValues(
-          YAML.stringify(blockWithoutResponses),
-          responses,
-        ),
-      ) as Record<string, unknown>;
 
       let blockWithArgs;
 
       let shouldWrite = true;
 
-      if (body) {
+      if (body && body.condition) {
         if (body.condition) {
           shouldWrite = resolveCNDIPromptCondition(body.condition, responses);
         }
-        if (body.args) {
+      }
+
+      if (shouldWrite) {
+        const blockWithoutArgs = YAML.parse(
+          literalizeTemplateWithResponseValues(
+            YAML.stringify(blockWithoutResponses),
+            responses,
+          ),
+        ) as Record<string, unknown>;
+
+        if (body && body.args) {
           for (const argName in body.args) {
             const argValue = body.args[argName];
             if (typeof argValue === "string") {
@@ -704,9 +715,7 @@ async function parseEnvSection(
         } else {
           blockWithArgs = blockWithoutArgs;
         }
-      }
 
-      if (shouldWrite) {
         for (const k in blockWithArgs) {
           const v = blockWithArgs[k];
           const toke = parseAsCNDIToken(k);
