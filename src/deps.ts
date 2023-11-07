@@ -97,3 +97,6 @@ export const ccolors = {
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
   },
 };
+
+export { Construct } from "npm:constructs";
+export { App, TerraformStack } from "npm:cdktf";

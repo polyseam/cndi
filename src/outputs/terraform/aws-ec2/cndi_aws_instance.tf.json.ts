@@ -11,6 +11,7 @@ export default function getAWSComputeInstanceTFJSON(
   leaderNodeName: string,
 ): string {
   const { name, role } = node;
+  const root_block = node.disk_size.find((disk) => disk.name === 'default');
   const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
   const ami = node?.ami || DEFAULT_EC2_AMI;
   const instance_type = node?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
@@ -45,6 +46,14 @@ export default function getAWSComputeInstanceTFJSON(
         CNDINodeRole: role,
       },
       root_block_device,
+      ebs_block_device: [
+        {
+          device_name: "/dev/sdb",
+          volume_size,
+          volume_type,
+          delete_on_termination,
+        }
+      ],
       subnet_id,
       vpc_security_group_ids,
       user_data_replace_on_change: false,
