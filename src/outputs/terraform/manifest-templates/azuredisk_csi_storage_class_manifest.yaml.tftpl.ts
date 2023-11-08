@@ -9,6 +9,7 @@ metadata:
 provisioner: disk.csi.azure.com
 parameters:
   skuName: PremiumV2_LRS
+  fsType: xfs
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
