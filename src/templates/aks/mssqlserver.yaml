@@ -80,6 +80,13 @@ outputs:
             tlskey = /var/opt/mssql/sslcert/tls.key
             tlsprotocols = 1.2
             forceencryption = 0
+
+            [filelocation]
+            defaultbackupdir = /var/opt/mssql/data/
+            defaultdatadir = /var/opt/mssql/data/
+            defaultdumpdir = /var/opt/mssql/data/
+            defaultlogdir = /var/opt/mssql/data/
+
       mssql-secret:
         apiVersion: v1
         kind: Secret
@@ -179,11 +186,11 @@ outputs:
                     - name: newmssql
                       mountPath: "/var/opt/mssql"
                     - name: userdata
-                      mountPath: "/var/opt/mssql/userdata"
+                      mountPath: "/var/opt/mssql/data"
                     - name: userlog
-                      mountPath: "/var/opt/mssql/userlog"
+                      mountPath: "/var/opt/mssql/data"
                     - name: tempdb
-                      mountPath: "/var/opt/mssql/tempdb"
+                      mountPath: "/var/opt/mssql/data"
                     - name: mssql-config-volume
                       mountPath: /var/opt/config
               volumes:
@@ -219,6 +226,8 @@ outputs:
                   requests:
                     storage: 8Gi
             - metadata:
+              annotations:
+                volume.beta.kubernetes.io/storage-class: default
                 name: tempdb
               spec:
                 accessModes:
@@ -260,15 +269,8 @@ outputs:
         metadata:
           name: mssql-0-ingress
           namespace: mssql
-          annotations:
-            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
-          ingressClassName: public
-          tls:
-            - hosts:
-                - "{{ $.cndi.prompts.responses.mssqlDomainName }}"
-              secretName: cluster-issuer-private-key
+          ingressClassName: private
           rules:
             - host: "{{ $.cndi.prompts.responses.mssqlDomainName }}"
               http:
