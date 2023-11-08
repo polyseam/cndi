@@ -8,6 +8,9 @@ export default function getAKSDataTFJSON(): string {
           name_prefix: "kubernetes",
           resource_group_name:
             "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+          depends_on: [
+            "helm_release.cndi_nginx_controller_helm_chart_public",
+          ],
         },
       },
       azurerm_lb: {
@@ -15,6 +18,9 @@ export default function getAKSDataTFJSON(): string {
           name: "kubernetes-internal",
           resource_group_name:
             "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+          depends_on: [
+            "helm_release.cndi_nginx_controller_helm_chart_private",
+          ],
         },
       },
       template_file: {
