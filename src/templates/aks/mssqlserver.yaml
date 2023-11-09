@@ -184,7 +184,7 @@ outputs:
                       mountPath: /mnt/mssql-certs
                     - name: newmssql
                       mountPath: "/var/opt/mssql"
-                    - name: /userlog
+                    - name: userlog
                       mountPath: "/var/opt/mssql/userlog"
                     - name: userdata
                       mountPath: "/var/opt/mssql/userdata"
