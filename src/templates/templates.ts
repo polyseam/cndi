@@ -495,6 +495,7 @@ async function literalizeTemplateWithBlocks(
                 body.args[argName] = argValue;
               }
             }
+            console.log("body.args", body.args);
             blockString = literalizeTemplateWithResponseValues(
               YAML.stringify(block),
               body.args || {},
@@ -505,7 +506,7 @@ async function literalizeTemplateWithBlocks(
 
         if (shouldDisplay) {
           blockString = literalizeTemplateWithResponseValues(
-            YAML.stringify(block),
+            YAML.stringify(blockString),
             responses,
           );
           // put the block in the slot
