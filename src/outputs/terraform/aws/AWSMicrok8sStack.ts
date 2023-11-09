@@ -16,17 +16,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const nodeIdList: string[] = [];
     const project_name = cndi_config.project_name!;
 
-    new CDKTFProviderAWS.resourcegroupsGroup.ResourcegroupsGroup(
-      this,
-      `cndi_aws_resource_group`,
-      {
-        name: `CNDIResourceGroup_${project_name}`,
-        tags: {
-          Name: `CNDIResourceGroup_${project_name}`,
-        },
-      },
-    );
-
     for (const node of cndi_config.infrastructure.cndi.nodes) {
       const role = nodeIdList.length === 0 ? "leader" : "controller";
       const user_data = getUserDataTemplateFileString(role);
