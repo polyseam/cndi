@@ -16,10 +16,6 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
       aws_region,
     });
 
-    new TerraformLocal(this, "cndi_project_name", {
-      cndi_project_name: project_name,
-    });
-
     new CDKTFProviderAWS.provider.AwsProvider(this, "aws", {
       region: aws_region,
       defaultTags: [
