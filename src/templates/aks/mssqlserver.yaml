@@ -82,10 +82,10 @@ outputs:
             forceencryption = 0
 
             [filelocation]
-            defaultbackupdir = /var/opt/mssql/data/
-            defaultdatadir = /var/opt/mssql/data/
-            defaultdumpdir = /var/opt/mssql/data/
-            defaultlogdir = /var/opt/mssql/data/
+            defaultbackupdir = /var/opt/mssql/backup
+            defaultdatadir = /var/opt/mssql/userdata
+            defaultdumpdir = /var/opt/mssql/dump
+            defaultlogdir = /var/opt/mssql/userlog
 
       mssql-secret:
         apiVersion: v1
@@ -152,7 +152,6 @@ outputs:
                   command:
                     - /bin/bash
                     - -c
-                    # - cp /var/opt/config/mssql.conf /var/opt/mssql/mssql.conf && /opt/mssql/bin/sqlservr
                   image: "mcr.microsoft.com/mssql/server:2019-latest"
                   args:
                     - |
@@ -185,12 +184,14 @@ outputs:
                       mountPath: /mnt/mssql-certs
                     - name: newmssql
                       mountPath: "/var/opt/mssql"
+                    - name: /userlog
+                      mountPath: "/var/opt/mssql/userlog"
                     - name: userdata
-                      mountPath: "/var/opt/mssql/data"
-                    - name: userlog
-                      mountPath: "/var/opt/mssql/data"
+                      mountPath: "/var/opt/mssql/userdata"
                     - name: tempdb
-                      mountPath: "/var/opt/mssql/data"
+                      mountPath: "/var/opt/mssql/tempdb"
+                    - name: backup
+                      mountPath: "/var/opt/mssql/backup"
                     - name: mssql-config-volume
                       mountPath: /var/opt/config
               volumes:
@@ -226,8 +227,6 @@ outputs:
                   requests:
                     storage: 8Gi
             - metadata:
-              annotations:
-                volume.beta.kubernetes.io/storage-class: default
                 name: tempdb
               spec:
                 accessModes:
@@ -235,6 +234,16 @@ outputs:
                 resources:
                   requests:
                     storage: 8Gi
+            - metadata:
+                name: backup
+                annotations:
+                  volume.beta.kubernetes.io/storage-class: default
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
       argo-ingress:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
