@@ -1,4 +1,4 @@
-import { ccolors, path } from "deps";
+import { path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import {
   patchAndStageTerraformFilesWithConfig,
@@ -31,13 +31,13 @@ export default async function stageTerraformResourcesForConfig(
 
   switch (label) {
     case "aws/microk8s":
-      console.log(
-        ccolors.key_name('"kind"'),
-        ccolors.warn("is"),
-        ccolors.user_input('"aws"'),
-        ccolors.warn("defaulting to"),
-        ccolors.key_name('"ec2"'),
-      );
+      // console.log(
+      //   ccolors.key_name('"kind"'),
+      //   ccolors.warn("is"),
+      //   ccolors.user_input('"aws"'),
+      //   ccolors.warn("defaulting to"),
+      //   ccolors.key_name('"ec2"'),
+      // );
       await stageTerraformResourcesForAWSEC2(config);
       break;
     case "aws/eks":

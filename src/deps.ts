@@ -99,4 +99,17 @@ export const ccolors = {
 };
 
 export { Construct } from "npm:constructs";
-export { App, TerraformStack } from "npm:cdktf";
+export {
+  App,
+  Fn,
+  TerraformLocal,
+  TerraformOutput,
+  TerraformStack,
+  TerraformVariable,
+} from "npm:cdktf";
+
+// Terraform CDKTF Providers
+import * as CDKTFRandomProvider from "npm:@cdktf/provider-random";
+export const RandomProvider = CDKTFRandomProvider.provider.RandomProvider;
+export const RandomPassword = CDKTFRandomProvider.password.Password;
+export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";

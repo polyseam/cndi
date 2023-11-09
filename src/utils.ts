@@ -430,6 +430,19 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+type CDKTFAppConfig = {
+  outdir: string;
+};
+
+async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
+  const stagingDirectory = await getStagingDir();
+  const outdir = path.join(stagingDirectory, "cndi", "terraform");
+  await Deno.mkdir(path.dirname(outdir), { recursive: true });
+  return {
+    outdir,
+  };
+}
+
 async function getStagingDir(): Promise<string> {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
@@ -620,6 +633,7 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
+  getCDKTFAppConfig,
   getCndiInstallPath,
   getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
