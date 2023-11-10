@@ -23,14 +23,18 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifest from "src/outputs/custom-port-manifests/eks/ingress-service.ts";
-import getEKSIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/eks/ingress-tcp-services-configmap.ts";
+import getEKSIngressServiceManifest from "../outputs/custom-port-manifests/managed/ingress-service.ts";
+import getEKSIngressTcpServicesConfigMapManifest from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import {
+  KubernetesManifest,
+  KubernetesSecret,
+  ManagedNodeKind,
+} from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
-import { NON_MICROK8S_NODE_KINDS } from "consts";
+import { MANAGED_NODE_KINDS } from "consts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -159,28 +163,36 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   }
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
-  const isNotMicrok8sCluster = NON_MICROK8S_NODE_KINDS.includes(
-    config?.infrastructure?.cndi?.nodes?.[0]?.kind,
+
+  // deno-lint-ignore no-explicit-any
+  const kind = config?.infrastructure?.cndi?.nodes?.[0]?.kind as unknown as any;
+  const isNotMicrok8sCluster = MANAGED_NODE_KINDS.includes(
+    kind,
   );
 
   if (open_ports) {
     if (
-      isNotMicrok8sCluster // currently only EKS
+      isNotMicrok8sCluster // currently only EKS, AKS, GKE
     ) {
-      await Promise.all([
-        stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "ingress-tcp-services-configmap.yaml",
-          ),
-          getEKSIngressTcpServicesConfigMapManifest(open_ports),
-        ),
-        stageFile(
+      const managedKind = kind as ManagedNodeKind;
+      const ingressService = getEKSIngressServiceManifest(
+        open_ports,
+        managedKind,
+      );
+      if (ingressService) {
+        await stageFile(
           path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
-          getEKSIngressServiceManifest(open_ports),
+          ingressService,
+        );
+      }
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "ingress-tcp-services-configmap.yaml",
         ),
-      ]);
+        getEKSIngressTcpServicesConfigMapManifest(open_ports),
+      );
     } else {
       await Promise.all([
         stageFile(

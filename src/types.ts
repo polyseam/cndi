@@ -1,5 +1,8 @@
 // https://youtu.be/jjMbPt_H3RQ?t=303 Pocock Wizardry
 type ObjectValues<T> = T[keyof T];
+import { MANAGED_NODE_KINDS } from "./constants.ts";
+
+export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
 export const NODE_KIND = {
   aws: "aws",

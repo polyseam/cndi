@@ -1,11 +1,28 @@
 import { ccolors } from "deps";
 
-import { CNDIPort } from "src/types.ts";
+import { CNDIPort, ManagedNodeKind } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
   "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:",
 );
+
+type ManagedAnnotations = {
+  [key in ManagedNodeKind]: Record<string, string>;
+};
+
+// TODO: @IamTamika - please verify/add annotations for each managed provider
+const MANAGED_ANNOTATIONS: ManagedAnnotations = {
+  eks: {
+    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
+  },
+  gke: {
+    "cloud.google.com/load-balancer-type": "nlb",
+  },
+  aks: {
+    "service.beta.kubernetes.io/azure-load-balancer-type": "nlb",
+  },
+};
 
 interface IngressService {
   apiVersion: string;
@@ -13,6 +30,7 @@ interface IngressService {
   metadata: {
     "name": "ingress-nginx-controller";
     "namespace": "ingress";
+    "annotations": Record<string, string>;
   };
   spec: {
     type: "LoadBalancer";
@@ -44,7 +62,8 @@ type ServicePort = {
 
 const getIngressServiceManifest = (
   user_ports: Array<CNDIPort>,
-): string => {
+  kind: ManagedNodeKind,
+): string | null => {
   const ports: Array<ServicePort> = [...default_ports];
 
   user_ports.forEach((port) => {
@@ -78,12 +97,18 @@ const getIngressServiceManifest = (
     }
   });
 
+  if (ports.length === 0) {
+    // don't create service
+    return null;
+  }
+
   const manifest: IngressService = {
     apiVersion: "v1",
     kind: "Service",
     metadata: {
       "name": "ingress-nginx-controller",
       "namespace": "ingress",
+      "annotations": MANAGED_ANNOTATIONS[kind],
     },
     spec: {
       type: "LoadBalancer",
