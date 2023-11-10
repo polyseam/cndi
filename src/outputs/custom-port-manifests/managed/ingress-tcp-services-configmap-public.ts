@@ -11,7 +11,7 @@ interface IngressTCPServicesConfigMap {
   apiVersion: string;
   kind: "ConfigMap";
   metadata: {
-    name: "nginx-ingress-tcp-microk8s-conf";
+    name: string;
     namespace: "ingress";
   };
   data: {
@@ -20,19 +20,24 @@ interface IngressTCPServicesConfigMap {
 }
 
 const getIngressTcpServicesConfigMapManifest = (
-  user_ports: Array<CNDIPort>,
+  ports: Array<CNDIPort>,
 ): string => {
   const manifest: IngressTCPServicesConfigMap = {
     "apiVersion": "v1",
     "kind": "ConfigMap",
     "metadata": {
-      "name": "nginx-ingress-tcp-microk8s-conf",
+      "name": "ingress-nginx-controller-public",
       "namespace": "ingress",
     },
     "data": {},
   };
 
-  user_ports.forEach((port) => {
+  ports.forEach((port) => {
+    if (port.private) {
+      // port is private, don't add it to the public configmap
+      return;
+    }
+
     if (!port?.number) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,

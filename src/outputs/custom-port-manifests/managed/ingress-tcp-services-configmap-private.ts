@@ -11,7 +11,7 @@ interface IngressTCPServicesConfigMap {
   apiVersion: string;
   kind: "ConfigMap";
   metadata: {
-    name: "ingress-nginx-controller";
+    name: string;
     namespace: "ingress";
   };
   data: {
@@ -26,13 +26,17 @@ const getIngressTcpServicesConfigMapManifest = (
     "apiVersion": "v1",
     "kind": "ConfigMap",
     "metadata": {
-      "name": "ingress-nginx-controller",
+      "name": "ingress-nginx-controller-private",
       "namespace": "ingress",
     },
     "data": {},
   };
 
   ports.forEach((port) => {
+    if (!port?.private) {
+      // port is not private, don't add it to the private configmap
+      return;
+    }
     if (!port?.number) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,
