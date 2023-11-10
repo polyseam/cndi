@@ -46,7 +46,7 @@ function getFinalEnvString(
   let telemetryMode = "";
 
   if (cndiGeneratedValues.debugMode) {
-    telemetryMode = "\nCNDI_TELEMETRY=debug\n";
+    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
   }
 
   return `
@@ -58,8 +58,7 @@ SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
 TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
 
 # Argo UI Admin Password
-ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}
-${telemetryMode}
+ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
 ${templatePartial}`.trim();
 }
 
