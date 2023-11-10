@@ -641,13 +641,17 @@ async function parseEnvSection(
         responses,
       );
 
-      const blockWithoutResponses = await get_block(blockIdentifier, blocks);
+      let blockWithoutResponses = await get_block(blockIdentifier, blocks);
+
+      if ((typeof blockWithoutResponses != "string")) {
+        blockWithoutResponses = YAML.stringify(blockWithoutResponses);
+      }
 
       let blockWithArgs;
 
       let shouldWrite = true;
 
-      if (body && body.condition) {
+      if (body) {
         if (body.condition) {
           shouldWrite = resolveCNDIPromptCondition(body.condition, responses);
         }
@@ -656,7 +660,7 @@ async function parseEnvSection(
       if (shouldWrite) {
         const blockWithoutArgs = YAML.parse(
           literalizeTemplateWithResponseValues(
-            YAML.stringify(blockWithoutResponses),
+            blockWithoutResponses,
             responses,
           ),
         ) as Record<string, unknown>;
