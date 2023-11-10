@@ -20,7 +20,7 @@ interface IngressTCPServicesConfigMap {
 }
 
 const getIngressTcpServicesConfigMapManifest = (
-  ports: Array<CNDIPort>,
+  user_ports: Array<CNDIPort>,
 ): string => {
   const manifest: IngressTCPServicesConfigMap = {
     "apiVersion": "v1",
@@ -32,7 +32,7 @@ const getIngressTcpServicesConfigMapManifest = (
     "data": {},
   };
 
-  ports.forEach((port) => {
+  user_ports.forEach((port) => {
     if (!port?.number) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,

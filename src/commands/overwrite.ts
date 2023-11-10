@@ -162,55 +162,51 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     }
   }
 
-  const open_ports = config?.infrastructure?.cndi?.open_ports;
+  const open_ports = config?.infrastructure?.cndi?.open_ports || [];
 
   // deno-lint-ignore no-explicit-any
   const kind = config?.infrastructure?.cndi?.nodes?.[0]?.kind as unknown as any;
-  const isNotMicrok8sCluster = MANAGED_NODE_KINDS.includes(
-    kind,
-  );
+  const isNotMicrok8sCluster = MANAGED_NODE_KINDS.includes(kind);
 
-  if (open_ports) {
-    if (
-      isNotMicrok8sCluster // currently only EKS, AKS, GKE
-    ) {
-      const managedKind = kind as ManagedNodeKind;
-      const ingressService = getEKSIngressServiceManifest(
-        open_ports,
-        managedKind,
-      );
-      if (ingressService) {
-        await stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
-          ingressService,
-        );
-      }
+  if (
+    isNotMicrok8sCluster // currently only EKS, AKS, GKE
+  ) {
+    const managedKind = kind as ManagedNodeKind;
+    const ingressService = getEKSIngressServiceManifest(
+      open_ports,
+      managedKind,
+    );
+    if (ingressService) {
       await stageFile(
+        path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
+        ingressService,
+      );
+    }
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "ingress-tcp-services-configmap.yaml",
+      ),
+      getEKSIngressTcpServicesConfigMapManifest(open_ports),
+    );
+  } else {
+    await Promise.all([
+      stageFile(
         path.join(
           "cndi",
           "cluster_manifests",
           "ingress-tcp-services-configmap.yaml",
         ),
-        getEKSIngressTcpServicesConfigMapManifest(open_ports),
-      );
-    } else {
-      await Promise.all([
-        stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "ingress-tcp-services-configmap.yaml",
-          ),
-          getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
-        ),
-        stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
-          getMicrok8sIngressDaemonsetManifest(open_ports),
-        ),
-      ]);
-    }
-    console.log(ccolors.success("staged open ports manifests"));
+        getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+      ),
+      stageFile(
+        path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
+        getMicrok8sIngressDaemonsetManifest(open_ports),
+      ),
+    ]);
   }
+  console.log(ccolors.success("staged open ports manifests"));
 
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   for (const key in cluster_manifests) {
