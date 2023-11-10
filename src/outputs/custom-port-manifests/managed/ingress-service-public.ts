@@ -28,7 +28,7 @@ interface IngressService {
   apiVersion: string;
   kind: "Service";
   metadata: {
-    "name": "ingress-nginx-controller";
+    "name": string;
     "namespace": "ingress";
     "annotations": Record<string, string>;
   };
@@ -67,6 +67,10 @@ const getIngressServiceManifest = (
   const ports: Array<ServicePort> = [...default_ports];
 
   user_ports.forEach((port) => {
+    if (port?.private) {
+      // port is private, don't add it to the public configmap
+      return;
+    }
     const { number, name, disable } = port;
 
     if (!port?.number) {
@@ -106,7 +110,7 @@ const getIngressServiceManifest = (
     apiVersion: "v1",
     kind: "Service",
     metadata: {
-      "name": "ingress-nginx-controller",
+      "name": "ingress-nginx-controller-public",
       "namespace": "ingress",
       "annotations": MANAGED_ANNOTATIONS[kind],
     },
