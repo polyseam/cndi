@@ -607,17 +607,9 @@ async function parseEnvSection(
   env_spec: string,
   responses: Record<string, CNDITemplatePromptResponsePrimitive>,
   blocks: Array<Block>,
-  debug_telemetry = false,
 ): Promise<string> {
   const env: Array<string> = [];
   const envObj = YAML.parse(env_spec) as Record<string, unknown>;
-
-  if (debug_telemetry) {
-    console.log("debug in env?");
-    // is this broken?
-    envObj["$cndi.comment(telemetry_mode)"] = "Telemetry Mode";
-    envObj["CNDI_TELEMETRY"] = "debug";
-  }
 
   for (const key in envObj) {
     const value = envObj[key];
@@ -643,7 +635,7 @@ async function parseEnvSection(
 
       let blockWithoutResponses = await get_block(blockIdentifier, blocks);
 
-      if ((typeof blockWithoutResponses != "string")) {
+      if (typeof blockWithoutResponses != "string") {
         blockWithoutResponses = YAML.stringify(blockWithoutResponses);
       }
 
@@ -847,11 +839,7 @@ function getDefaultResponsesFromCliffyPrompts(
 
 export async function useTemplate(
   templateIdentifier: string,
-  opt: {
-    cndiGeneratedValues: CNDIGeneratedValues;
-    interactive: boolean;
-    debug_telemetry: boolean;
-  },
+  interactive: boolean,
   responseOverrides: Record<string, CNDITemplatePromptResponsePrimitive> = {},
 ): Promise<TemplateResult> {
   const isUrl = isValidUrl(templateIdentifier);
@@ -947,7 +935,7 @@ export async function useTemplate(
           ...responses,
         });
 
-        const blockResponses = opt?.interactive
+        const blockResponses = interactive
           // deno-lint-ignore no-explicit-any
           ? await prompt(cliffyPromptsFromBlock as any)
           : getDefaultResponsesFromCliffyPrompts(cliffyPromptsFromBlock);
@@ -964,7 +952,7 @@ export async function useTemplate(
 
   const cliffyPrompts = getCliffyPrompts(promptDefinitions, responses);
 
-  const tplResponses = opt?.interactive
+  const tplResponses = interactive
     // deno-lint-ignore no-explicit-any
     ? await prompt(cliffyPrompts as any)
     : getDefaultResponsesFromCliffyPrompts(cliffyPrompts);
@@ -991,7 +979,6 @@ export async function useTemplate(
     YAML.stringify(unparsedTemplateObject.outputs.env),
     responses,
     blocks,
-    opt.debug_telemetry,
   );
   console.log("---env-end---\n\n");
 
