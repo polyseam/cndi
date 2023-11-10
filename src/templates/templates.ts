@@ -415,9 +415,11 @@ async function literalizeTemplateWithBlocks(
   const parsedLitTemplate = YAML.parse(lit_template) as Record<string, unknown>;
 
   const keys = getObjectKeysRecursively(parsedLitTemplate);
+  console.log(ccolors.key_name("keys"), ccolors.user_input(keys.join("\n")));
 
   const tokens: CNDIToken[] = [];
 
+  const uniqueSlotStrings = new Set<string>();
   const destinationSlots: Array<Array<string>> = [];
 
   keys.forEach((key: string) => {
@@ -438,10 +440,15 @@ async function literalizeTemplateWithBlocks(
         if (left.charAt(left.length - 1) === ".") {
           left = left.substring(0, left.length - 1);
         }
-        destinationSlots.push([...left.split("."), `$cndi.${right}`]);
-        const toke = parseAsCNDIToken(`$cndi.${right}`);
-        if (toke) {
-          tokens.push(toke);
+        const slot = [...left.split("."), `$cndi.${right}`];
+        const slotString = slot.join(".");
+        if (!uniqueSlotStrings.has(slotString)) {
+          destinationSlots.push(slot);
+          uniqueSlotStrings.add(slotString);
+          const toke = parseAsCNDIToken(`$cndi.${right}`);
+          if (toke) {
+            tokens.push(toke);
+          }
         }
       }
     }
@@ -475,6 +482,12 @@ async function literalizeTemplateWithBlocks(
 
         let blockString;
 
+        if (typeof block === "string") {
+          blockString = block;
+        } else {
+          blockString = YAML.stringify(block);
+        }
+
         if (body) {
           if (body.condition) {
             shouldDisplay = resolveCNDIPromptCondition(
@@ -506,7 +519,7 @@ async function literalizeTemplateWithBlocks(
 
         if (shouldDisplay) {
           blockString = literalizeTemplateWithResponseValues(
-            YAML.stringify(blockString),
+            blockString,
             responses,
           );
           // put the block in the slot
