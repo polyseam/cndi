@@ -152,8 +152,6 @@ function resolveCNDIPromptCondition(
   if (typeof input === "string") {
     val = literalizeTemplateWithResponseValues(input, responses);
 
-    // console.log(`evaluating '${val}' ${comparator} ${standard}`);
-
     if (val === undefined) {
       console.log(`value for '${input}' is undefined`);
       return false;
@@ -166,7 +164,6 @@ function resolveCNDIPromptCondition(
     }
 
     const verdict = CNDITemplateComparators[comparator](val, standard);
-    // console.log("verdict for string", verdict);
 
     return verdict || false;
   } else {
@@ -415,7 +412,6 @@ async function literalizeTemplateWithBlocks(
   const parsedLitTemplate = YAML.parse(lit_template) as Record<string, unknown>;
 
   const keys = getObjectKeysRecursively(parsedLitTemplate);
-  console.log(ccolors.key_name("keys"), ccolors.user_input(keys.join("\n")));
 
   const tokens: CNDIToken[] = [];
 
@@ -508,7 +504,6 @@ async function literalizeTemplateWithBlocks(
                 body.args[argName] = argValue;
               }
             }
-            console.log("body.args", body.args);
             blockString = literalizeTemplateWithResponseValues(
               YAML.stringify(block),
               body.args || {},
