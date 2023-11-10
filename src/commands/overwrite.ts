@@ -23,8 +23,8 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifest from "../outputs/custom-port-manifests/managed/ingress-service.ts";
-import getEKSIngressTcpServicesConfigMapManifest from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap.ts";
+import getEKSIngressServiceManifest from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
+import getEKSIngressTcpServicesConfigMapManifest from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 

@@ -198,6 +198,7 @@ interface CNDIPort {
   namespace?: string;
   number: number;
   disable?: boolean;
+  private?: boolean;
 }
 
 // incomplete type, config will have more options
