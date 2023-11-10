@@ -50,17 +50,17 @@ function getFinalEnvString(
   }
 
   return `
-  # Sealed Secrets Keys
-  SEALED_SECRETS_PRIVATE_KEY=${sealedSecretsKeys.sealed_secrets_private_key}
-  SEALED_SECRETS_PUBLIC_KEY=${sealedSecretsKeys.sealed_secrets_public_key}
+# Sealed Secrets Keys
+SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
+SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
 
-  # Terraform State Passphrase
-  TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
+# Terraform State Passphrase
+TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
 
-  # Argo UI Admin Password
-  ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}
-  ${telemetryMode}
-  ${templatePartial}`.trim();
+# Argo UI Admin Password
+ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}
+${telemetryMode}
+${templatePartial}`.trim();
 }
 
 /**
