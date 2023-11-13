@@ -1,4 +1,5 @@
 import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
+import type { SealedSecretsKeys } from "src/types.ts";
 
 const { Input, Select } = PromptTypes;
 
@@ -29,6 +30,37 @@ import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "responses.yaml");
+
+function getFinalEnvString(
+  templatePartial = "",
+  cndiGeneratedValues: {
+    sealedSecretsKeys: SealedSecretsKeys;
+    terraformStatePassphrase: string;
+    argoUIAdminPassword: string;
+    debugMode: boolean;
+  },
+) {
+  const { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword } =
+    cndiGeneratedValues;
+
+  let telemetryMode = "";
+
+  if (cndiGeneratedValues.debugMode) {
+    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
+  }
+
+  return `
+# Sealed Secrets Keys
+SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
+SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
+
+# Terraform State Passphrase
+TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
+
+# Argo UI Admin Password
+ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
+${templatePartial}`.trim();
+}
 
 /**
  * COMMAND cndi init
@@ -249,19 +281,13 @@ const initCommand = new Command()
       sealedSecretsKeys,
       terraformStatePassphrase,
       argoUIAdminPassword,
+      debugMode: !!options.debug,
     };
-
-    const inDebugEnv =
-      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
 
     if (template) {
       const templateResult = await useTemplate(
         template!,
-        {
-          cndiGeneratedValues,
-          debug_telemetry: options?.debug || inDebugEnv,
-          interactive: !!options.interactive,
-        },
+        !!options.interactive,
         { project_name, ...overrides },
       );
       cndi_config = templateResult.cndi_config;
@@ -270,12 +296,13 @@ const initCommand = new Command()
       env = templateResult.env;
     } else {
       // uhh not sure bout dis
-      readme = "";
+      readme = `# ${project_name}\n`;
       env = "";
     }
 
-    // write a readme, extend via Template.readmeBlock if it exists
+    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 
+    // write a readme, extend via Template.readmeBlock if it exists
     const readmePath = path.join(options.output, "README.md");
     try {
       await Deno.stat(readmePath);
@@ -289,8 +316,6 @@ const initCommand = new Command()
         await stageFile("README.md", readme);
       }
     }
-
-    await stageFile(".env", env);
 
     await stageFile(
       path.join(".vscode", "settings.json"),

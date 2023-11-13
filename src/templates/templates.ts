@@ -152,8 +152,6 @@ function resolveCNDIPromptCondition(
   if (typeof input === "string") {
     val = literalizeTemplateWithResponseValues(input, responses);
 
-    // console.log(`evaluating '${val}' ${comparator} ${standard}`);
-
     if (val === undefined) {
       console.log(`value for '${input}' is undefined`);
       return false;
@@ -166,7 +164,6 @@ function resolveCNDIPromptCondition(
     }
 
     const verdict = CNDITemplateComparators[comparator](val, standard);
-    // console.log("verdict for string", verdict);
 
     return verdict || false;
   } else {
@@ -418,6 +415,7 @@ async function literalizeTemplateWithBlocks(
 
   const tokens: CNDIToken[] = [];
 
+  const uniqueSlotStrings = new Set<string>();
   const destinationSlots: Array<Array<string>> = [];
 
   keys.forEach((key: string) => {
@@ -438,10 +436,15 @@ async function literalizeTemplateWithBlocks(
         if (left.charAt(left.length - 1) === ".") {
           left = left.substring(0, left.length - 1);
         }
-        destinationSlots.push([...left.split("."), `$cndi.${right}`]);
-        const toke = parseAsCNDIToken(`$cndi.${right}`);
-        if (toke) {
-          tokens.push(toke);
+        const slot = [...left.split("."), `$cndi.${right}`];
+        const slotString = slot.join(".");
+        if (!uniqueSlotStrings.has(slotString)) {
+          destinationSlots.push(slot);
+          uniqueSlotStrings.add(slotString);
+          const toke = parseAsCNDIToken(`$cndi.${right}`);
+          if (toke) {
+            tokens.push(toke);
+          }
         }
       }
     }
@@ -475,6 +478,12 @@ async function literalizeTemplateWithBlocks(
 
         let blockString;
 
+        if (typeof block === "string") {
+          blockString = block;
+        } else {
+          blockString = YAML.stringify(block);
+        }
+
         if (body) {
           if (body.condition) {
             shouldDisplay = resolveCNDIPromptCondition(
@@ -505,7 +514,7 @@ async function literalizeTemplateWithBlocks(
 
         if (shouldDisplay) {
           blockString = literalizeTemplateWithResponseValues(
-            YAML.stringify(block),
+            blockString,
             responses,
           );
           // put the block in the slot
@@ -593,17 +602,9 @@ async function parseEnvSection(
   env_spec: string,
   responses: Record<string, CNDITemplatePromptResponsePrimitive>,
   blocks: Array<Block>,
-  debug_telemetry = false,
 ): Promise<string> {
   const env: Array<string> = [];
   const envObj = YAML.parse(env_spec) as Record<string, unknown>;
-
-  if (debug_telemetry) {
-    console.log("debug in env?");
-    // is this broken?
-    envObj["$cndi.comment(telemetry_mode)"] = "Telemetry Mode";
-    envObj["CNDI_TELEMETRY"] = "debug";
-  }
 
   for (const key in envObj) {
     const value = envObj[key];
@@ -627,13 +628,17 @@ async function parseEnvSection(
         responses,
       );
 
-      const blockWithoutResponses = await get_block(blockIdentifier, blocks);
+      let blockWithoutResponses = await get_block(blockIdentifier, blocks);
+
+      if (typeof blockWithoutResponses != "string") {
+        blockWithoutResponses = YAML.stringify(blockWithoutResponses);
+      }
 
       let blockWithArgs;
 
       let shouldWrite = true;
 
-      if (body && body.condition) {
+      if (body) {
         if (body.condition) {
           shouldWrite = resolveCNDIPromptCondition(body.condition, responses);
         }
@@ -642,7 +647,7 @@ async function parseEnvSection(
       if (shouldWrite) {
         const blockWithoutArgs = YAML.parse(
           literalizeTemplateWithResponseValues(
-            YAML.stringify(blockWithoutResponses),
+            blockWithoutResponses,
             responses,
           ),
         ) as Record<string, unknown>;
@@ -829,11 +834,7 @@ function getDefaultResponsesFromCliffyPrompts(
 
 export async function useTemplate(
   templateIdentifier: string,
-  opt: {
-    cndiGeneratedValues: CNDIGeneratedValues;
-    interactive: boolean;
-    debug_telemetry: boolean;
-  },
+  interactive: boolean,
   responseOverrides: Record<string, CNDITemplatePromptResponsePrimitive> = {},
 ): Promise<TemplateResult> {
   const isUrl = isValidUrl(templateIdentifier);
@@ -929,7 +930,7 @@ export async function useTemplate(
           ...responses,
         });
 
-        const blockResponses = opt?.interactive
+        const blockResponses = interactive
           // deno-lint-ignore no-explicit-any
           ? await prompt(cliffyPromptsFromBlock as any)
           : getDefaultResponsesFromCliffyPrompts(cliffyPromptsFromBlock);
@@ -946,7 +947,7 @@ export async function useTemplate(
 
   const cliffyPrompts = getCliffyPrompts(promptDefinitions, responses);
 
-  const tplResponses = opt?.interactive
+  const tplResponses = interactive
     // deno-lint-ignore no-explicit-any
     ? await prompt(cliffyPrompts as any)
     : getDefaultResponsesFromCliffyPrompts(cliffyPrompts);
@@ -973,7 +974,6 @@ export async function useTemplate(
     YAML.stringify(unparsedTemplateObject.outputs.env),
     responses,
     blocks,
-    opt.debug_telemetry,
   );
   console.log("---env-end---\n\n");
 

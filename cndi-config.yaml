@@ -4,6 +4,12 @@ deployment_target_provider: aws
 deployment_target_distribution: microk8s
 infrastructure:
   cndi:
+    open_ports:
+      - number: 1433
+        name: mssql
+        protocol: tcp
+        private: true
+
     cert_manager:
       email: jane.doe@example.com
     node_groups:

@@ -164,7 +164,6 @@ const getIngressDaemonSetManifest = (
                 },
               ],
               ports,
-
               "args": [
                 "/nginx-ingress-controller",
                 "--tcp-services-configmap=$(POD_NAMESPACE)/nginx-ingress-tcp-microk8s-conf",
