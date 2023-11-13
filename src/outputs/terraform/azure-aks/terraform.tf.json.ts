@@ -13,6 +13,7 @@ export default function getAzureTerraformTFJSON() {
     kubectl: { source: "gavinbunney/kubectl", version: "1.14.0" },
     kubernetes: { source: "hashicorp/kubernetes", version: "2.19.0" },
     time: { source: "hashicorp/time", version: "0.9.1" },
+    random: { source: "hashicorp/random", version: "3.5.1" },
   });
 
   return getPrettyJSONString(terraform);

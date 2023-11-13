@@ -7,6 +7,7 @@ export default function getAzureTerraformTFJSON() {
       source: "hashicorp/azurerm",
       version: "~> 3.0.2",
     },
+    random: { source: "hashicorp/random", version: "3.5.1" },
   });
 
   return getPrettyJSONString(terraform);
