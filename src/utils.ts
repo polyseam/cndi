@@ -546,7 +546,7 @@ function getUserDataTemplateFileString(
   doBase64Encode?: boolean,
 ) {
   let leaderString =
-    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_password": "\${var.git_password}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
+    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_token": "\${var.git_token}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   if (useSshRepoAuth()) {
     // this value contains base64 encoded values for git_repo and git_ssh_private_key
     // it's required in order to support multiline values in cloud-init
@@ -608,7 +608,7 @@ function getSecretOfLength(len = 32): string {
 function useSshRepoAuth(): boolean {
   return (
     !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
-    !Deno.env.get("GIT_PASSWORD")
+    !Deno.env.get("GIT_TOKEN")
   );
 }
 

@@ -49,7 +49,7 @@ const runCommand = new Command()
     { required: false },
   )
   .env(
-    "GIT_PASSWORD=<value:string>",
+    "GIT_TOKEN=<value:string>",
     "Personal access token ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )

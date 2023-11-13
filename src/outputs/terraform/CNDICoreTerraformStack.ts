@@ -43,7 +43,7 @@ export class CNDITerraformStack extends TerraformStack {
         description: "private key for accessing cluster repository",
       });
     } else {
-      new TerraformVariable(this, "git_password", {
+      new TerraformVariable(this, "git_token", {
         type: "string",
         description: "password for accessing cluster repository",
       });

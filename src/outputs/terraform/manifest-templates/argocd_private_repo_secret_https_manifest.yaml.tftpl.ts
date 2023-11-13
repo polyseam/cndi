@@ -13,7 +13,7 @@ export default function getArgoPrivateRepoSecretHTTPSYamlTftpl() {
     },
     stringData: {
       type: "git",
-      password: "\${git_password}",
+      password: "\${git_token}",
       username: "\${git_username}",
       url: "\${git_repo}",
     },

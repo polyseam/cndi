@@ -61,7 +61,7 @@ const cndiWorkflowObj = {
           name: "cndi run",
           env: {
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
-            GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
+            GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
             GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
             TERRAFORM_STATE_PASSPHRASE:
               "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
@@ -166,7 +166,7 @@ const getWorkflowYaml = (sourceRef?: string) => {
       run: "$HOME/.cndi/bin/cndi run",
       env: {
         GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
-        GIT_PASSWORD: "${{ secrets.GIT_PASSWORD }}",
+        GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
         GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
         TERRAFORM_STATE_PASSPHRASE: "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
         SEALED_SECRETS_PRIVATE_KEY: "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",

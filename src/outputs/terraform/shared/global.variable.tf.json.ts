@@ -32,7 +32,7 @@ export default function getVariablesTFJSON(): string {
       type: "string",
     };
   } else {
-    variable.git_password = {
+    variable.git_token = {
       description: "password for accessing cluster repository",
       type: "string",
     };
