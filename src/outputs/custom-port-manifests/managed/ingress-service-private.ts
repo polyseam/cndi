@@ -68,7 +68,7 @@ const getIngressServiceManifest = (
 
   user_ports.forEach((port) => {
     if (!port?.private) {
-      // port is not private, don't add it to the private configmap
+      // port is not private, don't add it to the private service
       return;
     }
     const { number, name, disable } = port;
