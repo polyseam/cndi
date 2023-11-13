@@ -87,6 +87,9 @@ const getPrivateIngressServiceManifest = (
     metadata: {
       "name": "ingress-nginx-private-controller",
       "namespace": "ingress-private",
+      "annotations": {
+        "service.beta.kubernetes.io/azure-load-balancer-internal": "true",
+      },
     },
     spec: {
       type: "LoadBalancer",
