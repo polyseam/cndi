@@ -17,7 +17,8 @@ const NODE_DISK_SIZE_KEY = {
   azure: "disk_size_gb" as const,
 };
 
-const NON_MICROK8S_NODE_KINDS = ["eks", "gke", "aks"];
+const MANAGED_NODE_KINDS = ["eks", "gke", "aks"] as const;
+
 const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
 
 const DEFAULT_OPEN_PORTS = [
@@ -44,8 +45,8 @@ export {
   DEFAULT_NODE_DISK_SIZE,
   DEFAULT_OPEN_PORTS,
   KUBESEAL_VERSION,
+  MANAGED_NODE_KINDS,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   NODE_DISK_SIZE_KEY,
-  NON_MICROK8S_NODE_KINDS,
   TERRAFORM_VERSION,
 };
