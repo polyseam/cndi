@@ -13,10 +13,10 @@ type ManagedAnnotations = {
 
 // TODO: @IamTamika - please verify/add annotations for each managed provider
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
-  eks: {},
+  eks: {"service.beta.kubernetes.io/aws-load-balancer-type": "nlb"},
   gke: {},
-  aks: {
-    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb"
+  aks: {"service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "/healthz"
+  
   },
 };
 
