@@ -99,7 +99,6 @@ const runCommand = new Command()
         args: [
           `-chdir=${pathToTerraformResources}`,
           "apply",
-          `-state=${path.join(pathToTerraformResources, "terraform.tfstate")}`,
           "-auto-approve",
         ],
         stderr: "piped",

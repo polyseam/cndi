@@ -79,8 +79,7 @@ const terraformCommand = new Command()
     const proxiedTerraformCommand = new Deno.Command(pathToTerraformBinary, {
       args: [
         `-chdir=${pathToTerraformResources}`,
-        ...args,
-        `-state='${path.join(pathToTerraformResources, "terraform.tfstate")}')`,
+        ...args
       ],
       stderr: "piped",
       stdout: "piped",
