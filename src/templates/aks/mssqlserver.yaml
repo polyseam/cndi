@@ -278,8 +278,15 @@ outputs:
         metadata:
           name: mssql-0-ingress
           namespace: mssql
+          annotations:
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
-          ingressClassName: private
+          ingressClassName: public
+          tls:
+            - hosts:
+                - "{{ $.cndi.prompts.responses.mssqlDomainName }}"
+              secretName: cluster-issuer-private-key
           rules:
             - host: "{{ $.cndi.prompts.responses.mssqlDomainName }}"
               http:

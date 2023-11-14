@@ -32,7 +32,8 @@ import cndi_cert_manager_helm_chart from "./cndi_cert_manager_helm_chart.tf.json
 import cndi_azurerm_subnet from "./cndi_azurerm_subnet.tf.json.ts";
 import cndi_azurerm_public_ip_lb from "./cndi_azurerm_public_ip_lb.tf.json.ts";
 import cndi_azurerm_virtual_network from "./cndi_azurerm_virtual_network.tf.json.ts";
-import cndi_random_integer_vnet_suffix from "./cndi_random_integer_vnet_suffix.tf.json.ts";
+import cndi_random_integer_vnet_octet1 from "./cndi_random_integer_vnet_octet1.tf.json.ts";
+import cndi_random_integer_vnet_octet2 from "./cndi_random_integer_vnet_octet2.tf.json.ts";
 export default async function stageTerraformResourcesForAzureAKS(
   config: CNDIConfig,
 ) {
@@ -246,9 +247,17 @@ export default async function stageTerraformResourcesForAzureAKS(
         path.join(
           "cndi",
           "terraform",
-          "cndi_random_integer_vnet_suffix.tf.json",
+          "cndi_random_integer_vnet_octet1.tf.json",
         ),
-        cndi_random_integer_vnet_suffix(),
+        cndi_random_integer_vnet_octet1(),
+      ),
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "cndi_random_integer_vnet_octet2.tf.json",
+        ),
+        cndi_random_integer_vnet_octet2(),
       ),
     ]);
   } catch (e) {

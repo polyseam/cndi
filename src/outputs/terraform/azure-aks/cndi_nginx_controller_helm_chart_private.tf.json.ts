@@ -10,7 +10,7 @@ export default function getNginxControllerTFJSON(): string {
     name: "ingress-nginx-private",
     namespace: "ingress-private",
     repository: "https://kubernetes.github.io/ingress-nginx",
-    timeout: "600",
+    timeout: "300",
     atomic: true,
     set: [
       {
