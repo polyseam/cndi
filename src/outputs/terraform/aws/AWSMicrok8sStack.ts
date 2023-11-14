@@ -25,6 +25,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const open_ports = resolveCNDIPorts(cndi_config);
     const nodeIdList: string[] = [];
     const project_name = cndi_config.project_name!;
+
     const cndiVPC = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
       cidrBlock: "10.0.0.0/16",
       enableDnsHostnames: true,
@@ -68,6 +69,60 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
+    const securityGroupIngresses = [
+      {
+        cidrBlocks: ["0.0.0.0/16"],
+        description:
+          "Inbound rule that enables traffic between EC2 instances in the VPC ",
+        fromPort: 0,
+        ipv6CidrBlocks: [],
+        prefixListIds: [],
+        protocol: "-1",
+        securityGroups: [],
+        self: false,
+        toPort: 0,
+      },
+    ];
+
+    open_ports.forEach((port) => {
+      securityGroupIngresses.push({
+        cidrBlocks: ["0.0.0.0/0"],
+        description: `Port for ${port.name} traffic`,
+        fromPort: port.number,
+        ipv6CidrBlocks: [],
+        prefixListIds: [],
+        protocol: "tcp",
+        securityGroups: [],
+        self: false,
+        toPort: port.number,
+      });
+    });
+
+    const securityGroup = new CDKTFProviderAWS.securityGroup.SecurityGroup(
+      this,
+      `cndi_aws_security_group`,
+      {
+        description: "Security firewall",
+        vpcId: cndiVPC.id,
+        ingress: securityGroupIngresses,
+        egress: [
+          {
+            cidrBlocks: ["0.0.0.0/0"],
+            description: "All traffic",
+            fromPort: 0,
+            ipv6CidrBlocks: [],
+            prefixListIds: [],
+            protocol: "-1",
+            securityGroups: [],
+            toPort: 0,
+          },
+        ],
+        tags: {
+          Name: `CNDISecurityGroup_${project_name}`,
+        },
+      },
+    );
+
     let leaderInstance: CDKTFProviderAWS.instance.Instance;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
@@ -99,6 +154,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           },
           userDataReplaceOnChange: false,
           subnetId: cndiPrimarySubnet.id,
+          vpcSecurityGroupIds: [securityGroup.id],
         },
       );
       if (role === "leader") {
