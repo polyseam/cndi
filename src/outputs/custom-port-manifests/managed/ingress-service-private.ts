@@ -4,7 +4,7 @@ import { CNDIPort, ManagedNodeKind } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
-  "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:",
+  "\nsrc/outputs/custom-port-manifests/managed/ingress-service.ts:",
 );
 
 type ManagedAnnotations = {
@@ -14,13 +14,13 @@ type ManagedAnnotations = {
 // TODO: @IamTamika - please verify/add annotations for each managed provider
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
   eks: {
-    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
+    "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal",
   },
   gke: {
-    "cloud.google.com/load-balancer-type": "nlb",
+    "networking.gke.io/load-balancer-type": "Internal",
   },
   aks: {
-    "service.beta.kubernetes.io/azure-load-balancer-type": "nlb",
+    "service.beta.kubernetes.io/azure-load-balancer-internal": "true",
   },
 };
 
@@ -29,7 +29,7 @@ interface IngressService {
   kind: "Service";
   metadata: {
     "name": string;
-    "namespace": "ingress";
+    "namespace": "ingress-private";
     "annotations": Record<string, string>;
   };
   spec: {
@@ -110,8 +110,8 @@ const getIngressServiceManifest = (
     apiVersion: "v1",
     kind: "Service",
     metadata: {
-      "name": "ingress-nginx-controller-private",
-      "namespace": "ingress",
+      "name": "ingress-nginx-private-controller",
+      "namespace": "ingress-private",
       "annotations": MANAGED_ANNOTATIONS[kind],
     },
     spec: {
