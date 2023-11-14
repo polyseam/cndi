@@ -67,6 +67,7 @@ const terraformCommand = new Command()
       "stacks",
       "cndi_stack",
     );
+
     const cmd = `cndi terraform ${args.join(" ")}`;
     console.log(`${cmd}\n`);
 
@@ -78,7 +79,7 @@ const terraformCommand = new Command()
     const proxiedTerraformCommand = new Deno.Command(pathToTerraformBinary, {
       args: [
         `-chdir=${pathToTerraformResources}`,
-        `-state=${pathToTerraformResources}/terraform.tfstate`,
+        `-state='./terraform.tfstate'`,
         ...args,
       ],
       stderr: "piped",

@@ -102,7 +102,7 @@ const runCommand = new Command()
       const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
         args: [
           `-chdir=${pathToTerraformResources}`,
-          `-state=${pathToTerraformResources}/terraform.tfstate`,
+          `-state='./terraform.tfstate'`,
           "apply",
           "-auto-approve",
         ],
