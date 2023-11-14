@@ -114,7 +114,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       loadBalancerType: "network",
       subnets: [cndiPrimarySubnet.id],
       tags: {
-        Name: `CNDINetworkLB_${project_name}}`,
+        Name: `CNDINetworkLB_${project_name}`,
       },
     });
 
