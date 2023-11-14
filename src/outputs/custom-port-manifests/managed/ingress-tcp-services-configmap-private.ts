@@ -4,7 +4,7 @@ import { CNDIPort } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
-  "\nsrc/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts:",
+  "\nsrc/outputs/custom-port-manifests/managed/ingress-tcp-services-configmap.ts:",
 );
 
 interface IngressTCPServicesConfigMap {
@@ -12,7 +12,7 @@ interface IngressTCPServicesConfigMap {
   kind: "ConfigMap";
   metadata: {
     name: string;
-    namespace: "ingress";
+    namespace: "ingress-private";
   };
   data: {
     [key: string]: string;
@@ -26,8 +26,8 @@ const getIngressTcpServicesConfigMapManifest = (
     "apiVersion": "v1",
     "kind": "ConfigMap",
     "metadata": {
-      "name": "ingress-nginx-controller-private",
-      "namespace": "ingress",
+      "name": "ingress-nginx-private-controller",
+      "namespace": "ingress-private",
     },
     "data": {},
   };
