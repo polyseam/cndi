@@ -136,6 +136,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 export async function synth(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
-  new AWSMicrok8sStack(app, `${cndi_config.project_name}`, cndi_config);
+  new AWSMicrok8sStack(app, `cndi_stack`, cndi_config);
   app.synth();
 }
