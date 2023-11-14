@@ -143,7 +143,7 @@ const getWorkflowYaml = (sourceRef?: string) => {
     },
     {
       name: "build cndi",
-      run: "deno task build",
+      run: "deno task build-linux",
     },
     {
       name: "persist cndi",
