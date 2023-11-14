@@ -74,6 +74,7 @@ export default function getAzureAKSTFJSON(
       private_cluster_enabled: false,
       public_network_access_enabled: true,
       ultra_ssd_enabled: false,
+      vnet_subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
     },
   );
 
