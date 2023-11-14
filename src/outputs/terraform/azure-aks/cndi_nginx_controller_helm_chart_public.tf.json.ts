@@ -17,7 +17,7 @@ export default function getNginxControllerTFJSON(): string {
       {
         "name":
           "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
-        "value": "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+        "value": "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
       },
       {
         "name": "controller.service.loadBalancerIP",

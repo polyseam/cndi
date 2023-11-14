@@ -8,7 +8,7 @@ export default function getAzureVirtualNetworkTFJSON(): string {
     location: "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
     name: "cndi-virtual-network-${local.cndi_project_name}",
     resource_group_name:
-      "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources}",
+      "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
     tags: { CNDIProject: "${local.cndi_project_name}" },
     depends_on: [
       "module.cndi_aks_cluster",

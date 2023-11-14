@@ -82,7 +82,7 @@ outputs:
             forceencryption = 0
 
             [filelocation]
-            defaultbackupdir = /var/opt/mssql/backup
+            defaultbackupdir = /var/opt/mssql
             defaultdatadir = /var/opt/mssql/userdata
             defaultdumpdir = /var/opt/mssql/dump
             defaultlogdir = /var/opt/mssql/userlog
@@ -190,8 +190,6 @@ outputs:
                       mountPath: "/var/opt/mssql/userdata"
                     - name: tempdb
                       mountPath: "/var/opt/mssql/tempdb"
-                    - name: backup
-                      mountPath: "/var/opt/mssql/backup"
                     - name: mssql-config-volume
                       mountPath: /var/opt/config
               volumes:
@@ -234,16 +232,7 @@ outputs:
                 resources:
                   requests:
                     storage: 8Gi
-            - metadata:
-                name: backup
-                annotations:
-                  volume.beta.kubernetes.io/storage-class: default
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 1Gi
+
       argo-ingress:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
