@@ -60,6 +60,7 @@ interface BaseNodeItemSpec {
   volume_size?: number;
   size?: number | string;
   disk_size_gb?: number;
+  disk_size?: number;
   instance_type?: string;
   machine_type?: string;
 }

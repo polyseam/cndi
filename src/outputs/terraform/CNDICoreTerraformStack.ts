@@ -15,9 +15,7 @@ export class CNDITerraformStack extends TerraformStack {
     super(scope, name);
 
     const cndi_project_name = cndi_config.project_name!;
-    new TerraformLocal(this, "cndi_project_name", {
-      cndi_project_name,
-    });
+    new TerraformLocal(this, "cndi_project_name", cndi_project_name);
 
     new TerraformVariable(this, "git_repo", {
       type: "string",
@@ -54,10 +52,11 @@ export class CNDITerraformStack extends TerraformStack {
     }
 
     new RandomProvider(this, "random", {});
-    new RandomPassword(this, "cndi_join_token", {
+    const joinToken = new RandomPassword(this, "cndi_join_token", {
       length: 32,
       special: false,
       upper: false,
     });
+    new TerraformLocal(this, "bootstrap_token", joinToken.result);
   }
 }

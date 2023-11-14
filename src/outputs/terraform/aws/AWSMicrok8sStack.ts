@@ -1,12 +1,22 @@
-import { App, CDKTFProviderAWS, Construct, Fn, TerraformOutput } from "deps";
+import {
+  App,
+  CDKTFProviderAWS,
+  Construct,
+  Fn,
+  TerraformLocal,
+  TerraformOutput,
+} from "deps";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 
 import {
   getCDKTFAppConfig,
   getUserDataTemplateFileString,
   resolveCNDIPorts,
 } from "src/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, NodeRole } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
+
+const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
 
 export class AWSMicrok8sStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -15,22 +25,25 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const open_ports = resolveCNDIPorts(cndi_config);
     const nodeIdList: string[] = [];
     const project_name = cndi_config.project_name!;
+    const cndiVPC = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
+      cidrBlock: "10.0.0.0/16",
+      enableDnsHostnames: true,
+      enableDnsSupport: true,
+      tags: {
+        Name: `CNDIVPC_${project_name}`,
+      },
+    });
 
-    for (const node of cndi_config.infrastructure.cndi.nodes) {
-      const role = nodeIdList.length === 0 ? "leader" : "controller";
-      const user_data = getUserDataTemplateFileString(role);
-
-      const cndiInstance = new CDKTFProviderAWS.instance.Instance(
-        this,
-        `cndi_aws_instance_${node.name}`,
-        {
-          userData: user_data,
-          tags: { Name: node.name },
+    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+      this,
+      `cndi_aws_internet_gateway`,
+      {
+        tags: {
+          Name: `CNDIInternetGateway_${project_name}`,
         },
-      );
-      nodeIdList.push(cndiInstance.id);
-    }
-
+        vpcId: cndiVPC.id,
+      },
+    );
     // TODO: should this be further filtered according to instance_type avaiability?
     const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -41,20 +54,10 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const cndiVPC = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
-      cidrBlock: "10.0.0.0/16",
-      enableDnsHostnames: true,
-      enableDnsSupport: true,
-      tags: {
-        Name: `CNDIVPC_${project_name}`,
-      },
-    });
-
     const cndiPrimarySubnet = new CDKTFProviderAWS.subnet.Subnet(
       this,
       `cndi_aws_subnet`,
       {
-        count: 1,
         availabilityZone: Fn.element(availabilityZones.names, 0),
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
@@ -64,6 +67,47 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         vpcId: cndiVPC.id,
       },
     );
+
+    let leaderInstance: CDKTFProviderAWS.instance.Instance;
+
+    for (const node of cndi_config.infrastructure.cndi.nodes) {
+      let role: NodeRole = nodeIdList.length === 0 ? "leader" : "controller";
+      if (node?.role === "worker") {
+        role = "worker";
+      }
+
+      const user_data = getUserDataTemplateFileString(role);
+      const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
+      const volumeSize = node?.volume_size ||
+        node?.disk_size ||
+        node?.disk_size_gb ||
+        DEFAULT_NODE_DISK_SIZE;
+
+      const cndiInstance = new CDKTFProviderAWS.instance.Instance(
+        this,
+        `cndi_aws_instance_${node.name}`,
+        {
+          userData: user_data,
+          tags: { Name: node.name },
+          dependsOn,
+          ami: DEFAULT_EC2_AMI,
+          instanceType: node?.instance_type || DEFAULT_INSTANCE_TYPES.aws,
+          rootBlockDevice: {
+            volumeType: "gp3",
+            volumeSize,
+            deleteOnTermination: true,
+          },
+          userDataReplaceOnChange: false,
+          subnetId: cndiPrimarySubnet.id,
+        },
+      );
+      if (role === "leader") {
+        leaderInstance = cndiInstance;
+      }
+      nodeIdList.push(cndiInstance.id);
+    }
+
+    new TerraformLocal(this, "leader_node_ip", leaderInstance!.privateIp);
 
     const cndiNLB = new CDKTFProviderAWS.lb.Lb(this, `cndi_aws_lb`, {
       internal: false,

@@ -12,9 +12,7 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
     const aws_region = (Deno.env.get("AWS_REGION") as string) ||
       DEFAULT_AWS_REGION;
 
-    new TerraformLocal(this, "aws_region", {
-      aws_region,
-    });
+    new TerraformLocal(this, "aws_region", aws_region);
 
     new CDKTFProviderAWS.provider.AwsProvider(this, "aws", {
       region: aws_region,
