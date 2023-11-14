@@ -9,7 +9,7 @@ export default async function stageTerraformResourcesForAWS(
   config: CNDIConfig,
 ) {
   try {
-    synthAWSMicrok8sStack(config);
+    await synthAWSMicrok8sStack(config);
 
     // const leaderNodeName = await getLeaderNodeNameFromConfig(config);
     // const leader_node_ip =
