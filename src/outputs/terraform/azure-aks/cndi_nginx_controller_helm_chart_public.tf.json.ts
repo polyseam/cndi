@@ -6,6 +6,7 @@ export default function getNginxControllerTFJSON(): string {
     create_namespace: true,
     depends_on: [
       "module.cndi_aks_cluster",
+      "azurerm_public_ip.cndi_azurerm_public_ip_lb",
     ],
     name: "ingress-nginx-public",
     namespace: "ingress-public",
@@ -13,6 +14,10 @@ export default function getNginxControllerTFJSON(): string {
     timeout: "600",
     atomic: true,
     set: [
+      {
+        "name": "controller.service.loadBalancerIP",
+        "value": "${azurerm_public_ip.cndi_azurerm_public_ip_lb.ip_address}",
+      },
       {
         "name":
           "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
