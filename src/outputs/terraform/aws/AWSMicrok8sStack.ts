@@ -167,7 +167,11 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     }
 
     new TerraformOutput(this, "cndi_aws_lb_public_host", {
-      value: cndiNLB.dnsName,
+      value: Fn.replace(
+        cndiNLB.dnsName,
+        "${local.aws_region}",
+        Fn.upper("${local.aws_region}"),
+      ),
     });
 
     new TerraformOutput(this, "cndi_resource_group_url", {
