@@ -28,6 +28,8 @@ import getEKSIngressTcpServicesConfigMapManifest from "../outputs/custom-port-ma
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
+import getCDKTFJSON from "src/outputs/terraform/cdktf-json.ts";
+
 import {
   KubernetesManifest,
   KubernetesSecret,
@@ -135,7 +137,10 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   );
 
   await stageTerraformResourcesForConfig(config, options);
-
+  await stageFile(
+    path.join("cndi", "terraform", "cdktf.json"),
+    getCDKTFJSON(config?.project_name),
+  );
   console.log(ccolors.success("staged terraform files"));
 
   const cert_manager = config?.infrastructure?.cndi?.cert_manager;
