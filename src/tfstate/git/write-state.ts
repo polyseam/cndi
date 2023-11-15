@@ -53,7 +53,7 @@ export default async function pushStateFromRun({
     console.log(
       ccolors.key_name("--- reading terraform.tfstate from disk ---"),
     );
-    console.log(ccolors.warn(state));
+    console.log(ccolors.warn(state).substring(0, 100) + "...");
   } catch (errorReadingState) {
     console.error(
       gitWriteStateLabel,
