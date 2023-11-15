@@ -23,8 +23,11 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifest from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
-import getEKSIngressTcpServicesConfigMapManifest from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
+import getEKSIngressServiceManifestPublic from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
+import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
+
+import getEKSIngressServiceManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-service-private.ts";
+import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -169,24 +172,34 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   if (
     isNotMicrok8sCluster // currently only EKS, AKS, GKE
   ) {
-    const managedKind = kind as ManagedNodeKind;
-    const ingressService = getEKSIngressServiceManifest(
-      open_ports,
-      managedKind,
+    const managedKind = kind as ManagedNodeKind; //aks
+
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
+      getEKSIngressServiceManifestPrivate(open_ports, managedKind),
     );
-    if (ingressService) {
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service.yaml"),
-        ingressService,
-      );
-    }
+
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
+      getEKSIngressServiceManifestPublic(open_ports, managedKind),
+    );
+
     await stageFile(
       path.join(
         "cndi",
         "cluster_manifests",
-        "ingress-tcp-services-configmap.yaml",
+        "ingress-tcp-services-configmap-public.yaml",
       ),
-      getEKSIngressTcpServicesConfigMapManifest(open_ports),
+      getEKSIngressTcpServicesConfigMapManifestPublic(open_ports),
+    );
+
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "ingress-tcp-services-configmap-private.yaml",
+      ),
+      getEKSIngressTcpServicesConfigMapManifestPrivate(open_ports),
     );
   } else {
     await Promise.all([
