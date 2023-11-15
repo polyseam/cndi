@@ -179,24 +179,20 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       managedKind,
     );
 
-    if (ingressServicePrivate) {
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
-        ingressServicePrivate,
-      );
-    }
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
+      ingressServicePrivate,
+    );
 
     const ingressServicePublic = getEKSIngressServiceManifestPublic(
       open_ports,
       managedKind,
     );
 
-    if (ingressServicePublic) {
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
-        ingressServicePublic,
-      );
-    }
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
+      ingressServicePublic,
+    );
 
     await stageFile(
       path.join(
