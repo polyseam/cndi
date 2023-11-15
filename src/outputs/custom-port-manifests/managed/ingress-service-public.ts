@@ -103,7 +103,19 @@ const getIngressServiceManifest = (
 
   if (ports.length === 0) {
     // don't create service
-    return null;
+    return getYAMLString({
+      apiVersion: "v1",
+      kind: "Service",
+      metadata: {
+        "name": "ingress-nginx-controller-public",
+        "namespace": "ingress",
+        "annotations": MANAGED_ANNOTATIONS[kind],
+      },
+      spec: {
+        type: "LoadBalancer",
+        ports,
+      },
+    });
   }
 
   const manifest: IngressService = {
