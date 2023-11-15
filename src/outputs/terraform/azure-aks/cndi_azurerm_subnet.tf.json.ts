@@ -3,7 +3,7 @@ import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 export default function getAzureSubnetTFJSON(): string {
   const resource = getTFResource("azurerm_subnet", {
     address_prefixes: [
-      "${cidrsubnet(azurerm_virtual_network.cndi_azurerm_virtual_network.address_space[0], 8, 0)}",
+      "10.${random_integer.cndi_random_integer_vnet_octet1.result}.${random_integer.cndi_random_integer_vnet_octet2.result}.0/24",
     ],
     name: "cndi-subnet-${local.cndi_project_name}",
     private_endpoint_network_policies_enabled: true,
