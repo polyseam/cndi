@@ -32,5 +32,29 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
         },
       ],
     });
+
+    const query = JSON.stringify({
+      ResourceTypeFilters: ["AWS::AllSupported"],
+      TagFilters: [
+        {
+          Key: "CNDIProject",
+          Values: [`${project_name}`],
+        },
+      ],
+    });
+
+    new CDKTFProviderAWS.resourcegroupsGroup.ResourcegroupsGroup(
+      this,
+      `cndi_aws_resource_group`,
+      {
+        name: `CNDIResourceGroup_${project_name}`,
+        tags: {
+          Name: `CNDIResourceGroup_${project_name}`,
+        },
+        resourceQuery: {
+          query,
+        },
+      },
+    );
   }
 }

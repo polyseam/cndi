@@ -264,30 +264,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       value:
         "https://${upper(local.aws_region)}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${upper(local.aws_region)}",
     });
-
-    const query = JSON.stringify({
-      ResourceTypeFilters: ["AWS::AllSupported"],
-      TagFilters: [
-        {
-          Key: "CNDIProject",
-          Values: [`${project_name}`],
-        },
-      ],
-    });
-
-    new CDKTFProviderAWS.resourcegroupsGroup.ResourcegroupsGroup(
-      this,
-      `cndi_aws_resource_group`,
-      {
-        name: `CNDIResourceGroup_${project_name}`,
-        tags: {
-          Name: `CNDIResourceGroup_${project_name}`,
-        },
-        resourceQuery: {
-          query,
-        },
-      },
-    );
   }
 }
 
