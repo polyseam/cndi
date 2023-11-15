@@ -6,13 +6,10 @@ export default function getAzurePublicIpLBTFJSON(): string {
     location: "${azurerm_resource_group.cndi_azurerm_resource_group.location}",
     name: "cndi_azurerm_public_ip_lb",
     resource_group_name:
-    "${azurerm_resource_group.cndi_azurerm_resource_group.name}-resources",
+      "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
     sku: "Standard",
     zones: ["1"],
     tags: { CNDIProject: "${local.cndi_project_name}" },
-    depends_on: [
-      "module.cndi_aks_cluster",
-    ],
   }, "cndi_azurerm_public_ip_lb");
   return getPrettyJSONString(resource);
 }

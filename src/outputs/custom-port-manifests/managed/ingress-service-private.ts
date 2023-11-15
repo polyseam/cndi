@@ -21,7 +21,8 @@ const MANAGED_ANNOTATIONS: ManagedAnnotations = {
   },
   aks: {
     "service.beta.kubernetes.io/azure-load-balancer-internal": "true",
-    "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "/healthz"
+    "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
+      "/healthz",
   },
 };
 
