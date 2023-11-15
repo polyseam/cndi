@@ -16,7 +16,7 @@ export class CNDITerraformStack extends TerraformStack {
     super(scope, name);
 
     new LocalBackend(this, {
-      path: "./stacks/cndi_stack/terraform.tfstate",
+      path: "${path.module}/terraform.tfstate",
     });
 
     const cndi_project_name = cndi_config.project_name!;
