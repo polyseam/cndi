@@ -45,6 +45,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         vpcId: cndiVPC.id,
       },
     );
+
     // TODO: should this be further filtered according to instance_type avaiability?
     const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -68,6 +69,35 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         vpcId: cndiVPC.id,
       },
     );
+
+    const routeTable = new CDKTFProviderAWS.routeTable.RouteTable(
+      this,
+      `cndi_aws_route_table`,
+      {
+        tags: {
+          Name: `CNDIRouteTable_${project_name}`,
+        },
+        vpcId: cndiVPC.id,
+      },
+    );
+
+    const _routeTableAssociation = new CDKTFProviderAWS.routeTableAssociation
+      .RouteTableAssociation(
+      this,
+      "cndi_aws_route_table_association",
+      {
+        count: 1,
+        routeTableId: routeTable.id,
+        subnetId: cndiPrimarySubnet.id,
+      },
+    );
+
+    const _route = new CDKTFProviderAWS.route.Route(this, `cndi_aws_route`, {
+      dependsOn: [routeTable],
+      routeTableId: routeTable.id,
+      destinationCidrBlock: "0.0.0.0/0",
+      gatewayId: igw.id,
+    });
 
     const securityGroupIngresses = [
       {
