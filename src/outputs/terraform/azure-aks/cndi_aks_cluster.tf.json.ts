@@ -6,7 +6,7 @@ export default function getAzureAKSTFJSON(
   node: AzureAKSNodeItemSpec,
 ): string {
   const max_size = node?.agents_max_count || 1;
-  const min_size = node?.agents_min_count || 1;
+  const min_size = node?.agents_min_count || 0;
   const desired_size = min_size;
 
   let machine_type = node?.machine_type || node?.instance_type ||
@@ -40,7 +40,7 @@ export default function getAzureAKSTFJSON(
       agents_min_count: desired_size,
       agents_max_count: max_size,
       agents_size: machine_type,
-      agents_max_pods: 100,
+      agents_max_pods: null,
       agents_tags,
       agents_pool_name: "np",
       agents_availability_zones: ["1"],
