@@ -40,10 +40,10 @@ export default function getAzureAKSTFJSON(
       agents_min_count: desired_size,
       agents_max_count: max_size,
       agents_size: machine_type,
-      agents_max_pods: null,
+      agents_max_pods: 100,
       agents_tags,
-      agents_pool_name: "np",
-      agents_availability_zones: ["1"],
+      agents_pool_name: "nodepool",
+      agents_availability_zones: ["1", "2"],
       agents_count: null,
       cluster_name: "${local.cndi_project_name}",
       resource_group_name:
