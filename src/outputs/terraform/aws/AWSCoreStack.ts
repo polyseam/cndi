@@ -1,9 +1,4 @@
-import {
-  CDKTFProviderAWS,
-  Construct,
-  LocalBackend,
-  TerraformLocal,
-} from "deps";
+import { CDKTFProviderAWS, Construct, TerraformLocal } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
@@ -19,10 +14,6 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
       DEFAULT_AWS_REGION;
 
     this.aws_region_local = new TerraformLocal(this, "aws_region", aws_region);
-
-    new LocalBackend(this, {
-      path: "./terraform.tfstate",
-    });
 
     new CDKTFProviderAWS.provider.AwsProvider(this, "aws", {
       region: this.aws_region_local.asString,

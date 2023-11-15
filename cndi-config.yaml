@@ -3,7 +3,15 @@ project_name: my-cndi-project
 deployment_target_provider: aws
 deployment_target_distribution: microk8s
 infrastructure:
+  terraform:
+    resource:
+      some_type:
+        cndi_some_type:
+          name: my-cndi-some-type
+          some_property: some_value
   cndi:
+   
+      
     open_ports:
       - number: 1433
         name: mssql
