@@ -2,6 +2,7 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 interface GetAzureLocalsTFJSONArg {
   azure_location: string;
+  random_multiple_of_16: number;
 }
 
 export default function getAzureLocalsTFJSON({
@@ -11,7 +12,7 @@ export default function getAzureLocalsTFJSON({
     locals: {
       azure_location,
       random_multiple_of_16:
-        "${random_integer.cndi_random_integer_vnet_octet2.result}*16",
+        "${random_integer.cndi_random_integer_vnet_octet3.result*16}",
     },
   });
 }
