@@ -102,6 +102,7 @@ export { Construct } from "npm:constructs";
 export {
   App,
   Fn,
+  LocalBackend,
   TerraformLocal,
   TerraformOutput,
   TerraformStack,
