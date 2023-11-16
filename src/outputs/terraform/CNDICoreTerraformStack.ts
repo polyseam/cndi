@@ -1,6 +1,5 @@
 import {
   Construct,
-  LocalBackend,
   RandomPassword,
   RandomProvider,
   TerraformLocal,
@@ -14,10 +13,6 @@ import { CNDIConfig } from "src/types.ts";
 export class CNDITerraformStack extends TerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name);
-
-    new LocalBackend(this, {
-      path: "${path.module}/terraform.tfstate",
-    });
 
     const cndi_project_name = cndi_config.project_name!;
     new TerraformLocal(this, "cndi_project_name", cndi_project_name);
