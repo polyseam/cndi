@@ -446,7 +446,10 @@ async function stageCDKTFStack(app: App) {
   for (const entry of synthFiles) {
     const destinationAbsPath = entry.path.replace(synthDir, tfHome);
     if (entry.path.endsWith("cdk.tf.json")) {
-      const jsonStr = await Deno.readTextFile(entry.path);
+      let jsonStr = await Deno.readTextFile(entry.path);
+      const cdktfObj = JSON.parse(jsonStr);
+      delete cdktfObj.terraform.backend;
+      jsonStr = getPrettyJSONString(cdktfObj);
       Deno.writeTextFileSync(
         destinationAbsPath,
         jsonStr.replaceAll("_cndi_stack_", "."),

@@ -1,6 +1,5 @@
 import {
   Construct,
-  LocalBackend,
   RandomPassword,
   RandomProvider,
   TerraformLocal,
@@ -16,10 +15,6 @@ export class CNDITerraformStack extends TerraformStack {
     super(scope, name);
 
     const cndi_project_name = cndi_config.project_name!;
-
-    new LocalBackend(this, {
-      path: "./terraform.tfstate",
-    });
 
     new TerraformLocal(this, "cndi_project_name", cndi_project_name);
 
