@@ -6,12 +6,14 @@ import {
   TerraformLocal,
   TerraformOutput,
 } from "deps";
+
 import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
 
 import {
   getCDKTFAppConfig,
   getUserDataTemplateFileString,
   resolveCNDIPorts,
+  stageCDKTFStack,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
@@ -270,6 +272,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 export async function synth(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
-  new AWSMicrok8sStack(app, `cndi_stack`, cndi_config);
-  app.synth();
+  new AWSMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+  await stageCDKTFStack(app);
 }

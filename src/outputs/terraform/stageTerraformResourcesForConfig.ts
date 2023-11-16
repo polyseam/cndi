@@ -84,8 +84,6 @@ export default async function stageTerraformResourcesForConfig(
       path.join(
         "cndi",
         "terraform",
-        "stacks",
-        "cndi_stack",
         "microk8s-cloud-init-leader.yml.tftpl",
       ),
       microk8sCloudInitLeaderTerraformTemplate(config, {
@@ -97,8 +95,6 @@ export default async function stageTerraformResourcesForConfig(
       path.join(
         "cndi",
         "terraform",
-        "stacks",
-        "cndi_stack",
         "microk8s-cloud-init-controller.yml.tftpl",
       ),
       microk8sCloudInitFollowerTerraformTemplate(config),
@@ -108,8 +104,6 @@ export default async function stageTerraformResourcesForConfig(
       path.join(
         "cndi",
         "terraform",
-        "stacks",
-        "cndi_stack",
         "microk8s-cloud-init-worker.yml.tftpl",
       ),
       microk8sCloudInitFollowerTerraformTemplate(config, { isWorker: true }),

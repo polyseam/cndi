@@ -1,4 +1,5 @@
 import {
+  App,
   ccolors,
   deepMerge,
   exists,
@@ -20,6 +21,7 @@ import {
 } from "src/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+import { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");
 
@@ -434,6 +436,28 @@ type CDKTFAppConfig = {
   outdir: string;
 };
 
+async function stageCDKTFStack(app: App) {
+  app.synth();
+  const stagingDirectory = await getStagingDir();
+  const tfHome = path.join(stagingDirectory, "cndi", "terraform");
+  const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
+  Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli
+  const synthFiles = walkSync(synthDir, { includeDirs: false });
+  for (const entry of synthFiles) {
+    const destinationAbsPath = entry.path.replace(synthDir, tfHome);
+    if (entry.path.endsWith("cdk.tf.json")) {
+      const jsonStr = await Deno.readTextFile(entry.path);
+      Deno.writeTextFileSync(
+        destinationAbsPath,
+        jsonStr.replaceAll("_cndi_stack_", "."),
+      );
+      Deno.removeSync(entry.path);
+      continue;
+    }
+    Deno.renameSync(entry.path, destinationAbsPath);
+  }
+}
+
 async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
   const stagingDirectory = await getStagingDir();
   const outdir = path.join(stagingDirectory, "cndi", "terraform");
@@ -607,8 +631,7 @@ function getSecretOfLength(len = 32): string {
 
 function useSshRepoAuth(): boolean {
   return (
-    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
-    !Deno.env.get("GIT_TOKEN")
+    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length && !Deno.env.get("GIT_TOKEN")
   );
 }
 
@@ -658,6 +681,7 @@ export {
   replaceRange,
   resolveCNDIPorts,
   sha256Digest,
+  stageCDKTFStack,
   stageFile,
   useSshRepoAuth,
 };

@@ -64,8 +64,6 @@ const terraformCommand = new Command()
       options.path,
       "cndi",
       "terraform",
-      "stacks",
-      "cndi_stack",
     );
 
     const cmd = `cndi terraform ${args.join(" ")}`;

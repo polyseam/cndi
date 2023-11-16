@@ -69,8 +69,6 @@ const destroyCommand = new Command()
       options.path,
       "cndi",
       "terraform",
-      "stacks",
-      "cndi_stack",
     );
 
     const pathToTerraformBinary = getPathToTerraformBinary();
