@@ -88,6 +88,7 @@ export default async function stageTerraformResourcesForConfig(
       ),
       microk8sCloudInitLeaderTerraformTemplate(config, {
         useSshRepoAuth: useSshRepoAuth(),
+        useClusterHA: config.infrastructure.cndi.nodes.length > 2,
       }),
     ),
     // this file may be extra
