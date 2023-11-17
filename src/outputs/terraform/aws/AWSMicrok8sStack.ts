@@ -103,7 +103,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 
     const securityGroupIngresses = [
       {
-        cidrBlocks: ["0.0.0.0/16"],
+        cidrBlocks: ["10.0.0.0/16"],
         description:
           "Inbound rule that enables traffic between EC2 instances in the VPC ",
         fromPort: 0,
