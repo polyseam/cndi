@@ -28,7 +28,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const nodeIdList: string[] = [];
     const project_name = cndi_config.project_name!;
 
-    const cndiVPC = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
+    const vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
       cidrBlock: "10.0.0.0/16",
       enableDnsHostnames: true,
       enableDnsSupport: true,
@@ -44,7 +44,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         tags: {
           Name: `CNDIInternetGateway_${project_name}`,
         },
-        vpcId: cndiVPC.id,
+        vpcId: vpc.id,
       },
     );
 
@@ -68,7 +68,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         tags: {
           Name: `CNDIPrimarySubnet_${project_name}`,
         },
-        vpcId: cndiVPC.id,
+        vpcId: vpc.id,
       },
     );
 
@@ -79,7 +79,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         tags: {
           Name: `CNDIRouteTable_${project_name}`,
         },
-        vpcId: cndiVPC.id,
+        vpcId: vpc.id,
       },
     );
 
@@ -135,7 +135,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       `cndi_aws_security_group`,
       {
         description: "Security firewall",
-        vpcId: cndiVPC.id,
+        vpcId: vpc.id,
         ingress: securityGroupIngresses,
         egress: [
           {
@@ -216,7 +216,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           tags: {
             Name: `CNDILBTargetGroupForPort-${port.name}_${project_name}`,
           },
-          vpcId: cndiVPC.id,
+          vpcId: vpc.id,
         },
       );
 
@@ -257,8 +257,8 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     new TerraformOutput(this, "cndi_aws_lb_public_host", {
       value: Fn.replace(
         cndiNLB.dnsName,
-        this.aws_region_local.asString,
-        Fn.upper(this.aws_region_local.asString),
+        this.locals.aws_region.asString,
+        Fn.upper(this.locals.aws_region.asString),
       ),
     });
 
@@ -269,7 +269,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
   }
 }
 
-export async function synth(cndi_config: CNDIConfig) {
+export async function stageTerraformSynthAWSMicrok8s(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AWSMicrok8sStack(app, `_cndi_stack_`, cndi_config);

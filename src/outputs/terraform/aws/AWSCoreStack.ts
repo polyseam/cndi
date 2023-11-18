@@ -6,17 +6,17 @@ const DEFAULT_AWS_REGION = "us-east-1";
 const CNDI_MAJOR_VERSION = "v2";
 
 export default class AWSCoreTerraformStack extends CNDITerraformStack {
-  aws_region_local: TerraformLocal;
+  locals: Record<string, TerraformLocal> = {};
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
     const { project_name } = cndi_config;
     const aws_region = (Deno.env.get("AWS_REGION") as string) ||
       DEFAULT_AWS_REGION;
 
-    this.aws_region_local = new TerraformLocal(this, "aws_region", aws_region);
+    this.locals.aws_region = new TerraformLocal(this, "aws_region", aws_region);
 
     new CDKTFProviderAWS.provider.AwsProvider(this, "aws", {
-      region: this.aws_region_local.asString,
+      region: this.locals.aws_region.asString,
       defaultTags: [
         {
           tags: { CNDIVersion: CNDI_MAJOR_VERSION, CNDIProject: project_name! },

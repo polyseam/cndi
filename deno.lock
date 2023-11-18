@@ -3,7 +3,12 @@
   "packages": {
     "specifiers": {
       "npm:@cdktf/provider-aws": "npm:@cdktf/provider-aws@12.0.11_cdktf@0.15.5__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-helm": "npm:@cdktf/provider-helm@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-null": "npm:@cdktf/provider-null@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-random": "npm:@cdktf/provider-random@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-time": "npm:@cdktf/provider-time@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-tls": "npm:@cdktf/provider-tls@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@types/node": "npm:@types/node@18.16.16",
       "npm:cdktf": "npm:cdktf@0.19.0_constructs@10.3.0",
       "npm:constructs": "npm:constructs@10.3.0",
@@ -22,8 +27,43 @@
           "constructs": "constructs@10.3.0"
         }
       },
+      "@cdktf/provider-helm@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-o9LRnBfSt7BO9InCoUMKUuarfDL+SpGtYJ3ktn+sL2l44NFmat0rrMG5leTwEcfBv+3Qt1M7lsjs6lY2hn8vRg==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
+      "@cdktf/provider-kubernetes@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-72dI4zXTQXhPhWxZFEYpMs8oOyHld0KnM/h5HKuS7d8VFDOcBh14Lut65LCSNyg2ky4vU+smFD/B++1fhzYyUw==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
+      "@cdktf/provider-null@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-5osel2UvwtB2RaOHECFvane43E4RbhOLzhrRUGJjoPCpb2E7LT8vrq4r9nA098BQvxGHPWtE+YR5OsvWUH5ouA==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
       "@cdktf/provider-random@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
         "integrity": "sha512-MTOq2+zvmNEbT0v1vpUfGHXxeL1Up7i8IkxjHuVeGPXpXJ+42WzASxTcaO6597IYwTnvpyv6gbTsPQMFHMex2A==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
+      "@cdktf/provider-time@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-vYZZ+M6IuIlz0+s+AuKnySkQCesLWF0ScNPDvsY4+qQYDcII4jqwlskgCyUurz+cSmvL0f33fS1mUrNdSnh1Gw==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
+      "@cdktf/provider-tls@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-n8l26xR+iskFyPAtuPbA6TTd6ryQiVxvQJByU9RTaJy+PWkgCEDLPl4uy47sGtXxcXo+BFXuLseWYbc9WN7qyw==",
         "dependencies": {
           "cdktf": "cdktf@0.19.0_constructs@10.3.0",
           "constructs": "constructs@10.3.0"

@@ -5,8 +5,8 @@ import {
   stageFile,
   useSshRepoAuth,
 } from "src/utils.ts";
-import stageTerraformResourcesForAWSEC2 from "src/outputs/terraform/aws-ec2/stageAll.ts";
-import stageTerraformResourcesForAWSEKS from "src/outputs/terraform/aws-eks/stageAll.ts";
+import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
+import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
 import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
@@ -29,17 +29,10 @@ export default async function stageTerraformResourcesForConfig(
 
   switch (label) {
     case "aws/microk8s":
-      // console.log(
-      //   ccolors.key_name('"kind"'),
-      //   ccolors.warn("is"),
-      //   ccolors.user_input('"aws"'),
-      //   ccolors.warn("defaulting to"),
-      //   ccolors.key_name('"ec2"'),
-      // );
-      await stageTerraformResourcesForAWSEC2(config);
+      await stageTerraformSynthAWSMicrok8s(config);
       break;
     case "aws/eks":
-      await stageTerraformResourcesForAWSEKS(config);
+      await stageTerraformSynthAWSEKS(config);
       break;
     case "gcp/gke":
       await stageTerraformResourcesForGCPGKE(config, options);
@@ -81,11 +74,7 @@ export default async function stageTerraformResourcesForConfig(
 
     // write tftpl terraform template for the user_data bootstrap script
     stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        "microk8s-cloud-init-leader.yml.tftpl",
-      ),
+      path.join("cndi", "terraform", "microk8s-cloud-init-leader.yml.tftpl"),
       microk8sCloudInitLeaderTerraformTemplate(config, {
         useSshRepoAuth: useSshRepoAuth(),
         useClusterHA: config.infrastructure.cndi.nodes.length > 2,
@@ -102,11 +91,7 @@ export default async function stageTerraformResourcesForConfig(
     ),
     // this file may be extra
     stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        "microk8s-cloud-init-worker.yml.tftpl",
-      ),
+      path.join("cndi", "terraform", "microk8s-cloud-init-worker.yml.tftpl"),
       microk8sCloudInitFollowerTerraformTemplate(config, { isWorker: true }),
     ),
   ]);
