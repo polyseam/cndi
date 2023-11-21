@@ -133,7 +133,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.3.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: "PrivateSubnetA",
+          Name: `CNDIPrivateSubnetA_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -205,23 +205,36 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const computePolicy = new CDKTFProviderAWS.dataAwsIamPolicyDocument
+      .DataAwsIamPolicyDocument(
+      this,
+      "cndi_aws_iam_policy_document_eks_ec2",
+      {
+        statement: [
+          {
+            actions: ["sts:AssumeRole"],
+            effect: "Allow",
+            principals: [
+              {
+                identifiers: ["eks.amazonaws.com"],
+                type: "Service",
+              },
+              {
+                identifiers: ["ec2.amazonaws.com"],
+                type: "Service",
+              },
+            ],
+          },
+        ],
+      },
+    );
+
     const computeRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
       "cndi_aws_iam_role_eks_ec2",
       {
         namePrefix: "EC2EKS",
-        assumeRolePolicy: JSON.stringify({
-          Version: "2012-10-17",
-          Statement: [
-            {
-              Action: "sts:AssumeRole",
-              Effect: "Allow", // TODO: this is no longer in any v2 tf objects
-              Principal: {
-                Service: ["ec2.amazonaws.com", "eks.amazonaws.com"],
-              },
-            },
-          ],
-        }),
+        assumeRolePolicy: computePolicy.json,
       },
     );
 
@@ -280,8 +293,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const clusterPolicyAttahchment = new CDKTFProviderAWS
-      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+    const clusterPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
       this,
       "cndi_aws_iam_role_policy_attachment_eks_cluster_policy",
       {
@@ -364,7 +377,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           Name: "EKSClusterControlPlane",
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
-        dependsOn: [clusterPolicyAttahchment, servicePolicyAttachment],
+        dependsOn: [clusterPolicyAttachment, servicePolicyAttachment],
       },
     );
 
