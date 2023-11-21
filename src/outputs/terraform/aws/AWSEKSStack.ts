@@ -61,6 +61,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       dependsOn: [igw],
     });
 
+    new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
+      this,
+      "cndi_aws_caller_identity",
+      {},
+    );
+
     // TODO: should this be further filtered according to instance_type avaiability?
     const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -350,6 +356,33 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         policyArn: "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
         role: computeRole.name,
+      },
+    );
+
+    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+      this,
+      "cndi_aws_route_table_association_private_a",
+      {
+        routeTableId: privateRouteTable.id,
+        subnetId: subnetPrivateA.id,
+      },
+    );
+
+    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+      this,
+      "cndi_aws_route_table_association_private_b",
+      {
+        routeTableId: privateRouteTable.id,
+        subnetId: subnetPrivateB.id,
+      },
+    );
+
+    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+      this,
+      "cndi_aws_route_table_association_public_a",
+      {
+        routeTableId: publicRouteTable.id,
+        subnetId: subnetPublicA.id,
       },
     );
 
@@ -733,6 +766,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         "cndi_argocd_private_repo_secret",
         {
+          dependsOn: [helmReleaseArgoCD],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
@@ -754,6 +788,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         "cndi_argocd_private_repo_secret",
         {
+          dependsOn: [helmReleaseArgoCD],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
