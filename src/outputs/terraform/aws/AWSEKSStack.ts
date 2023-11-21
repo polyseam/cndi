@@ -730,7 +730,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const argocdAdminPasswordHashed = Fn.bcrypt(
       this.variables.argocd_admin_password.value,
       10,
-    );
+    ); // TODO: does this re-evalulate every run??
 
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
@@ -753,8 +753,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         },
         data: {
           // TODO: investigate high chance of this being broken!
-          "admin.password": Fn.base64encode(argocdAdminPasswordHashed),
-          "admin.passwordMtime": Fn.base64encode(argocdAdminPasswordMtime.id), // this is not exactly what existed before
+          "admin.password": argocdAdminPasswordHashed,
+          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
         },
       },
     );
@@ -776,10 +776,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
           data: {
             type: "git",
-            url: Fn.base64encode(this.variables.git_repo.value),
-            sshPrivateKey: Fn.base64encode(
-              this.variables.git_ssh_private_key.value,
-            ),
+            url: this.variables.git_repo.value,
+            sshPrivateKey: this.variables.git_ssh_private_key.value,
           },
         },
       );
@@ -798,9 +796,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
           data: {
             type: "git",
-            password: Fn.base64encode(this.variables.git_token.value), // this makes a reasonable case we should call it git_password as before
-            username: Fn.base64encode(this.variables.git_username.value),
-            url: Fn.base64encode(this.variables.git_repo.value),
+            password: this.variables.git_token.value, // this makes a reasonable case we should call it git_password as before
+            username: this.variables.git_username.value,
+            url: this.variables.git_repo.value,
           },
         },
       );
@@ -818,13 +816,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             "sealedsecrets.bitnami.com/sealed-secrets-key": "active",
           },
         },
+
         data: {
-          "tls.crt": Fn.base64encode(
-            this.variables.sealed_secrets_public_key.value,
-          ),
-          "tls.key": Fn.base64encode(
-            this.variables.sealed_secrets_private_key.value,
-          ),
+          "tls.crt": this.variables.sealed_secrets_public_key.value,
+          "tls.key": this.variables.sealed_secrets_private_key.value,
         },
       },
     );
@@ -839,6 +834,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
         version: "2.12.0",
+        timeout: 300,
+        atomic: true,
       },
     );
 
