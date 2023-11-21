@@ -14,6 +14,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getPrettyJSONString,
   resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
@@ -67,26 +68,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "available-zones",
       {
         state: "available",
-      },
-    );
-
-    const computePolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
-      this,
-      "cndi_aws_iam_policy_eks_ec2",
-      {
-        namePrefix: "EC2EKS",
-        policy: JSON.stringify({
-          Version: "2012-10-17",
-          Statement: [
-            {
-              Action: "sts:AssumeRole",
-              Effect: "Allow",
-              Principal: {
-                Service: ["ec2.amazonaws.com", "eks.amazonaws.com"],
-              },
-            },
-          ],
-        }),
       },
     );
 
@@ -229,7 +210,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_iam_role_eks_ec2",
       {
         namePrefix: "EC2EKS",
-        assumeRolePolicy: computePolicy.policy,
+        assumeRolePolicy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Action: "sts:AssumeRole",
+              Effect: "Allow", // TODO: this is no longer in any v2 tf objects
+              Principal: {
+                Service: ["ec2.amazonaws.com", "eks.amazonaws.com"],
+              },
+            },
+          ],
+        }),
       },
     );
 
@@ -241,7 +233,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         dependsOn: [igw],
         subnetId: subnetPublicA.id,
         tags: {
-          Name: "NATGateway",
+          Name: `NATGateway_${project_name}`,
         },
       },
     );
@@ -426,22 +418,23 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_iam_role_web_identity_policy",
       {
         namePrefix: "WEBIDR",
+        description: "IAM role for web identity",
         dependsOn: [iamOpenIdConnectProvider],
         assumeRolePolicy: JSON.stringify({
-          depends_on: [
-            "aws_iam_openid_connect_provider.cndi_aws_iam_openid_connect_provider",
-          ],
-          statement: [
+          Version: "2012-10-17",
+          Statement: [
             {
-              actions: ["sts:AssumeRoleWithWebIdentity"],
-              condition: [
-                {
-                  test: "StringEquals",
-                  values: [
-                    "system:serviceaccount:kube-system:efs-csi-controller-sa",
-                    "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-                  ],
-                  variable: `${
+              Action: ["sts:AssumeRoleWithWebIdentity"],
+              Condition: {
+                StringEquals: {
+                  "system:serviceaccount:kube-system:efs-csi-controller-sa": `${
+                    Fn.replace(
+                      iamOpenIdConnectProvider.url,
+                      "https://",
+                      "",
+                    )
+                  }:sub`,
+                  "system:serviceaccount:kube-system:ebs-csi-controller-sa": `${
                     Fn.replace(
                       iamOpenIdConnectProvider.url,
                       "https://",
@@ -449,14 +442,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
                     )
                   }:sub`,
                 },
-              ],
-              effect: "Allow",
-              principals: [
-                {
-                  identifiers: [iamOpenIdConnectProvider.arn],
-                  type: "Federated",
-                },
-              ],
+              },
+              Effect: "Allow",
+              Principal: {
+                Federated: iamOpenIdConnectProvider.arn,
+              },
             },
           ],
         }),
@@ -468,10 +458,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_iam_policy_web_identity",
       {
         namePrefix: "WEBIDP",
-        policy: JSON.stringify({
-          statement: [
+        policy: getPrettyJSONString({
+          Version: "2012-10-17",
+          Statement: [
             {
-              actions: [
+              Action: [
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeLaunchConfigurations",
@@ -495,44 +486,38 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
                 "elasticfilesystem:DescribeMountTargets",
                 "ec2:DescribeAvailabilityZones",
               ],
-              effect: "Allow",
-              resources: ["*"],
+              Effect: "Allow",
+              Resource: ["*"],
             },
             {
-              actions: ["elasticfilesystem:CreateAccessPoint"],
-              condition: [
-                {
-                  test: "StringLike",
-                  values: ["true"],
-                  variable: "aws:RequestTag/efs.csi.aws.com/cluster",
+              Action: ["elasticfilesystem:CreateAccessPoint"],
+              Condition: {
+                StringLike: {
+                  "aws:RequestTag/efs.csi.aws.com/cluster": "true",
                 },
-              ],
-              effect: "Allow",
-              resources: ["*"],
+              },
+              Effect: "Allow",
+              Resource: ["*"],
             },
             {
-              actions: ["elasticfilesystem:TagResource"],
-              condition: [
-                {
-                  test: "StringLike",
-                  values: ["true"],
-                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
+              Action: ["elasticfilesystem:TagResource"],
+              Condition: {
+                StringLike: {
+                  "aws:ResourceTag/efs.csi.aws.com/cluster": "true",
                 },
-              ],
-              effect: "Allow",
-              resources: ["*"],
+              },
+              Effect: "Allow",
+              Resource: ["*"],
             },
             {
-              actions: ["elasticfilesystem:DeleteAccessPoint"],
-              condition: [
-                {
-                  test: "StringEquals",
-                  values: ["true"],
-                  variable: "aws:ResourceTag/efs.csi.aws.com/cluster",
+              Action: ["elasticfilesystem:DeleteAccessPoint"],
+              Condition: {
+                StringEquals: {
+                  "aws:RequestTag/efs.csi.aws.com/cluster": "true",
                 },
-              ],
-              effect: "Allow",
-              resources: ["*"],
+              },
+              Effect: "Allow",
+              Resource: ["*"],
             },
           ],
         }),
