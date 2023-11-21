@@ -31,22 +31,22 @@ interface IngressService {
   };
   spec: {
     type: "LoadBalancer";
-    ports: Array<ServicePort>;
+    ports?: Array<ServicePort>;
   };
 }
 
 const default_ports: Array<ServicePort> = [
   {
-    "name": "http",
-    "port": 80,
-    "targetPort": 80,
-    "protocol": "TCP",
+    name: "http",
+    port: 80,
+    targetPort: 80,
+    protocol: "TCP",
   },
   {
-    "name": "https",
-    "port": 443,
-    "targetPort": 443,
-    "protocol": "TCP",
+    name: "https",
+    port: 443,
+    targetPort: 443,
+    protocol: "TCP",
   },
 ];
 
@@ -60,7 +60,7 @@ type ServicePort = {
 const getIngressServiceManifest = (
   user_ports: Array<CNDIPort>,
   kind: ManagedNodeKind,
-): string | null => {
+): string => {
   const ports: Array<ServicePort> = [...default_ports];
 
   user_ports.forEach((port) => {
@@ -82,8 +82,8 @@ const getIngressServiceManifest = (
     }
 
     if (disable) {
-      const portToRemove = ports.findIndex((item) =>
-        (item.port === port.number) || (item.name === port.name)
+      const portToRemove = ports.findIndex(
+        (item) => item.port === port.number || item.name === port.name,
       );
       if (portToRemove > -1) {
         ports.splice(portToRemove, 1);
@@ -98,11 +98,6 @@ const getIngressServiceManifest = (
     }
   });
 
-  if (ports.length === 0) {
-    // don't create service
-    return null;
-  }
-
   const manifest: IngressService = {
     apiVersion: "v1",
     kind: "Service",
@@ -113,9 +108,12 @@ const getIngressServiceManifest = (
     },
     spec: {
       type: "LoadBalancer",
-      ports,
     },
   };
+
+  if (ports.length > 0) {
+    manifest.spec.ports = ports;
+  }
 
   return getYAMLString(manifest);
 };

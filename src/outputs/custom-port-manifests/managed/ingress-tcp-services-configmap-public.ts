@@ -33,7 +33,7 @@ const getIngressTcpServicesConfigMapManifest = (
   };
 
   ports.forEach((port) => {
-    if (port.private) {
+    if (port?.private) {
       // port is private, don't add it to the public configmap
       return;
     }

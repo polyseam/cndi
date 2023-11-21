@@ -36,7 +36,7 @@ interface IngressService {
   };
   spec: {
     type: "LoadBalancer";
-    ports: Array<ServicePort>;
+    ports?: Array<ServicePort>;
   };
 }
 
@@ -65,12 +65,12 @@ type ServicePort = {
 const getIngressServiceManifest = (
   user_ports: Array<CNDIPort>,
   kind: ManagedNodeKind,
-): string | null => {
+): string => {
   const ports: Array<ServicePort> = [...default_ports];
 
   user_ports.forEach((port) => {
     if (!port?.private) {
-      // port is not private, don't add it to the private configmap
+      // port is not private, don't add it to the private service
       return;
     }
     const { number, name, disable } = port;
@@ -103,11 +103,6 @@ const getIngressServiceManifest = (
     }
   });
 
-  if (ports.length === 0) {
-    // don't create service
-    return null;
-  }
-
   const manifest: IngressService = {
     apiVersion: "v1",
     kind: "Service",
@@ -118,9 +113,12 @@ const getIngressServiceManifest = (
     },
     spec: {
       type: "LoadBalancer",
-      ports,
     },
   };
+
+  if (ports.length > 0) {
+    manifest.spec.ports = ports;
+  }
 
   return getYAMLString(manifest);
 };
