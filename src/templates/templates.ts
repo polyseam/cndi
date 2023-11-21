@@ -115,6 +115,7 @@ interface TemplateResult {
   cndi_config: string;
   env: string;
   readme: string;
+  responses: Record<string, CNDITemplatePromptResponsePrimitive>;
 }
 
 interface TemplateObject {
@@ -988,5 +989,6 @@ export async function useTemplate(
     cndi_config,
     env,
     readme,
+    responses,
   };
 }

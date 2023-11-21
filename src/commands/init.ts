@@ -104,6 +104,7 @@ const initCommand = new Command()
     "-l, --deployment-target-label <deployment_target_label:string>",
     "Specify a deployment target",
   )
+  .option("-k, --keep", "Keep responses in response.yaml")
   .action(async (options) => {
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
@@ -294,6 +295,12 @@ const initCommand = new Command()
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
+      if (options.keep) {
+        await stageFile(
+          "responses.yaml",
+          YAML.stringify(templateResult.responses),
+        );
+      }
     } else {
       // uhh not sure bout dis
       readme = `# ${project_name}\n`;
