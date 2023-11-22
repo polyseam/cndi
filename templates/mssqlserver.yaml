@@ -47,6 +47,46 @@ prompts:
       - ==
       - true
 
+  - name: add_windows_login
+    default: false
+    message: >-
+      Do you want to add windows auth login?
+    type: Confirm
+
+  - name: windows_dns_url
+    default: mycompany-dc.mycompany.com
+    message: >-
+      What is the url of the domain controller?
+    type: input
+    validators:
+      - hostname # FQDN
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
+  - name: windows_dns_ip
+    default: 0.0.0.0
+    message: >-
+      What is the IP of the domain controller?
+    type: input
+    validators:
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
+  - name: windows_privilegedadaccount
+    default: superuser
+    message: >-
+      What is the username of the privilegedadaccount?
+    type: input
+    validators:
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
 outputs:
   cndi_config:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
@@ -72,7 +112,6 @@ outputs:
         type: Opaque
         stringData:
           MSSQL_SA_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(MSSQL_SA_PASSWORD)
-1
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -100,189 +139,57 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_mssql_ingress) }}"
             - ==
             - true
-      mssql:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: mssql
 
-      mssql-service:
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: mssql-0
+    applications: 
+      mssql:
+        targetRevision: 0.1.7
+        destinationNamespace: mssql
+        repoURL: https://polyseam.github.io/mssql2019-chart
+        chart: mssql
+        values:
+          name: mssql
           namespace: mssql
-        spec:
-          selector:
-            statefulset.kubernetes.io/pod-name: mssql-0
-          ports:
-            - protocol: TCP
+          appLabel: mssql
+          replicas: 1
+          securityContext:
+            fsGroup: 10001
+          container:
+            name: mssql
+            image: "mcr.microsoft.com/mssql/server:2019-latest"
+          saPasswordSecret: mssql-sa-secret
+          service:
+            name: mssql-0
+            namespace: mssql
+            selector:
+              podName: mssql-0
+            ports:
               port: 1433
               targetPort: 1433
-
-      selfsigned-issuer:
-        apiVersion: cert-manager.io/v1
-        kind: ClusterIssuer
-        metadata:
-          name: selfsigned-issuer
-        spec:
-          selfSigned: {}
-
-      mssql-certs:
-        apiVersion: cert-manager.io/v1
-        kind: Certificate
-        metadata:
-          name: mssql-certs
-          namespace: mssql
-        spec:
-          secretName: mssql-certs-secret
-          duration: 2160h
-          renewBefore: 360h
-          issuerRef:
-            name: selfsigned-issuer
-            kind: ClusterIssuer
-          commonName: "{{ $cndi.get_prompt_response(mssql_hostname) }}"
-          dnsNames:
-            - "{{ $cndi.get_prompt_response(mssql_hostname) }}"
-            - mssql-0.mssql.svc.cluster.local
-          privateKey:
-            algorithm: RSA
-            encoding: PKCS1
-            size: 2048
-
-      mssql-configmap:
-        kind: ConfigMap
-        apiVersion: v1
-        metadata:
-          name: mssql
-          namespace: mssql
-        data:
-          mssql.conf: |
-            [EULA]
-            accepteula = Y
-            accepteulaml = Y
-
-            [coredump]
-            captureminiandfull = true
-            coredumptype = full
-
-            [hadr]
-            hadrenabled = 1
-
-            [language]
-            lcid = 1033
-
-            [network]
-            tlscert = /var/opt/mssql/sslcert/tls.crt
-            tlskey = /var/opt/mssql/sslcert/tls.key
-            tlsprotocols = 1.2
-            forceencryption = 0
-
-      mssql-statefulset:
-        apiVersion: apps/v1
-        kind: StatefulSet
-        metadata:
-          name: mssql
-          namespace: mssql
-          labels:
-            app: mssql
-        spec:
-          serviceName: mssql
-          replicas: 1
-          selector:
-            matchLabels:
-              app: mssql
-          template:
-            metadata:
-              labels:
-                app: mssql
-            spec:
-              securityContext:
-                fsGroup: 10001
-              containers:
-                - name: mssql
-                  command:
-                    - /bin/bash
-                    - -c
-                  image: "mcr.microsoft.com/mssql/server:2019-latest"
-                  args:
-                    - |
-                      mkdir -p /var/opt/mssql/sslcert &&
-                      chown mssql /var/opt/mssql/sslcert &&
-                      chmod 700 /var/opt/mssql/sslcert &&
-                      cp /mnt/mssql-certs/tls.crt /var/opt/mssql/sslcert/tls.crt &&
-                      cp /mnt/mssql-certs/tls.key /var/opt/mssql/sslcert/tls.key &&
-                      chown mssql /var/opt/mssql/sslcert/tls.crt /var/opt/mssql/sslcert/tls.key &&
-                      chmod 600 /var/opt/mssql/sslcert/tls.crt /var/opt/mssql/sslcert/tls.key &&
-                      cp /var/opt/config/mssql.conf /var/opt/mssql/mssql.conf &&
-                      /opt/mssql/bin/sqlservr
-                  env:
-                    - name: MSSQL_PID
-                      value: Developer
-                    - name: ACCEPT_EULA
-                      value: "Y"
-                    - name: MSSQL_AGENT_ENABLED
-                      value: "1"
-                    - name: MSSQL_SA_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                          name: mssql-secret
-                          key: MSSQL_SA_PASSWORD
-                  volumeMounts:
-                    - name: mssql-certs-volume
-                      mountPath: /mnt/mssql-certs
-                    - name: newmssql
-                      mountPath: "/var/opt/mssql"
-                    - name: userdata
-                      mountPath: "/var/opt/mssql/userdata"
-                    - name: userlog
-                      mountPath: "/var/opt/mssql/userlog"
-                    - name: tempdb
-                      mountPath: "/var/opt/mssql/tempdb"
-                    - name: mssql-config-volume
-                      mountPath: /var/opt/config
-              volumes:
-                - name: mssql-certs-volume
-                  secret:
-                    secretName: mssql-certs-secret
-                - name: mssql-config-volume
-                  configMap:
-                    name: mssql
-          volumeClaimTemplates:
-            - metadata:
-                name: newmssql
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 8Gi
-            - metadata:
-                name: userdata
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 8Gi
-            - metadata:
-                name: userlog
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 8Gi
-            - metadata:
-                name: tempdb
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 8Gi
-    applications: null
-
+          certificate:
+            name: mssql-certs
+            namespace: mssql
+            secretName: mssql-certs-secret
+            commonName: "{{ $cndi.get_prompt_response(mssql_hostname) }}" 
+            dnsNames:
+              - "{{ $cndi.get_prompt_response(mssql_hostname) }}"
+              - "mssql-0.mssql.svc.cluster.local"
+          configMap:
+            name: mssql-config
+            data:
+              EULA: "Y"
+              accepteulaml: "Y"
+              captureminiandfull: "true"
+              coredumptype: "full"
+              hadrenabled: "1"
+              lcid: "1033"
+              tlscert: "/var/opt/mssql/sslcert/tls.crt"
+              tlskey: "/var/opt/mssql/sslcert/tls.key"
+              tlsprotocols: "1.2"
+              forceencryption: "0"
+          addWindowsLogin: "{{ $cndi.get_prompt_response(add_windows_login) }}"
+          dnsUrl: "{{ $cndi.get_prompt_response(windows_dns_url) }}"
+          privilegedadaccount: "{{ $cndi.get_prompt_response(windows_privilegedadaccount) }}"
+          dnsIp: "{{ $cndi.get_prompt_response(windows_dns_ip) }}"
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml): {}
 
