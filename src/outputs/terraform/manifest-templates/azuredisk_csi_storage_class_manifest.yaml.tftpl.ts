@@ -10,7 +10,6 @@ provisioner: disk.csi.azure.com
 parameters:
   skuName: PremiumV2_LRS
   fsType: xfs
-  enableBursting: "true"
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
