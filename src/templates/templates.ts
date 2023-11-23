@@ -365,25 +365,34 @@ export function literalizeTemplateWithResponseValues(
           indexOfClosingBracesInclusive,
           valueToSubstitute,
         );
+      } else if (valueToSubstitute === undefined) {
+        // if there is no prompt response flag it
+        // if any flags exist in the final output we will throw up the flag
+        const indexOfClosingBracesInclusive = indexOfClosingBraces + 2;
+        const fn = fnName.split("$cndi.")[1].split("(")[0];
+        literalizedString = replaceRange(
+          literalizedString,
+          indexOfOpeningBraces,
+          indexOfClosingBracesInclusive,
+          `${fn}::${key};`,
+        );
       } else {
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
 
         // this block is important because it tells template authors
         // when they depend on a variable that is not in scope
-        if (valueToSubstitute === undefined) {
-          const fn = fnName.split("$cndi.")[1].split("(")[0];
-          console.log(
-            ccolors.error(
-              `could not find a ${
-                ccolors.key_name(
-                  fn,
-                )
-              } value for "${ccolors.user_input(key)}"`,
-            ),
-          );
-          Deno.exit(1);
-        }
+        // if (valueToSubstitute === undefined) {
+        //   const fn = fnName.split("$cndi.")[1].split("(")[0];
+        //   console.log(
+        //     ccolors.error(
+        //       `could not find a ${ccolors.key_name(
+        //         fn
+        //       )} value for "${ccolors.user_input(key)}"`
+        //     )
+        //   );
+        //   Deno.exit(1);
+        // }
 
         literalizedString = replaceRange(
           literalizedString,
@@ -493,7 +502,7 @@ async function literalizeTemplateWithBlocks(
             );
           }
 
-          if (body.args) {
+          if (body.args && shouldDisplay) {
             for (const argName in body.args) {
               const argValue = body.args[argName];
               if (typeof argValue === "string") {
@@ -586,6 +595,46 @@ async function parseCNDIConfigSection(
     blocks,
     responses,
   );
+
+  const undefinedPromptToken = "get_prompt_response::";
+
+  const indexOfUndefinedPrompt = lit_template_with_blocks.indexOf(
+    undefinedPromptToken,
+  );
+
+  if (indexOfUndefinedPrompt > -1) {
+    const undefinedPromptName = lit_template_with_blocks.substring(
+      indexOfUndefinedPrompt + undefinedPromptToken.length,
+      lit_template_with_blocks.indexOf(";", indexOfUndefinedPrompt),
+    );
+    console.log(ccolors.error("template error:"));
+    console.log(
+      ccolors.error("prompt_response"),
+      ccolors.user_input(undefinedPromptName),
+      ccolors.error("is undefined"),
+    );
+    Deno.exit(1);
+  }
+
+  const undefinedArgToken = "get_arg::";
+
+  const indexOfUndefinedArgToken = lit_template_with_blocks.indexOf(
+    undefinedArgToken,
+  );
+
+  if (indexOfUndefinedArgToken > -1) {
+    const undefinedArgName = lit_template_with_blocks.substring(
+      indexOfUndefinedArgToken + undefinedArgToken.length,
+      lit_template_with_blocks.indexOf(";", indexOfUndefinedPrompt),
+    );
+    console.log(ccolors.error("template error:"));
+    console.log(
+      ccolors.error("arg"),
+      ccolors.user_input(undefinedArgName),
+      ccolors.error("is undefined"),
+    );
+    Deno.exit(1);
+  }
 
   const cndi_configObj = YAML.parse(lit_template_with_blocks);
 
