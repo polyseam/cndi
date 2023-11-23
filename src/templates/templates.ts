@@ -121,6 +121,7 @@ interface TemplateResult {
 interface TemplateObject {
   blocks: Array<Block>;
   prompts: Array<CNDITemplatePromptEntry>;
+  required_responses?: Array<string>;
   outputs: {
     cndi_config: Record<string, unknown>;
     env: Record<string, unknown>;
@@ -932,6 +933,28 @@ export async function useTemplate(
 
   // prompts and outputs are required
   coarselyValidateTemplateObjectOrPanic(unparsedTemplateObject);
+
+  // sometimes a template will need a response which should not have a default
+  if (
+    unparsedTemplateObject.required_responses &&
+    unparsedTemplateObject.required_responses.length > 0 &&
+    !interactive
+  ) {
+    for (const requiredResponse of unparsedTemplateObject.required_responses) {
+      if (!responseOverrides[requiredResponse]) {
+        console.log(
+          ccolors.error(
+            `required response ${
+              ccolors.user_input(
+                "'" + requiredResponse + "'",
+              )
+            } not provided`,
+          ),
+        );
+        Deno.exit(1);
+      }
+    }
+  }
 
   // promptDefinitions are the prompts entries
   // after any remote prompts have been fetched and inserted
