@@ -709,6 +709,47 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const argocdAdminPasswordHashed = Fn.bcrypt(
+      this.variables.argocd_admin_password.value,
+      10,
+    ); // TODO: does this re-evalulate every run??
+
+    const _argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
+      .StaticResource(
+      this,
+      "cndi_time_static_admin_password_update",
+      {
+        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+      },
+    );
+
+    const _argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
+      this,
+      "argocd_namespace",
+      {
+        metadata: {
+          name: "argocd",
+        },
+      },
+    );
+
+    // const argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret.Secret(
+    //   this,
+    //   "cndi_argocd_admin_password_secret",
+    //   {
+    //     dependsOn: [argocdNamespace],
+    //     metadata: {
+    //       name: "argocd-secret",
+    //       namespace: "argocd",
+    //     },
+    //     data: {
+    //       // TODO: investigate high chance of this being broken!
+    //       "admin.password": argocdAdminPasswordHashed,
+    //       "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
+    //     },
+    //   }
+    // );
+
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_argocd_helm_chart",
@@ -716,7 +757,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [efsFs, nodeGroup],
+        dependsOn: [efsFs, nodeGroup /* argocdAdminPasswordSecret*/],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -726,40 +767,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         version: "5.45.0",
       },
     );
-
-    const argocdAdminPasswordHashed = Fn.bcrypt(
-      this.variables.argocd_admin_password.value,
-      10,
-    ); // TODO: does this re-evalulate every run??
-
-    const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
-      .StaticResource(
-      this,
-      "cndi_time_static_admin_password_update",
-      {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
-      },
-    );
-
-    const _argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret
-      .Secret(
-      this,
-      "cndi_argocd_admin_password_secret",
-      {
-        dependsOn: [helmReleaseArgoCD],
-        metadata: {
-          name: "argocd-admin-password",
-          namespace: "argocd",
-        },
-        data: {
-          // TODO: investigate high chance of this being broken!
-          "admin.password": argocdAdminPasswordHashed,
-          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
-        },
-      },
-    );
-
-    // let argocdPrivateRepoSecret: CDKTFProviderKubernetes.secret.Secret;
 
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
@@ -877,6 +884,53 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         dependsOn: [helmReleaseNginx],
       },
     );
+
+    const argoAppsValues = {
+      applications: [
+        {
+          name: "root-application",
+          namespace: "argocd",
+          project: "default",
+          finalizers: ["resources-finalizer.argocd.argoproj.io"],
+          source: {
+            repoURL: this.variables.git_repo.value,
+            path: "cndi/cluster_manifests",
+            targetRevision: "HEAD",
+            directory: {
+              recurse: true,
+            },
+          },
+          destination: {
+            server: "https://kubernetes.default.svc",
+            namespace: "argocd",
+          },
+          syncPolicy: {
+            automated: {
+              prune: true,
+              selfHeal: true,
+            },
+            syncOptions: ["CreateNamespace=true"],
+          },
+        },
+      ],
+    };
+
+    new CDKTFProviderHelm.release.Release(this, "cndi_argocd_apps_root", {
+      chart: "argocd-apps",
+      createNamespace: true,
+      dependsOn: [helmReleaseArgoCD],
+      name: "root-argo-app",
+      namespace: "argocd",
+      repository: "https://argoproj.github.io/argo-helm",
+      version: "1.4.1",
+      timeout: 600,
+      atomic: true,
+      values: [Fn.yamlencode(argoAppsValues)],
+    });
+
+    // TODO: argocd is using the value from argocd-initial-admin-secret as password
+
+    // This manifest only works on second run after cluster exists
 
     new TerraformOutput(this, "cndi_aws_lb_public_host", {
       value: Fn.replace(
