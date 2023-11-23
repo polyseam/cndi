@@ -714,7 +714,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       10,
     ); // TODO: does this re-evalulate every run??
 
-    const _argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
+    const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
       this,
       "cndi_time_static_admin_password_update",
@@ -723,7 +723,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const _argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
+    const argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
       this,
       "argocd_namespace",
       {
@@ -733,22 +733,23 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    // const argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret.Secret(
-    //   this,
-    //   "cndi_argocd_admin_password_secret",
-    //   {
-    //     dependsOn: [argocdNamespace],
-    //     metadata: {
-    //       name: "argocd-secret",
-    //       namespace: "argocd",
-    //     },
-    //     data: {
-    //       // TODO: investigate high chance of this being broken!
-    //       "admin.password": argocdAdminPasswordHashed,
-    //       "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
-    //     },
-    //   }
-    // );
+    const _argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret
+      .Secret(
+      this,
+      "cndi_argocd_admin_password_secret",
+      {
+        dependsOn: [argocdNamespace],
+        metadata: {
+          name: "argocd-secret",
+          namespace: "argocd",
+        },
+        data: {
+          // TODO: investigate high chance of this being broken!
+          "admin.password": argocdAdminPasswordHashed,
+          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
+        },
+      },
+    );
 
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
@@ -756,8 +757,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "argo-cd",
         cleanupOnFail: true,
-        createNamespace: true,
-        dependsOn: [efsFs, nodeGroup /* argocdAdminPasswordSecret*/],
+        createNamespace: false,
+        dependsOn: [efsFs, nodeGroup, argocdNamespace],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -765,6 +766,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
         version: "5.45.0",
+        set: [
+          { name: "configs.secret.createSecret", value: "false", type: "auto" },
+        ],
       },
     );
 
