@@ -167,6 +167,9 @@ outputs:
                   ports:
                     - containerPort: 1433
                       name: tcpsql
+                  resources:
+                    requests:
+                      memory: "2Gi"  
                   env:
                     - name: MSSQL_PID
                       value: Developer
