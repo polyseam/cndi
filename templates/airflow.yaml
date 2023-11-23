@@ -4,6 +4,10 @@ blocks:
       $cndi.comment(dag-repo-credentials-embedded): Airflow DAG Repo Credentials Embedded
       GIT_SYNC_USERNAME: "{{ $cndi.get_prompt_response(airflow_git_sync_username) }}"
       GIT_SYNC_PASSWORD: "{{ $cndi.get_prompt_response(airflow_git_sync_password) }}"
+  
+  - name: placeholder
+    content:
+      foo: bar
 
   - name: git_sync_dedicated
     content:
@@ -158,16 +162,16 @@ outputs:
     cluster_manifests:
       $cndi.comment(airflow-git-sync-secret): Airflow Credentials
       git-sync-credentials-secret:
-        $cndi.get_block(git_sync_shared):
-          condition:
-            - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-            - ==
-            - true
         $cndi.get_block(git_sync_dedicated):
           condition:
             - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
             - ==
             - false
+        $cndi.get_block(git_sync_shared):
+          condition:
+            - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
+            - ==
+            - true
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
@@ -208,7 +212,7 @@ outputs:
               credentialsSecret: airflow-git-credentials
               branch: main
               wait: 40
-              subPath: "{{ $cndi.get_prompt_response(foo) }}"
+              subPath: dags
           config:
             $cndi.get_block(airflow_public_config):
               args:
