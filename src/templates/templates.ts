@@ -467,11 +467,6 @@ async function literalizeTemplateWithBlocks(
   let i = 0;
   for (const slot of destinationSlots) {
     const debugSlotStr = slot.join(ccolors.success("."));
-    console.log(
-      ccolors.key_name("\n--- processing slot"),
-      debugSlotStr,
-      ccolors.key_name("---"),
-    );
 
     const toke = tokens[i];
 
@@ -514,8 +509,6 @@ async function literalizeTemplateWithBlocks(
 
         if (body) {
           if (body.condition) {
-            console.log("--- evaluating condition", debugSlotStr, "---");
-            console.log(body.condition);
             shouldDisplay = resolveCNDIPromptCondition(
               body.condition,
               responses,
@@ -547,11 +540,6 @@ async function literalizeTemplateWithBlocks(
             blockString,
             responses,
           );
-          console.log(
-            ccolors.key_name("\n--- setting slot"),
-            debugSlotStr,
-            ccolors.key_name("---"),
-          );
           // put the block in the slot
           setValueForKeyPath(
             parsedLitTemplate,
@@ -559,11 +547,6 @@ async function literalizeTemplateWithBlocks(
             YAML.parse(blockString),
           );
         } else {
-          console.log(
-            ccolors.error("\n--- unsetting slot"),
-            debugSlotStr,
-            ccolors.error("---"),
-          );
           // the block should not be displayed, set its value to null
           setValueForKeyPath(parsedLitTemplate, slot, null);
 
