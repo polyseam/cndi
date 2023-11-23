@@ -1,6 +1,3 @@
-required_responses:
-  - deployment_target_provider
-  
 blocks:
   - name: git_sync_dedicated_env_block
     content:

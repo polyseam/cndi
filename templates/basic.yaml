@@ -1,6 +1,3 @@
-required_responses:
-  - deployment_target_provider
-
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
