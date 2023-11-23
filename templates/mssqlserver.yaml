@@ -1,3 +1,9 @@
+blocks:
+  windows_auth:
+    content:
+      dns_url: "{{ $cndi.get_arg(dns_url) }}"
+      dns_ip: "{{ $cndi.get_arg(dns_ip) }}"
+      privilegedadaccount: "{{ $cndi.get_arg(privilegedadaccount) }}"
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
@@ -186,10 +192,16 @@ outputs:
               tlskey: "/var/opt/mssql/sslcert/tls.key"
               tlsprotocols: "1.2"
               forceencryption: "0"
-          addWindowsLogin: "{{ $cndi.get_prompt_response(add_windows_login) }}"
-          dnsUrl: "{{ $cndi.get_prompt_response(windows_dns_url) }}"
-          privilegedadaccount: "{{ $cndi.get_prompt_response(windows_privilegedadaccount) }}"
-          dnsIp: "{{ $cndi.get_prompt_response(windows_dns_ip) }}"
+          windows_auth: 
+            $cndi.get_block(windows_auth):
+              condition:
+                - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+                - ==
+                - true
+              args:
+                dns_url: "{{ $cndi.get_prompt_response(windows_dns_url) }}"
+                dns_ip: "{{ $cndi.get_prompt_response(windows_dns_ip) }}"
+                privilegedadaccount: "{{ $cndi.get_prompt_response(windows_privilegedadaccount) }}"
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml): {}
 
