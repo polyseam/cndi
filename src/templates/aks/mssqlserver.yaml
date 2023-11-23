@@ -87,6 +87,8 @@ outputs:
             defaultdumpdir = /var/opt/mssql/dump
             defaultlogdir = /var/opt/mssql/userlog
 
+            [memory]
+            memorylimitmb = 3500
       mssql-secret:
         apiVersion: v1
         kind: Secret
