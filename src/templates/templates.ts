@@ -189,6 +189,7 @@ type CliffyPrompt = {
   options?: Array<unknown>;
   validators?: Array<string | Record<string, unknown>>;
   condition: CNDITemplateConditionTuple;
+  required?: boolean;
   after: (
     result: Record<string, CNDITemplatePromptResponsePrimitive>,
     next: (nextPromptName?: string | true) => Promise<void>,
@@ -892,6 +893,19 @@ function getDefaultResponsesFromCliffyPrompts(
 ): Record<string, CNDITemplatePromptResponsePrimitive> {
   const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
   for (const prompt of cliffyPrompts) {
+    if (!prompt.default && prompt.required) {
+      // if a prompt is required and has no default, we throw it
+      console.log(
+        ccolors.error(
+          `required response ${
+            ccolors.user_input(
+              "'" + prompt.name + "'",
+            )
+          } not provided`,
+        ),
+      );
+      Deno.exit(1);
+    }
     responses[prompt.name] = prompt
       .default as CNDITemplatePromptResponsePrimitive;
   }
@@ -933,28 +947,6 @@ export async function useTemplate(
 
   // prompts and outputs are required
   coarselyValidateTemplateObjectOrPanic(unparsedTemplateObject);
-
-  // sometimes a template will need a response which should not have a default
-  if (
-    unparsedTemplateObject.required_responses &&
-    unparsedTemplateObject.required_responses.length > 0 &&
-    !interactive
-  ) {
-    for (const requiredResponse of unparsedTemplateObject.required_responses) {
-      if (!responseOverrides[requiredResponse]) {
-        console.log(
-          ccolors.error(
-            `required response ${
-              ccolors.user_input(
-                "'" + requiredResponse + "'",
-              )
-            } not provided`,
-          ),
-        );
-        Deno.exit(1);
-      }
-    }
-  }
 
   // promptDefinitions are the prompts entries
   // after any remote prompts have been fetched and inserted
