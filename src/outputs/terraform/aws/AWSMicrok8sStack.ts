@@ -23,10 +23,9 @@ const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
 export class AWSMicrok8sStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
-
+    const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
     const nodeIdList: string[] = [];
-    const project_name = cndi_config.project_name!;
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
       cidrBlock: "10.0.0.0/16",

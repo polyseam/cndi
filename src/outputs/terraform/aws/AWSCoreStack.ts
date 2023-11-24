@@ -9,7 +9,8 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
   locals: Record<string, TerraformLocal> = {};
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
-    const { project_name } = cndi_config;
+    const project_name = this.locals.cndi_project_name.asString;
+
     const aws_region = (Deno.env.get("AWS_REGION") as string) ||
       DEFAULT_AWS_REGION;
 
