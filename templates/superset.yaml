@@ -104,6 +104,9 @@ outputs:
         nodes:
            $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
             {}
+        open_ports:
+          - name: superset
+            number: 8088
     cluster_manifests:
       superset-namespace:
           apiVersion: v1

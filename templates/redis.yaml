@@ -97,6 +97,11 @@ outputs:
         nodes:
            $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
             {}
+        open_ports:
+          - name: redisrep
+            number: 6379
+            service: redis-replication
+            namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
     cluster_manifests:
       redis-secret:
         apiVersion: v1

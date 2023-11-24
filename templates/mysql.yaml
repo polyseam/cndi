@@ -89,6 +89,11 @@ outputs:
         nodes:
            $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
             {}
+        open_ports:
+          - number: 3306
+            name: mysql
+            namespace: myinnodbcluster
+            service: mycluster
     cluster_manifests:
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
