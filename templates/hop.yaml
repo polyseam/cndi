@@ -114,7 +114,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
-      hpt-web-ingress:
+      hop-web-ingress:
         $cndi.get_block(hop-web-ingress):
           args:
             ingress_name: hop-web-ingress
