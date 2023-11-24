@@ -148,4 +148,4 @@ outputs:
     $cndi.comment(Hop-heading): Hop Comment in Readme
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
       {}
-    superset-section: "Welcome to Hop!" 
+    hop-section: "Welcome to Hop!" 

@@ -1,0 +1,282 @@
+blocks:
+  - name: redis-ingress
+    content:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: redis-server-ingress
+          namespace: "{{ $cndi.get_arg(namespace) }}"
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - "{{ $cndi.get_arg(hostname) }}"
+              secretName: cluster-issuer-redis-key
+          rules:
+            - host: "{{ $cndi.get_arg(hostname) }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: redis-replication
+                        port:
+                          number: 6379
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to install ArgoCD and expose it via an ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+  - name: deploy_redis_ingress
+    default: true
+    message: >-
+      Do you want to expose Redis via an ingress?
+    type: Confirm
+
+  - message: 'Please enter the domain name you want Redis to be accessible on:'
+    name: redis_hostname
+    default: redis.example.com
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_redis_ingress) }}"
+      - ==
+      - true
+
+  - message: 'Please enter Redis default user password '
+    default: password
+    name: default_user_password
+    type: Secret
+  - message: 'Please enter the namespace for the cluster'
+    default: redis-opr
+    name: default_namespace
+    type: Input
+  - message: 'Please enter the cluster size for Redis Replication'
+    default: 3
+    name: cluster_size
+    type: Number
+  - message: "Please enter the common name for TLS certificate"
+    default: polyseam.io
+    name: common_name
+    type: Input
+outputs:
+  cndi-config:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        nodes:
+           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
+            {}
+    cluster_manifests:
+      redis-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: redis-secret
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+        stringData:
+          password: $cndi_on_ow.seal_secret_from_env_var(REDISPASSWORD)
+        type: Opaque
+      redis-issuer:
+        apiVersion: cert-manager.io/v1
+        kind: Issuer
+        metadata:
+          name: selfsigned-issuer
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+        spec:
+          selfSigned: {}
+      redis-root-certificate:
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: redis-root-cert
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+        spec:
+          isCA: true
+          commonName: "{{ $cndi.get_prompt_response(common_name) }}"
+          privateKey:
+            algorithm: RSA
+            encoding: PKCS1
+            size: 2048
+          dnsNames:
+            - "{{ $cndi.get_prompt_response(redis_hostname) }}"
+          secretName: myredis-secret
+          issuerRef:
+            kind: Issuer
+            name: selfsigned-issuer
+      redis-ca-issuer:
+        apiVersion: cert-manager.io/v1
+        kind: Issuer
+        metadata:
+          name: redis-ca-issuer
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+        spec:
+          ca:
+            secretName: myredis-secret
+      redis-signed-cert:
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: redis-signed-cert
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          secretName: redis-server-tls
+          isCA: false
+          commonName: "CName-{{ $cndi.get_prompt_response(common_name) }}"
+          usages:
+            - server auth
+            - client auth
+          dnsNames:
+            - "{{ $cndi.get_prompt_response(redis_hostname) }}"
+          issuerRef:
+            name: redis-ca-issuer
+            kind: Issuer
+      redis-rep:
+        apiVersion: redis.redis.opstreelabs.in/v1beta1
+        kind: RedisReplication
+        metadata:
+          name: redis-replication
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          clusterSize: "{{ $cndi.get_prompt_response(cluster_size) }}"
+          TLS:
+            ca: ca.crt
+            cert: tls.crt
+            key: tls.key
+            secret:
+              secretName: redis-server-tls
+          podSecurityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+          kubernetesConfig:
+            image: quay.io/opstree/redis:v7.0.5
+            imagePullPolicy: IfNotPresent
+            redisSecret:
+              name: redis-secret
+              key: password
+            resources:
+              requests:
+                cpu: 101m
+                memory: 128Mi
+              limits:
+                cpu: 101m
+                memory: 128Mi
+          storage:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
+      redis-sentinel:
+        apiVersion: redis.redis.opstreelabs.in/v1beta1
+        kind: RedisSentinel
+        metadata:
+          name: redis-sentinel
+          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          clusterSize: "{{ $cndi.get_prompt_response(cluster_size) }}"
+          podSecurityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+          redisSentinelConfig: 
+            redisReplicationName : redis-replication
+            redisPort: "6379"
+          kubernetesConfig:
+            image: quay.io/opstree/redis-sentinel:v7.0.7 
+            imagePullPolicy: IfNotPresent
+            redisSecret:
+              name: redis-secret
+              key: password
+            resources:
+              requests:
+                cpu: 101m
+                memory: 128Mi
+              limits:
+                cpu: 101m
+                memory: 128Mi
+          storage:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+      redis-ingress:
+        $cndi.get_block(redis-ingress):
+          args:
+            ingress_name: redis-ingress
+            hostname: "{{ $cndi.get_prompt_response(redis_hostname) }}"
+            namespace: "{{ $cndi.get_prompt_response(default_namespace) }}" 
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_redis_ingress) }}"
+            - ==
+            - true
+
+    applications: 
+      redis-opr:
+        repoURL: https://ot-container-kit.github.io/helm-charts
+        chart: redis-operator
+        targetRevision: 0.15.0
+        destinationNamespace: "{{ $cndi.get_prompt_response(default_namespace) }}" 
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.comment(redis-heading): Redis Connection Parameters
+    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_user_password) }}" 
+  readme:
+    $cndi.comment(redis-heading): Redis Comment in Readme
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+      {}
+    redis-section: "This template deploys a Redis Operater along with Redis-Replication server with a user defined cluster size using helm chart. It also deploys Redis-Sentinel as a monitoring solution for Redis instances. Repo Url: [https://ot-container-kit.github.io/helm-charts]"
