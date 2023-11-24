@@ -1,0 +1,43 @@
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "request": "launch",
+//             "name": "Launch Program",
+//             "type": "node",
+//             "program": "${workspaceFolder}/main.ts",
+//             "cwd": "${workspaceFolder}",
+//             "runtimeExecutable": "/home/harshil/.deno/bin/deno",
+//             "runtimeArgs": [
+//                 "run",
+//                 "--inspect-wait",
+//                 "--allow-all"
+                
+//             ],
+//             "args": [
+//                 "init",
+//                 "--template",
+//                 "file:///home/harshil/cndi/templates/airflow.yaml"
+//             ],
+//             "attachSimplePort": 9229
+//         }
+//     ]
+// }
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Deno",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "restart": true,
+            "sourceMaps": true,
+            "outputCapture": "std"
+        }
+    ]
+}

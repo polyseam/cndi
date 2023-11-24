@@ -1,0 +1,214 @@
+blocks:
+   - name : windows_auth
+     content:
+      dns_url: "{{ $cndi.get_arg(dns_url) }}"
+      dns_ip: "{{ $cndi.get_arg(dns_ip) }}"
+      privilegedadaccount: "{{ $cndi.get_arg(privilegedadaccount) }}"
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to install ArgoCD and expose it via an ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: mssql_sa_password
+    default: S@password1234
+    message: >-
+      What will be your default password for your 'mssql sa' user?
+    type: Secret
+
+  - name: deploy_mssql_ingress
+    default: true
+    message: >-
+      Do you want to expose Mssql to the web?
+    type: Confirm
+
+  - name: mssql_hostname
+    default: mymssql.example.com
+    message: >-
+      What hostname should Mssql be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+      - min_length: 3
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_mssql_ingress) }}"
+      - ==
+      - true
+
+  - name: add_windows_login
+    default: false
+    message: >-
+      Do you want to add windows auth login?
+    type: Confirm
+
+  - name: windows_dns_url
+    default: mycompany-dc.mycompany.com
+    message: >-
+      What is the url of the domain controller?
+    type: Input
+    validators:
+      - hostname # FQDN
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
+  - name: windows_dns_ip
+    default: 0.0.0.0
+    message: >-
+      What is the IP of the domain controller?
+    type: Input
+    validators:
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
+  - name: windows_privilegedadaccount
+    default: superuser
+    message: >-
+      What is the username of the privilegedadaccount?
+    type: Input
+    validators:
+      - min_length: 3
+    condition: 
+      - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+      - ==
+      - true
+outputs:
+  cndi_config:
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    cndi_version: v2
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a template comment
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/mssql/nodes/{{ $cndi.get_prompt_response(deployment_target_provider) }}.yaml): {}
+
+    cluster_manifests:
+      $cndi.comment(mssql-sa-secret): Mssql sa password
+      mssql-sa-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: mssql-sa-secret
+          namespace: mssql
+        type: Opaque
+        stringData:
+          MSSQL_SA_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(MSSQL_SA_PASSWORD)
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      mssql-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: mssql-ingress
+            hostname: "{{ $cndi.get_prompt_response(mssql_hostname) }}"
+            service_name: sqlinst1-0
+            service_port: 1433
+            namespace: mssql
+
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_mssql_ingress) }}"
+            - ==
+            - true
+
+    applications: 
+      mssql:
+        targetRevision: 0.1.8
+        destinationNamespace: mssql
+        repoURL: https://polyseam.github.io/mssql2019-chart
+        chart: mssql
+        values:
+          name: mssql
+          namespace: mssql
+          appLabel: mssql
+          replicas: 1
+          securityContext:
+            fsGroup: 10001
+          container:
+            name: mssql
+            image: "mcr.microsoft.com/mssql/server:2019-latest"
+          saPasswordSecret: mssql-sa-secret
+          service:
+            name: mssql-0
+            namespace: mssql
+            selector:
+              podName: mssql-0
+            ports:
+              port: 1433
+              targetPort: 1433
+          certificate:
+            name: mssql-certs
+            namespace: mssql
+            secretName: mssql-certs-secret
+            commonName: "{{ $cndi.get_prompt_response(mssql_hostname) }}" 
+            dnsNames:
+              - "{{ $cndi.get_prompt_response(mssql_hostname) }}"
+              - "mssql-0.mssql.svc.cluster.local"
+          configMap:
+            name: mssql-config
+            data:
+              EULA: "Y"
+              accepteulaml: "Y"
+              captureminiandfull: "true"
+              coredumptype: "full"
+              hadrenabled: "1"
+              lcid: "1033"
+              tlscert: "/var/opt/mssql/sslcert/tls.crt"
+              tlskey: "/var/opt/mssql/sslcert/tls.key"
+              tlsprotocols: "1.2"
+              forceencryption: "0"
+          windows_auth: 
+            $cndi.get_block(windows_auth):
+              condition:
+                - "{{ $cndi.get_prompt_response(add_windows_login) }}"
+                - ==
+                - true
+              args:
+                dns_url: "{{ $cndi.get_prompt_response(windows_dns_url) }}"
+                dns_ip: "{{ $cndi.get_prompt_response(windows_dns_ip) }}"
+                privilegedadaccount: "{{ $cndi.get_prompt_response(windows_privilegedadaccount) }}"
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml): {}
+
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml): {}
+
+    $cndi.comment(mssql-sa-password-comment): "Should contain uppercase, lowercase, number, special character and muste be greater than 8 letters"
+    MSSQL_SA_PASSWORD: "{{ $cndi.get_prompt_response(mssql_sa_password) }}"
+
+  readme:
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md): {}

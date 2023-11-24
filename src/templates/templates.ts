@@ -973,11 +973,11 @@ export async function useTemplate(
       const literalizedPromptKeyIdentifier =
         literalizeTemplateWithResponseValues(promptKeyIdentifier, responses);
 
-      const promptSpecsFromBlock = await get_block(
+      const promptSpecsFromBlock = 
+      await get_block(
         literalizedPromptKeyIdentifier,
         unparsedTemplateObject.blocks,
       );
-
       if (Array.isArray(promptSpecsFromBlock)) {
         // if a user supplies prompt response overrides, do not display those prompts, just insert their values
         // this time for prompts from blocks
