@@ -932,10 +932,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       values: [Fn.yamlencode(argoAppsValues)],
     });
 
-    // TODO: argocd is using the value from argocd-initial-admin-secret as password
-
-    // This manifest only works on second run after cluster exists
-
     new TerraformOutput(this, "cndi_aws_lb_public_host", {
       value: Fn.replace(
         cndiNlb.dnsName,
