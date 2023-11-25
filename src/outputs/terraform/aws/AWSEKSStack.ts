@@ -1,5 +1,5 @@
 import { CNDIConfig } from "src/types.ts";
-
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 import {
   App,
   CDKTFProviderAWS,
@@ -26,7 +26,7 @@ import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
-    const { project_name } = cndi_config;
+    const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
 
     new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
@@ -453,7 +453,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         clientIdList: ["sts.amazonaws.com"],
         thumbprintList: [
           tlsCertificate.certificates.get(0).sha1Fingerprint,
-          //"${data.tls_certificate.cndi_tls_certificate.certificates[*].sha1_fingerprint}",
         ],
         url: tlsCertificate.url,
       },
@@ -570,28 +569,61 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    // TODO: render from cndi_config.infrastructure.cndi.nodes
-    const nodeGroup = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
-      this,
-      "cndi_aws_eks_node_group",
-      {
-        clusterName: eksCluster.name,
-        amiType: "AL2_x86_64",
-        diskSize: 100, // GiB
-        instanceTypes: ["t3.medium"],
-        nodeGroupName: "primary",
-        nodeRoleArn: computeRole.arn,
-        scalingConfig: { desiredSize: 3, maxSize: 3, minSize: 3 },
-        capacityType: "ON_DEMAND",
-        subnetIds: [subnetPrivateA.id],
-        updateConfig: { maxUnavailable: 1 },
-        dependsOn: [
-          workerNodePolicyAttachment,
-          cniPolicyAttachment,
-          containerRegistryAttachment,
-        ],
-      },
-    );
+    let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup | null =
+      null;
+
+    for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
+      const count = nodeGroup?.count || 1;
+      const maxCount = nodeGroup?.max_count;
+      const minCount = nodeGroup?.min_count;
+      const nodeGroupName = nodeGroup.name;
+
+      const instanceType = nodeGroup?.instance_type ||
+        DEFAULT_INSTANCE_TYPES.aws;
+
+      const diskSize = nodeGroup?.volume_size ||
+        nodeGroup?.disk_size ||
+        nodeGroup?.disk_size_gb ||
+        DEFAULT_NODE_DISK_SIZE_MANAGED;
+
+      const scalingConfig = {
+        desiredSize: count,
+        maxSize: count,
+        minSize: count,
+      };
+
+      if (maxCount) {
+        scalingConfig.maxSize = maxCount;
+      }
+      if (minCount) {
+        scalingConfig.minSize = minCount;
+      }
+
+      const ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
+        this,
+        "cndi_aws_eks_node_group",
+        {
+          clusterName: eksCluster.name,
+          amiType: "AL2_x86_64",
+          diskSize, // GiB
+          instanceTypes: [instanceType],
+          nodeGroupName,
+          nodeRoleArn: computeRole.arn,
+          scalingConfig,
+          capacityType: "ON_DEMAND",
+          subnetIds: [subnetPrivateA.id],
+          updateConfig: { maxUnavailable: 1 },
+          dependsOn: [
+            workerNodePolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+          ],
+        },
+      );
+      if (!firstNodeGroup) {
+        firstNodeGroup = ng;
+      }
+    }
 
     const _helmReleaseEFSCSIDriver = new CDKTFProviderHelm.release.Release(
       this,
@@ -657,7 +689,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "ingress-nginx",
         createNamespace: true,
         dependsOn: [
-          nodeGroup, // should be many node groups, currently 1
+          firstNodeGroup!,
         ],
         name: "ingress-nginx",
         namespace: "ingress",
@@ -693,7 +725,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "cert-manager",
         createNamespace: true,
-        dependsOn: [nodeGroup],
+        dependsOn: [firstNodeGroup!],
         name: "cert-manager",
         namespace: "cert-manager",
         repository: "https://charts.jetstack.io",
@@ -712,7 +744,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const argocdAdminPasswordHashed = Fn.bcrypt(
       this.variables.argocd_admin_password.value,
       10,
-    ); // TODO: does this re-evalulate every run??
+    );
 
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
@@ -758,7 +790,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: false,
-        dependsOn: [efsFs, nodeGroup, argocdNamespace],
+        dependsOn: [efsFs, firstNodeGroup!, argocdNamespace],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -840,7 +872,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_sealed_secrets_helm_chart",
       {
         chart: "sealed-secrets",
-        dependsOn: [nodeGroup, sealedSecretsSecret],
+        dependsOn: [firstNodeGroup!, sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",

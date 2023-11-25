@@ -63,6 +63,9 @@ interface BaseNodeItemSpec {
   disk_size?: number;
   instance_type?: string;
   machine_type?: string;
+  min_count?: number;
+  max_count?: number;
+  count?: number;
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]

@@ -1,6 +1,6 @@
 import { getPrettyJSONString, getTFModule } from "src/utils.ts";
 import { AzureAKSNodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 export default function getAzureAKSTFJSON(
   node: AzureAKSNodeItemSpec,
@@ -13,7 +13,7 @@ export default function getAzureAKSTFJSON(
     DEFAULT_INSTANCE_TYPES.azure;
 
   let disk_size_gb = node?.disk_size_gb || node?.volume_size ||
-    DEFAULT_NODE_DISK_SIZE;
+    DEFAULT_NODE_DISK_SIZE_MANAGED;
 
   // azure uses 'size' to describe the machine type, oof
   if (
