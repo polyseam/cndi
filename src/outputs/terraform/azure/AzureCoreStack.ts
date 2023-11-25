@@ -6,9 +6,10 @@ const DEFAULT_ARM_REGION = "eastus";
 // const CNDI_MAJOR_VERSION = "v2";
 
 export default class AzureCoreTerraformStack extends CNDITerraformStack {
-  locals: Record<string, TerraformLocal> = {};
+  rg: CDKTFProviderAzure.resourceGroup.ResourceGroup;
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+
     const ARM_REGION = (Deno.env.get("ARM_REGION") as string) ||
       DEFAULT_ARM_REGION;
 
@@ -26,7 +27,7 @@ export default class AzureCoreTerraformStack extends CNDITerraformStack {
       },
     );
 
-    new CDKTFProviderAzure.resourceGroup.ResourceGroup(
+    this.rg = new CDKTFProviderAzure.resourceGroup.ResourceGroup(
       this,
       "cndi_azurerm_resource_group",
       {
@@ -35,19 +36,5 @@ export default class AzureCoreTerraformStack extends CNDITerraformStack {
         tags: { CNDIProject: this.locals.cndi_project_name.asString },
       },
     );
-
-    // const aws_region = (Deno.env.get("AWS_REGION") as string) ||
-    //   DEFAULT_AWS_REGION;
-
-    // this.locals.aws_region = new TerraformLocal(this, "aws_region", aws_region);
-
-    // new CDKTFProviderAWS.provider.AwsProvider(this, "aws", {
-    //   region: this.locals.aws_region.asString,
-    //   defaultTags: [
-    //     {
-    //       tags: { CNDIVersion: CNDI_MAJOR_VERSION, CNDIProject: project_name! },
-    //     },
-    //   ],
-    // });
   }
 }

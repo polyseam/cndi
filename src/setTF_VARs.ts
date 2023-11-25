@@ -93,8 +93,8 @@ export default async function setTF_VARs() {
   Deno.env.set("TF_VAR_sealed_secrets_private_key", sealed_secrets_private_key);
 
   // aks module requires cred be set explicitly
-  const az_client_id = Deno.env.get("ARM_CLIENT_ID") || "";
-  const az_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
-  Deno.env.set("TF_VAR_client_id", az_client_id);
-  Deno.env.set("TF_VAR_client_secret", az_client_secret);
+  const azurerm_client_id = Deno.env.get("ARM_CLIENT_ID") || "";
+  const azurerm_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
+  Deno.env.set("TF_VAR_arm_client_id", azurerm_client_id);
+  Deno.env.set("TF_VAR_arm_client_secret", azurerm_client_secret);
 }
