@@ -4,7 +4,10 @@ import {
   getUserDataTemplateFileString,
 } from "src/utils.ts";
 import { AzureNodeItemSpec } from "src/types.ts";
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
+import {
+  DEFAULT_INSTANCE_TYPES,
+  DEFAULT_NODE_DISK_SIZE_UNMANAGED,
+} from "consts";
 
 export default function getAzureComputeInstanceTFJSON(
   node: AzureNodeItemSpec,
@@ -18,7 +21,7 @@ export default function getAzureComputeInstanceTFJSON(
     DEFAULT_INSTANCE_TYPES.azure;
 
   let disk_size_gb = node?.disk_size_gb || node?.volume_size ||
-    DEFAULT_NODE_DISK_SIZE;
+    DEFAULT_NODE_DISK_SIZE_UNMANAGED;
 
   const leaderComputeInstance =
     `azurerm_linux_virtual_machine.cndi_azurerm_linux_virtual_machine_${leaderNodeName}`;

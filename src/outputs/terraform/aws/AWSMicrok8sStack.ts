@@ -7,7 +7,10 @@ import {
   TerraformOutput,
 } from "deps";
 
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE } from "consts";
+import {
+  DEFAULT_INSTANCE_TYPES,
+  DEFAULT_NODE_DISK_SIZE_UNMANAGED,
+} from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -167,7 +170,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       const volumeSize = node?.volume_size ||
         node?.disk_size ||
         node?.disk_size_gb ||
-        DEFAULT_NODE_DISK_SIZE;
+        DEFAULT_NODE_DISK_SIZE_UNMANAGED;
 
       const cndiInstance = new CDKTFProviderAWS.instance.Instance(
         this,
