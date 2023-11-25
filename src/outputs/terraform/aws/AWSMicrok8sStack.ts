@@ -28,7 +28,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     super(scope, name, cndi_config);
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
-    const nodeIdList: string[] = [];
+    const nodeList: Array<{ name: string; id: string }> = [];
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
       cidrBlock: "10.0.0.0/16",
@@ -160,11 +160,11 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     let leaderInstance: CDKTFProviderAWS.instance.Instance;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
-      let role: NodeRole = nodeIdList.length === 0 ? "leader" : "controller";
+      let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
       if (node?.role === "worker") {
         role = "worker";
       }
-
+      const count = node?.count || 1; // count will never be zero, defaults to 1
       const user_data = getUserDataTemplateFileString(role);
       const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
       const volumeSize = node?.volume_size ||
@@ -172,29 +172,32 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         node?.disk_size_gb ||
         DEFAULT_NODE_DISK_SIZE_UNMANAGED;
 
-      const cndiInstance = new CDKTFProviderAWS.instance.Instance(
-        this,
-        `cndi_aws_instance_${node.name}`,
-        {
-          userData: user_data,
-          tags: { Name: node.name },
-          dependsOn,
-          ami: DEFAULT_EC2_AMI,
-          instanceType: node?.instance_type || DEFAULT_INSTANCE_TYPES.aws,
-          rootBlockDevice: {
-            volumeType: "gp3",
-            volumeSize,
-            deleteOnTermination: true,
+      for (let i = 0; i < count; i++) {
+        const nodeName = `${node.name}-${i}`;
+        const cndiInstance = new CDKTFProviderAWS.instance.Instance(
+          this,
+          `cndi_aws_instance_${node.name}_${i}`,
+          {
+            userData: user_data,
+            tags: { Name: nodeName },
+            dependsOn,
+            ami: DEFAULT_EC2_AMI,
+            instanceType: node?.instance_type || DEFAULT_INSTANCE_TYPES.aws,
+            rootBlockDevice: {
+              volumeType: "gp3",
+              volumeSize,
+              deleteOnTermination: true,
+            },
+            userDataReplaceOnChange: false,
+            subnetId: cndiPrimarySubnet.id,
+            vpcSecurityGroupIds: [securityGroup.id],
           },
-          userDataReplaceOnChange: false,
-          subnetId: cndiPrimarySubnet.id,
-          vpcSecurityGroupIds: [securityGroup.id],
-        },
-      );
-      if (role === "leader") {
-        leaderInstance = cndiInstance;
+        );
+        if (role === "leader") {
+          leaderInstance = cndiInstance;
+        }
+        nodeList.push({ id: cndiInstance.id, name: nodeName });
       }
-      nodeIdList.push(cndiInstance.id);
     }
 
     new TerraformLocal(this, "leader_node_ip", leaderInstance!.privateIp);
@@ -240,19 +243,16 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           },
         },
       );
-      let targetIdIndex = 0;
-      for (const node of cndi_config.infrastructure.cndi.nodes) {
-        const targetId = nodeIdList[targetIdIndex];
+      for (const target of nodeList) {
         new CDKTFProviderAWS.lbTargetGroupAttachment.LbTargetGroupAttachment(
           this,
-          `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${node.name}`,
+          `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${target.name}`,
           {
             port: port.number,
             targetGroupArn: cndiTargetGroup.arn,
-            targetId,
+            targetId: target.id,
           },
         );
-        targetIdIndex++;
       }
     }
 
