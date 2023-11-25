@@ -8,7 +8,6 @@ const CNDI_MAJOR_VERSION = "v2";
 export default class AWSCoreTerraformStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
-    console.log("this.locals", this.locals);
     const project_name = this.locals.cndi_project_name.asString;
 
     const aws_region = (Deno.env.get("AWS_REGION") as string) ||
