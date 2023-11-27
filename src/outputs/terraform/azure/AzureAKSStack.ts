@@ -6,7 +6,7 @@ import {
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
-  // CDKTFProviderTls,
+  CDKTFProviderTls,
   Construct,
   Fn,
   TerraformOutput,
@@ -34,6 +34,10 @@ type AnonymousClusterNodePoolConfig = Omit<
 export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+
+    new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
 
@@ -116,6 +120,37 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
+    // "apply_retry_count": 5,
+    // "client_certificate":
+    //   "${base64decode(module.cndi_aks_cluster.client_certificate)}",
+    // "client_key": "${base64decode(module.cndi_aks_cluster.client_key)}",
+    // "cluster_ca_certificate":
+    //   "${base64decode(module.cndi_aks_cluster.cluster_ca_certificate)}",
+    // "host": "${module.cndi_aks_cluster.host}",
+    // "load_config_file": false,
+
+    const kubernetes = {
+      clusterCaCertificate: Fn.base64decode(
+        cluster.kubeConfig.get(0).clusterCaCertificate,
+      ),
+      host: cluster.kubeConfig.get(0).host,
+      clientKey: Fn.base64decode(cluster.kubeConfig.get(0).clientKey),
+      clientCertificate: Fn.base64decode(
+        cluster.kubeConfig.get(0).clientCertificate,
+      ),
+      loadConfigFile: false,
+    };
+
+    new CDKTFProviderKubernetes.provider.KubernetesProvider(
+      this,
+      "kubernetes",
+      kubernetes,
+    );
+
+    new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
+      kubernetes,
+    });
+
     for (const nodeSpec of nodePools) {
       // all non-default nodePoolSpecs
       new CDKTFProviderAzure.kubernetesClusterNodePool
@@ -128,6 +163,13 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
       );
     }
+
+    // new CDKTFProviderAzure.roleAssignment.RoleAssignment(this, 'cndi_azure_aks_cluster_role_assignment', {
+    //   principalId: cluster.identity.get(0).principalId,
+    //   roleDefinitionName: "Acr Pull",
+    //   skipServicePrincipalAadCheck: true,
+    //   scope: this.rg.id,
+    // })
 
     const publicIp = new CDKTFProviderAzure.publicIp.PublicIp(
       this,
