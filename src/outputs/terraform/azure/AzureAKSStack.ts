@@ -6,6 +6,7 @@ import {
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
+  CDKTFProviderNull,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
@@ -45,6 +46,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderNull.provider.NullProvider(this, "cndi_null_provider", {});
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
@@ -382,41 +384,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
-      this,
-      "argocd_namespace",
-      {
-        metadata: {
-          name: "argocd",
-        },
-      },
-    );
-
-    const argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret.Secret(
-      this,
-      "cndi_argocd_admin_password_secret",
-      {
-        dependsOn: [argocdNamespace],
-        metadata: {
-          name: "argocd-secret",
-          namespace: "argocd",
-        },
-        data: {
-          // TODO: investigate high chance of this being broken!
-          "admin.password": argocdAdminPasswordHashed,
-          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
-        },
-      },
-    );
-
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_argocd_helm_chart",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
-        createNamespace: false,
-        dependsOn: [cluster, argocdNamespace, argocdAdminPasswordSecret],
+        createNamespace: true,
+        dependsOn: [cluster],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -425,10 +400,37 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         repository: "https://argoproj.github.io/argo-helm",
         version: "5.45.0",
         set: [
-          { name: "configs.secret.createSecret", value: "false", type: "auto" },
+          {
+            name: "server.service.annotations.redeployTime",
+            value: argocdAdminPasswordMtime.id,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPassword",
+            value: argocdAdminPasswordHashed,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPasswordMtime",
+            value: argocdAdminPasswordMtime.id,
+          },
         ],
       },
     );
+
+    // const _restartArgoServer = new CDKTFProviderNull.resource.Resource(
+    //   this,
+    //   "cndi_argocd_restart_argo_server",
+    //   {
+    //     dependsOn: [helmReleaseArgoCD, argocdAdminPasswordSecret],
+    //     triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+    //     provisioners: [
+    //       {
+    //         command:
+    //           "kubectl rollout restart deployment argocd-server -n argocd",
+    //         type: "local-exec",
+    //       },
+    //     ],
+    //   },
+    // );
 
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(

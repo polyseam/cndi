@@ -5,6 +5,7 @@ import {
   CDKTFProviderAWS,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
+  CDKTFProviderNull,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
@@ -31,6 +32,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderNull.provider.NullProvider(this, "cndi_null_provider", {});
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
       cidrBlock: "10.0.0.0/16",
@@ -843,44 +845,16 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
-      this,
-      "argocd_namespace",
-      {
-        metadata: {
-          name: "argocd",
-        },
-      },
-    );
-
-    const argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret.Secret(
-      this,
-      "cndi_argocd_admin_password_secret",
-      {
-        dependsOn: [argocdNamespace],
-        metadata: {
-          name: "argocd-secret",
-          namespace: "argocd",
-        },
-        data: {
-          "admin.password": argocdAdminPasswordHashed,
-          "admin.passwordMtime": argocdAdminPasswordMtime.id,
-        },
-      },
-    );
-
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_argocd_helm_chart",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
-        createNamespace: false,
+        createNamespace: true,
         dependsOn: [
           efsFs,
           firstNodeGroup!,
-          argocdNamespace,
-          argocdAdminPasswordSecret,
         ],
         timeout: 600,
         atomic: true,
@@ -890,7 +864,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         repository: "https://argoproj.github.io/argo-helm",
         version: "5.45.0",
         set: [
-          { name: "configs.secret.createSecret", value: "false", type: "auto" },
+          {
+            name: "server.service.annotations.redeployTime",
+            value: argocdAdminPasswordMtime.id,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPassword",
+            value: argocdAdminPasswordHashed,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPasswordMtime",
+            value: argocdAdminPasswordMtime.id,
+          },
         ],
       },
     );
