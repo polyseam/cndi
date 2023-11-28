@@ -973,8 +973,7 @@ export async function useTemplate(
       const literalizedPromptKeyIdentifier =
         literalizeTemplateWithResponseValues(promptKeyIdentifier, responses);
 
-      const promptSpecsFromBlock = 
-      await get_block(
+      const promptSpecsFromBlock = await get_block(
         literalizedPromptKeyIdentifier,
         unparsedTemplateObject.blocks,
       );
