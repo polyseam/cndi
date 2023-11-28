@@ -217,6 +217,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         atomic: true,
         set: [
           {
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
+            value: this.rg.name,
+          },
+          {
             name: "controller.service.loadBalancerIP",
             value: publicIp.ipAddress,
           },
@@ -364,10 +369,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const argocdAdminPasswordHashed = Fn.sensitive(Fn.bcrypt(
-      this.variables.argocd_admin_password.value,
-      10,
-    ));
+    const argocdAdminPasswordHashed = Fn.sensitive(
+      Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
+    );
 
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
@@ -388,8 +392,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const _argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret
-      .Secret(
+    const argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret.Secret(
       this,
       "cndi_argocd_admin_password_secret",
       {
@@ -413,7 +416,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: false,
-        dependsOn: [cluster, argocdNamespace],
+        dependsOn: [cluster, argocdNamespace, argocdAdminPasswordSecret],
         timeout: 600,
         atomic: true,
         name: "argocd",
