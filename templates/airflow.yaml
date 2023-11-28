@@ -231,6 +231,7 @@ outputs:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
+            ingress_class_name: public
             hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
             service_name: argocd-server
             service_port: 443

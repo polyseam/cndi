@@ -117,6 +117,7 @@ outputs:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
+            ingress_class_name: public
             hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
             service_name: argocd-server
             service_port: 443
@@ -129,6 +130,7 @@ outputs:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
             ingress_name: superset-ingress
+            ingress_class_name: public
             hostname: "{{ $cndi.get_prompt_response(superset_hostname) }}"
             service_name: apache-superset
             service_port: 8088
