@@ -11,16 +11,12 @@ type ManagedAnnotations = {
   [key in ManagedNodeKind]: Record<string, string>;
 };
 
-// TODO: @IamTamika - please verify/add annotations for each managed provider
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
-  eks: {
-    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
-  },
-  gke: {
-    "cloud.google.com/load-balancer-type": "nlb",
-  },
+  eks: { "service.beta.kubernetes.io/aws-load-balancer-type": "nlb" },
+  gke: {},
   aks: {
-    "service.beta.kubernetes.io/azure-load-balancer-type": "nlb",
+    "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
+      "/healthz",
   },
 };
 
@@ -28,28 +24,28 @@ interface IngressService {
   apiVersion: string;
   kind: "Service";
   metadata: {
-    "name": string;
-    "namespace": "ingress";
-    "annotations": Record<string, string>;
+    name: string;
+    namespace: "ingress-public";
+    annotations: Record<string, string>;
   };
   spec: {
     type: "LoadBalancer";
-    ports: Array<ServicePort>;
+    ports?: Array<ServicePort>;
   };
 }
 
 const default_ports: Array<ServicePort> = [
   {
-    "name": "http",
-    "port": 80,
-    "targetPort": 80,
-    "protocol": "TCP",
+    name: "http",
+    port: 80,
+    targetPort: 80,
+    protocol: "TCP",
   },
   {
-    "name": "https",
-    "port": 443,
-    "targetPort": 443,
-    "protocol": "TCP",
+    name: "https",
+    port: 443,
+    targetPort: 443,
+    protocol: "TCP",
   },
 ];
 
@@ -63,7 +59,7 @@ type ServicePort = {
 const getIngressServiceManifest = (
   user_ports: Array<CNDIPort>,
   kind: ManagedNodeKind,
-): string | null => {
+): string => {
   const ports: Array<ServicePort> = [...default_ports];
 
   user_ports.forEach((port) => {
@@ -85,8 +81,8 @@ const getIngressServiceManifest = (
     }
 
     if (disable) {
-      const portToRemove = ports.findIndex((item) =>
-        (item.port === port.number) || (item.name === port.name)
+      const portToRemove = ports.findIndex(
+        (item) => item.port === port.number || item.name === port.name,
       );
       if (portToRemove > -1) {
         ports.splice(portToRemove, 1);
@@ -101,24 +97,22 @@ const getIngressServiceManifest = (
     }
   });
 
-  if (ports.length === 0) {
-    // don't create service
-    return null;
-  }
-
   const manifest: IngressService = {
     apiVersion: "v1",
     kind: "Service",
     metadata: {
-      "name": "ingress-nginx-controller-public",
-      "namespace": "ingress",
-      "annotations": MANAGED_ANNOTATIONS[kind],
+      name: "ingress-nginx-public-controller",
+      namespace: "ingress-public",
+      annotations: MANAGED_ANNOTATIONS[kind],
     },
     spec: {
       type: "LoadBalancer",
-      ports,
     },
   };
+
+  if (ports.length > 0) {
+    manifest.spec.ports = ports;
+  }
 
   return getYAMLString(manifest);
 };

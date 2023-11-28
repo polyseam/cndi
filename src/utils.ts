@@ -1,4 +1,5 @@
 import {
+  App,
   ccolors,
   deepMerge,
   exists,
@@ -20,6 +21,7 @@ import {
 } from "src/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+import { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");
 
@@ -430,6 +432,44 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+type CDKTFAppConfig = {
+  outdir: string;
+};
+
+async function stageCDKTFStack(app: App) {
+  app.synth();
+  const stagingDirectory = await getStagingDir();
+  const tfHome = path.join(stagingDirectory, "cndi", "terraform");
+  const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
+  Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli
+  const synthFiles = walkSync(synthDir, { includeDirs: false });
+  for (const entry of synthFiles) {
+    const destinationAbsPath = entry.path.replace(synthDir, tfHome);
+    if (entry.path.endsWith("cdk.tf.json")) {
+      let jsonStr = await Deno.readTextFile(entry.path);
+      const cdktfObj = JSON.parse(jsonStr);
+      delete cdktfObj.terraform.backend;
+      jsonStr = getPrettyJSONString(cdktfObj);
+      Deno.writeTextFileSync(
+        destinationAbsPath,
+        jsonStr.replaceAll("_cndi_stack_", "."),
+      );
+      Deno.removeSync(entry.path);
+      continue;
+    }
+    Deno.renameSync(entry.path, destinationAbsPath);
+  }
+}
+
+async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
+  const stagingDirectory = await getStagingDir();
+  const outdir = path.join(stagingDirectory, "cndi", "terraform");
+  await Deno.mkdir(path.dirname(outdir), { recursive: true });
+  return {
+    outdir,
+  };
+}
+
 async function getStagingDir(): Promise<string> {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
@@ -533,7 +573,7 @@ function getUserDataTemplateFileString(
   doBase64Encode?: boolean,
 ) {
   let leaderString =
-    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_password": "\${var.git_password}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
+    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_token": "\${var.git_token}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   if (useSshRepoAuth()) {
     // this value contains base64 encoded values for git_repo and git_ssh_private_key
     // it's required in order to support multiline values in cloud-init
@@ -594,8 +634,7 @@ function getSecretOfLength(len = 32): string {
 
 function useSshRepoAuth(): boolean {
   return (
-    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
-    !Deno.env.get("GIT_PASSWORD")
+    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length && !Deno.env.get("GIT_TOKEN")
   );
 }
 
@@ -620,6 +659,7 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
+  getCDKTFAppConfig,
   getCndiInstallPath,
   getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
@@ -644,6 +684,7 @@ export {
   replaceRange,
   resolveCNDIPorts,
   sha256Digest,
+  stageCDKTFStack,
   stageFile,
   useSshRepoAuth,
 };

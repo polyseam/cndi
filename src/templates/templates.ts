@@ -18,6 +18,7 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
+// TODO: make this real/remote
 export const POLYSEAM_TEMPLATE_DIRECTORY =
   "file:///Users/m/dev/polyseam/cndi/templates/";
 

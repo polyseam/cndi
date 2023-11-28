@@ -49,7 +49,7 @@ const terraformCommand = new Command()
     { required: false },
   )
   .env(
-    "GIT_PASSWORD=<value:string>",
+    "GIT_TOKEN=<value:string>",
     "Personal access token ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
@@ -65,6 +65,7 @@ const terraformCommand = new Command()
       "cndi",
       "terraform",
     );
+
     const cmd = `cndi terraform ${args.join(" ")}`;
     console.log(`${cmd}\n`);
 

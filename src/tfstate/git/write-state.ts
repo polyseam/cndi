@@ -49,6 +49,11 @@ export default async function pushStateFromRun({
 
   try {
     state = Deno.readTextFileSync(pathToState);
+
+    console.log(
+      ccolors.key_name("--- reading terraform.tfstate from disk ---"),
+    );
+    console.log(ccolors.warn(state).substring(0, 400) + "...");
   } catch (errorReadingState) {
     console.error(
       gitWriteStateLabel,
@@ -96,6 +101,8 @@ export default async function pushStateFromRun({
     pathToTerraformResources,
     "terraform.tfstate.encrypted",
   );
+
+  console.log("encrypted state!");
 
   try {
     Deno.writeTextFileSync(pathToNewState, encryptedState);

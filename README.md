@@ -137,7 +137,7 @@ We break down all of these generated files later in this document in the
 The next step for our one-time project setup is to make sure that we have all
 the required envrionment variables for our project. Some of these values are
 required for every deployment. For example, you always need to have
-`GIT_USERNAME`, `GIT_PASSWORD` and `GIT_REPO`.
+`GIT_USERNAME`, `GIT_TOKEN` and `GIT_REPO`.
 
 Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
@@ -431,8 +431,8 @@ secret to your cluster add the value to your `.env` file and then add a
 seal your secret.
 
 The example below results in sealing the environment variables `"GIT_USERNAME"`
-and `"GIT_PASSWORD"`, into the destination secret key names
-`"GIT_SYNC_USERNAME"` and `"GIT_SYNC_PASSWORD"` respectively.
+and `"GIT_TOKEN"`, into the destination secret key names `"GIT_SYNC_USERNAME"`
+and `"GIT_SYNC_PASSWORD"` respectively.
 
 ```yaml
 infrastructure: {}
@@ -446,7 +446,7 @@ cluster_manifests:
       namespace: airflow
     stringData:
       GIT_SYNC_USERNAME: "$.cndi.secrets.seal(GIT_USERNAME)"
-      GIT_SYNC_PASSWORD: "$.cndi.secrets.seal(GIT_PASSWORD)"
+      GIT_SYNC_PASSWORD: "$.cndi.secrets.seal(GIT_TOKEN)"
 ```
 
 ---

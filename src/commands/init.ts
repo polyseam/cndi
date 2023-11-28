@@ -58,7 +58,7 @@ SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
 TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
 
 # Argo UI Admin Password
-ARGO_UI_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
+ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
 ${templatePartial}`.trim();
 }
 
