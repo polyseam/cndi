@@ -7,9 +7,11 @@ import {
 } from "src/utils.ts";
 import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
 import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
+import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
+import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
 import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
-import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
-import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
+// import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
+// import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
 import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
 import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
 // import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
@@ -41,10 +43,10 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformResourcesForGCP(config, options);
       break;
     case "azure/microk8s":
-      await stageTerraformResourcesForAzure(config);
+      await stageTerraformSynthAzureMicrok8s(config);
       break;
     case "azure/aks":
-      await stageTerraformResourcesForAzureAKS(config);
+      await stageTerraformSynthAzureAKS(config);
       break;
     case "dev/microk8s":
       await stageTerraformResourcesForDev(config);

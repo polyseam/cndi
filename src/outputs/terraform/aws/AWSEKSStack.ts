@@ -155,7 +155,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.4.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: "PrivateSubnetB",
+          Name: `PrivateSubnetB_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -171,7 +171,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: "PublicSubnetA",
+          Name: `PublicSubnetA_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/elb": "1",
         },
@@ -451,9 +451,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_iam_openid_connect_provider",
       {
         clientIdList: ["sts.amazonaws.com"],
-        thumbprintList: [
-          tlsCertificate.certificates.get(0).sha1Fingerprint,
-        ],
+        thumbprintList: [tlsCertificate.certificates.get(0).sha1Fingerprint],
         url: tlsCertificate.url,
       },
     );
@@ -682,28 +680,111 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const helmReleaseNginx = new CDKTFProviderHelm.release.Release(
+    const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart",
+      "cndi_nginx_controller_helm_chart_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [
-          firstNodeGroup!,
-        ],
-        name: "ingress-nginx",
-        namespace: "ingress",
+        dependsOn: [eksCluster, firstNodeGroup!],
+        name: "ingress-nginx-private",
+        namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 600,
+        timeout: 300,
         atomic: true,
         set: [
           {
+            name: "service.beta.kubernetes.io/aws-load-balancer-scheme",
+            value: "internal",
+          },
+          {
             name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-            value: "nlb",
+              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name:
+              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
+            value: "linux",
           },
           {
             name: "controller.ingressClassResource.default",
+            value: "false",
+          },
+          {
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/private-nginx",
+          },
+          {
+            name: "controller.ingressClassResource.enabled",
+            value: "true",
+          },
+          {
+            name: "controller.ingressClassResource.name",
+            value: "private",
+          },
+          {
+            name: "controller.electionID",
+            value: "private-controller-leader",
+          },
+          {
+            name: "controller.extraArgs.tcp-services-configmap",
+            value: "ingress-private/ingress-nginx-private-controller",
+          },
+          {
+            name: "rbac.create",
+            value: "false",
+          },
+        ],
+        version: "4.8.3",
+      },
+    );
+
+    const helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_nginx_controller_helm_chart_public",
+      {
+        chart: "ingress-nginx",
+        createNamespace: true,
+        dependsOn: [eksCluster],
+        name: "ingress-nginx-public",
+        namespace: "ingress-public",
+        repository: "https://kubernetes.github.io/ingress-nginx",
+        timeout: 300,
+        atomic: true,
+        set: [
+          {
+            name: "service.beta.kubernetes.io/aws-load-balancer-type",
+            value: "nlb",
+          },
+          {
+            name:
+              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name:
+              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name: "controller.ingressClassResource.default",
+            value: "false",
+          },
+          {
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/public-nginx",
+          },
+          {
+            name: "controller.ingressClassResource.enabled",
             value: "true",
           },
           {
@@ -711,11 +792,19 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "public",
           },
           {
+            name: "controller.electionID",
+            value: "public-controller-leader",
+          },
+          {
             name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress/ingress-nginx-controller",
+            value: "ingress-public/ingress-nginx-public-controller",
+          },
+          {
+            name: "rbac.create",
+            value: "false",
           },
         ],
-        version: "4.7.1",
+        version: "4.8.3",
       },
     );
 
@@ -741,9 +830,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const argocdAdminPasswordHashed = Fn.bcrypt(
-      this.variables.argocd_admin_password.value,
-      10,
+    const argocdAdminPasswordHashed = Fn.sensitive(
+      Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
     );
 
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
@@ -755,42 +843,17 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
-      this,
-      "argocd_namespace",
-      {
-        metadata: {
-          name: "argocd",
-        },
-      },
-    );
-
-    const _argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret
-      .Secret(
-      this,
-      "cndi_argocd_admin_password_secret",
-      {
-        dependsOn: [argocdNamespace],
-        metadata: {
-          name: "argocd-secret",
-          namespace: "argocd",
-        },
-        data: {
-          // TODO: investigate high chance of this being broken!
-          "admin.password": argocdAdminPasswordHashed,
-          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
-        },
-      },
-    );
-
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_argocd_helm_chart",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
-        createNamespace: false,
-        dependsOn: [efsFs, firstNodeGroup!, argocdNamespace],
+        createNamespace: true,
+        dependsOn: [
+          efsFs,
+          firstNodeGroup!,
+        ],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -799,7 +862,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         repository: "https://argoproj.github.io/argo-helm",
         version: "5.45.0",
         set: [
-          { name: "configs.secret.createSecret", value: "false", type: "auto" },
+          {
+            name: "server.service.annotations.redeployTime",
+            value: argocdAdminPasswordMtime.id,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPassword",
+            value: argocdAdminPasswordHashed,
+          },
+          {
+            name: "configs.secret.argocdServerAdminPasswordMtime",
+            value: argocdAdminPasswordMtime.id,
+          },
         ],
       },
     );
@@ -917,7 +991,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
-        dependsOn: [helmReleaseNginx],
+        dependsOn: [helmReleaseNginxPublic],
       },
     );
 

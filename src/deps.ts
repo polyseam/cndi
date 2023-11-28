@@ -114,6 +114,7 @@ import * as CDKTFRandomProvider from "npm:@cdktf/provider-random";
 export const RandomProvider = CDKTFRandomProvider.provider.RandomProvider;
 export const RandomPassword = CDKTFRandomProvider.password.Password;
 export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";
+export * as CDKTFProviderAzure from "npm:@cdktf/provider-azurerm";
 export * as CDKTFProviderHelm from "npm:@cdktf/provider-helm";
 export * as CDKTFProviderKubernetes from "npm:@cdktf/provider-kubernetes";
 export * as CDKTFProviderTime from "npm:@cdktf/provider-time";
