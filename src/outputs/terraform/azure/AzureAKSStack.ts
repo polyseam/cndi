@@ -205,7 +205,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart",
+      "cndi_nginx_controller_helm_chart_public",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -274,7 +274,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart",
+      "cndi_nginx_controller_helm_chart_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,

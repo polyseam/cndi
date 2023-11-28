@@ -4,7 +4,7 @@ import { CNDIPort, ManagedNodeKind } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
-  "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:"
+  "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:",
 );
 
 type ManagedAnnotations = {
@@ -13,9 +13,7 @@ type ManagedAnnotations = {
 
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
   eks: { "service.beta.kubernetes.io/aws-load-balancer-type": "nlb" },
-  gke: {
-   
-  },
+  gke: {},
   aks: {
     "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
       "/healthz",
@@ -60,7 +58,7 @@ type ServicePort = {
 
 const getIngressServiceManifest = (
   user_ports: Array<CNDIPort>,
-  kind: ManagedNodeKind
+  kind: ManagedNodeKind,
 ): string => {
   const ports: Array<ServicePort> = [...default_ports];
 
@@ -74,7 +72,7 @@ const getIngressServiceManifest = (
     if (!port?.number) {
       console.error(
         ingressTcpServicesConfigMapManifestLabel,
-        'custom port specs need "number" property'
+        'custom port specs need "number" property',
       );
     }
 
@@ -84,7 +82,7 @@ const getIngressServiceManifest = (
 
     if (disable) {
       const portToRemove = ports.findIndex(
-        (item) => item.port === port.number || item.name === port.name
+        (item) => item.port === port.number || item.name === port.name,
       );
       if (portToRemove > -1) {
         ports.splice(portToRemove, 1);

@@ -50,7 +50,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `CNDIInternetGateway_${project_name}`,
         },
-      }
+      },
     );
 
     const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
@@ -64,18 +64,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
       this,
       "cndi_aws_caller_identity",
-      {}
+      {},
     );
 
     // TODO: should this be further filtered according to instance_type avaiability?
-    const availabilityZones =
-      new CDKTFProviderAWS.dataAwsAvailabilityZones.DataAwsAvailabilityZones(
-        this,
-        "available-zones",
-        {
-          state: "available",
-        }
-      );
+    const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
+      .DataAwsAvailabilityZones(
+      this,
+      "available-zones",
+      {
+        state: "available",
+      },
+    );
 
     const securityGroupIngresses = [
       {
@@ -128,7 +128,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `CNDISecurityGroup_${project_name}`,
         },
-      }
+      },
     );
 
     const subnetPrivateA = new CDKTFProviderAWS.subnet.Subnet(
@@ -144,7 +144,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "kubernetes.io/role/internal-elb": "1",
         },
         vpcId: vpc.id,
-      }
+      },
     );
 
     const subnetPrivateB = new CDKTFProviderAWS.subnet.Subnet(
@@ -155,12 +155,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.4.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: "PrivateSubnetB",
+          Name: `PrivateSubnetB_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
         vpcId: vpc.id,
-      }
+      },
     );
 
     const subnetPublicA = new CDKTFProviderAWS.subnet.Subnet(
@@ -171,12 +171,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: "PublicSubnetA",
+          Name: `PublicSubnetA_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/elb": "1",
         },
         vpcId: vpc.id,
-      }
+      },
     );
 
     const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
@@ -187,7 +187,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `ElasticFileSystem_${project_name}`,
         },
-      }
+      },
     );
 
     const _efsAccessPoint = new CDKTFProviderAWS.efsAccessPoint.EfsAccessPoint(
@@ -198,7 +198,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `ElasticFileSystemAccessPoint_${project_name}`,
         },
-      }
+      },
     );
 
     const _efsMountTargetA = new CDKTFProviderAWS.efsMountTarget.EfsMountTarget(
@@ -208,32 +208,32 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         fileSystemId: efsFs.id,
         securityGroups: [securityGroup.id],
         subnetId: subnetPrivateA.id,
-      }
+      },
     );
 
-    const computePolicy =
-      new CDKTFProviderAWS.dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
-        this,
-        "cndi_aws_iam_policy_document_eks_ec2",
-        {
-          statement: [
-            {
-              actions: ["sts:AssumeRole"],
-              effect: "Allow",
-              principals: [
-                {
-                  identifiers: ["eks.amazonaws.com"],
-                  type: "Service",
-                },
-                {
-                  identifiers: ["ec2.amazonaws.com"],
-                  type: "Service",
-                },
-              ],
-            },
-          ],
-        }
-      );
+    const computePolicy = new CDKTFProviderAWS.dataAwsIamPolicyDocument
+      .DataAwsIamPolicyDocument(
+      this,
+      "cndi_aws_iam_policy_document_eks_ec2",
+      {
+        statement: [
+          {
+            actions: ["sts:AssumeRole"],
+            effect: "Allow",
+            principals: [
+              {
+                identifiers: ["eks.amazonaws.com"],
+                type: "Service",
+              },
+              {
+                identifiers: ["ec2.amazonaws.com"],
+                type: "Service",
+              },
+            ],
+          },
+        ],
+      },
+    );
 
     const computeRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
@@ -241,7 +241,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         namePrefix: "EC2EKS",
         assumeRolePolicy: computePolicy.json,
-      }
+      },
     );
 
     const natGateway = new CDKTFProviderAWS.natGateway.NatGateway(
@@ -254,7 +254,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `NATGateway_${project_name}`,
         },
-      }
+      },
     );
 
     const publicRouteTable = new CDKTFProviderAWS.routeTable.RouteTable(
@@ -265,7 +265,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           Name: `RouteTablePublic_${project_name}`,
         },
         vpcId: vpc.id,
-      }
+      },
     );
 
     const _publicRoute = new CDKTFProviderAWS.route.Route(
@@ -275,7 +275,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         routeTableId: publicRouteTable.id,
         destinationCidrBlock: "0.0.0.0/0",
         gatewayId: igw.id,
-      }
+      },
     );
 
     const privateRouteTable = new CDKTFProviderAWS.routeTable.RouteTable(
@@ -286,7 +286,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           Name: `RouteTablePrivate_${project_name}`,
         },
         vpcId: vpc.id,
-      }
+      },
     );
 
     const _privateRoute = new CDKTFProviderAWS.route.Route(
@@ -296,69 +296,68 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         routeTableId: privateRouteTable.id,
         destinationCidrBlock: "0.0.0.0/0",
         natGatewayId: natGateway.id,
-      }
+      },
     );
 
-    const clusterPolicyAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_eks_cluster_policy",
-        {
-          role: computeRole.name,
-          policyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-        }
-      );
+    const clusterPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_cluster_policy",
+      {
+        role: computeRole.name,
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      },
+    );
 
-    const servicePolicyAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_eks_service_policy",
-        {
-          policyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-          role: computeRole.name,
-        }
-      );
+    const servicePolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_service_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+        role: computeRole.name,
+      },
+    );
 
-    const workerNodePolicyAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
-        {
-          policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-          role: computeRole.name,
-        }
-      );
+    const workerNodePolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+        role: computeRole.name,
+      },
+    );
 
-    const cniPolicyAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_eks_cni_policy",
-        {
-          policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-          role: computeRole.name,
-        }
-      );
+    const cniPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_cni_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+        role: computeRole.name,
+      },
+    );
 
-    const containerRegistryAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
-        {
-          policyArn:
-            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-          role: computeRole.name,
-        }
-      );
+    const containerRegistryAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+        role: computeRole.name,
+      },
+    );
 
-    const _vpcAttachment =
-      new CDKTFProviderAWS.iamRolePolicyAttachment.IamRolePolicyAttachment(
-        this,
-        "cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller",
-        {
-          policyArn: "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
-          role: computeRole.name,
-        }
-      );
+    const _vpcAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
+        role: computeRole.name,
+      },
+    );
 
     new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
       this,
@@ -366,7 +365,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         routeTableId: privateRouteTable.id,
         subnetId: subnetPrivateA.id,
-      }
+      },
     );
 
     new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
@@ -375,7 +374,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         routeTableId: privateRouteTable.id,
         subnetId: subnetPrivateB.id,
-      }
+      },
     );
 
     new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
@@ -384,7 +383,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         routeTableId: publicRouteTable.id,
         subnetId: subnetPublicA.id,
-      }
+      },
     );
 
     const eksCluster = new CDKTFProviderAWS.eksCluster.EksCluster(
@@ -412,12 +411,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
         dependsOn: [clusterPolicyAttachment, servicePolicyAttachment],
-      }
+      },
     );
 
     const kubernetes = {
       clusterCaCertificate: Fn.base64decode(
-        eksCluster.certificateAuthority.get(0).data
+        eksCluster.certificateAuthority.get(0).data,
       ),
       host: eksCluster.endpoint,
       exec: {
@@ -430,32 +429,32 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
       "kubernetes",
-      kubernetes
+      kubernetes,
     );
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
       kubernetes,
     });
 
-    const tlsCertificate =
-      new CDKTFProviderTls.dataTlsCertificate.DataTlsCertificate(
-        this,
-        "cndi_tls_certificate",
-        {
-          url: eksCluster.identity.get(0).oidc.get(0).issuer,
-        }
-      );
+    const tlsCertificate = new CDKTFProviderTls.dataTlsCertificate
+      .DataTlsCertificate(
+      this,
+      "cndi_tls_certificate",
+      {
+        url: eksCluster.identity.get(0).oidc.get(0).issuer,
+      },
+    );
 
-    const iamOpenIdConnectProvider =
-      new CDKTFProviderAWS.iamOpenidConnectProvider.IamOpenidConnectProvider(
-        this,
-        "cndi_aws_iam_openid_connect_provider",
-        {
-          clientIdList: ["sts.amazonaws.com"],
-          thumbprintList: [tlsCertificate.certificates.get(0).sha1Fingerprint],
-          url: tlsCertificate.url,
-        }
-      );
+    const iamOpenIdConnectProvider = new CDKTFProviderAWS
+      .iamOpenidConnectProvider.IamOpenidConnectProvider(
+      this,
+      "cndi_aws_iam_openid_connect_provider",
+      {
+        clientIdList: ["sts.amazonaws.com"],
+        thumbprintList: [tlsCertificate.certificates.get(0).sha1Fingerprint],
+        url: tlsCertificate.url,
+      },
+    );
 
     const webIdentityRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
@@ -471,16 +470,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               Action: ["sts:AssumeRoleWithWebIdentity"],
               Condition: {
                 StringEquals: {
-                  "system:serviceaccount:kube-system:efs-csi-controller-sa": `${Fn.replace(
-                    iamOpenIdConnectProvider.url,
-                    "https://",
-                    ""
-                  )}:sub`,
-                  "system:serviceaccount:kube-system:ebs-csi-controller-sa": `${Fn.replace(
-                    iamOpenIdConnectProvider.url,
-                    "https://",
-                    ""
-                  )}:sub`,
+                  "system:serviceaccount:kube-system:efs-csi-controller-sa": `${
+                    Fn.replace(
+                      iamOpenIdConnectProvider.url,
+                      "https://",
+                      "",
+                    )
+                  }:sub`,
+                  "system:serviceaccount:kube-system:ebs-csi-controller-sa": `${
+                    Fn.replace(
+                      iamOpenIdConnectProvider.url,
+                      "https://",
+                      "",
+                    )
+                  }:sub`,
                 },
               },
               Effect: "Allow",
@@ -490,7 +493,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             },
           ],
         }),
-      }
+      },
     );
 
     const _webIdentityPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
@@ -561,7 +564,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             },
           ],
         }),
-      }
+      },
     );
 
     let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup | null =
@@ -573,11 +576,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       const minCount = nodeGroup?.min_count;
       const nodeGroupName = nodeGroup.name;
 
-      const instanceType =
-        nodeGroup?.instance_type || DEFAULT_INSTANCE_TYPES.aws;
+      const instanceType = nodeGroup?.instance_type ||
+        DEFAULT_INSTANCE_TYPES.aws;
 
-      const diskSize =
-        nodeGroup?.volume_size ||
+      const diskSize = nodeGroup?.volume_size ||
         nodeGroup?.disk_size ||
         nodeGroup?.disk_size_gb ||
         DEFAULT_NODE_DISK_SIZE_MANAGED;
@@ -614,7 +616,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             cniPolicyAttachment,
             containerRegistryAttachment,
           ],
-        }
+        },
       );
       if (!firstNodeGroup) {
         firstNodeGroup = ng;
@@ -635,17 +637,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
+            name:
+              "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
           {
-            name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
+            name:
+              "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
           { name: "storageClasses[0].name", value: "nfs" },
           { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com" },
           {
-            name: "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+            name:
+              "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
             value: '"false"',
           },
           {
@@ -672,12 +677,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "700",
           },
         ],
-      }
+      },
     );
 
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart",
+      "cndi_nginx_controller_helm_chart_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -693,11 +698,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "internal",
           },
           {
-            name: "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
+            name:
+              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
             value: "linux",
           },
           {
-            name: "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
+            name:
+              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
             value: "linux",
           },
           {
@@ -734,12 +741,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
         ],
         version: "4.8.3",
-      }
+      },
     );
 
     const helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart",
+      "cndi_nginx_controller_helm_chart_public",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -751,8 +758,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name:  "service.beta.kubernetes.io/aws-load-balancer-type",
-            value: "nlb"
+            name: "service.beta.kubernetes.io/aws-load-balancer-type",
+            value: "nlb",
           },
           {
             name:
@@ -820,22 +827,22 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
         ],
         version: "1.12.3",
-      }
+      },
     );
 
     const argocdAdminPasswordHashed = Fn.bcrypt(
       this.variables.argocd_admin_password.value,
-      10
+      10,
     );
 
-    const argocdAdminPasswordMtime =
-      new CDKTFProviderTime.staticResource.StaticResource(
-        this,
-        "cndi_time_static_admin_password_update",
-        {
-          triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
-        }
-      );
+    const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
+      .StaticResource(
+      this,
+      "cndi_time_static_admin_password_update",
+      {
+        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+      },
+    );
 
     const argocdNamespace = new CDKTFProviderKubernetes.namespace.Namespace(
       this,
@@ -844,26 +851,26 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         metadata: {
           name: "argocd",
         },
-      }
+      },
     );
 
-    const _argocdAdminPasswordSecret =
-      new CDKTFProviderKubernetes.secret.Secret(
-        this,
-        "cndi_argocd_admin_password_secret",
-        {
-          dependsOn: [argocdNamespace],
-          metadata: {
-            name: "argocd-secret",
-            namespace: "argocd",
-          },
-          data: {
-            // TODO: investigate high chance of this being broken!
-            "admin.password": argocdAdminPasswordHashed,
-            "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
-          },
-        }
-      );
+    const _argocdAdminPasswordSecret = new CDKTFProviderKubernetes.secret
+      .Secret(
+      this,
+      "cndi_argocd_admin_password_secret",
+      {
+        dependsOn: [argocdNamespace],
+        metadata: {
+          name: "argocd-secret",
+          namespace: "argocd",
+        },
+        data: {
+          // TODO: investigate high chance of this being broken!
+          "admin.password": argocdAdminPasswordHashed,
+          "admin.passwordMtime": argocdAdminPasswordMtime.id, // this is not exactly what existed before
+        },
+      },
+    );
 
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
@@ -883,7 +890,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         set: [
           { name: "configs.secret.createSecret", value: "false", type: "auto" },
         ],
-      }
+      },
     );
 
     if (useSshRepoAuth()) {
@@ -904,7 +911,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             url: this.variables.git_repo.value,
             sshPrivateKey: this.variables.git_ssh_private_key.value,
           },
-        }
+        },
       );
     } else {
       new CDKTFProviderKubernetes.secret.Secret(
@@ -925,7 +932,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             username: this.variables.git_username.value,
             url: this.variables.git_repo.value,
           },
-        }
+        },
       );
     }
 
@@ -946,7 +953,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "tls.crt": this.variables.sealed_secrets_public_key.value,
           "tls.key": this.variables.sealed_secrets_private_key.value,
         },
-      }
+      },
     );
 
     const _helmReleaseSealedSecrets = new CDKTFProviderHelm.release.Release(
@@ -961,7 +968,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         version: "2.12.0",
         timeout: 300,
         atomic: true,
-      }
+      },
     );
 
     const _helmReleaseEbsDriver = new CDKTFProviderHelm.release.Release(
@@ -978,16 +985,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
+            name:
+              "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
           {
-            name: "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
+            name:
+              "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
         ],
         version: "2.22.0",
-      }
+      },
     );
 
     const cndiNlb = new CDKTFProviderAWS.dataAwsLb.DataAwsLb(
@@ -998,7 +1007,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
         dependsOn: [helmReleaseNginxPublic],
-      }
+      },
     );
 
     const argoAppsValues = {
@@ -1048,16 +1057,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       value: Fn.replace(
         cndiNlb.dnsName,
         this.locals.aws_region.asString,
-        Fn.upper(this.locals.aws_region.asString)
+        Fn.upper(this.locals.aws_region.asString),
       ),
     });
 
     new TerraformOutput(this, "cndi_resource_group_url", {
-      value: `https://${Fn.upper(
-        this.locals.aws_region.asString
-      )}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${project_name}?region=${Fn.upper(
-        this.locals.aws_region.asString
-      )}`,
+      value: `https://${
+        Fn.upper(
+          this.locals.aws_region.asString,
+        )
+      }.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${project_name}?region=${
+        Fn.upper(
+          this.locals.aws_region.asString,
+        )
+      }`,
     });
   }
 }
