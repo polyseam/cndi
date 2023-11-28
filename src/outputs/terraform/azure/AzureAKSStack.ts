@@ -6,7 +6,6 @@ import {
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
-  CDKTFProviderNull,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
@@ -46,7 +45,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
-    new CDKTFProviderNull.provider.NullProvider(this, "cndi_null_provider", {});
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);

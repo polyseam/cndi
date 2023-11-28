@@ -5,7 +5,6 @@ import {
   CDKTFProviderAWS,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
-  CDKTFProviderNull,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
@@ -32,7 +31,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
-    new CDKTFProviderNull.provider.NullProvider(this, "cndi_null_provider", {});
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
       cidrBlock: "10.0.0.0/16",
