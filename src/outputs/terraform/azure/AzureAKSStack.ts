@@ -364,10 +364,10 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const argocdAdminPasswordHashed = Fn.bcrypt(
+    const argocdAdminPasswordHashed = Fn.sensitive(Fn.bcrypt(
       this.variables.argocd_admin_password.value,
       10,
-    );
+    ));
 
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
