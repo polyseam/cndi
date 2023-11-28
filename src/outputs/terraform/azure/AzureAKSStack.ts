@@ -183,6 +183,44 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       );
     }
 
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
+      "cndi_aks_file_strorage_class",
+      {
+        metadata: {
+          name: "nfs",
+        },
+        storageProvisioner: "file.csi.azure.com",
+        parameters: {
+          skuName: "Premium_LRS",
+          protocol: "nfs",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        volumeBindingMode: "WaitForFirstConsumer",
+      },
+    );
+
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
+      "cndi_aks_disk_strorage_class",
+      {
+        metadata: {
+          name: "cndi-managed-premium-v2-disk",
+          annotations: {
+            "storageclass.kubernetes.io/is-default-class": "true",
+          },
+        },
+        storageProvisioner: "disk.csi.azure.com",
+        parameters: {
+          skuName: "PremiumV2_LRS",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        volumeBindingMode: "WaitForFirstConsumer",
+      },
+    );
+
     // new CDKTFProviderAzure.roleAssignment.RoleAssignment(this, 'cndi_azure_aks_cluster_role_assignment', {
     //   principalId: cluster.identity.get(0).principalId,
     //   roleDefinitionName: "Acr Pull",
