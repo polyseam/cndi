@@ -2,6 +2,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import {
   App,
+  ccolors,
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
@@ -25,6 +26,13 @@ import {
 
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
+function isValidAzureAKSNodePoolName(inputString: string): boolean {
+  if (inputString.match(/^[0-9a-z]+$/) && inputString.length <= 12) {
+    return true;
+  }
+  return false;
+}
+
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"
@@ -43,11 +51,24 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
+        console.log("nodeSpec.name", nodeSpec.name);
+        if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
+          console.log(ccolors.error("ERROR: invalid node pool name"));
+          console.log(
+            "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
+          );
+          console.log("you entered", ccolors.user_input(nodeSpec.name));
+          Deno.exit(11);
+        }
+        const count = nodeSpec.count || 1;
+
         const scale = {
-          nodeCount: nodeSpec.count,
-          maxCount: nodeSpec.count,
-          minCount: nodeSpec.count,
+          nodeCount: count,
+          maxCount: count,
+          minCount: count,
         };
+
+        console.log("scale", scale);
 
         if (nodeSpec.max_count) {
           scale.maxCount = nodeSpec.max_count;
@@ -65,6 +86,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osSku: "Ubuntu",
           osDiskType: "Managed",
           type: "VirtualMachineScaleSets",
+          enableAutoScaling: true,
         };
         return nodePoolSpec;
       });
@@ -103,9 +125,15 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         skuTier: "Free",
         dnsPrefix: `cndi-aks-${project_name}`,
-        identity: {
-          type: "SystemAssigned",
+        // identity: {
+        //   type: "SystemAssigned",
+        // },
+        networkProfile: {
+          loadBalancerSku: "standard",
+          networkPlugin: "azure",
+          networkPolicy: "azure",
         },
+        roleBasedAccessControlEnabled: false, // Tamika
         storageProfile: {
           fileDriverEnabled: true,
           diskDriverEnabled: true,
@@ -119,15 +147,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         dependsOn: [this.rg],
       },
     );
-
-    // "apply_retry_count": 5,
-    // "client_certificate":
-    //   "${base64decode(module.cndi_aks_cluster.client_certificate)}",
-    // "client_key": "${base64decode(module.cndi_aks_cluster.client_key)}",
-    // "cluster_ca_certificate":
-    //   "${base64decode(module.cndi_aks_cluster.cluster_ca_certificate)}",
-    // "host": "${module.cndi_aks_cluster.host}",
-    // "load_config_file": false,
 
     const kubernetes = {
       clusterCaCertificate: Fn.base64decode(
@@ -184,23 +203,27 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const _helmReleaseNginx = new CDKTFProviderHelm.release.Release(
+    const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_nginx_controller_helm_chart",
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [cluster, publicIp],
-        name: "ingress-nginx",
-        namespace: "ingress",
+        dependsOn: [cluster],
+        name: "ingress-nginx-public",
+        namespace: "ingress-public",
         repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 600,
+        timeout: 300,
         atomic: true,
         set: [
           {
+            name: "controller.service.loadBalancerIP",
+            value: publicIp.ipAddress,
+          },
+          {
             name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
-            value: "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
+              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
           },
           {
             name:
@@ -208,8 +231,69 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
             value: "/healthz",
           },
           {
-            name: "controller.service.enabled",
+            name:
+              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
+            value: "linux",
+          },
+          {
+            name: "controller.ingressClassResource.default",
+            value: "false",
+          },
+          {
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/public-nginx",
+          },
+          {
+            name: "controller.ingressClassResource.enabled",
             value: "true",
+          },
+          {
+            name: "controller.ingressClassResource.name",
+            value: "public",
+          },
+          {
+            name: "controller.electionID",
+            value: "public-controller-leader",
+          },
+          {
+            name: "controller.extraArgs.tcp-services-configmap",
+            value: "ingress-public/ingress-nginx-public-controller",
+          },
+          {
+            name: "rbac.create",
+            value: "false",
+          },
+        ],
+        version: "4.8.3",
+      },
+    );
+
+    const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_nginx_controller_helm_chart",
+      {
+        chart: "ingress-nginx",
+        createNamespace: true,
+        dependsOn: [cluster],
+        name: "ingress-nginx-private",
+        namespace: "ingress-private",
+        repository: "https://kubernetes.github.io/ingress-nginx",
+        timeout: 300,
+        atomic: true,
+        set: [
+          {
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
+            value: "true",
+          },
+          {
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
+            value: "/healthz",
           },
           {
             name:
@@ -226,12 +310,12 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
             value: "linux",
           },
           {
-            name: "controller.service.loadBalancerIP",
-            value: "${azurerm_public_ip.cndi_azurerm_public_ip_lb.ip_address}",
+            name: "controller.ingressClassResource.default",
+            value: "false",
           },
           {
-            name: "controller.ingressClassResource.default",
-            value: "true",
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/private-nginx",
           },
           {
             name: "controller.ingressClassResource.enabled",
@@ -239,22 +323,22 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           },
           {
             name: "controller.ingressClassResource.name",
-            value: "public",
+            value: "private",
           },
           {
-            name: "controller.ingressClass",
-            value: "public",
+            name: "controller.electionID",
+            value: "private-controller-leader",
           },
           {
             name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress/ingress-nginx-controller",
+            value: "ingress-private/ingress-nginx-private-controller",
           },
           {
             name: "rbac.create",
             value: "false",
           },
         ],
-        version: "4.7.1",
+        version: "4.8.3",
       },
     );
 
