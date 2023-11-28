@@ -61,7 +61,11 @@ outputs:
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/neo4j/nodes/{{ $cndi.get_prompt_response(deployment_target_provider) }}.yaml):
             {}
-
+        open_ports:
+          - name: tcp-bolt
+            number: 7687
+            service: neo4j
+            namespace: neo4j
     cluster_manifests:
       $cndi.comment(neo4j-auth-secret): Neo4j Credentials
       neo4j-auth-secret:

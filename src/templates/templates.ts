@@ -992,7 +992,6 @@ export async function useTemplate(
         literalizedPromptKeyIdentifier,
         unparsedTemplateObject.blocks,
       );
-
       if (Array.isArray(promptSpecsFromBlock)) {
         // if a user supplies prompt response overrides, do not display those prompts, just insert their values
         // this time for prompts from blocks
