@@ -1,6 +1,6 @@
 import { getPrettyJSONString, getTFModule } from "src/utils.ts";
 import { GKENodeItemSpec } from "src/types.ts";
-import { DEFAULT_NODE_DISK_SIZE } from "consts";
+import { DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GKENodeItemSpec,
@@ -8,7 +8,8 @@ export default function getGCPComputeInstanceTFJSON(
   const DEFAULT_MACHINE_TYPE = "n2-standard-2"; // The machine type to create.
   const machine_type = node?.machine_type || node?.instance_type ||
     DEFAULT_MACHINE_TYPE;
-  const size = node?.size || node?.volume_size || DEFAULT_NODE_DISK_SIZE;
+  const size = node?.size || node?.volume_size ||
+    DEFAULT_NODE_DISK_SIZE_MANAGED;
   const max_size = node?.max_count || 3;
   const min_size = node?.min_count || 1;
   const desired_size = min_size;

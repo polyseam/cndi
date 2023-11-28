@@ -18,6 +18,7 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
+// TODO: make this real/remote
 export const POLYSEAM_TEMPLATE_DIRECTORY =
   "file:///Users/m/dev/polyseam/cndi/templates/";
 
@@ -992,7 +993,6 @@ export async function useTemplate(
         literalizedPromptKeyIdentifier,
         unparsedTemplateObject.blocks,
       );
-
       if (Array.isArray(promptSpecsFromBlock)) {
         // if a user supplies prompt response overrides, do not display those prompts, just insert their values
         // this time for prompts from blocks

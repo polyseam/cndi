@@ -89,6 +89,7 @@ Deno.test(
       assert(status.success);
       assert(readme.startsWith(`# ${project_name}`));
     });
+
     await t.step("cleanup", async () => {
       Deno.chdir("..");
       await Deno.remove(dir, { recursive: true });
@@ -203,7 +204,7 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init -t airflow -dt aws/microk8s' should successfully bootstrap an ec2/microk8s cluster",
+  "'cndi init -t airflow -l aws/microk8s' should successfully bootstrap an ec2/microk8s cluster",
   async (t) => {
     let dir = "";
     await t.step("setup", async () => {

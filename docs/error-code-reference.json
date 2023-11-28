@@ -11,7 +11,7 @@
   },
   {
     "code": 101,
-    "message": "'GIT_PASSWORD' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
+    "message": "'GIT_TOKEN' and 'GIT_PRIVATE_SSH_KEY' env var are not set for terraform",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/458"
   },
   {

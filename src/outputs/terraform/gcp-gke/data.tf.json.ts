@@ -14,7 +14,7 @@ export default function getGKEDataTFJSON(): string {
         argocd_private_repo_secret_manifest: {
           template: '${file("argocd_private_repo_secret_manifest.yaml.tftpl")}',
           vars: {
-            git_password: "${var.git_password}",
+            git_token: "${var.git_token}",
             git_repo: "${var.git_repo}",
             git_username: "${var.git_username}",
           },

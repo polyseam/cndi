@@ -1,6 +1,6 @@
 import { getPrettyJSONString, getTFResource } from "src/utils.ts";
 import { GCPNodeItemSpec } from "src/types.ts";
-import { DEFAULT_NODE_DISK_SIZE } from "consts";
+import { DEFAULT_NODE_DISK_SIZE_UNMANAGED } from "consts";
 
 export default function getGCPComputeInstanceTFJSON(
   node: GCPNodeItemSpec,
@@ -8,7 +8,8 @@ export default function getGCPComputeInstanceTFJSON(
   const { name } = node;
   const DEFAULT_IMAGE = "ubuntu-2004-focal-v20221121"; // The image from which to initialize this disk
   const image = node?.image || DEFAULT_IMAGE;
-  const size = node?.size || node?.volume_size || DEFAULT_NODE_DISK_SIZE;
+  const size = node?.size || node?.volume_size ||
+    DEFAULT_NODE_DISK_SIZE_UNMANAGED;
   const type = "pd-ssd"; //  The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
 
   const resource = getTFResource(

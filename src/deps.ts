@@ -97,3 +97,26 @@ export const ccolors = {
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
   },
 };
+
+export { Construct } from "npm:constructs";
+export {
+  App,
+  Fn,
+  LocalBackend,
+  TerraformLocal,
+  TerraformOutput,
+  TerraformStack,
+  TerraformVariable,
+} from "npm:cdktf";
+
+// Terraform CDKTF Providers
+import * as CDKTFRandomProvider from "npm:@cdktf/provider-random";
+export const RandomProvider = CDKTFRandomProvider.provider.RandomProvider;
+export const RandomPassword = CDKTFRandomProvider.password.Password;
+export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";
+export * as CDKTFProviderAzure from "npm:@cdktf/provider-azurerm";
+export * as CDKTFProviderHelm from "npm:@cdktf/provider-helm";
+export * as CDKTFProviderKubernetes from "npm:@cdktf/provider-kubernetes";
+export * as CDKTFProviderTime from "npm:@cdktf/provider-time";
+export * as CDKTFProviderNull from "npm:@cdktf/provider-null";
+export * as CDKTFProviderTls from "npm:@cdktf/provider-tls";

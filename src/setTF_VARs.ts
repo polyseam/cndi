@@ -4,7 +4,7 @@ const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
 export default async function setTF_VARs() {
   const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
-  const git_password = Deno.env.get("GIT_PASSWORD");
+  const git_token = Deno.env.get("GIT_TOKEN");
   const git_username = Deno.env.get("GIT_USERNAME");
 
   if (!git_username && !git_ssh_private_key) {
@@ -17,11 +17,11 @@ export default async function setTF_VARs() {
     Deno.exit(100);
   }
 
-  if (!git_password && !git_ssh_private_key) {
+  if (!git_token && !git_ssh_private_key) {
     console.error(
       setTF_VARsLabel,
       ccolors.error("Either"),
-      ccolors.key_name(`"GIT_PASSWORD"`),
+      ccolors.key_name(`"GIT_TOKEN"`),
       ccolors.error("or"),
       ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
       ccolors.error("must be set"),
@@ -84,7 +84,7 @@ export default async function setTF_VARs() {
     Deno.env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
   } else {
     git_username && Deno.env.set("TF_VAR_git_username", git_username);
-    git_password && Deno.env.set("TF_VAR_git_password", git_password);
+    git_token && Deno.env.set("TF_VAR_git_token", git_token);
   }
 
   Deno.env.set("TF_VAR_git_repo", git_repo);
@@ -93,8 +93,8 @@ export default async function setTF_VARs() {
   Deno.env.set("TF_VAR_sealed_secrets_private_key", sealed_secrets_private_key);
 
   // aks module requires cred be set explicitly
-  const az_client_id = Deno.env.get("ARM_CLIENT_ID") || "";
-  const az_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
-  Deno.env.set("TF_VAR_client_id", az_client_id);
-  Deno.env.set("TF_VAR_client_secret", az_client_secret);
+  const azurerm_client_id = Deno.env.get("ARM_CLIENT_ID") || "";
+  const azurerm_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
+  Deno.env.set("TF_VAR_arm_client_id", azurerm_client_id);
+  Deno.env.set("TF_VAR_arm_client_secret", azurerm_client_secret);
 }

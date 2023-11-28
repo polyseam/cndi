@@ -212,6 +212,7 @@ outputs:
               credentialsSecret: airflow-git-credentials
               branch: main
               wait: 40
+              $cndi.comment(subPath): Folder path in DAG repo to sync
               subPath: dags
           config:
             $cndi.get_block(airflow_public_config):

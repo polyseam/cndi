@@ -42,9 +42,9 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   const userAddons = config.infrastructure.cndi?.microk8s?.addons;
   if (userAddons) {
     for (const userAddon of userAddons) {
-      const index = defaultAddons.findIndex((
-        defaultAddon: Microk8sAddon,
-      ) => (defaultAddon.name === userAddon.name));
+      const index = defaultAddons.findIndex(
+        (defaultAddon: Microk8sAddon) => defaultAddon.name === userAddon.name,
+      );
 
       if (index !== -1) {
         addons[index] = {
@@ -59,7 +59,8 @@ const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
   return addons;
 };
 
-const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide opt-in for key-based auth
+const getClusterRepoSecretYaml = (useSshRepoAuth = false) => {
+  // TODO: provide opt-in for key-based auth
   if (useSshRepoAuth) {
     return getClusterRepoSecretSSHTemplate();
   } else {
@@ -68,12 +69,13 @@ const getClusterRepoSecretYaml = (useSshRepoAuth = false) => { // TODO: provide 
 };
 
 type GetLeaderCloudInitYamlOptions = {
-  useSshRepoAuth?: boolean;
+  useSshRepoAuth: boolean;
+  useClusterHA: boolean;
 };
 
 const getLeaderCloudInitYaml = (
   config: CNDIConfig,
-  { useSshRepoAuth }: GetLeaderCloudInitYamlOptions,
+  { useSshRepoAuth, useClusterHA }: GetLeaderCloudInitYamlOptions,
 ) => {
   const addons = getMicrok8sAddons(config);
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
@@ -81,8 +83,9 @@ const getLeaderCloudInitYaml = (
   const microk8sChannel = config.infrastructure.cndi?.microk8s?.channel ||
     "stable";
 
-  const DEFAULT_ARGOCD_INSTALL_URL =
-    `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
+  const DEFAULT_ARGOCD_INSTALL_URL = useClusterHA
+    ? `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/ha/install.yaml`
+    : `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
 
   const userBefore =
     config.infrastructure.cndi?.microk8s?.["cloud-init"]?.leader_before || [];
@@ -108,6 +111,7 @@ const getLeaderCloudInitYaml = (
       },
     ],
   };
+
   const microk8sLeaderLaunchConfigYaml = YAML.stringify(
     microk8sLeaderLaunchConfig,
   );

@@ -8,6 +8,7 @@
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "clean-dist": "rm dist/cndi-mac dist/cndi-linux dist/cndi-win.exe || true",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all",
+    "build-linux": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux",
     "test": "deno test --allow-all",
     "test-fast": "deno test --allow-all --fail-fast",
     "test-watch": "deno test --allow-all --watch"
