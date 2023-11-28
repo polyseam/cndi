@@ -11,16 +11,12 @@ type ManagedAnnotations = {
   [key in ManagedNodeKind]: Record<string, string>;
 };
 
-// TODO: @IamTamika - please verify/add annotations for each managed provider
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
-  eks: {
-    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
-  },
-  gke: {
-    "cloud.google.com/load-balancer-type": "nlb",
-  },
+  eks: { "service.beta.kubernetes.io/aws-load-balancer-type": "nlb" },
+  gke: {}, // TODO: this might be necessary for GKE
   aks: {
-    "service.beta.kubernetes.io/azure-load-balancer-type": "nlb",
+    "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
+      "/healthz",
   },
 };
 
@@ -29,7 +25,7 @@ interface IngressService {
   kind: "Service";
   metadata: {
     name: string;
-    namespace: "ingress";
+    namespace: "ingress-public";
     annotations: Record<string, string>;
   };
   spec: {
@@ -105,8 +101,8 @@ const getIngressServiceManifest = (
     apiVersion: "v1",
     kind: "Service",
     metadata: {
-      name: "ingress-nginx-controller-public",
-      namespace: "ingress",
+      name: "ingress-nginx-public-controller",
+      namespace: "ingress-public",
       annotations: MANAGED_ANNOTATIONS[kind],
     },
     spec: {
