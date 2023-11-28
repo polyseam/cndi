@@ -5,10 +5,6 @@ blocks:
       GIT_SYNC_USERNAME: "{{ $cndi.get_prompt_response(airflow_git_sync_username) }}"
       GIT_SYNC_PASSWORD: "{{ $cndi.get_prompt_response(airflow_git_sync_password) }}"
   
-  - name: placeholder
-    content:
-      foo: bar
-
   - name: git_sync_dedicated
     content:
       apiVersion: v1
@@ -56,6 +52,7 @@ blocks:
         enabled: true
         annotations:
           cert-manager.io/cluster-issuer: cluster-issuer
+        ingressClassName: public
         hosts:
           - name: "{{ $cndi.get_arg(hostname) }}"
             tls:
@@ -172,6 +169,63 @@ outputs:
             - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
             - ==
             - true
+      postgresql-connection-string-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: postgresql-connection-string-secret
+          namespace: airflow
+        type: Opaque
+        stringData:
+          connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
+      cnpg-cluster:
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Cluster
+        metadata:
+          name: cnpg-airflow-cluster
+          namespace: airflow
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          imageName: "ghcr.io/cloudnative-pg/postgresql:15.2"
+          instances: 3
+          storage:
+            size: 1Gi
+          replicationSlots:
+            highAvailability:
+              enabled: true
+          postgresql:
+            pg_hba:
+              - >-
+                host airflow-db airflow all password
+          bootstrap:
+            initdb:
+              database: airflow-db
+              owner: airflow
+              secret:
+                name: cnpg-database-user-auth-secret
+          superuserSecret:
+            name: cnpg-cluster-superuser-auth-secret
+      cnpg-cluster-superuser-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-cluster-superuser-auth-secret
+          namespace: airflow
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+      cnpg-database-user-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-database-user-auth-secret
+          namespace: airflow
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):

@@ -119,6 +119,7 @@ outputs:
             # the semi-colon can also be removed in similar expressions
             nginx.ingress.kubernetes.io/configuration-snippet: limit_req_status {{ $cndi.get_prompt_response(rate_limit_status_code) }};
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $cndi.get_prompt_response(proxy_host) }}" # domain to deploy proxy to

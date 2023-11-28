@@ -10,6 +10,7 @@ blocks:
           cert-manager.io/cluster-issuer: cluster-issuer
           kubernetes.io/tls-acme: 'true'
       spec:
+        ingressClassName: public
         tls:
           - hosts:
               - "{{ $cndi.get_arg(hostname) }}"

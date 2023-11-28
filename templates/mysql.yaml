@@ -12,6 +12,7 @@ blocks:
             nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         spec:
+          ingressClassName: public
           tls:
             - hosts:
                 - "{{ $cndi.get_arg(hostname) }}"
