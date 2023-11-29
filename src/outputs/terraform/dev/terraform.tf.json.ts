@@ -1,13 +1,21 @@
 import { getPrettyJSONString } from "src/utils.ts";
-import getTerraform from "src/outputs/terraform/shared/basicTerraform.ts";
 
 export default function getDevTerraformTFJSON() {
-  const terraform = getTerraform({
-    multipass: {
-      source: "larstobi/multipass",
-      version: "~> 1.4.2",
+  const terraform = {
+    terraform: {
+      required_providers: {
+        multipass: {
+          source: "larstobi/multipass",
+          version: "~> 1.4.2",
+        },
+        external: {
+          source: "hashicorp/external",
+          version: "2.2.2",
+        },
+      },
+      required_version: ">= 1.2.0",
     },
-  });
+  };
 
   return getPrettyJSONString(terraform);
 }

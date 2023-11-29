@@ -9,11 +9,12 @@ import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMic
 import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
 import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
 import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
-import stageTerraformResourcesForGCP from "src/outputs/terraform/gcp/stageAll.ts";
+import { stageTerraformSynthGCPMicrok8s } from "src/outputs/terraform/gcp/GCPMicrok8sStack.ts";
+import { stageTerraformSynthGCPGKE } from "src/outputs/terraform/gcp/GCPGKEStack.ts";
 // import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
 // import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
 import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
-import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
+// import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
 // import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
 // import global_variable from "src/outputs/terraform/shared/global.variable.tf.json.ts";
 // import global_locals from "src/outputs/terraform/shared/global.locals.tf.json.ts";
@@ -23,7 +24,7 @@ import microk8sCloudInitFollowerTerraformTemplate from "src/cloud-init/microk8s/
 
 export default async function stageTerraformResourcesForConfig(
   config: CNDIConfig,
-  options: { output: string; initializing: boolean },
+  // options: { output: string; initializing: boolean },
 ) {
   const { distribution, provider } = config;
 
@@ -37,10 +38,10 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformSynthAWSEKS(config);
       break;
     case "gcp/gke":
-      await stageTerraformResourcesForGCPGKE(config, options);
+      await stageTerraformSynthGCPGKE(config);
       break;
     case "gcp/microk8s":
-      await stageTerraformResourcesForGCP(config, options);
+      await stageTerraformSynthGCPMicrok8s(config);
       break;
     case "azure/microk8s":
       await stageTerraformSynthAzureMicrok8s(config);

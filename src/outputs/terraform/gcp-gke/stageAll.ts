@@ -110,11 +110,7 @@ export default async function stageTerraformResourcesForGCPGKE(
 
   const stageNodes = config.infrastructure.cndi.nodes.map((node) =>
     stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        `cndi_gke_cluster_${node.name}.tf.json`,
-      ),
+      path.join("cndi", "terraform", `cndi_gke_cluster_${node.name}.tf.json`),
       cndi_gke_cluster(node as GKENodeItemSpec),
     )
   );
@@ -131,10 +127,7 @@ export default async function stageTerraformResourcesForGCPGKE(
           client_email: parsedJSONServiceAccountClientEmail.client_email,
         }),
       ),
-      stageFile(
-        path.join("cndi", "terraform", "provider.tf.json"),
-        provider(),
-      ),
+      stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider()),
       stageFile(
         path.join("cndi", "terraform", "cndi_outputs.tf.json"),
         cndi_outputs(),
@@ -189,11 +182,7 @@ export default async function stageTerraformResourcesForGCPGKE(
         cndi_google_compute_subnetwork(),
       ),
       stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_google_compute_address.tf.json",
-        ),
+        path.join("cndi", "terraform", "cndi_google_compute_address.tf.json"),
         cndi_google_compute_address(),
       ),
       stageFile(
@@ -205,11 +194,7 @@ export default async function stageTerraformResourcesForGCPGKE(
         cndi_nginx_controller_helm_chart(),
       ),
       stageFile(
-        path.join(
-          "cndi",
-          "terraform",
-          "cndi_cert_manager_helm_chart.tf.json",
-        ),
+        path.join("cndi", "terraform", "cndi_cert_manager_helm_chart.tf.json"),
         cndi_cert_manager_helm_chart(),
       ),
       stageFile(
