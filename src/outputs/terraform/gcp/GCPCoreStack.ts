@@ -1,4 +1,5 @@
-import { CDKTFProviderGCP, Construct } from "deps";
+import { Construct } from "deps";
+import { CDKTFProviderGCP } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
@@ -20,6 +21,7 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
     const key = Deno.env.get("GOOGLE_CREDENTIALS");
+
     if (!key) {
       throw new Error("'GOOGLE_CREDENTIALS' env variable not set");
     }

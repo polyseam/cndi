@@ -136,7 +136,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  await stageTerraformResourcesForConfig(config, options);
+  await stageTerraformResourcesForConfig(config); //, options);
   console.log(ccolors.success("staged terraform files"));
 
   const cert_manager = config?.infrastructure?.cndi?.cert_manager;
