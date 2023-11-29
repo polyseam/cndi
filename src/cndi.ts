@@ -30,6 +30,16 @@ export default async function cndi() {
     throw new Error("deno.json is missing a version");
   }
 
+  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+
+  if (isDebug) {
+    console.log(
+      "using",
+      ccolors.warn(`${Math.floor(Deno.memoryUsage().rss / 1_000_000)}mb`),
+      "of RAM\n",
+    );
+  }
+
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
 
   const CNDI_VERSION = `${deno_json?.version}`;
