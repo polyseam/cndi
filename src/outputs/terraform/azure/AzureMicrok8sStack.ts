@@ -216,7 +216,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
 
         const leader_node_ip = role === "leader"
           ? null
-          : leaderInstance!.publicIpAddress;
+          : leaderInstance!.privateIpAddress;
 
         const nodeName = `${node.name}-${i}`;
 
