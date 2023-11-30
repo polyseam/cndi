@@ -2,7 +2,7 @@ import {
   App,
   CDKTFProviderAzure,
   Construct,
-  // Fn,
+  Fn,
   // TerraformLocal,
   TerraformOutput,
 } from "deps";
@@ -14,7 +14,6 @@ import {
 
 import {
   getCDKTFAppConfig,
-  getUserDataTemplateFileString,
   resolveCNDIPorts,
   stageCDKTFStack,
 } from "src/utils.ts";
@@ -78,11 +77,23 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           publicIpAddressId: publicIp.id,
         },
       ],
+      sku: "Standard",
+      skuTier: "Regional",
       location: this.rg.location!,
       name: `cndi_azure_load_balancer`,
       resourceGroupName: this.rg.name,
       tags,
     });
+
+    const backendAddressPool = new CDKTFProviderAzure.lbBackendAddressPool
+      .LbBackendAddressPool(
+      this,
+      "cndi_azure_lb_backend_address_pool",
+      {
+        loadbalancerId: lb.id,
+        name: `cndi_azure_lb_backend_address_pool`,
+      },
+    );
 
     const securityRule: Array<
       CDKTFProviderAzure.networkSecurityGroup.NetworkSecurityGroupSecurityRule
@@ -97,7 +108,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         destinationPortRange: `${port.number}`,
         destinationPortRanges: [],
         direction: "Inbound",
-        name: `Allow_${name}`,
+        name: `Allow_${port.name}`,
         priority: parseInt(`10${index}`),
         protocol: "Tcp",
         sourceAddressPrefix: "*",
@@ -112,7 +123,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         `cndi_azure_lb_probe_${port.number}`,
         {
           loadbalancerId: lb.id,
-          name: `cndi_azure_lb_probe`,
+          name: `cndi_azure_lb_probe_${port.number}`,
           port: port.number,
         },
       );
@@ -121,10 +132,10 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         this,
         `cndi_azure_lb_rule_${port.number}`,
         {
+          backendAddressPoolIds: [backendAddressPool.id],
           backendPort: port.number,
           frontendPort: port.number,
-          frontendIpConfigurationName:
-            `cndi_azure_lb_frontend_ip_configuration`,
+          frontendIpConfigurationName: lb.frontendIpConfiguration.get(0).name,
           loadbalancerId: lb.id,
           protocol: "Tcp",
           name: port.name,
@@ -156,29 +167,14 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const backendAddressPool = new CDKTFProviderAzure.lbBackendAddressPool
-      .LbBackendAddressPool(
-      this,
-      "cndi_azure_lb_backend_address_pool",
-      {
-        loadbalancerId: lb.id,
-        name: `cndi_azure_lb_backend_address_pool`,
-      },
-    );
-
     const nodeList = [];
 
     let leaderInstance:
       CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
-      let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
-      if (node?.role === "worker") {
-        role = "worker";
-      }
       const count = node?.count || 1; // count will never be zero, defaults to 1
-      const userData = getUserDataTemplateFileString(role, true);
-      const dependsOn = role === "leader" ? [] : [leaderInstance!];
+
       let machine_type = node?.machine_type ||
         node?.instance_type ||
         DEFAULT_INSTANCE_TYPES.azure;
@@ -210,6 +206,18 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       };
 
       for (let i = 0; i < count; i++) {
+        let role: NodeRole = "controller";
+
+        if (nodeList.length === 0) {
+          role = "leader";
+        } else if (node?.role === "worker") {
+          role = "worker";
+        }
+
+        const leader_node_ip = role === "leader"
+          ? null
+          : leaderInstance!.publicIpAddress;
+
         const nodeName = `${node.name}-${i}`;
 
         const osDisk = {
@@ -254,6 +262,52 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           },
         );
 
+        new CDKTFProviderAzure.networkInterfaceBackendAddressPoolAssociation
+          .NetworkInterfaceBackendAddressPoolAssociation(
+          this,
+          `cndi_azure_lb_backend_address_pool_association_${nodeName}`,
+          {
+            backendAddressPoolId: backendAddressPool.id,
+            networkInterfaceId: networkInterface.id,
+            ipConfigurationName: networkInterface.ipConfiguration.get(0).name,
+          },
+        );
+
+        let userData: string = Fn.base64encode(
+          Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
+            bootstrap_token: this.locals.bootstrap_token.asString!,
+            leader_node_ip,
+          }),
+        );
+
+        if (role === "leader") {
+          userData = Fn.base64encode(
+            Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
+              bootstrap_token: this.locals.bootstrap_token.asString!,
+              git_repo: this.variables.git_repo.stringValue,
+              git_token: this.variables.git_token.stringValue,
+              git_username: this.variables.git_username.stringValue,
+              sealed_secrets_private_key: Fn.base64encode(
+                this.variables.sealed_secrets_private_key.stringValue,
+              ),
+              sealed_secrets_public_key: Fn.base64encode(
+                this.variables.sealed_secrets_public_key.stringValue,
+              ),
+              argocd_admin_password:
+                this.variables.argocd_admin_password.stringValue,
+            }),
+          );
+        } else if (role === "worker") {
+          userData = Fn.base64encode(
+            Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
+              bootstrap_token: this.locals.bootstrap_token.asString!,
+              leader_node_ip,
+            }),
+          );
+        }
+
+        const dependsOn = role === "leader" ? [] : [leaderInstance!];
+
         const cndiInstance:
           CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine =
             new CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine(
@@ -269,6 +323,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
                 adminUsername: "ubuntu",
                 adminPassword: "Password123",
                 sourceImageReference,
+                disablePasswordAuthentication: false,
                 tags,
                 osDisk,
                 zone,
@@ -279,17 +334,6 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         if (role === "leader") {
           leaderInstance = cndiInstance;
         }
-        new CDKTFProviderAzure.networkInterfaceBackendAddressPoolAssociation
-          .NetworkInterfaceBackendAddressPoolAssociation(
-          this,
-          `cndi_azure_lb_backend_address_pool_association_${nodeName}`,
-          {
-            backendAddressPoolId: backendAddressPool.id,
-            networkInterfaceId: networkInterface.id,
-            ipConfigurationName:
-              `cndi_azure_network_interface_ip_configuration_${nodeName}`,
-          },
-        );
 
         nodeList.push({ id: cndiInstance.id, name: nodeName });
       }

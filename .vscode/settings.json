@@ -1,5 +1,6 @@
 {
   "deno.enable": true,
+  "deno.maxTsServerMemory": 3072,
   "deno.inlayHints.parameterNames.enabled": "none",
   "deno.inlayHints.parameterTypes.enabled": false,
   "deno.inlayHints.variableTypes.enabled": false,
