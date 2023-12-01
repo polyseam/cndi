@@ -589,11 +589,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       values: [Fn.yamlencode(argoAppsValues)],
     });
 
-    new TerraformOutput(this, "cndi_lb_public_host", {
+    new TerraformOutput(this, "public_host", {
       value: publicIp.ipAddress,
     });
 
-    new TerraformOutput(this, "cndi_resource_group_url", {
+    new TerraformOutput(this, "resource_group", {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });
