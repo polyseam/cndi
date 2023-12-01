@@ -172,28 +172,28 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     let leaderInstance:
       CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine;
 
-    for (const node of cndi_config.infrastructure.cndi.nodes) {
-      const count = node?.count || 1; // count will never be zero, defaults to 1
+    for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
+      const count = nodeSpec?.count || 1; // count will never be zero, defaults to 1
 
-      let machine_type = node?.machine_type ||
-        node?.instance_type ||
+      let machine_type = nodeSpec?.machine_type ||
+        nodeSpec?.instance_type ||
         DEFAULT_INSTANCE_TYPES.azure;
       // azure uses 'size' to describe the machine type, oof
       if (
-        node?.size &&
-        typeof node.size === "string" &&
-        !node?.machine_type &&
-        !node?.instance_type
+        nodeSpec?.size &&
+        typeof nodeSpec.size === "string" &&
+        !nodeSpec?.machine_type &&
+        !nodeSpec?.instance_type
       ) {
-        machine_type = node.size;
+        machine_type = nodeSpec.size;
       }
 
-      let diskSizeGb = node?.disk_size_gb ||
-        node?.volume_size ||
+      let diskSizeGb = nodeSpec?.disk_size_gb ||
+        nodeSpec?.volume_size ||
         DEFAULT_NODE_DISK_SIZE_UNMANAGED;
 
-      if (node?.size && typeof node.size === "number") {
-        diskSizeGb = node.size;
+      if (nodeSpec?.size && typeof nodeSpec.size === "number") {
+        diskSizeGb = nodeSpec.size;
       }
 
       const zone = "1";
@@ -206,19 +206,13 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       };
 
       for (let i = 0; i < count; i++) {
-        let role: NodeRole = "controller";
+        let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
 
-        if (nodeList.length === 0) {
-          role = "leader";
-        } else if (node?.role === "worker") {
+        if (nodeSpec?.role === "worker") {
           role = "worker";
         }
 
-        const leader_node_ip = role === "leader"
-          ? null
-          : leaderInstance!.privateIpAddress;
-
-        const nodeName = `${node.name}-${i}`;
+        const nodeName = `${nodeSpec.name}-${i}`;
 
         const osDisk = {
           name: `cndi_${nodeName}_disk`,
@@ -273,12 +267,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           },
         );
 
-        let userData: string = Fn.base64encode(
-          Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
-            bootstrap_token: this.locals.bootstrap_token.asString!,
-            leader_node_ip,
-          }),
-        );
+        let userData;
 
         if (role === "leader") {
           userData = Fn.base64encode(
@@ -301,7 +290,14 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
               bootstrap_token: this.locals.bootstrap_token.asString!,
-              leader_node_ip,
+              leader_node_ip: leaderInstance!.privateIpAddress,
+            }),
+          );
+        } else {
+          userData = Fn.base64encode(
+            Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
+              bootstrap_token: this.locals.bootstrap_token.asString!,
+              leader_node_ip: leaderInstance!.privateIpAddress,
             }),
           );
         }

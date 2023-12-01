@@ -136,17 +136,12 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     const instanceSelfLinks: string[] = [];
 
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
-      let role: NodeRole = "controller";
-      let leader_node_ip: string;
+      let role: NodeRole = instanceSelfLinks.length === 0
+        ? "leader"
+        : "controller";
 
-      if (instanceSelfLinks.length === 0) {
-        // leader node
-        role = "leader";
-      } else {
-        leader_node_ip = leaderInstance!.networkInterface.get(0).networkIp;
-        if (nodeSpec.role === "worker") {
-          role = "worker";
-        }
+      if (nodeSpec?.role === "worker") {
+        role = "worker";
       }
 
       const count = nodeSpec.count || 1;
@@ -179,13 +174,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
           },
         );
 
-        let userData = Fn.templatefile(
-          "microk8s-cloud-init-controller.yml.tftpl",
-          {
-            bootstrap_token: this.locals.bootstrap_token.asString!,
-            leader_node_ip: leader_node_ip!,
-          },
-        );
+        let userData;
 
         if (role === "leader") {
           userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
@@ -205,8 +194,16 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         } else if (role === "worker") {
           userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
             bootstrap_token: this.locals.bootstrap_token.asString!,
-            leader_node_ip: leader_node_ip!,
+            leader_node_ip: leaderInstance!.networkInterface.get(0).networkIp,
           });
+        } else {
+          userData = Fn.templatefile(
+            "microk8s-cloud-init-controller.yml.tftpl",
+            {
+              bootstrap_token: this.locals.bootstrap_token.asString!,
+              leader_node_ip: leaderInstance!.networkInterface.get(0).networkIp,
+            },
+          );
         }
 
         const instance = new CDKTFProviderGCP.computeInstance.ComputeInstance(

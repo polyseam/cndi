@@ -1,11 +1,4 @@
-import {
-  App,
-  CDKTFProviderAWS,
-  Construct,
-  Fn,
-  TerraformLocal,
-  TerraformOutput,
-} from "deps";
+import { App, CDKTFProviderAWS, Construct, Fn, TerraformOutput } from "deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -14,7 +7,6 @@ import {
 
 import {
   getCDKTFAppConfig,
-  getUserDataTemplateFileString,
   resolveCNDIPorts,
   stageCDKTFStack,
 } from "src/utils.ts";
@@ -164,8 +156,37 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       if (node?.role === "worker") {
         role = "worker";
       }
+
+      let userData;
+
+      if (role === "leader") {
+        userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
+          bootstrap_token: this.locals.bootstrap_token.asString!,
+          git_repo: this.variables.git_repo.stringValue,
+          git_token: this.variables.git_token.stringValue,
+          git_username: this.variables.git_username.stringValue,
+          sealed_secrets_private_key: Fn.base64encode(
+            this.variables.sealed_secrets_private_key.stringValue,
+          ),
+          sealed_secrets_public_key: Fn.base64encode(
+            this.variables.sealed_secrets_public_key.stringValue,
+          ),
+          argocd_admin_password:
+            this.variables.argocd_admin_password.stringValue,
+        });
+      } else if (role === "worker") {
+        userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
+          bootstrap_token: this.locals.bootstrap_token.asString!,
+          leader_node_ip: leaderInstance!.privateIp,
+        });
+      } else {
+        userData = Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
+          bootstrap_token: this.locals.bootstrap_token.asString!,
+          leader_node_ip: leaderInstance!.privateIp,
+        });
+      }
+
       const count = node?.count || 1; // count will never be zero, defaults to 1
-      const user_data = getUserDataTemplateFileString(role);
       const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
       const volumeSize = node?.volume_size ||
         node?.disk_size ||
@@ -178,7 +199,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           this,
           `cndi_aws_instance_${node.name}_${i}`,
           {
-            userData: user_data,
+            userData,
             tags: { Name: nodeName },
             dependsOn,
             ami: DEFAULT_EC2_AMI,
@@ -199,8 +220,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         nodeList.push({ id: cndiInstance.id, name: nodeName });
       }
     }
-
-    new TerraformLocal(this, "leader_node_ip", leaderInstance!.privateIp);
 
     const cndiNLB = new CDKTFProviderAWS.lb.Lb(this, `cndi_aws_lb`, {
       internal: false,
