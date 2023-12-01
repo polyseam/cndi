@@ -16,6 +16,7 @@ import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
   stageCDKTFStack,
+  useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole } from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
@@ -270,22 +271,45 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         let userData;
 
         if (role === "leader") {
-          userData = Fn.base64encode(
-            Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-              bootstrap_token: this.locals.bootstrap_token.asString!,
-              git_repo: this.variables.git_repo.stringValue,
-              git_token: this.variables.git_token.stringValue,
-              git_username: this.variables.git_username.stringValue,
-              sealed_secrets_private_key: Fn.base64encode(
-                this.variables.sealed_secrets_private_key.stringValue,
-              ),
-              sealed_secrets_public_key: Fn.base64encode(
-                this.variables.sealed_secrets_public_key.stringValue,
-              ),
-              argocd_admin_password:
-                this.variables.argocd_admin_password.stringValue,
-            }),
-          );
+          if (useSshRepoAuth()) {
+            userData = Fn.base64encode(
+              Fn.templatefile("microk8s-cloud-init-leader-ssh.yml.tftpl", {
+                bootstrap_token: this.locals.bootstrap_token.asString!,
+                git_repo_encoded: Fn.base64encode(
+                  this.variables.git_repo.stringValue,
+                ),
+                git_repo: this.variables.git_repo.stringValue,
+                git_ssh_private_key: Fn.base64encode(
+                  this.variables.git_ssh_private_key.stringValue,
+                ),
+                sealed_secrets_private_key: Fn.base64encode(
+                  this.variables.sealed_secrets_private_key.stringValue,
+                ),
+                sealed_secrets_public_key: Fn.base64encode(
+                  this.variables.sealed_secrets_public_key.stringValue,
+                ),
+                argocd_admin_password:
+                  this.variables.argocd_admin_password.stringValue,
+              }),
+            );
+          } else {
+            userData = Fn.base64encode(
+              Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
+                bootstrap_token: this.locals.bootstrap_token.asString!,
+                git_repo: this.variables.git_repo.stringValue,
+                git_token: this.variables.git_token.stringValue,
+                git_username: this.variables.git_username.stringValue,
+                sealed_secrets_private_key: Fn.base64encode(
+                  this.variables.sealed_secrets_private_key.stringValue,
+                ),
+                sealed_secrets_public_key: Fn.base64encode(
+                  this.variables.sealed_secrets_public_key.stringValue,
+                ),
+                argocd_admin_password:
+                  this.variables.argocd_admin_password.stringValue,
+              }),
+            );
+          }
         } else if (role === "worker") {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
