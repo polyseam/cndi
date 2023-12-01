@@ -1,5 +1,4 @@
-import { Construct } from "deps";
-import { CDKTFProviderGCP } from "deps";
+import { CDKTFProviderGCP, Construct, TerraformLocal } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
@@ -45,11 +44,15 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
     }
 
     const region = Deno.env.get("GCP_REGION");
+
     if (!region) {
       throw new Error("'GCP_REGION' env variable not set");
     }
 
     const zone = `${region}-a`;
+
+    this.locals.gcp_zone = new TerraformLocal(this, "gcp_zone", zone);
+    this.locals.project_id = new TerraformLocal(this, "project_id", project);
 
     new CDKTFProviderGCP.provider.GoogleProvider(this, "cndi_google_provider", {
       project,
