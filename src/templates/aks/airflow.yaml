@@ -39,16 +39,43 @@ outputs:
   cndi-config:
     cndi_version: v1
     infrastructure:
+      terraform:
+          resource:
+            azurerm_virtual_network_peering:
+              cndi_azurerm_virtual_network_peering_hub:
+                name: peer-vnet-hub-main-global-to-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}
+                resource_group_name : <HUB_VNET_RESOURCE_GROUP>
+                virtual_network_name : <HUB_VNET>
+                remote_virtual_network_id: "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/${azurerm_resource_group.cndi_azurerm_resource_group.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
+                allow_forwarded_traffic: true
+                allow_gateway_transit: true
+                use_remote_gateways: false
+                depends_on: [azurerm_virtual_network_peering.cndi_azurerm_virtual_network_peering_hub]
+              cndi_azurerm_virtual_network_peering_spoke:
+                name: peer-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}-to-vnet-hub-main-global
+                resource_group_name : "${azurerm_resource_group.cndi_azurerm_resource_group.name}"
+                virtual_network_name : "${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
+                remote_virtual_network_id: "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<HUB_VNET_RESOURCE_GROUP>/providers/Microsoft.Network/virtualNetworks/<HUB_VNET>"
+                allow_forwarded_traffic: true
+                allow_gateway_transit: false
+                use_remote_gateways: true
       cndi:
         cert_manager:
           email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
+      open_ports:
+        - number: 443
+          name: https
+          disable: true
+        - number: 80
+          name: http
+          disable: true             
         nodes:
           - name: airflow-nodes
             kind: aks
             instance_type: Standard_D2s_v3
             volume_size: 128
             agents_min_count: 1
-            agents_max_count: 3
+            agents_max_count: 1
     cluster_manifests:
       git-credentials-secret:
         apiVersion: v1
@@ -78,9 +105,9 @@ outputs:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
           imageName: "ghcr.io/cloudnative-pg/postgresql:15.2"
-          instances: 3
+          instances: 1
           storage:
-            size: 1Gi
+            size: 10Gi
           replicationSlots:
             highAvailability:
               enabled: true
@@ -124,16 +151,10 @@ outputs:
           name: argocd-server-ingress
           namespace: argocd
           annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: "true"
-            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+            nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
         spec:
-          ingressClassName: public
-          tls:
-            - hosts:
-                - "{{ $.cndi.prompts.responses.argocdDomainName }}"
-              secretName: cluster-issuer-private-key
+          ingressClassName: private
           rules:
             - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
@@ -145,6 +166,19 @@ outputs:
                         name: argocd-server
                         port:
                           name: https
+      oauth2-airflow-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: oauth2-airflow-secret
+          namespace: airflow
+        stringData:
+          authorization_url: $.cndi.secrets.seal(AUTHORIZATION_URL)
+          access_token_url: $.cndi.secrets.seal(ACCESS_TOKEN_URL)
+          arm_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)
+          arm_client_id: $.cndi.secrets.seal(ARM_CLIENT_ID)
+          arm_client_secret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
+          api_base_url: $.cndi.secrets.seal(API_BASE_URL)
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -170,6 +204,76 @@ outputs:
               branch: main
               wait: 40
               subPath: dags
+          webserver:  
+            webserverConfig: |
+              import os
+              from airflow.configuration import conf
+              from airflow.utils.log.logging_mixin import LoggingMixin
+              from flask_appbuilder.security.manager import AUTH_OAUTH
+              from airflow.www.security import AirflowSecurityManager
+              print("configuring webserver!!")
+              SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
+              basedir = os.path.abspath(os.path.dirname(__file__))
+              CSRF_ENABLED = True
+              AUTH_TYPE = AUTH_OAUTH
+              AUTH_USER_REGISTRATION_ROLE = "Admin"
+              AUTH_USER_REGISTRATION = True
+
+              class AzureCustomSecurity(AirflowSecurityManager, LoggingMixin):
+                  def get_oauth_user_info(self, provider, response=None):
+                      if provider == "azure":
+                          self.log.debug("Azure response received : {0}".format(response))
+                          id_token = response["id_token"]
+                          self.log.debug(str(id_token))
+                          me = self._azure_jwt_token_parse(id_token)
+                          self.log.debug("Parse JWT token : {0}".format(me))
+                          print("Parse JWT token : {0}".format(me))
+                          parsed_token = {
+                              "name": me["name"],
+                              "email": me["upn"],
+                              "first_name": me["given_name"],
+                              "last_name": me["family_name"],
+                              "id": me["oid"],
+                              "username": me["preferred_username"],
+                              "upn": me["oid"]  
+                          }
+                          return parsed_token
+                      else:
+                          return {}
+
+
+              OAUTH_PROVIDERS = [
+                {
+                  "name": "azure",
+                  "icon": "fa-windows",
+                  "token_key": "access_token",
+                  "remote_app": {
+                      "client_id": os.environ.get("ARM_CLIENT_ID"),
+                      "client_secret": os.environ.get("ARM_CLIENT_SECRET"),
+                      "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('ARM_TENANT_ID')}/oauth2/v2.0",
+                      "client_kwargs": {
+                          "scope": "User.Read openid email profile ",
+                          "resource": os.environ.get("ARM_CLIENT_ID"),
+                          "verify_signature": True
+                      },
+                      "request_token_url": None,
+                      "access_token_url": f"https://login.microsoftonline.com/"
+                      f"{os.environ.get('ARM_TENANT_ID')}/"
+                      "oauth2/v2.0/token",
+                      "authorize_url": f"https://login.microsoftonline.com/"
+                      f"{os.environ.get('ARM_TENANT_ID')}/"
+                      f"oauth2/v2.0/authorize",
+                  } 
+                }
+              ]
+
+              # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
+              AUTH_ROLES_MAPPING = {
+                "airflow_admin": ["Admin"]
+              }
+
+              AUTH_ROLES_SYNC_AT_LOGIN = True
+              SECURITY_MANAGER_CLASS = AzureCustomSecurity            
           config:
             webserver:
               expose_config: "True"
@@ -178,22 +282,36 @@ outputs:
               base_url: "https://{{ $.cndi.prompts.responses.airflowDomainName }}"
             operators:
               default_owner: Polyseam
+          secret: 
+            - envName: ARM_TENANT_ID
+              secretKey: arm_tenant_id
+              secretName: oauth2-airflow-secret
+            - envName: ARM_CLIENT_ID
+              secretKey: arm_client_id
+              secretName: oauth2-airflow-secret
+            - envName: ARM_CLIENT_SECRET
+              secretKey: arm_client_secret
+              secretName: oauth2-airflow-secret 
+            - envName: AUTHORIZATION_URL
+              secretKey: authorization_url
+              secretName: oauth2-airflow-secret   
+            - envName: ACCESS_TOKEN_URL
+              secretKey: access_token_url
+              secretName: oauth2-airflow-secret
+            - envName: API_BASE_URL
+              secretKey: api_base_url
+              secretName: oauth2-airflow-secret
           ingress:
             web:
               enabled: true
-              ingressClassName: public
+              ingressClassName: private
               annotations:
-                cert-manager.io/cluster-issuer: cluster-issuer
-              hosts:
-                - name: "{{ $.cndi.prompts.responses.airflowDomainName }}"
-                  tls:
-                    secretName: cluster-issuer-private-key
-                    enabled: true
+                nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
           logs:
             persistence:
               enabled: true
-              size: 15Gi
-              storageClassName: nfs
+              size: 10Gi
+              storageClassName: azurefile-csi
           createUserJob:
             useHelmHooks: false
           migrateDatabaseJob:
@@ -228,7 +346,13 @@ outputs:
       - name: GIT_SYNC_USERNAME
         value: "{{ $.cndi.prompts.responses.gitSyncUsername }}"
       - name: GIT_SYNC_PASSWORD
-        value: "{{ $.cndi.prompts.responses.gitSyncPassword }}"
+        value: "{{ $.cndi.prompts.responses.gitSyncPassword }}"  
+      - name: ACCESS_TOKEN_URL
+        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2/v2.0/token
+      - name: AUTHORIZATION_URL
+        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2/v2.0/authorize
+      - name: API_BASE_URL
+        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2
   readme:
     extend_basic_readme: azure
     template_section: >-
