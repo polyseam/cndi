@@ -62,13 +62,13 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
-      open_ports:
-        - number: 443
-          name: https
-          disable: true
-        - number: 80
-          name: http
-          disable: true             
+        open_ports:
+          - number: 443
+            name: https
+            disable: true
+          - number: 80
+            name: http
+            disable: true             
         nodes:
           - name: airflow-nodes
             kind: aks
