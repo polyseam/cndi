@@ -51,8 +51,13 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
 
     const zone = `${region}-a`;
 
+    this.locals.gcp_region = new TerraformLocal(this, "gcp_region", region);
     this.locals.gcp_zone = new TerraformLocal(this, "gcp_zone", zone);
-    this.locals.project_id = new TerraformLocal(this, "project_id", project);
+    this.locals.gcp_project_id = new TerraformLocal(
+      this,
+      "project_id",
+      project,
+    );
 
     new CDKTFProviderGCP.provider.GoogleProvider(this, "cndi_google_provider", {
       project,

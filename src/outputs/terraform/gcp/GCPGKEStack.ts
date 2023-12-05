@@ -78,7 +78,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     const _projectServiceContainer = new CDKTFProviderGCP.projectService
       .ProjectService(
       this,
-      "cndi_google_project_service_file",
+      "cndi_google_project_service_container",
       {
         disableOnDestroy: false,
         service: "container.googleapis.com",
@@ -160,7 +160,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         // node pool and immediately delete it."
         removeDefaultNodePool: true,
         initialNodeCount: 1,
-        project: this.locals.gcp_project.asString,
+        project: this.locals.gcp_project_id.asString,
       },
     );
 
@@ -188,7 +188,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       const _nodePool = new CDKTFProviderGCP.containerNodePool
         .ContainerNodePool(
         this,
-        "cndi_gcp_container_node_pool",
+        `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
         {
           cluster: gkeCluster.name,
           nodeCount,
