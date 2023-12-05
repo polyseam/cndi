@@ -186,7 +186,7 @@ outputs:
               - "{{ $cndi.get_prompt_response(mssql_hostname) }}"
               - "mssql-0.mssql.svc.cluster.local"
           configMap:
-            name: mssql-config
+            name: mssql # TODO: @harshil4076 was mssql-config but that was not picked up by pods downstream
             data:
               EULA: "Y"
               accepteulaml: "Y"
