@@ -10,7 +10,7 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
-  // TerraformOutput,
+  TerraformOutput,
   // TerraformVariable,
 } from "deps";
 
@@ -503,6 +503,31 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         version: "4.8.3",
       },
     );
+
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
+      "cndi_google_filestore_storage_class",
+      {
+        metadata: {
+          name: "nfs",
+        },
+        parameters: {
+          network: network.selfLink,
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        storageProvisioner: "filestore.csi.storage.gke.io",
+        volumeBindingMode: "WaitForFirstConsumer",
+      },
+    );
+
+    new TerraformOutput(this, "public_host", {
+      value: computeAddress.address,
+    });
+
+    new TerraformOutput(this, "resource_group", {
+      value: `https://console.cloud.google.com/welcome?project=${project_name}`,
+    });
   }
 }
 
