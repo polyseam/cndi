@@ -64,7 +64,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const _projectServiceFile = new CDKTFProviderGCP.projectService
+    const projectServiceFile = new CDKTFProviderGCP.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_file",
@@ -75,7 +75,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const _projectServiceContainer = new CDKTFProviderGCP.projectService
+    const projectServiceContainer = new CDKTFProviderGCP.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_container",
@@ -86,13 +86,27 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
+    const projectServicesReady = new CDKTFProviderTime.sleep.Sleep(
+      this,
+      "cndi_time_sleep_services_ready",
+      {
+        createDuration: "60s",
+        dependsOn: [
+          projectServiceCloudResourseManager,
+          projectServiceCompute,
+          projectServiceContainer,
+          projectServiceFile,
+        ],
+      },
+    );
+
     const network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
       this,
       "cndi_google_compute_network",
       {
         autoCreateSubnetworks: false,
         name: "cndi-compute-network",
-        dependsOn: [projectServiceCompute],
+        dependsOn: [projectServicesReady],
       },
     );
 
@@ -126,7 +140,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: "cndi-compute-firewall-allow-internal",
         description: "Allow internal traffic inside cluster",
         network: network.selfLink,
-        dependsOn: [projectServiceCompute],
+        dependsOn: [projectServicesReady],
         allow: [
           {
             protocol: "icmp",
@@ -165,8 +179,10 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     );
 
     const kubernetes = {
-      clusterCaCertificate: gkeCluster.masterAuth.clusterCaCertificate,
-      host: gkeCluster.endpoint,
+      clusterCaCertificate: Fn.base64decode(
+        gkeCluster.masterAuth.clusterCaCertificate,
+      ),
+      host: `https://${gkeCluster.endpoint}`,
       token: clientConfig.accessToken,
     };
 
@@ -179,24 +195,41 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
       const nodeCount = nodePoolSpec.count || 1;
 
-      const autoscaling = {
-        minNodeCount: nodePoolSpec?.min_count || nodeCount,
-        maxNodeCount: nodePoolSpec?.max_count || nodeCount,
-        locationPolicy: "BALANCED",
-      };
-
-      const _nodePool = new CDKTFProviderGCP.containerNodePool
-        .ContainerNodePool(
-        this,
-        `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
-        {
+      const nodePoolConfig:
+        CDKTFProviderGCP.containerNodePool.ContainerNodePoolConfig = {
           cluster: gkeCluster.name,
-          nodeCount,
-          autoscaling,
-          initialNodeCount: nodeCount,
           name: nodePoolSpec.name,
-        },
-      );
+        };
+
+      if (
+        Object.hasOwn(nodePoolSpec, "min_count") ||
+        Object.hasOwn(nodePoolSpec, "max_count")
+      ) {
+        const autoscaling = {
+          minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
+          maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
+          locationPolicy: "BALANCED",
+        };
+
+        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+          this,
+          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+          {
+            ...nodePoolConfig,
+            autoscaling,
+            initialNodeCount: nodeCount ?? nodePoolSpec.min_count,
+          },
+        );
+      } else {
+        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+          this,
+          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+          {
+            ...nodePoolConfig,
+            nodeCount,
+          },
+        );
+      }
     }
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
@@ -210,7 +243,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: "cndi-compute-address-lb",
         networkTier: "PREMIUM",
         addressType: "EXTERNAL",
-        dependsOn: [projectServiceCompute],
+        dependsOn: [projectServicesReady],
       },
     );
 

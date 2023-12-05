@@ -1,6 +1,7 @@
 import {
   App,
   CDKTFProviderGCP,
+  CDKTFProviderTime,
   Construct,
   Fn,
   // TerraformLocal,
@@ -50,13 +51,22 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
+    const projectServicesReady = new CDKTFProviderTime.sleep.Sleep(
+      this,
+      "cndi_time_sleep_services_ready",
+      {
+        createDuration: "60s",
+        dependsOn: [projectServiceCloudResourseManager, projectServiceCompute],
+      },
+    );
+
     const computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
       this,
       "cndi_google_compute_network",
       {
         name: "cndi-compute-network", // rename to cndi-compute-network
         autoCreateSubnetworks: false,
-        dependsOn: [projectServiceCompute],
+        dependsOn: [projectServicesReady],
       },
     );
 
@@ -282,7 +292,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         tcpHealthCheck: {
           port: 80,
         },
-        dependsOn: [projectServiceCompute],
+        dependsOn: [projectServicesReady],
       },
     );
 
