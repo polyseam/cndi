@@ -39,36 +39,9 @@ outputs:
   cndi-config:
     cndi_version: v1
     infrastructure:
-      terraform:
-          resource:
-            azurerm_virtual_network_peering:
-              cndi_azurerm_virtual_network_peering_hub:
-                name: peer-vnet-hub-main-global-to-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}
-                resource_group_name : <HUB_VNET_RESOURCE_GROUP>
-                virtual_network_name : <HUB_VNET>
-                remote_virtual_network_id: "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/${azurerm_resource_group.cndi_azurerm_resource_group.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
-                allow_forwarded_traffic: true
-                allow_gateway_transit: true
-                use_remote_gateways: false
-                depends_on: [azurerm_virtual_network_peering.cndi_azurerm_virtual_network_peering_hub]
-              cndi_azurerm_virtual_network_peering_spoke:
-                name: peer-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}-to-vnet-hub-main-global
-                resource_group_name : "${azurerm_resource_group.cndi_azurerm_resource_group.name}"
-                virtual_network_name : "${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
-                remote_virtual_network_id: "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<HUB_VNET_RESOURCE_GROUP>/providers/Microsoft.Network/virtualNetworks/<HUB_VNET>"
-                allow_forwarded_traffic: true
-                allow_gateway_transit: false
-                use_remote_gateways: true
       cndi:
         cert_manager:
           email: "{{ $.cndi.prompts.responses.letsEncryptClusterIssuerEmailAddress }}"
-        open_ports:
-          - number: 443
-            name: https
-            disable: true
-          - number: 80
-            name: http
-            disable: true             
         nodes:
           - name: airflow-nodes
             kind: aks
@@ -152,7 +125,7 @@ outputs:
           namespace: argocd
           annotations:
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-            nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+            nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
         spec:
           ingressClassName: private
           rules:
@@ -166,19 +139,16 @@ outputs:
                         name: argocd-server
                         port:
                           name: https
-      oauth2-airflow-secret:
+      oauth2-secret:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: oauth2-airflow-secret
+          name: oauth2-secret
           namespace: airflow
         stringData:
-          authorization_url: $.cndi.secrets.seal(AUTHORIZATION_URL)
-          access_token_url: $.cndi.secrets.seal(ACCESS_TOKEN_URL)
           arm_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)
           arm_client_id: $.cndi.secrets.seal(ARM_CLIENT_ID)
           arm_client_secret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
-          api_base_url: $.cndi.secrets.seal(API_BASE_URL)
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -204,7 +174,7 @@ outputs:
               branch: main
               wait: 40
               subPath: dags
-          webserver:  
+          webserver:
             webserverConfig: |
               import os
               from airflow.configuration import conf
@@ -235,12 +205,12 @@ outputs:
                               "last_name": me["family_name"],
                               "id": me["oid"],
                               "username": me["preferred_username"],
-                              "upn": me["oid"]  
+                              "upn": me["oid"],
+                              "role_keys": me["roles"], 
                           }
                           return parsed_token
                       else:
                           return {}
-
 
               OAUTH_PROVIDERS = [
                 {
@@ -269,11 +239,12 @@ outputs:
 
               # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
               AUTH_ROLES_MAPPING = {
-                "airflow_admin": ["Admin"]
+                "admin": ["Admin"],
+                "reader": ["Viewer"]
               }
 
               AUTH_ROLES_SYNC_AT_LOGIN = True
-              SECURITY_MANAGER_CLASS = AzureCustomSecurity            
+              SECURITY_MANAGER_CLASS = AzureCustomSecurity
           config:
             webserver:
               expose_config: "True"
@@ -282,31 +253,27 @@ outputs:
               base_url: "https://{{ $.cndi.prompts.responses.airflowDomainName }}"
             operators:
               default_owner: Polyseam
-          secret: 
+          secret:
             - envName: ARM_TENANT_ID
               secretKey: arm_tenant_id
-              secretName: oauth2-airflow-secret
+              secretName: oauth2-secret
             - envName: ARM_CLIENT_ID
               secretKey: arm_client_id
-              secretName: oauth2-airflow-secret
+              secretName: oauth2-secret
             - envName: ARM_CLIENT_SECRET
               secretKey: arm_client_secret
-              secretName: oauth2-airflow-secret 
-            - envName: AUTHORIZATION_URL
-              secretKey: authorization_url
-              secretName: oauth2-airflow-secret   
-            - envName: ACCESS_TOKEN_URL
-              secretKey: access_token_url
-              secretName: oauth2-airflow-secret
-            - envName: API_BASE_URL
-              secretKey: api_base_url
-              secretName: oauth2-airflow-secret
+              secretName: oauth2-secret
           ingress:
             web:
               enabled: true
-              ingressClassName: private
+              ingressClassName: public
               annotations:
-                nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+                cert-manager.io/cluster-issuer: cluster-issuer
+              hosts:
+                - name: "{{ $.cndi.prompts.responses.airflowDomainName }}"
+                  tls:
+                    secretName: cluster-issuer-private-key
+                    enabled: true
           logs:
             persistence:
               enabled: true
@@ -346,7 +313,7 @@ outputs:
       - name: GIT_SYNC_USERNAME
         value: "{{ $.cndi.prompts.responses.gitSyncUsername }}"
       - name: GIT_SYNC_PASSWORD
-        value: "{{ $.cndi.prompts.responses.gitSyncPassword }}"  
+        value: "{{ $.cndi.prompts.responses.gitSyncPassword }}"
       - name: ACCESS_TOKEN_URL
         value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2/v2.0/token
       - name: AUTHORIZATION_URL
