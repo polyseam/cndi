@@ -59,6 +59,16 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
       project,
     );
 
+    if (!parsedKey?.client_email) {
+      throw new Error("'client_email' not found in GOOGLE_CREDENTIALS JSON");
+    }
+
+    this.locals.gcp_client_email = new TerraformLocal(
+      this,
+      "gcp_client_email",
+      parsedKey.client_email,
+    );
+
     new CDKTFProviderGCP.provider.GoogleProvider(this, "cndi_google_provider", {
       project,
       region,
