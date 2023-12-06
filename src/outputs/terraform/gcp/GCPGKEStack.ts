@@ -118,16 +118,16 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ipCidrRange: "10.0.0.0/16",
         network: network.selfLink,
         privateIpGoogleAccess: true,
-        secondaryIpRange: [
-          {
-            ipCidrRange: "10.48.0.0/14",
-            rangeName: "cndi-k8s-pod-range",
-          },
-          {
-            ipCidrRange: "10.52.0.0/20",
-            rangeName: "cndi-k8s-service-range",
-          },
-        ],
+        // secondaryIpRange: [
+        //   {
+        //     ipCidrRange: "10.48.0.0/14",
+        //     rangeName: "cndi-k8s-pod-range",
+        //   },
+        //   {
+        //     ipCidrRange: "10.52.0.0/20",
+        //     rangeName: "cndi-k8s-service-range",
+        //   },
+        // ],
         dependsOn: [network],
       },
     );
@@ -140,6 +140,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: "cndi-compute-firewall-allow-internal",
         description: "Allow internal traffic inside cluster",
         network: network.selfLink,
+        direction: "INGRESS",
         dependsOn: [projectServicesReady],
         allow: [
           {
@@ -156,8 +157,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ],
         sourceRanges: [
           subnet.ipCidrRange,
-          subnet.secondaryIpRange.get(0).ipCidrRange,
-          subnet.secondaryIpRange.get(1).ipCidrRange,
+          // subnet.secondaryIpRange.get(0).ipCidrRange,
+          // subnet.secondaryIpRange.get(1).ipCidrRange,
         ],
       },
     );
@@ -173,17 +174,25 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         // separately managed node pools. So we create the smallest possible default
         // node pool and immediately delete it."
         removeDefaultNodePool: true,
-        initialNodeCount: 1,
+        initialNodeCount: 1, // ^
         project: this.locals.gcp_project_id.asString,
+        dependsOn: [projectServicesReady, subnet, network],
+        network: network.selfLink,
+        subnetwork: subnet.selfLink,
+        addonsConfig: {
+          gcpFilestoreCsiDriverConfig: {
+            enabled: true
+          }
+        }
       },
     );
 
     const kubernetes = {
+      host: `https://${gkeCluster.endpoint}`,
+      token: clientConfig.accessToken,
       clusterCaCertificate: Fn.base64decode(
         gkeCluster.masterAuth.clusterCaCertificate,
       ),
-      host: `https://${gkeCluster.endpoint}`,
-      token: clientConfig.accessToken,
     };
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
@@ -192,45 +201,57 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       kubernetes,
     );
 
+    const nodePools = [];
+
     for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
       const nodeCount = nodePoolSpec.count || 1;
-
-      const nodePoolConfig:
-        CDKTFProviderGCP.containerNodePool.ContainerNodePoolConfig = {
-          cluster: gkeCluster.name,
-          name: nodePoolSpec.name,
-        };
 
       if (
         Object.hasOwn(nodePoolSpec, "min_count") ||
         Object.hasOwn(nodePoolSpec, "max_count")
       ) {
-        const autoscaling = {
-          minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
-          maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
-          locationPolicy: "BALANCED",
-        };
-
-        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
-          this,
-          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
-          {
-            ...nodePoolConfig,
-            autoscaling,
-            initialNodeCount: nodeCount ?? nodePoolSpec.min_count,
-          },
+        nodePools.push(
+          new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+            this,
+            `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+            {
+              cluster: gkeCluster.name,
+              name: nodePoolSpec.name,
+              nodeConfig: {
+                diskSizeGb: 100,
+                diskType: "pd-ssd",
+                serviceAccount: this.locals.gcp_client_email.asString,
+              },
+              autoscaling: {
+                minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
+                maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
+                locationPolicy: "BALANCED",
+              },
+              initialNodeCount: nodeCount ?? nodePoolSpec.min_count,
+            },
+          ),
         );
       } else {
-        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
-          this,
-          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
-          {
-            ...nodePoolConfig,
-            nodeCount,
-          },
+        nodePools.push(
+          new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+            this,
+            `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+            {
+              cluster: gkeCluster.name,
+              name: nodePoolSpec.name,
+              nodeConfig: {
+                diskSizeGb: 100,
+                diskType: "pd-ssd",
+                serviceAccount: this.locals.gcp_client_email.asString,
+              },
+              nodeCount,
+            },
+          ),
         );
       }
     }
+
+    const firstNodePool = nodePools[0];
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
       kubernetes,
@@ -352,6 +373,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           "tls.crt": this.variables.sealed_secrets_public_key.value,
           "tls.key": this.variables.sealed_secrets_private_key.value,
         },
+        dependsOn: [gkeCluster],
       },
     );
 
@@ -419,7 +441,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [gkeCluster],
+        dependsOn: [gkeCluster, computeAddress, firstNodePool],
         name: "ingress-nginx-public",
         namespace: "ingress-public",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -431,26 +453,12 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             value: computeAddress.address,
           },
           {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/public-nginx",
           },
           {
             name: "controller.ingressClassResource.default",
             value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/public-nginx",
           },
           {
             name: "controller.ingressClassResource.enabled",
@@ -461,16 +469,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             value: "public",
           },
           {
-            name: "controller.electionID",
-            value: "public-controller-leader",
-          },
-          {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-public/ingress-nginx-public-controller",
-          },
-          {
-            name: "rbac.create",
-            value: "false",
           },
         ],
         version: "4.8.3",
@@ -483,27 +483,13 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [gkeCluster],
+        dependsOn: [gkeCluster, firstNodePool],
         name: "ingress-nginx-private",
         namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
         timeout: 300,
         atomic: true,
         set: [
-          {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
-          },
           {
             name: "controller.ingressClassResource.default",
             value: "false",
@@ -521,21 +507,41 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             value: "private",
           },
           {
-            name: "controller.electionID",
-            value: "private-controller-leader",
-          },
-          {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-private/ingress-nginx-private-controller",
           },
           {
-            name: "rbac.create",
-            value: "false",
+            name:
+              "controller.service.annotations.networking\\.gke\\.io/load-balancer-type",
+            value: "Internal",
           },
         ],
         version: "4.8.3",
       },
     );
+
+    const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_cert_manager_helm_chart",
+      {
+        chart: "cert-manager",
+        createNamespace: true,
+        dependsOn: [gkeCluster],
+        name: "cert-manager",
+        namespace: "cert-manager",
+        repository: "https://charts.jetstack.io",
+        timeout: 600,
+        atomic: true,
+        set: [
+          {
+            name: "installCRDs",
+            value: "true",
+          },
+        ],
+        version: "1.12.3",
+      },
+    );
+
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
@@ -551,6 +557,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         allowVolumeExpansion: true,
         storageProvisioner: "filestore.csi.storage.gke.io",
         volumeBindingMode: "WaitForFirstConsumer",
+        dependsOn: [gkeCluster],
       },
     );
 
