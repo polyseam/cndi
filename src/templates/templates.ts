@@ -108,6 +108,10 @@ export function getKnownTemplates() {
       name: "proxy",
       url: `${POLYSEAM_TEMPLATE_DIRECTORY}/proxy.yaml`,
     },
+    {
+      name: "mssqlserver",
+      url: `${POLYSEAM_TEMPLATE_DIRECTORY}/mssqlserver.yaml`,
+    },
   ];
   return knownTemplates;
 }
