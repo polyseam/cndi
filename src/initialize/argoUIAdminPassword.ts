@@ -13,7 +13,9 @@ const loadArgoUIAdminPassword = (): string | null => {
 };
 
 const createArgoUIAdminPassword = (): string => {
-  return getSecretOfLength(32);
+  const secret = getSecretOfLength(32);
+  Deno.env.set("ARGOCD_ADMIN_PASSWORD", secret);
+  return secret;
 };
 
 export { createArgoUIAdminPassword, loadArgoUIAdminPassword };

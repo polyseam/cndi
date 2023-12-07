@@ -13,15 +13,15 @@
       "type": "object",
       "description": "An object which defines the outputs of the cndi template",
       "required": [
-        "cndi-config",
+        "cndi_config",
         "env",
         "readme"
       ],
       "properties": {
-        "cndi-config": {
+        "cndi_config": {
           "type": "object",
-          "description": "The path to the cndi-config file",
-          "$ref": "./cndi-config.schema.json",
+          "description": "The path to the cndi_config file",
+          "$ref": "./cndi_config.schema.json",
           "not": {
             "required": [
               "project_name"

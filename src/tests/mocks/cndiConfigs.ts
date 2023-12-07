@@ -1,19 +1,18 @@
 const basicAWSCndiConfig = {
   cndi_version: "v1",
   project_name: "my-cndi-project-a",
+  distribution: "microk8s",
+  provider: "aws",
   infrastructure: {
     cndi: {
       nodes: [
         {
           name: "x-node",
-          kind: "aws",
-          role: "leader",
           instance_type: "m5a.2xlarge",
           volume_size: 128,
         },
         {
           name: "y-node",
-          kind: "aws",
           volume_size: 128,
         },
       ],
@@ -26,19 +25,18 @@ const basicAWSCndiConfig = {
 const basicGCPCndiConfig = {
   cndi_version: "v1",
   project_name: "my-cndi-project-b",
+  distribution: "microk8s",
+  provider: "gcp",
   infrastructure: {
     cndi: {
       nodes: [
         {
           name: "x-node",
-          kind: "gcp",
-          role: "leader",
           machine_type: "n2-standard-2",
           volume_size: 128,
         },
         {
           name: "y-node",
-          kind: "gcp",
           volume_size: 128,
         },
       ],
@@ -51,19 +49,18 @@ const basicGCPCndiConfig = {
 const basicAzureCndiConfig = {
   cndi_version: "v1",
   project_name: "my-cndi-project-c",
+  distribution: "microk8s",
+  provider: "azure",
   infrastructure: {
     cndi: {
       nodes: [
         {
           name: "x-node",
-          kind: "azure",
-          role: "leader",
           machine_type: "n2-standard-2",
           volume_size: 128,
         },
         {
           name: "y-node",
-          kind: "azure",
           volume_size: 128,
         },
       ],
@@ -75,13 +72,13 @@ const basicAzureCndiConfig = {
 const basicDevCndiConfig = {
   cndi_version: "v1",
   project_name: "my-cndi-project-d",
+  distribution: "microk8s",
+  provider: "dev",
   infrastructure: {
     cndi: {
       nodes: [
         {
           "name": "dev-node",
-          "kind": "dev",
-          "role": "leader",
           "volume_size": 128,
         },
       ],
@@ -90,6 +87,7 @@ const basicDevCndiConfig = {
   cluster_manifests: {},
   applications: {},
 };
+
 const emptyCndiConfig = {};
 
 export {

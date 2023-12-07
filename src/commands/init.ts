@@ -1,39 +1,66 @@
-import { ccolors, Command, Input, path, Select, SEP } from "deps";
+import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
+import type { SealedSecretsKeys } from "src/types.ts";
+
+const { Input, Select } = PromptTypes;
 
 import {
   checkInitialized,
   emitExitEvent,
-  getDeploymentTargetFromConfig,
   getPrettyJSONString,
-  getYAMLString,
-  loadCndiConfig,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
 
-import { CNDIConfig, EnvLines } from "src/types.ts";
-
 import { overwriteAction } from "src/commands/overwrite.ts";
 
-import { getCoreEnvLines } from "src/deployment-targets/shared.ts";
-
-import useTemplate from "src/templates/useTemplate.ts";
+import {
+  CNDITemplatePromptResponsePrimitive,
+  getKnownTemplates,
+  useTemplate,
+} from "src/templates/templates.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
-import getKnownTemplates from "src/templates/knownTemplates.ts";
-
-import getEnvFileContents from "src/outputs/env.ts";
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
-import getReadmeForProject from "src/outputs/readme.ts";
-
-import validateConfig from "src/validate/cndiConfig.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
+
+const defaultResponsesFilePath = path.join(Deno.cwd(), "responses.yaml");
+
+function getFinalEnvString(
+  templatePartial = "",
+  cndiGeneratedValues: {
+    sealedSecretsKeys: SealedSecretsKeys;
+    terraformStatePassphrase: string;
+    argoUIAdminPassword: string;
+    debugMode: boolean;
+  },
+) {
+  const { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword } =
+    cndiGeneratedValues;
+
+  let telemetryMode = "";
+
+  if (cndiGeneratedValues.debugMode) {
+    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
+  }
+
+  return `
+# Sealed Secrets Keys
+SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
+SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
+
+# Terraform State Passphrase
+TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
+
+# Argo UI Admin Password
+ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
+${templatePartial}`.trim();
+}
 
 /**
  * COMMAND cndi init
@@ -41,7 +68,6 @@ const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
  */
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
-  .option("-f, --file <file:string>", "Path to your cndi-config.yaml file.")
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
@@ -53,30 +79,115 @@ const initCommand = new Command()
     hidden: true,
   })
   .option(
+    "-r, --responses-file <responses_file:string>",
+    "A path to a set of responses to supply to your template",
+    {
+      default: defaultResponsesFilePath,
+    },
+  )
+  .option(
+    `-s, --set <set>`,
+    `Override a response, usage: --set responseName=responseValue`,
+    {
+      collect: true,
+      equalsSign: true,
+    },
+  )
+  .option(
     "-w, --workflow-ref <ref:string>",
     "Specify a ref to build a cndi workflow with",
     {
       hidden: true,
     },
   )
+  .option(
+    "-l, --deployment-target-label <deployment_target_label:string>",
+    "Specify a deployment target",
+  )
+  .option("-k, --keep", "Keep responses in response.yaml")
   .action(async (options) => {
     let template: string | undefined = options.template;
-    let cndiConfig: CNDIConfig;
-    let env: EnvLines;
+    let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
+    if (!template && !options.interactive) {
+      console.log("cndi init\n");
+      console.error(
+        initLabel,
+        ccolors.error(
+          `--interactive (-i) flag is required if no template is specified`,
+        ),
+      );
+      await emitExitEvent(400);
+      Deno.exit(400);
+    }
+
+    if (options.responsesFile === defaultResponsesFilePath) {
+      // attempting to load responses file from CWD, if it doesn't exist that's fine
+      try {
+        const responseFileText = Deno.readTextFileSync(options.responsesFile);
+        const responses = YAML.parse(responseFileText);
+        if (responses) {
+          overrides = responses as Record<
+            string,
+            CNDITemplatePromptResponsePrimitive
+          >;
+        }
+      } catch (_errorReadingResponsesFile) {
+        // we're not worried if the file isn't found if the user didn't specify a path
+      }
+    } else {
+      // attempting to load responses file from user specified path
+      let responseFileText = "";
+
+      try {
+        responseFileText = Deno.readTextFileSync(options.responsesFile);
+      } catch (errorReadingSuppliedResponseFile) {
+        console.log(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+
+        console.error(
+          initLabel,
+          ccolors.error(`Could not load responses file from provided path`),
+          ccolors.key_name(`"${options.responsesFile}"`),
+        );
+
+        await emitExitEvent(2000);
+        Deno.exit(2000);
+      }
+
+      try {
+        const responses = YAML.parse(responseFileText);
+        if (responses) {
+          overrides = responses as Record<
+            string,
+            CNDITemplatePromptResponsePrimitive
+          >;
+        }
+      } catch (errorParsingResponsesFile) {
+        console.log(ccolors.caught(errorParsingResponsesFile, 2001));
+
+        console.error(
+          initLabel,
+          ccolors.error(
+            `Could not parse file as responses YAML from provide path`,
+          ),
+          ccolors.key_name(`"${options.responsesFile}"`),
+        );
+        await emitExitEvent(2001);
+        Deno.exit(2001);
+      }
+    }
+
+    if (options.set) {
+      for (const set of options.set) {
+        const [key, value] = set.split("=");
+        overrides[key] = value;
+      }
+    }
+
+    let cndi_config: string;
+    let env: string;
     let readme: string;
     let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
-    // if 'template' and 'interactive' are both falsy we want to look for config at 'pathToConfig'
-    const useCNDIConfigFile = !options.interactive && !template;
-
-    if (useCNDIConfigFile) {
-      const [loadedConfig, pathToConfig] = await loadCndiConfig(options.file);
-      console.log(`cndi init --file "${pathToConfig}"\n`);
-      cndiConfig = loadedConfig;
-
-      // validate config
-      await validateConfig(cndiConfig, pathToConfig);
-      project_name = cndiConfig.project_name as string;
-    }
 
     if (options.template === "true") {
       console.error(
@@ -97,6 +208,33 @@ const initCommand = new Command()
 
     if (!options.interactive && template) {
       console.log(`cndi init --template ${template}\n`);
+    }
+
+    if (options.deploymentTargetLabel) {
+      const [deployment_target_provider, deployment_target_distribution] =
+        options.deploymentTargetLabel.split("/");
+      if (!deployment_target_distribution) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+          ),
+        );
+        await emitExitEvent(490);
+        Deno.exit(490);
+      }
+      if (!deployment_target_provider) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+          ),
+        );
+        await emitExitEvent(491);
+        Deno.exit(491);
+      }
+      overrides.deployment_target_provider = deployment_target_provider;
+      overrides.deployment_target_distribution = deployment_target_distribution;
     }
 
     const directoryContainsCNDIFiles = await checkInitialized(options.output);
@@ -132,8 +270,6 @@ const initCommand = new Command()
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
-    //let baseTemplateName = options.template?.split("/")[1]; // eg. "airflow"
-
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
@@ -146,37 +282,34 @@ const initCommand = new Command()
       sealedSecretsKeys,
       terraformStatePassphrase,
       argoUIAdminPassword,
+      debugMode: !!options.debug,
     };
 
     if (template) {
-      const templateResult = await useTemplate(template!, {
-        project_name,
-        cndiGeneratedValues,
-        interactive: !!options.interactive,
-      });
-      cndiConfig = templateResult.cndiConfig;
-      await stageFile(
-        "cndi-config.yaml",
-        getYAMLString(cndiConfig),
+      const templateResult = await useTemplate(
+        template!,
+        !!options.interactive,
+        { project_name, ...overrides },
       );
+      cndi_config = templateResult.cndi_config;
+      await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
+      if (options.keep) {
+        await stageFile(
+          "responses.yaml",
+          YAML.stringify(templateResult.responses),
+        );
+      }
     } else {
-      const nodeKind = cndiConfig!.infrastructure.cndi.nodes[0].kind;
-      readme = getReadmeForProject({
-        project_name,
-        nodeKind,
-      });
-
-      env = await getCoreEnvLines(
-        cndiGeneratedValues,
-        getDeploymentTargetFromConfig(cndiConfig!),
-        !!options.interactive,
-      );
+      // uhh not sure bout dis
+      readme = `# ${project_name}\n`;
+      env = "";
     }
 
-    // write a readme, extend via Template.readmeBlock if it exists
+    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 
+    // write a readme, extend via Template.readmeBlock if it exists
     const readmePath = path.join(options.output, "README.md");
     try {
       await Deno.stat(readmePath);
@@ -190,18 +323,6 @@ const initCommand = new Command()
         await stageFile("README.md", readme);
       }
     }
-
-    const inDebugEnv =
-      Deno.env.get("CNDI_TELEMETRY")?.toLowerCase() === "debug";
-
-    if (options?.debug || inDebugEnv) {
-      env.push(
-        { comment: "Telemetry Mode" },
-        { value: { CNDI_TELEMETRY: "debug" } },
-      );
-    }
-
-    await stageFile(".env", getEnvFileContents(env));
 
     await stageFile(
       path.join(".vscode", "settings.json"),

@@ -6,9 +6,13 @@ export default function getGitignore(): string {
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/
+# v2
+cndi/terraform/stacks/cndi_stack/.terraform*
+cndi/terraform/stacks/cndi_stack/*.tfstate*
+cndi/terraform/stacks/cndi_stack/.terraform/
+cndi/terraform/stacks/cndi_stack/terraform.tfstate
 .DS_Store
-cndi/terraform/microk8s-cloud-init-leader-hardcoded-values.yml.tftpl
-cndi/terraform/leader_ip_address.txt
+responses.yaml
 `;
   return gitignoreContents.trim();
 }

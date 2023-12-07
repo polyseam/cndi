@@ -1,4 +1,4 @@
-import { ccolors, Command, path } from "deps";
+import { ccolors, Command, loadEnv, path } from "deps";
 
 import {
   emitExitEvent,
@@ -37,7 +37,6 @@ import {
   ManagedNodeKind,
 } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
-import { MANAGED_NODE_KINDS } from "consts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 
@@ -60,11 +59,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
     "terraform",
   );
 
+  const envPath = path.join(options.output, ".env");
+
   const [config, pathToConfig] = await loadCndiConfig(options?.file);
 
   if (!options.initializing) {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
   } else {
+    await loadEnv({ export: true, envPath });
     console.log();
   }
 
@@ -128,16 +130,14 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   // create temporary key for sealing secrets
   const tempPublicKeyFilePath = await Deno.makeTempFile();
-  const dotEnvPath = path.join(options.output, ".env");
 
   await Deno.writeTextFile(
     tempPublicKeyFilePath,
     sealedSecretsKeys.sealed_secrets_public_key,
   );
 
-  await stageTerraformResourcesForConfig(config, options);
-
-  console.log(ccolors.success("staged terraform files"));
+  await stageTerraformResourcesForConfig(config); //, options);
+  console.log(ccolors.success("staged terraform stack"));
 
   const cert_manager = config?.infrastructure?.cndi?.cert_manager;
 
@@ -165,14 +165,27 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
 
   const open_ports = config?.infrastructure?.cndi?.open_ports || [];
 
-  // deno-lint-ignore no-explicit-any
-  const kind = config?.infrastructure?.cndi?.nodes?.[0]?.kind as unknown as any;
-  const isNotMicrok8sCluster = MANAGED_NODE_KINDS.includes(kind);
+  const isMicrok8sCluster = config?.distribution === "microk8s";
 
   if (
-    isNotMicrok8sCluster // currently only EKS, AKS, GKE
+    isMicrok8sCluster
   ) {
-    const managedKind = kind as ManagedNodeKind; //aks
+    await Promise.all([
+      stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "ingress-tcp-services-configmap.yaml",
+        ),
+        getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+      ),
+      stageFile(
+        path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
+        getMicrok8sIngressDaemonsetManifest(open_ports),
+      ),
+    ]);
+  } else {
+    const managedKind = config.distribution as ManagedNodeKind; //aks
 
     await stageFile(
       path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
@@ -201,21 +214,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ),
       getEKSIngressTcpServicesConfigMapManifestPrivate(open_ports),
     );
-  } else {
-    await Promise.all([
-      stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap.yaml",
-        ),
-        getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
-      ),
-      stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
-        getMicrok8sIngressDaemonsetManifest(open_ports),
-      ),
-    ]);
   }
   console.log(ccolors.success("staged open ports manifests"));
 
@@ -228,7 +226,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       const secretName = `${key}.yaml`;
       const sealedSecretManifest = await getSealedSecretManifest(secret, {
         publicKeyFilePath: tempPublicKeyFilePath,
-        dotEnvPath,
+        envPath,
       });
 
       if (sealedSecretManifest) {
@@ -305,9 +303,9 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
 const overwriteCommand = new Command()
-  .description(`Update cndi project files using cndi-config.yaml file.`)
+  .description(`Update cndi project files using cndi_config.yaml file.`)
   .alias("ow")
-  .option("-f, --file <file:string>", "Path to your cndi-config file.")
+  .option("-f, --file <file:string>", "Path to your cndi_config file.")
   .option(
     "-o, --output <output:string>",
     "Path to your cndi cluster git repository.",

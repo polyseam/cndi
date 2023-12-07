@@ -94,9 +94,14 @@ export default async function pullStateForRun({
 
   if (state) {
     const decryptedState = await decrypt(state, secret);
-    Deno.writeTextFileSync(
-      path.join(pathToTerraformResources, "terraform.tfstate"),
-      decryptedState,
-    );
+    try {
+      Deno.writeTextFileSync(
+        path.join(pathToTerraformResources, "terraform.tfstate"),
+        decryptedState,
+      );
+    } catch (error) {
+      console.log("error in reading state to workspace:");
+      console.log(error);
+    }
   }
 }

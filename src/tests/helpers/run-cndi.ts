@@ -34,8 +34,8 @@ async function runCndi(...args: string[]) {
 
     const cndiCommand = new Deno.Command(deno, {
       args: [...cmd, ...args],
-      stdout: "inherit",
-      stderr: "inherit",
+      stdout: "piped",
+      stderr: "piped",
     });
 
     const output = await cndiCommand.output();
@@ -45,7 +45,17 @@ async function runCndi(...args: string[]) {
       success: output.code === 0,
     };
 
-    return { status };
+    const outputStr = decoder.decode(output.stdout);
+    const stderrOutputStr = decoder.decode(output.stderr);
+
+    if (outputStr) console.log(outputStr);
+    if (stderrOutputStr) console.error(stderrOutputStr);
+
+    return {
+      status,
+      output: outputStr,
+      stderrOutput: stderrOutputStr,
+    };
   } else {
     const cndiCommand = new Deno.Command(deno, {
       args: [...cmd, ...args],
@@ -68,16 +78,4 @@ async function runCndi(...args: string[]) {
   }
 }
 
-async function runCndiLoud(...args: string[]) {
-  const cndiCommand = new Deno.Command(deno, {
-    args: [...cmd, ...args],
-  });
-  const output = await cndiCommand.output();
-  const status = {
-    code: output.code,
-    success: output.code === 0,
-  };
-  return { status };
-}
-
-export { getRunningCNDIProcess, runCndi, runCndiLoud };
+export { getRunningCNDIProcess, runCndi };

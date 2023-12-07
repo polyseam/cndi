@@ -1,0 +1,215 @@
+blocks:
+  - name: mongodb-server-ingress
+    content:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: mongodb-server-ingress
+          namespace: "{{ $cndi.get_arg(namespace) }}"
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          ingressClassName: public
+          tls:
+            - hosts:
+                - "{{ $cndi.get_arg(hostname) }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $cndi.get_arg(hostname) }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mongodb-replica-set-svc
+                        port:
+                          name: mongodb
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to expose ArgoCD with an Ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: deploy_mongodb_ingress
+    default: true
+    message: >-
+      Do you want to expose Mongodb with an Ingress?
+    type: Confirm
+
+  - name: mongodb_hostname
+    default: mongodb.example.com
+    message: >-
+      What hostname should Mongodb be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
+      - ==
+      - true
+  - message: Please enter the number of ReplicaSet you want to deploy
+    default: 3
+    name: mongodb_replica_sets
+    type: Number
+  - message: Please enter the username for your mongodb admin
+    default: admin
+    name: mongodb_user
+    type: Input
+  - message: >-
+      Please enter the mongodb password you want to use for your mongodb
+      database:
+    default: password
+    name: mongodb_password
+    type: Secret
+  - message: 'Please enter the name for the mongodb database you want to use:'
+    default: my-mongodb-database
+    name: mongodb_name
+    type: Input
+  - message: 'Please enter your destination namespace for your mongoDb database:'
+    default: mongodb
+    name: mongodb_namespace
+    type: Input
+
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        nodes:
+           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
+            {}
+        open_ports:
+          - number: 27017
+            name: mongodb
+            namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+            service: mongodb-replica-set-svc
+    cluster_manifests:
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+      mongodb-ingress:
+        $cndi.get_block(mongodb-server-ingress):
+          args:
+            ingress_name: mongodb-server-ingress
+            hostname: "{{ $cndi.get_prompt_response(mongodb_hostname) }}"
+            namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
+            - ==
+            - true
+
+      my-user-password:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: my-user-password
+          namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+        type: Opaque
+        stringData:
+          password: $cndi_on_ow.seal_secret_from_env_var(MONGODB_PASSWORD)
+      mongodb-community-crd:
+        apiVersion: mongodbcommunity.mongodb.com/v1
+        kind: MongoDBCommunity
+        metadata:
+          name: mongodb-replica-set
+          namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          members: "{{ $cndi.get_prompt_response(mongodb_replica_sets) }}"
+          type: ReplicaSet
+          version: 4.4.0
+          security:
+            authentication:
+              modes:
+                - SCRAM
+          users:
+            - name: "{{ $cndi.get_prompt_response(mongodb_user) }}"
+              db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
+              passwordSecretRef:
+                name: my-user-password
+              roles:
+                - name: clusterAdmin
+                  db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
+                - name: userAdminAnyDatabase
+                  db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
+              scramCredentialsSecretName: my-scram
+    applications:
+      mongodb:
+        targetRevision: 0.8.0
+        destinationNamespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+        repoURL: 'https://mongodb.github.io/helm-charts'
+        chart: community-operator
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.comment(mongodb-heading): Mongodb Connection Parameters
+    MONGODB_DATABASE: "{{ $cndi.get_prompt_response(mongodb_name) }}"
+    MONGODB_USER: "{{ $cndi.get_prompt_response(mongodb_user) }}"
+    MONGODB_PASSWORD: "{{ $cndi.get_prompt_response(mongodb_password) }}"
+    MONGODB_CONNECTION_STRING: >-
+          mongodb://{{ $cndi.get_prompt_response(mongodb_user) }}:
+          {{ $cndi.get_prompt_response(mongodb_password) }}@"{{
+             $cndi.get_prompt_response(mongodb_hostname) }}"/{{
+          $cndi.get_prompt_response(mongodb_name) }}
+    MONGODB_REPLICA_SETS: "{{ $cndi.get_prompt_response(mongodb_replica_sets) }}"
+    MONGODB_NAMESPACE: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+  readme:
+    $cndi.comment(mongodb-heading): Mongodb Comment in Readme
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+      {}
+    Mongodb-section: >-
+      "Welcome to Mongodb!" 
+
+      This template deploys a Standalone production ready
+      [mongodb-community-operator](https://github.com/mongodb/mongodb-kubernetes-operator) 
+
+
+      To test the connection you will need to [Install Mongo
+      shell](https://www.mongodb.com/docs/mongodb-shell/install/).
+
+
+      Once the `mongosh` is installed, test the connection from terminal
+      `mongosh mongodb://admin:password@mongodb.example.com`
+
+      You can find the MONGODB_CONNECTION_STRING in the .env file.

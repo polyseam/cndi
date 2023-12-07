@@ -1,4 +1,5 @@
 import {
+  App,
   ccolors,
   deepMerge,
   exists,
@@ -11,16 +12,10 @@ import {
 } from "deps";
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import {
-  BaseNodeItemSpec,
-  CNDIConfig,
-  CNDIPort,
-  DeploymentTarget,
-  NodeRole,
-  TFBlocks,
-} from "src/types.ts";
+import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+import { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");
 
@@ -81,7 +76,7 @@ const removeOldBinaryIfRequired = async (
   return true;
 };
 
-// attempts to find cndi-config.yaml or cndi-config.jsonc, then returns its value and location
+// attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
   providedPath?: string,
 ): Promise<[CNDIConfig, string]> => {
@@ -90,30 +85,30 @@ const loadCndiConfig = async (
   const isFile = true;
   const cwd = Deno.cwd();
 
-  // the user provided a direct path to a cndi-config file
+  // the user provided a direct path to a cndi_config file
   if (providedPath) {
     return [(await loadYAMLorJSONC(providedPath)) as CNDIConfig, providedPath];
   }
 
-  if (await exists(path.join(cwd, "cndi-config.yaml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.yaml");
-  } else if (await exists(path.join(cwd, "cndi-config.yml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.yml");
-  } else if (await exists(path.join(cwd, "cndi-config.jsonc"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.jsonc");
+  if (await exists(path.join(cwd, "cndi_config.yaml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.yaml");
+  } else if (await exists(path.join(cwd, "cndi_config.yml"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.yml");
+  } else if (await exists(path.join(cwd, "cndi_config.jsonc"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.jsonc");
     configIsYAML = false;
-  } else if (await exists(path.join(cwd, "cndi-config.json"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi-config.json");
+  } else if (await exists(path.join(cwd, "cndi_config.json"), { isFile })) {
+    pathToConfig = path.join(cwd, "cndi_config.json");
     configIsYAML = false;
   } else {
     console.error(
       utilsLabel,
       ccolors.error("there is no"),
-      ccolors.key_name('"cndi-config.yaml"'),
+      ccolors.key_name('"cndi_config.yaml"'),
       ccolors.error("file in your current directory"),
     );
     console.log(
-      "if you don't have a cndi-config file try",
+      "if you don't have a cndi_config file try",
       ccolors.prompt("cndi init --interactive"),
     );
     await emitExitEvent(500);
@@ -156,33 +151,17 @@ function getPrettyJSONString(object: unknown) {
 async function getLeaderNodeNameFromConfig(
   config: CNDIConfig,
 ): Promise<string> {
-  const nodesWithRoleLeader = config.infrastructure.cndi.nodes.filter(
-    (node: BaseNodeItemSpec) => node.role === "leader",
-  );
-  if (nodesWithRoleLeader.length !== 1) {
+  try {
+    return config.infrastructure.cndi.nodes[0].name;
+  } catch {
     console.error(
       utilsLabel,
-      ccolors.error("cndi-config exists"),
-      ccolors.error("but it does not have exactly 1"),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entry where"),
-      ccolors.key_name('"role"'),
-      ccolors.error("is"),
-      ccolors.key_name('"leader".'),
-      ccolors.error("There must be exactly one leader node."),
+      ccolors.error("cndi_config exists"),
+      ccolors.error("but we could not assign a named node as leader"),
     );
     await emitExitEvent(200);
     Deno.exit(200);
   }
-  return nodesWithRoleLeader[0].name;
-}
-
-function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
-  const clusterKind = config.infrastructure.cndi.nodes[0].kind;
-  if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
-  if (clusterKind === "aks" || clusterKind === "azure") return "azure";
-  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
-  return clusterKind;
 }
 
 function getTFResource(
@@ -439,6 +418,44 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+type CDKTFAppConfig = {
+  outdir: string;
+};
+
+async function stageCDKTFStack(app: App) {
+  app.synth();
+  const stagingDirectory = await getStagingDir();
+  const tfHome = path.join(stagingDirectory, "cndi", "terraform");
+  const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
+  Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli
+  const synthFiles = walkSync(synthDir, { includeDirs: false });
+  for (const entry of synthFiles) {
+    const destinationAbsPath = entry.path.replace(synthDir, tfHome);
+    if (entry.path.endsWith("cdk.tf.json")) {
+      let jsonStr = await Deno.readTextFile(entry.path);
+      const cdktfObj = JSON.parse(jsonStr);
+      delete cdktfObj.terraform.backend;
+      jsonStr = getPrettyJSONString(cdktfObj);
+      Deno.writeTextFileSync(
+        destinationAbsPath,
+        jsonStr.replaceAll("_cndi_stack_", "."),
+      );
+      Deno.removeSync(entry.path);
+      continue;
+    }
+    Deno.renameSync(entry.path, destinationAbsPath);
+  }
+}
+
+async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
+  const stagingDirectory = await getStagingDir();
+  const outdir = path.join(stagingDirectory, "cndi", "terraform");
+  await Deno.mkdir(path.dirname(outdir), { recursive: true });
+  return {
+    outdir,
+  };
+}
+
 async function getStagingDir(): Promise<string> {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
@@ -542,7 +559,7 @@ function getUserDataTemplateFileString(
   doBase64Encode?: boolean,
 ) {
   let leaderString =
-    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_password": "\${var.git_password}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
+    `templatefile("microk8s-cloud-init-leader.yml.tftpl",{"bootstrap_token": "\${local.bootstrap_token}", "git_repo": "\${var.git_repo}", "git_token": "\${var.git_token}", "git_username": "\${var.git_username}", "sealed_secrets_private_key": "\${base64encode(var.sealed_secrets_private_key)}", "sealed_secrets_public_key": "\${base64encode(var.sealed_secrets_public_key)}", "argocd_admin_password": "\${var.argocd_admin_password}"})`;
   if (useSshRepoAuth()) {
     // this value contains base64 encoded values for git_repo and git_ssh_private_key
     // it's required in order to support multiline values in cloud-init
@@ -603,8 +620,7 @@ function getSecretOfLength(len = 32): string {
 
 function useSshRepoAuth(): boolean {
   return (
-    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length &&
-    !Deno.env.get("GIT_PASSWORD")
+    !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length && !Deno.env.get("GIT_TOKEN")
   );
 }
 
@@ -629,8 +645,8 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
+  getCDKTFAppConfig,
   getCndiInstallPath,
-  getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,
@@ -653,6 +669,7 @@ export {
   replaceRange,
   resolveCNDIPorts,
   sha256Digest,
+  stageCDKTFStack,
   stageFile,
   useSshRepoAuth,
 };

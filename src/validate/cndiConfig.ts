@@ -12,7 +12,7 @@ export default async function validateConfig(
   if (!config?.project_name) {
     console.log(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"project_name"'),
@@ -25,7 +25,7 @@ export default async function validateConfig(
   if (!config?.infrastructure) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have the required"),
       ccolors.key_name('"infrastructure"'),
@@ -44,10 +44,10 @@ export default async function validateConfig(
         if (!port.number) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"number"'),
             ccolors.error("key"),
@@ -58,10 +58,10 @@ export default async function validateConfig(
         if (!port.name) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"name"'),
             ccolors.error("key"),
@@ -72,10 +72,10 @@ export default async function validateConfig(
         if (!port.service && !!port?.namespace) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"service"'),
             ccolors.error("key"),
@@ -85,10 +85,10 @@ export default async function validateConfig(
         } else if (!port.namespace && !!port?.service) {
           console.error(
             cndiConfigLabel,
-            ccolors.error("cndi-config file found was at "),
+            ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
-              `but 'cndi-config.infrastructure.cndi.open_ports[${index}]' is missing the`,
+              `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
             ),
             ccolors.key_name('"namespace"'),
             ccolors.error("key"),
@@ -101,7 +101,7 @@ export default async function validateConfig(
     } else {
       console.error(
         cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
+        ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but"),
         ccolors.key_name('"infrastructure.cndi.open_ports"'),
@@ -112,10 +112,36 @@ export default async function validateConfig(
     }
   }
 
+  if (!config?.provider) {
+    console.error(
+      cndiConfigLabel,
+      ccolors.error("cndi_config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have the required"),
+      ccolors.key_name('"provider"'),
+      ccolors.error("key"),
+    );
+    await emitExitEvent(920);
+    Deno.exit(920);
+  }
+
+  if (!config?.distribution) {
+    console.error(
+      cndiConfigLabel,
+      ccolors.error("cndi_config file found was at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+      ccolors.error("but it does not have the required"),
+      ccolors.key_name('"distribution"'),
+      ccolors.error("key"),
+    );
+    await emitExitEvent(921);
+    Deno.exit(921);
+  }
+
   if (!config?.infrastructure?.cndi?.nodes?.[0]) {
     console.error(
       cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
+      ccolors.error("cndi_config file found was at "),
       ccolors.user_input(`"${pathToConfig}"`),
       ccolors.error("but it does not have any"),
       ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -125,62 +151,62 @@ export default async function validateConfig(
     Deno.exit(902);
   }
 
-  const nodeIsMissingKind = config.infrastructure.cndi.nodes.every((node) =>
-    !node?.kind
-  );
+  // const nodeIsMissingKind = config.infrastructure.cndi.nodes.every((node) =>
+  //   !node?.kind
+  // );
 
-  if (nodeIsMissingKind) {
-    console.error(
-      cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("but it has atleast 1"),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entry missing a"),
-      ccolors.key_name('"kind"'),
-      ccolors.error('value. All nodes must specify a "kind".'),
-    );
-    await emitExitEvent(903);
-    Deno.exit(903);
-  }
+  // if (nodeIsMissingKind) {
+  //   console.error(
+  //     cndiConfigLabel,
+  //     ccolors.error("cndi_config file found was at "),
+  //     ccolors.user_input(`"${pathToConfig}"`),
+  //     ccolors.error("but it has atleast 1"),
+  //     ccolors.key_name('"infrastructure.cndi.nodes"'),
+  //     ccolors.error("entry missing a"),
+  //     ccolors.key_name('"kind"'),
+  //     ccolors.error('value. All nodes must specify a "kind".'),
+  //   );
+  //   await emitExitEvent(903);
+  //   Deno.exit(903);
+  // }
 
-  const onlyOneNodeKind = config.infrastructure.cndi.nodes.every(
-    (node) => node.kind === config.infrastructure.cndi.nodes[0].kind,
-  );
+  // const onlyOneNodeKind = config.infrastructure.cndi.nodes.every(
+  //   (node) => node.kind === config.infrastructure.cndi.nodes[0].kind,
+  // );
 
-  if (!onlyOneNodeKind) {
-    console.error(
-      cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("but it has multiple"),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entries with different"),
-      ccolors.key_name('"kind"'),
-      ccolors.error('values. All nodes must be deployed with the same "kind".'),
-    );
-    await emitExitEvent(904);
-    Deno.exit(904);
-  }
+  // if (!onlyOneNodeKind) {
+  //   console.error(
+  //     cndiConfigLabel,
+  //     ccolors.error("cndi_config file found was at "),
+  //     ccolors.user_input(`"${pathToConfig}"`),
+  //     ccolors.error("but it has multiple"),
+  //     ccolors.key_name('"infrastructure.cndi.nodes"'),
+  //     ccolors.error("entries with different"),
+  //     ccolors.key_name('"kind"'),
+  //     ccolors.error('values. All nodes must be deployed with the same "kind".'),
+  //   );
+  //   await emitExitEvent(904);
+  //   Deno.exit(904);
+  // }
 
-  if (config?.infrastructure?.cndi?.nodes?.[0]?.kind === "dev") {
-    if (config.infrastructure.cndi.nodes.length > 1) {
-      console.error(
-        cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it has multiple"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries with the"),
-        ccolors.key_name('"kind"'),
-        ccolors.error(
-          'value of "dev". Only one node can be deployed when doing dev deployments.',
-        ),
-      );
-      await emitExitEvent(911);
-      Deno.exit(911);
-    }
-  }
+  // if (config?.infrastructure?.cndi?.nodes?.[0]?.kind === "dev") {
+  //   if (config.infrastructure.cndi.nodes.length > 1) {
+  //     console.error(
+  //       cndiConfigLabel,
+  //       ccolors.error("cndi_config file found was at "),
+  //       ccolors.user_input(`"${pathToConfig}"`),
+  //       ccolors.error("but it has multiple"),
+  //       ccolors.key_name('"infrastructure.cndi.nodes"'),
+  //       ccolors.error("entries with the"),
+  //       ccolors.key_name('"kind"'),
+  //       ccolors.error(
+  //         'value of "dev". Only one node can be deployed when doing dev deployments.',
+  //       ),
+  //     );
+  //     await emitExitEvent(911);
+  //     Deno.exit(911);
+  //   }
+  // }
 
   if (!config?.cndi_version) {
     console.log(
@@ -197,7 +223,7 @@ export default async function validateConfig(
     if (!node.name) {
       console.error(
         cndiConfigLabel,
-        ccolors.error("cndi-config file found was at "),
+        ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it has at least one"),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
@@ -211,52 +237,52 @@ export default async function validateConfig(
     nodeNameSet.add(node.name);
   }
 
-  const nodeNamesAreUnique =
-    nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
+  // const nodeNamesAreUnique =
+  //   nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
 
-  if (!nodeNamesAreUnique) {
-    console.error(
-      cndiConfigLabel,
-      ccolors.error("cndi-config file found was at "),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("but it has multiple "),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entries with the same"),
-      ccolors.key_name('"name"'),
-      ccolors.error("values. Node names must be unique."),
-    );
-    await emitExitEvent(906);
-    Deno.exit(906);
-  }
+  // if (!nodeNamesAreUnique) {
+  //   console.error(
+  //     cndiConfigLabel,
+  //     ccolors.error("cndi_config file found was at "),
+  //     ccolors.user_input(`"${pathToConfig}"`),
+  //     ccolors.error("but it has multiple "),
+  //     ccolors.key_name('"infrastructure.cndi.nodes"'),
+  //     ccolors.error("entries with the same"),
+  //     ccolors.key_name('"name"'),
+  //     ccolors.error("values. Node names must be unique."),
+  //   );
+  //   await emitExitEvent(906);
+  //   Deno.exit(906);
+  // }
 
-  const numberOfNodesWithRoleLeader = config?.infrastructure?.cndi?.nodes
-    ?.filter(
-      ({ role }) => role === "leader",
-    ).length;
+  // const numberOfNodesWithRoleLeader = config?.infrastructure?.cndi?.nodes
+  //   ?.filter(
+  //     ({ role }) => role === "leader",
+  //   ).length;
 
   // deno-lint-ignore no-explicit-any
   const kind = config?.infrastructure?.cndi?.nodes[0]?.kind as unknown as any;
 
-  const isMicrok8sCluster = !MANAGED_NODE_KINDS.includes(
+  const _isMicrok8sCluster = !MANAGED_NODE_KINDS.includes(
     kind,
   );
 
-  if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
-    console.error(
-      cndiConfigLabel,
-      ccolors.error("cndi-config file found was at"),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("but it does not have exactly 1"),
-      ccolors.key_name('"infrastructure.cndi.nodes"'),
-      ccolors.error("entry with "),
-      ccolors.key_name('"role"'),
-      ccolors.error("is"),
-      ccolors.key_name('"leader".'),
-      ccolors.error(
-        "There must be exactly one leader node when using microk8s based clusters.",
-      ),
-    );
-    await emitExitEvent(907);
-    Deno.exit(907);
-  }
+  // if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
+  //   console.error(
+  //     cndiConfigLabel,
+  //     ccolors.error("cndi_config file found was at"),
+  //     ccolors.user_input(`"${pathToConfig}"`),
+  //     ccolors.error("but it does not have exactly 1"),
+  //     ccolors.key_name('"infrastructure.cndi.nodes"'),
+  //     ccolors.error("entry with "),
+  //     ccolors.key_name('"role"'),
+  //     ccolors.error("is"),
+  //     ccolors.key_name('"leader".'),
+  //     ccolors.error(
+  //       "There must be exactly one leader node when using microk8s based clusters.",
+  //     ),
+  //   );
+  //   await emitExitEvent(907);
+  //   Deno.exit(907);
+  // }
 }

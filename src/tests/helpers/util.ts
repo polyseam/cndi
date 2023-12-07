@@ -22,6 +22,7 @@ const hasSameFilesAfter = async (
   for await (const dirEntry of Deno.readDir(".")) {
     originalContents.add(dirEntry.name);
   }
+  console.log("originalContents", originalContents);
 
   await operationFn();
 
@@ -30,6 +31,7 @@ const hasSameFilesAfter = async (
   for await (const afterDirEntry of Deno.readDir(".")) {
     afterContents.add(afterDirEntry.name);
   }
+  console.log("afterContents", afterContents);
 
   return areSetsEqual(originalContents, afterContents);
 };

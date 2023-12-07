@@ -1,0 +1,199 @@
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to install ArgoCD and expose it via an ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: deploy_postgres_ingress
+    default: true
+    message: >-
+      Do you want to expose PostgreSQL to the web?
+    type: Confirm
+
+  - name: postgres_hostname
+    default: postgres.example.com
+    message: >-
+      What hostname should PostgreSQL be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+      - min_length: 3
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+      - ==
+      - true
+
+  - name: postgres_port
+    default: 5432
+    message: >-
+      What port should PostgreSQL be accessible at?
+    type: Number
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+      - ==
+      - true
+
+  - name: postgres_admin_username
+    default: postgres
+    message: >-
+      What username should be used for your PostgreSQL admin user?
+    type: Input
+
+  - name: postgres_admin_password
+    default: postgres
+    message: >-
+      What will be your default password for your PostgreSQL admin user?
+    type: Secret
+
+  - name: postgres_database_name
+    default: postgres
+    message: >-
+      What will be the name for your PostgreSQL database?
+    type: Input
+
+  - name: postgres_namespace
+    default: postgres
+    message: >-
+      What namespace should PostgreSQL be deployed in?
+    type: Input
+
+  - name: postgres_cluster_name
+    default: postgres-cluster
+    message: >-
+      What will be the name for your PostgreSQL cluster?
+    type: Input
+
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a template comment
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        open_ports:
+          - number: 5432
+            name: postgres
+            namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+            service: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-nodes.yaml):
+            {}
+
+    cluster_manifests:
+      cnpg-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+
+      $cndi.comment(postgres-auth-secret): Postgres Credentials
+      cnpg-cluster-superuser-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-cluster-superuser-auth-secret
+          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+
+      cnpg-cluster-user-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-database-user-auth-secret
+          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+        type: kubernetes.io/basic-auth
+        stringData:
+          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+
+      cnpg-connection-string-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cnpg-connection-string-secret
+          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+        type: Opaque
+        stringData:
+          connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
+
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      postgres-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: postgres-cluster-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(postgres_hostname) }}"
+            service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            service_port: 5432
+            namespace: postgres
+
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+            - ==
+            - true
+
+    applications:
+      cnpg:
+        targetRevision: 0.18.0
+        destinationNamespace: cnpg-system
+        repoURL: "https://cloudnative-pg.github.io/charts"
+        chart: cloudnative-pg
+
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+
+    $cndi.comment(neo4j-heading): Postgres Connection Parameters
+    POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
+    POSTGRES_PROTOCOL: postgresql
+    POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+    POSTGRESQL_PORT: "{{ $cndi.get_prompt_response(postgres_port) }}}}"
+    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:{{ $cndi.get_prompt_response(postgres_port) }}/{{ $cndi.get_prompt_response(postgres_database_name) }}"
+    POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+
+  readme:
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+      {}

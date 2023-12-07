@@ -13,9 +13,7 @@ const runLabel = ccolors.faded("\nsrc/commands/run.ts:");
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
 const runCommand = new Command()
-  .description(
-    `Deploy cndi cluster with project files.`,
-  )
+  .description(`Deploy cndi cluster with project files.`)
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
@@ -43,13 +41,14 @@ const runCommand = new Command()
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
     { required: true },
-  ).env(
+  )
+  .env(
     "GIT_USERNAME=<value:string>",
     "Username ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
   .env(
-    "GIT_PASSWORD=<value:string>",
+    "GIT_TOKEN=<value:string>",
     "Personal access token ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
@@ -77,10 +76,7 @@ const runCommand = new Command()
       console.log(ccolors.faded("\n-- terraform init --\n"));
 
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
-        args: [
-          `-chdir=${pathToTerraformResources}`,
-          "init",
-        ],
+        args: [`-chdir=${pathToTerraformResources}`, "init"],
         stderr: "piped",
         stdout: "piped",
       });
@@ -107,8 +103,7 @@ const runCommand = new Command()
         stdout: "piped",
       });
 
-      const terraformApplyChildProcess = terraformApplyCommand
-        .spawn();
+      const terraformApplyChildProcess = terraformApplyCommand.spawn();
 
       for await (const chunk of terraformApplyChildProcess.stdout) {
         Deno.stdout.write(chunk);
