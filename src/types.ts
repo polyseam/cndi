@@ -55,7 +55,6 @@ export type Command = ObjectValues<typeof COMMAND>;
 // cndi_config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
 interface BaseNodeItemSpec {
   name: string;
-  kind: NodeKind;
   role?: NodeRole; // default: controller
   volume_size?: number;
   size?: number | string;
@@ -66,6 +65,7 @@ interface BaseNodeItemSpec {
   min_count?: number;
   max_count?: number;
   count?: number;
+  disk_type?: string;
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]
@@ -135,6 +135,7 @@ interface GKENodeItemSpec extends BaseNodeItemSpec {
   volume_size?: number;
   disk_size_gb?: number;
   instance_type?: string;
+  disk_type?: string;
 }
 
 // cndi_config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
