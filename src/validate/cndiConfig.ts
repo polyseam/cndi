@@ -1,5 +1,4 @@
 import { ccolors } from "deps";
-import { MANAGED_NODE_KINDS } from "consts";
 import { CNDIConfig } from "src/types.ts";
 import { emitExitEvent } from "src/utils.ts";
 
@@ -260,12 +259,11 @@ export default async function validateConfig(
   //     ({ role }) => role === "leader",
   //   ).length;
 
-  // deno-lint-ignore no-explicit-any
-  const kind = config?.infrastructure?.cndi?.nodes[0]?.kind as unknown as any;
+  // const kind = config?.infrastructure?.cndi?.nodes[0]?.kind as unknown as any;
 
-  const _isMicrok8sCluster = !MANAGED_NODE_KINDS.includes(
-    kind,
-  );
+  // const _isMicrok8sCluster = !MANAGED_NODE_KINDS.includes(
+  //   kind,
+  // );
 
   // if (numberOfNodesWithRoleLeader !== 1 && isMicrok8sCluster) {
   //   console.error(
