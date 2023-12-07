@@ -5,7 +5,6 @@ import { path } from "deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import {
-  ensureResourceNamesMatchFileNames,
   hasSameFilesAfter,
 } from "src/tests/helpers/util.ts";
 
