@@ -4,9 +4,7 @@ import { path } from "deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-import {
-  hasSameFilesAfter,
-} from "src/tests/helpers/util.ts";
+import { hasSameFilesAfter } from "src/tests/helpers/util.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
