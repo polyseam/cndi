@@ -14,7 +14,7 @@ import {
   // TerraformVariable,
 } from "deps";
 
-// import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -181,9 +181,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         subnetwork: subnet.selfLink,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
-            enabled: true
-          }
-        }
+            enabled: true,
+          },
+        },
       },
     );
 
@@ -201,57 +201,61 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       kubernetes,
     );
 
-    const nodePools = [];
-
     for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
       const nodeCount = nodePoolSpec.count || 1;
+
+      const diskSizeGb = nodePoolSpec?.disk_size_gb ||
+        nodePoolSpec?.disk_size ||
+        nodePoolSpec?.volume_size ||
+        DEFAULT_NODE_DISK_SIZE_MANAGED;
+
+      const diskType = nodePoolSpec?.disk_type || "pd-ssd";
+
+      const serviceAccount = this.locals.gcp_client_email.asString;
+
+      const machineType = nodePoolSpec?.machine_type ||
+        nodePoolSpec?.instance_type ||
+        DEFAULT_INSTANCE_TYPES.gcp;
+
+      const nodeConfig = {
+        diskSizeGb,
+        diskType,
+        serviceAccount,
+        machineType,
+      };
 
       if (
         Object.hasOwn(nodePoolSpec, "min_count") ||
         Object.hasOwn(nodePoolSpec, "max_count")
       ) {
-        nodePools.push(
-          new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
-            this,
-            `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
-            {
-              cluster: gkeCluster.name,
-              name: nodePoolSpec.name,
-              nodeConfig: {
-                diskSizeGb: 100,
-                diskType: "pd-ssd",
-                serviceAccount: this.locals.gcp_client_email.asString,
-              },
-              autoscaling: {
-                minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
-                maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
-                locationPolicy: "BALANCED",
-              },
-              initialNodeCount: nodeCount ?? nodePoolSpec.min_count,
+        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+          this,
+          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+          {
+            cluster: gkeCluster.name,
+            name: nodePoolSpec.name,
+            nodeConfig,
+            autoscaling: {
+              minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
+              maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
+              locationPolicy: "BALANCED",
             },
-          ),
+            initialNodeCount: nodeCount ?? nodePoolSpec.min_count,
+          },
         );
       } else {
-        nodePools.push(
-          new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
-            this,
-            `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
-            {
-              cluster: gkeCluster.name,
-              name: nodePoolSpec.name,
-              nodeConfig: {
-                diskSizeGb: 100,
-                diskType: "pd-ssd",
-                serviceAccount: this.locals.gcp_client_email.asString,
-              },
-              nodeCount,
-            },
-          ),
+        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+          this,
+          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+          {
+            cluster: gkeCluster.name,
+            name: nodePoolSpec.name,
+            nodeConfig,
+            nodeCount,
+          },
         );
       }
     }
-
-    const firstNodePool = nodePools[0];
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
       kubernetes,
@@ -277,7 +281,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_time_static_admin_password_update",
       {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+        triggers: { argocdAdminPassword: argocdAdminPasswordHashed }, // TODO: use unhashed val as trigger
       },
     );
 
@@ -441,7 +445,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [gkeCluster, computeAddress, firstNodePool],
+        dependsOn: [gkeCluster, computeAddress],
         name: "ingress-nginx-public",
         namespace: "ingress-public",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -483,7 +487,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [gkeCluster, firstNodePool],
+        dependsOn: [gkeCluster],
         name: "ingress-nginx-private",
         namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -542,7 +546,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
       "cndi_google_filestore_storage_class",
@@ -551,7 +554,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           name: "nfs",
         },
         parameters: {
-          network: network.selfLink,
+          network: network.name,
         },
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
