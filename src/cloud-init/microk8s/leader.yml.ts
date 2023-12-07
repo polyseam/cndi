@@ -29,7 +29,7 @@ const defaultAddons: Array<Microk8sAddon> = [
 ];
 
 const isDevCluster = (config: CNDIConfig) => {
-  return config.infrastructure.cndi?.nodes?.[0].kind === "dev";
+  return config.provider === "dev";
 };
 
 const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
