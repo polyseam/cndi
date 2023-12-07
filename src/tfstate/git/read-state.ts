@@ -1,7 +1,7 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import decrypt from "src/tfstate/decrypt.ts";
-import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 
@@ -95,11 +95,6 @@ export default async function pullStateForRun({
   if (state) {
     const decryptedState = await decrypt(state, secret);
     try {
-      console.log(ccolors.key_name("--- decrypted terraform.tfstate ---:"));
-      console.log(getPrettyJSONString(decryptedState));
-      console.log(
-        ccolors.key_name("--- writing decrypted terraform.tfstate ---:"),
-      );
       Deno.writeTextFileSync(
         path.join(pathToTerraformResources, "terraform.tfstate"),
         decryptedState,

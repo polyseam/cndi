@@ -30,7 +30,6 @@ Deno.test(
         "deployment_target_provider=aws",
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
-      console.log("dotenv", dotenv);
       assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
       assert(status.success);
     });
@@ -85,7 +84,6 @@ Deno.test(
       );
 
       const readme = Deno.readTextFileSync(`README.md`);
-      console.log("readme", readme);
       assert(status.success);
       assert(readme.startsWith(`# ${project_name}`));
     });

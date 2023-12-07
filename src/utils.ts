@@ -12,13 +12,7 @@ import {
 } from "deps";
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import {
-  CNDIConfig,
-  CNDIPort,
-  DeploymentTarget,
-  NodeRole,
-  TFBlocks,
-} from "src/types.ts";
+import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 import { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
@@ -168,14 +162,6 @@ async function getLeaderNodeNameFromConfig(
     await emitExitEvent(200);
     Deno.exit(200);
   }
-}
-
-function getDeploymentTargetFromConfig(config: CNDIConfig): DeploymentTarget {
-  const clusterKind = config.infrastructure.cndi.nodes[0].kind;
-  if (clusterKind === "eks" || clusterKind === "ec2") return "aws";
-  if (clusterKind === "aks" || clusterKind === "azure") return "azure";
-  if (clusterKind === "gke" || clusterKind === "gcp") return "gcp";
-  return clusterKind;
 }
 
 function getTFResource(
@@ -661,7 +647,6 @@ export {
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
-  getDeploymentTargetFromConfig,
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,

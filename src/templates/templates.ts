@@ -154,17 +154,13 @@ function resolveCNDIPromptCondition(
   const [input, comparator, standard] = condition;
   const standardType = typeof standard;
 
-  console.log(
-    ccolors.user_input(`condition: ${input} ${comparator} ${standard}`),
-  );
-
   let val = input;
 
   if (typeof input === "string") {
     val = literalizeTemplateWithResponseValues(input, responses);
 
     if (val === undefined) {
-      console.log(`value for '${input}' is undefined`);
+      console.log(`value for '${ccolors.user_input(input)}' is undefined`);
       return false;
     }
 
@@ -232,7 +228,7 @@ function getCliffyPrompts(
             }
             result[promptDefinition.name] = fileContents;
             if (fileContents.length > 0) {
-              // await next(); everything is fine
+              // everything is fine
             } else {
               console.log("file is empty!");
               await next(promptDefinition.name); // run prompt again
@@ -271,7 +267,7 @@ function getCliffyPrompts(
               });
               if (validationError) {
                 console.log(ccolors.error(validationError));
-                await next(promptDefinition.name); // run like prompt again
+                await next(promptDefinition.name); // validation failed, run same prompt again
               } else {
                 validity.push(true);
                 if (validity.length === promptDefinition.validators.length) {
@@ -391,20 +387,6 @@ export function literalizeTemplateWithResponseValues(
         const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
         const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
 
-        // this block is important because it tells template authors
-        // when they depend on a variable that is not in scope
-        // if (valueToSubstitute === undefined) {
-        //   const fn = fnName.split("$cndi.")[1].split("(")[0];
-        //   console.log(
-        //     ccolors.error(
-        //       `could not find a ${ccolors.key_name(
-        //         fn
-        //       )} value for "${ccolors.user_input(key)}"`
-        //     )
-        //   );
-        //   Deno.exit(1);
-        // }
-
         literalizedString = replaceRange(
           literalizedString,
           indexOfOpenWrappingQuote,
@@ -473,7 +455,7 @@ async function literalizeTemplateWithBlocks(
 
   let i = 0;
   for (const slot of destinationSlots) {
-    const debugSlotStr = slot.join(ccolors.success("."));
+    // slot: path to slot where config should be inserted
 
     const toke = tokens[i];
 
@@ -563,8 +545,6 @@ async function literalizeTemplateWithBlocks(
             unsetValueForKeyPath(parsedLitTemplate, containing_slot_path);
           }
         }
-        console.log("parsedLitTemplate for", debugSlotStr);
-        console.log(parsedLitTemplate);
         break;
       }
     }
@@ -977,7 +957,6 @@ export async function useTemplate(
 
   // if a prompt must be imported from a remote source, fetch it
   // then format it as a promptDefinition then add it to the promptDefinitions array
-  console.log("\n\n---prompts-begin---");
   for (const promptSpec of promptSpecfications) {
     const promptKeys = Object.keys(promptSpec);
     const promptKeyRaw = promptKeys[0];
@@ -1039,9 +1018,6 @@ export async function useTemplate(
   for (const response in tplResponses) {
     responses[response] = tplResponses[response];
   }
-  console.log("---prompts-end---\n\n");
-
-  console.log("\n\n---cndi_config-begin---");
 
   const blocks = unparsedTemplateObject.blocks;
 
@@ -1051,22 +1027,17 @@ export async function useTemplate(
     responses,
     blocks,
   );
-  console.log("---cndi_config-end---\n\n");
 
-  console.log("\n\n---env-begin---");
   const env = await parseEnvSection(
     YAML.stringify(unparsedTemplateObject.outputs.env),
     responses,
     blocks,
   );
-  console.log("---env-end---\n\n");
 
-  console.log("\n\n---readme-begin---");
   const readme = await parseReadmeSection(
     YAML.stringify(unparsedTemplateObject.outputs.readme),
     responses,
   );
-  console.log("---readme-end---\n\n");
 
   return {
     cndi_config,

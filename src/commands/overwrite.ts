@@ -137,7 +137,7 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   );
 
   await stageTerraformResourcesForConfig(config); //, options);
-  console.log(ccolors.success("staged terraform files"));
+  console.log(ccolors.success("staged terraform stack"));
 
   const cert_manager = config?.infrastructure?.cndi?.cert_manager;
 
