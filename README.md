@@ -46,7 +46,7 @@ To install CNDI we just need to download the binary and add it to our PATH. This
 can be done using the script below:
 
 
-<details>
+<details open>
 <summary>:penguin: Linux and  :apple: Mac</summary>
 
 ### Linux Instructions
