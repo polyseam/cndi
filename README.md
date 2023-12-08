@@ -46,27 +46,23 @@ To install CNDI we just need to download the binary and add it to our PATH. This
 can be done using the script below:
 
 
-<details open>
 <summary>:penguin: Linux and  :apple: Mac</summary>
 
 ### Linux Instructions
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
-</details>
 
 
 If you'd prefer to use Windows we have a one-liner for that too described in
 this [short guide](docs/install.md).
 
-<details>
 <summary>:windows: Windows</summary>
 
 ### Windows Instructions
 ```bash
 irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
-</details>
 
 In either case once the script has finished running, the `cndi` binary and
 dependencies are installed to `~/.cndi/bin`.
