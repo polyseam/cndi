@@ -50,6 +50,45 @@ outputs:
             agents_min_count: 1
             agents_max_count: 1
     cluster_manifests:
+      argocd-cm:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: argocd-cm
+          namespace: argocd
+          annotations:
+            argocd.argoproj.io/sync-options: ServerSideApply=true
+          labels:
+            app.kubernetes.io/name: argocd-cm
+            app.kubernetes.io/part-of: argocd
+        data:
+          url: https://argocd.untribe.app
+          oidc.config: |
+            name: Azure
+            clientID: $azure-oidc-secret:oidc_azure_clientID
+            clientSecret: $azure-oidc-secret:oidc_azure_clientSecret
+            issuer: $azure-oidc-secret:oidc_azure_issuer
+            requestedIDTokenClaims:
+              groups:
+                essential: true
+            requestedScopes:
+              - openid
+              - profile
+              - User.Read
+      azure-oidc-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: azure-oidc-secret
+          namespace: argocd
+          labels:
+            app.kubernetes.io/part-of: argocd
+        type: Opaque
+        stringData:
+          oidc_azure_issuer: $.cndi.secrets.seal(ISSUER)
+          oidc_azure_clientSecret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
+          oidc_azure_clientID: $.cndi.secrets.seal(ARM_CLIENT_ID)  
+          oidc_azure_tenant_id: $.cndi.secrets.seal(TENANT_ID)   
       git-credentials-secret:
         apiVersion: v1
         kind: Secret
@@ -125,9 +164,15 @@ outputs:
           namespace: argocd
           annotations:
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-            nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
         spec:
-          ingressClassName: private
+          ingressClassName: public
+          tls:
+            - hosts:
+                - argocd.untribe.app
+              secretName: cluster-issuer-private-key
           rules:
             - host: "{{ $.cndi.prompts.responses.argocdDomainName }}"
               http:
@@ -139,16 +184,7 @@ outputs:
                         name: argocd-server
                         port:
                           name: https
-      oauth2-secret:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: oauth2-secret
-          namespace: airflow
-        stringData:
-          arm_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)
-          arm_client_id: $.cndi.secrets.seal(ARM_CLIENT_ID)
-          arm_client_secret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
+
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -239,8 +275,8 @@ outputs:
 
               # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
               AUTH_ROLES_MAPPING = {
-                "admin": ["Admin"],
-                "reader": ["Viewer"]
+                "airflow_admin": ["Admin"],
+                "airflow_reader": ["Viewer"]
               }
 
               AUTH_ROLES_SYNC_AT_LOGIN = True
@@ -255,14 +291,14 @@ outputs:
               default_owner: Polyseam
           secret:
             - envName: ARM_TENANT_ID
-              secretKey: arm_tenant_id
-              secretName: oauth2-secret
+              secretKey: oidc_azure_tenant_id
+              secretName: azure-oidc-secret
             - envName: ARM_CLIENT_ID
-              secretKey: arm_client_id
-              secretName: oauth2-secret
+              secretKey:  oidc_azure_clientID
+              secretName: azure-oidc-secret
             - envName: ARM_CLIENT_SECRET
-              secretKey: arm_client_secret
-              secretName: oauth2-secret
+              secretKey: oidc_azure_clientSecret
+              secretName: azure-oidc-secret
           ingress:
             web:
               enabled: true
