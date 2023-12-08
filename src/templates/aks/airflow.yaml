@@ -62,7 +62,7 @@ outputs:
             app.kubernetes.io/name: argocd-cm
             app.kubernetes.io/part-of: argocd
         data:
-          url: https://argocd.untribe.app
+          url: "{{ $.cndi.prompts.responses.airflowDomainName }}"
           oidc.config: |
             name: Azure
             clientID: $azure-oidc-secret:oidc_azure_clientID
@@ -88,7 +88,7 @@ outputs:
           oidc_azure_issuer: $.cndi.secrets.seal(ISSUER)
           oidc_azure_clientSecret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
           oidc_azure_clientID: $.cndi.secrets.seal(ARM_CLIENT_ID)  
-          oidc_azure_tenant_id: $.cndi.secrets.seal(TENANT_ID)   
+          oidc_azure_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)   
       git-credentials-secret:
         apiVersion: v1
         kind: Secret
@@ -350,12 +350,8 @@ outputs:
         value: "{{ $.cndi.prompts.responses.gitSyncUsername }}"
       - name: GIT_SYNC_PASSWORD
         value: "{{ $.cndi.prompts.responses.gitSyncPassword }}"
-      - name: ACCESS_TOKEN_URL
-        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2/v2.0/token
-      - name: AUTHORIZATION_URL
-        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2/v2.0/authorize
-      - name: API_BASE_URL
-        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/oauth2
+      - name:  ISSUER
+        value: https://login.microsoftonline.com/<ARM_TENANT_ID>/v2.0
   readme:
     extend_basic_readme: azure
     template_section: >-
