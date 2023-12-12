@@ -50,6 +50,17 @@ outputs:
             agents_min_count: 1
             agents_max_count: 1
     cluster_manifests:
+      airflow-azure-oidc-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-azure-oidc-secret
+          namespace: airflow
+        type: Opaque
+        stringData:
+          oidc_azure_clientSecret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
+          oidc_azure_clientID: $.cndi.secrets.seal(ARM_CLIENT_ID)
+          oidc_azure_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)   
       argocd-cm:
         apiVersion: v1
         kind: ConfigMap
@@ -74,21 +85,7 @@ outputs:
             requestedScopes:
               - openid
               - profile
-              - User.Read
-      azure-oidc-secret:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: azure-oidc-secret
-          namespace: argocd
-          labels:
-            app.kubernetes.io/part-of: argocd
-        type: Opaque
-        stringData:
-          oidc_azure_issuer: $.cndi.secrets.seal(ISSUER)
-          oidc_azure_clientSecret: $.cndi.secrets.seal(ARM_CLIENT_SECRET)
-          oidc_azure_clientID: $.cndi.secrets.seal(ARM_CLIENT_ID)  
-          oidc_azure_tenant_id: $.cndi.secrets.seal(ARM_TENANT_ID)   
+              - User.Read 
       git-credentials-secret:
         apiVersion: v1
         kind: Secret
@@ -222,7 +219,7 @@ outputs:
               basedir = os.path.abspath(os.path.dirname(__file__))
               CSRF_ENABLED = True
               AUTH_TYPE = AUTH_OAUTH
-              AUTH_USER_REGISTRATION_ROLE = "Admin"
+              AUTH_USER_REGISTRATION_ROLE = "Public"
               AUTH_USER_REGISTRATION = True
 
               class AzureCustomSecurity(AirflowSecurityManager, LoggingMixin):
@@ -292,13 +289,13 @@ outputs:
           secret:
             - envName: ARM_TENANT_ID
               secretKey: oidc_azure_tenant_id
-              secretName: azure-oidc-secret
+              secretName: airflow-azure-oidc-secret
             - envName: ARM_CLIENT_ID
               secretKey:  oidc_azure_clientID
-              secretName: azure-oidc-secret
+              secretName: airflow-azure-oidc-secret
             - envName: ARM_CLIENT_SECRET
               secretKey: oidc_azure_clientSecret
-              secretName: azure-oidc-secret
+              secretName: airflow-azure-oidc-secret
           ingress:
             web:
               enabled: true
