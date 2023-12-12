@@ -141,7 +141,7 @@ function coarselyValidateTemplateObjectOrPanic(templateObject: TemplateObject) {
   }
   if (!Object.hasOwn(templateObject, "prompts")) {
     console.error(
-      "template is missing prompts, if this is intentionaln please provide an empty array",
+      "template is missing prompts, if this is intentional please provide an empty array",
     );
     Deno.exit(1);
   }
