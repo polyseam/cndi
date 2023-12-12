@@ -66,7 +66,8 @@ understand this process is to look at it as a lifecycle.
 The first step in the lifecycle is to initialize the CNDI project. Because
 CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
 repository before we do anything else. The best way to do this as a GitHub user
-is to use the [gh cli](https://cli.github.com).
+is to install the [gh cli](https://cli.github.com), and we'll use this tool a
+bit later too for managing secrets.
 
 ```bash
 gh repo create cndi-example --private --clone && cd cndi-example
@@ -151,8 +152,8 @@ that file to overwrite, and they should be easy to spot. CNDI should also tell
 you if it is missing expected values.
 
 When all of the values have been set, we want to use the
-[gh cli](https://github.com/cli/cli) again, this time to push our secret
-environment variables to GitHub.
+[gh cli](https://cli.github.com) again, this time to push our secret environment
+variables to GitHub.
 
 ```bash
 # cndi requires version 2.23.0 or later of the GitHub CLI
