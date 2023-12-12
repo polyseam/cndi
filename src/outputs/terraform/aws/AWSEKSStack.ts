@@ -2,8 +2,8 @@ import { CNDIConfig } from "src/types.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  RELOADER_VERSION,
   KUBESEAL_VERSION,
+  RELOADER_VERSION,
 } from "consts";
 import {
   App,

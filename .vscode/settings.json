@@ -1,6 +1,7 @@
 {
   "deno.enable": true,
   "deno.maxTsServerMemory": 3072,
+  "editor.defaultFormatter": "denoland.vscode-deno",
   "deno.inlayHints.parameterNames.enabled": "none",
   "deno.inlayHints.parameterTypes.enabled": false,
   "deno.inlayHints.variableTypes.enabled": false,
@@ -23,5 +24,8 @@
     "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-template.schema.json": [
       "src/templates/*/*.yaml"
     ]
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
   }
 }
