@@ -104,7 +104,7 @@ const initCommand = new Command()
     "-l, --deployment-target-label <deployment_target_label:string>",
     "Specify a deployment target",
   )
-  .option("-k, --keep", "Keep responses in response.yaml")
+  .option("-k, --keep", "Keep responses in responses.yaml")
   .action(async (options) => {
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
