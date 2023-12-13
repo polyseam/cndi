@@ -12,7 +12,7 @@ cndi/terraform/stacks/cndi_stack/*.tfstate*
 cndi/terraform/stacks/cndi_stack/.terraform/
 cndi/terraform/stacks/cndi_stack/terraform.tfstate
 .DS_Store
-responses.yaml
+cndi_responses.yaml
 `;
   return gitignoreContents.trim();
 }

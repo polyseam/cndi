@@ -29,7 +29,7 @@ import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
-const defaultResponsesFilePath = path.join(Deno.cwd(), "responses.yaml");
+const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 
 function getFinalEnvString(
   templatePartial = "",
@@ -104,7 +104,7 @@ const initCommand = new Command()
     "-l, --deployment-target-label <deployment_target_label:string>",
     "Specify a deployment target",
   )
-  .option("-k, --keep", "Keep responses in responses.yaml")
+  .option("-k, --keep", "Keep responses in cndi_responses.yaml")
   .action(async (options) => {
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
@@ -297,7 +297,7 @@ const initCommand = new Command()
       env = templateResult.env;
       if (options.keep) {
         await stageFile(
-          "responses.yaml",
+          "cndi_responses.yaml",
           YAML.stringify(templateResult.responses),
         );
       }

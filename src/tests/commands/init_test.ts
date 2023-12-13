@@ -178,7 +178,7 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-           /* const { status } = */ await runCndi(
+      /* const { status } = */ await runCndi(
         "init",
         "-t",
         "airflow",
@@ -208,7 +208,7 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      /* const { status } = */await runCndi(
+      /* const { status } = */ await runCndi(
         "init",
         "-t",
         "airflow",
