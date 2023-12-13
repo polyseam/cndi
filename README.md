@@ -108,7 +108,7 @@ you would run:
 For example if you wanted to run the Airflow Template on EC2 you would run:
 
 ```bash
-cndi init --template ec2/airflow
+cndi init --template airflow --label aws/microk8s
 ```
 
 Alternatively, you can also specify a Template URL. A Template URL resolves to a
