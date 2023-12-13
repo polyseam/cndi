@@ -1,0 +1,15 @@
+prompts:
+  - name: "one"
+    type: "Input"
+    message: "what's one + zero?"
+    default: 1
+  - type: "Confirm"
+    message: "is one + zero one?"
+    default: true
+outputs:
+    cndi_config:
+        cndi_version: v2
+    env:
+        HELLO: WORLD
+    readme:
+        - '# readme heading'

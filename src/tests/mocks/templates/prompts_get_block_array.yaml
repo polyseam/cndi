@@ -1,0 +1,11 @@
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+
+outputs:
+  cndi_config:
+    # source_control_platform: github ?
+    cndi_version: v2
+  readme: '# hello world'
+  env:
+    FOO: bar

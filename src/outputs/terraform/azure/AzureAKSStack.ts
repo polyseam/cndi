@@ -14,7 +14,12 @@ import {
   TerraformVariable,
 } from "deps";
 
-import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
+import {
+  DEFAULT_INSTANCE_TYPES,
+  DEFAULT_NODE_DISK_SIZE_MANAGED,
+  KUBESEAL_VERSION,
+  RELOADER_VERSION,
+} from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -448,7 +453,30 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
             name: "configs.secret.argocdServerAdminPasswordMtime",
             value: argocdAdminPasswordMtime.id,
           },
+          {
+            "name":
+              "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
+            "value": "argocd-cm,argocd-rbac-cm",
+          },
         ],
+      },
+    );
+
+    const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_reloader_helm_chart",
+      {
+        chart: "reloader",
+        cleanupOnFail: true,
+        createNamespace: true,
+        dependsOn: [cluster],
+        timeout: 600,
+        atomic: true,
+        name: "reloader",
+        namespace: "reloader",
+        replace: true,
+        repository: "https://stakater.github.io/stakater-charts",
+        version: RELOADER_VERSION,
       },
     );
 
@@ -540,7 +568,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
-        version: "2.12.0",
+        version: KUBESEAL_VERSION,
         timeout: 300,
         atomic: true,
       },

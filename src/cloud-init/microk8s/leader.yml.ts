@@ -10,6 +10,7 @@ import {
   DEFAULT_MICROK8S_VERSION,
   KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
+  RELOADER_VERSION,
 } from "consts";
 
 const defaultAddons: Array<Microk8sAddon> = [
@@ -25,6 +26,9 @@ const defaultAddons: Array<Microk8sAddon> = [
   },
   {
     name: "cert-manager",
+  },
+  {
+    name: "helm",
   },
 ];
 
@@ -217,7 +221,9 @@ const getLeaderCloudInitYaml = (
       `sudo microk8s add-node --token \${bootstrap_token} -l ${MICROK8S_ADD_NODE_TOKEN_TTL}`,
 
       `echo "Installing sealed-secrets-controller"`,
-      `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
+      `sudo microk8s helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets`,
+      `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${KUBESEAL_VERSION} --namespace kube-system`,
+      // `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
       `echo "sealed-secrets-controller installed"`,
 
       // storageClass depends on dev cluster or not
@@ -243,6 +249,19 @@ const getLeaderCloudInitYaml = (
       `echo "Installing ArgoCD"`,
       `sudo microk8s kubectl apply -n argocd -f ${argocdInstallUrl}`,
       `echo "ArgoCD Installed"`,
+
+      `echo "Adding Reloader annotation to argocd-server Deployment"`,
+      `sudo microk8s kubectl patch deployment argocd-server -n argocd -p '{"metadata": {"annotations":{"configmap.reloader.stakater.com/reload": "argocd-cm,argocd-rbac-cm"}}}'`,
+      `echo "Reloader annotation added to argocd-server Deployment"`,
+
+      `echo "Creating reloader namespace"`,
+      `sudo microk8s kubectl create namespace reloader`,
+      `echo "reloader namespace created"`,
+
+      `echo "Installing Reloader"`,
+      `sudo microk8s helm repo add stakater https://stakater.github.io/stakater-charts`,
+      `sudo microk8s helm install stakater/reloader --generate-name --namespace reloader --version ${RELOADER_VERSION}`,
+      `echo "Reloader Installed"`,
 
       `echo "Configuring ArgoCD Root App Manifest"`,
       `sudo microk8s kubectl apply -n argocd -f ${PATH_TO_ROOT_APPLICATION_MANIFEST}`,

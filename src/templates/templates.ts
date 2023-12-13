@@ -141,7 +141,7 @@ function coarselyValidateTemplateObjectOrPanic(templateObject: TemplateObject) {
   }
   if (!Object.hasOwn(templateObject, "prompts")) {
     console.error(
-      "template is missing prompts, if this is intentionaln please provide an empty array",
+      "template is missing prompts, if this is intentional please provide an empty array",
     );
     Deno.exit(1);
   }
@@ -937,19 +937,19 @@ export async function useTemplate(
   // after any remote prompts have been fetched and inserted
 
   // promptSpecifications are the raw prompts entries from a template file
-  const promptSpecfications: Array<CNDITemplatePromptEntry> =
+  const promptSpecifications: Array<CNDITemplatePromptEntry> =
     unparsedTemplateObject?.prompts;
 
   const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
   // if a user supplies prompt response overrides, do not display those prompts, just insert their values
   for (const responseName in responseOverrides) {
-    const pSpecIndex = promptSpecfications.findIndex(
+    const pSpecIndex = promptSpecifications.findIndex(
       (pSpec) => pSpec.name === responseName,
     );
     if (pSpecIndex > -1) {
       responses[responseName] = responseOverrides[responseName];
-      promptSpecfications.splice(pSpecIndex, 1);
+      promptSpecifications.splice(pSpecIndex, 1);
     }
   }
 
@@ -957,7 +957,18 @@ export async function useTemplate(
 
   // if a prompt must be imported from a remote source, fetch it
   // then format it as a promptDefinition then add it to the promptDefinitions array
-  for (const promptSpec of promptSpecfications) {
+  for (const promptSpec of promptSpecifications) {
+    if (Object.keys(promptSpec).length > 1) {
+      // if a prompt has keys, then it is not an import
+      if (!promptSpec?.name) {
+        console.log(ccolors.error("prompt missing name"));
+        Deno.exit(1);
+      }
+      if (!promptSpec?.type) {
+        console.log(ccolors.error("prompt missing type"));
+        Deno.exit(1);
+      }
+    }
     const promptKeys = Object.keys(promptSpec);
     const promptKeyRaw = promptKeys[0];
 
