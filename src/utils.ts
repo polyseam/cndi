@@ -216,148 +216,43 @@ interface TFResourceFileObject {
   };
 }
 
-async function patchAndStageTerraformResources(
-  resourceObj: Record<string, unknown>,
-) {
-  const suffix = `.tf.json`;
-  // resourceObj: { aws_s3_bucket: { cndi_aws_s3_bucket: { ... } } }
-  for (const tfResourceType in resourceObj) {
-    // aws_s3_bucket
-    const resourceTypeBlock = resourceObj[tfResourceType] as Record<
-      string,
-      never
-    >;
-
-    for (const resourceName in resourceTypeBlock) {
-      // cndi_aws_s3_bucket
-      const filename = `${resourceName}${suffix}`;
-
-      let originalContent: TFResourceFileObject = {
-        resource: {},
-      };
-
-      try {
-        originalContent = (await loadJSONC(
-          path.join(await getStagingDir(), "cndi", "terraform", filename),
-        )) as unknown as TFResourceFileObject;
-      } catch {
-        // there was no pre-existing resource with this name
-      }
-
-      // deno-lint-ignore no-explicit-any
-      const attrs = resourceTypeBlock[resourceName] as any;
-      const originalAttrs =
-        originalContent?.resource?.[tfResourceType]?.[resourceName] || {};
-
-      const newContent = {
-        ...originalContent,
-        resource: {
-          ...originalContent.resource,
-          [tfResourceType]: {
-            [resourceName]: {
-              ...deepMerge(originalAttrs, attrs),
-            },
-          },
-        },
-      };
-
-      const newContentStr = getPrettyJSONString(newContent);
-
-      await stageFile(path.join("cndi", "terraform", filename), newContentStr);
-    }
-  }
-}
-
-const terraformBlockTypeNames = [
-  "terraform",
-  "provider",
-  "variable",
-  "output",
-  "locals",
-  "resource",
-  "data",
-  "module",
-];
-
-async function mergeAndStageTerraformObj(
-  terraformBlockName: string,
-  blockContentsPatch: Record<string, unknown>,
-) {
-  if (!terraformBlockTypeNames.includes(terraformBlockName)) {
-    console.error(
-      utilsLabel,
-      ccolors.error("there is no terraform block type named"),
-      ccolors.user_input(`"${terraformBlockName}"`),
-    );
-    await emitExitEvent(203);
-    Deno.exit(203);
-  }
-
-  const pathToTFBlock = path.join(
-    "cndi",
-    "terraform",
-    `${terraformBlockName}.tf.json`,
-  );
-
-  let newBlock = {};
-  try {
-    const originalBlock = (await loadJSONC(
-      path.join(await getStagingDir(), pathToTFBlock),
-    )) as Record<string, unknown>;
-    const originalBlockContents = originalBlock?.[terraformBlockName];
-    newBlock = deepMerge(originalBlockContents || {}, blockContentsPatch);
-  } catch {
-    // there was no pre-existing block with this name
-    newBlock = blockContentsPatch;
-  }
-
-  await stageFile(
-    pathToTFBlock,
-    getPrettyJSONString({ [terraformBlockName]: newBlock }),
-  );
-}
-
 // MUST be called after all other terraform files have been staged
 async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
   if (!config?.infrastructure?.terraform) return;
   const terraformBlocks = config.infrastructure.terraform as TFBlocks;
-  const workload: Array<Promise<void>> = [];
 
-  for (const tftype in terraformBlocks) {
-    // terraform[key]: resource, data, provider, etc.\
-    if (tftype === "resource") {
-      const resources = config.infrastructure?.terraform?.resource;
+  const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
 
-      const blockContainsResources = resources &&
-        Object.keys(resources).length &&
-        typeof resources === "object";
+  const cdktfObj = await loadJSONC(
+    path.join(await getStagingDir(), pathToTerraformObject),
+  ) as TFBlocks;
 
-      if (blockContainsResources) {
-        workload.push(patchAndStageTerraformResources(resources));
-      }
-    } else {
-      const t = tftype as keyof TFBlocks;
-      const contentObj = config.infrastructure?.terraform?.[t];
-
-      const blockContainsEntries = contentObj &&
-        Object.keys(contentObj).length &&
-        typeof contentObj === "object";
-
-      if (blockContainsEntries) {
-        workload.push(mergeAndStageTerraformObj(tftype, contentObj));
-      }
-    }
-  }
-  try {
-    await Promise.all(workload);
-  } catch (error) {
-    console.error(
-      utilsLabel,
-      ccolors.error("error patching terraform files with config"),
-    );
-    console.log(ccolors.caught(error));
-    console.log("attempting to continue anyway...");
-  }
+  await stageFile(
+    pathToTerraformObject,
+    getPrettyJSONString({
+      ...cdktfObj,
+      resource: deepMerge(
+        cdktfObj?.resource || {},
+        terraformBlocks?.resource || {},
+      ),
+      terraform: deepMerge(
+        cdktfObj?.terraform || {},
+        terraformBlocks?.terraform || {},
+      ),
+      variable: deepMerge(
+        cdktfObj?.variable || {},
+        terraformBlocks?.variable || {},
+      ),
+      locals: deepMerge(cdktfObj?.locals || {}, terraformBlocks?.locals || {}),
+      output: deepMerge(cdktfObj?.output || {}, terraformBlocks?.output || {}),
+      module: deepMerge(cdktfObj?.module || {}, terraformBlocks?.module || {}),
+      data: deepMerge(cdktfObj?.data || {}, terraformBlocks?.data || {}),
+      provider: deepMerge(
+        cdktfObj?.provider || {},
+        terraformBlocks?.provider || {},
+      ),
+    }),
+  );
 }
 
 function getPathToTerraformBinary() {

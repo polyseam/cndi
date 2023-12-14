@@ -195,6 +195,9 @@ type TFBlocks = {
   module?: {
     [key: string]: unknown;
   };
+  output?: {
+    [key: string]: unknown;
+  };
 };
 
 interface CNDIPort {
