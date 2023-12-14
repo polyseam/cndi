@@ -65,21 +65,17 @@ understand this process is to look at it as a lifecycle.
 
 The first step in the lifecycle is to initialize the CNDI project. Because
 CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
-repository before we do anything else. The best way to do this as a GitHub user
-is to install the [gh cli](https://cli.github.com), and we'll use this tool a
-bit later too for managing secrets.
+repository before we do anything else.
+
+The best way to create a repo this as a GitHub user is to install the
+[gh cli](https://cli.github.com), and we'll use this tool a bit later too for
+managing secrets.
 
 ```bash
 gh repo create cndi-example --private --clone && cd cndi-example
 ```
 
 Now that we have a Git repository, we can initialize a new CNDI project.
-
-We can do this in 2 different ways, either by using the interactive CLI, or by
-writing or forking a "cndi_config" file you got from someone else, named
-`cndi_config.yaml` or `cndi_config.jsonc`.
-
-**interactive mode**
 
 The best way to get started if you are new to CNDI is to use the interactive
 cli, so let's look at that first.
@@ -90,68 +86,53 @@ cndi init --interactive
 ```
 
 This will start an interactive cli that will ask you a series of questions, the
-first is to select a Template. Templates are a CNDI concept, and they can be
-thought of as a "blueprint" for a data stack. Once you select a Template, CNDI
-will ask you some general questions about your project and some
+first prompt is to select a Template. Templates are a CNDI concept, and they can
+be thought of as a "blueprint" for a cloud-native stack. Once you select a
+Template, CNDI will ask you some general questions about your project and some
 template-specific questions. Then it will write out a few files inside your
 project repo.
 
-**non-interactive mode**
-
-The other way to initialize a CNDI project is to use a CNDI Template file. This
-is done by calling `cndi init --template <template_location>`. When specifying a
-Template location you can choose to use Templates the CNDI team have built that
-are found in this repo at [src/templates](src/templates). To do this you pass in
-a Template "name". For example if you wanted to run the Airflow Template on EC2
-you would run:
-
-For example if you wanted to run the Airflow Template on EC2 you would run:
-
-```bash
-cndi init --template airflow --label aws/microk8s
-```
-
-Alternatively, you can also specify a Template URL. A Template URL resolves to a
-CNDI Template file, this means that you are not limited to only Templates the
-CNDI team has put together, you can point to any arbitrary template file that
-follows the [Template Schema](/src/schemas/cndi-template.schema.json).
+It's also possible to specify a Template URL to initialize with. A Template URL
+resolves to a CNDI Template file, this means that you are not limited to only
+Templates the CNDI team has put together, you can point to any arbitrary
+template file that follows the
+[Template Schema](/src/schemas/cndi-template.schema.json).
 
 These Template URLs can be `file://` URLs which have an absolute path to the
 file locally, or typical remote or `https://` URLs over the net.
 
 ```bash
 # file:// URLs must be absolute paths
-cndi init --template file:///absolute/path/to/template.yaml
+cndi init -i --template file:///absolute/path/to/template.yaml
 # or
-cndi init --template https://example.com/path/to/template.yaml
+cndi init -i --template https://example.com/path/to/template.yaml
 ```
 
 ---
 
-Whether you've chosen to use interactive mode or not, CNDI has generated a few
-files and folders for us based on our `cndi_config.yaml` file. If you want to
-learn about what CNDI is really creating, this is the best file to look at.
+CNDI has generated a few files and folders for us based on our Template file. If
+you want to learn about what CNDI is really creating, the best file to look at
+is the `cndi_config.yaml` file in the root of your repository.
 
-We break down all of these generated files later in this document in the
+We break down all of the generated files later in this document in the
 [outputs](#outputs-📂) section.
 
 The next step for our one-time project setup is to make sure that we have all
-the required envrionment variables for our project. Some of these values are
-required for every deployment. For example, you always need to have
-`GIT_USERNAME`, `GIT_TOKEN` and `GIT_REPO`.
+the required environment variables for our project in our `.env` file that CNDI
+generated.
 
-Some are only required for certain "deployment targets" like `AWS_ACCESS_KEY_ID`
-and `AWS_SECRET_ACCESS_KEY` which are only needed for aws deployments. Lastly,
-some are only required for certain Templates, for example all `airflow`
-templates require `GIT_SYNC_PASSWORD` for accessing repos that hold Airflow
-DAGs.
+Some of these values are required for every deployment. For example, you always
+need to have `GIT_USERNAME`, `GIT_TOKEN` and `GIT_REPO`. Some are only required
+for a specific `provider`, like `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`,
+which are only needed for `aws` deployments. Lastly, some are only required for
+certain Templates, for example all `airflow` templates require
+`GIT_SYNC_PASSWORD` for accessing repos that hold Airflow DAGs.
 
-These environment variables are saved to the `.env` file that CNDI has generated
-for us. If you didn't use interactive mode you may have some placeholders in
-that file to overwrite, and they should be easy to spot. CNDI should also tell
-you if it is missing expected values.
+If you didn't use interactive mode you may have some placeholders in that file
+to overwrite, and they should be easy to spot. CNDI should also tell you if it
+is missing expected values.
 
-When all of the values have been set, we want to use the
+When all of the values have been set in your `.env` file, we want to use the
 [gh cli](https://cli.github.com) again, this time to push our secret environment
 variables to GitHub.
 
@@ -289,7 +270,9 @@ Declaring a node is simple, we give it a name, we give it some specs, and we add
 it to the array!
 
 ```yaml
-# you could use JSON instead, but YAML is preferred
+cndi_version: v2
+provider: gcp
+distribution: microk8s
 infrastructure:
   cndi:
     nodes:
@@ -306,12 +289,17 @@ infrastructure:
         role: worker # node does not run the control plane
 ```
 
-Currently we have support for `dev`, AWS's `ec2` and `eks`, `azure` and `gce`
-clusters. More deployment targets are on the way!
+Currently we have support for Cloud Providers `aws` , `azure`, and `gcp` using
+[Microk8s](https://microk8s.io), as well as their managed offerings, `eks` ,
+`aks`, and `gke`. Finally we support running a `dev` cluster locally using
+`multipass`.
 
 Just like every other component in CNDI, nodes can be updated in our
-`cndi_config.jsonc` and we can call `cndi ow` and push the changes to our git
+`cndi_config.yaml` and we can call `cndi ow` and push the changes to our git
 remote to modify the cluster accordingly.
+
+Don't forget to push up your changes after running `cndi ow` so that we can kick
+off automation for you!
 
 ### infrastructure.terraform 🧱
 
@@ -446,8 +434,8 @@ cluster_manifests:
       name: airflow-git-credentials
       namespace: airflow
     stringData:
-      GIT_SYNC_USERNAME: "$.cndi.secrets.seal(GIT_USERNAME)"
-      GIT_SYNC_PASSWORD: "$.cndi.secrets.seal(GIT_TOKEN)"
+      GIT_SYNC_USERNAME: "$cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)"
+      GIT_SYNC_PASSWORD: "$cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)"
 ```
 
 ---
