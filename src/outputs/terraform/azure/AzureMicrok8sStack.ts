@@ -363,7 +363,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       value: publicIp.ipAddress,
     });
 
-    new TerraformOutput(this, "resource_group", {
+    new TerraformOutput(this, "resource_group_url", {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });

@@ -2,7 +2,6 @@ import { CNDIConfig } from "src/types.ts";
 
 import {
   App,
-  // ccolors,
   CDKTFProviderGCP,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
@@ -11,7 +10,6 @@ import {
   Construct,
   Fn,
   TerraformOutput,
-  // TerraformVariable,
 } from "deps";
 
 import {
@@ -23,8 +21,6 @@ import {
 
 import {
   getCDKTFAppConfig,
-  // getPrettyJSONString,
-  // resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -38,8 +34,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
 
     const clientConfig = new CDKTFProviderGCP.dataGoogleClientConfig
       .DataGoogleClientConfig(
@@ -123,16 +119,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ipCidrRange: "10.0.0.0/16",
         network: network.selfLink,
         privateIpGoogleAccess: true,
-        // secondaryIpRange: [
-        //   {
-        //     ipCidrRange: "10.48.0.0/14",
-        //     rangeName: "cndi-k8s-pod-range",
-        //   },
-        //   {
-        //     ipCidrRange: "10.52.0.0/20",
-        //     rangeName: "cndi-k8s-service-range",
-        //   },
-        // ],
         dependsOn: [network],
       },
     );
@@ -162,15 +148,13 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ],
         sourceRanges: [
           subnet.ipCidrRange,
-          // subnet.secondaryIpRange.get(0).ipCidrRange,
-          // subnet.secondaryIpRange.get(1).ipCidrRange,
         ],
       },
     );
 
     const gkeCluster = new CDKTFProviderGCP.containerCluster.ContainerCluster(
       this,
-      "gke_cluster",
+      "cndi_google_container_cluster",
       {
         name: project_name,
         location: this.locals.gcp_region.asString,
@@ -202,7 +186,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "kubernetes",
+      "cndi_provider_kubernetes",
       kubernetes,
     );
 
@@ -251,7 +235,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       } else {
         new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
           this,
-          `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
+          `cndi_google_container_node_pool_${nodePoolSpec.name}`,
           {
             cluster: gkeCluster.name,
             name: nodePoolSpec.name,
@@ -262,7 +246,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       }
     }
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
       kubernetes,
     });
 
@@ -284,7 +268,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
       this,
-      "cndi_time_static_admin_password_update",
+      "cndi_time_static_argocd_admin_password",
       {
         triggers: { argocdAdminPassword: argocdAdminPasswordHashed }, // TODO: use unhashed val as trigger
       },
@@ -292,7 +276,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_reloader_helm_chart",
+      "cndi_helm_release_reloader",
       {
         chart: "reloader",
         cleanupOnFail: true,
@@ -310,7 +294,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_argocd_helm_chart",
+      "cndi_helm_release_argocd",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -348,7 +332,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -368,7 +352,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     } else {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -390,7 +374,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const sealedSecretsSecret = new CDKTFProviderKubernetes.secret.Secret(
       this,
-      "cndi_sealed_secrets_secret",
+      "cndi_kubernetes_secret_sealed_secrets_key",
       {
         type: "kubernetes.io/tls",
         metadata: {
@@ -411,7 +395,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const _helmReleaseSealedSecrets = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_sealed_secrets_helm_chart",
+      "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
         dependsOn: [gkeCluster, sealedSecretsSecret],
@@ -454,22 +438,26 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       ],
     };
 
-    new CDKTFProviderHelm.release.Release(this, "cndi_argocd_apps_root", {
-      chart: "argocd-apps",
-      createNamespace: true,
-      dependsOn: [helmReleaseArgoCD],
-      name: "root-argo-app",
-      namespace: "argocd",
-      repository: "https://argoproj.github.io/argo-helm",
-      version: "1.4.1",
-      timeout: 600,
-      atomic: true,
-      values: [Fn.yamlencode(argoAppsValues)],
-    });
+    new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_helm_release_argocd_apps",
+      {
+        chart: "argocd-apps",
+        createNamespace: true,
+        dependsOn: [helmReleaseArgoCD],
+        name: "root-argo-app",
+        namespace: "argocd",
+        repository: "https://argoproj.github.io/argo-helm",
+        version: "1.4.1",
+        timeout: 600,
+        atomic: true,
+        values: [Fn.yamlencode(argoAppsValues)],
+      },
+    );
 
     const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_public",
+      "cndi_helm_release_ingress_nginx_controller_public",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -511,7 +499,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_private",
+      "cndi_helm_release_ingress_nginx_controller_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -554,7 +542,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_cert_manager_helm_chart",
+      "cndi_helm_release_cert_manager",
       {
         chart: "cert-manager",
         createNamespace: true,
@@ -576,7 +564,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
-      "cndi_google_filestore_storage_class",
+      "cndi_kubernetes_storage_class_filestore",
       {
         metadata: {
           name: "nfs",
@@ -596,7 +584,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       value: computeAddress.address,
     });
 
-    new TerraformOutput(this, "resource_group", {
+    new TerraformOutput(this, "resource_group_url", {
       value: `https://console.cloud.google.com/welcome?project=${project_name}`,
     });
   }

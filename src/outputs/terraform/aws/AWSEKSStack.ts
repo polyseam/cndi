@@ -433,11 +433,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "kubernetes",
+      "cndi_kubernetes_provider",
       kubernetes,
     );
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
     });
 
@@ -630,7 +630,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseEFSCSIDriver = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_efs_driver_helm_chart",
+      "cndi_helm_release_aws_efs_csi_driver",
       {
         chart: "aws-efs-csi-driver",
         createNamespace: true,
@@ -687,7 +687,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_private",
+      "cndi_helm_release_ingress_nginx_controller_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -751,7 +751,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_public",
+      "cndi_helm_release_ingress_nginx_controller_public",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -815,7 +815,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_cert_manager_helm_chart",
+      "cndi_helm_release_cert_manager",
       {
         chart: "cert-manager",
         createNamespace: true,
@@ -842,7 +842,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
       this,
-      "cndi_time_static_admin_password_update",
+      "cndi_time_static_argocd_admin_password",
       {
         triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
       },
@@ -850,7 +850,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_argocd_helm_chart",
+      "cndi_helm_release_argocd",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -890,7 +890,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_reloader_helm_chart",
+      "cndi_helm_release_reloader",
       {
         chart: "reloader",
         cleanupOnFail: true,
@@ -909,7 +909,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -929,7 +929,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     } else {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -951,7 +951,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const sealedSecretsSecret = new CDKTFProviderKubernetes.secret.Secret(
       this,
-      "cndi_sealed_secrets_secret",
+      "cndi_kubernetes_secret_sealed_secrets_key",
       {
         type: "kubernetes.io/tls",
         metadata: {
@@ -971,7 +971,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseSealedSecrets = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_sealed_secrets_helm_chart",
+      "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
         dependsOn: [firstNodeGroup!, sealedSecretsSecret],
@@ -986,7 +986,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const _helmReleaseEbsDriver = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_ebs_driver_helm_chart",
+      "cndi_helm_release_aws_ebs_csi_driver",
       {
         chart: "aws-ebs-csi-driver",
         createNamespace: true,
@@ -1053,18 +1053,22 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       ],
     };
 
-    new CDKTFProviderHelm.release.Release(this, "cndi_argocd_apps_root", {
-      chart: "argocd-apps",
-      createNamespace: true,
-      dependsOn: [helmReleaseArgoCD],
-      name: "root-argo-app",
-      namespace: "argocd",
-      repository: "https://argoproj.github.io/argo-helm",
-      version: "1.4.1",
-      timeout: 600,
-      atomic: true,
-      values: [Fn.yamlencode(argoAppsValues)],
-    });
+    new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_helm_release_argocd_apps",
+      {
+        chart: "argocd-apps",
+        createNamespace: true,
+        dependsOn: [helmReleaseArgoCD],
+        name: "root-argo-app",
+        namespace: "argocd",
+        repository: "https://argoproj.github.io/argo-helm",
+        version: "1.4.1",
+        timeout: 600,
+        atomic: true,
+        values: [Fn.yamlencode(argoAppsValues)],
+      },
+    );
 
     new TerraformOutput(this, "public_host", {
       value: Fn.replace(
@@ -1074,7 +1078,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       ),
     });
 
-    new TerraformOutput(this, "resource_group", {
+    new TerraformOutput(this, "resource_group_url", {
       value: `https://${
         Fn.upper(
           this.locals.aws_region.asString,

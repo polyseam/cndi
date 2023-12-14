@@ -48,22 +48,26 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
-        console.log("nodeSpec.name", nodeSpec.name);
         if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
-          console.log(ccolors.error("ERROR: invalid node pool name"));
+          console.log(
+            ccolors.error(
+              `ERROR: invalid node pool name '${
+                ccolors.user_input(nodeSpec.name)
+              }'`,
+            ),
+          );
           console.log(
             "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
           );
-          console.log("you entered", ccolors.user_input(nodeSpec.name));
-          Deno.exit(11);
+          Deno.exit(11); // TODO: proper error code
         }
         const count = nodeSpec.count || 1;
 
@@ -72,8 +76,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           maxCount: count,
           minCount: count,
         };
-
-        console.log("scale", scale);
 
         if (nodeSpec.max_count) {
           scale.maxCount = nodeSpec.max_count;
@@ -118,7 +120,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const cluster = new CDKTFProviderAzure.kubernetesCluster.KubernetesCluster(
       this,
-      `cndi_azure_aks_cluster`,
+      `cndi_azurerm_kubernetes_cluster`,
       {
         location: this.locals.arm_region.asString,
         name: `cndi-aks-cluster-${project_name}`,
@@ -130,9 +132,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         skuTier: "Free",
         dnsPrefix: `cndi-aks-${project_name}`,
-        // identity: {
-        //   type: "SystemAssigned",
-        // },
         networkProfile: {
           loadBalancerSku: "standard",
           networkPlugin: "azure",
@@ -167,11 +166,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "kubernetes",
+      "cndi_provider_kubernetes",
       kubernetes,
     );
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
       kubernetes,
     });
 
@@ -180,7 +179,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       new CDKTFProviderAzure.kubernetesClusterNodePool
         .KubernetesClusterNodePool(
         this,
-        `cndi_azure_aks_nodepool_${nodeSpec.name}`,
+        `cndi_azurerm_kubernetes_cluster_node_pool_${nodeSpec.name}`,
         {
           ...nodeSpec,
           kubernetesClusterId: cluster.id,
@@ -190,7 +189,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
-      "cndi_aks_file_strorage_class",
+      "cndi_kubernetes_storage_class_azure_file",
       {
         metadata: {
           name: "nfs",
@@ -208,7 +207,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
-      "cndi_aks_disk_strorage_class",
+      "cndi_kubernetes_storage_class_azure_disk",
       {
         metadata: {
           name: "cndi-managed-premium-v2-disk",
@@ -226,16 +225,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    // new CDKTFProviderAzure.roleAssignment.RoleAssignment(this, 'cndi_azure_aks_cluster_role_assignment', {
-    //   principalId: cluster.identity.get(0).principalId,
-    //   roleDefinitionName: "Acr Pull",
-    //   skipServicePrincipalAadCheck: true,
-    //   scope: this.rg.id,
-    // })
-
     const publicIp = new CDKTFProviderAzure.publicIp.PublicIp(
       this,
-      "cndi_azurerm_public_ip_lb",
+      "cndi_azurerm_public_ip",
       {
         allocationMethod: "Static",
         location: this.rg.location,
@@ -248,7 +240,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_public",
+      "cndi_helm_release_ingress_nginx_controller_public",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -322,7 +314,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_nginx_controller_helm_chart_private",
+      "cndi_helm_release_ingress_nginx_controller_private",
       {
         chart: "ingress-nginx",
         createNamespace: true,
@@ -392,7 +384,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_cert_manager_helm_chart",
+      "cndi_helm_release_cert_manager",
       {
         chart: "cert-manager",
         createNamespace: true,
@@ -419,7 +411,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
       .StaticResource(
       this,
-      "cndi_time_static_admin_password_update",
+      "cndi_time_static_argocd_admin_password",
       {
         triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
       },
@@ -427,7 +419,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_argocd_helm_chart",
+      "cndi_helm_release_argocd",
       {
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -464,7 +456,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_reloader_helm_chart",
+      "cndi_helm_release_reloader",
       {
         chart: "reloader",
         cleanupOnFail: true,
@@ -480,26 +472,10 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    // const _restartArgoServer = new CDKTFProviderNull.resource.Resource(
-    //   this,
-    //   "cndi_argocd_restart_argo_server",
-    //   {
-    //     dependsOn: [helmReleaseArgoCD, argocdAdminPasswordSecret],
-    //     triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
-    //     provisioners: [
-    //       {
-    //         command:
-    //           "kubectl rollout restart deployment argocd-server -n argocd",
-    //         type: "local-exec",
-    //       },
-    //     ],
-    //   },
-    // );
-
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -519,7 +495,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     } else {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
-        "cndi_argocd_private_repo_secret",
+        "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [helmReleaseArgoCD],
           metadata: {
@@ -541,7 +517,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const sealedSecretsSecret = new CDKTFProviderKubernetes.secret.Secret(
       this,
-      "cndi_sealed_secrets_secret",
+      "cndi_kubernetes_secret_sealed_secrets_key",
       {
         type: "kubernetes.io/tls",
         metadata: {
@@ -561,7 +537,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const _helmReleaseSealedSecrets = new CDKTFProviderHelm.release.Release(
       this,
-      "cndi_sealed_secrets_helm_chart",
+      "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
         dependsOn: [cluster, sealedSecretsSecret],
@@ -604,24 +580,28 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       ],
     };
 
-    new CDKTFProviderHelm.release.Release(this, "cndi_argocd_apps_root", {
-      chart: "argocd-apps",
-      createNamespace: true,
-      dependsOn: [helmReleaseArgoCD],
-      name: "root-argo-app",
-      namespace: "argocd",
-      repository: "https://argoproj.github.io/argo-helm",
-      version: "1.4.1",
-      timeout: 600,
-      atomic: true,
-      values: [Fn.yamlencode(argoAppsValues)],
-    });
+    new CDKTFProviderHelm.release.Release(
+      this,
+      "cndi_helm_release_argocd_apps",
+      {
+        chart: "argocd-apps",
+        createNamespace: true,
+        dependsOn: [helmReleaseArgoCD],
+        name: "root-argo-app",
+        namespace: "argocd",
+        repository: "https://argoproj.github.io/argo-helm",
+        version: "1.4.1",
+        timeout: 600,
+        atomic: true,
+        values: [Fn.yamlencode(argoAppsValues)],
+      },
+    );
 
     new TerraformOutput(this, "public_host", {
       value: publicIp.ipAddress,
     });
 
-    new TerraformOutput(this, "resource_group", {
+    new TerraformOutput(this, "resource_group_url", {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });

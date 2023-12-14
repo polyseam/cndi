@@ -300,7 +300,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       }
     }
 
-    new TerraformOutput(this, "cndi_aws_lb_public_host", {
+    new TerraformOutput(this, "public_host", {
       value: Fn.replace(
         cndiNLB.dnsName,
         this.locals.aws_region.asString,
@@ -308,7 +308,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       ),
     });
 
-    new TerraformOutput(this, "cndi_resource_group_url", {
+    new TerraformOutput(this, "resource_group_url", {
       value:
         "https://${upper(local.aws_region)}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${upper(local.aws_region)}",
     });

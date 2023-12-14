@@ -4,7 +4,6 @@ import {
   CDKTFProviderTime,
   Construct,
   Fn,
-  // TerraformLocal,
   TerraformOutput,
 } from "deps";
 
@@ -17,7 +16,6 @@ import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
   stageCDKTFStack,
-  // getUserDataTemplateFileString,
   useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole } from "src/types.ts";
