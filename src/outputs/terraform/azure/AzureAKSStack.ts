@@ -85,15 +85,15 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           scale.minCount = nodeSpec.min_count;
         }
 
-        const nodePoolSpec = {
+        const nodePoolSpec: AnonymousClusterNodePoolConfig = {
           name: nodeSpec.name,
           ...scale,
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
           osDiskType: "Managed",
-          type: "VirtualMachineScaleSets",
           enableAutoScaling: true,
+          maxPods: 110,
         };
         return nodePoolSpec;
       });
@@ -126,7 +126,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         name: `cndi-aks-cluster-${project_name}`,
         kubernetesVersion: "1.27",
         resourceGroupName: this.rg.name,
-        defaultNodePool,
+        defaultNodePool: {
+          ...defaultNodePool,
+          temporaryNameForRotation: "temp0",
+          type: "VirtualMachineScaleSets",
+        },
         tags: {
           CNDIProject: project_name,
         },
@@ -413,7 +417,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       this,
       "cndi_time_static_argocd_admin_password",
       {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+        triggers: {
+          argocdAdminPassword: this.variables.argocd_admin_password.value,
+        },
       },
     );
 
@@ -448,7 +454,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           {
             "name":
               "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            "value": "argocd-cm,argocd-rbac-cm",
+            "value": "argocd-cm",
           },
         ],
       },

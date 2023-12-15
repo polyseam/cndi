@@ -251,7 +251,7 @@ const getLeaderCloudInitYaml = (
       `echo "ArgoCD Installed"`,
 
       `echo "Adding Reloader annotation to argocd-server Deployment"`,
-      `sudo microk8s kubectl patch deployment argocd-server -n argocd -p '{"metadata": {"annotations":{"configmap.reloader.stakater.com/reload": "argocd-cm,argocd-rbac-cm"}}}'`,
+      `sudo microk8s kubectl patch deployment argocd-server -n argocd -p '{"metadata": {"annotations":{"configmap.reloader.stakater.com/reload": "argocd-cm"}}}'`,
       `echo "Reloader annotation added to argocd-server Deployment"`,
 
       `echo "Creating reloader namespace"`,

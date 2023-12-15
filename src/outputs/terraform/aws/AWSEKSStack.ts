@@ -844,7 +844,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_time_static_argocd_admin_password",
       {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed },
+        triggers: {
+          argocdAdminPassword: this.variables.argocd_admin_password.value,
+        },
       },
     );
 
@@ -882,7 +884,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             "name":
               "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            "value": "argocd-cm,argocd-rbac-cm",
+            "value": "argocd-cm",
           },
         ],
       },

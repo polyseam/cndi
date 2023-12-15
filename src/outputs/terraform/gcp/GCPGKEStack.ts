@@ -270,7 +270,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_time_static_argocd_admin_password",
       {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed }, // TODO: use unhashed val as trigger
+        triggers: {
+          argocdAdminPassword: this.variables.argocd_admin_password.value,
+        },
       },
     );
 
@@ -323,7 +325,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           {
             "name":
               "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            "value": "argocd-cm,argocd-rbac-cm",
+            "value": "argocd-cm",
           },
         ],
       },
