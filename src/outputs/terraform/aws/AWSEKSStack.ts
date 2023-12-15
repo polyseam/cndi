@@ -882,7 +882,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             "name":
               "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            "value": "argocd-cm,argocd-rbac-cm",
+            "value": "argocd-cm",
           },
         ],
       },
