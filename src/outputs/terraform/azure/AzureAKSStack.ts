@@ -418,7 +418,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_time_static_argocd_admin_password",
       {
         triggers: {
-          argocdAdminPassword: this.variables.argocd_admin_password.value,
+          argocdAdminPassword: Fn.sensitive(
+            this.variables.argocd_admin_password.value,
+          ),
         },
       },
     );
