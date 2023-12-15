@@ -270,7 +270,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_time_static_argocd_admin_password",
       {
-        triggers: { argocdAdminPassword: argocdAdminPasswordHashed }, // TODO: use unhashed val as trigger
+        triggers: {
+          argocdAdminPassword: this.variables.argocd_admin_password.value,
+        },
       },
     );
 
