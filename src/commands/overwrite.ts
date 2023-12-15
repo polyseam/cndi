@@ -217,6 +217,11 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
   }
   console.log(ccolors.success("staged open ports manifests"));
 
+  await stageFile(
+    path.join("cndi", "cluster_manifests", "Chart.yaml"),
+    RootChartYaml,
+  );
+
   // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
   for (const key in cluster_manifests) {
     const manifestObj = cluster_manifests[key] as KubernetesManifest;
@@ -251,11 +256,6 @@ const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.key_name(manifestFilename),
     );
   }
-
-  await stageFile(
-    path.join("cndi", "cluster_manifests", "Chart.yaml"),
-    RootChartYaml,
-  );
 
   const { applications } = config;
 
