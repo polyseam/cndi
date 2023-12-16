@@ -311,23 +311,25 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
         version: "5.45.0",
+        setSensitive: [
+          {
+            name: "configs.secret.argocdServerAdminPassword",
+            value: Fn.sensitive(argocdAdminPasswordHashed),
+          },
+        ],
         set: [
           {
             name: "server.service.annotations.redeployTime",
             value: argocdAdminPasswordMtime.id,
           },
           {
-            name: "configs.secret.argocdServerAdminPassword",
-            value: argocdAdminPasswordHashed,
-          },
-          {
             name: "configs.secret.argocdServerAdminPasswordMtime",
             value: argocdAdminPasswordMtime.id,
           },
           {
-            "name":
+            name:
               "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            "value": "argocd-cm",
+            value: "argocd-cm",
           },
         ],
       },
