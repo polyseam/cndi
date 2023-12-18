@@ -1,5 +1,6 @@
 const TERRAFORM_VERSION = "1.5.5";
-const KUBESEAL_VERSION = "2.13.3";
+const KUBESEAL_VERSION = "0.21.0"; // used to install binary on client
+const SEALED_SECRETS_VERSION = "2.13.3"; // used to install controller on cluster
 const DEFAULT_MICROK8S_VERSION = "1.28";
 const ARGOCD_VERSION = "2.7.12";
 const RELOADER_VERSION = "1.0.52";
@@ -52,5 +53,6 @@ export {
   MICROK8S_INSTALL_RETRY_INTERVAL,
   NODE_DISK_SIZE_KEY,
   RELOADER_VERSION,
+  SEALED_SECRETS_VERSION,
   TERRAFORM_VERSION,
 };
