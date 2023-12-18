@@ -177,17 +177,19 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       kubernetes,
     });
 
+    let nodePoolIndex = 1; // 0 is the default nodePoolSpec
     for (const nodeSpec of nodePools) {
       // all non-default nodePoolSpecs
       new CDKTFProviderAzure.kubernetesClusterNodePool
         .KubernetesClusterNodePool(
         this,
-        `cndi_azurerm_kubernetes_cluster_node_pool_${nodeSpec.name}`,
+        `cndi_azurerm_kubernetes_cluster_node_pool_${nodePoolIndex}`,
         {
           ...nodeSpec,
           kubernetesClusterId: cluster.id,
         },
       );
+      nodePoolIndex++;
     }
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(

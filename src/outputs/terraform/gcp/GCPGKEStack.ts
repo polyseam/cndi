@@ -190,6 +190,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       kubernetes,
     );
 
+    let nodePoolIndex = 0;
     for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
       const nodeCount = nodePoolSpec.count || 1;
 
@@ -235,7 +236,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       } else {
         new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
           this,
-          `cndi_google_container_node_pool_${nodePoolSpec.name}`,
+          `cndi_google_container_node_pool_${nodePoolIndex}`,
           {
             cluster: gkeCluster.name,
             name: nodePoolSpec.name,
@@ -244,6 +245,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           },
         );
       }
+      nodePoolIndex++;
     }
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
