@@ -11,13 +11,7 @@
     "build-linux": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux",
     "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000",
     "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
-    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
-  },
-  "imports": {
-    "src/": "./src/",
-    "deps": "./src/deps.ts",
-    "consts": "./src/constants.ts",
-    "test-deps": "./src/tests/deps.ts",
-    "get-project-root": "./_here.ts"
+    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
+    "bundle": "deno run -A bundle.ts"
   }
 }
