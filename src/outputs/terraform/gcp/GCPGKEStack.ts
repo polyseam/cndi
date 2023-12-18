@@ -15,8 +15,8 @@ import {
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  KUBESEAL_VERSION,
   RELOADER_VERSION,
+  SEALED_SECRETS_VERSION,
 } from "consts";
 
 import {
@@ -408,7 +408,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
-        version: KUBESEAL_VERSION,
+        version: SEALED_SECRETS_VERSION,
         timeout: 300,
         atomic: true,
       },
