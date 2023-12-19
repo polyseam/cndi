@@ -150,7 +150,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           clientId: this.variables.arm_client_id.value,
           clientSecret: this.variables.arm_client_secret.value,
         },
-        nodeResourceGroup: `${this.rg.name}-resources`,
+        nodeResourceGroup: `rg-node-${project_name}`,
         dependsOn: [this.rg],
       },
     );
@@ -236,7 +236,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         allocationMethod: "Static",
         location: this.rg.location,
-        name: "cndi_azurerm_public_ip_lb",
+        name: "cndi-azurerm-public-ip-lb",
         resourceGroupName: this.rg.name,
         sku: "Standard",
         tags: { CNDIProject: this.locals.cndi_project_name.asString },

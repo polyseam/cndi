@@ -160,7 +160,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.4.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `PrivateSubnetB_${project_name}`,
+          Name: `CNDIPrivateSubnetB_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -176,7 +176,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `PublicSubnetA_${project_name}`,
+          Name: `CNDIPublicSubnetA_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/elb": "1",
         },
@@ -190,7 +190,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         creationToken: `cndi_aws_efs_token_for_${project_name}`,
         tags: {
-          Name: `ElasticFileSystem_${project_name}`,
+          Name: `CNDIElasticFileSystem_${project_name}`,
         },
       },
     );
@@ -201,7 +201,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         fileSystemId: efsFs.id,
         tags: {
-          Name: `ElasticFileSystemAccessPoint_${project_name}`,
+          Name: `CNDIElasticFileSystemAccessPoint_${project_name}`,
         },
       },
     );
@@ -257,7 +257,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         dependsOn: [igw],
         subnetId: subnetPublicA.id,
         tags: {
-          Name: `NATGateway_${project_name}`,
+          Name: `CNDINATGateway_${project_name}`,
         },
       },
     );
@@ -267,7 +267,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_route_table_public",
       {
         tags: {
-          Name: `RouteTablePublic_${project_name}`,
+          Name: `CNDIRouteTablePublic_${project_name}`,
         },
         vpcId: vpc.id,
       },
@@ -288,7 +288,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_route_table_private",
       {
         tags: {
-          Name: `RouteTablePrivate_${project_name}`,
+          Name: `CNDIRouteTablePrivate_${project_name}`,
         },
         vpcId: vpc.id,
       },
@@ -412,7 +412,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "scheduler",
         ],
         tags: {
-          Name: "EKSClusterControlPlane",
+          Name: "CNDIEKSClusterControlPlane",
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
         dependsOn: [clusterPolicyAttachment, servicePolicyAttachment],
