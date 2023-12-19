@@ -48,8 +48,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
@@ -172,11 +172,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "cndi_provider_kubernetes",
+      "cndi_kubernetes_provider",
       kubernetes,
     );
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
     });
 

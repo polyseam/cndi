@@ -17,7 +17,7 @@ export class CNDITerraformStack extends TerraformStack {
 
     new CDKTFProviderRandom.provider.RandomProvider(
       this,
-      "cndi_provider_random",
+      "cndi_random_provider",
       {},
     );
 

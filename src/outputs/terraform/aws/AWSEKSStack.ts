@@ -35,8 +35,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
       cidrBlock: "10.0.0.0/16",
