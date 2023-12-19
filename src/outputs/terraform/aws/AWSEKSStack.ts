@@ -574,6 +574,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup | null =
       null;
+    let nodeGroupIndex = 0;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeGroup?.count || 1;
@@ -604,7 +605,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
       const ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
         this,
-        "cndi_aws_eks_node_group",
+        `cndi_aws_eks_node_group_${nodeGroupIndex}`,
         {
           clusterName: eksCluster.name,
           amiType: "AL2_x86_64",
@@ -626,6 +627,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (!firstNodeGroup) {
         firstNodeGroup = ng;
       }
+      nodeGroupIndex++;
     }
 
     const _helmReleaseEFSCSIDriver = new CDKTFProviderHelm.release.Release(
