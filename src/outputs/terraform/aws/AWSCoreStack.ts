@@ -1,4 +1,4 @@
-import { CDKTFProviderAWS, Construct, TerraformLocal } from "deps";
+import { CDKTFProviderAWS, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
@@ -38,9 +38,9 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
       this,
       `cndi_aws_resource_group`,
       {
-        name: `CNDIResourceGroup_${project_name}`,
+        name: `cndi-rg_${project_name}`,
         tags: {
-          Name: `CNDIResourceGroup_${project_name}`,
+          Name: `cndi-rg_${project_name}`,
         },
         resourceQuery: {
           query,

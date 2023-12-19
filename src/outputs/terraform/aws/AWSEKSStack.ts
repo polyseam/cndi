@@ -5,6 +5,7 @@ import {
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
+
 import {
   App,
   CDKTFProviderAWS,
@@ -14,14 +15,14 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  stageCDKTFStack,
   TerraformOutput,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   getCDKTFAppConfig,
   getPrettyJSONString,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 
@@ -34,15 +35,15 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
       cidrBlock: "10.0.0.0/16",
       enableDnsHostnames: true,
       enableDnsSupport: true,
       tags: {
-        Name: `CNDIVPC_${project_name}`,
+        Name: `cndi-vpc_${project_name}`,
         [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
     });
@@ -53,7 +54,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         vpcId: vpc.id,
         tags: {
-          Name: `CNDIInternetGateway_${project_name}`,
+          Name: `cndi-igw_${project_name}`,
         },
       },
     );
@@ -61,7 +62,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
       vpc: true,
       tags: {
-        Name: `CNDIElasticIP_${project_name}`,
+        Name: `cndi-elastic-ip_${project_name}`,
       },
       dependsOn: [igw],
     });
@@ -131,7 +132,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
         ],
         tags: {
-          Name: `CNDISecurityGroup_${project_name}`,
+          Name: `cndi-security-group_${project_name}`,
         },
       },
     );
@@ -144,7 +145,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.3.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `CNDIPrivateSubnetA_${project_name}`,
+          Name: `cndi-private-subnet-a_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -160,7 +161,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.4.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `PrivateSubnetB_${project_name}`,
+          Name: `cndi-private-subnet-b_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -176,7 +177,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `PublicSubnetA_${project_name}`,
+          Name: `cndi-public-subnet-a_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/elb": "1",
         },
@@ -190,7 +191,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         creationToken: `cndi_aws_efs_token_for_${project_name}`,
         tags: {
-          Name: `ElasticFileSystem_${project_name}`,
+          Name: `cndi-elastic-file-system_${project_name}`,
         },
       },
     );
@@ -201,7 +202,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         fileSystemId: efsFs.id,
         tags: {
-          Name: `ElasticFileSystemAccessPoint_${project_name}`,
+          Name: `cndi-elastic-file-system-access-point_${project_name}`,
         },
       },
     );
@@ -240,11 +241,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    // role for cluster and nodegroup
     const computeRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
-      "cndi_aws_iam_role_eks_ec2",
+      "cndi_aws_iam_role_compute",
       {
-        namePrefix: "EC2EKS",
+        namePrefix: "COMPUTE",
         assumeRolePolicy: computePolicy.json,
       },
     );
@@ -257,7 +259,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         dependsOn: [igw],
         subnetId: subnetPublicA.id,
         tags: {
-          Name: `NATGateway_${project_name}`,
+          Name: `cndi-nat-gateway_${project_name}`,
         },
       },
     );
@@ -267,7 +269,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_route_table_public",
       {
         tags: {
-          Name: `RouteTablePublic_${project_name}`,
+          Name: `cndi-route-table-public_${project_name}`,
         },
         vpcId: vpc.id,
       },
@@ -288,7 +290,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_route_table_private",
       {
         tags: {
-          Name: `RouteTablePrivate_${project_name}`,
+          Name: `cndi-route-table-private_${project_name}`,
         },
         vpcId: vpc.id,
       },
@@ -412,7 +414,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "scheduler",
         ],
         tags: {
-          Name: "EKSClusterControlPlane",
+          Name: `cndi-eks-cluster-${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
         dependsOn: [clusterPolicyAttachment, servicePolicyAttachment],
@@ -465,7 +467,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_aws_iam_role_web_identity_policy",
       {
-        namePrefix: "WEBIDR",
+        namePrefix: "WEBIDROLE",
         description: "IAM role for web identity",
         dependsOn: [iamOpenIdConnectProvider],
         assumeRolePolicy: JSON.stringify({
@@ -505,7 +507,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_aws_iam_policy_web_identity",
       {
-        namePrefix: "WEBIDP",
+        namePrefix: "WEBIDPOLICY",
         policy: getPrettyJSONString({
           Version: "2012-10-17",
           Statement: [
@@ -1091,7 +1093,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         Fn.upper(
           this.locals.aws_region.asString,
         )
-      }.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${project_name}?region=${
+      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}?region=${
         Fn.upper(
           this.locals.aws_region.asString,
         )

@@ -1,20 +1,22 @@
 import { CNDIConfig } from "src/types.ts";
 
+import { ccolors } from "deps";
+
 import {
   App,
-  ccolors,
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
   CDKTFProviderTls,
+  CDKTFProviderRandom,
   Construct,
   Fn,
-  RandomInteger,
-  TerraformLocal,
+  stageCDKTFStack,
   TerraformOutput,
   TerraformVariable,
-} from "deps";
+  TerraformLocal
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -26,7 +28,6 @@ import {
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 
@@ -49,26 +50,26 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
     // Generate a random integer within the range 0 to 255.
     // This is used for defining a part of the VNet address space.
-    const randomIntegerAddressRange0to255 = new RandomInteger(
+    const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer.Integer(
       this,
-      "cndi_random_integer_address_range_0_to_255",
       {
         min: 0,
         max: 255,
       },
     );
-
+    const tags = {
+      CNDIProject: project_name,
+    };
     // Generate a random integer within the range 0 to 15.
     // This will be used as a base multiplier for the VNet address space calculation.
-    const _randomIntegerAddressRange0to15 = new RandomInteger(
-      this,
+    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer.Integer(
       "cndi_random_integer_address_range_0_to_15",
       {
         min: 0,
@@ -154,14 +155,12 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           enableAutoScaling: true,
           maxPods: 110,
           vnetSubnetId: subnet.id,
+          tags,
         };
         return nodePoolSpec;
       });
-
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
-
     this.variables.arm_client_id = new TerraformVariable(
-      this,
       "arm_client_id",
       {
         type: "string",
@@ -191,9 +190,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           temporaryNameForRotation: "temp0",
           type: "VirtualMachineScaleSets",
         },
-        tags: {
-          CNDIProject: project_name,
-        },
+        tags,
         skuTier: "Free",
         dnsPrefix: `cndi-aks-${project_name}`,
         networkProfile: {
@@ -211,7 +208,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           clientId: this.variables.arm_client_id.value,
           clientSecret: this.variables.arm_client_secret.value,
         },
-        nodeResourceGroup: `${this.rg.name}-resources`,
+        nodeResourceGroup: `rg-${project_name}-cluster-resources`,
         dependsOn: [this.rg],
       },
     );
@@ -230,11 +227,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "cndi_provider_kubernetes",
+      "cndi_kubernetes_provider",
       kubernetes,
     );
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
     });
 
@@ -297,7 +294,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         allocationMethod: "Static",
         location: this.rg.location,
-        name: "cndi_azurerm_public_ip_lb",
+        name: "cndi-azurerm-public-ip-lb",
         resourceGroupName: this.rg.name,
         sku: "Standard",
         tags: { CNDIProject: this.locals.cndi_project_name.asString },

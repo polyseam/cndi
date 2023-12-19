@@ -3,9 +3,9 @@ import {
   CDKTFProviderAzure,
   Construct,
   Fn,
-  // TerraformLocal,
+  stageCDKTFStack,
   TerraformOutput,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -15,7 +15,6 @@ import {
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole } from "src/types.ts";
@@ -64,7 +63,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       this,
       "cndi_azure_subnet",
       {
-        name: `cndi_azure_subnet`,
+        name: `cndi-azure-subnet`,
         resourceGroupName: this.rg.name,
         virtualNetworkName: vnet.name,
         addressPrefixes: ["10.0.0.0/24"],
@@ -74,14 +73,14 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
       frontendIpConfiguration: [
         {
-          name: `cndi_azure_lb_frontend_ip_configuration`,
+          name: `cndi-azure-lb-frontend-ip-configuration`,
           publicIpAddressId: publicIp.id,
         },
       ],
       sku: "Standard",
       skuTier: "Regional",
       location: this.rg.location!,
-      name: `cndi_azure_load_balancer`,
+      name: `cndi-azure-load-balancer`,
       resourceGroupName: this.rg.name,
       tags,
     });
@@ -92,7 +91,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       "cndi_azure_lb_backend_address_pool",
       {
         loadbalancerId: lb.id,
-        name: `cndi_azure_lb_backend_address_pool`,
+        name: `cndi-azure-lb-backend-addres-pool`,
       },
     );
 
@@ -124,7 +123,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         `cndi_azure_lb_probe_${port.number}`,
         {
           loadbalancerId: lb.id,
-          name: `cndi_azure_lb_probe_${port.number}`,
+          name: `cndi-azure-lb-probe_${port.number}`,
           port: port.number,
         },
       );
@@ -154,7 +153,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
         location: this.rg.location!,
         tags,
-        name: "cndi_azure_nsg",
+        name: "cndi-azure-nsg",
       },
     );
 
@@ -216,7 +215,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         const nodeName = `${nodeSpec.name}-${i}`;
 
         const osDisk = {
-          name: `cndi_${nodeName}_disk`,
+          name: `cndi-disk_${nodeName}`,
           caching: "ReadWrite",
           storageAccountType: "StandardSSD_LRS",
           diskSizeGb,
@@ -239,12 +238,12 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         const networkInterface = new CDKTFProviderAzure.networkInterface
           .NetworkInterface(
           this,
-          `cndi_azure_network_interface_${nodeName}}`,
+          `cndi_azure_network_interface_${nodeName}`,
           {
             ipConfiguration: [
               {
                 name:
-                  `cndi_azure_network_interface_ip_configuration_${nodeName}`,
+                  `cndi-azure-network-interface-ip-configuration_${nodeName}`,
                 subnetId: subnet.id,
                 publicIpAddressId: nodePublicIp.id,
                 privateIpAddressAllocation: "Dynamic",
@@ -252,7 +251,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
             ],
             location: this.rg.location,
             resourceGroupName: this.rg.name,
-            name: `cndi_azure_network_interface_${nodeName}`,
+            name: `cndi-azure-network-interface_${nodeName}`,
             tags,
           },
         );
