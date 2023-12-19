@@ -13,5 +13,12 @@
     "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
     "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
     "bundle": "deno run -A bundle.ts"
+  },
+  "imports": {
+    "src/": "./src/",
+    "deps": "./src/deps.ts",
+    "consts": "./src/constants.ts",
+    "test-deps": "./src/tests/deps.ts",
+    "get-project-root": "./_here.ts"
   }
 }
