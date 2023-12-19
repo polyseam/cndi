@@ -7,11 +7,13 @@ import {
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
+  CDKTFProviderRandom,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
   Fn,
   stageCDKTFStack,
+  TerraformLocal,
   TerraformOutput,
   TerraformVariable,
 } from "cdktf-deps";
@@ -50,13 +52,77 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
+    new CDKTFProviderRandom.provider.RandomProvider(
+      this,
+      "cndi_random_provider",
+      {},
+    );
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
+    // Generate a random integer within the range 0 to 255.
+    // This is used for defining a part of the VNet address space.
+    const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer
+      .Integer(
+      this,
+      "cndi_random_integer_address_range_0_to_255",
+      {
+        min: 0,
+        max: 255,
+      },
+    );
     const tags = {
       CNDIProject: project_name,
     };
+    // Generate a random integer within the range 0 to 15.
+    // This will be used as a base multiplier for the VNet address space calculation.
+    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
+      .Integer(
+      this,
+      "cndi_random_integer_address_range_0_to_15",
+      {
+        min: 0,
+        max: 15,
+      },
+    );
 
+    // Calculate a multiplier for the VNet address space by multiplying
+    // the random integer (range 0-15) by 16. This local variable will
+    // be used in defining subnet address prefixes.
+    this.locals.address_space_random_multiplier_16 = new TerraformLocal(
+      this,
+      "cndi_address_space_random_multiplier_16",
+      "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
+    );
+
+    // Create a virtual network (VNet) in Azure with a dynamic address space.
+    // The address space is partially determined by the random integer generated above.
+    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+      this,
+      "cndi_azure_vnet",
+      {
+        name: `cndi-azure-vnet-${project_name}`,
+        resourceGroupName: this.rg.name,
+        addressSpace: [`10.${randomIntegerAddressRange0to255.result}.0.0/16`],
+        location: this.rg.location,
+        tags: { CNDIProject: this.locals.cndi_project_name.asString },
+      },
+    );
+
+    // Create a subnet within the above VNet.
+    // The subnet address prefix is dynamically calculated using the address space multiplier.
+    const subnet = new CDKTFProviderAzure.subnet.Subnet(
+      this,
+      "cndi_azure_subnet",
+      {
+        name: `cndi-azure-subnet-${project_name}`,
+        resourceGroupName: this.rg.name,
+        virtualNetworkName: vnet.name,
+        addressPrefixes: [
+          `10.${randomIntegerAddressRange0to255.id}.${this.locals.address_space_random_multiplier_16}.0/20`,
+        ],
+      },
+    );
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
@@ -97,11 +163,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
+          vnetSubnetId: subnet.id,
           tags,
         };
         return nodePoolSpec;
       });
-
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
 
     this.variables.arm_client_id = new TerraformVariable(
