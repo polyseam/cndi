@@ -1,7 +1,6 @@
 import {
   Construct,
-  RandomPassword,
-  RandomProvider,
+  CDKTFProviderRandom,
   TerraformLocal,
   TerraformStack,
   TerraformVariable,
@@ -15,8 +14,9 @@ export class CNDITerraformStack extends TerraformStack {
   locals: Record<string, TerraformLocal> = {};
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name);
-
     const cndi_project_name = cndi_config.project_name!;
+
+    new CDKTFProviderRandom.provider.RandomProvider(this, "cndi_provider_random", {});
 
     this.locals.cndi_project_name = new TerraformLocal(
       this,
@@ -80,9 +80,7 @@ export class CNDITerraformStack extends TerraformStack {
       );
     }
 
-    new RandomProvider(this, "random", {});
-
-    const joinToken = new RandomPassword(this, "cndi_join_token", {
+    const joinToken = new CDKTFProviderRandom.password.Password(this, "cndi_join_token", {
       length: 32,
       special: false,
       upper: false,

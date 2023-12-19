@@ -110,10 +110,7 @@ export {
 } from "npm:cdktf";
 
 // Terraform CDKTF Providers
-import * as CDKTFRandomProvider from "npm:@cdktf/provider-random";
-export const RandomProvider = CDKTFRandomProvider.provider.RandomProvider;
-export const RandomPassword = CDKTFRandomProvider.password.Password;
-
+export * as CDKTFProviderRandom from "npm:@cdktf/provider-random";
 export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";
 export * as CDKTFProviderAzure from "npm:@cdktf/provider-azurerm";
 export * as CDKTFProviderGCP from "npm:@cdktf/provider-google";

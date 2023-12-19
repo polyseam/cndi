@@ -8,8 +8,10 @@ import {
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
   CDKTFProviderTls,
+  CDKTFProviderRandom,
   Construct,
   Fn,
+  TerraformLocal,
   TerraformOutput,
   TerraformVariable,
 } from "deps";
@@ -49,6 +51,15 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
+
+    this.locals.rint = new TerraformLocal(
+      this,
+      "rint",
+      new CDKTFProviderRandom.integer.Integer(this, "cndi_random_int", {
+        min: 0,
+        max: 255,
+      }).result,
+    );
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
