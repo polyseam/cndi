@@ -11,8 +11,6 @@ import {
   stageFile,
 } from "src/utils.ts";
 
-import { overwriteAction } from "src/commands/overwrite.ts";
-
 import {
   CNDITemplatePromptResponsePrimitive,
   getKnownTemplates,
@@ -347,7 +345,8 @@ const initCommand = new Command()
       return;
     }
     await persistStagedFiles(options.output);
-    await overwriteAction({ output: options.output, initializing: true });
+    const owMod = await import("../actions/overwrite.ts");
+    await owMod.overwriteAction({ output: options.output, initializing: true });
   });
 
 export default initCommand;
