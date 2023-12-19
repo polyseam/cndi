@@ -160,7 +160,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
 
-
     this.variables.arm_client_id = new TerraformVariable(
       this,
       "arm_client_id",
