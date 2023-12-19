@@ -251,7 +251,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       loadBalancerType: "network",
       subnets: [cndiPrimarySubnet.id],
       tags: {
-        Name: `CNDINetworkLB_${project_name}`,
+        Name: `cndi-nlb_${project_name}`,
       },
     });
 
@@ -263,7 +263,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           port: port.number,
           protocol: "TCP",
           tags: {
-            Name: `CNDILBTargetGroupForPort-${port.name}_${project_name}`,
+            Name: `cndi-lb-target-group_${port.name}_${project_name}`,
           },
           vpcId: vpc.id,
         },
@@ -283,7 +283,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           port: port.number,
           protocol: "TCP",
           tags: {
-            Name: `CNDILBListenerForPort-${port.name}_${project_name}`,
+            Name: `cndi-lb-listener_for_${port.name}_${project_name}`,
           },
         },
       );
