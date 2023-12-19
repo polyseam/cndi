@@ -54,54 +54,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
-
-    const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
-      .infrastructure.cndi.nodes.map((nodeSpec) => {
-        if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
-          console.log(
-            ccolors.error(
-              `ERROR: invalid node pool name '${
-                ccolors.user_input(nodeSpec.name)
-              }'`,
-            ),
-          );
-          console.log(
-            "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
-          );
-          Deno.exit(11); // TODO: proper error code
-        }
-        const count = nodeSpec.count || 1;
-
-        const scale = {
-          nodeCount: count,
-          maxCount: count,
-          minCount: count,
-        };
-
-        if (nodeSpec.max_count) {
-          scale.maxCount = nodeSpec.max_count;
-        }
-
-        if (nodeSpec.min_count) {
-          scale.minCount = nodeSpec.min_count;
-        }
-
-        const nodePoolSpec: AnonymousClusterNodePoolConfig = {
-          name: nodeSpec.name,
-          ...scale,
-          vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
-          osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
-          osSku: "Ubuntu",
-          osDiskType: "Managed",
-          enableAutoScaling: true,
-          maxPods: 110,
-          vnetSubnetId: subnet.id,
-        };
-        return nodePoolSpec;
-      });
-
-    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
-
     // Generate a random integer within the range 0 to 255.
     // This is used for defining a part of the VNet address space.
     const randomIntegerAddressRange0to255 = new RandomInteger(
@@ -161,6 +113,53 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         ],
       },
     );
+    const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
+      .infrastructure.cndi.nodes.map((nodeSpec) => {
+        if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
+          console.log(
+            ccolors.error(
+              `ERROR: invalid node pool name '${
+                ccolors.user_input(nodeSpec.name)
+              }'`,
+            ),
+          );
+          console.log(
+            "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
+          );
+          Deno.exit(11); // TODO: proper error code
+        }
+        const count = nodeSpec.count || 1;
+
+        const scale = {
+          nodeCount: count,
+          maxCount: count,
+          minCount: count,
+        };
+
+        if (nodeSpec.max_count) {
+          scale.maxCount = nodeSpec.max_count;
+        }
+
+        if (nodeSpec.min_count) {
+          scale.minCount = nodeSpec.min_count;
+        }
+
+        const nodePoolSpec: AnonymousClusterNodePoolConfig = {
+          name: nodeSpec.name,
+          ...scale,
+          vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
+          osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
+          osSku: "Ubuntu",
+          osDiskType: "Managed",
+          enableAutoScaling: true,
+          maxPods: 110,
+          vnetSubnetId: subnet.id,
+        };
+        return nodePoolSpec;
+      });
+
+    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+
 
     this.variables.arm_client_id = new TerraformVariable(
       this,
