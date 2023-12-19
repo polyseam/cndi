@@ -5,6 +5,7 @@ import {
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
+
 import {
   App,
   CDKTFProviderAWS,
@@ -14,14 +15,14 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  stageCDKTFStack,
   TerraformOutput,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   getCDKTFAppConfig,
   getPrettyJSONString,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 

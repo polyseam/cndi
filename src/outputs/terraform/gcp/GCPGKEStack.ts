@@ -9,8 +9,9 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  stageCDKTFStack,
   TerraformOutput,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -19,11 +20,7 @@ import {
   SEALED_SECRETS_VERSION,
 } from "consts";
 
-import {
-  getCDKTFAppConfig,
-  stageCDKTFStack,
-  useSshRepoAuth,
-} from "src/utils.ts";
+import { getCDKTFAppConfig, useSshRepoAuth } from "src/utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 

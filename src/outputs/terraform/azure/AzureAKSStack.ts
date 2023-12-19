@@ -1,8 +1,9 @@
 import { CNDIConfig } from "src/types.ts";
 
+import { ccolors } from "deps";
+
 import {
   App,
-  ccolors,
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
@@ -10,9 +11,10 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  stageCDKTFStack,
   TerraformOutput,
   TerraformVariable,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -24,7 +26,6 @@ import {
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 

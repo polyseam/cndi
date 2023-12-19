@@ -334,18 +334,18 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
+    const owMod = await import("../actions/overwrite.ts");
     if (template) {
       await persistStagedFiles(options.output);
 
       // because there is no "pathToConfig" when using a template, we need to set it here
-      await overwriteAction({
+      await owMod.overwriteAction({
         output: options.output,
         initializing: true,
       });
       return;
     }
     await persistStagedFiles(options.output);
-    const owMod = await import("../actions/overwrite.ts");
     await owMod.overwriteAction({ output: options.output, initializing: true });
   });
 
