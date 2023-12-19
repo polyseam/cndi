@@ -52,6 +52,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
+    const tags = {
+      CNDIProject: project_name,
+    };
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
@@ -93,6 +96,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
+          tags,
         };
         return nodePoolSpec;
       });
@@ -130,9 +134,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           temporaryNameForRotation: "temp0",
           type: "VirtualMachineScaleSets",
         },
-        tags: {
-          CNDIProject: project_name,
-        },
+        tags,
         skuTier: "Free",
         dnsPrefix: `cndi-aks-${project_name}`,
         networkProfile: {
@@ -150,7 +152,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           clientId: this.variables.arm_client_id.value,
           clientSecret: this.variables.arm_client_secret.value,
         },
-        nodeResourceGroup: `rg-node-${project_name}`,
+        nodeResourceGroup: `rg-${project_name}-cluster-resources`,
         dependsOn: [this.rg],
       },
     );

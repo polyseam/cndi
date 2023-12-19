@@ -74,7 +74,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
       frontendIpConfiguration: [
         {
-          name: `cndi_azure_lb_frontend_ip_configuration`,
+          name: `cndi-azure-lb-frontend-ip-configuration`,
           publicIpAddressId: publicIp.id,
         },
       ],
