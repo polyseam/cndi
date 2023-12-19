@@ -7,15 +7,15 @@ import {
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
+  CDKTFProviderRandom,
   CDKTFProviderTime,
   CDKTFProviderTls,
-  CDKTFProviderRandom,
   Construct,
   Fn,
   stageCDKTFStack,
+  TerraformLocal,
   TerraformOutput,
   TerraformVariable,
-  TerraformLocal
 } from "cdktf-deps";
 
 import {
@@ -57,7 +57,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     const _open_ports = resolveCNDIPorts(cndi_config);
     // Generate a random integer within the range 0 to 255.
     // This is used for defining a part of the VNet address space.
-    const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer.Integer(
+    const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer
+      .Integer(
       this,
       {
         min: 0,
@@ -69,7 +70,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     };
     // Generate a random integer within the range 0 to 15.
     // This will be used as a base multiplier for the VNet address space calculation.
-    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer.Integer(
+    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
+      .Integer(
       "cndi_random_integer_address_range_0_to_15",
       {
         min: 0,
