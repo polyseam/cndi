@@ -251,7 +251,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       loadBalancerType: "network",
       subnets: [cndiPrimarySubnet.id],
       tags: {
-        Name: `CNDINetworkLB_${project_name}`,
+        Name: `cndi-nlb_${project_name}`,
       },
     });
 
@@ -263,7 +263,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           port: port.number,
           protocol: "TCP",
           tags: {
-            Name: `CNDILBTargetGroupForPort-${port.name}_${project_name}`,
+            Name: `cndi-lb-target-group_${port.name}_${project_name}`,
           },
           vpcId: vpc.id,
         },
@@ -283,7 +283,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           port: port.number,
           protocol: "TCP",
           tags: {
-            Name: `CNDILBListenerForPort-${port.name}_${project_name}`,
+            Name: `cndi-lb-listener_for_${port.name}_${project_name}`,
           },
         },
       );
@@ -309,8 +309,11 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     });
 
     new TerraformOutput(this, "resource_group_url", {
-      value:
-        "https://${upper(local.aws_region)}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${upper(local.aws_region)}",
+      value: `https://${
+        Fn.upper(this.locals.aws_region.asString)
+      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}?region=${
+        Fn.upper(this.locals.aws_region.asString)
+      }`,
     });
   }
 }
