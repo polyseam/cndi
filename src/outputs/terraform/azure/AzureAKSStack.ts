@@ -8,6 +8,7 @@ import {
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
   CDKTFProviderTls,
+  RandomInterger,
   Construct,
   Fn,
   TerraformOutput,
@@ -98,7 +99,29 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       });
 
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+    
+    // Generate a random integer within the range 0 to 255. 
+    // This is used for defining a part of the VNet address space.
+    const randomIntergerAddressRange0to255 = new RandomInterger(
+      this,
+      "cndi_random_integer_address_range_0_to_255",
+      {
+        min: 0,
+        max: 255
+      },
+    ); 
 
+    // Generate a random integer within the range 0 to 15.
+    // This will be used as a base multiplier for the VNet address space calculation.
+    const randomIntergerAddressRange0to15 = new RandomInterger(
+      this,
+      "cndi_random_integer_address_range_0_to_15",
+      {
+        min: 0,
+        max: 15
+      },
+    );    
+    
     this.variables.arm_client_id = new TerraformVariable(
       this,
       "arm_client_id",
