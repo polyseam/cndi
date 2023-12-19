@@ -10,7 +10,8 @@ import {
   CDKTFProviderTls,
   RandomInterger,
   Construct,
-  Fn,
+  Fn, 
+  TerraformLocal,
   TerraformOutput,
   TerraformVariable,
 } from "deps";
@@ -122,6 +123,43 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );    
     
+    // Calculate a multiplier for the VNet address space by multiplying
+    // the random integer (range 0-15) by 16. This local variable will
+    // be used in defining subnet address prefixes.
+    this.locals.address_space_random_multiplier_16 = new TerraformLocal(
+      this,
+      "cndi_address_space_random_multiplier_16",
+      randomIntergerAddressRange0to15.result*16,
+    ); 
+
+    // Create a virtual network (VNet) in Azure with a dynamic address space.
+    // The address space is partially determined by the random integer generated above.
+    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+      this,
+      "cndi_azure_vnet",
+      {
+        name: `cndi_azure_vnet`,
+        resourceGroupName: this.rg.name,
+        addressSpace: [`10.${randomIntergerAddressRange0to255.result.asString}.0.0/16`],
+        location: this.rg.location,
+        tags: { CNDIProject: this.locals.cndi_project_name.asString },
+      },
+    );
+
+    // Create a subnet within the above VNet.
+    // The subnet address prefix is dynamically calculated using the address space multiplier.
+    const subnet = new CDKTFProviderAzure.subnet.Subnet(
+      this,
+      "cndi_azure_subnet",
+      {
+        name: `cndi_azure_subnet`,
+        resourceGroupName: this.rg.name,
+        virtualNetworkName: vnet.name,
+        addressPrefixes: [`10.${randomIntergerAddressRange0to255.result.asString}.${this.locals.address_space_random_multiplier_16.asString}.0/20`],
+      
+      },
+    );
+
     this.variables.arm_client_id = new TerraformVariable(
       this,
       "arm_client_id",
@@ -175,6 +213,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         nodeResourceGroup: `${this.rg.name}-resources`,
         dependsOn: [this.rg],
+        vnet_subnet_id: subnet.name
       },
     );
 
