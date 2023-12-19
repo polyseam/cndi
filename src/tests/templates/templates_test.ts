@@ -1,7 +1,7 @@
-import { assert } from "test-deps";
-import { path } from "deps";
+import { assert } from "../deps.ts";
+import { path } from "../../deps.ts";
 import getCodebasePath from "../../../_here.ts";
-import { useTemplate } from "src/templates/templates.ts";
+import { useTemplate } from "../../templates/templates.ts";
 
 import errorCodeReference from "../../../docs/error-code-reference.json" with {
   type: "json",

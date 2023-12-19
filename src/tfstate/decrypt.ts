@@ -1,5 +1,5 @@
-import { ccolors, CryptoJS } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { ccolors, CryptoJS } from "../deps.ts";
+import { emitExitEvent } from "../utils.ts";
 
 const decryptLabel = ccolors.faded("\nsrc/tfstate/decrypt.ts:");
 

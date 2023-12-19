@@ -1,5 +1,5 @@
-import { assert } from "test-deps";
-import { path } from "deps";
+import { assert } from "../deps.ts";
+import { path } from "../../deps.ts";
 
 function areSetsEqual(setA: Set<string>, setB: Set<string>) {
   if (setA.size !== setB.size) return false;

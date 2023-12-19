@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig } from "../../../types.ts";
 
 import {
   App,
@@ -10,20 +10,20 @@ import {
   Construct,
   Fn,
   TerraformOutput,
-} from "deps";
+} from "../../../deps.ts";
 
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
-} from "consts";
+} from "../../../constants.ts";
 
 import {
   getCDKTFAppConfig,
   stageCDKTFStack,
   useSshRepoAuth,
-} from "src/utils.ts";
+} from "../../../utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 

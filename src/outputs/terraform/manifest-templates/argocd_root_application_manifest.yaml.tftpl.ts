@@ -1,4 +1,4 @@
-import { YAML } from "deps";
+import { YAML } from "../../../deps.ts";
 export default function getArgoRootApplicationManifestYamlTftpl() {
   const rootApplication = {
     apiVersion: "argoproj.io/v1alpha1",

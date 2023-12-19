@@ -1,5 +1,5 @@
-import { ccolors } from "deps";
-import { getYAMLString } from "src/utils.ts";
+import { ccolors } from "../../../deps.ts";
+import { getYAMLString } from "../../../utils.ts";
 
 const _devClusterIssuerManifestLabel = ccolors.faded(
   "\nsrc/outputs/self-signed/dev-cluster-issuer.ts:",

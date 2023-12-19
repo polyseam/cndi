@@ -1,4 +1,4 @@
-import { ccolors, Command, loadEnv, path } from "deps";
+import { ccolors, Command, loadEnv, path } from "../deps.ts";
 
 import {
   emitExitEvent,
@@ -7,21 +7,21 @@ import {
   loadCndiConfig,
   persistStagedFiles,
   stageFile,
-} from "src/utils.ts";
+} from "../utils.ts";
 
-import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { loadTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
+import { loadSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
+import { loadTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
+import { loadArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
-import getApplicationManifest from "src/outputs/application-manifest.ts";
-import RootChartYaml from "src/outputs/root-chart.ts";
-import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
+import getApplicationManifest from "../outputs/application-manifest.ts";
+import RootChartYaml from "../outputs/root-chart.ts";
+import getSealedSecretManifest from "../outputs/sealed-secret-manifest.ts";
 
-import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
-import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
+import getMicrok8sIngressTcpServicesConfigMapManifest from "../outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
+import getMicrok8sIngressDaemonsetManifest from "../outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
 
-import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
-import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
+import getProductionClusterIssuerManifest from "../outputs/cert-manager-manifests/production-cluster-issuer.ts";
+import getDevClusterIssuerManifest from "../outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
 import getEKSIngressServiceManifestPublic from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
 import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
@@ -29,14 +29,14 @@ import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-p
 import getEKSIngressServiceManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-service-private.ts";
 import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
 
-import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
+import stageTerraformResourcesForConfig from "../outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import {
   KubernetesManifest,
   KubernetesSecret,
   ManagedNodeKind,
-} from "src/types.ts";
-import validateConfig from "src/validate/cndiConfig.ts";
+} from "../types.ts";
+import validateConfig from "../validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
 

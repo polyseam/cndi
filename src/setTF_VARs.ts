@@ -1,5 +1,5 @@
-import { ccolors } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { ccolors } from "./deps.ts";
+import { emitExitEvent } from "./utils.ts";
 const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
 export default async function setTF_VARs() {

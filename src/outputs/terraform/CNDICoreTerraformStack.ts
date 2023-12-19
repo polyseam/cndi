@@ -5,10 +5,10 @@ import {
   TerraformLocal,
   TerraformStack,
   TerraformVariable,
-} from "deps";
+} from "../../deps.ts";
 
-import { useSshRepoAuth } from "src/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { useSshRepoAuth } from "../../utils.ts";
+import { CNDIConfig } from "../../types.ts";
 
 export class CNDITerraformStack extends TerraformStack {
   variables: Record<string, TerraformVariable> = {};

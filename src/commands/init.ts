@@ -1,5 +1,5 @@
-import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
-import type { SealedSecretsKeys } from "src/types.ts";
+import { ccolors, Command, path, PromptTypes, SEP, YAML } from "../deps.ts";
+import type { SealedSecretsKeys } from "../types.ts";
 
 const { Input, Select } = PromptTypes;
 
@@ -9,23 +9,23 @@ import {
   getPrettyJSONString,
   persistStagedFiles,
   stageFile,
-} from "src/utils.ts";
+} from "../utils.ts";
 
-import { overwriteAction } from "src/commands/overwrite.ts";
+import { overwriteAction } from "../commands/overwrite.ts";
 
 import {
   CNDITemplatePromptResponsePrimitive,
   getKnownTemplates,
   useTemplate,
-} from "src/templates/templates.ts";
+} from "../templates/templates.ts";
 
-import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
+import { createSealedSecretsKeys } from "../initialize/sealedSecretsKeys.ts";
+import { createTerraformStatePassphrase } from "../initialize/terraformStatePassphrase.ts";
+import { createArgoUIAdminPassword } from "../initialize/argoUIAdminPassword.ts";
 
-import getGitignoreContents from "src/outputs/gitignore.ts";
-import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getGitignoreContents from "../outputs/gitignore.ts";
+import vscodeSettings from "../outputs/vscode-settings.ts";
+import getCndiRunGitHubWorkflowYamlContents from "../outputs/cndi-run-workflow.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 

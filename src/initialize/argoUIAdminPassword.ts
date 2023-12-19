@@ -1,4 +1,4 @@
-import { getSecretOfLength } from "src/utils.ts";
+import { getSecretOfLength } from "../utils.ts";
 
 const loadArgoUIAdminPassword = (): string | null => {
   const argocd_admin_password = Deno.env

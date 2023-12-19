@@ -1,7 +1,7 @@
-import { ccolors, path } from "deps";
+import { ccolors, path } from "../../../deps.ts";
 
-import { CNDIConfig } from "src/types.ts";
-import { emitExitEvent, stageFile } from "src/utils.ts";
+import { CNDIConfig } from "../../../types.ts";
+import { emitExitEvent, stageFile } from "../../../utils.ts";
 
 import provider from "./provider.tf.json.ts";
 import terraform from "./terraform.tf.json.ts";

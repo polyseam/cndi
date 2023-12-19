@@ -1,7 +1,7 @@
-import { ccolors } from "deps";
+import { ccolors } from "../../../deps.ts";
 
-import { CNDIPort, ManagedNodeKind } from "src/types.ts";
-import { getYAMLString } from "src/utils.ts";
+import { CNDIPort, ManagedNodeKind } from "../../../types.ts";
+import { getYAMLString } from "../../../utils.ts";
 
 const ingressTcpServicesConfigMapManifestLabel = ccolors.faded(
   "\nsrc/outputs/custom-port-manifests/eks/ingress-service.ts:",

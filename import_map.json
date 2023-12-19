@@ -1,9 +1,0 @@
-{
-    "imports":{
-        "src/": "./src/",
-        "deps": "./src/deps.ts",
-        "consts": "./src/constants.ts",
-        "test-deps": "./src/tests/deps.ts",
-        "get-project-root": "./_here.ts"
-    }
-}

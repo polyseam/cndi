@@ -1,8 +1,8 @@
-import { getPrettyJSONString, getTFResource } from "src/utils.ts";
+import { getPrettyJSONString, getTFResource } from "../../../utils.ts";
 
-import { MultipassNodeItemSpec } from "src/types.ts";
+import { MultipassNodeItemSpec } from "../../../types.ts";
 
-import { ccolors } from "deps";
+import { ccolors } from "../../../deps.ts";
 
 const cndiMultipassNodeInstanceLabel = ccolors.faded(
   "\nsrc/outputs/terraform/dev/cndi_multipass_instance.tf.json.ts:",

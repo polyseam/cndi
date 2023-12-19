@@ -6,17 +6,17 @@ import {
   TerminalSpinner,
   UpgradeCommand,
   UpgradeOptions,
-} from "deps";
+} from "../deps.ts";
 
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../constants.ts";
 
 import {
   emitExitEvent,
   getCndiInstallPath,
   getFileSuffixForPlatform,
-} from "src/utils.ts";
+} from "../utils.ts";
 
-import installDependenciesIfRequired from "src/install.ts";
+import installDependenciesIfRequired from "../install.ts";
 
 const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
 class GitHubBinaryUpgradeProvider extends GithubProvider {

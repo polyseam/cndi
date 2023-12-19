@@ -1,10 +1,10 @@
-import { ccolors, platform } from "deps";
-import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
+import { ccolors, platform } from "../deps.ts";
+import { KubernetesSecret, KubernetesSecretWithStringData } from "../types.ts";
 import {
   emitExitEvent,
   getPathToKubesealBinary,
   getYAMLString,
-} from "src/utils.ts";
+} from "../utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$cndi_on_ow.seal_secret_from_env_var(";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";

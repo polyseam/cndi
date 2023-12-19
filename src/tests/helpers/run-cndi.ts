@@ -1,5 +1,5 @@
-import { path } from "deps";
-import getProjectRootDir from "get-project-root"; // this is the root of the project, runs on import (side-effect bad?)
+import { path } from "../../deps.ts";
+import getProjectRootDir from "../../../_here.ts"; // this is the root of the project, runs on import (side-effect bad?)
 
 export interface RunCndiResult {
   status: Deno.ProcessStatus;

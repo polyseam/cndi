@@ -5,20 +5,20 @@ import {
   Construct,
   Fn,
   TerraformOutput,
-} from "deps";
+} from "../../../deps.ts";
 
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
-} from "consts";
+} from "../../../constants.ts";
 
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
-} from "src/utils.ts";
-import { CNDIConfig, NodeRole } from "src/types.ts";
+} from "../../../utils.ts";
+import { CNDIConfig, NodeRole } from "../../../types.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 export class GCPMicrok8sStack extends GCPCoreTerraformStack {

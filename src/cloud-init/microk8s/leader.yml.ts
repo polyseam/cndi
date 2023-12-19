@@ -1,9 +1,9 @@
-import { YAML } from "deps";
-import { CNDIConfig, Microk8sAddon } from "src/types.ts";
+import { YAML } from "../../deps.ts";
+import { CNDIConfig, Microk8sAddon } from "../../types.ts";
 
-import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
-import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
-import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
+import getClusterRepoSecretSSHTemplate from "../../outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
+import getClusterRepoSecretHTTPSTemplate from "../../outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
+import getRootApplicationTemplate from "../../outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
 
 import {
   ARGOCD_VERSION,
@@ -11,7 +11,7 @@ import {
   KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   RELOADER_VERSION,
-} from "consts";
+} from "../../constants.ts";
 
 const defaultAddons: Array<Microk8sAddon> = [
   {
