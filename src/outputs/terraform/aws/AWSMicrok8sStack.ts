@@ -309,8 +309,11 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     });
 
     new TerraformOutput(this, "resource_group_url", {
-      value:
-        "https://${upper(local.aws_region)}.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${local.cndi_project_name}?region=${upper(local.aws_region)}",
+      value: `https://${
+        Fn.upper(this.locals.aws_region.asString)
+      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}?region=${
+        Fn.upper(this.locals.aws_region.asString)
+      }`,
     });
   }
 }

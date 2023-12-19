@@ -42,7 +42,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       enableDnsHostnames: true,
       enableDnsSupport: true,
       tags: {
-        Name: `CNDIVPC_${project_name}`,
+        Name: `cndi-vpc_${project_name}`,
         [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
     });
@@ -53,7 +53,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         vpcId: vpc.id,
         tags: {
-          Name: `CNDIInternetGateway_${project_name}`,
+          Name: `cndi-igw_${project_name}`,
         },
       },
     );
@@ -61,7 +61,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
       vpc: true,
       tags: {
-        Name: `CNDIElasticIP_${project_name}`,
+        Name: `cndi-elastic-ip_${project_name}`,
       },
       dependsOn: [igw],
     });
@@ -131,7 +131,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
         ],
         tags: {
-          Name: `CNDISecurityGroup_${project_name}`,
+          Name: `cndi-security-group_${project_name}`,
         },
       },
     );
@@ -144,7 +144,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.3.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `CNDIPrivateSubnetA_${project_name}`,
+          Name: `cndi-private-subnet-a_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -160,7 +160,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.4.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `CNDIPrivateSubnetB_${project_name}`,
+          Name: `cndi-private-subnet-b_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/internal-elb": "1",
         },
@@ -176,7 +176,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cidrBlock: "10.0.1.0/24",
         mapPublicIpOnLaunch: true,
         tags: {
-          Name: `CNDIPublicSubnetA_${project_name}`,
+          Name: `cndi-public-subnet-a_${project_name}`,
           [`kubernetes.io/cluster/${project_name}`]: "owned",
           "kubernetes.io/role/elb": "1",
         },
@@ -258,7 +258,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         dependsOn: [igw],
         subnetId: subnetPublicA.id,
         tags: {
-          Name: `CNDINATGateway_${project_name}`,
+          Name: `cndi-nat-gateway_${project_name}`,
         },
       },
     );
@@ -1092,7 +1092,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         Fn.upper(
           this.locals.aws_region.asString,
         )
-      }.console.aws.amazon.com/resource-groups/group/CNDIResourceGroup_${project_name}?region=${
+      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}?region=${
         Fn.upper(
           this.locals.aws_region.asString,
         )
