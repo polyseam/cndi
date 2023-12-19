@@ -52,7 +52,7 @@ blocks:
         enabled: true
         annotations:
           cert-manager.io/cluster-issuer: cluster-issuer
-        ingressClassName: public
+        ingressClassName: private
         hosts:
           - name: "{{ $cndi.get_arg(hostname) }}"
             tls:
@@ -149,6 +149,30 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     # this is a template comment
     infrastructure:
+      terraform:
+        resource:
+          azurerm_kubernetes_cluster:
+            cndi_azurerm_kubernetes_cluster:
+              default_node_pool:
+                os_disk_type: Ephemeral
+          azurerm_virtual_network_peering:
+            cndi_azurerm_virtual_network_peering_hub:
+              name: peer-vnet-hub-main-global-to-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}
+              resource_group_name : rg-networking-global
+              virtual_network_name : vnet-hub-main-global
+              remote_virtual_network_id: "/subscriptions/addSubscriptionIDHere/resourceGroups/${azurerm_resource_group.cndi_azurerm_resource_group.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
+              allow_forwarded_traffic: true
+              allow_gateway_transit: true
+              use_remote_gateways: false
+              depends_on: [azurerm_virtual_network_peering.cndi_azurerm_virtual_network_peering_hub]
+            cndi_azurerm_virtual_network_peering_spoke:
+              name: peer-${azurerm_virtual_network.cndi_azurerm_virtual_network.name}-to-vnet-hub-main-global
+              resource_group_name : "${azurerm_resource_group.cndi_azurerm_resource_group.name}"
+              virtual_network_name : "${azurerm_virtual_network.cndi_azurerm_virtual_network.name}"
+              remote_virtual_network_id: "/subscriptions/addSubscriptionIDHere/resourceGroups/rg-networking-global/providers/Microsoft.Network/virtualNetworks/vnet-hub-main-global"
+              allow_forwarded_traffic: true
+              allow_gateway_transit: false
+              use_remote_gateways: true
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
@@ -188,9 +212,9 @@ outputs:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
           imageName: "ghcr.io/cloudnative-pg/postgresql:15.2"
-          instances: 3
+          instances: 2
           storage:
-            size: 1Gi
+            size: 10Gi
           replicationSlots:
             highAvailability:
               enabled: true
@@ -206,6 +230,31 @@ outputs:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
+      cert-manager-cluster-issuer:
+        apiVersion: cert-manager.io/v1
+        kind: ClusterIssuer
+        metadata:
+          name: cluster-issuer
+        spec:
+          commonName: '*.devops.littlepotatoes.com'
+          acme:
+            email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+            server: 'https://acme-v02.api.letsencrypt.org/directory'
+            privateKeySecretRef:
+              name: cluster-issuer-private-key
+            solvers:
+              - dns01:
+                  azureDNS:
+                    clientID: "addClientIDHere"
+                    clientSecretSecretRef:
+                      name: airflow-azure-oidc-secret
+                      key: oidc_azure_clientSecret
+                    subscriptionID: addSubscriptionIDHere
+                    tenantID: addTenantIDHere
+                    resourceGroupName: rg-networking-global
+                    hostedZoneName: addSubscriptionIDHere
+                    environment: AzurePublicCloud
+      
       cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -226,12 +275,23 @@ outputs:
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
-
+      airflow-azure-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-azure-oidc-secret
+          namespace: cert-manager
+        type: Opaque
+        stringData:
+          oidc_azure_clientSecret: $cndi_on_ow.seal_secret_from_env_var(ARM_CLIENT_SECRET)
+          oidc_azure_clientID: $cndi_on_ow.seal_secret_from_env_var(ARM_CLIENT_ID)
+          oidc_azure_tenant_id: $cndi_on_ow.seal_secret_from_env_var(ARM_TENANT_ID)
+          oidc_azure_subscription_id: $cndi_on_ow.seal_secret_from_env_var(ARM_SUBSCRIPTION_ID)
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
-            ingress_class_name: public
+            ingress_class_name: private
             hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
             service_name: argocd-server
             service_port: 443
@@ -269,7 +329,129 @@ outputs:
               wait: 40
               $cndi.comment(subPath): Folder path in DAG repo to sync
               subPath: dags
+          webserver:
+            webserverConfig: >
+              import os
+
+              from airflow.configuration import conf
+
+              from airflow.utils.log.logging_mixin import LoggingMixin
+
+              from flask_appbuilder.security.manager import AUTH_OAUTH
+
+              from airflow.www.security import AirflowSecurityManager
+
+              print("configuring webserver!!")
+
+              SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
+
+              basedir = os.path.abspath(os.path.dirname(__file__))
+
+              CSRF_ENABLED = True
+
+              AUTH_TYPE = AUTH_OAUTH
+
+              AUTH_USER_REGISTRATION_ROLE = "Public"
+
+              AUTH_USER_REGISTRATION = True
+
+              class AzureCustomSecurity(AirflowSecurityManager, LoggingMixin):
+                  def get_oauth_user_info(self, provider, response=None):
+                      if provider == "azure":
+                          self.log.debug("Azure response received : {0}".format(response))
+                          id_token = response["id_token"]
+                          self.log.debug(str(id_token))
+                          me = self._azure_jwt_token_parse(id_token)
+                          self.log.debug("Parse JWT token : {0}".format(me))
+                          print("Parse JWT token : {0}".format(me))
+                          parsed_token = {
+                              "name": me["name"],
+                              "email": me["upn"],
+                              "first_name": me["given_name"],
+                              "last_name": me["family_name"],
+                              "id": me["oid"],
+                              "username": me["preferred_username"],
+                              "upn": me["oid"],
+                              "role_keys": me["roles"], 
+                          }
+                          return parsed_token
+                      else:
+                          return {}
+
+              OAUTH_PROVIDERS = [
+                {
+                  "name": "azure",
+                  "icon": "fa-windows",
+                  "token_key": "access_token",
+                  "remote_app": {
+                      "client_id": os.environ.get("ARM_CLIENT_ID"),
+                      "client_secret": os.environ.get("ARM_CLIENT_SECRET"),
+                      "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('ARM_TENANT_ID')}/oauth2/v2.0",
+                      "client_kwargs": {
+                          "scope": "User.Read openid email profile ",
+                          "resource": os.environ.get("ARM_CLIENT_ID"),
+                          "verify_signature": True
+                      },
+                      "request_token_url": None,
+                      "access_token_url": f"https://login.microsoftonline.com/"
+                      f"{os.environ.get('ARM_TENANT_ID')}/"
+                      "oauth2/v2.0/token",
+                      "authorize_url": f"https://login.microsoftonline.com/"
+                      f"{os.environ.get('ARM_TENANT_ID')}/"
+                      f"oauth2/v2.0/authorize",
+                      "jwks_uri": "https://login.microsoftonline.com/common/discovery/v2.0/keys"
+                  } 
+                }
+              ]
+
+
+              # a mapping from the values of `userinfo["role_keys"]` to a list of
+              FAB roles
+
+              AUTH_ROLES_MAPPING = {
+                "airflow_admin": ["Admin"],
+                "airflow_reader": ["Viewer"]
+              }
+
+
+              AUTH_ROLES_SYNC_AT_LOGIN = True
+
+              SECURITY_MANAGER_CLASS = AzureCustomSecurity      
+          
           config:
+            kubernetes:
+            scheduler:
+              schedule_after_task_execution: 'False'
+              livenessProbe:
+                initialDelaySeconds: 10
+                timeoutSeconds: 15
+                failureThreshold: 10
+                periodSeconds: 60
+                command:
+                  - sh
+                  - -c
+                  - |
+                    CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec /entrypoint \
+                    airflow jobs check --job-type SchedulerJob --hostname $(hostname)       
+            webserver:
+              expose_config: 'True'
+              instance_name: Polyseam
+              enable_proxy_fix: 'True'
+              base_url: 'https://airflow.devops.littlepotatoes.com'
+            operators:
+              default_owner: Polyseam
+            core:
+              test_connection: Enabled
+          secret:
+            - envName: ARM_TENANT_ID
+              secretKey: oidc_azure_tenant_id
+              secretName: airflow-azure-oidc-secret
+            - envName: ARM_CLIENT_ID
+              secretKey: oidc_azure_clientID
+              secretName: airflow-azure-oidc-secret
+            - envName: ARM_CLIENT_SECRET
+              secretKey: oidc_azure_clientSecret
+              secretName: airflow-azure-oidc-secret          
             $cndi.get_block(airflow_public_config):
               args:
                 hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
@@ -294,7 +476,7 @@ outputs:
           logs:
             persistence:
               enabled: true
-              size: 15Gi
+              size: 5Gi
               storageClassName: nfs
           createUserJob:
             useHelmHooks: false
