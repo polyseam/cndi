@@ -1,9 +1,5 @@
-import {
-  CDKTFProviderAzure,
-  Construct,
-  TerraformLocal,
-} from "../../../deps.ts";
-import { CNDIConfig } from "../../../types.ts";
+import { CDKTFProviderAzure, Construct, TerraformLocal } from "deps";
+import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
 const DEFAULT_ARM_REGION = "eastus";

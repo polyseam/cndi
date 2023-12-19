@@ -2,7 +2,7 @@ import {
   getPrettyJSONString,
   getTFResource,
   getUserDataTemplateFileString,
-} from "../../../../src/utils.ts";
+} from "src/utils.ts";
 
 export default function getMultipassLocalSensitiveFileTFJSON(): string {
   const resource = getTFResource("local_sensitive_file", {

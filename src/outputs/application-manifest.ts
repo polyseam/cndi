@@ -1,5 +1,5 @@
-import { ccolors } from "../deps.ts";
-import { getYAMLString } from "../utils.ts";
+import { ccolors } from "deps";
+import { getYAMLString } from "src/utils.ts";
 
 export interface CNDIApplicationSpec {
   targetRevision: string;

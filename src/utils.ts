@@ -9,12 +9,12 @@ import {
   platform,
   walk,
   YAML,
-} from "./deps.ts";
-import { DEFAULT_OPEN_PORTS, error_code_reference } from "./constants.ts";
+} from "deps";
+import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "./types.ts";
+import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
 
-import emitTelemetryEvent from "./telemetry/telemetry.ts";
+import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 import { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
 
 const utilsLabel = ccolors.faded("src/utils.ts:");

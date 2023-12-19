@@ -1,4 +1,4 @@
-import cndi from "./src/cndi.ts";
+import cndi from "src/cndi.ts";
 import { emitExitEvent } from "./src/utils.ts";
 
 if (import.meta.main) {

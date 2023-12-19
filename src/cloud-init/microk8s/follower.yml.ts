@@ -1,9 +1,9 @@
-import { YAML } from "../../deps.ts";
-import { CNDIConfig } from "../../types.ts";
+import { YAML } from "deps";
+import { CNDIConfig } from "src/types.ts";
 import {
   DEFAULT_MICROK8S_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
-} from "../../constants.ts";
+} from "consts";
 
 type GetFollowerCloudInitOptions = {
   isWorker: boolean;

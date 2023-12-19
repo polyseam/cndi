@@ -1,4 +1,4 @@
-import { CNDIConfig } from "../../../types.ts";
+import { CNDIConfig } from "src/types.ts";
 
 import {
   App,
@@ -12,21 +12,21 @@ import {
   Fn,
   TerraformOutput,
   TerraformVariable,
-} from "../../../deps.ts";
+} from "deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
-} from "../../../constants.ts";
+} from "consts";
 
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
-} from "../../../utils.ts";
+} from "src/utils.ts";
 
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 

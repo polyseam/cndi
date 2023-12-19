@@ -1,10 +1,10 @@
-import { ccolors, Command, path } from "../deps.ts";
+import { ccolors, Command, path } from "deps";
 
-import pullStateForRun from "../tfstate/git/read-state.ts";
-import pushStateFromRun from "../tfstate/git/write-state.ts";
+import pullStateForRun from "src/tfstate/git/read-state.ts";
+import pushStateFromRun from "src/tfstate/git/write-state.ts";
 
-import setTF_VARs from "../setTF_VARs.ts";
-import { getPathToTerraformBinary } from "../utils.ts";
+import setTF_VARs from "src/setTF_VARs.ts";
+import { getPathToTerraformBinary } from "src/utils.ts";
 
 const runLabel = ccolors.faded("\nsrc/commands/run.ts:");
 

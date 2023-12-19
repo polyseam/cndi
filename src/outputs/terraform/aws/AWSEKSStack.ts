@@ -1,10 +1,10 @@
-import { CNDIConfig } from "../../../types.ts";
+import { CNDIConfig } from "src/types.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
-} from "../../../constants.ts";
+} from "consts";
 import {
   App,
   CDKTFProviderAWS,
@@ -15,7 +15,7 @@ import {
   Construct,
   Fn,
   TerraformOutput,
-} from "../../../deps.ts";
+} from "deps";
 
 import {
   getCDKTFAppConfig,
@@ -23,7 +23,7 @@ import {
   resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
-} from "../../../utils.ts";
+} from "src/utils.ts";
 
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 

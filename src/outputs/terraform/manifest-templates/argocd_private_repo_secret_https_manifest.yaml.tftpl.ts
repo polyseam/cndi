@@ -1,4 +1,4 @@
-import { YAML } from "../../../deps.ts";
+import { YAML } from "deps";
 
 export default function getArgoPrivateRepoSecretHTTPSYamlTftpl() {
   const clusterRepoSecretHTTPS = {

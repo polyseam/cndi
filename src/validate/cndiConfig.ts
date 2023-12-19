@@ -1,6 +1,6 @@
-import { ccolors } from "../deps.ts";
-import { CNDIConfig } from "../types.ts";
-import { emitExitEvent } from "../utils.ts";
+import { ccolors } from "deps";
+import { CNDIConfig } from "src/types.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 

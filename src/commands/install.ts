@@ -1,6 +1,6 @@
-import { Command } from "../deps.ts";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "../constants.ts";
-import install from "../install.ts";
+import { Command } from "deps";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
+import install from "src/install.ts";
 
 /**
  * COMMAND cndi install

@@ -6,7 +6,7 @@ import {
   setValueForKeyPath,
   unsetValueForKeyPath,
   YAML,
-} from "../deps.ts";
+} from "deps";
 
 import CNDITemplateComparators from "./comparators.ts";
 import { BuiltInValidators } from "./validators.ts";

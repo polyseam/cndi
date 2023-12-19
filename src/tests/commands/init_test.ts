@@ -1,10 +1,10 @@
-import { assert /*beforeEach, describe, it*/ } from "../deps.ts";
+import { assert /*beforeEach, describe, it*/ } from "test-deps";
 
-import { path } from "../../deps.ts";
+import { path } from "deps";
 
-import { runCndi } from "../helpers/run-cndi.ts";
+import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-import { hasSameFilesAfter } from "../helpers/util.ts";
+import { hasSameFilesAfter } from "src/tests/helpers/util.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 

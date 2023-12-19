@@ -1,4 +1,4 @@
-import { getSecretOfLength } from "../utils.ts";
+import { getSecretOfLength } from "src/utils.ts";
 
 const loadTerraformStatePassphrase = (): string | null => {
   const terraform_state_passphrase = Deno.env

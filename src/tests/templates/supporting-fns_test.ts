@@ -1,5 +1,5 @@
-import { assert } from "../deps.ts";
-import { replaceRange } from "../../utils.ts";
+import { assert } from "test-deps";
+import { replaceRange } from "src/utils.ts";
 
 Deno.test("replaceRange", () => {
   const str = "foo bar baz";

@@ -1,4 +1,4 @@
-import { delay } from "../../deps.ts";
+import { delay } from "deps";
 
 // This object needs to be ordered, and the number of keys needs to be exactly the number of prompts
 type InteractiveEntries = Record<string, string>;

@@ -1,7 +1,7 @@
-import { path } from "../deps.ts";
+import { path } from "deps";
 
-import { SealedSecretsKeys } from "../types.ts";
-import { getPathToOpenSSLForPlatform } from "../utils.ts";
+import { SealedSecretsKeys } from "src/types.ts";
+import { getPathToOpenSSLForPlatform } from "src/utils.ts";
 
 const createSealedSecretsKeys = async (
   outputDir: string,

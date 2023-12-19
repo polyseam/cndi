@@ -1,4 +1,4 @@
-import { path } from "./src/deps.ts";
+import { path } from "deps";
 
 // https://stackoverflow.com/a/61829368
 // returns the path which contains this file (root of the repo)

@@ -1,23 +1,17 @@
-import {
-  App,
-  CDKTFProviderAWS,
-  Construct,
-  Fn,
-  TerraformOutput,
-} from "../../../deps.ts";
+import { App, CDKTFProviderAWS, Construct, Fn, TerraformOutput } from "deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
-} from "../../../constants.ts";
+} from "consts";
 
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
   stageCDKTFStack,
   useSshRepoAuth,
-} from "../../../utils.ts";
-import { CNDIConfig, NodeRole } from "../../../types.ts";
+} from "src/utils.ts";
+import { CNDIConfig, NodeRole } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";

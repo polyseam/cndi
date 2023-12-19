@@ -1,19 +1,26 @@
-import { path } from "../../deps.ts";
-import { CNDIConfig } from "../../types.ts";
+import { path } from "deps";
+import { CNDIConfig } from "src/types.ts";
 import {
   patchAndStageTerraformFilesWithConfig,
   stageFile,
   useSshRepoAuth,
-} from "../../utils.ts";
-import { stageTerraformSynthAWSMicrok8s } from "./aws/AWSMicrok8sStack.ts";
-import { stageTerraformSynthAWSEKS } from "./aws/AWSEKSStack.ts";
-import { stageTerraformSynthAzureMicrok8s } from "./azure/AzureMicrok8sStack.ts";
-import { stageTerraformSynthAzureAKS } from "./azure/AzureAKSStack.ts";
-import { stageTerraformSynthGCPMicrok8s } from "./gcp/GCPMicrok8sStack.ts";
-import { stageTerraformSynthGCPGKE } from "./gcp/GCPGKEStack.ts";
-import stageTerraformResourcesForDev from "./dev/stageAll.ts";
-import microk8sCloudInitLeaderTerraformTemplate from "../../cloud-init/microk8s/leader.yml.ts";
-import microk8sCloudInitFollowerTerraformTemplate from "../../cloud-init/microk8s/follower.yml.ts";
+} from "src/utils.ts";
+import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
+import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
+import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
+import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
+import { stageTerraformSynthGCPMicrok8s } from "src/outputs/terraform/gcp/GCPMicrok8sStack.ts";
+import { stageTerraformSynthGCPGKE } from "src/outputs/terraform/gcp/GCPGKEStack.ts";
+// import stageTerraformResourcesForAzure from "src/outputs/terraform/azure/stageAll.ts";
+// import stageTerraformResourcesForAzureAKS from "src/outputs/terraform/azure-aks/stageAll.ts";
+import stageTerraformResourcesForDev from "src/outputs/terraform/dev/stageAll.ts";
+// import stageTerraformResourcesForGCPGKE from "src/outputs/terraform/gcp-gke/stageAll.ts";
+// import cndi_join_token from "src/outputs/terraform/shared/cndi_join_token.tf.json.ts";
+// import global_variable from "src/outputs/terraform/shared/global.variable.tf.json.ts";
+// import global_locals from "src/outputs/terraform/shared/global.locals.tf.json.ts";
+
+import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
+import microk8sCloudInitFollowerTerraformTemplate from "src/cloud-init/microk8s/follower.yml.ts";
 
 export default async function stageTerraformResourcesForConfig(
   config: CNDIConfig,

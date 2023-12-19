@@ -1,4 +1,4 @@
-import { getPrettyJSONString } from "../../../utils.ts";
+import { getPrettyJSONString } from "src/utils.ts";
 
 export default function getMultipassLocalsTFJSON(): string {
   return getPrettyJSONString({

@@ -1,5 +1,5 @@
-import { getPrettyJSONString } from "../../../utils.ts";
-import { MultipassNodeItemSpec } from "../../../types.ts";
+import { getPrettyJSONString } from "src/utils.ts";
+import { MultipassNodeItemSpec } from "src/types.ts";
 
 export default function getOutputTFJSON(node: MultipassNodeItemSpec): string {
   return getPrettyJSONString({

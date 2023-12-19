@@ -1,4 +1,4 @@
-import { ccolors, Spinners, TerminalSpinner } from "./deps.ts";
+import { ccolors, Spinners, TerminalSpinner } from "deps";
 
 import {
   checkInstalled,
@@ -6,7 +6,7 @@ import {
   getFileSuffixForPlatform,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
-} from "./utils.ts";
+} from "src/utils.ts";
 
 const installLabel = ccolors.faded("\nsrc/install.ts:");
 

@@ -1,4 +1,4 @@
-import { YAML } from "../deps.ts";
+import { YAML } from "deps";
 
 const cndiWorkflowObj = {
   name: "cndi",

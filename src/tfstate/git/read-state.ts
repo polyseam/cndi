@@ -1,7 +1,7 @@
-import { ccolors, path, simpleGit } from "../../deps.ts";
+import { ccolors, path, simpleGit } from "deps";
 
-import decrypt from "../decrypt.ts";
-import { emitExitEvent } from "../../utils.ts";
+import decrypt from "src/tfstate/decrypt.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 

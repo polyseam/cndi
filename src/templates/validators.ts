@@ -1,4 +1,4 @@
-import { validator } from "../deps.ts";
+import { validator } from "deps";
 import {
   CNDITemplatePromptResponsePrimitive,
   PromptType,

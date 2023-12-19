@@ -8,20 +8,20 @@ import {
   HelpCommand,
   homedir,
   path,
-} from "./deps.ts";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "./constants.ts";
+} from "deps";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
 // commands
-import upgradeCommand from "./commands/upgrade.ts";
-import runCommand from "./commands/run.ts";
-import initCommand from "./commands/init.ts";
-import { overwriteCommand } from "./commands/overwrite.ts";
-import terraformCommand from "./commands/terraform.ts";
-import destroyCommand from "./commands/destroy.ts";
-import installDependenciesIfRequired from "./install.ts";
-import installCommand from "./commands/install.ts";
+import upgradeCommand from "src/commands/upgrade.ts";
+import runCommand from "src/commands/run.ts";
+import initCommand from "src/commands/init.ts";
+import { overwriteCommand } from "src/commands/overwrite.ts";
+import terraformCommand from "src/commands/terraform.ts";
+import destroyCommand from "src/commands/destroy.ts";
+import installDependenciesIfRequired from "src/install.ts";
+import installCommand from "src/commands/install.ts";
 
-import { emitExitEvent, removeOldBinaryIfRequired } from "./utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
 
