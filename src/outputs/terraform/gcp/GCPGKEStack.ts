@@ -9,8 +9,9 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  stageCDKTFStack,
   TerraformOutput,
-} from "deps";
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -19,11 +20,7 @@ import {
   SEALED_SECRETS_VERSION,
 } from "consts";
 
-import {
-  getCDKTFAppConfig,
-  stageCDKTFStack,
-  useSshRepoAuth,
-} from "src/utils.ts";
+import { getCDKTFAppConfig, useSshRepoAuth } from "src/utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
@@ -34,8 +31,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_provider_time", {});
-    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_provider_tls", {});
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
+    new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const clientConfig = new CDKTFProviderGCP.dataGoogleClientConfig
       .DataGoogleClientConfig(
@@ -186,7 +183,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
-      "cndi_provider_kubernetes",
+      "cndi_kubernetes_provider",
       kubernetes,
     );
 
@@ -248,7 +245,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       nodePoolIndex++;
     }
 
-    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_provider_helm", {
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
     });
 

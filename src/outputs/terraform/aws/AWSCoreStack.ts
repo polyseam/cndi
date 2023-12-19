@@ -1,4 +1,4 @@
-import { CDKTFProviderAWS, Construct, TerraformLocal } from "deps";
+import { CDKTFProviderAWS, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 

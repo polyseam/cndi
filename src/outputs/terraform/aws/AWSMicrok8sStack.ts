@@ -1,4 +1,11 @@
-import { App, CDKTFProviderAWS, Construct, Fn, TerraformOutput } from "deps";
+import {
+  App,
+  CDKTFProviderAWS,
+  Construct,
+  Fn,
+  stageCDKTFStack,
+  TerraformOutput,
+} from "cdktf-deps";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -8,7 +15,6 @@ import {
 import {
   getCDKTFAppConfig,
   resolveCNDIPorts,
-  stageCDKTFStack,
   useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole } from "src/types.ts";

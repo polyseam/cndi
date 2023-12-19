@@ -11,8 +11,6 @@ import {
   stageFile,
 } from "src/utils.ts";
 
-import { overwriteAction } from "src/commands/overwrite.ts";
-
 import {
   CNDITemplatePromptResponsePrimitive,
   getKnownTemplates,
@@ -336,18 +334,19 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
+    const owMod = await import("../actions/overwrite.ts");
     if (template) {
       await persistStagedFiles(options.output);
 
       // because there is no "pathToConfig" when using a template, we need to set it here
-      await overwriteAction({
+      await owMod.overwriteAction({
         output: options.output,
         initializing: true,
       });
       return;
     }
     await persistStagedFiles(options.output);
-    await overwriteAction({ output: options.output, initializing: true });
+    await owMod.overwriteAction({ output: options.output, initializing: true });
   });
 
 export default initCommand;
