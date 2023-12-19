@@ -52,9 +52,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
-    new CDKTFProviderRandom.provider.RandomIntegerProvider(
+    new CDKTFProviderRandom.provider.RandomProvider(
       this,
-      "cndi_random_integer_provider",
+      "cndi_random_provider",
       {},
     );
 
@@ -64,6 +64,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     // This is used for defining a part of the VNet address space.
     const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer
       .Integer(
+      this,
       "cndi_random_integer_address_range_0_to_255",
       {
         min: 0,
@@ -77,6 +78,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     // This will be used as a base multiplier for the VNet address space calculation.
     const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
       .Integer(
+      this,
       "cndi_random_integer_address_range_0_to_15",
       {
         min: 0,
@@ -167,7 +169,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         return nodePoolSpec;
       });
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+
     this.variables.arm_client_id = new TerraformVariable(
+      this,
       "arm_client_id",
       {
         type: "string",
