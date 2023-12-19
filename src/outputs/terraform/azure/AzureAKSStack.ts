@@ -52,6 +52,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
+    new CDKTFProviderRandom.provider.RandomIntegerProvider(
+      this,
+      "cndi_random_integer_provider",
+      {},
+    );
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
@@ -59,7 +64,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     // This is used for defining a part of the VNet address space.
     const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer
       .Integer(
-      this,
+      "cndi_random_integer_address_range_0_to_255",
       {
         min: 0,
         max: 255,
