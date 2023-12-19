@@ -8,9 +8,9 @@ import {
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
   CDKTFProviderTls,
-  RandomInterger,
   Construct,
-  Fn, 
+  Fn,
+  RandomInteger,
   TerraformLocal,
   TerraformOutput,
   TerraformVariable,
@@ -95,42 +95,43 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
+          vnetSubnetId: subnet.id,
         };
         return nodePoolSpec;
       });
 
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
-    
-    // Generate a random integer within the range 0 to 255. 
+
+    // Generate a random integer within the range 0 to 255.
     // This is used for defining a part of the VNet address space.
-    const randomIntergerAddressRange0to255 = new RandomInterger(
+    const randomIntegerAddressRange0to255 = new RandomInteger(
       this,
       "cndi_random_integer_address_range_0_to_255",
       {
         min: 0,
-        max: 255
+        max: 255,
       },
-    ); 
+    );
 
     // Generate a random integer within the range 0 to 15.
     // This will be used as a base multiplier for the VNet address space calculation.
-    const randomIntergerAddressRange0to15 = new RandomInterger(
+    const randomIntegerAddressRange0to15 = new RandomInteger(
       this,
       "cndi_random_integer_address_range_0_to_15",
       {
         min: 0,
-        max: 15
+        max: 15,
       },
-    );    
-    
+    );
+
     // Calculate a multiplier for the VNet address space by multiplying
     // the random integer (range 0-15) by 16. This local variable will
     // be used in defining subnet address prefixes.
     this.locals.address_space_random_multiplier_16 = new TerraformLocal(
       this,
       "cndi_address_space_random_multiplier_16",
-      randomIntergerAddressRange0to15.result*16,
-    ); 
+      randomIntegerAddressRange0to15.result * 16,
+    );
 
     // Create a virtual network (VNet) in Azure with a dynamic address space.
     // The address space is partially determined by the random integer generated above.
@@ -140,7 +141,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         name: `cndi_azure_vnet`,
         resourceGroupName: this.rg.name,
-        addressSpace: [`10.${randomIntergerAddressRange0to255.result.asString}.0.0/16`],
+        addressSpace: [`10.${randomIntegerAddressRange0to255.result}.0.0/16`],
         location: this.rg.location,
         tags: { CNDIProject: this.locals.cndi_project_name.asString },
       },
@@ -155,8 +156,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         name: `cndi_azure_subnet`,
         resourceGroupName: this.rg.name,
         virtualNetworkName: vnet.name,
-        addressPrefixes: [`10.${randomIntergerAddressRange0to255.result.asString}.${this.locals.address_space_random_multiplier_16.asString}.0/20`],
-      
+        addressPrefixes: [
+          `10.${randomIntegerAddressRange0to255.result}.${this.locals.address_space_random_multiplier_16}.0/20`,
+        ],
       },
     );
 
@@ -213,7 +215,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         nodeResourceGroup: `${this.rg.name}-resources`,
         dependsOn: [this.rg],
-        vnet_subnet_id: subnet.name
       },
     );
 
