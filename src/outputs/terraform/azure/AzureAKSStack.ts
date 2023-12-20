@@ -52,11 +52,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
-    new CDKTFProviderRandom.provider.RandomProvider(
-      this,
-      "cndi_random_provider",
-      {},
-    );
 
     const project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
