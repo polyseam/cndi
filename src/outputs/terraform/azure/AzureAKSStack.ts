@@ -103,7 +103,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         name: `cndi-azure-vnet-${project_name}`,
         resourceGroupName: this.rg.name,
-        addressSpace: [`10.${randomIntegerAddressRange0to255.result}.0.0/16`],
+        addressSpace: [`10.${randomIntegerAddressRange0to255.id}.0.0/16`],
         location: this.rg.location,
         tags: { CNDIProject: this.locals.cndi_project_name.asString },
       },
