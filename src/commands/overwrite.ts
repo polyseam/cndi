@@ -1,9 +1,26 @@
-import { Command } from "deps";
+import { Command, delay, Spinners, TerminalSpinner } from "deps";
+
+const getOwModule = async () => {
+  const spinner = new TerminalSpinner({
+    text: "loading terraform modules...",
+    color: "cyan",
+    indent: 0,
+    spinner: Spinners.windows,
+    writer: Deno.stdout,
+  });
+
+  spinner.start();
+  await delay(1000);
+  const owMod = await import("../actions/overwrite.ts");
+  spinner.succeed("terraform modules loaded!\n");
+  return owMod;
+};
 
 /**
  * COMMAND cndi overwrite
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
+
 const overwriteCommand = new Command()
   .description(`Update cndi project files using cndi_config.yaml file.`)
   .alias("ow")
@@ -21,8 +38,8 @@ const overwriteCommand = new Command()
     { hidden: true, default: false },
   )
   .action(async (...args) => {
-    const owMod = await import("../actions/overwrite.ts");
+    const owMod = await getOwModule();
     owMod.overwriteAction(...args);
   });
 
-export { overwriteCommand };
+export { getOwModule, overwriteCommand };
