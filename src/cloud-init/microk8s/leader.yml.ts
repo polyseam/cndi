@@ -8,9 +8,9 @@ import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates
 import {
   ARGOCD_VERSION,
   DEFAULT_MICROK8S_VERSION,
-  KUBESEAL_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   RELOADER_VERSION,
+  SEALED_SECRETS_VERSION,
 } from "consts";
 
 const defaultAddons: Array<Microk8sAddon> = [
@@ -222,8 +222,7 @@ const getLeaderCloudInitYaml = (
 
       `echo "Installing sealed-secrets-controller"`,
       `sudo microk8s helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets`,
-      `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${KUBESEAL_VERSION} --namespace kube-system`,
-      // `sudo microk8s kubectl --namespace kube-system apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/controller.yaml`,
+      `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${SEALED_SECRETS_VERSION} --namespace kube-system`,
       `echo "sealed-secrets-controller installed"`,
 
       // storageClass depends on dev cluster or not
