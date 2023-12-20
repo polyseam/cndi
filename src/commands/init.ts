@@ -17,6 +17,8 @@ import {
   useTemplate,
 } from "src/templates/templates.ts";
 
+import { getOwModule } from "src/commands/overwrite.ts";
+
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
@@ -334,7 +336,8 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    const owMod = await import("../actions/overwrite.ts");
+    const owMod = await getOwModule();
+
     if (template) {
       await persistStagedFiles(options.output);
 
