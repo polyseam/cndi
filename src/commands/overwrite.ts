@@ -11,7 +11,7 @@ const getOwModule = async () => {
 
   spinner.start();
   await delay(1000);
-  const owMod = await import("../actions/overwrite.ts");
+  const owMod = await import("src/actions/overwrite.ts");
   spinner.succeed("terraform modules loaded!\n");
   return owMod;
 };
