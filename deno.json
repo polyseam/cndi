@@ -1,5 +1,5 @@
 {
-  "version": "2.0.4",
+  "version": "2.0.5",
   "deno_version": "1.39.0",
   "tasks": {
     "compile-win": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --output dist/cndi-win.exe main.ts",
