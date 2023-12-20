@@ -45,6 +45,8 @@ type AnonymousClusterNodePoolConfig = Omit<
   "kubernetesClusterId"
 >;
 
+const DEFAULT_AZURE_NODEPOOL_ZONE = "1";
+
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -66,9 +68,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         max: 255,
       },
     );
+
     const tags = {
       CNDIProject: project_name,
     };
+
     // Generate a random integer within the range 0 to 15.
     // This will be used as a base multiplier for the VNet address space calculation.
     const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
@@ -100,7 +104,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
         addressSpace: [`10.${randomIntegerAddressRange0to255.id}.0.0/16`],
         location: this.rg.location,
-        tags: { CNDIProject: this.locals.cndi_project_name.asString },
+        tags,
       },
     );
 
@@ -160,9 +164,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           maxPods: 110,
           vnetSubnetId: subnet.id,
           tags,
+          zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
         };
         return nodePoolSpec;
       });
+
     const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
 
     this.variables.arm_client_id = new TerraformVariable(
@@ -304,6 +310,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
         sku: "Standard",
         tags: { CNDIProject: this.locals.cndi_project_name.asString },
+        zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
       },
     );
 
