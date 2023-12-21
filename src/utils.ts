@@ -223,31 +223,42 @@ async function patchAndStageTerraformFilesWithInput(input: TFBlocks) {
     path.join(await getStagingDir(), pathToTerraformObject),
   ) as TFBlocks;
 
+  // this is highly inefficient
+  const cdktfWithEmpties = {
+    ...cdktfObj,
+    resource: deepMerge(
+      cdktfObj?.resource || {},
+      input?.resource || {},
+    ),
+    terraform: deepMerge(
+      cdktfObj?.terraform || {},
+      input?.terraform || {},
+    ),
+    variable: deepMerge(
+      cdktfObj?.variable || {},
+      input?.variable || {},
+    ),
+    locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
+    output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
+    module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
+    data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
+    provider: deepMerge(
+      cdktfObj?.provider || {},
+      input?.provider || {},
+    ),
+  };
+
+  const output: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(cdktfWithEmpties)) {
+    if (Object.keys(value).length) {
+      output[key] = value;
+    }
+  }
+
   await stageFile(
     pathToTerraformObject,
-    getPrettyJSONString({
-      ...cdktfObj,
-      resource: deepMerge(
-        cdktfObj?.resource || {},
-        input?.resource || {},
-      ),
-      terraform: deepMerge(
-        cdktfObj?.terraform || {},
-        input?.terraform || {},
-      ),
-      variable: deepMerge(
-        cdktfObj?.variable || {},
-        input?.variable || {},
-      ),
-      locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
-      output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
-      module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
-      data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
-      provider: deepMerge(
-        cdktfObj?.provider || {},
-        input?.provider || {},
-      ),
-    }),
+    getPrettyJSONString(output),
   );
 }
 
