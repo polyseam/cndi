@@ -64,8 +64,8 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
-          - name: nginx-proxy-alpha
-            disk_size: 100
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-{{ $cndi.get_prompt_response(deploment_target_distribution)}}-nodes.yaml):
+            {}
 
     cluster_manifests:
       argo-ingress:
