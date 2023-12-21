@@ -104,13 +104,15 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-        nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/mssql/nodes/{{ $cndi.get_prompt_response(deployment_target_provider) }}.yaml): {}
         open_ports:
           - number: 1433
             name: mssql
             namespace: mssql
             service: mssql-0
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-{{ $cndi.get_prompt_response(deploment_target_distribution)}}-nodes.yaml):
+            {}
+
     cluster_manifests:
       $cndi.comment(mssql-sa-secret): Mssql sa password
       mssql-sa-secret:
