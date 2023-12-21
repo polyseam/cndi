@@ -297,7 +297,8 @@ const initCommand = new Command()
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
-      deployment_target_provider = templateResult.deployment_target_provider;
+      deployment_target_provider = templateResult?.responses
+        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
