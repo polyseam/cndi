@@ -285,6 +285,8 @@ const initCommand = new Command()
       debugMode: !!options.debug,
     };
 
+    let deployment_target_provider;
+
     if (template) {
       const templateResult = await useTemplate(
         template!,
@@ -295,6 +297,8 @@ const initCommand = new Command()
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
+      deployment_target_provider = templateResult?.responses
+        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
@@ -329,10 +333,12 @@ const initCommand = new Command()
       getPrettyJSONString(vscodeSettings),
     );
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
-    );
+    if (deployment_target_provider !== "dev") {
+      await stageFile(
+        path.join(".github", "workflows", "cndi-run.yaml"),
+        getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
+      );
+    }
 
     await stageFile(".gitignore", getGitignoreContents());
 

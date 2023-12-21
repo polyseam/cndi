@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
@@ -22,6 +22,7 @@ import {
 import {
   getCDKTFAppConfig,
   getPrettyJSONString,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -1106,5 +1107,14 @@ export async function stageTerraformSynthAWSEKS(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AWSEKSTerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

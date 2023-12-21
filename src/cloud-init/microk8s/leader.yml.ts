@@ -139,6 +139,15 @@ const getLeaderCloudInitYaml = (
   const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
   let packages = ["apache2-utils", "nfs-common"];
+
+  let nfsInstallCommands = [
+    `echo "Installing nfs on host: $(hostname)"`,
+    // because this next line uses interpolation at runtime
+    // we install the nfs addon manually rather than declaritively
+    `while ! sudo microk8s enable nfs -n "$(hostname)"; do echo 'nfs failed to install, retrying in 180 seconds'; sleep 180; done`,
+    `echo "nfs installed"`,
+  ];
+
   let storageClassSetupCommands = [
     `echo "Setting NFS as default storage class"`,
     `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
@@ -150,6 +159,7 @@ const getLeaderCloudInitYaml = (
     storageClassSetupCommands = [
       `echo "hostpath-storage is now the default storage class"`,
     ];
+    nfsInstallCommands = []; // no nfs on dev clusters, hostpath-storage is installed declaratively
   }
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
@@ -202,11 +212,8 @@ const getLeaderCloudInitYaml = (
       `echo "Setting microk8s config"`,
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
 
-      `echo "Installing nfs on host: $(hostname)"`,
-      // because this next line uses interpolation at runtime
-      // we install the nfs addon manually rather than declaritively
-      `while ! sudo microk8s enable nfs -n "$(hostname)"; do echo 'nfs failed to install, retrying in 180 seconds'; sleep 180; done`,
-      `echo "nfs installed"`,
+      ...nfsInstallCommands,
+
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
       `sudo usermod -a -G microk8s ubuntu`,
