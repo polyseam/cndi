@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   App,
@@ -20,7 +20,11 @@ import {
   SEALED_SECRETS_VERSION,
 } from "consts";
 
-import { getCDKTFAppConfig, useSshRepoAuth } from "src/utils.ts";
+import {
+  getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
+  useSshRepoAuth,
+} from "src/utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
@@ -599,5 +603,14 @@ export async function stageTerraformSynthGCPGKE(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new GCPGKETerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

@@ -216,10 +216,7 @@ interface TFResourceFileObject {
 }
 
 // MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
-  if (!config?.infrastructure?.terraform) return;
-  const terraformBlocks = config.infrastructure.terraform as TFBlocks;
-
+async function patchAndStageTerraformFilesWithInput(input: TFBlocks) {
   const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
 
   const cdktfObj = await loadJSONC(
@@ -232,23 +229,23 @@ async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
       ...cdktfObj,
       resource: deepMerge(
         cdktfObj?.resource || {},
-        terraformBlocks?.resource || {},
+        input?.resource || {},
       ),
       terraform: deepMerge(
         cdktfObj?.terraform || {},
-        terraformBlocks?.terraform || {},
+        input?.terraform || {},
       ),
       variable: deepMerge(
         cdktfObj?.variable || {},
-        terraformBlocks?.variable || {},
+        input?.variable || {},
       ),
-      locals: deepMerge(cdktfObj?.locals || {}, terraformBlocks?.locals || {}),
-      output: deepMerge(cdktfObj?.output || {}, terraformBlocks?.output || {}),
-      module: deepMerge(cdktfObj?.module || {}, terraformBlocks?.module || {}),
-      data: deepMerge(cdktfObj?.data || {}, terraformBlocks?.data || {}),
+      locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
+      output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
+      module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
+      data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
       provider: deepMerge(
         cdktfObj?.provider || {},
-        terraformBlocks?.provider || {},
+        input?.provider || {},
       ),
     }),
   );
@@ -532,7 +529,7 @@ export {
   loadCndiConfig,
   loadJSONC,
   loadYAML,
-  patchAndStageTerraformFilesWithConfig,
+  patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,
   replaceRange,

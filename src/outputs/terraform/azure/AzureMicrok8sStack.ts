@@ -14,10 +14,11 @@ import {
 
 import {
   getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole } from "src/types.ts";
+import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
@@ -375,5 +376,13 @@ export async function stageTerraformSynthAzureMicrok8s(
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AzureMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

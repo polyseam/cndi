@@ -7,6 +7,7 @@
       "npm:@cdktf/provider-google": "npm:@cdktf/provider-google@12.0.5_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-helm": "npm:@cdktf/provider-helm@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-local": "npm:@cdktf/provider-local@9.0.1_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-null": "npm:@cdktf/provider-null@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-random": "npm:@cdktf/provider-random@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-time": "npm:@cdktf/provider-time@9.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0",
@@ -52,6 +53,13 @@
       },
       "@cdktf/provider-kubernetes@10.0.0_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
         "integrity": "sha512-72dI4zXTQXhPhWxZFEYpMs8oOyHld0KnM/h5HKuS7d8VFDOcBh14Lut65LCSNyg2ky4vU+smFD/B++1fhzYyUw==",
+        "dependencies": {
+          "cdktf": "cdktf@0.19.0_constructs@10.3.0",
+          "constructs": "constructs@10.3.0"
+        }
+      },
+      "@cdktf/provider-local@9.0.1_cdktf@0.19.0__constructs@10.3.0_constructs@10.3.0": {
+        "integrity": "sha512-8CEbPmTfqXYLOVbTMqPtniWlKe+VyeuTsVEXvdHVUmn/WREs2wsYwrQ2DEeekGwrkgI2CL9n17HFI6CyZdMtiQ==",
         "dependencies": {
           "cdktf": "cdktf@0.19.0_constructs@10.3.0",
           "constructs": "constructs@10.3.0"

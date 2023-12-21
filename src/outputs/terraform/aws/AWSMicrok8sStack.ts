@@ -14,10 +14,11 @@ import {
 
 import {
   getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole } from "src/types.ts";
+import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
@@ -328,5 +329,14 @@ export async function stageTerraformSynthAWSMicrok8s(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AWSMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }
