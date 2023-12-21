@@ -98,7 +98,7 @@ outputs:
             namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
             service: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-{{ $cndi.get_prompt_response(deploment_target_distribution)}}-nodes.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
     cluster_manifests:

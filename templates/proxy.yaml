@@ -64,9 +64,9 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-{{ $cndi.get_prompt_response(deploment_target_distribution)}}-nodes.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-
+            
     cluster_manifests:
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):

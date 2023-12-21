@@ -110,9 +110,9 @@ outputs:
             namespace: mssql
             service: mssql-0
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/standard-{{ $cndi.get_prompt_response(deploment_target_distribution)}}-nodes.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-
+            
     cluster_manifests:
       $cndi.comment(mssql-sa-secret): Mssql sa password
       mssql-sa-secret:
