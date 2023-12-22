@@ -1,6 +1,7 @@
 import { Command, delay, Spinners, TerminalSpinner } from "deps";
 
 const getOwModule = async () => {
+  console.log(); // pad output
   const spinner = new TerminalSpinner({
     text: "loading terraform modules...",
     color: "cyan",
