@@ -4,6 +4,7 @@ import {
   Construct,
   Fn,
   stageCDKTFStack,
+  TerraformOutput,
 } from "cdktf-deps";
 
 import {
@@ -26,11 +27,15 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
     const _project_name = this.locals.cndi_project_name.asString;
     const _open_ports = resolveCNDIPorts(cndi_config);
 
-    const numberOfNodes = cndi_config.infrastructure.cndi.nodes.length;
+    const nodes = cndi_config.infrastructure.cndi.nodes;
+
+    const numberOfNodes = nodes.length;
 
     if (numberOfNodes !== 1) {
       console.log("dev clusters must have exactly one node");
     }
+
+    const node = nodes[0] as MultipassNodeItemSpec;
 
     new CDKTFProviderLocal.provider.LocalProvider(
       this,
@@ -86,6 +91,21 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
         filename: LOCAL_CLOUDINIT_FILE_NAME,
       },
     );
+
+    new TerraformOutput(this, "cndi_dev_tutorial", {
+      value: `
+          Accessing ArgoCD UI
+
+          1. Get the IP address of the node
+          run: multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '\\n'
+
+          2. Port forward the argocd-server service
+          run: multipass exec ${node.name} -- sudo microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 --address <ip address of node>
+
+          3. Login in the browser
+          open: https://<ip address of node>:8080 in your browser to access the argocd UI
+      `,
+    });
   }
 }
 
