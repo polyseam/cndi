@@ -15,8 +15,6 @@ const createSealedSecretsKeys = async (
   let sealed_secrets_private_key;
   let sealed_secrets_public_key;
 
-  // openssl req -x509 -nodes -newkey rsa:4096" -keyout -days 365 private-out -out public-out -subj /CN=sealed-secret/O=sealed-secret
-
   const openSSLGenerateKeyPairCommand = new Deno.Command(pathToOpenSSL, {
     args: [
       "req",
