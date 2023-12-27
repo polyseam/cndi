@@ -418,7 +418,7 @@ const getCndiInstallPath = (): string => {
 const getPathToOpenSSLForPlatform = () => {
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
 
-  if (currentPlatform === "win32") {
+  if (currentPlatform === "win32") { // /Program Files/Git/usr/bin/openssl.exe req -x509 -nodes -newkey rsa:4096 -keyout -days 365 private-out -out public-out -subj /CN=sealed-secret/O=sealed-secret
     return path.join("/", "Program Files", "Git", "usr", "bin", "openssl.exe");
   }
 
