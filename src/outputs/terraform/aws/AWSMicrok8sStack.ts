@@ -1,6 +1,5 @@
 import {
   App,
-  CDKTFProviderAWS,
   Construct,
   Fn,
   stageCDKTFStack,
@@ -22,6 +21,8 @@ import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
+
+const CDKTFProviderAWS = await import("npm:@cdktf/provider-aws");
 
 export class AWSMicrok8sStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -157,7 +158,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    let leaderInstance: CDKTFProviderAWS.instance.Instance;
+    const instances = [];
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
       let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
@@ -209,17 +210,17 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       } else if (role === "worker") {
         userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
           bootstrap_token: this.locals.bootstrap_token.asString!,
-          leader_node_ip: leaderInstance!.privateIp,
+          leader_node_ip: instances[0]!.privateIp,
         });
       } else {
         userData = Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
           bootstrap_token: this.locals.bootstrap_token.asString!,
-          leader_node_ip: leaderInstance!.privateIp,
+          leader_node_ip: instances[0]!.privateIp,
         });
       }
 
       const count = node?.count || 1; // count will never be zero, defaults to 1
-      const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
+      const dependsOn = role === "leader" ? [igw] : [];
       const volumeSize = node?.volume_size ||
         node?.disk_size ||
         node?.disk_size_gb ||
@@ -246,10 +247,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
             vpcSecurityGroupIds: [securityGroup.id],
           },
         );
-        if (role === "leader") {
-          leaderInstance = cndiInstance;
-        }
-        nodeList.push({ id: cndiInstance.id, name: nodeName });
+        instances.push(cndiInstance);
       }
     }
 

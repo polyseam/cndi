@@ -1,9 +1,11 @@
-import { CDKTFProviderAWS, Construct, TerraformLocal } from "cdktf-deps";
+import { Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const CNDI_MAJOR_VERSION = "v2";
+
+const CDKTFProviderAWS = await import("npm:@cdktf/provider-aws");
 
 export default class AWSCoreTerraformStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
