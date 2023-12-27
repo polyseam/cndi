@@ -1,6 +1,5 @@
 import {
   App,
-  CDKTFProviderAzure,
   Construct,
   Fn,
   stageCDKTFStack,
@@ -20,6 +19,27 @@ import {
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
+
+const CDKTFProviderAzure = await import("npm:@cdktf/provider-azurerm");
+
+type AzSecurityRule = {
+  access: "Allow";
+  description: string;
+  destinationAddressPrefix: string;
+  destinationAddressPrefixes: string[];
+  destinationApplicationSecurityGroupIds: string[];
+  destinationPortRange: string;
+  destinationPortRanges: string[];
+  direction: string;
+  name: string;
+  priority: number;
+  protocol: string;
+  sourceAddressPrefix: string;
+  sourceAddressPrefixes: string[];
+  sourceApplicationSecurityGroupIds: string[];
+  sourcePortRange: string;
+  sourcePortRanges: string[];
+};
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -96,9 +116,8 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const securityRule: Array<
-      CDKTFProviderAzure.networkSecurityGroup.NetworkSecurityGroupSecurityRule
-    > = [];
+    const securityRule: Array<AzSecurityRule> = [];
+
     open_ports.map((port, index) => {
       securityRule.push({
         access: "Allow",
@@ -168,10 +187,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const nodeList = [];
-
-    let leaderInstance:
-      CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine;
+    const instances = [];
 
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeSpec?.count || 1; // count will never be zero, defaults to 1
@@ -207,7 +223,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       };
 
       for (let i = 0; i < count; i++) {
-        let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
+        let role: NodeRole = instances.length === 0 ? "leader" : "controller";
 
         if (nodeSpec?.role === "worker") {
           role = "worker";
@@ -314,48 +330,40 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
               bootstrap_token: this.locals.bootstrap_token.asString!,
-              leader_node_ip: leaderInstance!.privateIpAddress,
+              leader_node_ip: instances[0].privateIpAddress,
             }),
           );
         } else {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
               bootstrap_token: this.locals.bootstrap_token.asString!,
-              leader_node_ip: leaderInstance!.privateIpAddress,
+              leader_node_ip: instances[0].privateIpAddress,
             }),
           );
         }
 
-        const dependsOn = role === "leader" ? [] : [leaderInstance!];
-
-        const cndiInstance:
-          CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine =
-            new CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine(
-              this,
-              `cndi_azure_virtual_machine_${nodeName}`,
-              {
-                dependsOn,
-                userData,
-                name: nodeName,
-                location: this.rg.location,
-                resourceGroupName: this.rg.name,
-                size: machine_type,
-                adminUsername: "ubuntu",
-                adminPassword: "Password123",
-                sourceImageReference,
-                disablePasswordAuthentication: false,
-                tags,
-                osDisk,
-                zone,
-                networkInterfaceIds: [networkInterface.id],
-              },
-            );
-
-        if (role === "leader") {
-          leaderInstance = cndiInstance;
-        }
-
-        nodeList.push({ id: cndiInstance.id, name: nodeName });
+        instances.push(
+          new CDKTFProviderAzure.linuxVirtualMachine
+            .LinuxVirtualMachine(
+            this,
+            `cndi_azure_virtual_machine_${nodeName}`,
+            {
+              userData,
+              name: nodeName,
+              location: this.rg.location,
+              resourceGroupName: this.rg.name,
+              size: machine_type,
+              adminUsername: "ubuntu",
+              adminPassword: "Password123",
+              sourceImageReference,
+              disablePasswordAuthentication: false,
+              tags,
+              osDisk,
+              zone,
+              networkInterfaceIds: [networkInterface.id],
+            },
+          ),
+        );
       }
     }
 

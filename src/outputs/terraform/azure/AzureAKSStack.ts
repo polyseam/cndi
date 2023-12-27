@@ -4,7 +4,6 @@ import { ccolors } from "deps";
 
 import {
   App,
-  CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderRandom,
@@ -34,6 +33,8 @@ import {
 
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
+const CDKTFProviderAzure = await import("npm:@cdktf/provider-azurerm");
+
 function isValidAzureAKSNodePoolName(inputString: string): boolean {
   if (inputString.match(/^[0-9a-z]+$/) && inputString.length <= 12) {
     return true;
@@ -41,10 +42,10 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   return false;
 }
 
-type AnonymousClusterNodePoolConfig = Omit<
-  CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
-  "kubernetesClusterId"
->;
+// type AnonymousClusterNodePoolConfig = Omit<
+//   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
+//   "kubernetesClusterId"
+// >;
 
 const DEFAULT_AZURE_NODEPOOL_ZONE = "1";
 
@@ -123,7 +124,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         ],
       },
     );
-    const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
+    const nodePools = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
           console.log(
@@ -154,7 +155,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           scale.minCount = nodeSpec.min_count;
         }
 
-        const nodePoolSpec: AnonymousClusterNodePoolConfig = {
+        const nodePoolSpec = {
           name: nodeSpec.name,
           ...scale,
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
