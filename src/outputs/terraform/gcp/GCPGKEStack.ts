@@ -2,7 +2,6 @@ import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   App,
-  CDKTFProviderGCP,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
@@ -25,6 +24,8 @@ import {
   patchAndStageTerraformFilesWithInput,
   useSshRepoAuth,
 } from "src/utils.ts";
+
+import { CDKTFProviderGCP } from "./deps.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
