@@ -1,11 +1,12 @@
 import {
   App,
-  CDKTFProviderAWS,
   Construct,
   Fn,
   stageCDKTFStack,
   TerraformOutput,
 } from "cdktf-deps";
+
+import { CDKTFProviderAWS } from "./deps.ts";
 
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -157,10 +158,10 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    let leaderInstance: CDKTFProviderAWS.instance.Instance;
+    const instances = [];
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
-      let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
+      let role: NodeRole = instances.length === 0 ? "leader" : "controller";
       if (node?.role === "worker") {
         role = "worker";
       }
@@ -209,17 +210,19 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       } else if (role === "worker") {
         userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
           bootstrap_token: this.locals.bootstrap_token.asString!,
-          leader_node_ip: leaderInstance!.privateIp,
+          leader_node_ip: instances[0]!.privateIp,
         });
       } else {
         userData = Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
           bootstrap_token: this.locals.bootstrap_token.asString!,
-          leader_node_ip: leaderInstance!.privateIp,
+          leader_node_ip: instances[0]!.privateIp,
         });
       }
 
       const count = node?.count || 1; // count will never be zero, defaults to 1
-      const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
+
+      // deno-lint-ignore no-explicit-any
+      const dependsOn: Array<any> = role === "leader" ? [igw] : [instances[0]];
       const volumeSize = node?.volume_size ||
         node?.disk_size ||
         node?.disk_size_gb ||
@@ -227,29 +230,27 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 
       for (let i = 0; i < count; i++) {
         const nodeName = `${node.name}-${i}`;
-        const cndiInstance = new CDKTFProviderAWS.instance.Instance(
-          this,
-          `cndi_aws_instance_${node.name}_${i}`,
-          {
-            userData,
-            tags: { Name: nodeName },
-            dependsOn,
-            ami: DEFAULT_EC2_AMI,
-            instanceType: node?.instance_type || DEFAULT_INSTANCE_TYPES.aws,
-            rootBlockDevice: {
-              volumeType: "gp3",
-              volumeSize,
-              deleteOnTermination: true,
+        instances.push(
+          new CDKTFProviderAWS.instance.Instance(
+            this,
+            `cndi_aws_instance_${node.name}_${i}`,
+            {
+              userData,
+              tags: { Name: nodeName },
+              dependsOn,
+              ami: DEFAULT_EC2_AMI,
+              instanceType: node?.instance_type || DEFAULT_INSTANCE_TYPES.aws,
+              rootBlockDevice: {
+                volumeType: "gp3",
+                volumeSize,
+                deleteOnTermination: true,
+              },
+              userDataReplaceOnChange: false,
+              subnetId: cndiPrimarySubnet.id,
+              vpcSecurityGroupIds: [securityGroup.id],
             },
-            userDataReplaceOnChange: false,
-            subnetId: cndiPrimarySubnet.id,
-            vpcSecurityGroupIds: [securityGroup.id],
-          },
+          ),
         );
-        if (role === "leader") {
-          leaderInstance = cndiInstance;
-        }
-        nodeList.push({ id: cndiInstance.id, name: nodeName });
       }
     }
 

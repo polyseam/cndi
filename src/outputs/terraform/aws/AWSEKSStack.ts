@@ -8,7 +8,6 @@ import {
 
 import {
   App,
-  CDKTFProviderAWS,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
@@ -18,6 +17,8 @@ import {
   stageCDKTFStack,
   TerraformOutput,
 } from "cdktf-deps";
+
+import { CDKTFProviderAWS } from "./deps.ts";
 
 import {
   getCDKTFAppConfig,
@@ -575,8 +576,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup | null =
-      null;
     let nodeGroupIndex = 0;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
@@ -606,7 +605,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         scalingConfig.minSize = minCount;
       }
 
-      const ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
+      const _ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
         this,
         `cndi_aws_eks_node_group_${nodeGroupIndex}`,
         {
@@ -627,9 +626,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           ],
         },
       );
-      if (!firstNodeGroup) {
-        firstNodeGroup = ng;
-      }
       nodeGroupIndex++;
     }
 
@@ -696,7 +692,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [eksCluster, firstNodeGroup!],
+        dependsOn: [eksCluster],
         name: "ingress-nginx-private",
         namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -824,7 +820,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "cert-manager",
         createNamespace: true,
-        dependsOn: [firstNodeGroup!],
         name: "cert-manager",
         namespace: "cert-manager",
         repository: "https://charts.jetstack.io",
@@ -866,7 +861,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         createNamespace: true,
         dependsOn: [
           efsFs,
-          firstNodeGroup!,
         ],
         timeout: 600,
         atomic: true,
@@ -985,7 +979,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [firstNodeGroup!, sealedSecretsSecret],
+        dependsOn: [sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",

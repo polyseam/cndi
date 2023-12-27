@@ -27,7 +27,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    new CDKTFProviderTime.provider.TimeProvider(this, 'cndi_time_provider', {})
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
 
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);

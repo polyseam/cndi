@@ -1,6 +1,7 @@
-import { CDKTFProviderAWS, Construct, TerraformLocal } from "cdktf-deps";
+import { Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
+import { CDKTFProviderAWS } from "src/outputs/terraform/aws/deps.ts";
 
 const DEFAULT_AWS_REGION = "us-east-1";
 const CNDI_MAJOR_VERSION = "v2";
