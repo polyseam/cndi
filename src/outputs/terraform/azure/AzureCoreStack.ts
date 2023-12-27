@@ -1,12 +1,13 @@
-import { CDKTFProviderAzure, Construct, TerraformLocal } from "cdktf-deps";
+import { Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
+import { CDKTFProviderAzure } from "./deps.ts";
 
 const DEFAULT_ARM_REGION = "eastus";
 // const CNDI_MAJOR_VERSION = "v2";
 
 export default class AzureCoreTerraformStack extends CNDITerraformStack {
-  rg: CDKTFProviderAzure.resourceGroup.ResourceGroup;
+  rg;
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 

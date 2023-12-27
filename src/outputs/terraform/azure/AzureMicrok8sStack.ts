@@ -1,6 +1,5 @@
 import {
   App,
-  CDKTFProviderAzure,
   Construct,
   Fn,
   stageCDKTFStack,
@@ -19,6 +18,8 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+import { CDKTFProviderAzure } from "./deps.ts";
+
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
@@ -97,7 +98,8 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     );
 
     const securityRule: Array<
-      CDKTFProviderAzure.networkSecurityGroup.NetworkSecurityGroupSecurityRule
+      // deno-lint-ignore no-explicit-any
+      any
     > = [];
     open_ports.map((port, index) => {
       securityRule.push({
@@ -170,8 +172,8 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
 
     const nodeList = [];
 
-    let leaderInstance:
-      CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine;
+    // deno-lint-ignore no-explicit-any
+    let leaderInstance: any;
 
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeSpec?.count || 1; // count will never be zero, defaults to 1
@@ -326,30 +328,31 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           );
         }
 
-        const dependsOn = role === "leader" ? [] : [leaderInstance!];
+        // deno-lint-ignore no-explicit-any
+        const dependsOn: any = role === "leader" ? [] : [leaderInstance!];
 
-        const cndiInstance:
-          CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine =
-            new CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine(
-              this,
-              `cndi_azure_virtual_machine_${nodeName}`,
-              {
-                dependsOn,
-                userData,
-                name: nodeName,
-                location: this.rg.location,
-                resourceGroupName: this.rg.name,
-                size: machine_type,
-                adminUsername: "ubuntu",
-                adminPassword: "Password123",
-                sourceImageReference,
-                disablePasswordAuthentication: false,
-                tags,
-                osDisk,
-                zone,
-                networkInterfaceIds: [networkInterface.id],
-              },
-            );
+        // deno-lint-ignore no-explicit-any
+        const cndiInstance: any = new CDKTFProviderAzure.linuxVirtualMachine
+          .LinuxVirtualMachine(
+          this,
+          `cndi_azure_virtual_machine_${nodeName}`,
+          {
+            dependsOn,
+            userData,
+            name: nodeName,
+            location: this.rg.location,
+            resourceGroupName: this.rg.name,
+            size: machine_type,
+            adminUsername: "ubuntu",
+            adminPassword: "Password123",
+            sourceImageReference,
+            disablePasswordAuthentication: false,
+            tags,
+            osDisk,
+            zone,
+            networkInterfaceIds: [networkInterface.id],
+          },
+        );
 
         if (role === "leader") {
           leaderInstance = cndiInstance;
