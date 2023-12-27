@@ -22,4 +22,6 @@ cndi/terraform/.terraform/
 
 cndi
 
+benchee.json
+
 src/tests/cwd
