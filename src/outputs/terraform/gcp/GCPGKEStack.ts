@@ -2,7 +2,6 @@ import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   App,
-  CDKTFProviderGCP,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
@@ -27,6 +26,8 @@ import {
 } from "src/utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
+
+const CDKTFProviderGCP = await import("npm:@cdktf/provider-google");
 
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class GCPGKETerraformStack extends GCPCoreTerraformStack {

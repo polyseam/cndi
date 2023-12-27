@@ -16,6 +16,8 @@ type GCPKeyJSON = {
   universe_domain: string;
 };
 
+const CDKTFProviderGCP = await import("npm:@cdktf/provider-google");
+
 export default class GCPCoreTerraformStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);

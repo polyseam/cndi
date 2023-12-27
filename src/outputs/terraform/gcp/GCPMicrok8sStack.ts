@@ -1,6 +1,5 @@
 import {
   App,
-  CDKTFProviderGCP,
   CDKTFProviderTime,
   Construct,
   Fn,
@@ -22,6 +21,8 @@ import {
 
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
+
+const CDKTFProviderGCP = await import("npm:@cdktf/provider-google");
 
 export class GCPMicrok8sStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -142,14 +143,10 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    let leaderInstance: CDKTFProviderGCP.computeInstance.ComputeInstance;
-
-    const instanceSelfLinks: string[] = [];
+    const instances = [];
 
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
-      let role: NodeRole = instanceSelfLinks.length === 0
-        ? "leader"
-        : "controller";
+      let role: NodeRole = instances.length === 0 ? "leader" : "controller";
 
       if (nodeSpec?.role === "worker") {
         role = "worker";
@@ -229,14 +226,14 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         } else if (role === "worker") {
           userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
             bootstrap_token: this.locals.bootstrap_token.asString!,
-            leader_node_ip: leaderInstance!.networkInterface.get(0).networkIp,
+            leader_node_ip: instances[0].networkInterface.get(0).networkIp,
           });
         } else {
           userData = Fn.templatefile(
             "microk8s-cloud-init-controller.yml.tftpl",
             {
               bootstrap_token: this.locals.bootstrap_token.asString!,
-              leader_node_ip: leaderInstance!.networkInterface.get(0).networkIp,
+              leader_node_ip: instances[0].networkInterface.get(0).networkIp,
             },
           );
         }
@@ -258,10 +255,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             },
           },
         );
-        if (role === "leader") {
-          leaderInstance = instance;
-        }
-        instanceSelfLinks.push(instance.selfLink);
+        instances.push(instance);
       }
     }
 
@@ -272,7 +266,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       {
         name: "cndi-compute-instance-group",
         description: "Compute Engine Instance Group for CNDI Cluster nodes",
-        instances: instanceSelfLinks,
+        instances: instances.map((instance) => instance.selfLink),
         namedPort: open_ports.map((port) => ({
           name: port.name,
           port: port.number,
