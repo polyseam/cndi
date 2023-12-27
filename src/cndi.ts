@@ -79,7 +79,7 @@ export default async function cndi() {
     Deno.exit(1);
   }
 
-await new Command()
+  return await new Command()
     .name("cndi")
     .version(`v${CNDI_VERSION}`)
     .description("Cloud-Native Data Infrastructure")
@@ -95,12 +95,4 @@ await new Command()
     .command("completions", new CompletionsCommand().global())
     .command("help", new HelpCommand().global())
     .parse(Deno.args);
-    
-    const endTime = Date.now();
-    const duration = endTime - startTime;
-    console.log(
-      ccolors.faded(
-        `\nFinished in ${Math.round((duration + Number.EPSILON) * 1000) / 1000} seconds\n`,
-      ),
-    );
 }
