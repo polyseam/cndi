@@ -19,6 +19,8 @@ const createSealedSecretsKeys = async (
     args: [
       "req",
       "-x509",
+      "-days",
+      "365",
       "-nodes",
       "-newkey",
       "rsa:4096",
