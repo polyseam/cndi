@@ -112,8 +112,8 @@ outputs:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
         metadata:
-          name: '{{ $.cndi.prompts.responses.postgresqlClusterName }}'
-          namespace: '{{ $.cndi.prompts.responses.pgNamespace }}'
+          name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
@@ -127,12 +127,12 @@ outputs:
           postgresql:
             pg_hba:
               - >-
-                hostssl {{ $.cndi.prompts.responses.postgresqlDb }} {{
-                $.cndi.prompts.responses.postgresqlUser }} all password
+                hostssl {{ $cndi.get_prompt_response(postgres_database_name) }} {{
+                $cndi.get_prompt_response(postgres_admin_username) }} all password
           bootstrap:
             initdb:
-              database: '{{ $.cndi.prompts.responses.postgresqlDb }}'
-              owner: '{{ $.cndi.prompts.responses.postgresqlUser }}'
+              database: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+              owner: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
               secret:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
