@@ -107,6 +107,36 @@ outputs:
         kind: Namespace
         metadata:
           name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          
+      cnpg-cluster:
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Cluster
+        metadata:
+          name: '{{ $.cndi.prompts.responses.postgresqlClusterName }}'
+          namespace: '{{ $.cndi.prompts.responses.pgNamespace }}'
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          imageName: 'ghcr.io/cloudnative-pg/postgresql:15.2'
+          instances: 3
+          storage:
+            size: 1Gi
+          replicationSlots:
+            highAvailability:
+              enabled: true
+          postgresql:
+            pg_hba:
+              - >-
+                hostssl {{ $.cndi.prompts.responses.postgresqlDb }} {{
+                $.cndi.prompts.responses.postgresqlUser }} all password
+          bootstrap:
+            initdb:
+              database: '{{ $.cndi.prompts.responses.postgresqlDb }}'
+              owner: '{{ $.cndi.prompts.responses.postgresqlUser }}'
+              secret:
+                name: cnpg-database-user-auth-secret
+          superuserSecret:
+            name: cnpg-cluster-superuser-auth-secret
 
       $cndi.comment(postgres-auth-secret): Postgres Credentials
       cnpg-cluster-superuser-auth-secret:
