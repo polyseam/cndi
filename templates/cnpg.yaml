@@ -41,16 +41,6 @@ prompts:
       - ==
       - true
 
-  - name: postgres_port
-    default: 5432
-    message: >-
-      What port should PostgreSQL be accessible at?
-    type: Number
-    condition:
-      - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
-      - ==
-      - true
-
   - name: postgres_admin_username
     default: postgres
     message: >-
@@ -220,8 +210,8 @@ outputs:
     POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
     POSTGRES_PROTOCOL: postgresql
     POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
-    POSTGRESQL_PORT: "{{ $cndi.get_prompt_response(postgres_port) }}"
-    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:{{ $cndi.get_prompt_response(postgres_port) }}/{{ $cndi.get_prompt_response(postgres_database_name) }}"
+    POSTGRESQL_PORT: "5432"
+    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
 
   readme:
