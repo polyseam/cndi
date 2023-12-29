@@ -6,6 +6,9 @@ const ARGOCD_VERSION = "2.7.12";
 const RELOADER_VERSION = "1.0.52";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 
+const POLYSEAM_TEMPLATE_DIRECTORY =
+  "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
+
 const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
   gcp: "n2-standard-2" as const,
@@ -54,6 +57,7 @@ export {
   MANAGED_NODE_KINDS,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   NODE_DISK_SIZE_KEY,
+  POLYSEAM_TEMPLATE_DIRECTORY,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
   TERRAFORM_VERSION,
