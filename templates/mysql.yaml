@@ -88,7 +88,7 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
             
         open_ports:
@@ -181,7 +181,9 @@ outputs:
     ROOT_PASSWORD: "{{ $cndi.get_prompt_response(rootPassword) }}"
 
   readme:
-    $cndi.comment(mysql-heading): Mysql Comment in Readme
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
-    Mysql-section: "Welcome to Mysql!" 
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
+      {}
+    mysql: |
+    # mysql

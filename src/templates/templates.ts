@@ -20,7 +20,7 @@ import {
 
 // TODO: make this real/remote
 export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
+  "file:///Users/m/dev/polyseam/cndi/templates/";
 
 interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
