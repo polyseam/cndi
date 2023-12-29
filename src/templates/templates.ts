@@ -18,9 +18,7 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
-// TODO: make this real/remote
-export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "consts";
 
 interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
