@@ -4,7 +4,6 @@ provider: aws
 distribution: microk8s
 infrastructure:
   cndi:
-    external_dns: true # default
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
@@ -14,8 +13,5 @@ infrastructure:
       - name: airflow-beta
         instance_type: t3.medium
         disk_size: 100
-cluster_manifests:
-  some-dns-record:
-    record_type: CNAME
-    record_value: 
+cluster_manifests: {}
 applications: {}
