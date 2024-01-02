@@ -690,13 +690,33 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const nginxPublicNS = new CDKTFProviderKubernetes.namespace.Namespace(
+      this,
+      "cndi_kubernetes_namespace_ingress_public",
+      {
+        metadata: {
+          name: "ingress-public",
+        },
+      },
+    );
+
+    const nginxPrivateNS = new CDKTFProviderKubernetes.namespace.Namespace(
+      this,
+      "cndi_kubernetes_namespace_ingress_private",
+      {
+        metadata: {
+          name: "ingress-private",
+        },
+      },
+    );
+
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_helm_release_ingress_nginx_controller_private",
       {
         chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [eksCluster, firstNodeGroup!],
+        createNamespace: false,
+        dependsOn: [firstNodeGroup!, nginxPrivateNS],
         name: "ingress-nginx-private",
         namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -704,50 +724,30 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "service.beta.kubernetes.io/aws-load-balancer-scheme",
-            value: "internal",
+            name: "controller.service.internal.enabled",
+            value: "true",
           },
           {
             name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
+            value: "nlb",
           },
           {
             name: "controller.ingressClassResource.default",
             value: "false",
           },
           {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/private-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
             name: "controller.ingressClassResource.name",
             value: "private",
-          },
-          {
-            name: "controller.electionID",
-            value: "private-controller-leader",
           },
           {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-private/ingress-nginx-private-controller",
           },
           {
-            name: "rbac.create",
-            value: "false",
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme",
+            value: "internal",
           },
         ],
         version: "4.8.3",
@@ -760,7 +760,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [eksCluster],
+        dependsOn: [firstNodeGroup!, nginxPublicNS],
         name: "ingress-nginx-public",
         namespace: "ingress-public",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -768,33 +768,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "service.beta.kubernetes.io/aws-load-balancer-type",
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
             value: "nlb",
           },
           {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
             name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/public-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
             value: "true",
           },
           {
@@ -802,16 +781,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "public",
           },
           {
-            name: "controller.electionID",
-            value: "public-controller-leader",
-          },
-          {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-public/ingress-nginx-public-controller",
-          },
-          {
-            name: "rbac.create",
-            value: "false",
           },
         ],
         version: "4.8.3",
@@ -906,7 +877,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "reloader",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [eksCluster],
+        dependsOn: [firstNodeGroup!],
         timeout: 600,
         atomic: true,
         name: "reloader",
@@ -1029,6 +1000,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         tags: {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
+          "kubernetes.io/service-name":
+            "ingress-public/ingress-nginx-public-controller",
         },
         dependsOn: [helmReleaseNginxPublic],
       },
