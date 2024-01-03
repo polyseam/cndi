@@ -464,6 +464,39 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const webIdentityPolicyDocument = new CDKTFProviderAWS
+      .dataAwsIamPolicyDocument
+      .DataAwsIamPolicyDocument(
+      this,
+      "cndi_aws_iam_policy_document_web_identity",
+      {
+        statement: [
+          {
+            effect: "Allow",
+            principals: [
+              {
+                identifiers: [
+                  iamOpenIdConnectProvider.arn,
+                ],
+                type: "Federated",
+              },
+            ],
+            actions: ["sts:AssumeRoleWithWebIdentity"],
+            condition: [{
+              test: "StringEquals",
+              values: [
+                "system:serviceaccount:kube-system:efs-csi-controller-sa",
+                "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+              ],
+              variable:
+                Fn.replace(iamOpenIdConnectProvider.url, "https://", "") +
+                ":sub",
+            }],
+          },
+        ],
+      },
+    );
+
     const webIdentityRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
       "cndi_aws_iam_role_web_identity_policy",
@@ -471,40 +504,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         namePrefix: "WEBIDROLE",
         description: "IAM role for web identity",
         dependsOn: [iamOpenIdConnectProvider],
-        assumeRolePolicy: JSON.stringify({
-          Version: "2012-10-17",
-          Statement: [
-            {
-              Action: ["sts:AssumeRoleWithWebIdentity"],
-              Condition: {
-                StringEquals: {
-                  "system:serviceaccount:kube-system:efs-csi-controller-sa": `${
-                    Fn.replace(
-                      iamOpenIdConnectProvider.url,
-                      "https://",
-                      "",
-                    )
-                  }:sub`,
-                  "system:serviceaccount:kube-system:ebs-csi-controller-sa": `${
-                    Fn.replace(
-                      iamOpenIdConnectProvider.url,
-                      "https://",
-                      "",
-                    )
-                  }:sub`,
-                },
-              },
-              Effect: "Allow",
-              Principal: {
-                Federated: iamOpenIdConnectProvider.arn,
-              },
-            },
-          ],
-        }),
+        assumeRolePolicy: webIdentityPolicyDocument.json,
       },
     );
 
-    const _webIdentityPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
+    const webIdentityPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
       this,
       "cndi_aws_iam_policy_web_identity",
       {
@@ -512,6 +516,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         policy: getPrettyJSONString({
           Version: "2012-10-17",
           Statement: [
+            // Misc
             {
               Action: [
                 "autoscaling:DescribeAutoScalingGroups",
@@ -520,58 +525,196 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
                 "autoscaling:DescribeTags",
                 "autoscaling:SetDesiredCapacity",
                 "autoscaling:TerminateInstanceInAutoScalingGroup",
-                "ec2:AttachVolume",
-                "ec2:CreateSnapshot",
-                "ec2:CreateTags",
-                "ec2:CreateVolume",
-                "ec2:DeleteSnapshot",
-                "ec2:DeleteTags",
-                "ec2:DeleteVolume",
-                "ec2:DescribeInstances",
-                "ec2:DescribeSnapshots",
-                "ec2:DescribeTags",
-                "ec2:DescribeVolumes",
-                "ec2:DetachVolume",
+              ],
+              Effect: "Allow",
+              Resource: ["*"],
+            },
+            // EFS CSI Driver
+            {
+              "Effect": "Allow",
+              "Action": [
                 "elasticfilesystem:DescribeAccessPoints",
                 "elasticfilesystem:DescribeFileSystems",
                 "elasticfilesystem:DescribeMountTargets",
                 "ec2:DescribeAvailabilityZones",
               ],
-              Effect: "Allow",
-              Resource: ["*"],
+              "Resource": "*",
             },
             {
-              Action: ["elasticfilesystem:CreateAccessPoint"],
-              Condition: {
-                StringLike: {
+              "Effect": "Allow",
+              "Action": [
+                "elasticfilesystem:CreateAccessPoint",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
                   "aws:RequestTag/efs.csi.aws.com/cluster": "true",
                 },
               },
-              Effect: "Allow",
-              Resource: ["*"],
             },
             {
-              Action: ["elasticfilesystem:TagResource"],
-              Condition: {
-                StringLike: {
+              "Effect": "Allow",
+              "Action": [
+                "elasticfilesystem:TagResource",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
                   "aws:ResourceTag/efs.csi.aws.com/cluster": "true",
                 },
               },
-              Effect: "Allow",
-              Resource: ["*"],
             },
             {
-              Action: ["elasticfilesystem:DeleteAccessPoint"],
-              Condition: {
-                StringEquals: {
-                  "aws:RequestTag/efs.csi.aws.com/cluster": "true",
+              "Effect": "Allow",
+              "Action": "elasticfilesystem:DeleteAccessPoint",
+              "Resource": "*",
+              "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/efs.csi.aws.com/cluster": "true",
                 },
               },
-              Effect: "Allow",
-              Resource: ["*"],
+            },
+            // EBS CSI Driver
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:CreateSnapshot",
+                "ec2:AttachVolume",
+                "ec2:DetachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeInstances",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeVolumesModifications",
+              ],
+              "Resource": "*",
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:CreateTags",
+              ],
+              "Resource": [
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:snapshot/*",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "ec2:CreateAction": [
+                    "CreateVolume",
+                    "CreateSnapshot",
+                  ],
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteTags",
+              ],
+              "Resource": [
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:snapshot/*",
+              ],
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:CreateVolume",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "aws:RequestTag/ebs.csi.aws.com/cluster": "true",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:CreateVolume",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "aws:RequestTag/CSIVolumeName": "*",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteVolume",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteVolume",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "ec2:ResourceTag/CSIVolumeName": "*",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteVolume",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "ec2:ResourceTag/kubernetes.io/created-for/pvc/name": "*",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteSnapshot",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "ec2:ResourceTag/CSIVolumeSnapshotName": "*",
+                },
+              },
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DeleteSnapshot",
+              ],
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true",
+                },
+              },
             },
           ],
         }),
+      },
+    );
+
+    const _webIdentityRolePolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_web_identity",
+      {
+        role: webIdentityRole.name,
+        policyArn: webIdentityPolicy.arn,
       },
     );
 
@@ -690,13 +833,33 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const nginxPublicNS = new CDKTFProviderKubernetes.namespace.Namespace(
+      this,
+      "cndi_kubernetes_namespace_ingress_public",
+      {
+        metadata: {
+          name: "ingress-public",
+        },
+      },
+    );
+
+    const nginxPrivateNS = new CDKTFProviderKubernetes.namespace.Namespace(
+      this,
+      "cndi_kubernetes_namespace_ingress_private",
+      {
+        metadata: {
+          name: "ingress-private",
+        },
+      },
+    );
+
     const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_helm_release_ingress_nginx_controller_private",
       {
         chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [eksCluster, firstNodeGroup!],
+        createNamespace: false,
+        dependsOn: [firstNodeGroup!, nginxPrivateNS],
         name: "ingress-nginx-private",
         namespace: "ingress-private",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -704,50 +867,38 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "service.beta.kubernetes.io/aws-load-balancer-scheme",
-            value: "internal",
+            name: "controller.service.internal.enabled",
+            value: "true",
           },
           {
             name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
+            value: "nlb",
           },
           {
             name: "controller.ingressClassResource.default",
             value: "false",
           },
           {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/private-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
             name: "controller.ingressClassResource.name",
             value: "private",
-          },
-          {
-            name: "controller.electionID",
-            value: "private-controller-leader",
           },
           {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-private/ingress-nginx-private-controller",
           },
           {
-            name: "rbac.create",
-            value: "false",
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme",
+            value: "internal",
+          },
+          {
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/ingress-nginx-private",
+          },
+          {
+            name: "controller.electionID",
+            value: "private-controller-leader",
           },
         ],
         version: "4.8.3",
@@ -760,7 +911,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "ingress-nginx",
         createNamespace: true,
-        dependsOn: [eksCluster],
+        dependsOn: [firstNodeGroup!, nginxPublicNS],
         name: "ingress-nginx-public",
         namespace: "ingress-public",
         repository: "https://kubernetes.github.io/ingress-nginx",
@@ -768,33 +919,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         atomic: true,
         set: [
           {
-            name: "service.beta.kubernetes.io/aws-load-balancer-type",
+            name:
+              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
             value: "nlb",
           },
           {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
             name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/public-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
             value: "true",
           },
           {
@@ -802,16 +932,16 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "public",
           },
           {
-            name: "controller.electionID",
-            value: "public-controller-leader",
-          },
-          {
             name: "controller.extraArgs.tcp-services-configmap",
             value: "ingress-public/ingress-nginx-public-controller",
           },
           {
-            name: "rbac.create",
-            value: "false",
+            name: "controller.ingressClassResource.controllerValue",
+            value: "k8s.io/ingress-nginx-public",
+          },
+          {
+            name: "controller.electionID",
+            value: "public-controller-leader",
           },
         ],
         version: "4.8.3",
@@ -906,7 +1036,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "reloader",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [eksCluster],
+        dependsOn: [firstNodeGroup!],
         timeout: 600,
         atomic: true,
         name: "reloader",
@@ -1029,6 +1159,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         tags: {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
+          "kubernetes.io/service-name":
+            "ingress-public/ingress-nginx-public-controller",
         },
         dependsOn: [helmReleaseNginxPublic],
       },
