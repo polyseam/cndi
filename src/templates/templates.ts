@@ -205,8 +205,10 @@ function getCliffyPrompts(
 ): Array<CliffyPrompt> {
   return promptDefinitions.map((promptDefinition) => {
     const type = PromptTypes[promptDefinition.type];
+    const message = ccolors.prompt(promptDefinition.message); // add color to prompt message
     return {
       ...promptDefinition,
+      message,
       type,
       after: async (
         result: Record<string, CNDITemplatePromptResponsePrimitive>,
