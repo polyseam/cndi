@@ -159,6 +159,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         name: project_name,
         location: this.locals.gcp_region.asString,
+        node_locations:[`${this.locals.gcp_region.asString}-a`,`${this.locals.gcp_region.asString}-b`],
         // https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#example-usage---with-a-separately-managed-node-pool-recommended
         // "We can't create a cluster with no node pool defined, but we want to only use
         // separately managed node pools. So we create the smallest possible default
