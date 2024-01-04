@@ -219,7 +219,7 @@ outputs:
     MSSQL_SA_PASSWORD: "{{ $cndi.get_prompt_response(mssql_sa_password) }}"
 
   readme:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}

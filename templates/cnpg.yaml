@@ -215,7 +215,7 @@ outputs:
     POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
 
   readme:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
