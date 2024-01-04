@@ -1,55 +1,14 @@
-import { path } from "deps";
+import { silky } from "deps";
 
 import { SealedSecretsKeys } from "src/types.ts";
-import { getPathToOpenSSLForPlatform } from "src/utils.ts";
 
-const createSealedSecretsKeys = async (
-  outputDir: string,
-): Promise<SealedSecretsKeys> => {
-  const pathToKeys = path.join(outputDir, ".keys");
-  const pathToOpenSSL = getPathToOpenSSLForPlatform();
-  Deno.mkdir(pathToKeys, { recursive: true });
-  const sealed_secrets_public_key_path = path.join(pathToKeys, "public.pem");
-  const sealed_secrets_private_key_path = path.join(pathToKeys, "private.pem");
+const createSealedSecretsKeys = async (): Promise<SealedSecretsKeys> => {
+  const { publicKey, privateKey } = await silky.generateSelfSignedX509KeyPair(
+    "CN=sealed-secret, O=sealed-secret",
+  );
 
-  let sealed_secrets_private_key;
-  let sealed_secrets_public_key;
-
-  const openSSLGenerateKeyPairCommand = new Deno.Command(pathToOpenSSL, {
-    args: [
-      "req",
-      "-x509",
-      "-days",
-      "365",
-      "-nodes",
-      "-newkey",
-      "rsa:4096",
-      "-keyout",
-      sealed_secrets_private_key_path,
-      "-out",
-      sealed_secrets_public_key_path,
-      "-subj",
-      "/CN=sealed-secret/O=sealed-secret",
-    ],
-    stdout: "piped",
-    stderr: "piped",
-  });
-
-  const openSSLGenerateKeyPairCommandOutput =
-    await openSSLGenerateKeyPairCommand.output();
-
-  if (openSSLGenerateKeyPairCommandOutput.code !== 0) {
-    Deno.stdout.write(openSSLGenerateKeyPairCommandOutput.stderr);
-    Deno.exit(251); // arbitrary exit code
-  } else {
-    sealed_secrets_private_key = await Deno.readTextFile(
-      sealed_secrets_private_key_path,
-    );
-    sealed_secrets_public_key = await Deno.readTextFile(
-      sealed_secrets_public_key_path,
-    );
-    Deno.removeSync(pathToKeys, { recursive: true });
-  }
+  const sealed_secrets_private_key = privateKey;
+  const sealed_secrets_public_key = publicKey;
 
   Deno.env.set("SEALED_SECRETS_PRIVATE_KEY", sealed_secrets_private_key);
   Deno.env.set("SEALED_SECRETS_PUBLIC_KEY", sealed_secrets_public_key);

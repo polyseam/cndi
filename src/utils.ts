@@ -415,16 +415,6 @@ const getCndiInstallPath = (): string => {
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 };
 
-const getPathToOpenSSLForPlatform = () => {
-  const currentPlatform = platform() as "linux" | "darwin" | "win32";
-
-  if (currentPlatform === "win32") {
-    return path.join("/", "Program Files", "Git", "usr", "bin", "openssl.exe");
-  }
-
-  return path.join("/", "usr", "bin", "openssl");
-};
-
 function base10intToHex(decimal: number): string {
   // if the int8 in hex is less than 2 characters, prepend 0
   const hex = decimal.toString(16).padStart(2, "0");
@@ -527,7 +517,6 @@ export {
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,
-  getPathToOpenSSLForPlatform,
   getPathToTerraformBinary,
   getPrettyJSONString,
   getSecretOfLength,
