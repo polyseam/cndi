@@ -1,13 +1,8 @@
-import { path, silky } from "deps";
+import { silky } from "deps";
 
 import { SealedSecretsKeys } from "src/types.ts";
 
-const createSealedSecretsKeys = async (
-  outputDir: string,
-): Promise<SealedSecretsKeys> => {
-  const pathToKeys = path.join(outputDir, ".keys");
-  Deno.mkdir(pathToKeys, { recursive: true });
-
+const createSealedSecretsKeys = async (): Promise<SealedSecretsKeys> => {
   const { publicKey, privateKey } = await silky.generateSelfSignedX509KeyPair(
     "CN=sealed-secret, O=sealed-secret",
   );

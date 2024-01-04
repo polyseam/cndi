@@ -266,7 +266,7 @@ const initCommand = new Command()
     }
 
     // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys(options.output);
+    const sealedSecretsKeys = await createSealedSecretsKeys();
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
