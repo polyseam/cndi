@@ -1226,11 +1226,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         Fn.upper(
           this.locals.aws_region.asString,
         )
-      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}?region=${
-        Fn.upper(
-          this.locals.aws_region.asString,
-        )
-      }`,
+      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
     });
   }
 }
