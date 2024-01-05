@@ -152,14 +152,14 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ],
       },
     );
-  
+
     const gkeCluster = new CDKTFProviderGCP.containerCluster.ContainerCluster(
       this,
       "cndi_google_container_cluster",
       {
         name: project_name,
         location: this.locals.gcp_region.asString,
-        nodeLocations:[this.locals.gcp_zone.asString],
+        nodeLocations: [this.locals.gcp_zone.asString],
         // https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#example-usage---with-a-separately-managed-node-pool-recommended
         // "We can't create a cluster with no node pool defined, but we want to only use
         // separately managed node pools. So we create the smallest possible default
