@@ -34,7 +34,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     super(scope, name, cndi_config);
 
     const project_name = this.locals.cndi_project_name.asString;
-
+    const project_id = this.locals.gcp_project_id.asString;
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
@@ -594,7 +594,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     });
 
     new TerraformOutput(this, "resource_group_url", {
-      value: `https://console.cloud.google.com/welcome?project=${project_name}`,
+      value: `https://console.cloud.google.com/welcome?project=${project_id}`,
     });
   }
 }
