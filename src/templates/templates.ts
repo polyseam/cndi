@@ -11,6 +11,7 @@ import {
 import CNDITemplateComparators from "./comparators.ts";
 import { BuiltInValidators } from "./validators.ts";
 import {
+  characterAtPositionIsQuote,
   getObjectKeysRecursively,
   homedir,
   isValidUrl,
@@ -384,13 +385,21 @@ export function literalizeTemplateWithResponseValues(
           `${fn}::${key};`,
         );
       } else {
-        const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
-        const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+        let start = indexOfOpeningBraces;
+        let end = indexOfClosingBraces + 2;
+
+        if (
+          characterAtPositionIsQuote(literalizedString, start - 1)
+        ) start--;
+
+        if (
+          characterAtPositionIsQuote(literalizedString, end)
+        ) end++;
 
         literalizedString = replaceRange(
           literalizedString,
-          indexOfOpenWrappingQuote,
-          indexOfClosingWrappingQuoteInclusive,
+          start,
+          end,
           valueToSubstitute,
         );
       }
