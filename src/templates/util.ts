@@ -84,7 +84,12 @@ function unwrapQuotes(s: string): string {
   return s;
 }
 
+function characterAtPositionIsQuote(str: string, pos: number): boolean {
+  return str.charAt(pos) === '"' || str.charAt(pos) === "'";
+}
+
 export {
+  characterAtPositionIsQuote,
   getObjectKeysRecursively,
   homedir,
   isValidUrl,
