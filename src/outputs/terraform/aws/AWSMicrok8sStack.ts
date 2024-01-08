@@ -157,6 +157,18 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
+    const sshKeyPair = new CDKTFProviderAWS.keyPair.KeyPair(
+      this,
+      "cndi_aws_key_pair",
+      {
+        publicKey: this.variables.ssh_public_key.stringValue,
+        keyNamePrefix: `cndi-ssh-key_${project_name}_`,
+        tags: {
+          Name: `cndi-aws-key-pair_${project_name}`,
+        },
+      },
+    );
+
     let leaderInstance: CDKTFProviderAWS.instance.Instance;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
@@ -232,6 +244,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           `cndi_aws_instance_${node.name}_${i}`,
           {
             userData,
+            keyName: sshKeyPair.keyName,
             tags: { Name: nodeName },
             dependsOn,
             ami: DEFAULT_EC2_AMI,

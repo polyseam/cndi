@@ -87,6 +87,18 @@ export default async function setTF_VARs() {
     git_token && Deno.env.set("TF_VAR_git_token", git_token);
   }
 
+  const ssh_public_key = Deno.env.get("SSH_PUBLIC_KEY");
+  if (!ssh_public_key) {
+    console.error(
+      setTF_VARsLabel,
+      ccolors.key_name(`"SSH_PUBLIC_KEY"`),
+      ccolors.error("env var is not set"),
+    );
+    await emitExitEvent(106);
+    Deno.exit(106);
+  }
+
+  Deno.env.set("TF_VAR_ssh_public_key", ssh_public_key);
   Deno.env.set("TF_VAR_git_repo", git_repo);
   Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
   Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);

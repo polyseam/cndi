@@ -1,5 +1,5 @@
 import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
-import type { SealedSecretsKeys } from "src/types.ts";
+import type { SealedSecretsKeys, SshKeys } from "src/types.ts";
 
 const { Input, Select } = PromptTypes;
 
@@ -20,6 +20,7 @@ import {
 import { getOwModule } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { createSshKeys } from "src/initialize/sshKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
@@ -34,6 +35,7 @@ const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 function getFinalEnvString(
   templatePartial = "",
   cndiGeneratedValues: {
+    sshKeys: SshKeys;
     sealedSecretsKeys: SealedSecretsKeys;
     terraformStatePassphrase: string;
     argoUIAdminPassword: string;
@@ -53,6 +55,10 @@ function getFinalEnvString(
 # Sealed Secrets Keys
 SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
 SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
+
+# SSH Keys
+SSH_PRIVATE_KEY='${cndiGeneratedValues.sshKeys.ssh_private_key}'
+SSH_PUBLIC_KEY='${cndiGeneratedValues.sshKeys.ssh_public_key}'
 
 # Terraform State Passphrase
 TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
@@ -267,6 +273,7 @@ const initCommand = new Command()
 
     // GENERATE ENV VARS
     const sealedSecretsKeys = await createSealedSecretsKeys();
+    const sshKeys = await createSshKeys();
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
@@ -279,6 +286,7 @@ const initCommand = new Command()
     }
 
     const cndiGeneratedValues = {
+      sshKeys,
       sealedSecretsKeys,
       terraformStatePassphrase,
       argoUIAdminPassword,
