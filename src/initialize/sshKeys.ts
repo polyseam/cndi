@@ -21,7 +21,7 @@ const createSshKeys = async (outputDir: string): Promise<SshKeys> => {
       "-f",
       ssh_private_key_path,
       "-N",
-      '""',
+      "",
       "-q",
     ],
     stdout: "piped",
