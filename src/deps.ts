@@ -12,7 +12,7 @@ export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { load as loadEnv } from "https://deno.land/std@0.205.0/dotenv/mod.ts";
 export { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
-export * as silky from "https://deno.land/x/silky@v1.0.0/mod.ts";
+export * as silky from "https://deno.land/x/silky@v1.1.0/mod.ts";
 
 export const YAML = {
   ...yaml,

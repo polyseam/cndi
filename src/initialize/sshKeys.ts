@@ -1,14 +1,48 @@
-import { silky } from "deps";
-
+import { path } from "deps";
 import { SshKeys } from "src/types.ts";
 
-const createSshKeys = async (): Promise<SshKeys> => {
-  const { publicKey, privateKey } = await silky.generateSelfSignedX509KeyPair(
-    "CN=cndi-ssh, O=cndi-ssh",
-  );
+const createSshKeys = async (outputDir: string): Promise<SshKeys> => {
+  const pathToKeys = path.join(outputDir, ".keys");
+  await Deno.mkdir(pathToKeys, { recursive: true });
+  const ssh_private_key_path = path.join(pathToKeys, "cndi_rsa");
+  const ssh_public_key_path = path.join(pathToKeys, "cndi_rsa.pub");
 
-  const ssh_private_key = privateKey;
-  const ssh_public_key = publicKey;
+  let ssh_private_key;
+  let ssh_public_key;
+
+  const sshKeygenGenerateKeyPairCommand = new Deno.Command("ssh-keygen", {
+    args: [
+      "-t",
+      "rsa",
+      "-b",
+      "4096",
+      "-C",
+      "bot@cndi.dev",
+      "-f",
+      ssh_private_key_path,
+      "-N",
+      '""',
+      "-q",
+    ],
+    stdout: "piped",
+    stderr: "piped",
+  });
+
+  const sshKeygenGenerateKeyPairCommandOutput =
+    await sshKeygenGenerateKeyPairCommand.output();
+
+  if (sshKeygenGenerateKeyPairCommandOutput.code !== 0) {
+    Deno.stdout.write(sshKeygenGenerateKeyPairCommandOutput.stderr);
+    Deno.exit(251); // arbitrary exit code
+  } else {
+    ssh_private_key = await Deno.readTextFile(
+      ssh_private_key_path,
+    );
+    ssh_public_key = await Deno.readTextFile(
+      ssh_public_key_path,
+    );
+    Deno.removeSync(pathToKeys, { recursive: true });
+  }
 
   Deno.env.set("SSH_PRIVATE_KEY", ssh_private_key);
   Deno.env.set("SSH_PUBLIC_KEY", ssh_public_key);

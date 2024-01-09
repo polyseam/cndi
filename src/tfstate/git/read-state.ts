@@ -27,7 +27,7 @@ export default async function pullStateForRun({
     Deno.exit(1001);
   }
 
-  await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
+  await git.raw("config", "user.email", "bot@cndi.dev"); // this is needed for git to work
   await git.raw("config", "user.name", Deno.env.get("GIT_USERNAME") || "cndi");
 
   await git.fetch();

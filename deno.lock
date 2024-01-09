@@ -939,6 +939,7 @@
     "https://deno.land/x/kia@0.4.1/spinners.ts": "26b63f964c745d6cc46e547d98352a4f64ae6d28400d35d9b77be7a5141db860",
     "https://deno.land/x/kia@0.4.1/util.ts": "b7ac0962b5a39f666bad41c8b93efe1ea599fbac05ea9f65c0409926e8092618",
     "https://deno.land/x/silky@v1.0.0/mod.ts": "6ef1d18688066687290430f84a422894cd75acc5bd690c09da92193e72519b67",
+    "https://deno.land/x/silky@v1.1.0/mod.ts": "be4b11ed1cc7a9bfe1f29f2888d8e30dc46ed50254ddc8368ecf21e4b07e0736",
     "https://deno.land/x/spinners@v1.1.2/mod.ts": "ed5b3562d4ea6c6887bc7e9844612b08a3bc3a3678ca77cc7dfdf461c362751e",
     "https://deno.land/x/spinners@v1.1.2/spinner-types.ts": "c67e6962a0c738aa57b4d3ad9fe06c8c0131f93360acbf95456f2ba200fd8826",
     "https://deno.land/x/spinners@v1.1.2/terminal-spinner.ts": "1cf0c38a423781734e2e538323c1992027830d741e90f0b81f532e5bc993d035",
