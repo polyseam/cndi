@@ -341,9 +341,12 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
                 resourceGroupName: this.rg.name,
                 size: machine_type,
                 adminUsername: "ubuntu",
-                adminPassword: "Password123",
+                adminSshKey: [{
+                  publicKey: this.variables.ssh_public_key.stringValue,
+                  username: "ubuntu",
+                }],
                 sourceImageReference,
-                disablePasswordAuthentication: false,
+                disablePasswordAuthentication: true,
                 tags,
                 osDisk,
                 zone,
@@ -366,6 +369,13 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     new TerraformOutput(this, "resource_group_url", {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
+    });
+
+    // @ts-ignore no-use-before-defined
+    const sshAddr = leaderInstance.publicIpAddress;
+
+    new TerraformOutput(this, "update_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }
 }
