@@ -5,7 +5,7 @@ const DEFAULT_MICROK8S_VERSION = "1.28";
 const ARGOCD_VERSION = "2.7.12";
 const RELOADER_VERSION = "1.0.52";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
-const EXTERNAL_DNS_VERSION = "0.14.0";
+const EXTERNAL_DNS_VERSION = "6.29.1";
 
 const POLYSEAM_TEMPLATE_DIRECTORY =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";

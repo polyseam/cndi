@@ -27,9 +27,39 @@ const getApplicationManifest = (
   const domain_filters =
     cndi_config?.infrastructure?.cndi?.external_dns?.domain_filters || [];
 
-  const externalDNSProvider =
+  const externalDNSProvider = // aws
     cndi_config?.infrastructure?.cndi?.external_dns?.provider ||
     getDefaultExternalDNSProviderForCNDIProvider(cndiProvider);
+
+  const externalDNSCannotUseEnvVars = [
+    "alibaba",
+    "azure",
+    "azure-private-dns",
+    "transip",
+    "oci",
+  ];
+
+  type ExternalDNSValues = {
+    provider: ExternalDNSProvider;
+    domainFilters: Array<string>;
+    [key: string]: unknown;
+    extraEnvVarsSecret?: string;
+  };
+
+  const values: ExternalDNSValues = {
+    ...cndi_config?.infrastructure?.cndi?.external_dns?.values,
+    provider: externalDNSProvider,
+    domainFilters: domain_filters,
+  };
+
+  if (externalDNSCannotUseEnvVars.includes(externalDNSProvider)) {
+    // this dns provider uses another method for authentication, probably volume mounts
+    values[externalDNSProvider] = {
+      secretName: "external-dns",
+    };
+  } else {
+    values.extraEnvVarsSecret = "external-dns";
+  }
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -38,7 +68,7 @@ const getApplicationManifest = (
       name: releaseName,
       namespace: DEFAULT_NAMESPACE,
       finalizers: DEFAULT_FINALIZERS,
-      labels: {},
+      labels: { name: releaseName },
     },
     spec: {
       project: DEFAULT_PROJECT,
@@ -47,11 +77,7 @@ const getApplicationManifest = (
         chart: "external-dns",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values: {
-            ...cndi_config?.infrastructure?.cndi?.external_dns?.values,
-            provider: externalDNSProvider,
-            domainFilters: domain_filters,
-          },
+          values,
         },
         targetRevision: EXTERNAL_DNS_VERSION,
       },
