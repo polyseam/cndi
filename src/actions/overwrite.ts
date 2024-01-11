@@ -259,6 +259,25 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
     );
   }
 
+  const skipExternalDNS =
+    config?.infrastructure?.cndi?.external_dns?.enabled === false;
+
+  if (!skipExternalDNS) {
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "applications",
+        "external-dns.application.yaml",
+      ),
+      getExternalDNSManifest(config),
+    );
+    console.log(
+      ccolors.success("staged application manifest:"),
+      ccolors.key_name("external-dns.application.yaml"),
+    );
+  }
+
   const { applications } = config;
 
   // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
@@ -275,24 +294,6 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log(
       ccolors.success("staged application manifest:"),
       ccolors.key_name(filename),
-    );
-  }
-
-  const skipExternalDNS =
-    config?.infrastructure?.cndi?.external_dns?.enabled === false;
-
-  if (!skipExternalDNS) {
-    await stageFile(
-      path.join(
-        "cndi",
-        "cluster_manifests",
-        "external-dns.application.yaml",
-      ),
-      getExternalDNSManifest(config),
-    );
-    console.log(
-      ccolors.success("staged application manifest:"),
-      ccolors.key_name("external-dns.application.yaml"),
     );
   }
 
