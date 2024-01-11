@@ -209,14 +209,41 @@ interface CNDIPort {
   private?: boolean;
 }
 
+// https://github.com/bitnami/charts/blob/16f3174da9441d2bf6c2355ab0afe94d4a7a9e48/bitnami/external-dns/values.yaml#L112
+export type ExternalDNSProvider =
+  | "akamai"
+  | "alibabacloud"
+  | "aws"
+  | "azure"
+  | "azure-private-dns"
+  | "cloudflare"
+  | "coredns"
+  | "designate"
+  | "digitalocean"
+  | "google"
+  | "hetzner"
+  | "infoblox"
+  | "linode"
+  | "rfc2136"
+  | "transip"
+  | "oci";
+
+export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
   distribution: "microk8s" | "eks" | "gke" | "aks";
-  provider: "aws" | "azure" | "gcp" | "dev";
+  provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      external_dns: {
+        enabled?: boolean; // default: true
+        provider: ExternalDNSProvider;
+        domain_filters: Array<string>;
+        values: Record<string, unknown>;
+      };
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
       cert_manager?: {
