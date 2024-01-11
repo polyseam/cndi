@@ -351,16 +351,18 @@ async function persistStagedFiles(targetDirectory: string) {
   const stagingDirectory = await getStagingDir();
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
-      const fileContents = await Deno.readTextFile(entry.path);
       const destinationAbsPath = entry.path.replace(
         stagingDirectory,
         targetDirectory,
       );
 
-      await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
-      await Deno.writeTextFile(destinationAbsPath, fileContents, {
-        create: true,
-      });
+      try {
+        await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
+      } catch {
+        // directory exists already
+      }
+
+      await Deno.copyFile(entry.path, destinationAbsPath);
     }
   }
   await Deno.remove(stagingDirectory, { recursive: true });
