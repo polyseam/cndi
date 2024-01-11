@@ -1,8 +1,11 @@
 import { path } from "deps";
+import { getStagingDir } from "src/utils.ts";
 
-const createSshKeys = async (outputDir: string): Promise<string> => {
-  const ssh_private_key_path = path.join(outputDir, "cndi_rsa");
-  const ssh_public_key_path = path.join(outputDir, "cndi_rsa.pub");
+const createSshKeys = async (): Promise<string> => {
+  const stagingDir = await getStagingDir();
+
+  const ssh_private_key_path = path.join(stagingDir, "cndi_rsa");
+  const ssh_public_key_path = path.join(stagingDir, "cndi_rsa.pub");
 
   let ssh_public_key;
 

@@ -333,6 +333,13 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         Fn.upper(this.locals.aws_region.asString)
       }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
     });
+
+    // @ts-ignore no-use-before-defined
+    const sshAddr = leaderInstance?.publicDns!;
+
+    new TerraformOutput(this, "update_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
+    });
   }
 }
 
