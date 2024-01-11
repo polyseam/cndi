@@ -272,7 +272,7 @@ const initCommand = new Command()
 
     // GENERATE ENV VARS
     const sealedSecretsKeys = await createSealedSecretsKeys();
-    const sshPublicKey = await createSshKeys(options.output);
+    const sshPublicKey = await createSshKeys();
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 

@@ -6,6 +6,7 @@ export default function getGitignore(): string {
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/
+cndi_rsa
 # v2
 cndi/terraform/stacks/cndi_stack/.terraform*
 cndi/terraform/stacks/cndi_stack/*.tfstate*
