@@ -341,7 +341,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     const sshAddr = // @ts-ignore no-use-before-defined
       leaderInstance.networkInterface.get(0).accessConfig.get(0).natIp;
 
-    new TerraformOutput(this, "update_kubeconfig_command", {
+    new TerraformOutput(this, "get_kubeconfig_command", {
       value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }

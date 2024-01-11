@@ -337,7 +337,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     // @ts-ignore no-use-before-defined
     const sshAddr = leaderInstance?.publicDns!;
 
-    new TerraformOutput(this, "update_kubeconfig_command", {
+    new TerraformOutput(this, "get_kubeconfig_command", {
       value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }

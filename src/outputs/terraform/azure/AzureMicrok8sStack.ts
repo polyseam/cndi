@@ -374,7 +374,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     // @ts-ignore no-use-before-defined
     const sshAddr = leaderInstance.publicIpAddress;
 
-    new TerraformOutput(this, "update_kubeconfig_command", {
+    new TerraformOutput(this, "get_kubeconfig_command", {
       value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }
