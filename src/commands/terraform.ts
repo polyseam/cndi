@@ -39,6 +39,11 @@ const terraformCommand = new Command()
     { required: true },
   )
   .env(
+    "SSH_PUBLIC_KEY=<value:string>",
+    "Public key used to connect to your nodes.",
+    { required: true },
+  )
+  .env(
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
     { required: true },

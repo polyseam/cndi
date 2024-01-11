@@ -2,7 +2,7 @@
 export { homedir, platform } from "node:os";
 export { copy } from "https://deno.land/std@0.201.0/streams/copy.ts";
 export { SEP } from "https://deno.land/std@0.201.0/path/mod.ts";
-export * as path from "https://deno.land/std@0.201.0/path/mod.ts";
+export * as path from "https://deno.land/std@0.211.0/path/mod.ts";
 import * as yaml from "https://deno.land/std@0.196.0/yaml/mod.ts";
 export { deepMerge } from "https://deno.land/std@0.201.0/collections/deep_merge.ts";
 export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
@@ -12,7 +12,7 @@ export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { load as loadEnv } from "https://deno.land/std@0.205.0/dotenv/mod.ts";
 export { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
-export * as silky from "https://deno.land/x/silky@v1.0.0/mod.ts";
+export * as silky from "https://deno.land/x/silky@v1.1.0/mod.ts";
 
 export const YAML = {
   ...yaml,

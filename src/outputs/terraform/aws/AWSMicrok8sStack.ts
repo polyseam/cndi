@@ -157,6 +157,18 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
+    const sshKeyPair = new CDKTFProviderAWS.keyPair.KeyPair(
+      this,
+      "cndi_aws_key_pair",
+      {
+        publicKey: this.variables.ssh_public_key.stringValue,
+        keyNamePrefix: `cndi-ssh-key_${project_name}_`,
+        tags: {
+          Name: `cndi-aws-key-pair_${project_name}`,
+        },
+      },
+    );
+
     let leaderInstance: CDKTFProviderAWS.instance.Instance;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
@@ -232,6 +244,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           `cndi_aws_instance_${node.name}_${i}`,
           {
             userData,
+            keyName: sshKeyPair.keyName,
             tags: { Name: nodeName },
             dependsOn,
             ami: DEFAULT_EC2_AMI,
@@ -319,6 +332,13 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       value: `https://${
         Fn.upper(this.locals.aws_region.asString)
       }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
+    });
+
+    // @ts-ignore no-use-before-defined
+    const sshAddr = leaderInstance?.publicDns!;
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }
 }

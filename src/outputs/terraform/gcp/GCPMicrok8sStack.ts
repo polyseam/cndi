@@ -257,6 +257,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             networkInterface: [networkInterface],
             metadata: {
               "user-data": userData,
+              "ssh-keys": `ubuntu:${this.variables.ssh_public_key.stringValue}`,
             },
           },
         );
@@ -335,6 +336,13 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     new TerraformOutput(this, "resource_group_url", {
       value:
         `https://console.cloud.google.com/welcome?project=${this.locals.gcp_project_id.asString}`,
+    });
+
+    const sshAddr = // @ts-ignore no-use-before-defined
+      leaderInstance.networkInterface.get(0).accessConfig.get(0).natIp;
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }
 }
