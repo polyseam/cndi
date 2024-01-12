@@ -5,7 +5,6 @@ import { EXTERNAL_DNS_VERSION } from "consts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
-const DEFAULT_NAMESPACE = "default";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
@@ -66,7 +65,6 @@ const getApplicationManifest = (
     kind: "Application",
     metadata: {
       name: releaseName,
-      namespace: DEFAULT_NAMESPACE,
       finalizers: DEFAULT_FINALIZERS,
       labels: { name: releaseName },
     },
