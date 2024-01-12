@@ -77,7 +77,7 @@ const getApplicationManifest = (
         chart: "external-dns",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values,
+          values: getYAMLString(values),
         },
         targetRevision: EXTERNAL_DNS_VERSION,
       },
