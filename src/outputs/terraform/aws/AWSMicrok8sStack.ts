@@ -231,7 +231,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       }
 
       const count = node?.count || 1; // count will never be zero, defaults to 1
-      const dependsOn = role === "leader" ? [igw] : [leaderInstance!];
+      const dependsOn = role === "leader" ? [igw, leaderInstance!] : [igw];
       const volumeSize = node?.volume_size ||
         node?.disk_size ||
         node?.disk_size_gb ||
