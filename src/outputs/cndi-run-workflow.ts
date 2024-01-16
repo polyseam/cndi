@@ -1,5 +1,5 @@
 import { YAML } from "deps";
-import { deno_version } from "../../deno.json" assert { type: "json" };
+import { deno_version } from "../../deno.json" with { type: "json" };
 
 const cndiWorkflowObj = {
   name: "cndi",
