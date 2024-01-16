@@ -938,13 +938,19 @@ export async function useTemplate(
         const templateResponse = await fetch(
           `${POLYSEAM_TEMPLATE_DIRECTORY}${templateIdentifier}.yaml`,
         );
-        if (!templateResponse.ok) throw new Error("Template not found");
-        templateContents = await templateResponse.text();
+
+        if (!templateResponse.ok) {
+          throw new Error(
+            `${templateResponse.status} - ${templateResponse.statusText}`,
+          );
+        } else {
+          templateContents = await templateResponse.text();
+        }
       } catch (fetchError) {
         console.log(
           templatesLabel,
           ccolors.error("CNDI Template not found for identifier:"),
-          ccolors.user_input(`"${templateIdentifier}"`),
+          ccolors.user_input(`"${templateIdentifier}"\n`),
         );
         console.log(ccolors.caught(fetchError, 1200));
         await emitExitEvent(1200);
