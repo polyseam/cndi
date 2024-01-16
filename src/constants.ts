@@ -43,7 +43,7 @@ const DEFAULT_OPEN_PORTS = [
   },
 ] as const;
 
-export { default as error_code_reference } from "../docs/error-code-reference.json" assert { type: "json" };
+export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 
 export {
   ARGOCD_VERSION,

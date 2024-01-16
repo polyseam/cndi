@@ -1,4 +1,4 @@
-import deno_json from "../../deno.json" assert { type: "json" };
+import deno_json from "../../deno.json" with { type: "json" };
 import { sha256Digest } from "src/utils.ts";
 
 interface TelemetryEvent {
