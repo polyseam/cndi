@@ -260,7 +260,7 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
   }
 
   const skipExternalDNS =
-    config?.infrastructure?.cndi?.external_dns?.enabled === false;
+    config?.infrastructure?.cndi?.external_dns?.enabled === false || isMicrok8sCluster;
 
   if (!skipExternalDNS) {
     await stageFile(
