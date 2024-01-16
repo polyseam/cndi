@@ -19,6 +19,8 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
+import { emitExitEvent } from "src/utils.ts";
+
 import { POLYSEAM_TEMPLATE_DIRECTORY } from "consts";
 
 interface SealedSecretsKeys {
@@ -83,6 +85,8 @@ type Block = {
   content_path?: string;
   content_url?: string;
 };
+
+const templatesLabel = ccolors.faded("\nsrc/templates/templates.ts:");
 
 // better to have a defined list of builtin templates than walk /templates directory
 export function getKnownTemplates() {
@@ -929,8 +933,23 @@ export async function useTemplate(
       const templateResponse = await fetch(tpl.url);
       templateContents = await templateResponse.text();
     } else {
-      // user did nothing sensible
-      throw new Error(`template '${templateIdentifier}' not found`);
+      // maybe the template is in the directory, but not officially listed
+      try {
+        const templateResponse = await fetch(
+          `${POLYSEAM_TEMPLATE_DIRECTORY}${templateIdentifier}.yaml`,
+        );
+        if (!templateResponse.ok) throw new Error("Template not found");
+        templateContents = await templateResponse.text();
+      } catch (fetchError) {
+        console.log(
+          templatesLabel,
+          ccolors.error("CNDI Template not found for identifier:"),
+          ccolors.user_input(`"${templateIdentifier}"`),
+        );
+        console.log(ccolors.caught(fetchError, 1200));
+        await emitExitEvent(1200);
+        Deno.exit(1200);
+      }
     }
   }
 
