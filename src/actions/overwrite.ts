@@ -260,23 +260,39 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
   }
 
   const skipExternalDNS =
-    config?.infrastructure?.cndi?.external_dns?.enabled === false ||
-    isMicrok8sCluster;
+    config?.infrastructure?.cndi?.external_dns?.enabled === false;
 
   if (!skipExternalDNS) {
-    await stageFile(
-      path.join(
-        "cndi",
-        "cluster_manifests",
-        "applications",
-        "external-dns.application.yaml",
-      ),
-      getExternalDNSManifest(config),
-    );
-    console.log(
-      ccolors.success("staged application manifest:"),
-      ccolors.key_name("external-dns.application.yaml"),
-    );
+    if (isMicrok8sCluster) {
+      // microk8s does not support external-dns
+      // if the user has configured external-dns, warn them that it will not work
+      if (Object.keys(config?.infrastructure?.cndi?.external_dns).length) {
+        console.log(
+          ccolors.key_name("external_dns"),
+          ccolors.warn("is not yet available for microk8s clusters"),
+        );
+        console.log(
+          "if you think you might be able to help, please open an issue!",
+        );
+        console.log(
+          ccolors.key_name("https://github.com/polyseam/cndi/issues/new"),
+        );
+      }
+    } else {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "external-dns.application.yaml",
+        ),
+        getExternalDNSManifest(config),
+      );
+      console.log(
+        ccolors.success("staged application manifest:"),
+        ccolors.key_name("external-dns.application.yaml"),
+      );
+    }
   }
 
   const { applications } = config;
