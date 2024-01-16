@@ -1,5 +1,5 @@
 import { YAML } from "deps";
-import { deno_version } from "../../deno.json" with { type: "json" };
+import deno_json from "../../deno.json" with { type: "json" };
 
 const cndiWorkflowObj = {
   name: "cndi",
@@ -143,7 +143,7 @@ const getWorkflowYaml = (sourceRef?: string) => {
       name: "setup deno",
       uses: "denoland/setup-deno@v1",
       with: {
-        "deno-version": `v${deno_version}`,
+        "deno-version": `v${deno_json.deno_version}`,
       },
     },
     {
