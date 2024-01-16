@@ -1,7 +1,7 @@
 const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.21.0"; // used to install binary on client
 const SEALED_SECRETS_VERSION = "2.13.3"; // used to install controller on cluster
-const DEFAULT_MICROK8S_VERSION = "1.28";
+const DEFAULT_K8S_VERSION = "1.28";
 const ARGOCD_VERSION = "2.7.12";
 const RELOADER_VERSION = "1.0.52";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
@@ -48,7 +48,7 @@ export { default as error_code_reference } from "../docs/error-code-reference.js
 export {
   ARGOCD_VERSION,
   DEFAULT_INSTANCE_TYPES,
-  DEFAULT_MICROK8S_VERSION,
+  DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
   DEFAULT_OPEN_PORTS,
