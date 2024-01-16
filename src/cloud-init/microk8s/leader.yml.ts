@@ -7,7 +7,7 @@ import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates
 
 import {
   ARGOCD_VERSION,
-  DEFAULT_MICROK8S_VERSION,
+  DEFAULT_K8S_VERSION,
   MICROK8S_INSTALL_RETRY_INTERVAL,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
@@ -83,7 +83,7 @@ const getLeaderCloudInitYaml = (
 ) => {
   const addons = getMicrok8sAddons(config);
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
-    DEFAULT_MICROK8S_VERSION;
+    DEFAULT_K8S_VERSION;
   const microk8sChannel = config.infrastructure.cndi?.microk8s?.channel ||
     "stable";
 

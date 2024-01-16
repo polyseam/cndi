@@ -20,6 +20,7 @@ import {
 
 import {
   DEFAULT_INSTANCE_TYPES,
+  DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
@@ -196,7 +197,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         location: this.locals.arm_region.asString,
         name: `cndi-aks-cluster-${project_name}`,
-        kubernetesVersion: "1.27",
+        kubernetesVersion: DEFAULT_K8S_VERSION,
         resourceGroupName: this.rg.name,
         defaultNodePool: {
           ...defaultNodePool,
@@ -211,6 +212,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           networkPlugin: "azure",
           networkPolicy: "azure",
         },
+        automaticChannelUpgrade: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
         storageProfile: {
           fileDriverEnabled: true,
