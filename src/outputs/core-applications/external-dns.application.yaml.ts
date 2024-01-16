@@ -17,9 +17,9 @@ const getDefaultExternalDNSProviderForCNDIProvider = (
   return cndiProvider;
 };
 
-const getApplicationManifest = (
+export default function getExternalDNSApplicationManifest(
   cndi_config: CNDIConfig,
-): string => {
+): string {
   const releaseName = "external-dns";
   const cndiProvider = cndi_config.provider;
 
@@ -108,6 +108,4 @@ const getApplicationManifest = (
   };
 
   return getYAMLString(manifest);
-};
-
-export default getApplicationManifest;
+}
