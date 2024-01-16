@@ -1,6 +1,7 @@
 import { CNDIConfig, TFBlocks } from "src/types.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
+  DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
@@ -400,7 +401,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         name: project_name!,
         roleArn: computeRole.arn,
-        version: "1.25",
+        version: DEFAULT_K8S_VERSION,
         vpcConfig: {
           endpointPrivateAccess: true,
           endpointPublicAccess: true,
