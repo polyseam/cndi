@@ -1,4 +1,5 @@
 import { YAML } from "deps";
+import { deno_version } from "../../deno.json" assert { type: "json" };
 
 const cndiWorkflowObj = {
   name: "cndi",
@@ -141,6 +142,9 @@ const getWorkflowYaml = (sourceRef?: string) => {
     {
       name: "setup deno",
       uses: "denoland/setup-deno@v1",
+      with: {
+        "deno-version": `v${deno_version}`,
+      },
     },
     {
       name: "build cndi",
@@ -196,7 +200,9 @@ const getWorkflowYaml = (sourceRef?: string) => {
       },
     },
   ];
-  cndiWorkflowObj.jobs["cndi-run"].steps = steps;
-  return YAML.stringify(cndiWorkflowObj);
+  return YAML.stringify({
+    ...cndiWorkflowObj,
+    jobs: { "cndi-run": { steps } },
+  });
 };
 export default getWorkflowYaml;
