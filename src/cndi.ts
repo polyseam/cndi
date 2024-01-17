@@ -20,6 +20,7 @@ import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
 import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
+import tfOutputCommand from "src/commands/tf-output.ts";
 
 import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
@@ -88,6 +89,7 @@ export default async function cndi() {
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)
     .command("terraform", terraformCommand)
+    .command("tf-output", tfOutputCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
     .command("install", installCommand)
