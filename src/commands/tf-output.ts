@@ -59,7 +59,7 @@ const tfOutputCommand = new Command()
   )
   .action(async (options) => {
     const cmd = "cndi tf-output";
-    console.log(`${cmd}\n`);
+    // console.log(`${cmd}\n`);
 
     const pathToTerraformResources = path.join(
       options.path,
@@ -73,7 +73,7 @@ const tfOutputCommand = new Command()
 
       await pullStateForRun({ pathToTerraformResources, cmd });
 
-      console.log(ccolors.faded("\n-- terraform init --\n"));
+      // console.log(ccolors.faded("\n-- terraform init --\n"));
 
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [`-chdir=${pathToTerraformResources}`, "init"],
@@ -83,15 +83,15 @@ const tfOutputCommand = new Command()
 
       const terraformInitCommandOutput = await terraformInitCommand.output();
 
-      await Deno.stdout.write(terraformInitCommandOutput.stdout);
-      await Deno.stderr.write(terraformInitCommandOutput.stderr);
+      // await Deno.stdout.write(terraformInitCommandOutput.stdout);
+      // await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
       if (terraformInitCommandOutput.code !== 0) {
         console.log(runLabel, ccolors.error("terraform init failed"));
         Deno.exit(terraformInitCommandOutput.code);
       }
 
-      console.log(ccolors.faded("\n-- terraform output --\n"));
+      // console.log(ccolors.faded("\n-- terraform output --\n"));
 
       await pushStateFromRun({ pathToTerraformResources, cmd });
 
