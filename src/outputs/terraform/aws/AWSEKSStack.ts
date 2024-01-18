@@ -1215,19 +1215,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     );
 
     new TerraformOutput(this, "public_host", {
-      value: Fn.replace(
-        cndiNlb.dnsName,
-        this.locals.aws_region.asString,
-        Fn.upper(this.locals.aws_region.asString),
-      ),
+      value: cndiNlb.dnsName,
     });
 
     new TerraformOutput(this, "resource_group_url", {
-      value: `https://${
-        Fn.upper(
-          this.locals.aws_region.asString,
-        )
-      }.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
+      value:
+        `https://${this.locals.aws_region.asString}.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
     });
   }
 }

@@ -29,6 +29,8 @@ import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-p
 import getEKSIngressServiceManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-service-private.ts";
 import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
 
+import getExternalDNSManifest from "../outputs/core-applications/external-dns.application.yaml.ts";
+
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import {
@@ -254,6 +256,25 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
     console.log(
       ccolors.success("staged manifest:"),
       ccolors.key_name(manifestFilename),
+    );
+  }
+
+  const skipExternalDNS =
+    config?.infrastructure?.cndi?.external_dns?.enabled === false;
+
+  if (!skipExternalDNS) {
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "applications",
+        "external-dns.application.yaml",
+      ),
+      getExternalDNSManifest(config),
+    );
+    console.log(
+      ccolors.success("staged application manifest:"),
+      ccolors.key_name("external-dns.application.yaml"),
     );
   }
 
