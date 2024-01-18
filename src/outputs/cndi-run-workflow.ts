@@ -60,6 +60,8 @@ const cndiWorkflowObj = {
         {
           name: "cndi run",
           env: {
+            ARM_REGION: "${{ vars.ARM_REGION }}",
+            AWS_REGION: "${{ vars.AWS_REGION }}",
             GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
             GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
             GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
@@ -73,9 +75,7 @@ const cndiWorkflowObj = {
             ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
             AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
             AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-            AWS_REGION: "${{ secrets.AWS_REGION }}",
             GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
-            ARM_REGION: "${{ secrets.ARM_REGION }}",
             ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
             ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
             ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
@@ -166,6 +166,8 @@ const getWorkflowYaml = (sourceRef?: string) => {
       name: "cndi run",
       run: "$HOME/.cndi/bin/cndi run",
       env: {
+        ARM_REGION: "${{ vars.ARM_REGION }}",
+        AWS_REGION: "${{ vars.AWS_REGION }}",
         GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
         GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
         GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
@@ -176,9 +178,7 @@ const getWorkflowYaml = (sourceRef?: string) => {
         ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
         AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
         AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-        AWS_REGION: "${{ secrets.AWS_REGION }}",
         GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
-        ARM_REGION: "${{ secrets.ARM_REGION }}",
         ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
         ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
         ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
