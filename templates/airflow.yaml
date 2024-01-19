@@ -248,7 +248,7 @@ outputs:
         chart: cloudnative-pg
 
       airflow:
-        targetRevision: 1.7.0
+        targetRevision: 1.11.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
