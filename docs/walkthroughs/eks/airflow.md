@@ -70,65 +70,69 @@ cndi init --interactive
 You will get an interactive prompt where you'll name your project, then one to
 specify the CNDI template you want.
 
-For this project select the `eks/airflow` Template.
+For this project select the `airflow` Template.
 
 ```shell
 ? Pick a template
-   aws/basic
-   gce/basic
-   avm/basic
- ❯ eks/airflow
-   avm/airflow
-   gce/airflow
+   cnpg
+   neo4j
+   basic
+ ❯ airflow
 ```
 
-Below is the list of all of the interactive prompt values that should be
-supplied for this project:
+## CNDI Project Configuration
 
-- **Cndi Project Name**: _name of project_
-- **Template**: _list of templates to choose from_
+Please enter the required information for your CNDI project setup.
 
----
+### Project Setup
 
-- **GitHub Username**: _a user's handle on GitHub._
-- **GitHub Repository URL**: _the url for the GitHub repository that will hold
-  all cluster configuration_
-- **GitHub Personal Access Token**: _the access token CNDI will use to access
-  your repo for cluster creation and synchronization_
+- **Cndi Project Name***: _Enter the name of your CNDI project (e.g.,
+  "my-cndi-cluster")._
+- **Template**: _Choose a template from the following list: [list templates
+  here]._
 
----
+### GitHub Configuration
 
-- **AWS Access key ID**: _access keys are long-term credentials for an IAM user_
-- **AWS Secret Access key**: _access keys are long-term credentials for an IAM
-  user_
-- **AWS Region**: _region where the infastructure is being created_
+- **GitHub Username***: _Enter your GitHub username (e.g., "johndoe")._
+- **GitHub Repository URL***: _Enter the URL for the GitHub repository that will
+  hold all cluster configurations (e.g.,
+  "https://github.com/username/repository")._
+- **GitHub Personal Access Token***: _Enter the access token for CNDI to access
+  your GitHub repository._
 
----
+### AWS Configuration
 
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
-  synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to
-  synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
-  will be stored_
+- **AWS Region***: _Select the AWS region where the infrastructure will be
+  created (e.g., "us-east-1")._
+- **AWS Access key ID***: _Enter your AWS access key ID._
+- **AWS Secret Access key***: _Enter your AWS secret access key._
 
----
+### Airflow DAG Storage
 
-- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
-  be hosted_
-- **Domain name you want Airflow to be accessible on**: _domain where Airflow
-  will be hosted_
+- **Git Username for Airflow DAG Storage***: _Enter the GitHub username for
+  synchronizing Airflow DAGs._
+- **Git Password for Airflow DAG Storage***: _Enter the access token or password
+  for DAG synchronization._
+- **Git Repo for Airflow DAG Storage***: _Enter the URL for the repository where
+  your Airflow DAGs will be stored._
 
----
+### Domain Configuration
 
-- **Email address you want to use for lets encrypt:** _an email for lets encrypt
-  to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to
-  use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to
-  use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:**
-  _name of the postgresql database you want to use for airflow cnpg database_
+- **Domain name for ArgoCD***: _Enter the domain name where ArgoCD will be
+  accessible (e.g., "argocd.example.com")._
+- **Domain name for Airflow***: _Enter the domain name where Airflow will be
+  accessible (e.g., "airflow.example.com")._
+
+### Certificate and Database Configuration
+
+- **Email for Let's Encrypt***: _Enter the email address for Let's Encrypt
+  certificate notifications._
+- **PostgreSQL Username for Airflow***: _Enter the username for the Airflow
+  database._
+- **PostgreSQL Password for Airflow***: _Enter the password for the Airflow
+  database._
+- **PostgreSQL Database Name for Airflow***: _Enter the name of the PostgreSQL
+  database for Airflow._
 
 ![AWS instances dashboard](/docs/walkthroughs/eks/img/cndi-init-interactive.png)
 
