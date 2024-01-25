@@ -690,6 +690,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value:
+        `az aks get-credentials --resource-group rg-${project_name} --name cndi-aks-cluster-${project_name} --overwrite-existing`,
+    });
   }
 }
 
