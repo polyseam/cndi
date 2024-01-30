@@ -1,6 +1,6 @@
 {
   "deno.enable": true,
-  "deno.maxTsServerMemory": 3072,
+  "deno.maxTsServerMemory": 8000,
   "editor.defaultFormatter": "denoland.vscode-deno",
   "deno.inlayHints.parameterNames.enabled": "none",
   "deno.inlayHints.parameterTypes.enabled": false,
@@ -25,9 +25,7 @@
       "src/templates/*/*.yaml"
     ]
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
+  "[typescript]": { "editor.defaultFormatter": "denoland.vscode-deno" },
   "[json]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   }
