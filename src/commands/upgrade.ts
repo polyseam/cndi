@@ -2,8 +2,10 @@ import {
   ccolors,
   GithubProvider,
   platform,
+  promisify,
   Spinners,
   TerminalSpinner,
+  unzip,
   UpgradeCommand,
   UpgradeOptions,
 } from "deps";
@@ -39,7 +41,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
 
     spinner.start();
     const binaryUrl = new URL(
-      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getFileSuffixForPlatform()}`,
+      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getFileSuffixForPlatform()}.zip`,
     );
     try {
       const response = await fetch(binaryUrl);
@@ -50,8 +52,13 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           write: true,
           mode: 0o777,
         });
-        await response.body.pipeTo(cndiFile.writable, { preventClose: true });
+
+        const uz = promisify(unzip);
+
+        const unzipped = await uz(await response.arrayBuffer());
+        cndiFile.write(unzipped);
         cndiFile.close();
+
         const isWindows = platform() === "win32";
 
         // take existing cndi binary and put it aside
