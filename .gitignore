@@ -10,12 +10,8 @@ node_modules
 .github/workflows/cndi-run.yaml
 .github/CNDI_GITHUB_README.md
 
-dist/cndi-linux
-dist/cndi-mac
-dist/cndi-win.exe
-dist/cndi.esm.js
-dist/cndi.js
-.keys
+dist/*
+!dist/.preserve
 
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
