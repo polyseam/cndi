@@ -17,19 +17,24 @@ $BinDir = if ($CNDIInstall) {
   "${Home}\.cndi\bin"
 }
 
-$CNDIExe = "$BinDir\cndi.exe"
+$CNDIZip = "$BinDir\cndi.zip"
+$CNDIExe = "$BinDir\deno.exe"
 
 $DownloadUrl = if (!$Version) {
-  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.exe"
+  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.exe.zip"
 } else {
-  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.exe"
+  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.exe.zip"
 }
 
 if (!(Test-Path $BinDir)) {
   New-Item $BinDir -ItemType Directory | Out-Null
 }
 
-curl.exe --fail --location --progress-bar --output $CNDIExe $DownloadUrl
+curl.exe --fail --location --progress-bar --output $CNDIZip $DownloadUrl
+
+tar.exe --extract --file $CNDIZip -C $BinDir
+
+Remove-Item $CNDIZip
 
 $User = [System.EnvironmentVariableTarget]::User
 $Path = [System.Environment]::GetEnvironmentVariable('Path', $User)
@@ -40,3 +45,4 @@ if (!(";${Path};".ToLower() -like "*;${BinDir};*".ToLower())) {
 
 Write-Output "CNDI was installed successfully to ${CNDIExe}"
 Write-Output "Run 'cndi --help' to get started"
+Write-Output "Stuck? Join our Discord https://cndi.run/di?utm_id=5095"
