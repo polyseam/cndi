@@ -3,8 +3,10 @@
 set -e
 
 main() {
-    cndi_install="${CNDI_INSTALL:-$HOME/.cndi/bin}"
+    cndi_install="${CNDI_INSTALL:-$HOME/.cndi}"
+    bin_dir="$cndi_install/bin"
     bin_suffix=""
+
     if [ "$OS" = "Windows_NT" ]; then # WSL or Git Bash or Cygwin
         bin_suffix=".exe"
         target="win.exe"
@@ -23,8 +25,13 @@ main() {
                 target="linux"
         esac
     fi
-    
-    cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}"
+
+    if ! command -v unzip >/dev/null; then
+        echo "Error: unzip is required to install CNDI!" 1>&2
+        exit 1
+    fi
+        
+    cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}.zip"
     
     exe="$cndi_install/cndi$bin_suffix"
     
@@ -33,7 +40,8 @@ main() {
     fi
     
     echo "$cndi_uri"
-    curl --fail --location --progress-bar --output "$exe" "$cndi_uri"
+    curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
+    unzip -d "$bin_dir" -o "$exe.zip"
     chmod +x "$exe"
     
     echo "cndi was downloaded successfully to $exe"
@@ -68,6 +76,8 @@ main() {
     fi
     
     echo "Please restart your terminal then run 'cndi --help' to get started!"
+    echo
+    echo "Stuck? Join our Discord https://cndi.run/di?utm_id=5096"
 }
 
 main "$@"
