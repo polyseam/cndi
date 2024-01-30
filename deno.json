@@ -1,5 +1,5 @@
 {
-  "version": "2.0.11",
+  "version": "2.1.0",
   "deno_version": "1.40.2",
   "tasks": {
     "zip-win": "zip dist/cndi-win.exe.zip dist/cndi-win.exe",
