@@ -18,6 +18,7 @@ const result = await esbuild.build({
   outfile: "./dist/cndi.esm.js",
   bundle: true,
   format: "esm",
+  minify: true,
 });
 
 console.log(result.outputFiles);
