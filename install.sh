@@ -33,16 +33,19 @@ main() {
         
     cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}.zip"
     
-    exe="$cndi_install/cndi$bin_suffix"
+    exe="$bin_dir/cndi"
     
-    if [ ! -d "$cndi_install" ]; then
-        mkdir -p "$cndi_install"
+    if [ ! -d "$bin_dir" ]; then
+        mkdir -p "$bin_dir"
     fi
     
-    echo "$cndi_uri"
     curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
-    unzip -d "$bin_dir" -o "$exe"
-    chmod +x "$bin_dir$exe"
+    
+    unzip -d "$bin_dir" -o "$bin_dir/cndi"
+
+    mv "$exe-$target" "$exe"
+    
+    chmod +x "$exe"
     rm "$exe.zip"
     
     echo "cndi was downloaded successfully to $exe"
