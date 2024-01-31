@@ -2,9 +2,9 @@
   "version": "2.1.0",
   "deno_version": "1.40.2",
   "tasks": {
-    "zip-win": "zip dist/cndi-win.exe.zip dist/cndi-win.exe",
-    "zip-linux": "zip dist/cndi-linux.zip dist/cndi-linux",
-    "zip-mac": "zip dist/cndi-mac.zip dist/cndi-mac",
+    "zip-win": "zip -j dist/cndi-win.exe.zip dist/cndi-win.exe",
+    "zip-linux": "zip -j dist/cndi-linux.zip dist/cndi-linux",
+    "zip-mac": "zip -j dist/cndi-mac.zip dist/cndi-mac",
     "zip-all": "deno task zip-win && deno task zip-linux && deno task zip-mac",
     "compile-win": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --output dist/cndi-win.exe dist/cndi.esm.js",
     "compile-linux": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/cndi-linux dist/cndi.esm.js",
