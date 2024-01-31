@@ -20,6 +20,7 @@
       "npm:lodash.set@4.3.2": "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2": "npm:lodash.unset@4.5.2",
       "npm:simple-git@3.18.0": "npm:simple-git@3.18.0",
+      "npm:simple-git@3.22.0": "npm:simple-git@3.22.0",
       "npm:validator": "npm:validator@13.11.0"
     },
     "npm": {
@@ -552,6 +553,14 @@
       },
       "simple-git@3.18.0": {
         "integrity": "sha512-Yt0GJ5aYrpPci3JyrYcsPz8Xc05Hi4JPSOb+Sgn/BmPX35fn/6Fp9Mef8eMBCrL2siY5w4j49TA5Q+bxPpri1Q==",
+        "dependencies": {
+          "@kwsites/file-exists": "@kwsites/file-exists@1.1.1",
+          "@kwsites/promise-deferred": "@kwsites/promise-deferred@1.1.1",
+          "debug": "debug@4.3.4"
+        }
+      },
+      "simple-git@3.22.0": {
+        "integrity": "sha512-6JujwSs0ac82jkGjMHiCnTifvf1crOiY/+tfs/Pqih6iow7VrpNKRRNdWm6RtaXpvvv/JGNYhlUtLhGFqHF+Yw==",
         "dependencies": {
           "@kwsites/file-exists": "@kwsites/file-exists@1.1.1",
           "@kwsites/promise-deferred": "@kwsites/promise-deferred@1.1.1",

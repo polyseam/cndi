@@ -15,7 +15,7 @@ const result = await esbuild.build({
     }),
   ],
   entryPoints: ["main.ts"],
-  outfile: "./dist/cndi.esm.js",
+  outfile: "./dist/cndi.js",
   bundle: true,
   format: "esm",
   minify: true,
