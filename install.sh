@@ -42,7 +42,7 @@ main() {
     echo "$cndi_uri"
     curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
     unzip -d "$bin_dir" -o "$exe"
-    chmod +x "$exe"
+    chmod +x "$bin_dir$exe"
     rm "$exe.zip"
     
     echo "cndi was downloaded successfully to $exe"
