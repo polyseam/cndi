@@ -27,7 +27,7 @@ main() {
     fi
 
     if ! command -v unzip >/dev/null; then
-        echo "Error: unzip is required to install CNDI!" 1>&2
+        echo "Error: unzip is required to install and upgrade CNDI!" 1>&2
         exit 1
     fi
         
@@ -42,8 +42,6 @@ main() {
     curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
     
     unzip -d "$bin_dir" -o "$bin_dir/cndi"
-
-    mv "$exe-$target" "$exe"
     
     chmod +x "$exe"
     rm "$exe.zip"
