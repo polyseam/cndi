@@ -21,9 +21,9 @@ $CNDIZip = "$BinDir\cndi.zip"
 $CNDIExe = "$BinDir\deno.exe"
 
 $DownloadUrl = if (!$Version) {
-  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.exe.zip"
+  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.zip"
 } else {
-  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.exe.zip"
+  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.zip"
 }
 
 if (!(Test-Path $BinDir)) {

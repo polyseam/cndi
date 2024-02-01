@@ -1,11 +1,10 @@
 import {
   ccolors,
   GithubProvider,
+  path,
   platform,
-  promisify,
   Spinners,
   TerminalSpinner,
-  unzip,
   UpgradeCommand,
   UpgradeOptions,
 } from "deps";
@@ -21,6 +20,8 @@ import {
 import installDependenciesIfRequired from "src/install.ts";
 
 const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
+
+const MACOSX_TRASH_DIR = "__MACOSX";
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
@@ -47,16 +48,16 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       const response = await fetch(binaryUrl);
       if (response.body && response.status === 200) {
         // write binary to fs then rename, executable can't be overwritten while it's executing
-        const cndiFile = await Deno.open(`${destinationPath}-new`, {
+
+        const zipPath = `${destinationPath}.zip`;
+
+        const cndiFile = await Deno.open(zipPath, {
           create: true,
           write: true,
           mode: 0o777,
         });
 
-        const uz = promisify(unzip);
-
-        const unzipped = await uz(await response.arrayBuffer());
-        cndiFile.write(unzipped);
+        await response.body.pipeTo(cndiFile.writable, { preventClose: true });
         cndiFile.close();
 
         const isWindows = platform() === "win32";
@@ -66,14 +67,42 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           ? destinationPath.replace(".exe", "-old.exe")
           : `${destinationPath}-old`;
 
-        await Deno.rename(destinationPath, oldBinaryDestination);
+        try {
+          await Deno.rename(destinationPath, oldBinaryDestination);
+        } catch (_err) {
+          // the old binary doesn't exist
+          // user is likely a dev executing cndi-next upgrade
+        }
 
-        // take the freshly downloaded binary, and put it in the right spot
-        const newBinaryDestination = isWindows
-          ? destinationPath.replace("-new", ".exe")
-          : destinationPath;
+        const unzipCommand = new Deno.Command("unzip", {
+          args: [
+            "-o",
+            zipPath,
+            "-d",
+            path.dirname(destinationPath),
+          ],
+          stdout: "piped",
+          stderr: "piped",
+        });
 
-        await Deno.rename(`${destinationPath}-new`, newBinaryDestination);
+        const unzipCommandOutput = await unzipCommand.output();
+
+        if (unzipCommandOutput.code !== 0) {
+          Deno.stdout.write(unzipCommandOutput.stderr);
+          Deno.exit(232323); // arbitrary exit code
+        }
+
+        try {
+          await Deno.remove(zipPath);
+          await Deno.remove(
+            path.join(path.dirname(destinationPath), MACOSX_TRASH_DIR),
+            {
+              recursive: true,
+            },
+          );
+        } catch (_cleanupError) {
+          // removing extra files if possible
+        }
       } else {
         spinner.stop();
         console.error(
