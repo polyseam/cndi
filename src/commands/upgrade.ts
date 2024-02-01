@@ -11,17 +11,24 @@ import {
 
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 
-import {
-  emitExitEvent,
-  getCndiInstallPath,
-  getFileSuffixForPlatform,
-} from "src/utils.ts";
+import { emitExitEvent, getCndiInstallPath } from "src/utils.ts";
 
 import installDependenciesIfRequired from "src/install.ts";
 
 const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
 
 const MACOSX_TRASH_DIR = "__MACOSX";
+
+const getReleaseSuffixForPlatform = () => {
+  const fileSuffixForPlatform = {
+    linux: "linux",
+    darwin: "mac",
+    win32: "win",
+  };
+  const currentPlatform = platform() as "linux" | "darwin" | "win32";
+  return fileSuffixForPlatform[currentPlatform];
+};
+
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
     const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
@@ -41,8 +48,9 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     }
 
     spinner.start();
+
     const binaryUrl = new URL(
-      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getFileSuffixForPlatform()}.zip`,
+      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getReleaseSuffixForPlatform()}.zip`,
     );
     try {
       const response = await fetch(binaryUrl);
