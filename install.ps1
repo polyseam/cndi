@@ -18,7 +18,7 @@ $BinDir = if ($CNDIInstall) {
 }
 
 $CNDIZip = "$BinDir\cndi.zip"
-$CNDIExe = "$BinDir\deno.exe"
+$CNDIExe = "$BinDir\cndi.exe"
 
 $DownloadUrl = if (!$Version) {
   "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.zip"
