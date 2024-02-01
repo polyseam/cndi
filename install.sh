@@ -41,7 +41,7 @@ main() {
     
     curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
     
-    unzip -d "$bin_dir" -o "$bin_dir/cndi"
+    unzip -o -d "$bin_dir" "$bin_dir/cndi.zip"
     
     chmod +x "$exe"
     rm "$exe.zip"
