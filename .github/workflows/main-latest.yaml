@@ -30,6 +30,7 @@ jobs:
         with:
           deno-version: v1.39.1
 
+      - run: tar --version # delete this
       - run: deno task build
           
       - id: upload-source-code
