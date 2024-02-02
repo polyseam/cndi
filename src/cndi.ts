@@ -18,8 +18,6 @@ import initCommand from "src/commands/init.ts";
 import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
-import installDependenciesIfRequired from "src/install.ts";
-import installCommand from "src/commands/install.ts";
 
 import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
@@ -59,12 +57,6 @@ export default async function cndi() {
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);
 
-  await installDependenciesIfRequired({
-    CNDI_HOME,
-    KUBESEAL_VERSION,
-    TERRAFORM_VERSION,
-  });
-
   try {
     Deno.mkdirSync(stagingDirectory, { recursive: true });
   } catch (failedToCreateStagingDirectoryError) {
@@ -90,7 +82,6 @@ export default async function cndi() {
     .command("terraform", terraformCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
-    .command("install", installCommand)
     .command("completions", new CompletionsCommand().global())
     .command("help", new HelpCommand().global())
     .parse(Deno.args);

@@ -270,7 +270,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform-${fileSuffixForPlatform}`,
+    `terraform${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -282,7 +282,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal-${fileSuffixForPlatform}`,
+    `kubeseal${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -399,9 +399,9 @@ async function checkInitialized(output: string) {
 
 const getFileSuffixForPlatform = () => {
   const fileSuffixForPlatform = {
-    linux: "linux",
-    darwin: "mac",
-    win32: "win.exe",
+    linux: "",
+    darwin: "",
+    win32: ".exe",
   };
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   return fileSuffixForPlatform[currentPlatform];
