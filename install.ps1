@@ -17,24 +17,24 @@ $BinDir = if ($CNDIInstall) {
   "${Home}\.cndi\bin"
 }
 
-$CNDIZip = "$BinDir\cndi.zip"
+$CNDITarGz = "$BinDir\cndi.tar.gz"
 $CNDIExe = "$BinDir\cndi.exe"
 
 $DownloadUrl = if (!$Version) {
-  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.zip"
+  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.tar.gz"
 } else {
-  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.zip"
+  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.tar.gz"
 }
 
 if (!(Test-Path $BinDir)) {
   New-Item $BinDir -ItemType Directory | Out-Null
 }
 
-curl.exe --fail --location --progress-bar --output $CNDIZip $DownloadUrl
+curl.exe --fail --location --progress-bar --output $CNDITarGz $DownloadUrl
 
-tar.exe --extract --file $CNDIZip -C $BinDir
+tar.exe --extract --file $CNDITarGz -C $BinDir
 
-Remove-Item $CNDIZip
+Remove-Item $CNDITarGz
 
 $User = [System.EnvironmentVariableTarget]::User
 $Path = [System.Environment]::GetEnvironmentVariable('Path', $User)

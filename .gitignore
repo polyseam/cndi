@@ -11,7 +11,7 @@ node_modules
 .github/CNDI_GITHUB_README.md
 
 !dist/*/.preserve
-dist/**
+dist/**/cndi*
 
 cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*

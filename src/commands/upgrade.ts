@@ -1,6 +1,7 @@
 import {
   ccolors,
   GithubProvider,
+  inflateResponse,
   path,
   platform,
   Spinners,
@@ -9,15 +10,9 @@ import {
   UpgradeOptions,
 } from "deps";
 
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
-
 import { emitExitEvent, getCndiInstallPath } from "src/utils.ts";
 
-import installDependenciesIfRequired from "src/install.ts";
-
 const upgradeLabel = ccolors.faded("\nsrc/commands/upgrade.ts:");
-
-const MACOSX_TRASH_DIR = "__MACOSX";
 
 const getReleaseSuffixForPlatform = () => {
   const fileSuffixForPlatform = {
@@ -31,7 +26,6 @@ const getReleaseSuffixForPlatform = () => {
 
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
-    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
     const spinner = new TerminalSpinner({
       text: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
@@ -50,24 +44,11 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     spinner.start();
 
     const binaryUrl = new URL(
-      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getReleaseSuffixForPlatform()}.zip`,
+      `https://github.com/polyseam/cndi/releases/download/${to}/cndi-${getReleaseSuffixForPlatform()}.tar.gz`,
     );
     try {
       const response = await fetch(binaryUrl);
       if (response.body && response.status === 200) {
-        // write binary to fs then rename, executable can't be overwritten while it's executing
-
-        const zipPath = `${destinationPath}.zip`;
-
-        const cndiFile = await Deno.open(zipPath, {
-          create: true,
-          write: true,
-          mode: 0o777,
-        });
-
-        await response.body.pipeTo(cndiFile.writable, { preventClose: true });
-        cndiFile.close();
-
         const isWindows = platform() === "win32";
 
         // take existing cndi binary and put it aside
@@ -82,35 +63,34 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
           // user is likely a dev executing cndi-next upgrade
         }
 
-        const unzipCommand = new Deno.Command("unzip", {
-          args: [
-            "-o",
-            zipPath,
-            "-d",
-            path.dirname(destinationPath),
-          ],
-          stdout: "piped",
-          stderr: "piped",
+        // write binary to fs then rename, executable can't be overwritten while it's executing
+
+        const folderName =
+          `${destinationPath}-${getReleaseSuffixForPlatform()}`;
+
+        await inflateResponse(response, folderName, {
+          compressionFormat: "gzip",
+          doUntar: true,
         });
 
-        const unzipCommandOutput = await unzipCommand.output();
-
-        if (unzipCommandOutput.code !== 0) {
-          Deno.stdout.write(unzipCommandOutput.stderr);
-          Deno.exit(232323); // arbitrary exit code
+        for await (const entry of Deno.readDirSync(folderName)) {
+          if (entry.isFile) {
+            const finalDest = path.join(
+              path.dirname(destinationPath),
+              entry.name,
+            );
+            await Deno.rename(
+              path.join(folderName, entry.name),
+              path.join(finalDest),
+            );
+            if (!isWindows) {
+              await Deno.chmod(finalDest, 0o755);
+            }
+          }
         }
 
-        try {
-          await Deno.remove(zipPath);
-          await Deno.remove(
-            path.join(path.dirname(destinationPath), MACOSX_TRASH_DIR),
-            {
-              recursive: true,
-            },
-          );
-        } catch (_cleanupError) {
-          // removing extra files if possible
-        }
+        await Deno.remove(folderName, { recursive: true });
+        await Deno.remove(`${folderName}.tar`);
       } else {
         spinner.stop();
         console.error(
@@ -133,14 +113,6 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
             `https://github.com/polyseam/cndi/releases/${to}`,
           )
         }`,
-      );
-      await installDependenciesIfRequired(
-        {
-          CNDI_HOME,
-          KUBESEAL_VERSION,
-          TERRAFORM_VERSION,
-        },
-        true,
       );
     } catch (upgradeError) {
       spinner.stop();

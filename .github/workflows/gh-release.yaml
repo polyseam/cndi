@@ -44,6 +44,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/mac/cndi-mac.zip
-            dist/linux/cndi-linux.zip
-            dist/win/cndi-win.zip
+            dist/release-archives/cndi-*
