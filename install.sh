@@ -31,7 +31,7 @@ main() {
         exit 1
     fi
         
-    cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}.zip"
+    cndi_uri="https://github.com/polyseam/cndi/releases/latest/download/cndi-${target}.tar.gz"
     
     exe="$bin_dir/cndi"
     
@@ -39,12 +39,14 @@ main() {
         mkdir -p "$bin_dir"
     fi
     
-    curl --fail --location --progress-bar --output "$exe.zip" "$cndi_uri"
-    
-    unzip -o -d "$bin_dir" "$bin_dir/cndi.zip"
+    curl --fail --location --progress-bar --output "$exe.tar.gz" "$cndi_uri"
+    tar -xzf "$exe.tar.gz" -C "$bin_dir"
     
     chmod +x "$exe"
-    rm "$exe.zip"
+    chmod +x "$bin_dir/kubeseal"
+    chmod +x "$bin_dir/terraform"
+    
+    rm "$exe.tar.gz"
     
     echo "cndi was downloaded successfully to $exe"
     
