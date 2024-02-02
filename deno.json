@@ -2,9 +2,9 @@
   "version": "2.1.0",
   "deno_version": "1.40.2",
   "tasks": {
-    "tar-win": "tar --strip-components=3 -czvf dist/release-archives/cndi-win.tar.gz dist/win/in/*",
-    "tar-linux": "tar --strip-components=3 -czvf dist/release-archives/cndi-linux.tar.gz dist/linux/in/*",
-    "tar-mac": "tar --strip-components=3 -czvf dist/release-archives/cndi-mac.tar.gz dist/mac/in/*",
+    "tar-win": "tar --strip-components=3 --strip 3 -czvf dist/release-archives/cndi-win.tar.gz dist/win/in/*",
+    "tar-linux": "tar --strip-components=3 --strip 3 -czvf dist/release-archives/cndi-linux.tar.gz dist/linux/in/*",
+    "tar-mac": "tar --strip-components=3 --strip 3 -czvf dist/release-archives/cndi-mac.tar.gz dist/mac/in/*",
     "tar-all": "deno task tar-mac && deno task tar-win && deno task tar-linux",
     "compile-win": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --output dist/win/in/cndi.exe main.ts",
     "compile-linux": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/linux/in/cndi main.ts",
