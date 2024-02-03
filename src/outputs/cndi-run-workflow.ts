@@ -51,7 +51,7 @@ const cndiWorkflowObj = {
         },
         {
           name: "setup cndi",
-          uses: "polyseam/setup-cndi@v2.0.0",
+          uses: "polyseam/setup-cndi@v2",
         },
         {
           name: "cndi install",
