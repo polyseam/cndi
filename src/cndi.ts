@@ -4,7 +4,7 @@ import {
   ccolors,
   Command,
   CompletionsCommand,
-  existsSync,
+  ensureDirSync,
   HelpCommand,
   homedir,
   path,
@@ -46,20 +46,15 @@ export default async function cndi() {
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 
-  // ensure CNDI_HOME/bin directory exists before installing deps
-  if (!existsSync(path.join(CNDI_HOME, "bin"), { isDirectory: true })) {
-    Deno.mkdirSync(path.join(CNDI_HOME, "bin"), { recursive: true });
-  } else {
-    // if cndi was updated in the previous execution, remove the old unused binary
-    // this is necessary because Windows will not allow you to delete a binary while it is running
-    await removeOldBinaryIfRequired(CNDI_HOME);
-  }
+  // if cndi was updated in the previous execution, remove the old unused binary
+  // this is necessary because Windows will not allow you to delete a binary while it is running
+  await removeOldBinaryIfRequired(CNDI_HOME);
 
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);
 
   try {
-    Deno.mkdirSync(stagingDirectory, { recursive: true });
+    ensureDirSync(stagingDirectory);
   } catch (failedToCreateStagingDirectoryError) {
     console.error(
       cndiLabel,

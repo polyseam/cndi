@@ -9,6 +9,7 @@ export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export * as JSONC from "https://deno.land/std@0.201.0/jsonc/mod.ts";
 export { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
 export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
+export { ensureDirSync } from "https://deno.land/std@0.201.0/fs/ensure_dir.ts";
 export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 export { load as loadEnv } from "https://deno.land/std@0.205.0/dotenv/mod.ts";
 export { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
