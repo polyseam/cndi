@@ -114,29 +114,53 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
 
   const cluster_manifests = config?.cluster_manifests || {};
 
-  // ⚠️ ks_checks.json being loaded here is the one from the previous overwrite
+  // this ks_checks will be written to cndi/ks_checks.json
   let ks_checks: Record<string, string> = {};
 
+  // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
+  let ksc: Record<string, string> = {};
+
   try {
-    const ksc = await loadJSONC(
+    ksc = await loadJSONC(
       path.join(options.output, "cndi", "ks_checks.json"),
     ) as Record<string, string>;
+  } catch {
+    // ks_checks.json did not exist or was invalid JSON
+  }
 
-    // restage the SealedSecret yaml file for every key in ks_checks.json
-    for (const key in ksc) {
-      ks_checks[key] = ksc[key];
+  // restage the SealedSecret yaml file for every key in ks_checks.json
+  for (const key in ksc) {
+    ks_checks[key] = ksc[key];
 
-      const sealedManifest = await Deno.readTextFileSync(
+    let sealedManifest = "";
+
+    try {
+      sealedManifest = await Deno.readTextFileSync(
         path.join(options.output, "cndi", "cluster_manifests", `${key}.yaml`),
       );
-
-      await stageFile(
-        path.join("cndi", "cluster_manifests", `${key}.yaml`),
-        sealedManifest,
+    } catch {
+      console.log(
+        ccolors.warn(
+          `failed to read SealedSecret: "${
+            ccolors.key_name(key + ".yaml")
+          }" referenced in 'ks_checks.json'`,
+        ),
       );
+      // sealedManifest from ks_checks.json did not exist
+      // so we remove it from the ks_check.json list
+      delete ks_checks[key];
     }
-  } catch (_errorLoadingKSC) {
-    // ks_checks.json did not exist or was malformed
+
+    try {
+      if (sealedManifest) {
+        await stageFile(
+          path.join("cndi", "cluster_manifests", `${key}.yaml`),
+          sealedManifest,
+        );
+      }
+    } catch {
+      // failed to stage sealedManifest from ks_checks.json
+    }
   }
 
   try {
