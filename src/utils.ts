@@ -58,18 +58,7 @@ const removeOldBinaryIfRequired = async (
 
   try {
     await Deno.remove(pathToGarbageBinary);
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error(
-        utilsLabel,
-        ccolors.error("\nfailed to delete old"),
-        ccolors.key_name("cndi"),
-        ccolors.error("binary, please try again"),
-      );
-      console.log(ccolors.caught(error, 302));
-      await emitExitEvent(302);
-      Deno.exit(302);
-    }
+  } catch {
     return false;
   }
   return true;
