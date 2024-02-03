@@ -152,11 +152,14 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
     }
 
     try {
-      if (sealedManifest) {
+      if (sealedManifest && cluster_manifests?.[key]) {
         await stageFile(
           path.join("cndi", "cluster_manifests", `${key}.yaml`),
           sealedManifest,
         );
+      } else {
+        // sealedManifest either did not exist or is no longer in cluster_manifests
+        delete ks_checks[key];
       }
     } catch {
       // failed to stage sealedManifest from ks_checks.json
