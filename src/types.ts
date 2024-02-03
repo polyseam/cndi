@@ -290,6 +290,7 @@ interface KubernetesSecret extends KubernetesManifest {
   };
   metadata: {
     name: string;
+    namespace?: string;
   };
   isPlaceholder: boolean;
 }
