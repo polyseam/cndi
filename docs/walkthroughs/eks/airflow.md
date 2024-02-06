@@ -19,8 +19,8 @@ workflow you are already comfortable with.
 **You will need the following things to get up and running with cndi
 successfully:**
 
-- **An AWS cloud account**: cndi will deploy infrastructure within AWS
-
+- **An AWS cloud account**: cndi will deploy infrastructure within AWS.
+  [Here's a guide of how to set up your Amazon Web Services account including roles and permissions](/docs/cloud-setup-guide/aws/aws-setup.md)
 - **Your cloud credentials**: cndi will leverage your amazon web services's
   **AWS ACCESS KEY ID** and **AWS_SECRET_ACCESS_KEY**
   [credentials](https://docs.eks.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
@@ -36,15 +36,17 @@ successfully:**
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
-
-- [Here's a guide of how to set up your Amazon Web Services account including roles and permissions](/docs/cloud-setup-guide/aws/aws-setup.md)
+  -`gh` CLI: The GitHub CLI tool is required for some operations. Please follow
+  the installation instructions at
+  [GitHub CLI](https://cli.github.com/manual/installation).
 
 ## download cndi ⬇️
 
 Run the following command within your terminal to download and install cndi:
 
+> [!NOTE] this command will download the correct binary for your OS
+
 ```shell
-# this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
@@ -67,22 +69,8 @@ as Code and Cluster Configuration:
 cndi init --interactive
 ```
 
-You will get an interactive prompt where you'll name your project, then one to
-specify the CNDI template you want.
-
-For this project select the `airflow` Template.
-
-```shell
-? Pick a template
-   cnpg
-   neo4j
-   basic
- ❯ airflow
-```
-
-## CNDI Project Configuration
-
-Please enter the required information for your CNDI project setup.
+You will get an interactive prompt where you'll enter all of the values that
+should be supplied for this project:
 
 ### Project Setup
 
@@ -144,23 +132,25 @@ root of your repository.
 The structure of the generated CNDI project will be something like:
 
 ```shell
-├── 📁 cndi
-│   ├── 📁 cluster_manifests
-│   │   ├── 📁 applications
-|   |   |   ├── cnpg.yaml 
-│   │   │   └── airflow.application.yaml
-│   │   ├── argo-ingress.yaml
-│   │   ├── cert-manager-cluster-issuer.yaml
-│   │   ├── git-credentials-secret.yaml
-│   │   └── etc
-│   └── 📁 terraform
-│       ├── airflow-nodes.cndi-node.tf.yaml
-│       └── etc 
-├── cndi_config.yaml
-├── .env
-├── .gitignore
-├── .github
-└── README.md
+├── 📁 cndi/                              # CNDI project root directory
+│   ├── 📁 cluster_manifests/             # Kubernetes cluster manifests
+│   │   ├── 📁 applications/              # Application-specific manifests
+│   │   │   ├── cnpg.yaml                 # Manifest for CNPG application
+│   │   │   ├── external-dns.application.yaml  # External DNS application manifest
+│   │   │   └── airflow.application.yaml  # Airflow application manifest
+│   │   ├── argo-ingress.yaml             # Argo ingress configuration
+│   │   ├── airflow-ingress.yaml          # Airflow ingress configuration
+│   │   ├── cert-manager-cluster-issuer.yaml  # Cert-manager cluster issuer
+│   │   ├── git-credentials-secret.yaml   # Git credentials secret
+│   │   └── etc                           # Other miscellaneous manifests
+│   └── 📁 terraform/                     # Terraform configuration files
+│       ├── cdk.tf.json                   # Terraform CDK configuration
+│       └── etc                           # Other Terraform-related files
+├── cndi_config.yaml                      # CNDI configuration file
+├── .env                                  # Environment variables
+├── .gitignore                            # Ignored files and directories in Git
+├── .github/                              # GitHub-specific files (e.g., workflows)
+└── README.md                             # Project overview and documentation
 ```
 
 For a breakdown of all of these files, checkout the
@@ -168,27 +158,44 @@ For a breakdown of all of these files, checkout the
 
 ## upload environment variables to GitHub ⬆️
 
-GitHub Actions is responsible for calling the `cndi run` command to deploy our
-cluster, so it is important that our secrets are available in the actions
-runtime. However we don't want these to be visible in our source code, so we
-will use GitHub Actions Secrets to store them. The
-[gh](https://github.com/cli/cli) CLI makes this very easy.
+GitHub Actions plays a key role in deploying your cluster by executing the cndi
+run command. To ensure the security and accessibility of your secrets during the
+actions runtime, it's essential to store them securely and not expose them in
+your source code. We achieve this by using GitHub Actions Secrets via the Github
+CLI. Install The GitHub CLI [gh](https://cli.github.com/) for convenient method
+to set these secrets.
+
+### Authenticate with GitHub
+
+Before using the gh CLI, authenticate with your GitHub account to gain access to
+your repositories:
+
+```shell
+gh auth login
+```
+
+### Set Secrets Using the .env File
+
+Use the gh secret set command to upload your secrets from the .env file to
+GitHub Actions. This file should contain all the environment variables required
+for your deployment:
 
 ```shell
 gh secret set -f .env
-# if this does not complete the first time, try running it again!
 ```
+
+> [!NOTE] if this does not complete the first time, try running it again!
 
 ![GitHub secrets](/docs/walkthroughs/eks/img/upload-git-secrets.png)
 
 ## deploy your templated cluster configration 🚀
 
-Once all the config is created and environment variables are uploaded to GitHub,
-add, commit and push the config to your GitHub repository:
+After you have created your configuration files and uploaded the necessary
+environment variables to GitHub, it's time to push your configuration to your
+GitHub repository. Follow these steps to ensure a smooth deployment:
 
 ```shell
 git add .
-git status # take a quick look and make sure these are all files you want to push
 git commit -m "initial commit"
 git push --set-upstream origin main
 ```
@@ -212,49 +219,57 @@ Once `cndi run` has been completed, at the end of the run will be a link to
 `resource groups`, where you can view resources deployed by CNDI for this
 project. ![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
 
-Click on your project resource group
+Click on your project resource group to see the resources you have created in
+the project
 
-![resource groups root page](/docs/walkthroughs/eks/img/resource-groups-root.png)
+![resource groups root page](/docs/walkthroughs/eks/img/resource-groups.png)
 
-Click on your on eks cluster control plane
+## Optional attach the load balancer to your domain 🌐
 
-![current resource group](/docs/walkthroughs/eks/img/resource-groups.png)
-
-## attach the load balancer to your domain 🌐
-
-At the end of the cndi run there is also an output called `public host`, which
-is the **DNS** (CNAME) of the load Balancer thats attached to your EKS
-instances.
+At the end of the cndi run there is also an output called `public host`. This is
+the DNS (CNAME) of the load balancer attached to your EKS instances, which
+you'll use to connect your custom domain to your cluster's services.
 
 ![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
 
-- Copy `public host`
-- Go to your custom domain,
+- Copy `public host` output
+- login into the management console of your domain registrar (e.g., GoDaddy,
+  Google Domains) where you have your custom domain.
 - Create an CNAME record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
-![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png) Open the
-domain name you've assigned for ArgoCD in your browser to see the Argo Login
-page.
+![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png) After the
+DNS records have propagated (which may take up to a few minutes), open the
+domain name you've assigned for applications like ArgoCD and Airflow in your
+browser. You should see the respective login pages.
 
-- (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
+## (Optional: Port Forwarding Without a Custom Domain)
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
+If you don't have a custom domain, you can still access your deployed
+applications by port forwarding:
+[Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
+
+## Logging Into ArgoCD:
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/eks/img/argocd-admin-password.png)
+![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-1.png) Notice that the
-`cluster_manifests` in the GitHub repository matches config in the ArgoCD UI
+After logging in, you can verify that the cluster_manifests in your GitHub
+repository match the configurations in the ArgoCD UI.
+
+![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-1.png)
 
 ```shell
 └── 📁 cndi
    └── 📁 cluster_manifests
        ├── 📁 applications
-       │   └── airflow.application.yaml
+       │   ├── airflow.application.yaml
+       │   ├── cnpg.yaml
+       │   ├── external-dns.application.yaml  
+       │   └── airflow.application.yaml  
        ├────── git-credentials-secret.yaml
        ├────── cert-manager-cluster-issuer.yaml
        ├────── argo-ingress.yaml
