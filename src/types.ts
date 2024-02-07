@@ -244,11 +244,21 @@ interface CNDIConfig {
         domain_filters: Array<string>;
         values: Record<string, unknown>;
       };
+      ingress: {
+        enabled?: boolean; // default: true
+        values: Record<string, unknown>;
+      };
+      ingress-nginx: {
+        enabled?: boolean; // default: true
+        private?: boolean;
+      };
       deployment_target_configuration?: DeploymentTargetConfiguration;
       nodes: Array<BaseNodeItemSpec>;
       cert_manager?: {
+        enabled?: boolean; // default: true
         email: string;
         self_signed?: boolean;
+        private?: boolean;
       };
       microk8s: {
         addons: Array<Microk8sAddon>;

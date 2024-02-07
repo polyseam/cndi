@@ -21,8 +21,8 @@ import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.t
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
-
-import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
+import getProductionClusterIssuerPrivateManifest from "../outputs/cert-manager-manifests/production-cluster-issuer-private.ts";
+import getProductionClusterIssuerPublicManifest from "../outputs/cert-manager-manifests/production-cluster-issuer-public.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
 import getEKSIngressServiceManifestPublic from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
@@ -207,6 +207,16 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
         ),
         getDevClusterIssuerManifest(),
       );
+    }
+    if (cert_manager?.private) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "cert-manager-cluster-issuer-private.yaml",
+        ),
+        getProductionClusterIssuerManifest(cert_manager?.email,
+      );
     } else {
       await stageFile(
         path.join(
@@ -355,7 +365,24 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.key_name("external-dns.application.yaml"),
     );
   }
+  const skipPublicIngress =
+    config?.infrastructure?.cndi?.public_ingress?.enabled === false;
 
+  if (!skipPublicIngress) {
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "applications",
+        "external-dns.application.yaml",
+      ),
+      getExternalDNSManifest(config),
+    );
+    console.log(
+      ccolors.success("staged application manifest:"),
+      ccolors.key_name("external-dns.application.yaml"),
+    );
+  }
   const { applications } = config;
 
   // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
