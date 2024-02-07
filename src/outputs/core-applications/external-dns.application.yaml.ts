@@ -45,18 +45,11 @@ export default function getExternalDNSApplicationManifest(
     extraEnvVarsSecret?: string;
   };
 
-  const cloudflareValues =
-    cndi_config?.infrastructure?.cndi?.external_dns?.values?.cloudflare || {};
-
   const values: ExternalDNSValues = {
-    txtOwnerId: cndi_config?.project_name || 'external-dns',
+    txtOwnerId: cndi_config?.project_name || "external-dns",
     txtSuffix: "txt",
     policy: "sync",
-    cloudflare: {
-      proxied: false,
-      ...cloudflareValues,
-    },
-    ...cndi_config?.infrastructure?.cndi?.external_dns?.values,
+    ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
     provider: externalDNSProvider,
     domainFilters: domain_filters,
   };
