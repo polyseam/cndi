@@ -49,6 +49,7 @@ export default function getExternalDNSApplicationManifest(
     cndi_config?.infrastructure?.cndi?.external_dns?.values?.cloudflare || {};
 
   const values: ExternalDNSValues = {
+    txtOwnerId: cndi_config?.project_name || 'external-dns',
     txtSuffix: "txt",
     policy: "sync",
     cloudflare: {
