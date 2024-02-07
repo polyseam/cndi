@@ -19,13 +19,7 @@ const defaultAddons: Array<Microk8sAddon> = [
     args: ["1.1.1.1"],
   },
   {
-    name: "ingress",
-  },
-  {
     name: "community",
-  },
-  {
-    name: "cert-manager",
   },
   {
     name: "helm",
