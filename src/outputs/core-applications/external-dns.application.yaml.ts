@@ -45,7 +45,16 @@ export default function getExternalDNSApplicationManifest(
     extraEnvVarsSecret?: string;
   };
 
+  const cloudflareValues =
+    cndi_config?.infrastructure?.cndi?.external_dns?.values?.cloudflare || {};
+
   const values: ExternalDNSValues = {
+    txtSuffix: "txt",
+    policy: "sync",
+    cloudflare: {
+      proxied: false,
+      ...cloudflareValues,
+    },
     ...cndi_config?.infrastructure?.cndi?.external_dns?.values,
     provider: externalDNSProvider,
     domainFilters: domain_filters,
