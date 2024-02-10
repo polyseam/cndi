@@ -262,6 +262,7 @@ outputs:
         repoURL: "https://airflow.apache.org"
         chart: airflow
         values:
+          useStandardNaming: true
           executor: LocalKubernetesExecutor
           data:
             metadataSecretName: postgresql-connection-string-secret
@@ -308,6 +309,8 @@ outputs:
             useHelmHooks: false
             applyCustomEnv: false
           migrateDatabaseJob:
+            jobAnnotations:
+              "argocd.argoproj.io/hook": Sync
             useHelmHooks: false
             applyCustomEnv: false
             
