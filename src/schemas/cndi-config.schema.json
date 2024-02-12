@@ -15,8 +15,8 @@
     "cndi_version": {
       "type": "string",
       "description": "The version of cndi config api to use.",
-      "pattern": "v1",
-      "default": "v1"
+      "pattern": "v2",
+      "default": "v2"
     },
     "infrastructure": {
       "type": "object",
