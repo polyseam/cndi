@@ -22,6 +22,24 @@ prompts:
       - ==
       - true
 
+  - name: deploy_pgadmin_ingress
+    default: true
+    message: >-
+      Do you want to expose PgAdmin to the web?
+    type: Confirm
+
+  - name: pgadmin_hostname
+    default: pgadmin.example.com
+    message: >-
+      What hostname should PGAdmin be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+      - ==
+      - true
+
   - name: deploy_postgres_ingress
     default: true
     message: >-
@@ -190,7 +208,40 @@ outputs:
             - ==
             - true
 
+      pgadmin-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+          args:
+            ingress_name: pgadmin-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+            service_name: pgadmin
+            service_port: 80
+            namespace: cnpg-system
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+            - ==
+            - true
+
     applications:
+      pgadmin:
+        targetRevision: 1.23.3
+        destinationNamespace: cnpg-system
+        repoURL: "https://helm.runix.net"
+        chart: pgadmin4
+        values:
+          persistentVolume:
+            enabled: true
+            size: 1Gi
+          serverDefinitions:
+            enabled: true
+            servers:
+              DevServer:
+                Name: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+                Group: "Servers"
+                Port: 5432
+                SSLMode: "prefer"
+                Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+                Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
       cnpg:
         targetRevision: 0.18.0
         destinationNamespace: cnpg-system
