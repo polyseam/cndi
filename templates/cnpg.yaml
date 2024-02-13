@@ -335,7 +335,7 @@ outputs:
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
-      pgadmin-ingress:
+      pgadmin:
         $cndi.get_block(deploy_pgadmin_application_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
