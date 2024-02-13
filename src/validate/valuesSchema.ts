@@ -79,9 +79,51 @@ export default async function validateValuesForSchema(
             });
             break;
 
+          case "additionalProperties":
+            console.log(
+              valPath,
+              ccolors.warn(
+                `contains invalid property: ${
+                  ccolors.user_input(
+                    err.params.additionalProperty,
+                  )
+                }`,
+              ),
+            );
+            break;
+
+          case "required":
+            console.log(
+              valPath,
+              ccolors.warn(
+                `is missing required property: ${
+                  ccolors.user_input(
+                    err.params.missingProperty,
+                  )
+                }`,
+              ),
+            );
+            break;
+
+          case "oneOf":
+            console.log(
+              valPath,
+              ccolors.warn(
+                `does not match exactly one of the provided schemas`,
+              ),
+            );
+            break;
+
+          case "anyOf":
+            console.log(
+              valPath,
+              ccolors.warn(`does not match any of the provided schemas`),
+            );
+            break;
+
           default:
             console.log(
-              `values${valPath} ${err.message} ${keyword}\n\n ${
+              `${valPath} ${ccolors.warn(err.message || "")} ${keyword}\n\n${
                 getPrettyJSONString(err)
               }`,
             );
@@ -97,7 +139,7 @@ export default async function validateValuesForSchema(
         `Unable to perform validation of applications.${releaseName}:`,
       ),
     );
-    ccolors.caught(errValidating);
+    console.log(ccolors.caught(errValidating));
     await emitExitEvent(1302);
     Deno.exit(1302);
   }
