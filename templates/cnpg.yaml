@@ -241,20 +241,21 @@ outputs:
         values:
           existingSecret: "pgadmin-login-password-secret"
           env:
-            email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+            email: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
           persistentVolume:
             enabled: true
             size: 1Gi
           serverDefinitions:
             enabled: true
             servers:
-              DevServer:
-                Name: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+              cndiServer:
+                Name: "My CNDI Server"
                 Group: "Servers"
                 Port: 5432
                 SSLMode: "prefer"
                 Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
                 Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+                MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
       cnpg:
         targetRevision: 0.18.0
         destinationNamespace: cnpg-system
