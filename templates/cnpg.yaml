@@ -1,9 +1,77 @@
+blocks:
+ - name: deploy_pgadmin_application_blk
+   content:
+    targetRevision: 1.23.3
+    destinationNamespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+    repoURL: "https://helm.runix.net"
+    chart: pgadmin4
+    values:
+      existingSecret: "pgadmin-login-password-secret"
+      env:
+        email: "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
+      persistentVolume:
+        enabled: true
+        size: 1Gi
+      serverDefinitions:
+        enabled: true
+        servers:
+          cndiServer:
+            Name: "My CNDI Server"
+            Group: "Servers"
+            Port: 5432
+            SSLMode: "prefer"
+            Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+            Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+
+ - name: deploy_pgadmin_ingress_blk
+   content:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: pgadmin-ingress
+      namespace: postgres
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        kubernetes.io/tls-acme: 'true'
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+        external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+        # if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname
+        # external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com
+    spec:
+      ingressClassName: public
+      tls:
+        - hosts:
+            - "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+          secretName: cluster-issuer-private-key
+      rules:
+        - host: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: pgadmin-pgadmin4
+                    port:
+                      number: 80
+ - name: pgadmin_login_password_secret_blk
+   content:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgadmin-login-password-secret
+      namespace: "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
+    type: Opaque
+    stringData:
+      password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
       {}
-
+   
   - name: deploy_argocd_ingress
     default: true
     message: >-
@@ -19,6 +87,54 @@ prompts:
       - hostname # FQDN
     condition:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: deploy_pgadmin_application
+    default: true
+    message: >-
+      Do you want to install PgAdmin, a web-based database management tool?
+    type: Confirm
+
+  - name: deploy_pgadmin_ingress
+    default: true
+    message: >-
+      Do you want to expose PgAdmin to the web?
+    type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+      - ==
+      - true
+
+  - name: pgadmin_hostname
+    default: pgadmin.example.com
+    message: >-
+      What hostname should PGAdmin be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+      - ==
+      - true
+
+  - name: pgadmin_login_email
+    default: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+    message: >-
+      What email do you want to use for your PgAdmin login?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+      - ==
+      - true
+
+  - name: pgadmin_login_password
+    default: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
+    message: >-
+      What password do you want to use for your PgAdmin login ?
+    type: Secret
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
       - ==
       - true
 
@@ -80,6 +196,8 @@ outputs:
     # this is a template comment
     infrastructure:
       cndi:
+        external_dns:
+          provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         open_ports:
@@ -92,6 +210,13 @@ outputs:
             {}
 
     cluster_manifests:
+      $cndi.comment(external-dns-secret): External DNS Credentials
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_autodns) }}"
+            - ==
+            - true
       cnpg-namespace:
         apiVersion: v1
         kind: Namespace
@@ -161,6 +286,13 @@ outputs:
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
 
+      pgadmin-login-password-secret:
+        $cndi.get_block(pgadmin_login_password_secret_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+            - ==
+            - true
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -190,12 +322,25 @@ outputs:
             - ==
             - true
 
+      pgadmin-ingress:
+        $cndi.get_block(deploy_pgadmin_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+            - ==
+            - true
+
     applications:
       cnpg:
         targetRevision: 0.18.0
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+      pgadmin:
+        $cndi.get_block(deploy_pgadmin_application_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+            - ==
+            - true
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
@@ -214,6 +359,9 @@ outputs:
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
 
+    $cndi.comment(cnpg-heading): PgAdmin Login Parameters
+    PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
+    PGADMIN_LOGIN_EMAIL:  "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
   readme:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
