@@ -1,17 +1,15 @@
 import { Command } from "deps";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
-import install from "src/install.ts";
-
 /**
  * COMMAND cndi install
  * Installs CNDI dependencies to CNDI_HOME
  */
 const installCommand = new Command()
-  .description(`Install cndi dependencies.`)
+  .description(`DEPRECATED: Install cndi dependencies.`)
   .hidden()
   .action(async () => {
-    const CNDI_HOME = Deno.env.get("CNDI_HOME")!;
-    await install({ KUBESEAL_VERSION, TERRAFORM_VERSION, CNDI_HOME }, true);
+    // TODO: remove this command
+    // cndi install is no longer required
+    // dependencies are included in the tarball
   });
 
 export default installCommand;

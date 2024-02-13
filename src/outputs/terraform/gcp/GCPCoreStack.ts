@@ -1,6 +1,7 @@
 import { CDKTFProviderGCP, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 type GCPKeyJSON = {
   type: string;
@@ -32,7 +33,8 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
     } catch (e) {
       console.error("'GOOGLE_CREDENTIALS' env variable is not valid JSON");
       console.error(e);
-      Deno.exit(1111);
+      emitExitEvent(609);
+      Deno.exit(609);
     }
 
     const project = parsedKey?.project_id;

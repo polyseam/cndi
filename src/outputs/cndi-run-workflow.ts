@@ -51,11 +51,7 @@ const cndiWorkflowObj = {
         },
         {
           name: "setup cndi",
-          uses: "polyseam/setup-cndi@v2.0.0",
-        },
-        {
-          name: "cndi install",
-          run: "cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
+          uses: "polyseam/setup-cndi@v2",
         },
         {
           name: "cndi run",

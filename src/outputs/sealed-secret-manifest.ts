@@ -4,6 +4,7 @@ import {
   emitExitEvent,
   getPathToKubesealBinary,
   getYAMLString,
+  sha256Digest,
 } from "src/utils.ts";
 
 const CNDI_SECRETS_PREFIX = "$cndi_on_ow.seal_secret_from_env_var(";
@@ -186,12 +187,20 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
 type GetSealedSecretManifestOptions = {
   publicKeyFilePath: string;
   envPath: string;
+  ks_checks: Record<string, string>;
+  secretFileName: string;
 };
 
-const getSealedSecretManifest = async (
+type SealedSecretManifestWithKSC = {
+  manifest: string;
+  ksc: Record<string, string>;
+};
+
+const getSealedSecretManifestWithKSC = async (
   secret: KubernetesSecret,
-  { publicKeyFilePath, envPath }: GetSealedSecretManifestOptions,
-): Promise<string | null> => {
+  { publicKeyFilePath, envPath, ks_checks, secretFileName }:
+    GetSealedSecretManifestOptions,
+): Promise<SealedSecretManifestWithKSC | null> => {
   let sealed = "";
   const pathToKubeseal = getPathToKubesealBinary();
   const secretPath = await Deno.makeTempFile();
@@ -199,6 +208,16 @@ const getSealedSecretManifest = async (
 
   // if the secret is just a placeholder we don't want to seal it
   if (secretWithStringData.isPlaceholder) {
+    return null;
+  }
+
+  const secretDigest = await sha256Digest(JSON.stringify(secretWithStringData));
+
+  const ksId = secretFileName.replace(".yaml", "");
+
+  if (ks_checks[ksId] === secretDigest) {
+    // secret has not changed since last deployment
+
     return null;
   }
 
@@ -236,7 +255,7 @@ const getSealedSecretManifest = async (
   } else {
     sealed = new TextDecoder().decode(kubesealCommandOutput.stdout);
   }
-  return sealed;
+  return { manifest: sealed, ksc: { [ksId]: secretDigest } };
 };
 
-export default getSealedSecretManifest;
+export default getSealedSecretManifestWithKSC;

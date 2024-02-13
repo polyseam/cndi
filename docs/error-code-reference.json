@@ -130,6 +130,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/544"
   },
   {
+    "code": 609,
+    "message": "failed to generate .env because the GCP key JSON found at the path specified failed to parse during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/706"
+  },
+  {
     "code": 700,
     "message": "Kubernetes Secret manifest 'data' was specified as a literal, Secrets must be sealed",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/546"
@@ -193,6 +198,11 @@
     "code": 809,
     "message": "failed to stage all gke terraform objects during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/564"
+  },
+  {
+    "code": 810,
+    "message": "failed to stage all aks terraform objects because the node pool name is invalid",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/707"
   },
   {
     "code": 900,
@@ -313,11 +323,13 @@
   },
   {
     "code": 1100,
-    "message": "cndi release binary fetch not ok during 'cndi upgrade'"
+    "message": "cndi release binary fetch not ok during 'cndi upgrade'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/704"
   },
   {
     "code": 1101,
-    "message": "cndi binary and dependency upgrade failed"
+    "message": "cndi binary and dependency upgrade failed",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/705"
   },
   {
     "code": 1200,

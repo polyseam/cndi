@@ -2,9 +2,11 @@ import { ccolors, loadEnv, path } from "deps";
 
 import {
   emitExitEvent,
+  getPrettyJSONString,
   getStagingDir,
   getYAMLString,
   loadCndiConfig,
+  loadJSONC,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -15,7 +17,7 @@ import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
-import getSealedSecretManifest from "src/outputs/sealed-secret-manifest.ts";
+import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -111,6 +113,58 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
   }
 
   const cluster_manifests = config?.cluster_manifests || {};
+
+  // this ks_checks will be written to cndi/ks_checks.json
+  let ks_checks: Record<string, string> = {};
+
+  // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
+  let ksc: Record<string, string> = {};
+
+  try {
+    ksc = await loadJSONC(
+      path.join(options.output, "cndi", "ks_checks.json"),
+    ) as Record<string, string>;
+  } catch {
+    // ks_checks.json did not exist or was invalid JSON
+  }
+
+  // restage the SealedSecret yaml file for every key in ks_checks.json
+  for (const key in ksc) {
+    ks_checks[key] = ksc[key];
+
+    let sealedManifest = "";
+
+    try {
+      sealedManifest = await Deno.readTextFileSync(
+        path.join(options.output, "cndi", "cluster_manifests", `${key}.yaml`),
+      );
+    } catch {
+      console.log(
+        ccolors.warn(
+          `failed to read SealedSecret: "${
+            ccolors.key_name(key + ".yaml")
+          }" referenced in 'ks_checks.json'`,
+        ),
+      );
+      // sealedManifest from ks_checks.json did not exist
+      // so we remove it from the ks_check.json list
+      delete ks_checks[key];
+    }
+
+    try {
+      if (sealedManifest && cluster_manifests?.[key]) {
+        await stageFile(
+          path.join("cndi", "cluster_manifests", `${key}.yaml`),
+          sealedManifest,
+        );
+      } else {
+        // sealedManifest either did not exist or is no longer in cluster_manifests
+        delete ks_checks[key];
+      }
+    } catch {
+      // failed to stage sealedManifest from ks_checks.json
+    }
+  }
 
   try {
     // remove all files in cndi/cluster
@@ -230,20 +284,34 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
 
     if (manifestObj?.kind && manifestObj.kind === "Secret") {
       const secret = cluster_manifests[key] as KubernetesSecret;
-      const secretName = `${key}.yaml`;
-      const sealedSecretManifest = await getSealedSecretManifest(secret, {
-        publicKeyFilePath: tempPublicKeyFilePath,
-        envPath,
-      });
+      const secretFileName = `${key}.yaml`;
+      const sealedSecretManifestWithKSC = await getSealedSecretManifestWithKSC(
+        secret,
+        {
+          publicKeyFilePath: tempPublicKeyFilePath,
+          envPath,
+          ks_checks,
+          secretFileName,
+        },
+      );
+
+      const sealedSecretManifest = sealedSecretManifestWithKSC?.manifest;
 
       if (sealedSecretManifest) {
+        // add the ksc to the ks_checks object
+        ks_checks = {
+          ...ks_checks,
+          ...sealedSecretManifestWithKSC.ksc,
+        };
+
         await stageFile(
-          path.join("cndi", "cluster_manifests", secretName),
+          path.join("cndi", "cluster_manifests", secretFileName),
           sealedSecretManifest,
         );
+
         console.log(
           ccolors.success(`staged encrypted secret:`),
-          ccolors.key_name(secretName),
+          ccolors.key_name(secretFileName),
         );
       }
       continue;
@@ -258,6 +326,16 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
       ccolors.key_name(manifestFilename),
     );
   }
+
+  await stageFile(
+    path.join("cndi", "ks_checks.json"),
+    getPrettyJSONString(ks_checks),
+  );
+
+  console.log(
+    ccolors.success("staged metadata:"),
+    ccolors.key_name("ks_checks.json"),
+  );
 
   const skipExternalDNS =
     config?.infrastructure?.cndi?.external_dns?.enabled === false;

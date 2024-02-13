@@ -4,7 +4,7 @@ on:
       - main
 jobs:
   test_and_lint: # cndi
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -12,7 +12,7 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.39.1
+          deno-version: v1.40
       
       - name: Check formatting
         run: deno fmt --check

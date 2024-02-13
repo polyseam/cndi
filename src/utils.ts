@@ -58,18 +58,7 @@ const removeOldBinaryIfRequired = async (
 
   try {
     await Deno.remove(pathToGarbageBinary);
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error(
-        utilsLabel,
-        ccolors.error("\nfailed to delete old"),
-        ccolors.key_name("cndi"),
-        ccolors.error("binary, please try again"),
-      );
-      console.log(ccolors.caught(error, 302));
-      await emitExitEvent(302);
-      Deno.exit(302);
-    }
+  } catch {
     return false;
   }
   return true;
@@ -270,7 +259,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform-${fileSuffixForPlatform}`,
+    `terraform${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -282,7 +271,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal-${fileSuffixForPlatform}`,
+    `kubeseal${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -399,9 +388,9 @@ async function checkInitialized(output: string) {
 
 const getFileSuffixForPlatform = () => {
   const fileSuffixForPlatform = {
-    linux: "linux",
-    darwin: "mac",
-    win32: "win.exe",
+    linux: "",
+    darwin: "",
+    win32: ".exe",
   };
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   return fileSuffixForPlatform[currentPlatform];
