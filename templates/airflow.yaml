@@ -251,17 +251,18 @@ outputs:
 
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.20.1
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        valuesSchema: https://raw.githubusercontent.com/cloudnative-pg/charts/cloudnative-pg-v0.20.1/charts/cloudnative-pg/values.schema.json
 
       airflow:
-        targetRevision: 1.11.0
+        targetRevision: 1.12.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
-        valuesSchema: https://raw.githubusercontent.com/apache/airflow/main/chart/values.schema.json
+        valuesSchema: https://raw.githubusercontent.com/apache/airflow/helm-chart/1.12.0/chart/values.schema.json
         values:
           executor: LocalKubernetesExecutor
           data:

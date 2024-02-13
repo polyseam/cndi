@@ -192,10 +192,11 @@ outputs:
 
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.20.1
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        valuesSchema: https://raw.githubusercontent.com/cloudnative-pg/charts/cloudnative-pg-v0.20.1/charts/cloudnative-pg/values.schema.json
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):

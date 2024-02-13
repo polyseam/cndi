@@ -1,5 +1,5 @@
 import { Ajv, ccolors, DefinedError } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
 
 const _validateValsLabel = ccolors.faded("src/validate/valuesSchema.ts:");
 
@@ -27,6 +27,7 @@ export default async function validateValuesForSchema(
     strict: false,
     validateFormats: false,
   });
+
   let schemaJSON: Record<string, unknown>;
 
   try {
@@ -79,7 +80,11 @@ export default async function validateValuesForSchema(
             break;
 
           default:
-            console.log(`values${err.instancePath} ${err.message}`);
+            console.log(
+              `values${valPath} ${err.message} ${keyword}\n\n ${
+                getPrettyJSONString(err)
+              }`,
+            );
             break;
         }
       });
