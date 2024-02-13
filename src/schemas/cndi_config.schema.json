@@ -6,6 +6,68 @@
   "description": "A configuration file for CNDI that defines the hardware and software of your cluster",
   "required": ["infrastructure"],
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "provider": { "const": "aws" }
+        },
+        "required": ["provider"]
+      },
+      "then": {
+        "properties": {
+          "distribution": {
+            "enum": ["microk8s", "eks"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provider": { "const": "gcp" }
+        },
+        "required": ["provider"]
+      },
+      "then": {
+        "properties": {
+          "distribution": {
+            "enum": ["microk8s", "gke"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provider": { "const": "azure" }
+        },
+        "required": ["provider"]
+      },
+      "then": {
+        "properties": {
+          "distribution": {
+            "enum": ["microk8s", "aks"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provider": { "const": "dev" }
+        },
+        "required": ["provider"]
+      },
+      "then": {
+        "properties": {
+          "distribution": {
+            "enum": ["microk8s"]
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "project_name": {
       "type": "string",
@@ -15,8 +77,18 @@
     "cndi_version": {
       "type": "string",
       "description": "The version of cndi config api to use.",
-      "pattern": "v1",
-      "default": "v1"
+      "pattern": "v2",
+      "default": "v2"
+    },
+    "provider": {
+      "type": "string",
+      "description": "The cloud provider to use for the infrastructure.",
+      "enum": ["aws", "gcp", "azure", "dev"]
+    },
+    "distribution": {
+      "type": "string",
+      "description": "The distribution of Kubernetes to use for the infrastructure.",
+      "enum": ["microk8s", "eks", "gke", "aks"]
     },
     "infrastructure": {
       "type": "object",
@@ -24,7 +96,17 @@
       "required": ["cndi"],
       "properties": {
         "terraform": {
-          "": {}
+          "properties": {
+            "terraform": {},
+            "provider": {},
+            "variable": {},
+            "locals": {},
+            "data": {},
+            "resource": {},
+            "module": {},
+            "output": {}
+          },
+          "additionalProperties": false
         },
         "cndi": {
           "type": "object",
@@ -96,25 +178,11 @@
               "items": {
                 "type": "object",
                 "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
-                "required": ["name", "kind"],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the node to deploy."
-                  },
-                  "kind": {
-                    "type": "string",
-                    "description": "The type of node to deploy.",
-                    "enum": [
-                      "aws",
-                      "eks",
-                      "ec2",
-                      "gcp",
-                      "azure",
-                      "aks",
-                      "dev",
-                      "gke"
-                    ]
+                    "description": "The name of the node or node group to deploy."
                   },
                   "role": {
                     "type": "string",
@@ -126,6 +194,12 @@
                     "type": "number",
                     "description": "The amount of disk to allocate to the node in G.",
                     "minimum": 1
+                  },
+                  "count": {
+                    "type": "number",
+                    "description": "The number of nodes to deploy.",
+                    "minimum": 1,
+                    "default": 1
                   },
                   "disk": {
                     "oneOf": [
@@ -230,8 +304,6 @@
               "description": "The path to the Helm Chart from the root of the git-hosted repository."
             },
             "values": {
-              "type": "object",
-              "additionalProperties": true
             }
           }
         }
