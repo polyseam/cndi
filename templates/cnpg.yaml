@@ -1,9 +1,40 @@
+blocks:
+ - name: pgadmin-ingress
+   content:
+    kind: Ingress
+    metadata:
+      name: pgadmin-ingress
+      namespace: postgres
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        kubernetes.io/tls-acme: 'true'
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+        external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+        # if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname
+        # external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com
+    spec:
+      ingressClassName: public
+      tls:
+        - hosts:
+            - "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+          secretName: cluster-issuer-private-key
+      rules:
+        - host: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: pgadmin-pgadmin4
+                    port:
+                      number: 80
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
       {}
-
+   
   - name: deploy_argocd_ingress
     default: true
     message: >-
@@ -219,14 +250,7 @@ outputs:
             - true
 
       pgadmin-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
-          args:
-            ingress_name: pgadmin-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
-            service_name: pgadmin-pgadmin4
-            service_port: 80
-            namespace: postgres
+        $cndi.get_block(pgadmin-ingress):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
             - ==
