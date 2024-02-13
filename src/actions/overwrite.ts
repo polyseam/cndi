@@ -368,29 +368,31 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
       applicationSpec,
     );
     if (applicationSpec?.valuesSchema) {
-      if (typeof applicationSpec.valuesSchema === "string") {
-        const valid = await validateValuesForSchema(
-          releaseName,
-          applicationSpec?.valuesSchema,
-          applicationSpec?.values,
-        );
+      if (Object.keys(applicationSpec?.values || {}).length > 0) {
+        if (typeof applicationSpec.valuesSchema === "string") {
+          const valid = await validateValuesForSchema(
+            releaseName,
+            applicationSpec?.valuesSchema,
+            applicationSpec?.values,
+          );
 
-        if (!valid) {
-          console.error(
-            owLabel,
-            ccolors.error(
-              `values do not adhere to provided schema: ${
-                ccolors.user_input(applicationSpec?.valuesSchema)
-              }`,
-            ),
-          );
-          await emitExitEvent(504);
-          Deno.exit(504);
-        } else {
-          console.log(
-            ccolors.success(`validated values for application:`),
-            ccolors.key_name(releaseName),
-          );
+          if (!valid) {
+            console.error(
+              owLabel,
+              ccolors.error(
+                `values do not adhere to provided schema: ${
+                  ccolors.user_input(applicationSpec?.valuesSchema)
+                }`,
+              ),
+            );
+            await emitExitEvent(504);
+            Deno.exit(504);
+          } else {
+            console.log(
+              ccolors.success(`validated values for application:`),
+              ccolors.key_name(releaseName),
+            );
+          }
         }
       }
     }
