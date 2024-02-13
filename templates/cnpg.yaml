@@ -179,6 +179,16 @@ outputs:
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
 
+      pgadmin-login-password-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: pgadmin-login-password-secret
+          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+        type: Opaque
+        stringData:
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -229,6 +239,9 @@ outputs:
         repoURL: "https://helm.runix.net"
         chart: pgadmin4
         values:
+          existingSecret: "pgadmin-login-password-secret"
+          env:
+            email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           persistentVolume:
             enabled: true
             size: 1Gi
