@@ -313,11 +313,13 @@
   },
   {
     "code": 1100,
-    "message": "cndi release binary fetch not ok during 'cndi upgrade'"
+    "message": "cndi release binary fetch not ok during 'cndi upgrade'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/704"
   },
   {
     "code": 1101,
-    "message": "cndi binary and dependency upgrade failed"
+    "message": "cndi binary and dependency upgrade failed",
+    "discussion_link":"https://github.com/orgs/polyseam/discussions/705"
   },
   {
     "code": 1200,
