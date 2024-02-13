@@ -597,6 +597,11 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     new TerraformOutput(this, "resource_group_url", {
       value: `https://console.cloud.google.com/welcome?project=${project_id}`,
     });
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value:
+        `gcloud container clusters get-credentials ${project_name} --region ${this.locals.gcp_region.asString} --project ${project_id}`,
+    });
   }
 }
 

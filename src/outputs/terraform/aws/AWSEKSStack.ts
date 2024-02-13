@@ -1222,6 +1222,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       value:
         `https://${this.locals.aws_region.asString}.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
     });
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value:
+        `aws eks update-kubeconfig --region ${this.locals.aws_region.asString} --name ${project_name}`,
+    });
   }
 }
 
