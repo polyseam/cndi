@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "cndi_template",
+  "$comment": "The root of the cndi config schema",
+  "required": [
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "blocks": {
+      "type": "array",
+      "description": "An array of blocks which can be used within the Template",
+      "items": {
+        "type": "object",
+        "description": "A block which can be used within the Template",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the block"
+          },
+          "content": {
+            "type": "object"
+          },
+          "content_path": {
+            "type": "string"
+          },
+          "content_url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "description": "An object which defines the outputs of the cndi template",
+      "required": [
+        "cndi_config",
+        "env",
+        "readme"
+      ],
+      "properties": {
+        "cndi_config": {
+          "type": "object",
+          "description": "The cndi_config body template",
+          "additionalProperties": false,
+          "properties": {
+            "cndi_version": { "type": "string" },
+            "project_name": { "type": "string" },
+            "provider": { "type": "string" },
+            "distribution": { "type": "string" },
+            "infrastructure": {},
+            "cluster_manifests": {},
+            "applications": {}
+          }
+        },
+        "env": {
+          "type": "object",
+          "description": "The dotenv body template",
+          "patternProperties": {
+            "^.*$": {
+            }
+          }
+        },
+        "readme": {
+          "type": "object",
+          "description": "used to configure how the cluster README.md is generated",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^.*$": {
+            }
+          }
+        }
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "description": "An array of prompts to be presented to the user for configuration",
+      "items": {
+        "type": "object",
+        "description": "A prompt to be presented the user of a CNDI template so they can configure it",
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The key which can be used to inject the value later, eg. {{ $.cndi.prompts.responses.myPromptName }}"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message to be presented to the user when they are prompted for a value"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of prompt to be presented to the user",
+            "enum": [
+              "Input",
+              "Secret",
+              "Confirm",
+              "Toggle",
+              "Select",
+              "List",
+              "Checkbox",
+              "Number"
+            ]
+          },
+          "default": {
+            "description": "The default value to be used if the user does not provide one"
+          }
+        }
+      }
+    }
+  }
+}
