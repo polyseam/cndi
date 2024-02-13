@@ -214,9 +214,9 @@ outputs:
             ingress_name: pgadmin-ingress
             ingress_class_name: public
             hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
-            service_name: pgadmin
+            service_name: pgadmin-pgadmin4
             service_port: 80
-            namespace: cnpg-system
+            namespace: postgres
           condition:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
             - ==
@@ -225,7 +225,7 @@ outputs:
     applications:
       pgadmin:
         targetRevision: 1.23.3
-        destinationNamespace: cnpg-system
+        destinationNamespace: postgres
         repoURL: "https://helm.runix.net"
         chart: pgadmin4
         values:
