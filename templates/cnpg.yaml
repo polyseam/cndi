@@ -1,5 +1,30 @@
 blocks:
- - name: pgadmin-ingress
+ - name: deploy_pgadmin_application_blk
+   content:
+    targetRevision: 1.23.3
+    destinationNamespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+    repoURL: "https://helm.runix.net"
+    chart: pgadmin4
+    values:
+      existingSecret: "pgadmin-login-password-secret"
+      env:
+        email: "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
+      persistentVolume:
+        enabled: true
+        size: 1Gi
+      serverDefinitions:
+        enabled: true
+        servers:
+          cndiServer:
+            Name: "My CNDI Server"
+            Group: "Servers"
+            Port: 5432
+            SSLMode: "prefer"
+            Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+            Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+
+ - name: deploy_pgadmin_ingress_blk
    content:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
@@ -30,6 +55,17 @@ blocks:
                     name: pgadmin-pgadmin4
                     port:
                       number: 80
+ - name: pgadmin_login_password_secret_blk
+   content:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgadmin-login-password-secret
+      namespace: "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
+    type: Opaque
+    stringData:
+      password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
@@ -54,11 +90,21 @@ prompts:
       - ==
       - true
 
+  - name: deploy_pgadmin_application
+    default: true
+    message: >-
+      Do you want to install PgAdmin, a web-based database management tool?
+    type: Confirm
+
   - name: deploy_pgadmin_ingress
     default: true
     message: >-
       Do you want to expose PgAdmin to the web?
     type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+      - ==
+      - true
 
   - name: pgadmin_hostname
     default: pgadmin.example.com
@@ -77,13 +123,20 @@ prompts:
     message: >-
       What email do you want to use for your PgAdmin login?
     type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+      - ==
+      - true
 
   - name: pgadmin_login_password
     default: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
     message: >-
       What password do you want to use for your PgAdmin login ?
     type: Secret
-
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+      - ==
+      - true
 
   - name: deploy_postgres_ingress
     default: true
@@ -234,14 +287,11 @@ outputs:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
 
       pgadmin-login-password-secret:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: pgadmin-login-password-secret
-          namespace: "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
-        type: Opaque
-        stringData:
-          password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
+        $cndi.get_block(pgadmin_login_password_secret_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+            - ==
+            - true
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
@@ -273,41 +323,24 @@ outputs:
             - true
 
       pgadmin-ingress:
-        $cndi.get_block(pgadmin-ingress):
+        $cndi.get_block(deploy_pgadmin_ingress_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
             - ==
             - true
 
     applications:
-      pgadmin:
-        targetRevision: 1.23.3
-        destinationNamespace: postgres
-        repoURL: "https://helm.runix.net"
-        chart: pgadmin4
-        values:
-          existingSecret: "pgadmin-login-password-secret"
-          env:
-            email: "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
-          persistentVolume:
-            enabled: true
-            size: 1Gi
-          serverDefinitions:
-            enabled: true
-            servers:
-              cndiServer:
-                Name: "My CNDI Server"
-                Group: "Servers"
-                Port: 5432
-                SSLMode: "prefer"
-                Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-                Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
-                MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
       cnpg:
         targetRevision: 0.18.0
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+      pgadmin-ingress:
+        $cndi.get_block(deploy_pgadmin_application_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+            - ==
+            - true
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
