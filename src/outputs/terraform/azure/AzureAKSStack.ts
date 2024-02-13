@@ -27,6 +27,7 @@ import {
 } from "consts";
 
 import {
+  emitExitEvent,
   getCDKTFAppConfig,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
@@ -137,7 +138,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           console.log(
             "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
           );
-          Deno.exit(11); // TODO: proper error code
+          emitExitEvent(810);
+          Deno.exit(810);
         }
         const count = nodeSpec.count || 1;
 

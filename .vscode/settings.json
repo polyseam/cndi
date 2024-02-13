@@ -11,18 +11,12 @@
   "files.associations": {
     "*.sh.tftpl": "shellscript"
   },
-  "json.schemas": [
-    {
-      "fileMatch": ["*cndi_config.json*"],
-      "url": "/src/schemas/cndi_config.schema.json"
-    }
-  ],
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_config.schema.json": [
+    "src/schemas/cndi_config.schema.json": [
       "cndi_config.yaml"
     ],
-    "https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi-template.schema.json": [
-      "src/templates/*/*.yaml"
+    "src/schemas/cndi_template.schema.json": [
+      "templates/*.yaml"
     ]
   },
   "[typescript]": { "editor.defaultFormatter": "denoland.vscode-deno" },

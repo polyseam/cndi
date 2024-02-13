@@ -99,6 +99,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
             `\nfailed to upgrade ${name} - http response status ${response.status}`,
           ),
         );
+        await emitExitEvent(1100);
         Deno.exit(1100);
       }
       spinner.stop();
