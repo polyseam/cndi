@@ -261,6 +261,7 @@ outputs:
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
+        valuesSchema: https://raw.githubusercontent.com/apache/airflow/main/chart/values.schema.json
         values:
           executor: LocalKubernetesExecutor
           data:

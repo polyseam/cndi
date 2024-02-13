@@ -319,6 +319,7 @@ interface CNDIApplicationSpec {
   values: {
     [key: string]: unknown;
   };
+  valuesSchema: string;
 }
 
 interface SealedSecretsKeys {

@@ -333,5 +333,10 @@
     "code": 1202,
     "message": "failed to parse template JSONC or YAML during 'cndi init'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
+  },
+  {
+    "code": 1300,
+    "message": "failed to construct URL when fetching 'valuesSchema'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/709"
   }
 ]

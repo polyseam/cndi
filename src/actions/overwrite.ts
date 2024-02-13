@@ -35,6 +35,8 @@ import getExternalDNSManifest from "../outputs/core-applications/external-dns.ap
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
+import validateValuesForSchema from "src/validate/valuesSchema.ts";
+
 import {
   KubernetesManifest,
   KubernetesSecret,
@@ -365,6 +367,33 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
       releaseName,
       applicationSpec,
     );
+    if (applicationSpec?.valuesSchema) {
+      if (typeof applicationSpec.valuesSchema === "string") {
+        const valid = await validateValuesForSchema(
+          releaseName,
+          applicationSpec?.valuesSchema,
+          applicationSpec?.values,
+        );
+
+        if (!valid) {
+          console.error(
+            owLabel,
+            ccolors.error(
+              `values do not adhere to provided schema: ${
+                ccolors.user_input(applicationSpec?.valuesSchema)
+              }`,
+            ),
+          );
+          await emitExitEvent(504);
+          Deno.exit(504);
+        } else {
+          console.log(
+            ccolors.success(`validated values for application:`),
+            ccolors.key_name(releaseName),
+          );
+        }
+      }
+    }
     await stageFile(
       path.join("cndi", "cluster_manifests", "applications", filename),
       manifestContent,
