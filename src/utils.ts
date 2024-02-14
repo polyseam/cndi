@@ -75,7 +75,7 @@ const loadCndiConfig = async (
 
   // the user provided a direct path to a cndi_config file
   if (providedPath) {
-    return [(await loadYAMLorJSONC(providedPath)) as CNDIConfig, providedPath];
+    return [(await loadYAML(providedPath)) as CNDIConfig, providedPath];
   }
 
   if (await exists(path.join(cwd, "cndi_config.yaml"), { isFile })) {

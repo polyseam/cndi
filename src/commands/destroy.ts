@@ -1,7 +1,7 @@
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
-import { getPathToTerraformBinary } from "src/utils.ts";
+import { getPathToTerraformBinary, emitExitEvent } from "src/utils.ts";
 
 import { ccolors, Command, path } from "deps";
 
@@ -143,6 +143,7 @@ const destroyCommand = new Command()
       );
       console.log(ccolors.caught(cndiDestroyError));
     }
+    await emitExitEvent(0);
   });
 
 export default destroyCommand;

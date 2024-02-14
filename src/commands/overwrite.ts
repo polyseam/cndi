@@ -1,24 +1,49 @@
-import { Command, Spinners, TerminalSpinner } from "deps";
+import { Command, TerminalSpinner } from "deps";
+import { emitExitEvent } from "src/utils.ts";
 
 // deno-lint-ignore no-explicit-any
 const owAction = (args: any) => {
+  if(!args.initializing){
+    console.log(`cndi overwrite --file "${args.file}"\n`);
+  }
   const spinner = new TerminalSpinner({
-    text: "",
+    // text: "",
     color: "cyan",
-    spinner: Spinners.dots,
+    spinner:{
+      "interval": 80,
+      "frames": [
+        "▰▱▱▱▱▱▱",
+        "▰▰▱▱▱▱▱",
+        "▰▰▰▱▱▱▱",
+        "▰▰▰▰▱▱▱",
+        "▰▰▰▰▰▱▱",
+        "▰▰▰▰▰▰▱",
+        "▰▰▰▰▰▰▰",
+        "▰▱▱▱▱▱▱",
+      ]
+    },
     writer: Deno.stdout,
   });
+
+  spinner.start();
 
   const w = new Worker(import.meta.resolve("src/actions/overwrite.worker.ts"), {
     type: "module",
   });
 
   w.postMessage({ args, type: "begin-overwrite" });
-  spinner.start();
-  w.onmessage = (e) => {
+
+  w.onmessage = async (e) => {
+    console.log()
     if (e.data.type === "complete-overwrite") {
-      spinner.succeed();
       w.terminate();
+      spinner.stop();
+      await emitExitEvent(0);
+      Deno.exit(0);
+    } else if(e.data.type==="error-overwrite"){
+      w.terminate();
+      await emitExitEvent(e.data.code);
+      Deno.exit(e.data.code);
     }
   };
 };

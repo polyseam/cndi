@@ -4,7 +4,7 @@ import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 
 import setTF_VARs from "src/setTF_VARs.ts";
-import { getPathToTerraformBinary } from "src/utils.ts";
+import { getPathToTerraformBinary, emitExitEvent } from "src/utils.ts";
 
 /**
  * COMMAND cndi terrafrom ...args
@@ -106,6 +106,7 @@ const terraformCommand = new Command()
     if (status.code !== 0) {
       Deno.exit(status.code);
     }
+    await emitExitEvent(0);
   });
 
 export default terraformCommand;

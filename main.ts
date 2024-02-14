@@ -4,5 +4,5 @@ import { emitExitEvent } from "./src/utils.ts";
 if (import.meta.main) {
   console.log(""); // pad output
   await cndi();
-  await emitExitEvent(0);
+  // await emitExitEvent(0);
 }

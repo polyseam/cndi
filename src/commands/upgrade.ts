@@ -125,6 +125,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       await emitExitEvent(1101);
       Deno.exit(1101);
     }
+    await emitExitEvent(0);
   }
 }
 
