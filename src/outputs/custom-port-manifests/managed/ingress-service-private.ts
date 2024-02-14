@@ -15,6 +15,7 @@ type ManagedAnnotations = {
 const MANAGED_ANNOTATIONS: ManagedAnnotations = {
   eks: {
     "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal",
+    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
   },
   gke: {
     "networking.gke.io/load-balancer-type": "Internal",

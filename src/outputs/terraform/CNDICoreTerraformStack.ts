@@ -61,6 +61,15 @@ export class CNDITerraformStack extends TerraformStack {
       },
     );
 
+    this.variables.ssh_public_key = new TerraformVariable(
+      this,
+      "ssh_public_key",
+      {
+        type: "string",
+        description: "public key for accessing cluster nodes",
+      },
+    );
+
     if (useSshRepoAuth()) {
       this.variables.git_ssh_private_key = new TerraformVariable(
         this,

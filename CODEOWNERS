@@ -1,0 +1,19 @@
+/templates/basic.yaml @johnstonmatt
+/templates/proxy.yaml @johnstonmatt
+/templates/neo4j.yaml @johnstonmatt
+
+/templates/airflow.yaml @IamTamika
+/templates/hop.yaml @IamTamika
+/templates/cnpg.yaml @IamTamika
+/templates/mssqlserver.yaml @IamTamika @harshil4076
+
+/templates/mysql.yaml @vipmarwah
+
+/templates/mongodb.yaml @harshil4076 @vipmarwah
+/templates/redis.yaml @harshil4076 @vipmarwah
+/templates/superset.yaml @vipmarwah
+
+README.md @johnstonmatt
+demo.md @johnstonmatt
+
+docs/ @IamTamika @johnstonmatt

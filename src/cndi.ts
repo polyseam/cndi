@@ -1,10 +1,10 @@
-import deno_json from "../deno.json" assert { type: "json" };
+import deno_json from "../deno.json" with { type: "json" };
 import "https://deno.land/std@0.196.0/dotenv/load.ts";
 import {
   ccolors,
   Command,
   CompletionsCommand,
-  existsSync,
+  ensureDirSync,
   HelpCommand,
   homedir,
   path,
@@ -18,7 +18,6 @@ import initCommand from "src/commands/init.ts";
 import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
-import installDependenciesIfRequired from "src/install.ts";
 import installCommand from "src/commands/install.ts";
 
 import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
@@ -47,26 +46,15 @@ export default async function cndi() {
   const timestamp = `${Date.now()}`;
   const stagingDirectory = path.join(CNDI_HOME, "staging", timestamp);
 
-  // ensure CNDI_HOME/bin directory exists before installing deps
-  if (!existsSync(path.join(CNDI_HOME, "bin"), { isDirectory: true })) {
-    Deno.mkdirSync(path.join(CNDI_HOME, "bin"), { recursive: true });
-  } else {
-    // if cndi was updated in the previous execution, remove the old unused binary
-    // this is necessary because Windows will not allow you to delete a binary while it is running
-    await removeOldBinaryIfRequired(CNDI_HOME);
-  }
+  // if cndi was updated in the previous execution, remove the old unused binary
+  // this is necessary because Windows will not allow you to delete a binary while it is running
+  await removeOldBinaryIfRequired(CNDI_HOME);
 
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);
 
-  await installDependenciesIfRequired({
-    CNDI_HOME,
-    KUBESEAL_VERSION,
-    TERRAFORM_VERSION,
-  });
-
   try {
-    Deno.mkdirSync(stagingDirectory, { recursive: true });
+    ensureDirSync(stagingDirectory);
   } catch (failedToCreateStagingDirectoryError) {
     console.error(
       cndiLabel,

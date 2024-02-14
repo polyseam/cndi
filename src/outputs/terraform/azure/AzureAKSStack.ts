@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import { ccolors } from "deps";
 
@@ -20,13 +20,16 @@ import {
 
 import {
   DEFAULT_INSTANCE_TYPES,
+  DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
 
 import {
+  emitExitEvent,
   getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -135,7 +138,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           console.log(
             "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
           );
-          Deno.exit(11); // TODO: proper error code
+          emitExitEvent(810);
+          Deno.exit(810);
         }
         const count = nodeSpec.count || 1;
 
@@ -195,7 +199,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         location: this.locals.arm_region.asString,
         name: `cndi-aks-cluster-${project_name}`,
-        kubernetesVersion: "1.27",
+        kubernetesVersion: DEFAULT_K8S_VERSION,
         resourceGroupName: this.rg.name,
         defaultNodePool: {
           ...defaultNodePool,
@@ -210,6 +214,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           networkPlugin: "azure",
           networkPolicy: "azure",
         },
+        automaticChannelUpgrade: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
         storageProfile: {
           fileDriverEnabled: true,
@@ -687,6 +692,11 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value:
+        `az aks get-credentials --resource-group rg-${project_name} --name cndi-aks-cluster-${project_name} --overwrite-existing`,
+    });
   }
 }
 
@@ -694,5 +704,14 @@ export async function stageTerraformSynthAzureAKS(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AzureAKSTerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

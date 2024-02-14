@@ -20,6 +20,7 @@ export * as CDKTFProviderHelm from "npm:@cdktf/provider-helm";
 export * as CDKTFProviderKubernetes from "npm:@cdktf/provider-kubernetes";
 export * as CDKTFProviderTime from "npm:@cdktf/provider-time";
 export * as CDKTFProviderTls from "npm:@cdktf/provider-tls";
+export * as CDKTFProviderLocal from "npm:@cdktf/provider-local";
 
 import { getPrettyJSONString, getStagingDir } from "src/utils.ts";
 import { path, walkSync } from "deps";

@@ -20,6 +20,7 @@ import {
 import { getOwModule } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { createSshKeys } from "src/initialize/sshKeys.ts";
 import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
 import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
@@ -34,6 +35,7 @@ const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 function getFinalEnvString(
   templatePartial = "",
   cndiGeneratedValues: {
+    sshPublicKey: string;
     sealedSecretsKeys: SealedSecretsKeys;
     terraformStatePassphrase: string;
     argoUIAdminPassword: string;
@@ -53,6 +55,9 @@ function getFinalEnvString(
 # Sealed Secrets Keys
 SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
 SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
+
+# SSH Keys
+SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'
 
 # Terraform State Passphrase
 TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
@@ -266,7 +271,8 @@ const initCommand = new Command()
     }
 
     // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys(options.output);
+    const sealedSecretsKeys = await createSealedSecretsKeys();
+    const sshPublicKey = await createSshKeys();
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
@@ -279,11 +285,14 @@ const initCommand = new Command()
     }
 
     const cndiGeneratedValues = {
+      sshPublicKey,
       sealedSecretsKeys,
       terraformStatePassphrase,
       argoUIAdminPassword,
       debugMode: !!options.debug,
     };
+
+    let deployment_target_provider;
 
     if (template) {
       const templateResult = await useTemplate(
@@ -295,6 +304,8 @@ const initCommand = new Command()
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
       env = templateResult.env;
+      deployment_target_provider = templateResult?.responses
+        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
@@ -329,10 +340,12 @@ const initCommand = new Command()
       getPrettyJSONString(vscodeSettings),
     );
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
-    );
+    if (deployment_target_provider !== "dev") {
+      await stageFile(
+        path.join(".github", "workflows", "cndi-run.yaml"),
+        getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
+      );
+    }
 
     await stageFile(".gitignore", getGitignoreContents());
 

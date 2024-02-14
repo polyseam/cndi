@@ -14,10 +14,11 @@ import {
 
 import {
   getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole } from "src/types.ts";
+import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
@@ -340,9 +341,12 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
                 resourceGroupName: this.rg.name,
                 size: machine_type,
                 adminUsername: "ubuntu",
-                adminPassword: "Password123",
+                adminSshKey: [{
+                  publicKey: this.variables.ssh_public_key.stringValue,
+                  username: "ubuntu",
+                }],
                 sourceImageReference,
-                disablePasswordAuthentication: false,
+                disablePasswordAuthentication: true,
                 tags,
                 osDisk,
                 zone,
@@ -366,6 +370,13 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       value:
         `https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${project_name}`,
     });
+
+    // @ts-ignore no-use-before-defined
+    const sshAddr = leaderInstance.publicIpAddress;
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
+    });
   }
 }
 
@@ -375,5 +386,13 @@ export async function stageTerraformSynthAzureMicrok8s(
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new AzureMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

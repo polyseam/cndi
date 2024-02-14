@@ -1,9 +1,6 @@
 import { YAML } from "deps";
 import { CNDIConfig } from "src/types.ts";
-import {
-  DEFAULT_MICROK8S_VERSION,
-  MICROK8S_INSTALL_RETRY_INTERVAL,
-} from "consts";
+import { DEFAULT_K8S_VERSION, MICROK8S_INSTALL_RETRY_INTERVAL } from "consts";
 
 type GetFollowerCloudInitOptions = {
   isWorker: boolean;
@@ -37,7 +34,7 @@ const getFollowerCloudInitYaml = (
   );
 
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
-    DEFAULT_MICROK8S_VERSION;
+    DEFAULT_K8S_VERSION;
   const microk8sChannel = config.infrastructure.cndi?.microk8s?.channel ||
     "stable";
 

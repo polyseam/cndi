@@ -58,18 +58,7 @@ const removeOldBinaryIfRequired = async (
 
   try {
     await Deno.remove(pathToGarbageBinary);
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error(
-        utilsLabel,
-        ccolors.error("\nfailed to delete old"),
-        ccolors.key_name("cndi"),
-        ccolors.error("binary, please try again"),
-      );
-      console.log(ccolors.caught(error, 302));
-      await emitExitEvent(302);
-      Deno.exit(302);
-    }
+  } catch {
     return false;
   }
   return true;
@@ -216,41 +205,49 @@ interface TFResourceFileObject {
 }
 
 // MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithConfig(config: CNDIConfig) {
-  if (!config?.infrastructure?.terraform) return;
-  const terraformBlocks = config.infrastructure.terraform as TFBlocks;
-
+async function patchAndStageTerraformFilesWithInput(input: TFBlocks) {
   const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
 
   const cdktfObj = await loadJSONC(
     path.join(await getStagingDir(), pathToTerraformObject),
   ) as TFBlocks;
 
+  // this is highly inefficient
+  const cdktfWithEmpties = {
+    ...cdktfObj,
+    resource: deepMerge(
+      cdktfObj?.resource || {},
+      input?.resource || {},
+    ),
+    terraform: deepMerge(
+      cdktfObj?.terraform || {},
+      input?.terraform || {},
+    ),
+    variable: deepMerge(
+      cdktfObj?.variable || {},
+      input?.variable || {},
+    ),
+    locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
+    output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
+    module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
+    data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
+    provider: deepMerge(
+      cdktfObj?.provider || {},
+      input?.provider || {},
+    ),
+  };
+
+  const output: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(cdktfWithEmpties)) {
+    if (Object.keys(value).length) {
+      output[key] = value;
+    }
+  }
+
   await stageFile(
     pathToTerraformObject,
-    getPrettyJSONString({
-      ...cdktfObj,
-      resource: deepMerge(
-        cdktfObj?.resource || {},
-        terraformBlocks?.resource || {},
-      ),
-      terraform: deepMerge(
-        cdktfObj?.terraform || {},
-        terraformBlocks?.terraform || {},
-      ),
-      variable: deepMerge(
-        cdktfObj?.variable || {},
-        terraformBlocks?.variable || {},
-      ),
-      locals: deepMerge(cdktfObj?.locals || {}, terraformBlocks?.locals || {}),
-      output: deepMerge(cdktfObj?.output || {}, terraformBlocks?.output || {}),
-      module: deepMerge(cdktfObj?.module || {}, terraformBlocks?.module || {}),
-      data: deepMerge(cdktfObj?.data || {}, terraformBlocks?.data || {}),
-      provider: deepMerge(
-        cdktfObj?.provider || {},
-        terraformBlocks?.provider || {},
-      ),
-    }),
+    getPrettyJSONString(output),
   );
 }
 
@@ -262,7 +259,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform-${fileSuffixForPlatform}`,
+    `terraform${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -274,7 +271,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal-${fileSuffixForPlatform}`,
+    `kubeseal${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -343,16 +340,18 @@ async function persistStagedFiles(targetDirectory: string) {
   const stagingDirectory = await getStagingDir();
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
-      const fileContents = await Deno.readTextFile(entry.path);
       const destinationAbsPath = entry.path.replace(
         stagingDirectory,
         targetDirectory,
       );
 
-      await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
-      await Deno.writeTextFile(destinationAbsPath, fileContents, {
-        create: true,
-      });
+      try {
+        await Deno.mkdir(path.dirname(destinationAbsPath), { recursive: true });
+      } catch {
+        // directory exists already
+      }
+
+      await Deno.copyFile(entry.path, destinationAbsPath);
     }
   }
   await Deno.remove(stagingDirectory, { recursive: true });
@@ -389,9 +388,9 @@ async function checkInitialized(output: string) {
 
 const getFileSuffixForPlatform = () => {
   const fileSuffixForPlatform = {
-    linux: "linux",
-    darwin: "mac",
-    win32: "win.exe",
+    linux: "",
+    darwin: "",
+    win32: ".exe",
   };
   const currentPlatform = platform() as "linux" | "darwin" | "win32";
   return fileSuffixForPlatform[currentPlatform];
@@ -405,16 +404,6 @@ const getCndiInstallPath = (): string => {
     suffix = ".exe";
   }
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
-};
-
-const getPathToOpenSSLForPlatform = () => {
-  const currentPlatform = platform() as "linux" | "darwin" | "win32";
-
-  if (currentPlatform === "win32") {
-    return path.join("/", "Program Files", "Git", "usr", "bin", "openssl.exe");
-  }
-
-  return path.join("/", "usr", "bin", "openssl");
 };
 
 function base10intToHex(decimal: number): string {
@@ -519,7 +508,6 @@ export {
   getFileSuffixForPlatform,
   getLeaderNodeNameFromConfig,
   getPathToKubesealBinary,
-  getPathToOpenSSLForPlatform,
   getPathToTerraformBinary,
   getPrettyJSONString,
   getSecretOfLength,
@@ -532,7 +520,7 @@ export {
   loadCndiConfig,
   loadJSONC,
   loadYAML,
-  patchAndStageTerraformFilesWithConfig,
+  patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,
   replaceRange,

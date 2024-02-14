@@ -147,16 +147,24 @@ outputs:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
     infrastructure:
       cndi:
+        external_dns:
+          provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
 
     cluster_manifests:
+      $cndi.comment(external-dns-secret): External DNS Credentials
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_autodns) }}"
+            - ==
+            - true
       $cndi.comment(airflow-git-sync-secret): Airflow Credentials
       git-sync-credentials-secret:
         $cndi.get_block(git_sync_dedicated):
@@ -249,7 +257,7 @@ outputs:
         chart: cloudnative-pg
 
       airflow:
-        targetRevision: 1.7.0
+        targetRevision: 1.11.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
@@ -324,7 +332,10 @@ outputs:
         - false
 
   readme:
-    $cndi.comment(airflow-heading): Airflow Comment in Readme
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
-    airflow-section: " # Welcome to Airflow!"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
+      {}
+    airflow-section: |
+    # airflow 
+    

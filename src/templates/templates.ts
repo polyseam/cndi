@@ -11,6 +11,7 @@ import {
 import CNDITemplateComparators from "./comparators.ts";
 import { BuiltInValidators } from "./validators.ts";
 import {
+  characterAtPositionIsQuote,
   getObjectKeysRecursively,
   homedir,
   isValidUrl,
@@ -18,9 +19,9 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
-// TODO: make this real/remote
-export const POLYSEAM_TEMPLATE_DIRECTORY =
-  "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
+import { emitExitEvent } from "src/utils.ts";
+
+import { POLYSEAM_TEMPLATE_DIRECTORY } from "consts";
 
 interface SealedSecretsKeys {
   sealed_secrets_private_key: string;
@@ -84,6 +85,8 @@ type Block = {
   content_path?: string;
   content_url?: string;
 };
+
+const templatesLabel = ccolors.faded("\nsrc/templates/templates.ts:");
 
 // better to have a defined list of builtin templates than walk /templates directory
 export function getKnownTemplates() {
@@ -207,8 +210,10 @@ function getCliffyPrompts(
 ): Array<CliffyPrompt> {
   return promptDefinitions.map((promptDefinition) => {
     const type = PromptTypes[promptDefinition.type];
+    const message = ccolors.prompt(promptDefinition.message); // add color to prompt message
     return {
       ...promptDefinition,
+      message,
       type,
       after: async (
         result: Record<string, CNDITemplatePromptResponsePrimitive>,
@@ -384,13 +389,21 @@ export function literalizeTemplateWithResponseValues(
           `${fn}::${key};`,
         );
       } else {
-        const indexOfOpenWrappingQuote = indexOfOpeningBraces - 1;
-        const indexOfClosingWrappingQuoteInclusive = indexOfClosingBraces + 3;
+        let start = indexOfOpeningBraces;
+        let end = indexOfClosingBraces + 2;
+
+        if (
+          characterAtPositionIsQuote(literalizedString, start - 1)
+        ) start--;
+
+        if (
+          characterAtPositionIsQuote(literalizedString, end)
+        ) end++;
 
         literalizedString = replaceRange(
           literalizedString,
-          indexOfOpenWrappingQuote,
-          indexOfClosingWrappingQuoteInclusive,
+          start,
+          end,
           valueToSubstitute,
         );
       }
@@ -920,8 +933,29 @@ export async function useTemplate(
       const templateResponse = await fetch(tpl.url);
       templateContents = await templateResponse.text();
     } else {
-      // user did nothing sensible
-      throw new Error(`template '${templateIdentifier}' not found`);
+      // maybe the template is in the directory, but not officially listed
+      try {
+        const templateResponse = await fetch(
+          `${POLYSEAM_TEMPLATE_DIRECTORY}${templateIdentifier}.yaml`,
+        );
+
+        if (!templateResponse.ok) {
+          throw new Error(
+            `${templateResponse.status} - ${templateResponse.statusText}`,
+          );
+        } else {
+          templateContents = await templateResponse.text();
+        }
+      } catch (fetchError) {
+        console.log(
+          templatesLabel,
+          ccolors.error("CNDI Template not found for identifier:"),
+          ccolors.user_input(`"${templateIdentifier}"\n`),
+        );
+        console.log(ccolors.caught(fetchError, 1200));
+        await emitExitEvent(1200);
+        Deno.exit(1200);
+      }
     }
   }
 

@@ -97,7 +97,7 @@ export default async function pushStateFromRun({
     "terraform.tfstate.encrypted",
   );
 
-  console.log("encrypted state!");
+  // console.log("encrypted state!");
 
   try {
     Deno.writeTextFileSync(pathToNewState, encryptedState);

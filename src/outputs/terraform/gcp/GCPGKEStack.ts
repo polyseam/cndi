@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   App,
@@ -20,7 +20,11 @@ import {
   SEALED_SECRETS_VERSION,
 } from "consts";
 
-import { getCDKTFAppConfig, useSshRepoAuth } from "src/utils.ts";
+import {
+  getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
+  useSshRepoAuth,
+} from "src/utils.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
@@ -30,7 +34,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     super(scope, name, cndi_config);
 
     const project_name = this.locals.cndi_project_name.asString;
-
+    const project_id = this.locals.gcp_project_id.asString;
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
@@ -155,6 +159,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       {
         name: project_name,
         location: this.locals.gcp_region.asString,
+        nodeLocations: [this.locals.gcp_zone.asString],
         // https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#example-usage---with-a-separately-managed-node-pool-recommended
         // "We can't create a cluster with no node pool defined, but we want to only use
         // separately managed node pools. So we create the smallest possible default
@@ -590,7 +595,12 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     });
 
     new TerraformOutput(this, "resource_group_url", {
-      value: `https://console.cloud.google.com/welcome?project=${project_name}`,
+      value: `https://console.cloud.google.com/welcome?project=${project_id}`,
+    });
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value:
+        `gcloud container clusters get-credentials ${project_name} --region ${this.locals.gcp_region.asString} --project ${project_id}`,
     });
   }
 }
@@ -599,5 +609,14 @@ export async function stageTerraformSynthGCPGKE(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new GCPGKETerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }

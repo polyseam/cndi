@@ -15,15 +15,19 @@ import {
 
 import {
   getCDKTFAppConfig,
+  patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole } from "src/types.ts";
+
+import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 export class GCPMicrok8sStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+
+    new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
 
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
@@ -253,6 +257,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             networkInterface: [networkInterface],
             metadata: {
               "user-data": userData,
+              "ssh-keys": `ubuntu:${this.variables.ssh_public_key.stringValue}`,
             },
           },
         );
@@ -330,7 +335,14 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
 
     new TerraformOutput(this, "resource_group_url", {
       value:
-        `https://console.cloud.google.com/welcome?project=${this.locals.project_id.asString}`,
+        `https://console.cloud.google.com/welcome?project=${this.locals.gcp_project_id.asString}`,
+    });
+
+    const sshAddr = // @ts-ignore no-use-before-defined
+      leaderInstance.networkInterface.get(0).accessConfig.get(0).natIp;
+
+    new TerraformOutput(this, "get_kubeconfig_command", {
+      value: `ssh -i 'cndi_rsa' ubuntu@${sshAddr} -t 'sudo microk8s config'`,
     });
   }
 }
@@ -339,5 +351,14 @@ export async function stageTerraformSynthGCPMicrok8s(cndi_config: CNDIConfig) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new GCPMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+
+  // write terraform stack to staging directory
   await stageCDKTFStack(app);
+
+  const input: TFBlocks = {
+    ...cndi_config?.infrastructure?.terraform,
+  };
+
+  // patch cdk.tf.json with user's terraform pass-through
+  await patchAndStageTerraformFilesWithInput(input);
 }
