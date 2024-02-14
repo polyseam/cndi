@@ -3,7 +3,7 @@ import { Command, Spinners, TerminalSpinner } from "deps";
 // deno-lint-ignore no-explicit-any
 const owAction = (args: any) => {
   const spinner = new TerminalSpinner({
-    text: "generating manifests and resources...",
+    text: "",
     color: "cyan",
     spinner: Spinners.dots,
     writer: Deno.stdout,
@@ -16,7 +16,7 @@ const owAction = (args: any) => {
   w.postMessage({ args, type: "begin-overwrite" });
   spinner.start();
   w.onmessage = (e) => {
-    if (e.data.type === "overwrite-complete") {
+    if (e.data.type === "complete-overwrite") {
       spinner.succeed();
       w.terminate();
     }

@@ -53,7 +53,7 @@ interface OverwriteActionArgs {
 type OverwriteWorkerMessage = {
   data: {
     args: OverwriteActionArgs;
-    type: "begin-overwrite" | "overwrite-complete";
+    type: "begin-overwrite" | "complete-overwrite";
   };
 };
 
@@ -385,7 +385,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
   try {
     await persistStagedFiles(options.output);
-    console.log();
+    console.log("  ");
   } catch (errorPersistingStagedFiles) {
     console.error(
       owLabel,
@@ -403,5 +403,5 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log("\n" + completionMessage);
-  self.postMessage({ type: "overwrite-complete" });
+  self.postMessage({ type: "complete-overwrite" });
 };
