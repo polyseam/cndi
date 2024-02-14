@@ -273,7 +273,7 @@ Click on your on eks cluster control plane
 
 ![current resource group](/docs/walkthroughs/eks/img/resource-groups.png)
 
-## attach the load balancer to your domain 🌐
+## attach the load balancer to your domain manually 🌐
 
 At the end of the cndi run there is also an output called `public host`, which
 is the **DNS** (CNAME) of the load Balancer thats attached to your EKS
@@ -286,9 +286,24 @@ instances.
 - Create an CNAME record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
-![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png) Open the
-domain name you've assigned for ArgoCD in your browser to see the Argo Login
-page.
+![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png)
+
+If everything is working correctly you should now open the domain name you've
+assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
+changes may take a few minutes to propagate.
+
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
+
+## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
+
+Instead of manually creating a CNAME record in your domain's DNS settings, if
+you enabled & configured ExternalDNS during the cndi init process then
+ExternalDNS will automatically create a CNAME record in Route 53, pointing to
+your load balancer's public host. This process eliminates the need for manual
+DNS record management.If everything is working correctly you should now open the
+domain name you've assigned for ArgoCD in your browser to see the ArgoCD login
+page. The DNS changes may take a few minutes to propagate
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
