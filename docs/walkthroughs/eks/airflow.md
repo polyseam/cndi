@@ -67,70 +67,127 @@ as Code and Cluster Configuration:
 cndi init --interactive
 ```
 
-You will get an interactive prompt where you'll name your project, then one to
-specify the CNDI template you want.
+You will first be prompted to enter the name of your cndi project
 
-For this project select the `eks/airflow` Template.
+```shell
+Please enter a name for your CNDI project: (my-cndi-cluster)
+```
+
+When you're prompted to choose a template for your project, select the airflow
+template. This option is tailored for projects requiring orchestration and
+workflow automation. The prompt will look like this:
 
 ```shell
 ? Pick a template
-   aws/basic
-   gce/basic
-   avm/basic
- ❯ eks/airflow
-   avm/airflow
-   gce/airflow
+   basic
+ ❯ airflow # Highlighted as the current selection
+   cnpg
+   neo4j
+   mssqlserver
 ```
 
-Below is the list of all of the interactive prompt values that should be
-supplied for this project:
+Make sure airflow is highlighted and press Enter to confirm your selection.
 
-- **Cndi Project Name**: _name of project_
-- **Template**: _list of templates to choose from_
+Next, you'll need to decide where you want to deploy your cluster. For this
+project, choose aws if you're deploying to Amazon Web Services, which is
+recommended for its scalability and integration capabilities. The prompt will
+appear as follows:
 
----
+```shell
+? Where do you want to deploy your cluster?
+ ❯ aws # Highlighted as the current selection
+   azure
+   gcp
+   dev
+```
 
-- **GitHub Username**: _a user's handle on GitHub._
-- **GitHub Repository URL**: _the url for the GitHub repository that will hold
-  all cluster configuration_
-- **GitHub Personal Access Token**: _the access token CNDI will use to access
-  your repo for cluster creation and synchronization_
+Ensure `aws` is highlighted and press Enter to proceed.
 
----
+Finally, select a Kubernetes distribution for your deployment. The eks (Elastic
+Kubernetes Service) option is for deploying on AWS, offering a managed
+Kubernetes service that simplifies running Kubernetes applications. The prompt
+will be:
 
-- **AWS Access key ID**: _access keys are long-term credentials for an IAM user_
-- **AWS Secret Access key**: _access keys are long-term credentials for an IAM
-  user_
-- **AWS Region**: _region where the infastructure is being created_
+```shell
+? Select a distribution
+   microk8s
+ ❯ eks # Highlighted as the current selection
+```
 
----
+After confirming that `eks` is highlighted, press `Enter` to finalize your
+choice. You will then need to provide specific information at various
+interactive prompts. Below is a comprehensive list of the prompts used during
+this init process:
 
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
-  synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to
-  synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
-  will be stored_
+```
+cndi init --interactive
 
----
+ ? Please enter a name for your CNDI project: (my-cndi-cluster) » my-cndi-cluster
+ ? Pick a template » airflow
+ ? Where do you want to deploy your cluster? » aws
+ ? Select a distribution (microk8s) » eks
+ ? Would you like ArgoCD to connect to your repo using a Git token or SSH key? (token) » token
+ ? What is your git username? () » IamTamika
+ ? Please enter your Git Personal Access Token: () » *******
+ ? Please enter your Git Repo URL: () »
+ ? What email address should be used for Let"s Encrypt certificate registration? (jane.doe@example.com) » tamika.taylor@untribe.com
+ ? Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
+  ? Please select your DNS provider (aws) » aws
+ ? Please enter your AWS Access Key ID: () »  ***   
+ ? Please enter your AWS Secret Access Key: () » ****
+ ? Please enter your AWS Region: (us-east-1) » us-east-1 
+ ? Do you want to expose ArgoCD with an Ingress? (Y/n) » Yes
+ ? What hostname should ArgoCD be accessible at? (argocd.example.com) » argocd.untribe.com
+ ? Do you want to expose the Airflow UI to the web? (Y/n) » Yes
+ ? What hostname should Airflow be accessible at? (airflow.example.com) » airflow.untribe.com
+ ? What is the URL of the Git repository containing your Airflow DAGs? (https://github.com/polyseam/demo-dag-bag) » https://github.com/polyseam/demo-dag-bag
+ ? Do you want to use your cluster credentials for Airflow's Git Sync? (Y/n) » Yes
+```
 
-- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
-  be hosted_
-- **Domain name you want Airflow to be accessible on**: _domain where Airflow
-  will be hosted_
+#### Project Setup:
 
----
+- **Cndi Project Name**: Specify the name of your project.
+- **Template**: Choose from a provided list of templates, each tailored to
+  different project needs.
 
-- **Email address you want to use for lets encrypt:** _an email for lets encrypt
-  to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to
-  use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to
-  use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:**
-  _name of the postgresql database you want to use for airflow cnpg database_
+#### GitHub Configuration:
 
-![AWS instances dashboard](/docs/walkthroughs/eks/img/cndi-init-interactive.png)
+- **GitHub Username**: Your GitHub handle.
+- **GitHub Repository URL**: The URL of the GitHub repository for storing all
+  cluster configurations.
+- **GitHub Personal Access Token**: An access token allowing CNDI to interact
+  with your repository for cluster creation and synchronization.
+
+#### AWS Credentials:
+
+- **AWS Access Key ID**: Long-term credentials for an IAM user.
+- **AWS Secret Access Key**: Long-term credentials for an IAM user.
+- **AWS Region**: The AWS region where the infrastructure will be deployed.
+
+#### Airflow DAG Storage:
+
+- **Git Username for Airflow DAG Storage**: Your GitHub handle for syncing
+  Airflow DAGs.
+- **Git Password for Airflow DAG Storage**: A personal access token for DAG
+  synchronization.
+- **Git Repo for Airflow DAG Storage**: The URL of the repository where your
+  Airflow DAGs will be stored.
+
+#### Domain Configuration:
+
+- **Domain for ArgoCD**: The domain where ArgoCD will be accessible.
+- **Domain for Airflow**: The domain where Airflow will be accessible.
+
+#### Security and Database:
+
+- **Email for Lets Encrypt**: An email address for Lets Encrypt to use when
+  generating certificates.
+- **Username for Airflow CNPG Database**: The username for accessing the Airflow
+  database.
+- **Password for Airflow CNPG Database**: The password for accessing the Airflow
+  database.
+- **Name of the PostgreSQL Database for Airflow CNPG**: The name of the
+  PostgreSQL database for the Airflow CNPG database.
 
 This process will generate a `cndi_config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
