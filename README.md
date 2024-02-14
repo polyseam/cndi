@@ -96,7 +96,7 @@ It's also possible to specify a Template URL to initialize with. A Template URL
 resolves to a CNDI Template file, this means that you are not limited to only
 Templates the CNDI team has put together, you can point to any arbitrary
 template file that follows the
-[Template Schema](/src/schemas/cndi-template.schema.json).
+[Template Schema](/src/schemas/cndi_template.schema.json).
 
 These Template URLs can be `file://` URLs which have an absolute path to the
 file locally, or typical remote or `https://` URLs over the net.
@@ -115,7 +115,7 @@ you want to learn about what CNDI is really creating, the best file to look at
 is the `cndi_config.yaml` file in the root of your repository.
 
 We break down all of the generated files later in this document in the
-[outputs](#outputs-📂) section.
+[outputs](#outputs-) section.
 
 The next step for our one-time project setup is to make sure that we have all
 the required environment variables for our project in our `.env` file that CNDI
