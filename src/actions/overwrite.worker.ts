@@ -50,7 +50,15 @@ interface OverwriteActionArgs {
   initializing: boolean;
 }
 
-export const overwriteAction = async (options: OverwriteActionArgs) => {
+type OverwriteWorkerMessage = {
+  data: {
+    args: OverwriteActionArgs;
+    type: "begin-overwrite" | "overwrite-complete";
+  };
+};
+
+self.onmessage = async (message: OverwriteWorkerMessage) => {
+  const options = message.data.args;
   const pathToKubernetesManifests = path.join(
     options.output,
     "cndi",
@@ -395,4 +403,5 @@ export const overwriteAction = async (options: OverwriteActionArgs) => {
     : "overwrote your cndi project in the ./cndi directory!";
 
   console.log("\n" + completionMessage);
+  self.postMessage({ type: "overwrite-complete" });
 };

@@ -1,27 +1,32 @@
-import { Command, delay, Spinners, TerminalSpinner } from "deps";
+import { Command, Spinners, TerminalSpinner } from "deps";
 
-const getOwModule = async () => {
-  console.log(); // pad output
+// deno-lint-ignore no-explicit-any
+const owAction = (args: any) => {
   const spinner = new TerminalSpinner({
-    text: "loading terraform modules...",
+    text: "generating manifests and resources...",
     color: "cyan",
-    indent: 0,
-    spinner: Spinners.windows,
+    spinner: Spinners.dots,
     writer: Deno.stdout,
   });
 
+  const w = new Worker(import.meta.resolve("src/actions/overwrite.worker.ts"), {
+    type: "module",
+  });
+
+  w.postMessage({ args, type: "begin-overwrite" });
   spinner.start();
-  await delay(1000); // let the spinner start to spin
-  const owMod = await import("src/actions/overwrite.ts");
-  spinner.succeed("terraform modules loaded!\n");
-  return owMod;
+  w.onmessage = (e) => {
+    if (e.data.type === "overwrite-complete") {
+      spinner.succeed();
+      w.terminate();
+    }
+  };
 };
 
 /**
  * COMMAND cndi overwrite
  * Creates a CNDI cluster by reading the contents of ./cndi
  */
-
 const overwriteCommand = new Command()
   .description(`Update cndi project files using cndi_config.yaml file.`)
   .alias("ow")
@@ -38,9 +43,6 @@ const overwriteCommand = new Command()
     'true if "cndi init" is the caller of this command',
     { hidden: true, default: false },
   )
-  .action(async (...args) => {
-    const owMod = await getOwModule();
-    owMod.overwriteAction(...args);
-  });
+  .action(owAction);
 
-export { getOwModule, overwriteCommand };
+export { overwriteCommand, owAction };

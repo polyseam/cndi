@@ -17,7 +17,7 @@ import {
   useTemplate,
 } from "src/templates/templates.ts";
 
-import { getOwModule } from "src/commands/overwrite.ts";
+import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
@@ -349,20 +349,18 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    const owMod = await getOwModule();
-
     if (template) {
       await persistStagedFiles(options.output);
 
       // because there is no "pathToConfig" when using a template, we need to set it here
-      await owMod.overwriteAction({
+      await owAction({
         output: options.output,
         initializing: true,
       });
       return;
     }
     await persistStagedFiles(options.output);
-    await owMod.overwriteAction({ output: options.output, initializing: true });
+    await owAction({ output: options.output, initializing: true });
   });
 
 export default initCommand;
