@@ -1,9 +1,7 @@
 import { ccolors, loadEnv, path } from "deps";
 
 import {
-  emitExitEvent,
   getPrettyJSONString,
-  getStagingDir,
   getYAMLString,
   loadCndiConfig,
   loadJSONC,
@@ -36,6 +34,7 @@ import getExternalDNSManifest from "../outputs/core-applications/external-dns.ap
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import {
+  CNDIConfig,
   KubernetesManifest,
   KubernetesSecret,
   ManagedNodeKind,
@@ -98,7 +97,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     );
 
     const envPath = path.join(options.output, ".env");
-    let config: any;
+    let config: CNDIConfig;
     let pathToConfig: string;
 
     try {
@@ -371,6 +370,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         const secret = cluster_manifests[key] as KubernetesSecret;
         const secretFileName = `${key}.yaml`;
         let sealedSecretManifestWithKSC;
+
         try {
           sealedSecretManifestWithKSC = await getSealedSecretManifestWithKSC(
             secret,
@@ -396,7 +396,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           // add the ksc to the ks_checks object
           ks_checks = {
             ...ks_checks,
-            ...sealedSecretManifestWithKSC.ksc,
+            ...sealedSecretManifestWithKSC?.ksc,
           };
 
           await stageFile(
@@ -411,6 +411,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         }
         continue;
       }
+
       const manifestFilename = `${key}.yaml`;
       await stageFile(
         path.join("cndi", "cluster_manifests", manifestFilename),
@@ -468,19 +469,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         ccolors.success("staged application manifest:"),
         ccolors.key_name(filename),
       );
-    }
-
-    let stagingDir: string;
-
-    try {
-      stagingDir = getStagingDir();
-    } catch (errorGettingStagingDir) {
-      self.postMessage({
-        type: "error-overwrite",
-        code: errorGettingStagingDir.code,
-        message: errorGettingStagingDir.message,
-      });
-      return;
     }
 
     try {

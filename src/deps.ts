@@ -80,11 +80,9 @@ export { simpleGit } from "npm:simple-git@3.18.0";
 import CryptoJS from "npm:crypto-js@4.1.1";
 
 // spinners
-export {
-  default as TerminalSpinner,
-  Spinners,
-} from "https://deno.land/x/kia@0.4.1/mod.ts";
 
+export { Spinner } from "https://deno.land/std@0.216.0/cli/spinner.ts";
+export { type SpinnerOptions } from "https://deno.land/std@0.216.0/cli/spinner.ts";
 // import/export required
 export { CryptoJS };
 export type { UpgradeOptions };

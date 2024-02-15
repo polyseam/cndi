@@ -1,4 +1,4 @@
-import { Command, TerminalSpinner } from "deps";
+import { Command, Spinner } from "deps";
 import { emitExitEvent, getPathToCndiConfig } from "src/utils.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -8,23 +8,19 @@ const owAction = async (args: any) => {
     console.log(`cndi overwrite --file "${pathToConfig}"\n`);
   }
 
-  const spinner = new TerminalSpinner({
-    // text: "",
+  const spinner = new Spinner({
+    interval: 80,
     color: "cyan",
-    spinner: {
-      "interval": 80,
-      "frames": [
-        "▰▱▱▱▱▱▱",
-        "▰▰▱▱▱▱▱",
-        "▰▰▰▱▱▱▱",
-        "▰▰▰▰▱▱▱",
-        "▰▰▰▰▰▱▱",
-        "▰▰▰▰▰▰▱",
-        "▰▰▰▰▰▰▰",
-        "▰▱▱▱▱▱▱",
-      ],
-    },
-    writer: Deno.stdout,
+    spinner: [
+      "▰▱▱▱▱▱▱",
+      "▰▰▱▱▱▱▱",
+      "▰▰▰▱▱▱▱",
+      "▰▰▰▰▱▱▱",
+      "▰▰▰▰▰▱▱",
+      "▰▰▰▰▰▰▱",
+      "▰▰▰▰▰▰▰",
+      "▰▱▱▱▱▱▱",
+    ],
   });
 
   spinner.start();

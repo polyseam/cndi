@@ -1,7 +1,6 @@
 import { ccolors, platform } from "deps";
 import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
 import {
-  emitExitEvent,
   getPathToKubesealBinary,
   getYAMLString,
   sha256Digest,
@@ -14,10 +13,10 @@ const sealedSecretManifestLabel = ccolors.faded(
   "\nsrc/outputs/sealed-secret-manifest.ts:",
 );
 
-const parseCndiSecret = async (
+const parseCndiSecret = (
   inputSecret: KubernetesSecret,
   dotEnvPath: string,
-): Promise<KubernetesSecretWithStringData> => {
+): KubernetesSecretWithStringData => {
   // convert secret.data to secret.stringData
   const outputSecret = {
     stringData: {},
@@ -228,7 +227,6 @@ const getSealedSecretManifestWithKSC = async (
 
   if (ks_checks[ksId] === secretDigest) {
     // secret has not changed since last deployment
-
     return null;
   }
 

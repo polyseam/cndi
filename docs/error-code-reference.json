@@ -71,7 +71,7 @@
   },
   {
     "code": 500,
-    "message": "cndi_config not found during 'cndi overwrite'",
+    "message": "cndi_config.yaml not found during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/508"
   },
   {
@@ -218,16 +218,6 @@
     "code": 902,
     "message": "cndi_config invalid: does not have any 'infrastructure.nodes'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/568"
-  },
-  {
-    "code": 903,
-    "message": "cndi_config invalid: contains at least one node without a 'kind'",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/569"
-  },
-  {
-    "code": 904,
-    "message": "cndi_config invalid: contains multiple node 'kind's",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/570"
   },
   {
     "code": 905,

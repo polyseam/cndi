@@ -37,17 +37,6 @@ async function sha256Digest(message: string): Promise<string> {
   return hashHex;
 }
 
-const loadYAMLorJSONC = async (
-  filePath: string,
-): Promise<JSONC.JsonValue | unknown> => {
-  if (filePath.endsWith(".yaml") || filePath.endsWith(".yml")) {
-    return await loadYAML(filePath);
-  }
-  if (filePath.endsWith(".jsonc") || filePath.endsWith(".json")) {
-    return await loadJSONC(filePath);
-  }
-};
-
 const removeOldBinaryIfRequired = async (
   CNDI_HOME: string,
 ): Promise<boolean> => {
@@ -100,7 +89,7 @@ const loadCndiConfig = async (
   try {
     const config = await loadYAML(pathToConfig) as CNDIConfig;
     return { config, pathToConfig };
-  } catch (error) {
+  } catch (_error) {
     throw new Error(
       [
         utilsLabel,
