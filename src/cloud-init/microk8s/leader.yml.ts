@@ -158,8 +158,8 @@ const getLeaderCloudInitYaml = (
     packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
       `echo "Setting NFS(hostpath-storage) as default storage class"`,
-      `while ! sudo microk8s kubectl create storageclass nfs --provisioner=microk8s.io/hostpath --reclaim-policy=Delete --volume-binding-mode=WaitForFirstConsumer`,
-      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+      `while ! sudo microk8s kubectl create storageclass nfs --provisioner=microk8s.io/hostpath --reclaim-policy=Delete --volume-binding-mode=WaitForFirstConsumer; do echo 'microk8s create new sc, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+      `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to patch nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
       `echo "NFS is now the default storage class"`,
     ];
     nfsInstallCommands = []; // no nfs on dev clusters, hostpath-storage is installed declaratively
