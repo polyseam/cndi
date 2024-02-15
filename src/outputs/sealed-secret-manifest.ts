@@ -77,17 +77,22 @@ const parseCndiSecret = async (
         }
       } else {
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
-        console.error(
-          sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported.\nUse"),
-          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
-          ccolors.error("to reference environment variables at"),
-          ccolors.key_name(
-            `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
-          ),
+        throw new Error(
+          [
+            sealedSecretManifestLabel,
+            ccolors.error("Secret string literals are not supported.\nUse"),
+            ccolors.key_name(
+              `"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`,
+            ),
+            ccolors.error("to reference environment variables at"),
+            ccolors.key_name(
+              `"${inputSecret.metadata.name}.data.${dataEntryKey}"`,
+            ),
+          ].join(" "),
+          {
+            cause: 700,
+          },
         );
-        await emitExitEvent(700);
-        Deno.exit(700);
       }
     }
 
@@ -131,30 +136,36 @@ const parseCndiSecret = async (
           outputSecret.isPlaceholder = false;
         }
       } else {
-        console.error(
-          sealedSecretManifestLabel,
-          ccolors.error("Secret string literals are not supported.\nUse"),
-          ccolors.key_name(`"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`),
-          ccolors.error("to reference environment variables at"),
-          ccolors.key_name(
-            `"cndi_config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
-          ),
+        throw new Error(
+          [
+            sealedSecretManifestLabel,
+            ccolors.error("Secret string literals are not supported.\nUse"),
+            ccolors.key_name(
+              `"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`,
+            ),
+            ccolors.error("to reference environment variables at"),
+            ccolors.key_name(
+              `"cndi_config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
+            ),
+          ].join(" "),
+          { cause: 701 },
         );
-        await emitExitEvent(701);
-        Deno.exit(701);
       }
     }
   } else {
-    console.error(
-      sealedSecretManifestLabel,
-      ccolors.error(
-        `Secret`,
-      ),
-      ccolors.key_name(`"${inputSecret.metadata.name}"`),
-      ccolors.error("has no data or stringData"),
+    throw new Error(
+      [
+        sealedSecretManifestLabel,
+        ccolors.error(
+          `Secret`,
+        ),
+        ccolors.key_name(`"${inputSecret.metadata.name}"`),
+        ccolors.error("has no data or stringData"),
+      ].join(" "),
+      {
+        cause: 702,
+      },
     );
-    await emitExitEvent(702);
-    Deno.exit(702);
   }
   delete outputSecret.data;
   return outputSecret;
@@ -249,9 +260,10 @@ const getSealedSecretManifestWithKSC = async (
   const kubesealCommandOutput = await kubesealCommand.output();
 
   if (kubesealCommandOutput.code !== 0) {
-    console.log("kubeseal failed");
     Deno.stdout.write(kubesealCommandOutput.stderr);
-    Deno.exit(332); // arbitrary exit code
+    throw new Error("kubeseal command exited with non-zero status code.", {
+      cause: kubesealCommandOutput.code,
+    });
   } else {
     sealed = new TextDecoder().decode(kubesealCommandOutput.stdout);
   }

@@ -1,6 +1,7 @@
 import { ccolors, loadEnv, path } from "deps";
 
 import {
+  emitExitEvent,
   getPrettyJSONString,
   getStagingDir,
   getYAMLString,
@@ -41,7 +42,7 @@ import {
 } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 
-const owLabel = ccolors.faded("\nsrc/commands/overwrite.ts:");
+const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
 interface OverwriteActionArgs {
   output: string;
@@ -60,14 +61,29 @@ type OverwriteWorkerMessage = {
 declare const self: {
   onmessage: (message: OverwriteWorkerMessage) => void;
   postMessage: (
-    message: { type: "complete-overwrite" | "error-overwrite"; code?: number },
+    message: {
+      type: "complete-overwrite" | "error-overwrite";
+      code?: number;
+      message?: string;
+    },
   ) => void;
-  close: () => void;
+  close: () => never;
+  Deno: typeof Deno;
+};
+
+// forgive me
+self.Deno.exit = (code?: number): never => {
+  if (code) {
+    self.postMessage({ type: "error-overwrite", code });
+  } else {
+    self.postMessage({ type: "complete-overwrite" });
+  }
+  self.close();
 };
 
 self.onmessage = async (message: OverwriteWorkerMessage) => {
+  // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
-
     const options = message.data.args as OverwriteActionArgs;
     const pathToKubernetesManifests = path.join(
       options.output,
@@ -82,53 +98,101 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     );
 
     const envPath = path.join(options.output, ".env");
+    let config: any;
+    let pathToConfig: string;
 
-    const [config, pathToConfig] = await loadCndiConfig(options?.file);
+    try {
+      const result = await loadCndiConfig(options?.file);
+      config = result.config;
+      pathToConfig = result.pathToConfig;
+    } catch (errorLoadingCndiConfig) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: 500,
+        message: errorLoadingCndiConfig.message,
+      });
+      return;
+    }
 
-    if (!options.initializing) {
-      console.log();
-      console.log(`cndi overwrite --file "${pathToConfig}"\n`);
-    } else {
+    if (options.initializing) {
       await loadEnv({ export: true, envPath });
       console.log();
     }
 
-    await validateConfig(config, pathToConfig);
+    try {
+      await validateConfig(config, pathToConfig);
+    } catch (errorValidatingConfig) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: errorValidatingConfig.cause,
+        message: errorValidatingConfig.message,
+      });
+    }
 
     const sealedSecretsKeys = loadSealedSecretsKeys();
     const terraformStatePassphrase = loadTerraformStatePassphrase();
     const argoUIAdminPassword = loadArgoUIAdminPassword();
 
     if (!sealedSecretsKeys) {
-      console.error(
-        owLabel,
-        ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
-        ccolors.error(`and/or`),
-        ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-        ccolors.error(`are not present in environment`),
-      );
-      self.postMessage({ type: "error-overwrite", code: 501 });
+      try {
+        throw new Error(
+          [
+            owLabel,
+            ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+            ccolors.error(`and/or`),
+            ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+            ccolors.error(`are not present in environment`),
+          ].join(" "),
+          { cause: 501 },
+        );
+      } catch (error) {
+        self.postMessage({
+          type: "error-overwrite",
+          code: error.cause,
+          message: error.message,
+        });
+      }
       return;
     }
 
     if (!argoUIAdminPassword) {
-      console.error(
-        owLabel,
-        ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
-        ccolors.error(`is not set in environment`),
-      );
-      self.postMessage({ type: "error-overwrite", code: 502 });
-      return;
+      try {
+        throw new Error(
+          [
+            owLabel,
+            ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
+            ccolors.error(`is not set in environment`),
+          ].join(" "),
+          { cause: 502 },
+        );
+      } catch (error) {
+        self.postMessage({
+          type: "error-overwrite",
+          code: error.cause,
+          message: error.message,
+        });
+        return;
+      }
     }
 
     if (!terraformStatePassphrase) {
-      console.error(
-        owLabel,
-        ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-        ccolors.error(`is not set in environment`),
-      );
-      self.postMessage({ type: "error-overwrite", code: 503 });
-      return;
+      try {
+        throw new Error(
+          [
+            owLabel,
+            ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+            ccolors.error(`is not set in environment`),
+          ].join(" "),
+          { cause: 503 },
+        );
+      } catch (error) {
+        self.postMessage({
+          type: "error-overwrite",
+          code: error.cause,
+          message: error.message,
+        });
+        return;
+      }
     }
 
     const cluster_manifests = config?.cluster_manifests || {};
@@ -306,8 +370,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       if (manifestObj?.kind && manifestObj.kind === "Secret") {
         const secret = cluster_manifests[key] as KubernetesSecret;
         const secretFileName = `${key}.yaml`;
-        const sealedSecretManifestWithKSC =
-          await getSealedSecretManifestWithKSC(
+        let sealedSecretManifestWithKSC;
+        try {
+          sealedSecretManifestWithKSC = await getSealedSecretManifestWithKSC(
             secret,
             {
               publicKeyFilePath: tempPublicKeyFilePath,
@@ -316,6 +381,14 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
               secretFileName,
             },
           );
+        } catch (error) {
+          self.postMessage({
+            type: "error-overwrite",
+            code: error.cause,
+            message: error.message,
+          });
+          return;
+        }
 
         const sealedSecretManifest = sealedSecretManifestWithKSC?.manifest;
 
@@ -397,19 +470,40 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       );
     }
 
+    let stagingDir: string;
+
+    try {
+      stagingDir = getStagingDir();
+    } catch (errorGettingStagingDir) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: errorGettingStagingDir.code,
+        message: errorGettingStagingDir.message,
+      });
+      return;
+    }
+
     try {
       await persistStagedFiles(options.output);
       console.log("  ");
-    } catch (errorPersistingStagedFiles) {
-      console.error(
-        owLabel,
-        ccolors.error(`failed to persist staged cndi files to`),
-        ccolors.user_input(`${options.output}`),
-      );
-      console.log(ccolors.caught(errorPersistingStagedFiles));
-      await Deno.remove(await getStagingDir(), { recursive: true });
-      self.postMessage({ type: "error-overwrite", code: 509 });
-      return;
+    } catch (_errorPersistingStagedFiles) {
+      try {
+        throw new Error(
+          [
+            owLabel,
+            ccolors.error(`failed to persist staged cndi files to`),
+            ccolors.user_input(`${options.output}`),
+          ].join(" "),
+          { cause: 509 },
+        );
+      } catch (error) {
+        self.postMessage({
+          type: "error-overwrite",
+          code: error.cause,
+          message: error.message,
+        });
+        return;
+      }
     }
 
     const completionMessage = options?.initializing

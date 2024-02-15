@@ -8,6 +8,16 @@ export default async function validateConfig(
   config: CNDIConfig,
   pathToConfig: string,
 ): Promise<void> {
+  if (!config) {
+    console.error(
+      cndiConfigLabel,
+      ccolors.error("cndi_config file not found at "),
+      ccolors.user_input(`"${pathToConfig}"`),
+    );
+    await emitExitEvent(900);
+    Deno.exit(900);
+  }
+
   if (!config?.project_name) {
     console.log(
       cndiConfigLabel,
@@ -22,16 +32,18 @@ export default async function validateConfig(
   }
 
   if (!config?.infrastructure) {
-    console.error(
-      cndiConfigLabel,
-      ccolors.error("cndi_config file found was at "),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("but it does not have the required"),
-      ccolors.key_name('"infrastructure"'),
-      ccolors.error("key"),
+    console.log();
+    throw new Error(
+      [
+        cndiConfigLabel,
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it does not have the required"),
+        ccolors.key_name('"infrastructure"'),
+        ccolors.error("key"),
+      ].join(" "),
+      { cause: 901 },
     );
-    await emitExitEvent(901);
-    Deno.exit(901);
   }
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;

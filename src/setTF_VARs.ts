@@ -8,13 +8,14 @@ export default async function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
 
   if (!git_username && !git_ssh_private_key) {
+    const message = `${ccolors.key_name(`"GIT_USERNAME"`)} env var is not set`;
     console.error(
       setTF_VARsLabel,
-      ccolors.key_name(`"GIT_USERNAME"`),
-      "env var is not set",
+      message,
     );
+
     await emitExitEvent(100);
-    Deno.exit(100);
+    throw new Error(message);
   }
 
   if (!git_token && !git_ssh_private_key) {

@@ -1,15 +1,17 @@
 import { Command, TerminalSpinner } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getPathToCndiConfig } from "src/utils.ts";
 
 // deno-lint-ignore no-explicit-any
-const owAction = (args: any) => {
-  if(!args.initializing){
-    console.log(`cndi overwrite --file "${args.file}"\n`);
+const owAction = async (args: any) => {
+  if (!args.initializing) {
+    const pathToConfig = await getPathToCndiConfig(args.file);
+    console.log(`cndi overwrite --file "${pathToConfig}"\n`);
   }
+
   const spinner = new TerminalSpinner({
     // text: "",
     color: "cyan",
-    spinner:{
+    spinner: {
       "interval": 80,
       "frames": [
         "▰▱▱▱▱▱▱",
@@ -20,7 +22,7 @@ const owAction = (args: any) => {
         "▰▰▰▰▰▰▱",
         "▰▰▰▰▰▰▰",
         "▰▱▱▱▱▱▱",
-      ]
+      ],
     },
     writer: Deno.stdout,
   });
@@ -34,14 +36,17 @@ const owAction = (args: any) => {
   w.postMessage({ args, type: "begin-overwrite" });
 
   w.onmessage = async (e) => {
-    console.log()
+    console.log();
     if (e.data.type === "complete-overwrite") {
       w.terminate();
       spinner.stop();
       await emitExitEvent(0);
       Deno.exit(0);
-    } else if(e.data.type==="error-overwrite"){
+    } else if (e.data.type === "error-overwrite") {
+      spinner.stop();
       w.terminate();
+      console.log();
+      console.log(e?.data?.message || "");
       await emitExitEvent(e.data.code);
       Deno.exit(e.data.code);
     }

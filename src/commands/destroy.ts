@@ -1,7 +1,7 @@
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
-import { getPathToTerraformBinary, emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { ccolors, Command, path } from "deps";
 
