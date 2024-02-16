@@ -28,7 +28,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
     const spinner = new Spinner({
       message: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
-      spinner:[
+      spinner: [
         "▰▱▱▱▱▱▱",
         "▰▰▱▱▱▱▱",
         "▰▰▰▱▱▱▱",
