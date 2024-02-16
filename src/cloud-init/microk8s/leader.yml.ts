@@ -5,9 +5,10 @@ import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-temp
 import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
 
+import { loopUntilSuccess } from "src/cloud-init/utils.ts";
+
 import {
   ARGOCD_VERSION,
-  CLOUDINIT_RETRY_INTERVAL,
   DEFAULT_K8S_VERSION,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
@@ -76,13 +77,6 @@ type GetLeaderCloudInitYamlOptions = {
   useSshRepoAuth: boolean;
   useClusterHA: boolean;
 };
-
-const loopUntilSuccess = (
-  command: string,
-  retryMsg: string,
-  interval = CLOUDINIT_RETRY_INTERVAL,
-) =>
-  `while ! ${command}; do echo '${retryMsg}, retrying in ${interval} seconds'; sleep ${interval}; done`;
 
 const getLeaderCloudInitYaml = (
   config: CNDIConfig,
