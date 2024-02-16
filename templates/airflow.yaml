@@ -59,6 +59,7 @@ blocks:
               secretName: cluster-issuer-private-key
               enabled: true
 
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
@@ -164,7 +165,6 @@ outputs:
             {}
 
     cluster_manifests:
-      $cndi.comment(external-dns-secret): External DNS Credentials
       external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
