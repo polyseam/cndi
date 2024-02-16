@@ -196,7 +196,7 @@ outputs:
     # this is a template comment
     infrastructure:
       cndi:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}/cndi.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
