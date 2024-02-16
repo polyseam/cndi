@@ -43,8 +43,9 @@ successfully:**
 
 Run the following command within your terminal to download and install cndi:
 
+> [!NOTE] this will download the correct binary for your OS
+
 ```shell
-# this will download the correct binary for your OS
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
@@ -69,7 +70,7 @@ cndi init --interactive
 
 You will first be prompted to enter the name of your cndi project
 
-```shell
+```
 Please enter a name for your CNDI project: (my-cndi-cluster)
 ```
 
@@ -77,13 +78,13 @@ When you're prompted to choose a template for your project, select the airflow
 template. This option is tailored for projects requiring orchestration and
 workflow automation. The prompt will look like this:
 
-```shell
-? Pick a template
-   basic
- ❯ airflow # Highlighted as the current selection
-   cnpg
-   neo4j
-   mssqlserver
+```
+Pick a template
+  basic
+❯ airflow 
+  cnpg
+  neo4j
+  mssqlserver
 ```
 
 Make sure airflow is highlighted and press Enter to confirm your selection.
@@ -93,25 +94,25 @@ project, choose aws if you're deploying to Amazon Web Services, which is
 recommended for its scalability and integration capabilities. The prompt will
 appear as follows:
 
-```shell
-? Where do you want to deploy your cluster?
- ❯ aws # Highlighted as the current selection
-   azure
-   gcp
-   dev
+```
+Where do you want to deploy your cluster?
+❯ aws 
+  azure
+  gcp
+  dev
 ```
 
 Ensure `aws` is highlighted and press Enter to proceed.
 
-Finally, select a Kubernetes distribution for your deployment. The eks (Elastic
-Kubernetes Service) option is for deploying on AWS, offering a managed
+Finally, select a Kubernetes distribution for your deployment. The `eks`
+(Elastic Kubernetes Service) option is for deploying on AWS, offering a managed
 Kubernetes service that simplifies running Kubernetes applications. The prompt
 will be:
 
-```shell
-? Select a distribution
-   microk8s
- ❯ eks # Highlighted as the current selection
+```
+Select a distribution
+  microk8s
+❯ eks
 ```
 
 After confirming that `eks` is highlighted, press `Enter` to finalize your
@@ -122,26 +123,26 @@ this init process:
 ```
 cndi init --interactive
 
- ? Please enter a name for your CNDI project: (my-cndi-cluster) » my-cndi-cluster
- ? Pick a template » airflow
- ? Where do you want to deploy your cluster? » aws
- ? Select a distribution (microk8s) » eks
- ? Would you like ArgoCD to connect to your repo using a Git token or SSH key? (token) » token
- ? What is your git username? () » IamTamika
- ? Please enter your Git Personal Access Token: () » *******
- ? Please enter your Git Repo URL: () »
- ? What email address should be used for Let"s Encrypt certificate registration? (jane.doe@example.com) » tamika.taylor@untribe.com
- ? Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
-  ? Please select your DNS provider (aws) » aws
- ? Please enter your AWS Access Key ID: () »  ***   
- ? Please enter your AWS Secret Access Key: () » ****
- ? Please enter your AWS Region: (us-east-1) » us-east-1 
- ? Do you want to expose ArgoCD with an Ingress? (Y/n) » Yes
- ? What hostname should ArgoCD be accessible at? (argocd.example.com) » argocd.untribe.com
- ? Do you want to expose the Airflow UI to the web? (Y/n) » Yes
- ? What hostname should Airflow be accessible at? (airflow.example.com) » airflow.untribe.com
- ? What is the URL of the Git repository containing your Airflow DAGs? (https://github.com/polyseam/demo-dag-bag) » https://github.com/polyseam/demo-dag-bag
- ? Do you want to use your cluster credentials for Airflow's Git Sync? (Y/n) » Yes
+Please enter a name for your CNDI project: » my-cndi-cluster
+Pick a template » airflow
+Where do you want to deploy your cluster? » aws
+Select a distribution » eks
+Would you like ArgoCD to connect to your repo using a Git token or SSH key? » token
+What is your git username? () » IamTamika
+Please enter your Git Personal Access Token: () » ****************************
+Please enter your Git Repo URL: () »
+What email address should be used for Let"s Encrypt certificate registration?  » tamika.taylor@untribe.com
+Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
+Please select your DNS provider (aws) » aws
+Please enter your AWS Access Key ID: () »  *****************   
+Please enter your AWS Secret Access Key: () » ******************
+Please enter your AWS Region: (us-east-1) » us-east-1 
+Do you want to expose ArgoCD with an Ingress? (Y/n) » Yes
+What hostname should ArgoCD be accessible at? » argocd.untribe.com
+Do you want to expose the Airflow UI to the web? (Y/n) » Yes
+What hostname should Airflow be accessible at? » airflow.untribe.com
+What is the URL of the Git repository containing your Airflow DAGs? (https://github.com/polyseam/demo-dag-bag) » https://github.com/polyseam/demo-dag-bag
+Do you want to use your cluster credentials for Airflow's Git Sync? (Y/n) » Yes
 ```
 
 #### Project Setup:
@@ -239,9 +240,9 @@ gh secret set -f .env
 Once all the config is created and environment variables are uploaded to GitHub,
 add, commit and push the config to your GitHub repository:
 
-```shell
+```
 git add .
-git status # take a quick look and make sure these are all files you want to push
+git status
 git commit -m "initial commit"
 git push --set-upstream origin main
 ```
@@ -265,13 +266,23 @@ Once `cndi run` has been completed, at the end of the run will be a link to
 `resource groups`, where you can view resources deployed by CNDI for this
 project. ![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
 
-Click on your project resource group
+## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
 
-![resource groups root page](/docs/walkthroughs/eks/img/resource-groups-root.png)
+Instead of manually creating a CNAME record in your domain's DNS settings, if
+you enabled & configured ExternalDNS during the cndi init process then
+ExternalDNS will automatically create a CNAME record in Route 53, pointing to
+your load balancer's public host. This process eliminates the need for manual
+DNS record management.If everything is working correctly you should now open the
+domain name you've assigned for ArgoCD in your browser to see the ArgoCD login
+page. The DNS changes may take a few minutes to propagate
 
-Click on your on eks cluster control plane
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
 
-![current resource group](/docs/walkthroughs/eks/img/resource-groups.png)
+![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
+
+To log in, use the username `admin` and the password which is the value of the
+`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 
 ## attach the load balancer to your domain manually 🌐
 
@@ -294,24 +305,6 @@ changes may take a few minutes to propagate.
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
-
-## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
-
-Instead of manually creating a CNAME record in your domain's DNS settings, if
-you enabled & configured ExternalDNS during the cndi init process then
-ExternalDNS will automatically create a CNAME record in Route 53, pointing to
-your load balancer's public host. This process eliminates the need for manual
-DNS record management.If everything is working correctly you should now open the
-domain name you've assigned for ArgoCD in your browser to see the ArgoCD login
-page. The DNS changes may take a few minutes to propagate
-
-- (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
-
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
-
-To log in, use the username `admin` and the password which is the value of the
-`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
 
 ![.env file](/docs/walkthroughs/eks/img/argocd-admin-password.png)
 
