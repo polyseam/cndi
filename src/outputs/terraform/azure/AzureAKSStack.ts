@@ -125,6 +125,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         ],
       },
     );
+
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
@@ -141,6 +142,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           emitExitEvent(810);
           Deno.exit(810);
         }
+
         const count = nodeSpec.count || 1;
 
         const scale = {

@@ -75,7 +75,11 @@ const destroyCommand = new Command()
 
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
+    } catch (setTF_VARsError) {
+      throw setTF_VARsError;
+    }
 
+    try {
       await pullStateForRun({ pathToTerraformResources, cmd });
 
       console.log(ccolors.faded("\n-- terraform init --\n"));

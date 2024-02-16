@@ -70,7 +70,11 @@ const runCommand = new Command()
     const pathToTerraformBinary = getPathToTerraformBinary();
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
+    } catch (setTF_VARsError) {
+      throw setTF_VARsError;
+    }
 
+    try {
       await pullStateForRun({ pathToTerraformResources, cmd });
 
       console.log(ccolors.faded("\n-- terraform init --\n"));
