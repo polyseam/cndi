@@ -198,7 +198,7 @@ outputs:
       cndi:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}/cndi.yaml):
           condition:
-            - "{{ $cndi.get_prompt_response(enable_autodns) }}"
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
         cert_manager:
@@ -217,7 +217,7 @@ outputs:
       external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
-            - "{{ $cndi.get_prompt_response(enable_autodns) }}"
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
       cnpg-namespace:
