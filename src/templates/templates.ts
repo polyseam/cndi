@@ -1123,7 +1123,8 @@ export async function useTemplate(
         throw new Error(
           [
             templatesLabel,
-            ccolors.error(`Template prompt object is missing field`),
+            ccolors.error(`template error:`),
+            ccolors.error(`a Template prompt object is missing field`),
             ccolors.key_name("name"),
           ].join(" "),
           {
@@ -1135,6 +1136,7 @@ export async function useTemplate(
         throw new Error(
           [
             templatesLabel,
+            ccolors.error(`template error:\n`),
             ccolors.error(`Template prompt object is missing field`),
             ccolors.key_name("type"),
           ].join(" "),
