@@ -1033,52 +1033,21 @@ export async function useTemplate(
       templateContents = await templateResponse.text();
     } else {
       // maybe the template is in the directory, but not officially listed
-      try {
-        const templateResponse = await fetch(
-          `${POLYSEAM_TEMPLATE_DIRECTORY}${templateIdentifier}.yaml`,
-        );
+      const templateResponse = await fetch(
+        `${POLYSEAM_TEMPLATE_DIRECTORY}${templateIdentifier}.yaml`,
+      );
 
-        if (!templateResponse.ok) {
-          if (templateResponse.status === 404) {
-            throw new Error(
-              [
-                templatesLabel,
-                ccolors.error("CNDI Template not found for identifier:"),
-                ccolors.user_input(`"${templateIdentifier}"\n`),
-                ccolors.error(
-                  `${templateResponse.status} - ${templateResponse.statusText}`,
-                ),
-              ].join(" "),
-              { cause: 1200 },
-            );
-          } else {
-            throw new Error(
-              [
-                templatesLabel,
-                ccolors.error(
-                  "Failed to fetch CNDI Template using identifier:",
-                ),
-                ccolors.user_input(`"${templateIdentifier}"\n`),
-                ccolors.error(
-                  `${templateResponse.status} - ${templateResponse.statusText}`,
-                ),
-              ].join(" "),
-              { cause: 4500 },
-            );
-          }
-        } else {
-          templateContents = await templateResponse.text();
-        }
-      } catch (fetchError) {
+      if (!templateResponse.ok) {
         throw new Error(
           [
             templatesLabel,
-            ccolors.error("Failed to fetch CNDI Template using identifier:"),
+            ccolors.error("CNDI Template not found for identifier:"),
             ccolors.user_input(`"${templateIdentifier}"\n`),
-            ccolors.caught(fetchError.message),
           ].join(" "),
-          { cause: 4500 },
+          { cause: 1200 },
         );
+      } else {
+        templateContents = await templateResponse.text();
       }
     }
   }
