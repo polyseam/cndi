@@ -27,12 +27,8 @@ import { path, walkSync } from "deps";
 
 export async function stageCDKTFStack(app: App) {
   app.synth();
-  let stagingDirectory: string;
-  try {
-    stagingDirectory = getStagingDir();
-  } catch (error) {
-    throw error;
-  }
+  const stagingDirectory = getStagingDir();
+
   const tfHome = path.join(stagingDirectory, "cndi", "terraform");
   const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
   Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli

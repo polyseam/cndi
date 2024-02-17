@@ -79,17 +79,12 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
 const loadCndiConfig = async (
   providedPath?: string,
 ): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
-  let pathToConfig: string;
-  try {
-    pathToConfig = await getPathToCndiConfig(providedPath);
-  } catch (error) {
-    throw error;
-  }
+  const pathToConfig = await getPathToCndiConfig(providedPath);
 
   try {
     const config = await loadYAML(pathToConfig) as CNDIConfig;
     return { config, pathToConfig };
-  } catch (_error) {
+  } catch {
     throw new Error(
       [
         utilsLabel,
@@ -119,23 +114,32 @@ const loadYAML = async (path: string) => {
     txt = await Deno.readTextFile(path);
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
-      console.error(
-        utilsLabel,
-        ccolors.error("could not find file at"),
-        ccolors.user_input(`"${path}"`),
+      throw new Error(
+        [
+          utilsLabel,
+          ccolors.error("could not find file at"),
+          ccolors.user_input(`"${path}"`),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
       );
     }
     throw error;
   }
   try {
     y = await YAML.parse(txt);
-  } catch (error) {
-    console.error(
-      utilsLabel,
-      ccolors.error("could not parse file as YAML at"),
-      ccolors.user_input(`"${path}"`),
+  } catch {
+    throw new Error(
+      [
+        utilsLabel,
+        ccolors.error("could not parse file as YAML at"),
+        ccolors.user_input(`"${path}"`),
+      ].join(" "),
+      {
+        cause: 4500,
+      },
     );
-    throw error;
   }
   return y;
 };
@@ -306,12 +310,7 @@ type CDKTFAppConfig = {
 };
 
 async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
-  let stagingDirectory: string;
-  try {
-    stagingDirectory = getStagingDir();
-  } catch (error) {
-    throw error;
-  }
+  const stagingDirectory = getStagingDir();
   const outdir = path.join(stagingDirectory, "cndi", "terraform");
   await Deno.mkdir(path.dirname(outdir), { recursive: true });
   return {
@@ -335,13 +334,7 @@ function getStagingDir(): string {
 }
 
 async function persistStagedFiles(targetDirectory: string) {
-  let stagingDirectory: string;
-
-  try {
-    stagingDirectory = getStagingDir();
-  } catch (error) {
-    throw error;
-  }
+  const stagingDirectory = getStagingDir();
 
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {

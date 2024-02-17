@@ -1,4 +1,4 @@
-import { path } from "deps";
+import { ccolors, path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { stageFile, useSshRepoAuth } from "src/utils.ts";
 import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
@@ -11,6 +11,42 @@ import { stageTerraformSynthDevMultipassMicrok8s } from "src/outputs/terraform/d
 
 import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
 import microk8sCloudInitFollowerTerraformTemplate from "src/cloud-init/microk8s/follower.yml.ts";
+
+const stageTerraformResourcesForConfigLabel = ccolors.faded(
+  "src/outputs/terraform/stageTerraformResourcesForConfig.ts:",
+);
+
+const ensureValidGoogleCredentials = () => {
+  const key = Deno.env.get("GOOGLE_CREDENTIALS");
+
+  if (!key) {
+    throw new Error(
+      [
+        stageTerraformResourcesForConfigLabel,
+        ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
+        ccolors.error("env variable not set"),
+      ].join(" "),
+      {
+        cause: 4300,
+      },
+    );
+  }
+
+  try {
+    JSON.parse(key);
+  } catch {
+    throw new Error(
+      [
+        stageTerraformResourcesForConfigLabel,
+        ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
+        ccolors.error("env variable is not valid JSON"),
+      ].join(" "),
+      {
+        cause: 4301,
+      },
+    );
+  }
+};
 
 export default async function stageTerraformResourcesForConfig(
   config: CNDIConfig,
@@ -28,9 +64,11 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformSynthAWSEKS(config);
       break;
     case "gcp/gke":
+      ensureValidGoogleCredentials();
       await stageTerraformSynthGCPGKE(config);
       break;
     case "gcp/microk8s":
+      ensureValidGoogleCredentials();
       await stageTerraformSynthGCPMicrok8s(config);
       break;
     case "azure/microk8s":

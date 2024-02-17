@@ -19,8 +19,6 @@ import {
   unwrapQuotes,
 } from "./util.ts";
 
-import { emitExitEvent } from "src/utils.ts";
-
 import { POLYSEAM_TEMPLATE_DIRECTORY } from "consts";
 
 interface SealedSecretsKeys {
@@ -139,14 +137,29 @@ interface TemplateObject {
 
 function coarselyValidateTemplateObjectOrPanic(templateObject: TemplateObject) {
   if (!Object.hasOwn(templateObject, "outputs")) {
-    console.error("template is missing outputs, resulting in a noop");
-    Deno.exit(1);
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("template error:\n"),
+        ccolors.error("template yaml is missing required"),
+        ccolors.key_name("outputs"),
+        ccolors.error("field"),
+      ].join(" "),
+      { cause: 4500 },
+    );
   }
   if (!Object.hasOwn(templateObject, "prompts")) {
-    console.error(
-      "template is missing prompts, if this is intentional please provide an empty array",
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("template error:\n"),
+        ccolors.error("template yaml is missing required"),
+        ccolors.key_name("prompts"),
+        ccolors.error("field"),
+        console.log("if this is intentional please provide an empty array"),
+      ].join(" "),
+      { cause: 4500 },
     );
-    Deno.exit(1);
   }
 }
 
@@ -263,7 +276,18 @@ function getCliffyPrompts(
               BuiltInValidators[validatorName as BuiltInValidator];
 
             if (typeof validate != "function") {
-              throw new Error(`validator '${validatorName}' not found`);
+              throw new Error(
+                [
+                  templatesLabel,
+                  ccolors.error("template error:\n"),
+                  ccolors.error("validator"),
+                  ccolors.user_input(validatorName),
+                  ccolors.error("not found"),
+                ].join(" "),
+                {
+                  cause: 4500,
+                },
+              );
             } else {
               const validationError = validate({
                 value: currentResponse,
@@ -622,13 +646,18 @@ async function parseCNDIConfigSection(
       indexOfUndefinedPrompt + undefinedPromptToken.length,
       lit_template_with_blocks.indexOf(";", indexOfUndefinedPrompt),
     );
-    console.log(ccolors.error("template error:"));
-    console.log(
-      ccolors.error("prompt_response"),
-      ccolors.user_input(undefinedPromptName),
-      ccolors.error("is undefined"),
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("template error:\n"),
+        ccolors.error("prompt_response"),
+        ccolors.user_input(undefinedPromptName),
+        ccolors.error("is undefined"),
+      ].join(" "),
+      {
+        cause: 4500,
+      },
     );
-    Deno.exit(1);
   }
 
   const undefinedArgToken = "get_arg::";
@@ -642,13 +671,18 @@ async function parseCNDIConfigSection(
       indexOfUndefinedArgToken + undefinedArgToken.length,
       lit_template_with_blocks.indexOf(";", indexOfUndefinedPrompt),
     );
-    console.log(ccolors.error("template error:"));
-    console.log(
-      ccolors.error("arg"),
-      ccolors.user_input(undefinedArgName),
-      ccolors.error("is undefined"),
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("template error:\n"),
+        ccolors.error("arg"),
+        ccolors.user_input(undefinedArgName),
+        ccolors.error("is undefined"),
+      ].join(" "),
+      {
+        cause: 4500,
+      },
     );
-    Deno.exit(1);
   }
 
   const cndi_configObj = YAML.parse(lit_template_with_blocks);
@@ -807,19 +841,36 @@ async function get_string(identifier: string) {
       // fetch
       blockResponse = await fetch(identifier);
     } catch (fetchError) {
-      console.log("error fetching string", ccolors.user_input(identifier));
-      throw fetchError;
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("error fetching string block from url"),
+          ccolors.user_input(identifier),
+          "\n",
+          ccolors.caught(fetchError.message),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
+      );
     }
 
     try {
       // get text
       return await blockResponse.text();
     } catch (responseTextError) {
-      console.log(
-        "error getting text from block response",
-        ccolors.user_input(identifier),
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("error getting text from string block response"),
+          ccolors.user_input(identifier),
+          "\n",
+          ccolors.caught(responseTextError.message),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
       );
-      throw responseTextError;
     }
   }
 }
@@ -836,19 +887,36 @@ async function get_block(
       // fetch
       blockResponse = await fetch(identifier);
     } catch (fetchError) {
-      console.log("error fetching block", ccolors.user_input(identifier));
-      throw fetchError;
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("error fetching block from url"),
+          ccolors.user_input(identifier),
+          "\n",
+          ccolors.caught(fetchError.message),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
+      );
     }
 
     try {
       // get text
       blockText = await blockResponse.text();
     } catch (responseTextError) {
-      console.log(
-        "error getting text from block response",
-        ccolors.user_input(identifier),
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("error getting text from block response"),
+          ccolors.user_input(identifier),
+          "\n",
+          ccolors.caught(responseTextError.message),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
       );
-      throw responseTextError;
     }
 
     try {
@@ -857,11 +925,18 @@ async function get_block(
       return blockContent as Record<string, unknown>;
     } catch (yamlParseError) {
       if (identifier.endsWith("yaml") || identifier.endsWith("yml")) {
-        console.log(
-          "error parsing yaml from block response",
-          ccolors.user_input(identifier),
+        throw new Error(
+          [
+            templatesLabel,
+            ccolors.error("error parsing yaml from block response"),
+            ccolors.user_input(identifier),
+            "\n",
+            ccolors.caught(yamlParseError.message),
+          ].join(" "),
+          {
+            cause: 4500,
+          },
         );
-        throw yamlParseError;
       } else {
         return blockText as string;
       }
@@ -882,7 +957,17 @@ async function get_block(
       const blockText = await blockResponse.text();
       return YAML.parse(blockText) as Record<string, unknown>;
     }
-    throw new Error(`block "${identifier}" could not be resolved`);
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("block"),
+        ccolors.user_input(identifier),
+        ccolors.error("could not be resolved"),
+      ].join(" "),
+      {
+        cause: 4500,
+      },
+    );
   }
 }
 
@@ -892,17 +977,18 @@ function getDefaultResponsesFromCliffyPrompts(
   const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
   for (const prompt of cliffyPrompts) {
     if (!prompt.default && prompt.required) {
-      // if a prompt is required and has no default, we throw it
-      console.log(
-        ccolors.error(
-          `required response ${
-            ccolors.user_input(
-              "'" + prompt.name + "'",
-            )
-          } not provided`,
-        ),
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("template error:\n"),
+          ccolors.error("required prompt"),
+          ccolors.user_input(`'${prompt.name}'`),
+          ccolors.error("has no default value"),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
       );
-      Deno.exit(1);
     }
     responses[prompt.name] = prompt
       .default as CNDITemplatePromptResponsePrimitive;
@@ -919,8 +1005,21 @@ export async function useTemplate(
   let templateContents = "";
 
   if (isUrl) {
-    const templateResponse = await fetch(templateIdentifier);
-    templateContents = await templateResponse.text();
+    try {
+      const templateResponse = await fetch(templateIdentifier);
+      templateContents = await templateResponse.text();
+    } catch {
+      throw new Error(
+        [
+          templatesLabel,
+          ccolors.error("Failed to fetch CNDI Template using URL identifier:"),
+          ccolors.user_input(`"${templateIdentifier}"\n`),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
+      );
+    }
   } else if (templateIdentifier.indexOf("/") > -1) {
     // user is likely trying to load a file from the local filesystem
     templateContents = await Deno.readTextFile(templateIdentifier);
@@ -940,21 +1039,46 @@ export async function useTemplate(
         );
 
         if (!templateResponse.ok) {
-          throw new Error(
-            `${templateResponse.status} - ${templateResponse.statusText}`,
-          );
+          if (templateResponse.status === 404) {
+            throw new Error(
+              [
+                templatesLabel,
+                ccolors.error("CNDI Template not found for identifier:"),
+                ccolors.user_input(`"${templateIdentifier}"\n`),
+                ccolors.error(
+                  `${templateResponse.status} - ${templateResponse.statusText}`,
+                ),
+              ].join(" "),
+              { cause: 1200 },
+            );
+          } else {
+            throw new Error(
+              [
+                templatesLabel,
+                ccolors.error(
+                  "Failed to fetch CNDI Template using identifier:",
+                ),
+                ccolors.user_input(`"${templateIdentifier}"\n`),
+                ccolors.error(
+                  `${templateResponse.status} - ${templateResponse.statusText}`,
+                ),
+              ].join(" "),
+              { cause: 4500 },
+            );
+          }
         } else {
           templateContents = await templateResponse.text();
         }
       } catch (fetchError) {
-        console.log(
-          templatesLabel,
-          ccolors.error("CNDI Template not found for identifier:"),
-          ccolors.user_input(`"${templateIdentifier}"\n`),
+        throw new Error(
+          [
+            templatesLabel,
+            ccolors.error("Failed to fetch CNDI Template using identifier:"),
+            ccolors.user_input(`"${templateIdentifier}"\n`),
+            ccolors.caught(fetchError.message),
+          ].join(" "),
+          { cause: 4500 },
         );
-        console.log(ccolors.caught(fetchError, 1200));
-        await emitExitEvent(1200);
-        Deno.exit(1200);
       }
     }
   }
@@ -965,6 +1089,7 @@ export async function useTemplate(
   )) as TemplateObject;
 
   // prompts and outputs are required
+
   coarselyValidateTemplateObjectOrPanic(unparsedTemplateObject);
 
   // promptDefinitions are the prompts entries
@@ -995,14 +1120,31 @@ export async function useTemplate(
     if (Object.keys(promptSpec).length > 1) {
       // if a prompt has keys, then it is not an import
       if (!promptSpec?.name) {
-        console.log(ccolors.error("prompt missing name"));
-        Deno.exit(1);
+        throw new Error(
+          [
+            templatesLabel,
+            ccolors.error(`Template prompt object is missing field`),
+            ccolors.key_name("name"),
+          ].join(" "),
+          {
+            cause: 4500,
+          },
+        );
       }
       if (!promptSpec?.type) {
-        console.log(ccolors.error("prompt missing type"));
-        Deno.exit(1);
+        throw new Error(
+          [
+            templatesLabel,
+            ccolors.error(`Template prompt object is missing field`),
+            ccolors.key_name("type"),
+          ].join(" "),
+          {
+            cause: 4500,
+          },
+        );
       }
     }
+
     const promptKeys = Object.keys(promptSpec);
     const promptKeyRaw = promptKeys[0];
 
@@ -1046,7 +1188,16 @@ export async function useTemplate(
           responses[key] = blockResponses[key];
         }
       } else {
-        throw new Error("Block used for prompts must be an Array");
+        throw new Error(
+          [
+            templatesLabel,
+            ccolors.error("template error:"),
+            ccolors.error("Block used for prompts must be an Array"),
+          ].join(" "),
+          {
+            cause: 4500,
+          },
+        );
       }
     } else {
       promptDefinitions.push(promptSpec as CNDITemplatePromptEntry);

@@ -274,7 +274,17 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       sealedSecretsKeys.sealed_secrets_public_key,
     );
 
-    await stageTerraformResourcesForConfig(config); //, options);
+    try {
+      await stageTerraformResourcesForConfig(config); //, options);
+    } catch (error) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: error.cause,
+        message: error.message,
+      });
+      return;
+    }
+
     console.log();
     // console.log();
     console.log(ccolors.success("staged terraform stack"));

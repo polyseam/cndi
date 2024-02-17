@@ -1,11 +1,11 @@
 import { assert } from "test-deps";
-import { path } from "deps";
+import { ccolors, path } from "deps";
 import getCodebasePath from "../../../_here.ts";
 import { useTemplate } from "src/templates/templates.ts";
 
-import errorCodeReference from "../../../docs/error-code-reference.json" with {
-  type: "json",
-};
+// import errorCodeReference from "../../../docs/error-code-reference.json" with {
+//   type: "json",
+// };
 
 function getTemplatePath(name: string): string {
   return path.join(
@@ -15,65 +15,54 @@ function getTemplatePath(name: string): string {
   );
 }
 
-function assertTestCaseAttemptedToExitWithCode(
-  error: string,
-  targetCode: number,
-) {
-  // SEARCH_PREFIX is stapled to Deno's error message when a test case exits with a non-zero exit code
-  const SEARCH_PREFIX = "Error: Test case attempted to exit with exit code:";
-  const exitCodeStr = error.toString().split(SEARCH_PREFIX)[1].split(`\n`)[0];
-  const exitCode = parseInt(exitCodeStr);
-  assert(
-    exitCode === targetCode,
-    `Expected exit code ${targetCode} but got ${exitCode}`,
-  );
-}
+// function assertTestCaseAttemptedToExitWithCode(
+//   error: string,
+//   targetCode: number,
+// ) {
+//   // SEARCH_PREFIX is stapled to Deno's error message when a test case exits with a non-zero exit code
+//   const SEARCH_PREFIX = "Error: Test case attempted to exit with exit code:";
+//   const exitCodeStr = error.toString().split(SEARCH_PREFIX)[1].split(`\n`)[0];
+//   const exitCode = parseInt(exitCodeStr);
+//   assert(
+//     exitCode === targetCode,
+//     `Expected exit code ${targetCode} but got ${exitCode}`,
+//   );
+// }
 
-function assertErrorCodeReferenceContainsCode(code: number) {
-  assert(
-    errorCodeReference.findIndex((error) => error.code === code) > -1,
-    `Expected error code reference to contain code ${code}`,
-  );
-}
+// function assertErrorCodeReferenceContainsCode(code: number) {
+//   assert(
+//     errorCodeReference.findIndex((error) => error.code === code) > -1,
+//     `Expected error code reference to contain code ${code}`,
+//   );
+// }
 
-function assertOccurenceInStrings(strings: Array<string>, substring: string) {
-  let foundOccurence = false;
-  for (const string of strings) {
-    if (string.includes(substring)) {
-      foundOccurence = true;
-    }
-  }
-  assert(foundOccurence, `Expected to find occurence of "${substring}"`);
-}
+// function assertOccurenceInStrings(strings: Array<string>, substring: string) {
+//   let foundOccurence = false;
+//   for (const string of strings) {
+//     if (string.includes(substring)) {
+//       foundOccurence = true;
+//     }
+//   }
+//   assert(foundOccurence, `Expected to find occurence of "${substring}"`);
+// }
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test( // TODO: better message search; better exit_code;
   "template parsing should fail if a prompt is missing a name",
   async () => {
-    // let dir = "";
     const pathToPromptMissingNameTemplate = getTemplatePath(
       "prompt_missing_name.yaml",
     );
-
-    console.log(pathToPromptMissingNameTemplate);
-
-    const originalConsoleLog = console.log;
-    const loggedMessages: Array<string> = [];
-
-    console.log = (...args) => {
-      loggedMessages.push(args.join(" "));
-      originalConsoleLog(...args);
-    };
-
     try {
       await useTemplate(`file://${pathToPromptMissingNameTemplate}`, false);
     } catch (error) {
-      assertOccurenceInStrings(loggedMessages, "prompt missing name");
-      assertErrorCodeReferenceContainsCode(1);
-      assertTestCaseAttemptedToExitWithCode(error, 1);
-    } finally {
-      console.log = originalConsoleLog;
+      const msg = error.toString();
+      const desired = [ // colors matter in string search
+        ccolors.error(`Template prompt object is missing field`),
+        ccolors.key_name("name"),
+      ].join(" ");
+      assert(msg.indexOf(desired) > -1);
     }
   },
 );
@@ -81,29 +70,18 @@ Deno.test( // TODO: better message search; better exit_code;
 Deno.test( // TODO: better message search; better exit_code;
   "template parsing should fail if a prompt has no type property",
   async () => {
-    // let dir = "";
     const pathToPromptMissingTypeTemplate = getTemplatePath(
       "prompt_missing_type.yaml",
     );
-
-    console.log(pathToPromptMissingTypeTemplate);
-
-    const originalConsoleLog = console.log;
-    const loggedMessages: Array<string> = [];
-
-    console.log = (...args) => {
-      loggedMessages.push(args.join(" "));
-      originalConsoleLog(...args);
-    };
-
     try {
       await useTemplate(`file://${pathToPromptMissingTypeTemplate}`, false);
     } catch (error) {
-      assertOccurenceInStrings(loggedMessages, "prompt missing type");
-      assertErrorCodeReferenceContainsCode(1);
-      assertTestCaseAttemptedToExitWithCode(error, 1);
-    } finally {
-      console.log = originalConsoleLog;
+      const msg = error.toString();
+      const desired = [ // colors matter in string search
+        ccolors.error(`Template prompt object is missing field`),
+        ccolors.key_name("type"),
+      ].join(" ");
+      assert(msg.indexOf(desired) > -1);
     }
   },
 );

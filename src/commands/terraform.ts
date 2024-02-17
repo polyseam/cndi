@@ -79,10 +79,18 @@ const terraformCommand = new Command()
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
-      throw setTF_VARsError;
+      console.log(setTF_VARsError.message);
+      await emitExitEvent(setTF_VARsError.cause);
+      Deno.exit(setTF_VARsError.cause);
     }
 
-    await pullStateForRun({ pathToTerraformResources, cmd });
+    try {
+      await pullStateForRun({ pathToTerraformResources, cmd });
+    } catch (pullStateForRunError) {
+      console.log(pullStateForRunError.message);
+      await emitExitEvent(pullStateForRunError.cause);
+      Deno.exit(pullStateForRunError.cause);
+    }
 
     const proxiedTerraformCommand = new Deno.Command(pathToTerraformBinary, {
       args: [
@@ -106,11 +114,19 @@ const terraformCommand = new Command()
 
     const status = await proxiedTerraformCommandChildProcess.status;
 
-    await pushStateFromRun({ pathToTerraformResources, cmd });
+    try {
+      await pushStateFromRun({ pathToTerraformResources, cmd });
+    } catch (pushStateFromRunError) {
+      console.log(pushStateFromRunError.message);
+      await emitExitEvent(pushStateFromRunError.cause);
+      Deno.exit(pushStateFromRunError.cause);
+    }
 
     if (status.code !== 0) {
+      await emitExitEvent(4500);
       Deno.exit(status.code);
     }
+
     await emitExitEvent(0);
   });
 

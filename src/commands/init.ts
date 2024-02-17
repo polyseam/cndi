@@ -293,13 +293,21 @@ const initCommand = new Command()
     };
 
     let deployment_target_provider;
+    let templateResult;
 
     if (template) {
-      const templateResult = await useTemplate(
-        template!,
-        !!options.interactive,
-        { project_name, ...overrides },
-      );
+      try {
+        templateResult = await useTemplate(
+          template!,
+          !!options.interactive,
+          { project_name, ...overrides },
+        );
+      } catch (e) {
+        console.log(e.message);
+        await emitExitEvent(e.cause);
+        Deno.exit(e.cause);
+      }
+
       cndi_config = templateResult.cndi_config;
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;

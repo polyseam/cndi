@@ -68,15 +68,24 @@ const runCommand = new Command()
     );
 
     const pathToTerraformBinary = getPathToTerraformBinary();
+
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
-      throw setTF_VARsError;
+      console.log(setTF_VARsError.message);
+      await emitExitEvent(setTF_VARsError.cause);
+      Deno.exit(setTF_VARsError.cause);
     }
 
     try {
       await pullStateForRun({ pathToTerraformResources, cmd });
+    } catch (pullStateForRunError) {
+      console.log(pullStateForRunError.message);
+      await emitExitEvent(pullStateForRunError.cause);
+      Deno.exit(pullStateForRunError.cause);
+    }
 
+    try {
       console.log(ccolors.faded("\n-- terraform init --\n"));
 
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
@@ -92,9 +101,17 @@ const runCommand = new Command()
 
       if (terraformInitCommandOutput.code !== 0) {
         console.log(runLabel, ccolors.error("terraform init failed"));
+        await emitExitEvent(4500);
         Deno.exit(terraformInitCommandOutput.code);
       }
+    } catch (err) {
+      console.log(runLabel, ccolors.error("failed to spawn 'terraform init'"));
+      console.log(ccolors.caught(err));
+      await emitExitEvent(4500);
+      Deno.exit(4500);
+    }
 
+    try {
       console.log(ccolors.faded("\n-- terraform apply --\n"));
 
       const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
@@ -119,18 +136,24 @@ const runCommand = new Command()
 
       const status = await terraformApplyChildProcess.status;
 
-      await pushStateFromRun({ pathToTerraformResources, cmd });
+      try {
+        await pushStateFromRun({ pathToTerraformResources, cmd });
+      } catch (pushStateFromRunError) {
+        console.log(pushStateFromRunError.message);
+        await emitExitEvent(pushStateFromRunError.cause);
+        Deno.exit(pushStateFromRunError.cause);
+      }
 
       // if `terraform apply` fails, exit with the code
       if (status.code !== 0) {
+        await emitExitEvent(4500);
         Deno.exit(status.code);
       }
     } catch (err) {
-      console.log(
-        runLabel,
-        ccolors.error("cndi failed to deploy your resources"),
-      );
+      console.log(runLabel, ccolors.error("failed to spawn 'terraform apply'"));
       console.log(ccolors.caught(err));
+      await emitExitEvent(4500);
+      Deno.exit(4500);
     }
     await emitExitEvent(0);
   });
