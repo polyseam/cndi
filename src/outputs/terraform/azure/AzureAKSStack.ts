@@ -272,7 +272,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_kubernetes_storage_class_azure_file",
       {
         metadata: {
-          name: "nfs",
+          name: "rwm",
         },
         storageProvisioner: "file.csi.azure.com",
         parameters: {
@@ -290,14 +290,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_kubernetes_storage_class_azure_disk",
       {
         metadata: {
-          name: "cndi-managed-premium-v2-disk",
+          name: "rwo",
           annotations: {
             "storageclass.kubernetes.io/is-default-class": "true",
           },
         },
         storageProvisioner: "disk.csi.azure.com",
         parameters: {
-          skuName: "PremiumV2_LRS",
+          skuName: "Standard_LRS",
         },
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
