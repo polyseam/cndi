@@ -59,7 +59,7 @@ Deno.test( // TODO: better message search; better exit_code;
     } catch (error) {
       const msg = error.toString();
       const desired = [ // colors matter in string search
-        ccolors.error(`Template prompt object is missing field`),
+        ccolors.error(`a Template prompt object is missing field`),
         ccolors.key_name("name"),
       ].join(" ");
       assert(msg.indexOf(desired) > -1);
@@ -78,7 +78,7 @@ Deno.test( // TODO: better message search; better exit_code;
     } catch (error) {
       const msg = error.toString();
       const desired = [ // colors matter in string search
-        ccolors.error(`Template prompt object is missing field`),
+        ccolors.error(`a Template prompt object is missing field`),
         ccolors.key_name("type"),
       ].join(" ");
       assert(msg.indexOf(desired) > -1);
