@@ -237,7 +237,7 @@ outputs:
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          imageName: 'ghcr.io/cloudnative-pg/postgresql:15.2'
+          imageName: 'ghcr.io/cloudnative-pg/postgresql:16.2'
           instances: 3
           storage:
             size: 1Gi
