@@ -357,16 +357,6 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    if (template) {
-      await persistStagedFiles(options.output);
-
-      // because there is no "pathToConfig" when using a template, we need to set it here
-      await owAction({
-        output: options.output,
-        initializing: true,
-      });
-      return;
-    }
     await persistStagedFiles(options.output);
     await owAction({ output: options.output, initializing: true });
   });

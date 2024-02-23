@@ -1,5 +1,7 @@
-import { path } from "deps";
+import { ccolors, path, writeAll } from "deps";
 import { getStagingDir } from "src/utils.ts";
+
+const sshKeysLabel = ccolors.faded("\nsrc/initialize/sshKeys.ts:");
 
 const createSshKeys = async (): Promise<string> => {
   const stagingDir = getStagingDir();
@@ -31,8 +33,15 @@ const createSshKeys = async (): Promise<string> => {
     await sshKeygenGenerateKeyPairCommand.output();
 
   if (sshKeygenGenerateKeyPairCommandOutput.code !== 0) {
-    Deno.stdout.write(sshKeygenGenerateKeyPairCommandOutput.stderr);
-    Deno.exit(251); // arbitrary exit code
+    await writeAll(Deno.stderr, sshKeygenGenerateKeyPairCommandOutput.stderr);
+    console.error();
+    throw new Error(
+      [
+        sshKeysLabel,
+        "ssh-keygen failed to generate ssh keypair",
+      ].join(" "),
+      { cause: sshKeygenGenerateKeyPairCommandOutput.code },
+    );
   } else {
     ssh_public_key = await Deno.readTextFile(
       ssh_public_key_path,

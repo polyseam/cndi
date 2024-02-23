@@ -7,22 +7,19 @@ export default function setTF_VARs() {
   const git_username = Deno.env.get("GIT_USERNAME");
 
   if (!git_username && !git_ssh_private_key) {
-    throw new Error(
-      [
-        setTF_VARsLabel,
-        ccolors.error("Either"),
-        ccolors.key_name(`"GIT_USERNAME"`),
-        ccolors.error("or"),
-        ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
-        ccolors.error("must be set"),
-      ].join(" "),
-      {
-        cause: 100,
-      },
+    console.error(
+      setTF_VARsLabel,
+      ccolors.error("Either"),
+      ccolors.key_name(`"GIT_USERNAME"`),
+      ccolors.error("or"),
+      ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
+      ccolors.error("must be set"),
     );
+    Deno.exit(100);
   }
 
   if (!git_token && !git_ssh_private_key) {
+    console.error();
     throw new Error(
       [
         setTF_VARsLabel,
