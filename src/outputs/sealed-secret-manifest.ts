@@ -104,7 +104,7 @@ const parseCndiSecret = (
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
         const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
           .replace(")", "");
-        const placeholder = `${secretEnvName}${PLACEHOLDER_SUFFIX}`;
+        const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
 
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
