@@ -1052,11 +1052,22 @@ export async function useTemplate(
     }
   }
 
+  let unparsedTemplateObject: TemplateObject;
   // parse the template file as YAML
-  const unparsedTemplateObject = (await YAML.parse(
-    templateContents,
-  )) as TemplateObject;
-
+  try {
+    unparsedTemplateObject = (await YAML.parse(
+      templateContents,
+    )) as TemplateObject;
+  } catch (parseError) {
+    throw new Error(
+      [
+        templatesLabel,
+        ccolors.error("error parsing template file as YAML\n\n") +
+        ccolors.caught(parseError.message, 4500),
+      ].join(" "),
+      { cause: 4500 },
+    );
+  }
   // prompts and outputs are required
 
   coarselyValidateTemplateObjectOrPanic(unparsedTemplateObject);
