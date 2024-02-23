@@ -21,7 +21,6 @@ export default function setTF_VARs() {
   }
 
   if (!git_token && !git_ssh_private_key) {
-    console.error();
     throw new Error(
       [
         setTF_VARsLabel,
