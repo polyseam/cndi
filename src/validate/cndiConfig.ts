@@ -18,6 +18,22 @@ export default function validateConfig(
     );
   }
 
+  if (config?.cndi_version && config?.cndi_version !== "v2") {
+    throw new Error(
+      [
+        cndiConfigLabel,
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but it has an unsupported"),
+        ccolors.key_name('"cndi_version"'),
+        ccolors.error("value. Only"),
+        ccolors.key_name("v2"),
+        ccolors.error("is supported."),
+      ].join(" "),
+      { cause: 4500 },
+    );
+  }
+
   if (!config?.project_name) {
     console.log();
     throw new Error(
