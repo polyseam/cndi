@@ -1212,6 +1212,7 @@
     "https://deno.land/std@0.214.0/path/windows/to_file_url.ts": "1cd63fd35ec8d1370feaa4752eccc4cc05ea5362a878be8dc7db733650995484",
     "https://deno.land/std@0.214.0/path/windows/to_namespaced_path.ts": "4ffa4fb6fae321448d5fe810b3ca741d84df4d7897e61ee29be961a6aac89a4c",
     "https://deno.land/std@0.216.0/cli/spinner.ts": "005395c4e00b1086bfa2ae44e8c9413c1231c4741a08a55aa0d3c9ea267cecb5",
+    "https://deno.land/std@0.217.0/io/write_all.ts": "24aac2312bb21096ae3ae0b102b22c26164d3249dff96dbac130958aa736f038",
     "https://deno.land/std@0.52.0/fmt/colors.ts": "ec9d653672a9a3c7b6eafe53c5bc797364a2db2dcf766ab649c1155fea7a80b2",
     "https://deno.land/std@0.97.0/fmt/colors.ts": "db22b314a2ae9430ae7460ce005e0a7130e23ae1c999157e3bb77cf55800f7e4",
     "https://deno.land/std@0.97.0/testing/_diff.ts": "961eaf6d9f5b0a8556c9d835bbc6fa74f5addd7d3b02728ba7936ff93364f7a3",

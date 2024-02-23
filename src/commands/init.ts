@@ -212,7 +212,21 @@ const initCommand = new Command()
     }
 
     if (!options.interactive && template) {
-      console.log(`cndi init --template ${template}\n`);
+      if (!options.deploymentTargetLabel) {
+        console.log(`cndi init --template ${template}\n`);
+        console.error(
+          initLabel,
+          ccolors.error(
+            `--deployment-target-label (-l) flag is required when not running in interactive mode`,
+          ),
+        );
+        await emitExitEvent(490);
+        Deno.exit(490);
+      } else {
+        console.log(
+          `cndi init --template ${template} --deployment-target-label ${options.deploymentTargetLabel}\n`,
+        );
+      }
     }
 
     if (options.deploymentTargetLabel) {
@@ -222,7 +236,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(490);
@@ -232,7 +246,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(491);
