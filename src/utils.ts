@@ -54,7 +54,23 @@ const removeOldBinaryIfRequired = async (
 };
 
 const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
-  if (providedPath) return providedPath;
+  if (providedPath) {
+    const normalized = path.normalize(providedPath);
+    if (await exists(normalized)) {
+      return normalized;
+    } else {
+      throw new Error(
+        [
+          utilsLabel,
+          ccolors.error("could not find cndi_config file at"),
+          ccolors.user_input(`"${providedPath}"`),
+        ].join(" "),
+        {
+          cause: 4500,
+        },
+      );
+    }
+  }
 
   if (await exists(path.join(Deno.cwd(), "cndi_config.yaml"))) {
     return path.join(Deno.cwd(), "cndi_config.yaml");

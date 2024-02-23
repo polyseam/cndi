@@ -1,11 +1,14 @@
 import { Command, Spinner } from "deps";
-import { emitExitEvent, getPathToCndiConfig } from "src/utils.ts";
+import { emitExitEvent } from "src/utils.ts";
 
 // deno-lint-ignore no-explicit-any
-const owAction = async (args: any) => {
+const owAction = (args: any) => {
   if (!args.initializing) {
-    const pathToConfig = await getPathToCndiConfig(args.file);
-    console.log(`cndi overwrite --file "${pathToConfig}"\n`);
+    if (args.file) {
+      console.log(`cndi overwrite --file "${args.file}"\n`);
+    } else {
+      console.log(`cndi overwrite\n`);
+    }
   }
 
   const spinner = new Spinner({

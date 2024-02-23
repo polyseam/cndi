@@ -143,8 +143,9 @@ const parseCndiSecret = (
               `"${CNDI_SECRETS_PREFIX}YOUR_SECRET_ENV_VAR_NAME)"`,
             ),
             ccolors.error("to reference environment variables at"),
+            "cndi_config.yaml" +
             ccolors.key_name(
-              `"cndi_config.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}"`,
+              `.cluster_manifests.${inputSecret.metadata.name}.stringData.${dataEntryKey}`,
             ),
           ].join(" "),
           { cause: 701 },
@@ -170,7 +171,7 @@ const parseCndiSecret = (
   return outputSecret;
 };
 
-// if a user passes in a cndi_config file in non-interactive mode
+// if a user passes in a cndi_config.yaml file in non-interactive mode
 // we want to write placeholders for the $.cndi.secrets entries to the .env file
 function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
   const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
