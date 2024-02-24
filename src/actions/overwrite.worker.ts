@@ -133,65 +133,44 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     const argoUIAdminPassword = loadArgoUIAdminPassword();
 
     if (!sealedSecretsKeys) {
-      try {
-        throw new Error(
-          [
-            owLabel,
-            ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
-            ccolors.error(`and/or`),
-            ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-            ccolors.error(`are not present in environment`),
-          ].join(" "),
-          { cause: 501 },
-        );
-      } catch (error) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: error.cause,
-          message: error.message,
-        });
-      }
+      self.postMessage({
+        type: "error-overwrite",
+        code: 501,
+        message: [
+          owLabel,
+          ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+          ccolors.error(`and/or`),
+          ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+          ccolors.error(`are not present in environment`),
+        ].join(" "),
+      });
       return;
     }
 
     if (!argoUIAdminPassword) {
-      try {
-        throw new Error(
-          [
-            owLabel,
-            ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
-            ccolors.error(`is not set in environment`),
-          ].join(" "),
-          { cause: 502 },
-        );
-      } catch (error) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: error.cause,
-          message: error.message,
-        });
-        return;
-      }
+      self.postMessage({
+        type: "error-overwrite",
+        code: 502,
+        message: [
+          owLabel,
+          ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
+          ccolors.error(`is not set in environment`),
+        ].join(" "),
+      });
+      return;
     }
 
     if (!terraformStatePassphrase) {
-      try {
-        throw new Error(
-          [
-            owLabel,
-            ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-            ccolors.error(`is not set in environment`),
-          ].join(" "),
-          { cause: 503 },
-        );
-      } catch (error) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: error.cause,
-          message: error.message,
-        });
-        return;
-      }
+      self.postMessage({
+        type: "error-overwrite",
+        code: 503,
+        message: [
+          owLabel,
+          ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+          ccolors.error(`is not set in environment`),
+        ].join(" "),
+      });
+      return;
     }
 
     const cluster_manifests = config?.cluster_manifests || {};
