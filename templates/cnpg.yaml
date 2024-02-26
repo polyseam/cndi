@@ -119,7 +119,7 @@ prompts:
       - true
 
   - name: pgadmin_login_email
-    default: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+    default: jane.doe@example.com
     message: >-
       What email do you want to use for your PgAdmin login?
     type: Input
@@ -129,7 +129,7 @@ prompts:
       - true
 
   - name: pgadmin_login_password
-    default: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
+    default: postgres
     message: >-
       What password do you want to use for your PgAdmin login ?
     type: Secret
@@ -237,7 +237,7 @@ outputs:
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          imageName: 'ghcr.io/cloudnative-pg/postgresql:15.2'
+          imageName: 'ghcr.io/cloudnative-pg/postgresql:16'
           instances: 3
           storage:
             size: 1Gi
