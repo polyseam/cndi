@@ -66,7 +66,7 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
           ccolors.user_input(`"${providedPath}"`),
         ].join(" "),
         {
-          cause: 4500,
+          cause: 500,
         },
       );
     }
@@ -85,7 +85,7 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
         ccolors.error("file in your current directory"),
       ].join(" "),
       {
-        cause: 5000,
+        cause: 500,
       },
     );
   }
