@@ -107,7 +107,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     } catch (errorLoadingCndiConfig) {
       self.postMessage({
         type: "error-overwrite",
-        code: 500,
+        code: errorLoadingCndiConfig.cause,
         message: errorLoadingCndiConfig.message,
       });
       return;

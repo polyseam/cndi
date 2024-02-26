@@ -104,12 +104,12 @@ const loadCndiConfig = async (
     throw new Error(
       [
         utilsLabel,
-        ccolors.error("your cndi config file at"),
+        ccolors.error("your cndi_config file at"),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("could not be read"),
       ].join(" "),
       {
-        cause: 5001,
+        cause: 504,
       },
     );
   }
