@@ -27,7 +27,7 @@ const NODE_DISK_SIZE_KEY = {
 
 const MANAGED_NODE_KINDS = ["eks", "gke", "aks"] as const;
 
-const MICROK8S_INSTALL_RETRY_INTERVAL = 180; // seconds
+const CLOUDINIT_RETRY_INTERVAL = 180; // seconds
 
 const DEFAULT_OPEN_PORTS = [
   {
@@ -46,8 +46,15 @@ const DEFAULT_OPEN_PORTS = [
 
 export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 
+const PROCESS_ERROR_CODE_PREFIX = {
+  terraform: 1000,
+  kubeseal: 2000,
+  "ssh-keygen": 3000,
+} as const;
+
 export {
   ARGOCD_VERSION,
+  CLOUDINIT_RETRY_INTERVAL,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
@@ -57,9 +64,9 @@ export {
   KUBESEAL_VERSION,
   LARSTOBI_MULTIPASS_PROVIDER_VERSION,
   MANAGED_NODE_KINDS,
-  MICROK8S_INSTALL_RETRY_INTERVAL,
   NODE_DISK_SIZE_KEY,
   POLYSEAM_TEMPLATE_DIRECTORY,
+  PROCESS_ERROR_CODE_PREFIX,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
   TERRAFORM_VERSION,

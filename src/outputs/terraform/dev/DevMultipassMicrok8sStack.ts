@@ -21,6 +21,10 @@ import { ccolors, deepMerge } from "deps";
 const LOCAL_CLOUDINIT_FILE_NAME =
   "microk8s-cloud-init-leader.sensitive.yml.tftpl";
 
+const devMultipassMicrok8sStackLabel = ccolors.faded(
+  "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts:",
+);
+
 export class DevMultipassMicrok8sStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
@@ -123,8 +127,15 @@ export default function getMultipassResource(
   cndi_config: CNDIConfig,
 ) {
   if (cndi_config.infrastructure.cndi.nodes.length !== 1) {
-    console.log("dev clusters must have exactly one node");
-    Deno.exit(1);
+    throw new Error(
+      [
+        devMultipassMicrok8sStackLabel,
+        ccolors.error("dev clusters must have exactly one node"),
+      ].join(" "),
+      {
+        cause: 4777,
+      },
+    );
   }
   const node = cndi_config.infrastructure.cndi
     .nodes[0] as MultipassNodeItemSpec;

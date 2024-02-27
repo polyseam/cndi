@@ -17,7 +17,7 @@ import {
   useTemplate,
 } from "src/templates/templates.ts";
 
-import { getOwModule } from "src/commands/overwrite.ts";
+import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
@@ -212,7 +212,23 @@ const initCommand = new Command()
     }
 
     if (!options.interactive && template) {
-      console.log(`cndi init --template ${template}\n`);
+      if (!options.deploymentTargetLabel) {
+        console.log(`cndi init --template ${template}\n`);
+        if (!overrides.deployment_target_provider) {
+          console.error(
+            initLabel,
+            ccolors.error(
+              `--deployment-target-label (-l) flag is required when not running in interactive mode`,
+            ),
+          );
+          await emitExitEvent(490);
+          Deno.exit(490);
+        }
+      } else {
+        console.log(
+          `cndi init --template ${template} --deployment-target-label ${options.deploymentTargetLabel}\n`,
+        );
+      }
     }
 
     if (options.deploymentTargetLabel) {
@@ -222,7 +238,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(490);
@@ -232,7 +248,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(491);
@@ -293,13 +309,21 @@ const initCommand = new Command()
     };
 
     let deployment_target_provider;
+    let templateResult;
 
     if (template) {
-      const templateResult = await useTemplate(
-        template!,
-        !!options.interactive,
-        { project_name, ...overrides },
-      );
+      try {
+        templateResult = await useTemplate(
+          template!,
+          !!options.interactive,
+          { project_name, ...overrides },
+        );
+      } catch (e) {
+        console.log(e.message);
+        await emitExitEvent(e.cause);
+        Deno.exit(e.cause);
+      }
+
       cndi_config = templateResult.cndi_config;
       await stageFile("cndi_config.yaml", cndi_config);
       readme = templateResult.readme;
@@ -349,20 +373,8 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    const owMod = await getOwModule();
-
-    if (template) {
-      await persistStagedFiles(options.output);
-
-      // because there is no "pathToConfig" when using a template, we need to set it here
-      await owMod.overwriteAction({
-        output: options.output,
-        initializing: true,
-      });
-      return;
-    }
     await persistStagedFiles(options.output);
-    await owMod.overwriteAction({ output: options.output, initializing: true });
+    await owAction({ output: options.output, initializing: true });
   });
 
 export default initCommand;

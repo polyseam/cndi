@@ -1,55 +1,67 @@
 import { ccolors } from "deps";
-import { emitExitEvent } from "src/utils.ts";
 const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
-export default async function setTF_VARs() {
+export default function setTF_VARs() {
   const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
   const git_token = Deno.env.get("GIT_TOKEN");
   const git_username = Deno.env.get("GIT_USERNAME");
 
   if (!git_username && !git_ssh_private_key) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"GIT_USERNAME"`),
-      "env var is not set",
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.error("Either"),
+        ccolors.key_name(`"GIT_USERNAME"`),
+        ccolors.error("or"),
+        ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
+        ccolors.error("must be set"),
+      ].join(" "),
+      { cause: 100 },
     );
-    await emitExitEvent(100);
-    Deno.exit(100);
   }
 
   if (!git_token && !git_ssh_private_key) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.error("Either"),
-      ccolors.key_name(`"GIT_TOKEN"`),
-      ccolors.error("or"),
-      ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
-      ccolors.error("must be set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.error("Either"),
+        ccolors.key_name(`"GIT_TOKEN"`),
+        ccolors.error("or"),
+        ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
+        ccolors.error("must be set"),
+      ].join(" "),
+      {
+        cause: 101,
+      },
     );
-    await emitExitEvent(101);
-    Deno.exit(101);
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
   if (!git_repo) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"GIT_REPO"`),
-      ccolors.error("env var is not set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.key_name(`"GIT_REPO"`),
+        ccolors.error("env var is not set"),
+      ].join(" "),
+      {
+        cause: 102,
+      },
     );
-    await emitExitEvent(102);
-    Deno.exit(102);
   }
 
   const argocd_admin_password = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
   if (!argocd_admin_password) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
-      ccolors.error("env var is not set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
+        ccolors.error("env var is not set"),
+      ].join(" "),
+      {
+        cause: 103,
+      },
     );
-    await emitExitEvent(103);
-    Deno.exit(103);
   }
 
   const sealed_secrets_private_key = Deno.env
@@ -57,13 +69,16 @@ export default async function setTF_VARs() {
     ?.trim();
 
   if (!sealed_secrets_private_key) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-      ccolors.error("env var is not set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+        ccolors.error("env var is not set"),
+      ].join(" "),
+      {
+        cause: 104,
+      },
     );
-    await emitExitEvent(104);
-    Deno.exit(104);
   }
 
   const sealed_secrets_public_key = Deno.env
@@ -71,13 +86,16 @@ export default async function setTF_VARs() {
     ?.trim();
 
   if (!sealed_secrets_public_key) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
-      ccolors.error("env var is not set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+        ccolors.error("env var is not set"),
+      ].join(" "),
+      {
+        cause: 105,
+      },
     );
-    await emitExitEvent(105);
-    Deno.exit(105);
   }
 
   if (git_ssh_private_key) {
@@ -89,13 +107,16 @@ export default async function setTF_VARs() {
 
   const ssh_public_key = Deno.env.get("SSH_PUBLIC_KEY");
   if (!ssh_public_key) {
-    console.error(
-      setTF_VARsLabel,
-      ccolors.key_name(`"SSH_PUBLIC_KEY"`),
-      ccolors.error("env var is not set"),
+    throw new Error(
+      [
+        setTF_VARsLabel,
+        ccolors.key_name(`"SSH_PUBLIC_KEY"`),
+        ccolors.error("env var is not set"),
+      ].join(" "),
+      {
+        cause: 106,
+      },
     );
-    await emitExitEvent(106);
-    Deno.exit(106);
   }
 
   Deno.env.set("TF_VAR_ssh_public_key", ssh_public_key);

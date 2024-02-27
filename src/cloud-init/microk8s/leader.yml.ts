@@ -4,11 +4,13 @@ import { CNDIConfig, Microk8sAddon } from "src/types.ts";
 import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
 import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
+import getStorageClass from "src/outputs/terraform/manifest-templates/storage.yaml.tftpl.ts";
+
+import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 
 import {
   ARGOCD_VERSION,
   DEFAULT_K8S_VERSION,
-  MICROK8S_INSTALL_RETRY_INTERVAL,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
@@ -131,6 +133,9 @@ const getLeaderCloudInitYaml = (
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
     `${PATH_TO_MANIFESTS}/cluster-repo-secret.yaml`;
 
+  const PATH_TO_STORAGE_CLASS_MANIFEST =
+    `${PATH_TO_MANIFESTS}/storage-class.yaml`;
+
   const PATH_TO_SEALED_SECRETS_PRIVATE_KEY =
     `${WORKING_DIR}/sealed_secrets_private_key.key`;
   const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
@@ -144,19 +149,30 @@ const getLeaderCloudInitYaml = (
     `echo "Installing nfs on host: $(hostname)"`,
     // because this next line uses interpolation at runtime
     // we install the nfs addon manually rather than declaritively
-    `while ! sudo microk8s enable nfs -n "$(hostname)"; do echo 'nfs failed to install, retrying in 180 seconds'; sleep 180; done`,
+    loopUntilSuccess(
+      'sudo microk8s enable nfs "$(hostname)"',
+      "microk8s failed to enable 'nfs' addon",
+    ),
     `echo "nfs installed"`,
   ];
 
   let storageClassSetupCommands = [
     `echo "Setting NFS as default storage class"`,
-    `while ! sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'; do echo 'microk8s failed to install nfs, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+    loopUntilSuccess(
+      `sudo microk8s kubectl apply -f ${PATH_TO_STORAGE_CLASS_MANIFEST}`,
+      `microk8s failed to install nfs`,
+    ),
     `echo "NFS is now the default storage class"`,
   ];
 
   if (isDevCluster(config)) {
     packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
+      `echo "Setting hostpath-storage as default storage class"`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl apply -f ${PATH_TO_STORAGE_CLASS_MANIFEST}`,
+        "microk8s failed to install hostpath-storage",
+      ),
       `echo "hostpath-storage is now the default storage class"`,
     ];
     nfsInstallCommands = []; // no nfs on dev clusters, hostpath-storage is installed declaratively
@@ -168,6 +184,10 @@ const getLeaderCloudInitYaml = (
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages,
     write_files: [
+      {
+        path: `${PATH_TO_MANIFESTS}/storage-class.yaml`,
+        content: getStorageClass(isDevCluster(config)),
+      },
       {
         path: PATH_TO_LAUNCH_CONFIG,
         content: microk8sLeaderLaunchConfigYaml,
@@ -205,11 +225,14 @@ const getLeaderCloudInitYaml = (
       `echo "------------------"`,
       `echo "cndi-platform begin"`,
       `echo "Installing microk8s"`,
-      // the following used to retry every 180 seconds until success:
-      `while ! sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}; do echo 'microk8s failed to install, retrying in ${MICROK8S_INSTALL_RETRY_INTERVAL} seconds'; sleep ${MICROK8S_INSTALL_RETRY_INTERVAL}; done`,
+      loopUntilSuccess(
+        `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`,
+        `snap failed to install 'microk8s'`,
+      ),
       `echo "microk8s installed"`,
 
       `echo "Setting microk8s config"`,
+
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
 
       ...nfsInstallCommands,
@@ -228,21 +251,36 @@ const getLeaderCloudInitYaml = (
       `sudo microk8s add-node --token \${bootstrap_token} -l ${MICROK8S_ADD_NODE_TOKEN_TTL}`,
 
       `echo "Installing sealed-secrets-controller"`,
-      `sudo microk8s helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets`,
-      `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${SEALED_SECRETS_VERSION} --namespace kube-system`,
+      loopUntilSuccess(
+        `sudo microk8s helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets`,
+        "helm failed to add sealed-secrets repo",
+      ),
+      loopUntilSuccess(
+        `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${SEALED_SECRETS_VERSION} --namespace kube-system`,
+        "helm failed to install sealed-secrets-controller",
+      ),
       `echo "sealed-secrets-controller installed"`,
 
       // storageClass depends on dev cluster or not
       ...storageClassSetupCommands,
 
       `echo "Importing Sealed Secrets Keys"`,
-      `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
-      `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
+        "failed to create sealed-secrets-key secret",
+      ),
+      loopUntilSuccess(
+        `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
+        "failed to label sealed-secrets-key secret",
+      ),
       `echo "Sealed Secrets Keys imported"`,
 
       `echo "Restarting sealed-secrets-controller"`,
-      `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
-
+      loopUntilSuccess(
+        `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
+        "failed to restart sealed-secrets-controller",
+      ),
+      `echo "sealed-secrets-controller restarted"`,
       `echo "Removing Sealed Secrets Keys from disk"`,
       `sudo rm ${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}`,
       `sudo rm ${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}`,
@@ -253,11 +291,17 @@ const getLeaderCloudInitYaml = (
       `echo "ArgoCD namespace created"`,
 
       `echo "Installing ArgoCD"`,
-      `sudo microk8s kubectl apply -n argocd -f ${argocdInstallUrl}`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl apply -n argocd -f ${argocdInstallUrl}`,
+        `failed to install ArgoCD using manifests: ${argocdInstallUrl}`,
+      ),
       `echo "ArgoCD Installed"`,
 
       `echo "Adding Reloader annotation to argocd-server Deployment"`,
-      `sudo microk8s kubectl patch deployment argocd-server -n argocd -p '{"metadata": {"annotations":{"configmap.reloader.stakater.com/reload": "argocd-cm"}}}'`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl patch deployment argocd-server -n argocd -p '{"metadata": {"annotations":{"configmap.reloader.stakater.com/reload": "argocd-cm"}}}'`,
+        `failed to add Reloader annotation to argocd-server Deployment`,
+      ),
       `echo "Reloader annotation added to argocd-server Deployment"`,
 
       `echo "Creating reloader namespace"`,
@@ -265,8 +309,14 @@ const getLeaderCloudInitYaml = (
       `echo "reloader namespace created"`,
 
       `echo "Installing Reloader"`,
-      `sudo microk8s helm repo add stakater https://stakater.github.io/stakater-charts`,
-      `sudo microk8s helm install stakater/reloader --generate-name --namespace reloader --version ${RELOADER_VERSION}`,
+      loopUntilSuccess(
+        `sudo microk8s helm repo add stakater https://stakater.github.io/stakater-charts`,
+        "helm failed to add stakater repo",
+      ),
+      loopUntilSuccess(
+        `sudo microk8s helm install stakater/reloader --generate-name --namespace reloader --version ${RELOADER_VERSION}`,
+        `helm failed to install reloader`,
+      ),
       `echo "Reloader Installed"`,
 
       `echo "Configuring ArgoCD Root App Manifest"`,
