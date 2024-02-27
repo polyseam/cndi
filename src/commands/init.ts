@@ -214,14 +214,16 @@ const initCommand = new Command()
     if (!options.interactive && template) {
       if (!options.deploymentTargetLabel) {
         console.log(`cndi init --template ${template}\n`);
-        console.error(
-          initLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag is required when not running in interactive mode`,
-          ),
-        );
-        await emitExitEvent(490);
-        Deno.exit(490);
+        if (!overrides.deployment_target_provider) {
+          console.error(
+            initLabel,
+            ccolors.error(
+              `--deployment-target-label (-l) flag is required when not running in interactive mode`,
+            ),
+          );
+          await emitExitEvent(490);
+          Deno.exit(490);
+        }
       } else {
         console.log(
           `cndi init --template ${template} --deployment-target-label ${options.deploymentTargetLabel}\n`,
