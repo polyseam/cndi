@@ -453,11 +453,20 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       );
 
       if (applicationSpec.valuesSchema) {
-        await validateValuesWithSchema(
-          releaseName,
-          applicationSpec.valuesSchema,
-          applicationSpec.values,
-        );
+        try {
+          await validateValuesWithSchema(
+            releaseName,
+            applicationSpec.valuesSchema,
+            applicationSpec.values,
+          );
+        } catch (error) {
+          self.postMessage({
+            type: "error-overwrite",
+            code: error.cause,
+            message: error.message,
+          });
+          return;
+        }
       }
 
       await stageFile(

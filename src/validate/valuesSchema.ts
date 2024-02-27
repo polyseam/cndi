@@ -1,7 +1,7 @@
 import { Ajv, ccolors, DefinedError } from "deps";
-import { emitExitEvent, getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString } from "src/utils.ts";
 
-const _validateValsLabel = ccolors.faded("src/validate/valuesSchema.ts:");
+const validateValsLabel = ccolors.faded("src/validate/valuesSchema.ts:");
 
 export default async function validateValuesForSchema(
   releaseName: string,
@@ -10,15 +10,19 @@ export default async function validateValuesForSchema(
 ): Promise<boolean> {
   try {
     new URL(valuesSchemaURL);
-  } catch (_e) {
-    console.log(
-      ccolors.error(
-        `Invalid 'valuesSchema' URL in applications.${releaseName}:`,
-      ),
-      ccolors.user_input(valuesSchemaURL),
+  } catch {
+    throw new Error(
+      [
+        validateValsLabel,
+        ccolors.error(
+          `Invalid 'valuesSchema' URL in applications.${releaseName}:`,
+        ),
+        ccolors.user_input(valuesSchemaURL),
+      ].join(" "),
+      {
+        cause: 811,
+      },
     );
-    await emitExitEvent(1300);
-    Deno.exit(1300);
   }
 
   // @ts-ignore TODO: expression not constructable??
@@ -33,16 +37,17 @@ export default async function validateValuesForSchema(
   try {
     const valSchemaResponse = await fetch(valuesSchemaURL);
     schemaJSON = await valSchemaResponse.json();
-  } catch (fetchErr) {
-    console.log(
-      ccolors.error(
-        `Failed to fetch 'valuesSchema' in applications.${releaseName}:`,
-      ),
-      ccolors.user_input(valuesSchemaURL),
+  } catch (_fetchErr) {
+    throw new Error(
+      [
+        validateValsLabel,
+        ccolors.error(
+          `Failed to fetch 'valuesSchema' in applications.${releaseName}:`,
+        ),
+        ccolors.user_input(valuesSchemaURL),
+      ].join(" "),
+      { cause: 5500 },
     );
-    ccolors.caught(fetchErr);
-    await emitExitEvent(1301);
-    Deno.exit(1301);
   }
 
   try {
@@ -133,14 +138,17 @@ export default async function validateValuesForSchema(
       return false;
     }
     return true;
-  } catch (errValidating) {
-    console.log(
-      ccolors.error(
-        `Unable to perform validation of applications.${releaseName}:`,
-      ),
+  } catch (_errValidating) {
+    throw new Error(
+      [
+        validateValsLabel,
+        ccolors.error(
+          `Unable to perform validation of applications.${releaseName}:`,
+        ),
+      ].join(" "),
+      {
+        cause: 5500,
+      },
     );
-    console.log(ccolors.caught(errValidating));
-    await emitExitEvent(1302);
-    Deno.exit(1302);
   }
 }
