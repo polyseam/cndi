@@ -6,6 +6,8 @@ import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
+import { PROCESS_ERROR_CODE_PREFIX } from "consts";
+
 /**
  * COMMAND cndi terrafrom ...args
  * executes terraform against the resources in a project's ./cndi/terraform
@@ -123,7 +125,10 @@ const terraformCommand = new Command()
     }
 
     if (status.code !== 0) {
-      await emitExitEvent(4500);
+      const cndiExitCode = parseInt(
+        `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
+      );
+      await emitExitEvent(cndiExitCode);
       Deno.exit(status.code);
     }
 

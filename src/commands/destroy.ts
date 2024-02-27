@@ -5,6 +5,8 @@ import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { ccolors, Command, path } from "deps";
 
+import { PROCESS_ERROR_CODE_PREFIX } from "consts";
+
 const destroyLabel = ccolors.faded("\nsrc/commands/destroy.ts:");
 
 /**
@@ -162,6 +164,10 @@ const destroyCommand = new Command()
 
       // if `terraform destroy` fails, exit with the code
       if (status.code !== 0) {
+        const cndiExitCode = parseInt(
+          `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
+        );
+        await emitExitEvent(cndiExitCode);
         Deno.exit(status.code);
       }
     } catch (cndiDestroyError) {

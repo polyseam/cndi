@@ -6,6 +6,8 @@ import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
+import { PROCESS_ERROR_CODE_PREFIX } from "consts";
+
 const runLabel = ccolors.faded("\nsrc/commands/run.ts:");
 
 /**
@@ -101,14 +103,17 @@ const runCommand = new Command()
 
       if (terraformInitCommandOutput.code !== 0) {
         console.log(runLabel, ccolors.error("terraform init failed"));
-        await emitExitEvent(4500);
+        const cndiExitCode = parseInt(
+          `${PROCESS_ERROR_CODE_PREFIX.terraform}${terraformInitCommandOutput.code}`,
+        );
+        await emitExitEvent(cndiExitCode);
         Deno.exit(terraformInitCommandOutput.code);
       }
     } catch (err) {
       console.log(runLabel, ccolors.error("failed to spawn 'terraform init'"));
       console.log(ccolors.caught(err));
-      await emitExitEvent(4500);
-      Deno.exit(4500);
+      await emitExitEvent(1402);
+      Deno.exit(1402);
     }
 
     try {
@@ -146,14 +151,17 @@ const runCommand = new Command()
 
       // if `terraform apply` fails, exit with the code
       if (status.code !== 0) {
-        await emitExitEvent(4500);
+        const cndiExitCode = parseInt(
+          `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
+        );
+        await emitExitEvent(cndiExitCode);
         Deno.exit(status.code);
       }
     } catch (err) {
       console.log(runLabel, ccolors.error("failed to spawn 'terraform apply'"));
       console.log(ccolors.caught(err));
-      await emitExitEvent(4500);
-      Deno.exit(4500);
+      await emitExitEvent(1403);
+      Deno.exit(1403);
     }
     await emitExitEvent(0);
   });
