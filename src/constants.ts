@@ -46,6 +46,12 @@ const DEFAULT_OPEN_PORTS = [
 
 export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 
+const PROCESS_ERROR_CODE_PREFIX = {
+  terraform: 1000,
+  kubeseal: 2000,
+  "ssh-keygen": 3000,
+} as const;
+
 export {
   ARGOCD_VERSION,
   CLOUDINIT_RETRY_INTERVAL,
@@ -60,6 +66,7 @@ export {
   MANAGED_NODE_KINDS,
   NODE_DISK_SIZE_KEY,
   POLYSEAM_TEMPLATE_DIRECTORY,
+  PROCESS_ERROR_CODE_PREFIX,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
   TERRAFORM_VERSION,

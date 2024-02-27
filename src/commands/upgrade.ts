@@ -4,8 +4,7 @@ import {
   inflateResponse,
   path,
   platform,
-  Spinners,
-  TerminalSpinner,
+  Spinner,
   UpgradeCommand,
   UpgradeOptions,
 } from "deps";
@@ -26,12 +25,20 @@ const getReleaseSuffixForPlatform = () => {
 
 class GitHubBinaryUpgradeProvider extends GithubProvider {
   async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
-    const spinner = new TerminalSpinner({
-      text: `Upgrading ${name} from ${from} to version ${to}...`,
+    const spinner = new Spinner({
+      message: `Upgrading ${name} from ${from} to version ${to}...`,
       color: "cyan",
-      indent: 2,
-      spinner: Spinners.windows,
-      writer: Deno.stdout,
+      spinner: [
+        "▰▱▱▱▱▱▱",
+        "▰▰▱▱▱▱▱",
+        "▰▰▰▱▱▱▱",
+        "▰▰▰▰▱▱▱",
+        "▰▰▰▰▰▱▱",
+        "▰▰▰▰▰▰▱",
+        "▰▰▰▰▰▰▰",
+        "▰▱▱▱▱▱▱",
+      ],
+      interval: 80,
     });
 
     const destinationPath = await getCndiInstallPath();
@@ -125,6 +132,7 @@ class GitHubBinaryUpgradeProvider extends GithubProvider {
       await emitExitEvent(1101);
       Deno.exit(1101);
     }
+    await emitExitEvent(0);
   }
 }
 
