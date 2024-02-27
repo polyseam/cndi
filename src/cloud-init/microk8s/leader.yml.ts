@@ -4,6 +4,7 @@ import { CNDIConfig, Microk8sAddon } from "src/types.ts";
 import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
 import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
+import getStorageClass from "src/outputs/terraform/manifest-templates/storage.yaml.tftpl.ts";
 
 import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 
@@ -132,6 +133,9 @@ const getLeaderCloudInitYaml = (
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
     `${PATH_TO_MANIFESTS}/cluster-repo-secret.yaml`;
 
+  const PATH_TO_STORAGE_CLASS_MANIFEST =
+    `${PATH_TO_MANIFESTS}/storage-class.yaml`;
+
   const PATH_TO_SEALED_SECRETS_PRIVATE_KEY =
     `${WORKING_DIR}/sealed_secrets_private_key.key`;
   const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
@@ -155,8 +159,8 @@ const getLeaderCloudInitYaml = (
   let storageClassSetupCommands = [
     `echo "Setting NFS as default storage class"`,
     loopUntilSuccess(
-      `sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'`,
-      "failed to set 'nfs' as default storage class",
+      `sudo microk8s kubectl apply -f ${PATH_TO_STORAGE_CLASS_MANIFEST}`,
+      `microk8s failed to install nfs`,
     ),
     `echo "NFS is now the default storage class"`,
   ];
@@ -164,6 +168,11 @@ const getLeaderCloudInitYaml = (
   if (isDevCluster(config)) {
     packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
+      `echo "Setting hostpath-storage as default storage class"`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl apply -f ${PATH_TO_STORAGE_CLASS_MANIFEST}`,
+        "microk8s failed to install hostpath-storage",
+      ),
       `echo "hostpath-storage is now the default storage class"`,
     ];
     nfsInstallCommands = []; // no nfs on dev clusters, hostpath-storage is installed declaratively
@@ -175,6 +184,10 @@ const getLeaderCloudInitYaml = (
     package_upgrade: false, // TODO: is package_upgrade:true better?
     packages,
     write_files: [
+      {
+        path: `${PATH_TO_MANIFESTS}/storage-class.yaml`,
+        content: getStorageClass(isDevCluster(config)),
+      },
       {
         path: PATH_TO_LAUNCH_CONFIG,
         content: microk8sLeaderLaunchConfigYaml,
