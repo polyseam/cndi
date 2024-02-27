@@ -115,9 +115,9 @@ const destroyCommand = new Command()
         destroyLabel,
         ccolors.error("failed to spawn 'terraform init'"),
       );
-      console.log(ccolors.caught(terraformInitError, 4500));
-      await emitExitEvent(4500);
-      Deno.exit(4500);
+      console.log(ccolors.caught(terraformInitError, 1400));
+      await emitExitEvent(1400);
+      Deno.exit(1400);
     }
 
     try {
@@ -169,7 +169,9 @@ const destroyCommand = new Command()
         destroyLabel,
         ccolors.error("failed to spawn 'terraform destroy'"),
       );
-      console.log(ccolors.caught(cndiDestroyError));
+      console.log(ccolors.caught(cndiDestroyError, 1401));
+      await emitExitEvent(1401);
+      Deno.exit(1401);
     }
     await emitExitEvent(0);
   });

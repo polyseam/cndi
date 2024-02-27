@@ -137,12 +137,13 @@ const loadYAML = async (path: string) => {
           ccolors.user_input(`"${path}"`),
         ].join(" "),
         {
-          cause: 4500,
+          cause: 1301,
         },
       );
     }
     throw error;
   }
+
   try {
     y = await YAML.parse(txt);
   } catch {
@@ -153,7 +154,7 @@ const loadYAML = async (path: string) => {
         ccolors.user_input(`"${path}"`),
       ].join(" "),
       {
-        cause: 4500,
+        cause: 1300,
       },
     );
   }
