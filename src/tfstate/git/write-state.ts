@@ -1,7 +1,6 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import encrypt from "src/tfstate/encrypt.ts";
-import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 
@@ -17,26 +16,28 @@ export default async function pushStateFromRun({
   const isGitRepo = await git.checkIsRepo();
 
   if (!isGitRepo) {
-    console.error(
-      gitWriteStateLabel,
-      ccolors.user_input(`"${cmd}"`),
-      ccolors.error("must be executed inside a git repository"),
+    throw new Error(
+      [
+        gitWriteStateLabel,
+        ccolors.user_input(`"${cmd}"`),
+        ccolors.error("must be executed inside a git repository"),
+      ].join(" "),
+      { cause: 1005 },
     );
-    await emitExitEvent(1005);
-    Deno.exit(1005);
   }
 
   // we can't have any uncommitted changes
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
-    console.error(
-      gitWriteStateLabel,
-      ccolors.error("you must have clean git state when running"),
-      ccolors.user_input(`"${cmd}"`),
+    throw new Error(
+      [
+        gitWriteStateLabel,
+        ccolors.error("you must have clean git state when running"),
+        ccolors.user_input(`"${cmd}"`),
+      ].join(" "),
+      { cause: 1006 },
     );
-    await emitExitEvent(1006);
-    Deno.exit(1006);
   }
 
   await git.raw("config", "user.email", "bot@cndi.run"); // this is needed for git to work
@@ -50,37 +51,44 @@ export default async function pushStateFromRun({
   try {
     state = Deno.readTextFileSync(pathToState);
   } catch (errorReadingState) {
-    console.error(
-      gitWriteStateLabel,
-      ccolors.error("failed to read tfstate from disk"),
-    );
-    console.log(ccolors.caught(errorReadingState));
-    await emitExitEvent(1009);
-    Deno.exit(1009);
+    if (errorReadingState instanceof Deno.errors.NotFound) {
+      throw new Error(
+        [
+          gitWriteStateLabel,
+          ccolors.error("failed to find tfstate at"),
+          ccolors.key_name(`"${pathToState}"`),
+        ].join(" "),
+        { cause: 1009 },
+      );
+    }
   }
 
   try {
     // this should throw an error if state is corrupted
     JSON.parse(state!);
   } catch {
-    console.log(
-      gitWriteStateLabel,
-      `corrupted state, please run "${cmd}" again`,
+    throw new Error(
+      [
+        gitWriteStateLabel,
+        ccolors.error("corrupted state JSON please run"),
+        ccolors.user_input(`"${cmd}"`),
+        ccolors.error("again"),
+      ].join(" "),
+      { cause: 1007 },
     );
-    await emitExitEvent(1007);
-    Deno.exit(1007);
   }
 
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
   if (!secret) {
-    console.error(
-      gitWriteStateLabel,
-      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-      "is not set in your environment",
+    throw new Error(
+      [
+        gitWriteStateLabel,
+        ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+        "is not set in your environment",
+      ].join(" "),
+      { cause: 1008 },
     );
-    await emitExitEvent(1008);
-    Deno.exit(1008);
   }
 
   try {
@@ -90,7 +98,7 @@ export default async function pushStateFromRun({
     await git.checkout("_state");
   }
 
-  const encryptedState = encrypt(state, secret);
+  const encryptedState = encrypt(state!, secret);
 
   const pathToNewState = path.join(
     pathToTerraformResources,

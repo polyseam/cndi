@@ -71,7 +71,7 @@
   },
   {
     "code": 500,
-    "message": "cndi_config not found during 'cndi overwrite'",
+    "message": "cndi_config.yaml not found during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/508"
   },
   {
@@ -220,16 +220,6 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/568"
   },
   {
-    "code": 903,
-    "message": "cndi_config invalid: contains at least one node without a 'kind'",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/569"
-  },
-  {
-    "code": 904,
-    "message": "cndi_config invalid: contains multiple node 'kind's",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/570"
-  },
-  {
     "code": 905,
     "message": "cndi_config invalid: contains at least one node with a missing 'name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/571"
@@ -273,6 +263,11 @@
     "code": 913,
     "message": "cndi_config invalid: infrastructure.cndi.open_ports entry is missing the 'name' key",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/572"
+  },
+  {
+    "code": 914,
+    "message": "cndi_config invalid: 'cndi_version' is set to a value other than 'v2'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/745"
   },
   {
     "code": 1000,
@@ -345,5 +340,45 @@
     "code": 1202,
     "message": "failed to parse template JSONC or YAML during 'cndi init'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
+  },
+  {
+    "code": 1300,
+    "message": "failed to parse YAML using loadYAML utility",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/737"
+  },
+  {
+    "code": 1301,
+    "message": "failed to find YAML using loadYAML utility",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/738"
+  },
+  {
+    "code": 1400,
+    "message": "failed to spawn 'terraform init' during 'cndi destroy'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/739"
+  },
+  {
+    "code": 1401,
+    "message": "failed to spawn 'terraform destroy' during 'cndi destroy'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/740"
+  },
+  {
+    "code": 1402,
+    "message": "failed to spawn 'terraform init' during 'cndi run'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/741"
+  },
+  {
+    "code": 1403,
+    "message": "failed to spawn 'terraform apply' during 'cndi run'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/743"
+  },
+  {
+    "code": 1404,
+    "message": "failed to spawn 'terraform init' during 'cndi terraform ...'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/742"
+  },
+  {
+    "code": 1405,
+    "message": "failed to spawn 'terraform ...' during 'cndi terraform ...'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/744"
   }
 ]
