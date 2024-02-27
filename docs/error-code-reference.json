@@ -205,6 +205,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/707"
   },
   {
+    "code": 811,
+    "message": "failed to construct URL when fetching 'valuesSchema' during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/709"
+  },
+  {
     "code": 900,
     "message": "cndi_config invalid: does not have 'project_name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/566"
@@ -342,9 +347,6 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
   },
   {
-    "message": "failed to construct URL when fetching 'valuesSchema'",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/709"
-  },{
     "code": 1300,
     "message": "failed to parse YAML using loadYAML utility",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/737"

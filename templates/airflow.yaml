@@ -261,7 +261,6 @@ outputs:
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
-        valuesSchema: https://raw.githubusercontent.com/cloudnative-pg/charts/cloudnative-pg-v0.20.1/charts/cloudnative-pg/values.schema.json
 
       airflow:
         targetRevision: 1.12.0

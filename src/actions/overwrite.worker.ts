@@ -40,6 +40,7 @@ import {
   ManagedNodeKind,
 } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
+import validateValuesWithSchema from "src/validate/valuesSchema.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
@@ -450,6 +451,15 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         releaseName,
         applicationSpec,
       );
+
+      if (applicationSpec.valuesSchema) {
+        await validateValuesWithSchema(
+          releaseName,
+          applicationSpec.valuesSchema,
+          applicationSpec.values,
+        );
+      }
+
       await stageFile(
         path.join("cndi", "cluster_manifests", "applications", filename),
         manifestContent,
