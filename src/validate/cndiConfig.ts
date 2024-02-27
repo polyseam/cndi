@@ -30,7 +30,7 @@ export default function validateConfig(
         ccolors.key_name("v2"),
         ccolors.error("is supported."),
       ].join(" "),
-      { cause: 4500 },
+      { cause: 914 },
     );
   }
 
