@@ -844,6 +844,7 @@ async function get_string(identifier: string) {
       throw new Error(
         [
           templatesLabel,
+          ccolors.error("template error:\n"),
           ccolors.error("error fetching string block from url"),
           ccolors.user_input(identifier),
           "\n",
@@ -862,6 +863,7 @@ async function get_string(identifier: string) {
       throw new Error(
         [
           templatesLabel,
+          ccolors.error("template error:\n"),
           ccolors.error("error getting text from string block response"),
           ccolors.user_input(identifier),
           "\n",
@@ -890,6 +892,7 @@ async function get_block(
       throw new Error(
         [
           templatesLabel,
+          ccolors.error("template error:\n"),
           ccolors.error("error fetching block from url"),
           ccolors.user_input(identifier),
           "\n",
@@ -908,6 +911,7 @@ async function get_block(
       throw new Error(
         [
           templatesLabel,
+          ccolors.error("template error:\n"),
           ccolors.error("error getting text from block response"),
           ccolors.user_input(identifier),
           "\n",
@@ -928,6 +932,7 @@ async function get_block(
         throw new Error(
           [
             templatesLabel,
+            ccolors.error("template error:\n"),
             ccolors.error("error parsing yaml from block response"),
             ccolors.user_input(identifier),
             "\n",
@@ -960,6 +965,9 @@ async function get_block(
     throw new Error(
       [
         templatesLabel,
+        ccolors.error(
+          "template error:\n",
+        ),
         ccolors.error("block"),
         ccolors.user_input(identifier),
         ccolors.error("could not be resolved"),
@@ -1016,7 +1024,7 @@ export async function useTemplate(
           ccolors.user_input(`"${templateIdentifier}"\n`),
         ].join(" "),
         {
-          cause: 4500,
+          cause: 1201,
         },
       );
     }
@@ -1063,9 +1071,9 @@ export async function useTemplate(
       [
         templatesLabel,
         ccolors.error("error parsing template file as YAML\n\n") +
-        ccolors.caught(parseError.message, 4500),
+        ccolors.caught(parseError.message, 1200),
       ].join(" "),
-      { cause: 4500 },
+      { cause: 1200 },
     );
   }
   // prompts and outputs are required
@@ -1173,7 +1181,7 @@ export async function useTemplate(
         throw new Error(
           [
             templatesLabel,
-            ccolors.error("template error:"),
+            ccolors.error("template error:\n"),
             ccolors.error("Block used for prompts must be an Array"),
           ].join(" "),
           {
