@@ -18,6 +18,8 @@ export { inflateResponse } from "https://deno.land/x/inflate_response@v1.1.0/mod
 export { writeAll } from "https://deno.land/std@0.217.0/io/write_all.ts";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
+export { default as Ajv } from "npm:ajv";
+export type { DefinedError } from "npm:ajv";
 
 export const YAML = {
   ...yaml,

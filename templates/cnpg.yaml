@@ -336,7 +336,7 @@ outputs:
 
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.20.1
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
