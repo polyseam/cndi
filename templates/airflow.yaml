@@ -309,7 +309,7 @@ outputs:
             persistence:
               enabled: true
               size: 15Gi
-              storageClassName: rwm
+              storageClassName: nfs
           createUserJob:
             useHelmHooks: false
           migrateDatabaseJob:
