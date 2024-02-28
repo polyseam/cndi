@@ -146,7 +146,7 @@ const getLeaderCloudInitYaml = (
     // because this next line uses interpolation at runtime
     // we install the nfs addon manually rather than declaritively
     loopUntilSuccess(
-      'sudo microk8s enable nfs "$(hostname)"',
+      'sudo microk8s enable nfs -n "$(hostname)"',
       "microk8s failed to enable 'nfs' addon",
     ),
     `echo "nfs installed"`,
