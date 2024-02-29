@@ -173,7 +173,8 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
             effect: "Allow",
             principals: [
               {
-                service: "ec2.amazonaws.com",
+                identifiers: ["ec2.amazonaws.com"],
+                type: "Service",
               },
             ],
           },
