@@ -1,11 +1,11 @@
 const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.21.0"; // used to install binary on client
-const SEALED_SECRETS_VERSION = "2.13.3"; // used to install controller on cluster
+const SEALED_SECRETS_VERSION = "2.15.0"; // used to install controller on cluster
 const DEFAULT_K8S_VERSION = "1.28";
-const ARGOCD_VERSION = "2.7.12";
-const RELOADER_VERSION = "1.0.52";
+const ARGOCD_VERSION = "2.10.1";
+const RELOADER_VERSION = "1.0.69";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
-const EXTERNAL_DNS_VERSION = "6.29.1";
+const EXTERNAL_DNS_VERSION = "6.35.0";
 const CERT_MANAGER_VERSION = "1.14.3";
 
 const POLYSEAM_TEMPLATE_DIRECTORY =
