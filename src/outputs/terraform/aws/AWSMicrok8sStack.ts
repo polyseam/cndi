@@ -14,6 +14,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getPrettyJSONString,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
@@ -132,6 +133,83 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       });
     });
 
+    const ebsPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
+      this,
+      "cndi_aws_iam_policy_ebs_policy",
+      {
+        namePrefix: "EBSPOLICY",
+        policy: getPrettyJSONString({
+          Version: "2012-10-17",
+          Statement: [
+            // EBS CSI Driver
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:CreateSnapshot",
+                "ec2:AttachVolume",
+                "ec2:DetachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeInstances",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeVolumesModifications",
+              ],
+              "Resource": "*",
+            },
+          ],
+        }),
+      },
+    );
+    const ebsPolicyDocument = new CDKTFProviderAWS
+      .dataAwsIamPolicyDocument
+      .DataAwsIamPolicyDocument(
+      this,
+      "cndi_aws_iam_policy_document_ebs",
+      {
+        statement: [
+          {
+            effect: "Allow",
+            principals: [
+              {
+                service: "ec2.amazonaws.com",
+              },
+            ],
+          },
+        ],
+      },
+    );
+
+    const ebsRole = new CDKTFProviderAWS.iamRole.IamRole(
+      this,
+      "cndi_aws_iam_role_ebs",
+      {
+        namePrefix: "EBSROLE",
+        description: "IAM role for ebs",
+        assumeRolePolicy: ebsPolicyDocument.json,
+      },
+    );
+
+    const _ebsPolicyPolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ebs_policy",
+      {
+        role: ebsRole.name,
+        policyArn: ebsPolicy.arn,
+      },
+    );
+    const ebsIamInstanceProfile = new CDKTFProviderAWS.iamInstanceProfile
+      .IamInstanceProfile(
+      this,
+      "cndi_aws_iam_instance_profile_ebs",
+      {
+        name: "ebs_profile",
+        role: ebsRole.name,
+      },
+    );
+
     const securityGroup = new CDKTFProviderAWS.securityGroup.SecurityGroup(
       this,
       `cndi_aws_security_group`,
@@ -243,6 +321,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           this,
           `cndi_aws_instance_${node.name}_${i}`,
           {
+            iam_instance_profile: ebsIamInstanceProfile.name,
             userData,
             keyName: sshKeyPair.keyName,
             tags: { Name: nodeName },
