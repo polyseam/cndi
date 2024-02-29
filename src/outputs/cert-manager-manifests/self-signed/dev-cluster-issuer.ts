@@ -11,6 +11,9 @@ const getDevClusterIssuerManifest = (): string => {
     kind: "ClusterIssuer",
     metadata: {
       name: "cluster-issuer",
+      annotations: {
+        "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+      },
     },
     spec: {
       selfSigned: {},
