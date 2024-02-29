@@ -170,6 +170,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       {
         statement: [
           {
+            actions: ["sts:AssumeRole"],
             effect: "Allow",
             principals: [
               {
