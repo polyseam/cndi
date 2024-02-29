@@ -146,6 +146,30 @@ export default function validateConfig(
     }
   }
 
+  if (config?.infrastructure?.cndi?.cert_manager) {
+    if (config?.infrastructure?.cndi?.cert_manager?.enabled === false) {
+      // cert_manager is disabled explicitly
+    } else if (
+      !config?.infrastructure?.cndi?.cert_manager?.self_signed &&
+      !config?.infrastructure?.cndi?.cert_manager?.email
+    ) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at"),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("\nwith"),
+          ccolors.key_name("infrastructure.cndi.cert_manager"),
+          ccolors.error("present but missing one of the required keys:"),
+          ccolors.key_name("\ninfrastructure.cndi.cert_manager.self_signed"),
+          ccolors.error("or"),
+          ccolors.key_name("infrastructure.cndi.cert_manager.email"),
+        ].join(" "),
+        { cause: 915 },
+      );
+    }
+  }
+
   if (!config?.provider) {
     throw new Error(
       [
@@ -156,7 +180,7 @@ export default function validateConfig(
         ccolors.key_name('"provider"'),
         ccolors.error("key"),
       ].join(" "),
-      { cause: 920 },
+      { cause: 916 },
     );
   }
 
@@ -170,7 +194,7 @@ export default function validateConfig(
         ccolors.key_name('"distribution"'),
         ccolors.error("key"),
       ].join(" "),
-      { cause: 921 },
+      { cause: 917 },
     );
   }
 

@@ -23,13 +23,15 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifestPublic from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
-import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
+import getEKSIngressServiceManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-service-public.ts";
+import getEKSIngressTcpServicesConfigMapManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
 
-import getEKSIngressServiceManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-service-private.ts";
+import getEKSIngressServiceManifestPrivate from "src/outputs/custom-port-manifests/managed/ingress-service-private.ts";
 import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
 
-import getExternalDNSManifest from "../outputs/core-applications/external-dns.application.yaml.ts";
+import getExternalDNSManifest from "src/outputs/core-applications/external-dns.application.yaml.ts";
+import getCertManagerApplicationManifest from "src/outputs/core-applications/cert-manager.application.yaml.ts";
+import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -265,12 +267,30 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     console.log();
-    // console.log();
+
     console.log(ccolors.success("staged terraform stack"));
 
     const cert_manager = config?.infrastructure?.cndi?.cert_manager;
 
-    if (cert_manager) {
+    const skipCertManager = // explicitly disabled cert-manager
+      config?.infrastructure?.cndi?.cert_manager?.enabled === false;
+
+    if (cert_manager && !skipCertManager) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "cert-manager.application.yaml",
+        ),
+        getCertManagerApplicationManifest(),
+      );
+
+      console.log(
+        ccolors.success("staged application manifest:"),
+        ccolors.key_name("cert-manager.application.yaml"),
+      );
+
       if (cert_manager?.self_signed) {
         await stageFile(
           path.join(
@@ -290,6 +310,21 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           getProductionClusterIssuerManifest(cert_manager?.email),
         );
       }
+    }
+
+    const skipReloader = // explicitly disabled reloader
+      config?.infrastructure?.cndi?.reloader?.enabled === false;
+
+    if (!skipReloader) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "reloader.application.yaml",
+        ),
+        getReloaderApplicationManifest(),
+      );
     }
 
     const open_ports = config?.infrastructure?.cndi?.open_ports || [];
