@@ -577,7 +577,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       "cndi_kubernetes_storage_class_filestore",
       {
         metadata: {
-          name: "rwm",
+          name: "nfs",
         },
         parameters: {
           network: network.name,
