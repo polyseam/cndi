@@ -262,8 +262,8 @@ const getLeaderCloudInitYaml = (
       `echo "Sealed Secrets Keys imported"`,
 
       `echo "Restarting sealed-secrets-controller"`,
-      loopUntilSuccess(
-        `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
+      loopUntilSuccess( // restart sealed-secrets-controller, label set by chart
+        `sudo microk8s kubectl --namespace kube-system delete pod -l app.kubernetes.io/name=sealed-secrets`,
         "failed to restart sealed-secrets-controller",
       ),
       `echo "sealed-secrets-controller restarted"`,
