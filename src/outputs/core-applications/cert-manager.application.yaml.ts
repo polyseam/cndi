@@ -25,7 +25,7 @@ export default function getCertManagerApplicationManifest(): string {
         chart: "cert-manager",
         helm: { // installCRDs?
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString({}),
+          values: getYAMLString({ installCRDs: true }),
         },
         targetRevision: CERT_MANAGER_VERSION,
       },
