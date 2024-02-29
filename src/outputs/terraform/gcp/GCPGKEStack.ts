@@ -16,7 +16,6 @@ import {
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
 
@@ -282,24 +281,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_reloader",
-      {
-        chart: "reloader",
-        cleanupOnFail: true,
-        createNamespace: true,
-        dependsOn: [gkeCluster],
-        timeout: 600,
-        atomic: true,
-        name: "reloader",
-        namespace: "reloader",
-        replace: true,
-        repository: "https://stakater.github.io/stakater-charts",
-        version: RELOADER_VERSION,
-      },
-    );
-
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_helm_release_argocd",
@@ -547,28 +528,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           },
         ],
         version: "4.8.3",
-      },
-    );
-
-    const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_cert_manager",
-      {
-        chart: "cert-manager",
-        createNamespace: true,
-        dependsOn: [gkeCluster],
-        name: "cert-manager",
-        namespace: "cert-manager",
-        repository: "https://charts.jetstack.io",
-        timeout: 600,
-        atomic: true,
-        set: [
-          {
-            name: "installCRDs",
-            value: "true",
-          },
-        ],
-        version: "1.12.3",
       },
     );
 
