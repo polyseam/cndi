@@ -241,7 +241,7 @@ const getLeaderCloudInitYaml = (
       ),
       `sleep 10`,
       loopUntilSuccess(
-        `sudo microk8s helm install sealed-secrets-controller sealed-secrets/sealed-secrets --version v${SEALED_SECRETS_VERSION} --namespace kube-system`,
+        `sudo microk8s helm install sealed-secrets-controller sealed-secrets/sealed-secrets --version v${SEALED_SECRETS_VERSION} --namespace kube-system --set fullnameOverride=sealed-secrets-controller`,
         "helm failed to install sealed-secrets-controller",
       ),
       `echo "sealed-secrets-controller installed"`,
