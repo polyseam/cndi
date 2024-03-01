@@ -238,18 +238,22 @@ interface CNDIConfig {
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      deployment_target_configuration?: DeploymentTargetConfiguration;
       external_dns: {
         enabled?: boolean; // default: true
         provider: ExternalDNSProvider;
         domain_filters: Array<string>;
         values: Record<string, unknown>;
       };
-      deployment_target_configuration?: DeploymentTargetConfiguration;
-      nodes: Array<BaseNodeItemSpec>;
+      reloader: {
+        enabled?: boolean; // default: true
+      };
       cert_manager?: {
+        enabled?: boolean; // default: true
         email: string;
         self_signed?: boolean;
       };
+      nodes: Array<BaseNodeItemSpec>;
       microk8s: {
         addons: Array<Microk8sAddon>;
         version?: string; // 1.27

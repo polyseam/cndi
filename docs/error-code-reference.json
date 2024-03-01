@@ -270,6 +270,21 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/745"
   },
   {
+    "code": 915,
+    "message": "cndi_config invalid: 'cert_manager' enabled but missing configuration",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/752"
+  },
+  {
+    "code": 916,
+    "message": "cndi_config invalid: top-level key 'provider' is not defined",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/750"
+  },
+  {
+    "code": 917,
+    "message": "cndi_config invalid: top-level key 'distribution' is not defined",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/751"
+  },
+  {
     "code": 1000,
     "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
   },

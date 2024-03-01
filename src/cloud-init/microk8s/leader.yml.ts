@@ -10,7 +10,6 @@ import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 import {
   ARGOCD_VERSION,
   DEFAULT_K8S_VERSION,
-  RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
 
@@ -24,9 +23,6 @@ const defaultAddons: Array<Microk8sAddon> = [
   },
   {
     name: "community",
-  },
-  {
-    name: "cert-manager",
   },
   {
     name: "helm",
@@ -222,7 +218,7 @@ const getLeaderCloudInitYaml = (
       `echo "Setting microk8s config"`,
 
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
-
+      `sleep 10`,
       ...nfsInstallCommands,
 
       // group "microk8s" is created by microk8s snap
@@ -243,8 +239,9 @@ const getLeaderCloudInitYaml = (
         `sudo microk8s helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets`,
         "helm failed to add sealed-secrets repo",
       ),
+      `sleep 10`,
       loopUntilSuccess(
-        `sudo microk8s helm install sealed-secrets/sealed-secrets --generate-name --version v${SEALED_SECRETS_VERSION} --namespace kube-system`,
+        `sudo microk8s helm install sealed-secrets-controller sealed-secrets/sealed-secrets --version v${SEALED_SECRETS_VERSION} --namespace kube-system --set fullnameOverride=sealed-secrets-controller`,
         "helm failed to install sealed-secrets-controller",
       ),
       `echo "sealed-secrets-controller installed"`,
@@ -257,6 +254,7 @@ const getLeaderCloudInitYaml = (
         `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
         "failed to create sealed-secrets-key secret",
       ),
+      `sleep 10`,
       loopUntilSuccess(
         `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
         "failed to label sealed-secrets-key secret",
@@ -264,8 +262,8 @@ const getLeaderCloudInitYaml = (
       `echo "Sealed Secrets Keys imported"`,
 
       `echo "Restarting sealed-secrets-controller"`,
-      loopUntilSuccess(
-        `sudo microk8s kubectl --namespace kube-system delete pod -l name=sealed-secrets-controller`,
+      loopUntilSuccess( // restart sealed-secrets-controller, label set by chart
+        `sudo microk8s kubectl --namespace kube-system delete pod -l app.kubernetes.io/name=sealed-secrets`,
         "failed to restart sealed-secrets-controller",
       ),
       `echo "sealed-secrets-controller restarted"`,
@@ -291,21 +289,6 @@ const getLeaderCloudInitYaml = (
         `failed to add Reloader annotation to argocd-server Deployment`,
       ),
       `echo "Reloader annotation added to argocd-server Deployment"`,
-
-      `echo "Creating reloader namespace"`,
-      `sudo microk8s kubectl create namespace reloader`,
-      `echo "reloader namespace created"`,
-
-      `echo "Installing Reloader"`,
-      loopUntilSuccess(
-        `sudo microk8s helm repo add stakater https://stakater.github.io/stakater-charts`,
-        "helm failed to add stakater repo",
-      ),
-      loopUntilSuccess(
-        `sudo microk8s helm install stakater/reloader --generate-name --namespace reloader --version ${RELOADER_VERSION}`,
-        `helm failed to install reloader`,
-      ),
-      `echo "Reloader Installed"`,
 
       `echo "Configuring ArgoCD Root App Manifest"`,
       `sudo microk8s kubectl apply -n argocd -f ${PATH_TO_ROOT_APPLICATION_MANIFEST}`,
