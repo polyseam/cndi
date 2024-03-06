@@ -266,64 +266,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       }
     }
 
-    const cndiNLB = new CDKTFProviderAWS.lb.Lb(this, `cndi_aws_lb`, {
-      internal: false,
-      loadBalancerType: "network",
-      subnets: [cndiPrimarySubnet.id],
-      tags: {
-        Name: `cndi-nlb_${project_name}`,
-      },
-    });
-
-    for (const port of open_ports) {
-      const cndiTargetGroup = new CDKTFProviderAWS.lbTargetGroup.LbTargetGroup(
-        this,
-        `cndi_aws_lb_target_group_for_port_${port.name}`,
-        {
-          port: port.number,
-          protocol: "TCP",
-          tags: {
-            Name: `cndi-lb-target-group_${port.name}_${project_name}`,
-          },
-          vpcId: vpc.id,
-        },
-      );
-
-      const _cndiListener = new CDKTFProviderAWS.lbListener.LbListener(
-        this,
-        `cndi_aws_lb_listener_for_port_${port.name}`,
-        {
-          defaultAction: [
-            {
-              type: "forward",
-              targetGroupArn: cndiTargetGroup.arn,
-            },
-          ],
-          loadBalancerArn: cndiNLB.arn,
-          port: port.number,
-          protocol: "TCP",
-          tags: {
-            Name: `cndi-lb-listener_for_${port.name}_${project_name}`,
-          },
-        },
-      );
-      for (const target of nodeList) {
-        new CDKTFProviderAWS.lbTargetGroupAttachment.LbTargetGroupAttachment(
-          this,
-          `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${target.name}`,
-          {
-            port: port.number,
-            targetGroupArn: cndiTargetGroup.arn,
-            targetId: target.id,
-          },
-        );
-      }
-    }
-
-    new TerraformOutput(this, "public_host", {
-      value: cndiNLB.dnsName,
-    });
-
     new TerraformOutput(this, "resource_group_url", {
       value:
         `https://${this.locals.aws_region.asString}.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
