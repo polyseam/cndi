@@ -326,56 +326,36 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     const open_ports = config?.infrastructure?.cndi?.open_ports || [];
 
-    const isMicrok8sCluster = config?.distribution === "microk8s";
+    const managedKind = config.distribution as ManagedNodeKind; //aks
 
-    if (
-      isMicrok8sCluster
-    ) {
-      await Promise.all([
-        stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "ingress-tcp-services-configmap.yaml",
-          ),
-          getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
-        ),
-        stageFile(
-          path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
-          getMicrok8sIngressDaemonsetManifest(open_ports),
-        ),
-      ]);
-    } else {
-      const managedKind = config.distribution as ManagedNodeKind; //aks
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
+      getEKSIngressServiceManifestPrivate(open_ports, managedKind),
+    );
 
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
-        getEKSIngressServiceManifestPrivate(open_ports, managedKind),
-      );
+    await stageFile(
+      path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
+      getEKSIngressServiceManifestPublic(open_ports, managedKind),
+    );
 
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
-        getEKSIngressServiceManifestPublic(open_ports, managedKind),
-      );
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "ingress-tcp-services-configmap-public.yaml",
+      ),
+      getEKSIngressTcpServicesConfigMapManifestPublic(open_ports),
+    );
 
-      await stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap-public.yaml",
-        ),
-        getEKSIngressTcpServicesConfigMapManifestPublic(open_ports),
-      );
+    await stageFile(
+      path.join(
+        "cndi",
+        "cluster_manifests",
+        "ingress-tcp-services-configmap-private.yaml",
+      ),
+      getEKSIngressTcpServicesConfigMapManifestPrivate(open_ports),
+    );
 
-      await stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap-private.yaml",
-        ),
-        getEKSIngressTcpServicesConfigMapManifestPrivate(open_ports),
-      );
-    }
     console.log(ccolors.success("staged open ports manifests"));
 
     await stageFile(
