@@ -36,6 +36,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       enableDnsSupport: true,
       tags: {
         Name: `CNDIVPC_${project_name}`,
+        [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
     });
 
@@ -69,6 +70,8 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         mapPublicIpOnLaunch: true,
         tags: {
           Name: `CNDIPrimarySubnet_${project_name}`,
+          [`kubernetes.io/cluster/${project_name}`]: "owned",
+          "kubernetes.io/role/elb": "1",
         },
         vpcId: vpc.id,
       },
