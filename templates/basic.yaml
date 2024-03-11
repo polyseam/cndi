@@ -68,3 +68,5 @@ outputs:
     basic: |
       # basic
 
+      This Template provides the essential building blocks of a CNDI Cluster, and can be extended to meet any need
+

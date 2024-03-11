@@ -288,6 +288,7 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     redis: |
-    # redis
-    This template deploys a Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator). 
-    It also deploys Redis-Sentinel as a monitoring solution for Redis instances.
+      # redis
+      
+      This template deploys a Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator). 
+      It also deploys Redis-Sentinel as a monitoring solution for Redis instances.
