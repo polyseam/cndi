@@ -907,10 +907,10 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
         for (const blockKey in block) {
           envSpec[blockKey] = block[blockKey];
         }
-      } catch (error) {
-        console.log("error processing block .env", error);
-        console.log(obj.value);
-        return { error: new Error("block imports must return YAML Objects") };
+      } catch {
+        return {
+          error: new Error("'.env' get_block calls must return YAML Objects"),
+        };
       }
     }
   }
