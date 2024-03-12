@@ -8,12 +8,15 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("./mock/templates/basic.yaml", {
-      interactive: false,
-      overrides: {
-        deployment_target_provider: "aws",
+    const template = await useTemplate(
+      "src/use-template/tests/mock/templates/basic.yaml",
+      {
+        interactive: false,
+        overrides: {
+          deployment_target_provider: "aws",
+        },
       },
-    });
+    );
     assert(!!template);
   },
 );
@@ -23,12 +26,15 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("./mock/templates/basic.yaml", {
-      interactive: false,
-      overrides: {
-        deployment_target_provider: "aws",
+    const template = await useTemplate(
+      "src/use-template/tests/mock/templates/basic.yaml",
+      {
+        interactive: false,
+        overrides: {
+          deployment_target_provider: "aws",
+        },
       },
-    });
+    );
     assert(!!template);
   },
 );
@@ -38,14 +44,17 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const _template = await useTemplate("./mock/templates/basic.yaml", {
-      interactive: false,
-      overrides: {
-        project_name: "my-app",
-        deployment_target_provider: "aws",
-        deployment_target_distribution: "microk8s",
-        argocd_hostname: "argocd.example.com",
+    const _template = await useTemplate(
+      "src/use-template/tests/mock/templates/basic.yaml",
+      {
+        interactive: false,
+        overrides: {
+          project_name: "my-app",
+          deployment_target_provider: "aws",
+          deployment_target_distribution: "microk8s",
+          argocd_hostname: "argocd.example.com",
+        },
       },
-    });
+    );
   },
 );

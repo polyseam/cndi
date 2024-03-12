@@ -8,12 +8,15 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("./mock/templates/alpha.yaml", {
-      interactive: false,
-      overrides: {
-        deployment_target_provider: "aws",
+    const template = await useTemplate(
+      "src/use-template/tests/mock/templates/alpha.yaml",
+      {
+        interactive: false,
+        overrides: {
+          deployment_target_provider: "aws",
+        },
       },
-    });
+    );
     assert(!!template);
   },
 );
@@ -25,7 +28,7 @@ Deno.test(
     // Deno.cwd() is the root of the project
     assertRejects(async () => {
       const _template = await useTemplate(
-        "./mock/templates/non-existent.yaml",
+        "src/use-template/tests/mock/templates/non-existent.yaml",
         {
           interactive: false,
           overrides: {
