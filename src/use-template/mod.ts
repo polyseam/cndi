@@ -636,14 +636,6 @@ async function processCNDIConfigOutput(
 ): Promise<Result<string>> {
   let cndiConfigObj = cndi_config; // object is mutated
 
-  try {
-    Deno.removeSync("checkpoints", { recursive: true });
-  } catch {
-    // no dir to delete
-  }
-
-  Deno.mkdirSync("checkpoints");
-
   let output = removeWhitespaceBetweenBraces(YAML.stringify(cndiConfigObj));
 
   // get_prompt_response evals
