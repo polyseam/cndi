@@ -51,7 +51,7 @@ import {
   Toggle,
 } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
 
-export { prompt } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+export { prompt as cprompt } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
 
 // used to have keys, should not matter
 export const PromptTypes = {

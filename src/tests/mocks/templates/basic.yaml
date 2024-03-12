@@ -61,13 +61,10 @@ outputs:
       {}
 
   readme:
-    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     basic: |
-      # basic
-
-      This Template provides the essential building blocks of a CNDI Cluster, and can be extended to meet any need
+    # basic
 

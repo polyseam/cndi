@@ -1,8 +1,5 @@
 import { validator } from "deps";
-import {
-  CNDITemplatePromptResponsePrimitive,
-  PromptType,
-} from "./templates.ts";
+import { CNDITemplatePromptResponsePrimitive, PromptType } from "../types.ts";
 
 type CNDIValidatorInput = {
   value: CNDITemplatePromptResponsePrimitive;

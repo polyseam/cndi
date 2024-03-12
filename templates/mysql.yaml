@@ -170,6 +170,7 @@ outputs:
         chart: mysql-operator
         destinationNamespace: mysql-operator
   env:
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
 
