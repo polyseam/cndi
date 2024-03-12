@@ -463,7 +463,42 @@ async function presentCliffyPrompt(
           return;
         }
 
-        const value = responses[promptDefinition.name];
+        let value = responses[promptDefinition.name];
+
+        if (promptDefinition.type === "File") {
+          const providedPath = responses[promptDefinition.name];
+
+          if (!providedPath) {
+            console.log(ccolors.warn("No file path provided"));
+            await next(promptDefinition.name);
+            return;
+          }
+
+          if (providedPath && typeof providedPath === "string") {
+            const absPath = makeAbsolutePath(providedPath);
+            if (absPath.error) {
+              console.log(ccolors.error(absPath.error.message));
+              await next(promptDefinition.name);
+              return;
+            } else {
+              try {
+                const data = Deno.readTextFileSync(absPath.value!);
+                if (data.length) {
+                  value = data;
+                } else {
+                  console.log(ccolors.warn("The file you provided is empty"));
+                  await next(promptDefinition.name);
+                  return;
+                }
+              } catch (errReadingFile) {
+                console.log(ccolors.warn(errReadingFile.message));
+                await next(promptDefinition.name);
+                return;
+              }
+            }
+          }
+        }
+
         if (value) {
           if (
             promptDefinition.validators?.length &&
@@ -868,10 +903,13 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       obj.value = processBlockBodyArgs(obj.value, body?.args);
       try {
         const block = YAML.parse(obj.value) as Record<string, unknown>;
+
         for (const blockKey in block) {
           envSpec[blockKey] = block[blockKey];
         }
-      } catch {
+      } catch (error) {
+        console.log("error processing block .env", error);
+        console.log(obj.value);
         return { error: new Error("block imports must return YAML Objects") };
       }
     }
