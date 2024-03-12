@@ -188,7 +188,7 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
     if (needsHeading) {
       dotEnvLines.push(`\n${secretHeading}\n${secretEnvName}='${placeholder}'`);
     } else {
-      dotEnvLines.push(`\n${secretEnvName}='${placeholder}'`);
+      dotEnvLines.push(`${secretEnvName}='${placeholder}'`);
     }
 
     Deno.writeTextFileSync(dotEnvPath, dotEnvLines.join("\n"));
