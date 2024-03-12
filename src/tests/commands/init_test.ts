@@ -214,10 +214,12 @@ Deno.test(
         "airflow",
         "-l",
         "aws/microk8s",
-        "-k"
+        "-k",
       );
 
-      const cndi_responses = Deno.readTextFileSync(path.join(Deno.cwd(), `cndi_responses.yaml`));
+      const cndi_responses = Deno.readTextFileSync(
+        path.join(Deno.cwd(), `cndi_responses.yaml`),
+      );
       assert(YAML.parse(cndi_responses));
     });
     await t.step("cleanup", async () => {
