@@ -7,3 +7,4 @@ export {
 export { assert } from "https://deno.land/std@0.196.0/assert/assert.ts";
 export { assertThrows } from "https://deno.land/std@0.196.0/assert/assert_throws.ts";
 export { assertRejects } from "https://deno.land/std@0.196.0/assert/assert_rejects.ts";
+export { parse as parseDotEnv } from "https://deno.land/std@0.219.0/dotenv/mod.ts";

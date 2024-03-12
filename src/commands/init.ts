@@ -11,11 +11,11 @@ import {
   stageFile,
 } from "src/utils.ts";
 
-import {
-  CNDITemplatePromptResponsePrimitive,
-  getKnownTemplates,
-  useTemplate,
-} from "src/templates/templates.ts";
+import { useTemplate } from "src/use-template/mod.ts";
+
+import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
+
+import { KNOWN_TEMPLATES } from "consts";
 
 import { owAction } from "src/commands/overwrite.ts";
 
@@ -277,7 +277,7 @@ const initCommand = new Command()
       Deno.exit(0); // this event isn't handled by telemetry, it's just not very interesting
     }
 
-    const templateNamesList: string[] = getKnownTemplates().map((t) => t.name);
+    const templateNamesList: string[] = KNOWN_TEMPLATES.map((t) => t.name);
 
     if (options.interactive) {
       project_name = (await Input.prompt({
@@ -315,8 +315,13 @@ const initCommand = new Command()
       try {
         templateResult = await useTemplate(
           template!,
-          !!options.interactive,
-          { project_name, ...overrides },
+          {
+            interactive: !!options.interactive,
+            overrides: {
+              project_name,
+              ...overrides,
+            },
+          },
         );
       } catch (e) {
         console.log(e.message);
@@ -324,10 +329,12 @@ const initCommand = new Command()
         Deno.exit(e.cause);
       }
 
-      cndi_config = templateResult.cndi_config;
+      cndi_config = templateResult.files["cndi_config.yaml"];
       await stageFile("cndi_config.yaml", cndi_config);
-      readme = templateResult.readme;
-      env = templateResult.env;
+
+      readme = templateResult.files["README.md"];
+      env = templateResult.files[".env"];
+
       deployment_target_provider = templateResult?.responses
         ?.deployment_target_provider;
       if (options.keep) {

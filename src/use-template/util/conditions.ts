@@ -1,6 +1,6 @@
-import { CNDITemplatePromptResponsePrimitive } from "./templates.ts";
+import { CNDITemplatePromptResponsePrimitive } from "../types.ts";
 
-const CNDITemplateComparators = {
+export const CNDITemplateComparators = {
   // comparators are generous with type coercion for better or worse
   "==": (
     response: CNDITemplatePromptResponsePrimitive,
@@ -59,5 +59,3 @@ const CNDITemplateComparators = {
     throw new Error("cannot compare non-number to number");
   },
 } as const;
-
-export default CNDITemplateComparators;

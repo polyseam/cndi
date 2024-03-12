@@ -8,7 +8,7 @@ const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 const EXTERNAL_DNS_VERSION = "6.35.0";
 const CERT_MANAGER_VERSION = "1.14.3";
 
-const POLYSEAM_TEMPLATE_DIRECTORY =
+const POLYSEAM_TEMPLATE_DIRECTORY_URL =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
 
 const DEFAULT_INSTANCE_TYPES = {
@@ -53,6 +53,34 @@ const PROCESS_ERROR_CODE_PREFIX = {
   "ssh-keygen": 3000,
 } as const;
 
+// better to have a defined list of builtin templates than walk /templates directory
+const KNOWN_TEMPLATES = [
+  {
+    name: "basic",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/basic.yaml`,
+  },
+  {
+    name: "airflow",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/airflow.yaml`,
+  },
+  {
+    name: "cnpg",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
+  },
+  {
+    name: "neo4j",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/neo4j.yaml`,
+  },
+  {
+    name: "proxy",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/proxy.yaml`,
+  },
+  {
+    name: "mssqlserver",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mssqlserver.yaml`,
+  },
+] as const;
+
 export {
   ARGOCD_VERSION,
   CERT_MANAGER_VERSION,
@@ -63,11 +91,12 @@ export {
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
   DEFAULT_OPEN_PORTS,
   EXTERNAL_DNS_VERSION,
+  KNOWN_TEMPLATES,
   KUBESEAL_VERSION,
   LARSTOBI_MULTIPASS_PROVIDER_VERSION,
   MANAGED_NODE_KINDS,
   NODE_DISK_SIZE_KEY,
-  POLYSEAM_TEMPLATE_DIRECTORY,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
   PROCESS_ERROR_CODE_PREFIX,
   RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
