@@ -140,7 +140,7 @@ Deno.test(
 );
 
 Deno.test(
-  "template execution: basic aws template should have aws provider in cndi_config.yaml",
+  "template execution: 'basic' aws template should have aws provider in cndi_config.yaml",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
@@ -158,7 +158,7 @@ Deno.test(
 );
 
 Deno.test(
-  "template execution: basic gcp template should have gcp provider in cndi_config.yaml",
+  "template execution: 'basic' gcp template should have gcp provider in cndi_config.yaml",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
@@ -176,7 +176,7 @@ Deno.test(
 );
 
 Deno.test(
-  "template execution: basic azure template should have azure provider in cndi_config.yaml",
+  "template execution: 'basic' azure template should have azure provider in cndi_config.yaml",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project

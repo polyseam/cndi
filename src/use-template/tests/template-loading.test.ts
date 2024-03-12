@@ -1,3 +1,4 @@
+import getProjectRoot from "get-project-root";
 import { useTemplate } from "../mod.ts";
 import { assert, assertRejects } from "test-deps";
 
@@ -9,7 +10,7 @@ Deno.test(
   async () => {
     // Deno.cwd() is the root of the project
     const template = await useTemplate(
-      "src/use-template/tests/mock/templates/alpha.yaml",
+      `${getProjectRoot()}/src/tests/mocks/templates/alpha.yaml`,
       {
         interactive: false,
         overrides: {
@@ -28,7 +29,7 @@ Deno.test(
     // Deno.cwd() is the root of the project
     assertRejects(async () => {
       const _template = await useTemplate(
-        "src/use-template/tests/mock/templates/non-existent.yaml",
+        `${getProjectRoot()}/src/tests/mocks/templates/non-existent.yaml`,
         {
           interactive: false,
           overrides: {
@@ -45,7 +46,7 @@ Deno.test(
   mySanity,
   async () => {
     const template = await useTemplate(
-      `file://${Deno.cwd()}/mock/templates/alpha.yaml`,
+      `file://${getProjectRoot()}/src/tests/mocks/templates/alpha.yaml`,
       {
         interactive: false,
         overrides: {
