@@ -170,7 +170,6 @@ outputs:
         chart: mysql-operator
         destinationNamespace: mysql-operator
   env:
-    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
 
@@ -182,6 +181,7 @@ outputs:
     ROOT_PASSWORD: "{{ $cndi.get_prompt_response(rootPassword) }}"
 
   readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
