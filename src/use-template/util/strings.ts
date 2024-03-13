@@ -19,7 +19,12 @@ export function processBlockBodyArgs(
   for (const key in args) {
     if (blk.indexOf(`{{$cndi.get_arg(${key})}}`) > -1) {
       const val = args[key];
-      blk = blk.replaceAll(`{{$cndi.get_arg(${key})}}`, `${val}`);
+      if (typeof val !== "string") {
+        blk = blk.replaceAll(`'{{$cndi.get_arg(${key})}}'`, `${val}`);
+        blk = blk.replaceAll(`"{{$cndi.get_arg(${key})}}"`, `${val}`);
+      } else {
+        blk = blk.replaceAll(`{{$cndi.get_arg(${key})}}`, `${val}`);
+      }
     }
   }
   return blk;
