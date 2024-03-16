@@ -930,7 +930,7 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       envLines.push(`\n# ${val}`);
     } else if (key.startsWith("$cndi.get_block")) {
       // do nothing, already handled
-    } else if (val === "") {
+    } else if (val === "" || val === "''") {
       const placeholder = `__${key}_PLACEHOLDER__`;
       envLines.push(`${key}=${placeholder}`);
     } else {
