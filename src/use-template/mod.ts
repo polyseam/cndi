@@ -902,14 +902,22 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       // so we call the literalize function on each value in the block instead
       // and wrap the result in quotes
 
-      const block = YAML.parse(obj.value) as Record<string, unknown>;
       try {
+        const block = YAML.parse(obj.value) as Record<string, unknown>;
         for (const blockKey in block) {
-          envSpec[blockKey] = `'${literalizeGetPromptResponseCalls(`${block[blockKey]}`)}'`;
+          envSpec[blockKey] = `'${
+            literalizeGetPromptResponseCalls(`${block[blockKey]}`)
+          }'`;
         }
-      } catch(_error) {
+      } catch (error) {
         return {
-          error: new Error("'.env' get_block calls must return YAML Objects"),
+          error: new Error([
+            templatesLabel,
+            "template error:\n",
+            `template error: '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+            ccolors.caught(error),
+          ].join(" ")),
+          cause: 4501,
         };
       }
     }
