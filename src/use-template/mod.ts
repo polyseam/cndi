@@ -878,7 +878,7 @@ async function processCNDIReadmeOutput(
 async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
   const envStr = YAML.stringify(envSpecRaw);
   const envSpec = YAML.parse(
-    literalizeGetPromptResponseCalls(removeWhitespaceBetweenBraces(envStr)),
+    literalizeGetPromptResponseCalls(envStr),
   ) as Record<string, unknown>;
   const envLines: Array<string> = [];
 
@@ -897,17 +897,17 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       if (obj.error) {
         return { error: obj.error };
       }
-      obj.value = literalizeGetPromptResponseCalls(
-        removeWhitespaceBetweenBraces(obj.value),
-      );
-      obj.value = processBlockBodyArgs(obj.value, body?.args);
-      try {
-        const block = YAML.parse(obj.value) as Record<string, unknown>;
 
+      // calling literalize on the block as a string results in weird multiline strings in .env
+      // so we call the literalize function on each value in the block instead
+      // and wrap the result in quotes
+
+      const block = YAML.parse(obj.value) as Record<string, unknown>;
+      try {
         for (const blockKey in block) {
-          envSpec[blockKey] = block[blockKey];
+          envSpec[blockKey] = `'${literalizeGetPromptResponseCalls(`${block[blockKey]}`)}'`;
         }
-      } catch {
+      } catch(_error) {
         return {
           error: new Error("'.env' get_block calls must return YAML Objects"),
         };
