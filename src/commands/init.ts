@@ -1,4 +1,4 @@
-import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
+import { ccolors, Command, loadEnv, path, PromptTypes, SEP, YAML } from "deps";
 import type { SealedSecretsKeys } from "src/types.ts";
 
 const { Input, Select } = PromptTypes;
@@ -31,6 +31,36 @@ import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
+
+function checkForRequiredMissingCreateRepoValues(
+  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
+): string[] {
+  const git_credentials_mode = responses?.git_credentials_mode || "token";
+
+  const requiredKeys = [
+    "git_username",
+    "git_repo",
+  ];
+
+  if (git_credentials_mode === "token") {
+    requiredKeys.push("git_token");
+  } else if (git_credentials_mode === "ssh") {
+    requiredKeys.push("git_ssh_private_key");
+  }
+
+  const missingKeys: Array<string> = [];
+
+  for (const key of requiredKeys) {
+    const envVarName = key.toUpperCase();
+    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
+      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
+
+    if (missingValue) {
+      missingKeys.push(key);
+    }
+  }
+  return missingKeys;
+}
 
 function getFinalEnvString(
   templatePartial = "",
@@ -110,6 +140,7 @@ const initCommand = new Command()
     "Specify a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
+  .option("-c, --create", "Create a new cndi cluster repo")
   .action(async (options) => {
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
@@ -380,8 +411,31 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
+    // there is one case where we don't want to persist the staged files
+    if (options.create) {
+      const missingRequiredValuesForCreateRepo =
+        checkForRequiredMissingCreateRepoValues({
+          ...templateResult?.responses,
+        });
+      if (missingRequiredValuesForCreateRepo.length > 0) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `The following required values are missing for creating a new cndi cluster repo:`,
+          ),
+          ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
+        );
+        await emitExitEvent(400);
+        Deno.exit(400);
+      }
+    }
+
     await persistStagedFiles(options.output);
     await owAction({ output: options.output, initializing: true });
+
+    if (options.create) {
+      console.log("Creating a new cndi cluster repo");
+    }
   });
 
 export default initCommand;

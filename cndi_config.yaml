@@ -1,9 +1,12 @@
 cndi_version: v2
 project_name: mj-ec2-airflow
-provider: aws
-distribution: microk8s
+provider: dev # local but single-node and easy to iterate | 'baremetal' | 'aws'
+distribution: microk8s # 'rke2'
 infrastructure:
   cndi:
+    open_ports:
+      - name: kubeapi
+        number: 16443
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
