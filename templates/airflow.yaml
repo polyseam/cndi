@@ -344,5 +344,65 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     airflow-section: |
-      # airflow 
-    
+      # Apache Airflow
+
+      ## Introduction
+      This template facilitates the deployment of a standalone, production-ready instance of Apache Airflow using Helm on a Kubernetes cluster. Apache Airflow is an open-source platform designed to programmatically author, schedule, and monitor workflows, offering a robust foundation for managing complex data pipelines.
+
+      ## Walkthroughs 
+      For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target. These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` template on various platforms:
+
+      - **AWS EC2:** [ec2/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/ec2/airflow.md)
+      - **AWS EKS:** [eks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/airflow.md)
+      - **GCP Compute Engine:** [gce/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gce/airflow.md)
+      - **GCP GKE:** [gke/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gke/airflow.md)
+      - **Azure Virtual Machines:** [avm/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/avm/airflow.md)
+      - **Azure AKS:** [aks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/aks/airflow.md)
+      - **Local Development:** [dev/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/dev/airflow.md)
+
+      ## Configuration
+      Customizing your Airflow deployment is straightforward with the Helm chart's extensive configuration options, adjustable in the `config.yaml` file under `application.airflow.values`. Key configuration areas include:
+
+      - **Executor:** Choose between Sequential, Local, Celery, and Kubernetes executors for task execution.
+      - **Persistence:** Configure persistent storage solutions for DAGs and logs, ensuring data durability.
+      - **Webserver:** Customize service type and ingress settings for external web access.
+      - **Scheduler:** Fine-tune scheduler behavior and resource allocations to optimize performance.
+
+      For comprehensive details on all configurable values, please refer to the [chart's values.yaml file](https://github.com/apache/airflow/blob/main/chart/values.yaml) or the [official chart documentation](https://airflow.apache.org/docs/helm-chart/stable/index.html).
+
+      ## Configuring External Access
+
+      ### Via Port Forwarding (Optional)
+      For local access or development purposes, port forwarding can be used to expose Airflow's web interface. Follow these platform-specific guides to set up port forwarding for your Kubernetes cluster:
+
+      - [Azure AKS](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/aks/port-forwarding.md)
+      - [AWS EKS](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/port-forwarding.md)
+      - [GCP GKE](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gke/port-forwarding.md)
+      - [Unmanaged Microk8s Cluster](https://github.com/polyseam/cndi/blob/main/docs/port-forwarding.md)
+
+      ### Via External DNS
+      Integrating ExternalDNS automates DNS management, enabling Kubernetes resources to be accessed via public domain names. When enabled alongside your Airflow deployment, it facilitates rapid DNS record creation for domains (e.g., `airflow.yourdomain.com`), streamlining access to your Airflow instance.
+
+      ### Verifying Airflow Accessibility
+      After deploying your Airflow instance and configuring external access (either via port forwarding, Ingress, or ExternalDNS), it's crucial to ensure that Airflow is properly accessible through your chosen domain.
+
+      ### Steps for Verification
+
+      **Access the Web Interface**:
+        - Open a web browser and navigate to the domain you've configured for Airflow, e.g., `http://airflow.yourdomain.com`.
+        - You should be greeted with Airflow's login screen.
+
+      **Default Credentials**:
+        - By default, the login credentials for a fresh Airflow installation are:
+          - **Username:** `admin`
+          - **Password:** `admin`
+        - It's strongly recommended to change these default credentials during the initial setup to ensure your Airflow instance is secure.
+
+      **Verify that Airflow is connected to the private DAG repository**:
+        - If correct, the private DAGs should be visible on the Airflow UI. If not,you should go back and make sure that the private DAG repository is properly connected to Airflow with the correct credentials that located in the .env file
+      
+      
+
+
+
+
