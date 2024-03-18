@@ -374,4 +374,60 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     cnpg: |
-      # cnpg
+      # CloudNativePG Deployment Guide
+
+      ## Introduction
+
+      This template guides you through deploying a standalone, production-ready PostgreSQL database using the CloudNativePG operator on a Kubernetes cluster. CloudNativePG, an open-source Kubernetes Operator for PostgreSQL, is designed to leverage the Kubernetes API to manage PostgreSQL instances in a cloud-native manner.
+
+      ## Configuration
+
+      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `config.yaml` file under `application.cnpg.values`. Key areas of configuration include:
+
+      - **Instances:** To adjust the number of PostgreSQL instances for scalability or redundancy, modify the `instances` value.
+      - **Storage:** Customize the persistent volume size and specify the storage class to meet your storage requirements.
+      - **HighAvailability:** Enable high availability settings to ensure your database remains accessible in the event of a failure.
+      - **Users:** Define superuser and application user credentials.
+
+      For comprehensive details on all configurable values, please refer to the [chart's `values.yaml` file](https://github.com/cloudnative-pg/charts/blob/main/charts/cloudnative-pg/values.yaml) or the [official chart documentation](https://cloudnative-pg.io/docs/).
+
+      ## Configuring External Access
+
+      ### Via Port Forwarding (Optional)
+
+      For local access or development purposes, port forwarding can be utilized to expose the CloudNativePG web interface. Follow these platform-specific guides to set up port forwarding for your Kubernetes cluster:
+
+      - [Managed and unmanaged clusters guide](https://github.com/polyseam/cndi/blob/main/docs/port-forwarding.md)
+
+      ### Via External DNS
+
+      Integrating ExternalDNS automates DNS management, enabling Kubernetes resources to be accessed via public domain names. When enabled alongside your CloudNativePG deployment, it supports rapid DNS record creation for domains (e.g., `cnpg.yourdomain.com`), streamlining access to your instance.
+
+      ## Testing Your PostgreSQL Connection
+
+      Ensure CloudNativePG is properly accessible through your chosen domain after deploying and configuring external access.
+
+      ### Using `psql` Command Line Tool
+
+      `psql` is a powerful PostgreSQL command-line interface. To test your connection:
+
+      #### Install `psql`
+
+      Ensure you have `psql` installed, included in PostgreSQL client packages.
+
+      #### Connect to the Database
+
+      Execute the command below, replacing placeholders with your connection details. You'll be prompted for the password.
+
+      ```bash
+      psql -h <hostname> -p <port> -U <username> -d <database>
+
+      The POSTGRESQL_CONNECTION_STRING can be found in the .env file.
+
+      ### Using PgAdmin
+
+      PgAdmin offers a GUI for managing your PostgreSQL databases. To connect:
+
+      **Launch PgAdmin** and navigate to the dashboard.
+      Enter the login and email credentials. The `PGADMIN_LOGIN_PASSWORD`, and `PGADMIN_LOGIN_EMAIL` can be found in the `.env` file.
+      Through a connection file, your database details are made automatically available, allowing you to simply click on your server entry in PgAdmin's browser panel to connect to your database.
