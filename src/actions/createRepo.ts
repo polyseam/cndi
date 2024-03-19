@@ -9,7 +9,26 @@ type CreateRepoOptions = {
 
 export default async function createRepo(options: CreateRepoOptions) {
   let repoUrl: URL;
-  const git = simpleGit();
+
+  try {
+    const ghAvailableCmd = new Deno.Command("gh", {
+      args: ["gh", "--version"],
+    });
+    await ghAvailableCmd.output();
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      throw new Error(
+        [
+          createRepoLabel,
+          ccolors.error(
+            "'gh' CLI must be installed and added to PATH when using",
+          ),
+          ccolors.key_name("cndi init --create"),
+        ].join(" "),
+        { cause: 45000 },
+      );
+    }
+  }
 
   await loadEnv({
     envPath: path.join(options.output, ".env"),
@@ -33,6 +52,8 @@ export default async function createRepo(options: CreateRepoOptions) {
     await emitExitEvent(4000);
     Deno.exit(4000);
   }
+
+  const git = simpleGit();
 
   repoUrl.username = GIT_USERNAME;
   repoUrl.password = GIT_TOKEN;
@@ -87,8 +108,10 @@ export default async function createRepo(options: CreateRepoOptions) {
 
   try {
     const createRepoOutput = await createRepoCmd.output();
-    await writeAll(Deno.stdout, createRepoOutput.stdout);
-    await writeAll(Deno.stderr, createRepoOutput.stderr);
+    if (createRepoOutput.code !== 0) {
+      await writeAll(Deno.stderr, createRepoOutput.stderr);
+      console.error(createRepoLabel, ccolors.error("failed to create repo"));
+    }
   } catch (e) {
     console.error("failed to create repo");
     console.error(e);
