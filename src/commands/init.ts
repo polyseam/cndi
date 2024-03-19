@@ -265,7 +265,7 @@ const initCommand = new Command()
     if (options.deploymentTargetLabel) {
       const [deployment_target_provider, deployment_target_distribution] =
         options.deploymentTargetLabel.split("/");
-        
+
       if (!deployment_target_distribution) {
         console.error(
           initLabel,
