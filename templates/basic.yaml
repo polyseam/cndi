@@ -34,6 +34,16 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+              
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -50,6 +60,13 @@ outputs:
             namespace: argocd
           condition:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
