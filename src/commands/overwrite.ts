@@ -1,5 +1,6 @@
 import { Command, Spinner } from "deps";
 import { emitExitEvent } from "src/utils.ts";
+import createRepo from "src/actions/createRepo.ts";
 
 // deno-lint-ignore no-explicit-any
 const owAction = (args: any) => {
@@ -39,6 +40,9 @@ const owAction = (args: any) => {
     if (e.data.type === "complete-overwrite") {
       w.terminate();
       spinner.stop();
+      if (args.create) {
+        await createRepo(args);
+      }
       await emitExitEvent(0);
       Deno.exit(0);
     } else if (e.data.type === "error-overwrite") {
@@ -70,6 +74,11 @@ const overwriteCommand = new Command()
   .option(
     "--initializing <initializing:boolean>",
     'true if "cndi init" is the caller of this command',
+    { hidden: true, default: false },
+  )
+  .option(
+    "--create <create:boolean>",
+    "Create a new cndi cluster repository",
     { hidden: true, default: false },
   )
   .action(owAction);

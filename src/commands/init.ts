@@ -1,4 +1,4 @@
-import { ccolors, Command, loadEnv, path, PromptTypes, SEP, YAML } from "deps";
+import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
 import type { SealedSecretsKeys } from "src/types.ts";
 
 const { Input, Select } = PromptTypes;
@@ -265,6 +265,7 @@ const initCommand = new Command()
     if (options.deploymentTargetLabel) {
       const [deployment_target_provider, deployment_target_distribution] =
         options.deploymentTargetLabel.split("/");
+        
       if (!deployment_target_distribution) {
         console.error(
           initLabel,
@@ -275,6 +276,7 @@ const initCommand = new Command()
         await emitExitEvent(490);
         Deno.exit(490);
       }
+
       if (!deployment_target_provider) {
         console.error(
           initLabel,
@@ -413,10 +415,26 @@ const initCommand = new Command()
 
     // there is one case where we don't want to persist the staged files
     if (options.create) {
+      if (templateResult?.responses.git_credentials_mode === "ssh") {
+        // not implemented!
+        console.error(
+          initLabel,
+          "git_credentials_mode",
+          ccolors.error(
+            `must be ${ccolors.key_name("token")} when using ${
+              ccolors.key_name("--create")
+            }`,
+          ),
+        );
+        await emitExitEvent(4501);
+        Deno.exit(4501);
+      }
+
       const missingRequiredValuesForCreateRepo =
         checkForRequiredMissingCreateRepoValues({
           ...templateResult?.responses,
         });
+
       if (missingRequiredValuesForCreateRepo.length > 0) {
         console.error(
           initLabel,
@@ -431,11 +449,11 @@ const initCommand = new Command()
     }
 
     await persistStagedFiles(options.output);
-    await owAction({ output: options.output, initializing: true });
-
-    if (options.create) {
-      console.log("Creating a new cndi cluster repo");
-    }
+    await owAction({
+      output: options.output,
+      initializing: true,
+      create: options.create,
+    });
   });
 
 export default initCommand;
