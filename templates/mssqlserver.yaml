@@ -104,11 +104,22 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+
         open_ports:
           - number: 1433
             name: mssql
             namespace: mssql
             service: mssql-0
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -124,6 +135,7 @@ outputs:
         type: Opaque
         stringData:
           MSSQL_SA_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(MSSQL_SA_PASSWORD)
+          
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -133,7 +145,6 @@ outputs:
             service_name: argocd-server
             service_port: 443
             namespace: argocd
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
@@ -148,9 +159,15 @@ outputs:
             service_name: sqlinst1-0
             service_port: 1433
             namespace: mssql
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_mssql_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
