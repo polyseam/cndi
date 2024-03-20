@@ -146,7 +146,7 @@ export default async function createRepo(options: CreateRepoOptions) {
   }
 
   try {
-    await git.push("origin", "main");
+    await git.push("origin", "main", ["--set-upstream"]);
   } catch (e) {
     console.error(e);
     console.log(
