@@ -344,13 +344,15 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     airflow-section: |
-      # Apache Airflow
+      # Apache Airflow Deployment Guide
 
-      ## Introduction
-      This template facilitates the deployment of a standalone, production-ready instance of Apache Airflow using Helm on a Kubernetes cluster. Apache Airflow is an open-source platform designed to programmatically author, schedule, and monitor workflows, offering a robust foundation for managing complex data pipelines.
+      This template deploys a standalone production-ready (Apache airflow)[https://airflow.apache.org/] application using Helm on a Kubernetes cluster.
+      Apache Airflow is an open-source platform designed to programmatically author, schedule, and monitor workflows, offering a robust foundation for managing complex data pipelines.
 
       ## Walkthroughs 
-      For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target. These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` template on various platforms:
+      
+      For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target.
+      These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` template on various platforms:
 
       - **AWS EC2:** [ec2/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/ec2/airflow.md)
       - **AWS EKS:** [eks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/airflow.md)
@@ -361,6 +363,7 @@ outputs:
       - **Local Development:** [dev/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/dev/airflow.md)
 
       ## Configuration
+
       Customizing your Airflow deployment is straightforward with the Helm chart's extensive configuration options, adjustable in the `config.yaml` file under `application.airflow.values`. Key configuration areas include:
 
       - **Executor:** Choose between Sequential, Local, Celery, and Kubernetes executors for task execution.
@@ -370,21 +373,7 @@ outputs:
 
       For comprehensive details on all configurable values, please refer to the [chart's values.yaml file](https://github.com/apache/airflow/blob/main/chart/values.yaml) or the [official chart documentation](https://airflow.apache.org/docs/helm-chart/stable/index.html).
 
-      ## Configuring External Access
-
-      ### Via Port Forwarding (Optional)
-      For local access or development purposes, port forwarding can be used to expose Airflow's web interface. Follow these platform-specific guides to set up port forwarding for your Kubernetes cluster:
-
-      - [Azure AKS](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/aks/port-forwarding.md)
-      - [AWS EKS](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/port-forwarding.md)
-      - [GCP GKE](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gke/port-forwarding.md)
-      - [Unmanaged Microk8s Cluster](https://github.com/polyseam/cndi/blob/main/docs/port-forwarding.md)
-
-      ### Via External DNS
-      Integrating ExternalDNS automates DNS management, enabling Kubernetes resources to be accessed via public domain names. When enabled alongside your Airflow deployment, it facilitates rapid DNS record creation for domains (e.g., `airflow.yourdomain.com`), streamlining access to your Airflow instance.
-
-      ### Verifying Airflow Accessibility
-      After deploying your Airflow instance and configuring external access (either via port forwarding, Ingress, or ExternalDNS), it's crucial to ensure that Airflow is properly accessible through your chosen domain.
+      ## Verifying Airflow Accessibility
 
       ### Steps for Verification
 
