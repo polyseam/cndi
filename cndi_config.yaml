@@ -4,6 +4,8 @@ provider: aws
 distribution: microk8s
 infrastructure:
   cndi:
+    functions:
+      myfunc: $cndi_on_ow.load_func(mytypescript.ts)
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
@@ -15,3 +17,7 @@ infrastructure:
         disk_size: 100
 cluster_manifests: {}
 applications: {}
+
+# function(Request) => Response.ts
+
+# gcloud functions deploy myfunc.ts
