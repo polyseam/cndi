@@ -354,7 +354,7 @@ outputs:
     airflow-section: |
       # Apache Airflow Deployment Guide
 
-      This template deploys a standalone production-ready (Apache airflow)[https://airflow.apache.org/] application using Helm on a Kubernetes cluster.
+      This template deploys a standalone production-ready [Apache Airflow](https://airflow.apache.org) application using Helm on a Kubernetes cluster.
       Apache Airflow is an open-source platform designed to programmatically author, schedule, and monitor workflows, offering a robust foundation for managing complex data pipelines.
 
       ## Walkthroughs 
