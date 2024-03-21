@@ -179,4 +179,30 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     hop: |
-      # hop
+      # Apache Hop Deployment Guide
+
+      This Template deploys a Standalone production ready [Apache Hop](https://hop.apache.org) application on a Kubernetes cluster using Helm.
+      Apache Hop (Hop Orchestration Platform) is an open-source data integration platform designed to facilitate efficient and flexible data transformation and orchestration.
+      With its lightweight, extensible architecture, Apache Hop supports a wide range of data sources and destinations, making it ideal for complex data pipelines and ETL processes.
+
+      ## Customizing Your Deployment
+
+      Tailor your Apache Hop deployment to your specific needs by adjusting the values in the `values.yaml` file. Important configuration options include:
+
+      - **Persistence:** Activate and configure persistent storage options for Apache Hop projects and workflows.
+      - **Database:** Set up external database connections for storing metadata or handling transformation data more effectively.
+      - **Resources:** Define CPU and memory limits and requests to optimize the performance of Apache Hop pods.
+      - **Ingress:** Adjust Ingress configurations to facilitate external access to the Apache Hop Web interface.
+
+      For a comprehensive list of all configuration options, refer to the Helm chart's documentation or the [values.yaml](https://github.com/apache/hop/blob/master/helm/hop/values.yaml) file within the chart repository.
+
+      ## Verifying Apache Hop 
+
+      Once Apache Hop is deployed and access is configured (via port forwarding, Ingress, or ExternalDNS), it's important to verify that the platform is accessible:
+
+      **Access the Web Interface**:
+        - Open a web browser and navigate to the domain set up for Apache Hop, e.g., `https://hop.yourdomain.com`.
+        - The Apache Hop browser application should appear, indicating successful deployment and accessibility.
+
+      Ensure to adapt the steps and URLs mentioned to fit the specific setup and configuration of your Apache Hop environment.
+

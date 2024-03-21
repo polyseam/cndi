@@ -99,7 +99,7 @@ outputs:
     cndi_version: v2
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
+    # this is a Template comment
     infrastructure:
       cndi:
         cert_manager:
@@ -242,4 +242,41 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     mssqlserver: |
-      # mssqlserver
+      # SQL Server Deployment Guide
+
+      This guide covers the deployment of Microsoft SQL Server on a Kubernetes cluster using Helm. SQL Server is a relational database management system developed by Microsoft. It's designed for the enterprise environment and offers a wide range of tools for data storage, processing, and analytics. SQL Server supports various data types, making it suitable for a broad array of applications.
+
+      ## Customizing Your Deployment
+
+      You can customize your SQL Server deployment to fit your specific needs by editing the `values.yaml` file in the Helm chart. Important configuration options to consider include:
+
+      - **Persistence:** Enable persistent storage to ensure that your data remains safe across pod restarts and deployments.
+      - **Replication:** Configure replication settings to improve data availability and disaster recovery capabilities.
+      - **Resources:** Allocate CPU and memory resources to your SQL Server pods to balance performance and resource usage.
+      - **Authentication:** Setup authentication and authorization to secure access to your databases.
+
+      Consult the Helm chart's documentation or the `values.yaml` file for a full list of configurable parameters and their descriptions.
+
+      ## Verifying SQL Server Accessibility
+
+      **Connect to the Database**:
+        - Use a SQL Server client tool like SQL Server Management Studio (SSMS) or sqlcmd to connect to your instance, specifying the domain you've configured, e.g., `sqlserver.yourdomain.com`.
+
+      ## Connecting to the Database Step-by-Step
+
+      To connect to your SQL Server database, follow these steps:
+
+      1. **Install SQL Server Client Tools:** If not already installed, download and install SQL Server Management Studio (SSMS) or the sqlcmd command-line tool from the official Microsoft website.
+
+      2. **Gather Connection Details:** Obtain the necessary connection details such as the fully qualified domain name (FQDN) for your SQL Server instance (e.g., `sqlserver.yourdomain.com`), the port (default is `1433`), and the credentials if authentication is enabled.
+
+      3. **Open Your Client Tool:** Launch SSMS or open a terminal for sqlcmd.
+
+      4. **Construct the Connection String:** In SSMS, use the Connect to Server dialog to enter your server's FQDN or IP address and the authentication details.
+         In the terminal, use the format `sqlcmd -S tcp:<hostname>,<port> -U <username> -P <password>`, replacing placeholders with your actual details.
+
+      5. **Connect to SQL Server:** In SSMS, click Connect. For sqlcmd, enter the command in your terminal.
+
+      6. **Verify Connection:** If the connection is successful, you'll be able to execute SQL commands against your database in SSMS or through the sqlcmd terminal.
+
+      Ensure to adjust your steps and connection details according to the specific configuration and security settings of your SQL Server deployment.
