@@ -261,4 +261,4 @@ outputs:
       5. **Connect to MongoDB:** Enter the command `mongo <connection-string>` in your terminal, replacing `<connection-string>` with your actual connection string. For example:
       `mongosh mongodb://admin:password@mongodb.example.com`
 
-      You can find the MONGODB_CONNECTION_STRING in the .env file in your project directory
+      You can find the `MONGODB_CONNECTION_STRING` in the `.env` file in your project directory

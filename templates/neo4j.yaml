@@ -207,15 +207,15 @@ outputs:
       After deploying Neo4j and configuring external access (either through port forwarding, Ingress, or ExternalDNS), ensure that the database is properly accessible:
 
       **Connect to the Database**:
-        - Use a web browser to navigate to the Neo4j browser interface, typically at `http://neo4j.yourdomain.com:7474`.
+        - Use a web browser to navigate to the Neo4j browser interface, typically at `https://neo4j.yourdomain.com:7474`.
 
-      ## Connecting to the Database Step-by-Step
+      ## Connecting to the Database UI Step-by-Step
 
       To connect to your Neo4j database, follow these steps:
 
       1. **Open a Web Browser:** Start by opening your preferred web browser.
 
-      2. **Navigate to the Neo4j Browser:** Enter the URL for your Neo4j browser interface, which is usually formatted as `http://neo4j.yourdomain.com:7474`. Adjust the protocol (`http` or `https`) and port (`7474` for HTTP, `7473` for HTTPS) as necessary, based on your deployment configuration.
+      2. **Navigate to the Neo4j Browser:** Enter the URL for your Neo4j browser interface, which is usually formatted as `https://neo4j.yourdomain.com:7474`. Adjust the protocol (`http` or `https`) and port (`7474` for HTTP, `7473` for HTTPS) as necessary, based on your deployment configuration.
 
       3. **Enter Credentials:** Upon reaching the Neo4j browser login page, input the default or configured credentials. The default credentials are often `neo4j` for both the username and password, unless you've changed them during setup.
 
@@ -224,3 +224,9 @@ outputs:
       5. **Troubleshooting:** If you encounter any issues accessing the Neo4j browser, check your Kubernetes service and ingress configurations to ensure they are correctly set up for external access. Additionally, verify that any firewall or network settings allow traffic to the appropriate ports.
 
       Remember to adjust the URL and credentials based on your specific Neo4j deployment and security settings.
+
+      ## Connect to the Database from your Application
+
+      If you've deployed Neo4j with a load balancer you are also able to connect to the database from your application. 
+      
+      Neo4j will listen on port `7687` for the Bolt protocol for programmatic access.

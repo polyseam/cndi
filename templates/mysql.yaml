@@ -215,20 +215,20 @@ outputs:
     mysql: |
       # MySQL Deployment Guide
 
-      This Template deploys a standalone production-ready MySQL datbase on a Kubernetes cluster using Helm.
-       MySQL is a widely used open-source relational database management system that is an essential part of the LAMP (Linux, Apache, MySQL, PHP/Python/Perl) stack. 
-       It offers a comprehensive range of features that allow for efficient data storage, retrieval, and management, making it suitable for a vast array of applications, from small web projects to large-scale enterprise solutions.
+      This Template deploys a standalone production-ready MySQL database on a Kubernetes cluster using Helm.
+      MySQL is a widely used open-source relational database management system that is an essential part of the LAMP (Linux, Apache, MySQL, PHP/Python/Perl) stack. 
+      It offers a comprehensive range of features that allow for efficient data storage, retrieval, and management, making it suitable for a vast array of applications, from small web projects to large-scale enterprise solutions.
 
       ## Customizing Your Deployment
 
-      Adjust your MySQL deployment to meet your specific requirements by modifying the `values.yaml` file within the Helm chart. Important configuration options include:
+      Adjust your MySQL deployment to meet your specific requirements by modifying the `mycluster-innodbcluster` manifest from the `cluster_manifests` section of your [cndi_config.yaml](cndi_config.yaml) file. Important configuration options include:
 
       - **Persistence:** Enable persistent storage to safeguard your data across pod restarts and deployments.
       - **Replication:** Set up replication settings to enhance data durability and availability.
       - **Resources:** Allocate appropriate CPU and memory resources to your MySQL pods to ensure optimal performance.
       - **Authentication:** Implement authentication mechanisms to secure access to your database.
 
-      For an exhaustive list of all configurable parameters and their explanations, refer to the documentation of the Helm chart or examine the `values.yaml` file in the chart repository.
+      For an exhaustive list of all configurable parameters and their explanations, refer to the the [CRD Reference](https://dev.mysql.com/doc/mysql-operator/en/mysql-operator-innodbcluster-common.html) from the [MySQLOperator Docs](https://dev.mysql.com/doc/mysql-operator/en/).
 
       ## Verifying MySQL Accessibility
 

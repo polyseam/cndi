@@ -396,7 +396,7 @@ outputs:
         - It's strongly recommended to change these default credentials during the initial setup to ensure your Airflow instance is secure.
 
       **Verify that Airflow is connected to the private DAG repository**:
-        - If correct, the private DAGs should be visible on the Airflow UI. If not,you should go back and make sure that the private DAG repository is properly connected to Airflow with the correct credentials that located in the .env file
+        - If correct, the private DAGs should be visible on the Airflow UI. If not,you should go back and make sure that the private DAG repository is properly connected to Airflow with the correct credentials that located in the `.env` file
       
       
 

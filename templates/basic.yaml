@@ -35,7 +35,7 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -43,7 +43,7 @@ outputs:
               - true
             args:
               dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
-              
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -63,7 +63,7 @@ outputs:
             - ==
             - true
 
-      external-dns-secret: 
+      external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -84,7 +84,14 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     basic: |
-      # basic
+      # Basic Deployment Guide
 
-      This Template provides the essential building blocks of a CNDI Cluster, and can be extended to meet any need
-
+      This Template provides the essential building blocks of a CNDI Cluster,
+      and can be extended to meet any need. If there is no existing 
+      CNDI Template for your use-case, we recommend deploying this `basic`
+      Template as is. 
+      
+      After you verify the Template is deployed successfully to your 
+      infrastructure, it can be enhanced using the `cndi_config.yaml` fields 
+      `applications` and `cluster_manifests` with Kubernetes manifests 
+      and Helm charts respectively.
