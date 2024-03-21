@@ -229,7 +229,7 @@ outputs:
         kind: Namespace
         metadata:
           name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
-          
+      $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -383,14 +383,13 @@ outputs:
 
       ## Configuration
 
-      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `cndi_config.yaml` file under `applications.cnpg.values`. Key areas of configuration include:
+      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `cndi_config.yaml` file under `cluster_manifests.cnpg-cluster.spec`. Key areas of configuration include:
 
-      - **Instances:** To adjust the number of PostgreSQL instances for scalability or redundancy, modify the `instances` value.
-      - **Storage:** Customize the persistent volume size and specify the storage class to meet your storage requirements.
-      - **HighAvailability:** Enable high availability settings to ensure your database remains accessible in the event of a failure.
-      - **Users:** Define superuser and application user credentials.
+      - **instances:** To adjust the number of PostgreSQL instances for scalability or redundancy, modify the `instances` value.
+      - **storage:** Customize the persistent volume size and specify the storage class to meet your storage requirements.
+      - **replicationSlots.highAvailability:** Enable high availability settings to ensure your database remains accessible in the event of a failure.
 
-      For comprehensive details on all configurable values, please refer to the [chart's `values.yaml` file](https://github.com/cloudnative-pg/charts/blob/main/charts/cloudnative-pg/values.yaml) or the [official chart documentation](https://cloudnative-pg.io/docs/).
+      For comprehensive details on all configurable Cluster manifest properties, please refer to the [Cluster Section in the API Reference](https://cloudnative-pg.io/documentation/1.22/cloudnative-pg.v1) or the [Official CNPG Guide](https://cloudnative-pg.io/docs).
 
       ## Testing Your PostgreSQL Connection
 
