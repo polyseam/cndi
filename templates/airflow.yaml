@@ -386,7 +386,7 @@ outputs:
       ### Steps for Verification
 
       **Access the Web Interface**:
-        - Open a web browser and navigate to the domain you've configured for Airflow, e.g., `http://airflow.yourdomain.com`.
+        - Open a web browser and navigate to the domain you've configured for Airflow, e.g., `https://airflow.yourdomain.com`.
         - You should be greeted with Airflow's login screen.
 
       **Default Credentials**:
