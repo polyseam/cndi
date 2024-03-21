@@ -358,4 +358,28 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     superset: |
-      # superset
+      # Apache Superset Deployment Guide
+
+      This Template deploys a standalone production-ready [Apache Superset](https://superset.apache.org) application on a Kubernetes cluster using Helm.
+      Apache Superset is an open-source data exploration and visualization platform designed to be intuitive and easy to use. 
+      It supports connection to a wide variety of databases and data warehouses, allowing you to visualize your data through rich, interactive dashboards.
+
+      ## Customizing Your Deployment
+
+      Customize your Superset deployment by modifying the values.yaml file. Key configuration options include:
+
+      - **Persistence:** Enable and configure persistent storage for Superset metadata.
+      - **Database:** Configure external database connections for better performance and scalability.
+      - **Resources:** Set CPU and memory limits and requests for the Superset pods.
+      - **Ingress:** Customize Ingress settings for external access.
+
+      For a full list of configurable values, consult the Helm chart's documentation or the [values.yaml](https://github.com/apache/superset/tree/master/helm/superset/values.yaml) file in the chart source.
+      
+      ## Verifying Superset Accessibility
+
+      After deploying your Superset instance and configuring external access (either via port forwarding, Ingress, or ExternalDNS), it's crucial to ensure that Superset is properly accessible through your chosen domain.
+
+      **Access the Web Interface**:
+        - Open a web browser and navigate to the domain you've configured for Superset, e.g., `http://superset.yourdomain.com`.
+        - You should be greeted with Superset's login screen.
+

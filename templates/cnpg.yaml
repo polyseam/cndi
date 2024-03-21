@@ -194,7 +194,7 @@ outputs:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
+    # this is a Template comment
     infrastructure:
       cndi:
         external_dns:
@@ -229,7 +229,7 @@ outputs:
         kind: Namespace
         metadata:
           name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
-          
+      $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -376,4 +376,48 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     cnpg: |
-      # cnpg
+      # CloudNativePG Deployment Guide
+
+      This Template deploys a standalone production-ready PostgreSQL database using the CloudNativePG operator on a Kubernetes cluster.
+      CloudNativePG, an open-source Kubernetes Operator for PostgreSQL, is designed to leverage the Kubernetes API to manage PostgreSQL instances in a cloud-native manner.
+
+      ## Configuration
+
+      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `cndi_config.yaml` file under `cluster_manifests.cnpg-cluster.spec`. Key areas of configuration include:
+
+      - **instances:** To adjust the number of PostgreSQL instances for scalability or redundancy, modify the `instances` value.
+      - **storage:** Customize the persistent volume size and specify the storage class to meet your storage requirements.
+      - **replicationSlots.highAvailability:** Enable high availability settings to ensure your database remains accessible in the event of a failure.
+
+      For comprehensive details on all configurable Cluster manifest properties, please refer to the [Cluster Section in the API Reference](https://cloudnative-pg.io/documentation/1.22/cloudnative-pg.v1) or the [Official CNPG Guide](https://cloudnative-pg.io/docs).
+
+      ## Testing Your PostgreSQL Connection
+
+      Ensure CloudNativePG is properly accessible through your chosen domain after deploying and configuring external access.
+
+      ### Using `psql` Command Line Tool
+
+      `psql` is a powerful PostgreSQL command-line interface. To test your connection:
+
+      #### Install `psql`
+
+      Ensure you have `psql` installed, included in PostgreSQL client packages.
+
+      #### Connect to the Database
+
+      Execute the command below, replacing placeholders with your connection details. You'll be prompted for the password.
+
+      ```bash
+      psql -h <hostname> -p <port> -U <username> -d <database>
+      ```
+
+      The POSTGRESQL_CONNECTION_STRING can be found in the .env file.
+
+      ### Using PgAdmin
+
+      PgAdmin offers a GUI for managing your PostgreSQL databases. To connect:
+
+      **Launch PgAdmin** and navigate to the dashboard.
+      
+      Enter the login and email credentials. The `PGADMIN_LOGIN_PASSWORD`, and `PGADMIN_LOGIN_EMAIL` can be found in the `.env` file.
+      Through a connection file, your database details are made automatically available, allowing you to simply click on your server entry in PgAdmin's browser panel to connect to your database.

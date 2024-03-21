@@ -213,4 +213,31 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     mysql: |
-      # mysql
+      # MySQL Deployment Guide
+
+      This Template deploys a standalone production-ready MySQL database on a Kubernetes cluster using Helm.
+      MySQL is a widely used open-source relational database management system that is an essential part of the LAMP (Linux, Apache, MySQL, PHP/Python/Perl) stack. 
+      It offers a comprehensive range of features that allow for efficient data storage, retrieval, and management, making it suitable for a vast array of applications, from small web projects to large-scale enterprise solutions.
+
+      ## Customizing Your Deployment
+
+      Adjust your MySQL deployment to meet your specific requirements by modifying the `mycluster-innodbcluster` manifest from the `cluster_manifests` section of your [cndi_config.yaml](cndi_config.yaml) file. Important configuration options include:
+
+      - **Persistence:** Enable persistent storage to safeguard your data across pod restarts and deployments.
+      - **Replication:** Set up replication settings to enhance data durability and availability.
+      - **Resources:** Allocate appropriate CPU and memory resources to your MySQL pods to ensure optimal performance.
+      - **Authentication:** Implement authentication mechanisms to secure access to your database.
+
+      For an exhaustive list of all configurable parameters and their explanations, refer to the the [CRD Reference](https://dev.mysql.com/doc/mysql-operator/en/mysql-operator-innodbcluster-common.html) from the [MySQLOperator Docs](https://dev.mysql.com/doc/mysql-operator/en/).
+
+      ## Verifying MySQL Accessibility
+
+      **Connect to the Database**:
+        - Use a MySQL client to connect to your instance, specifying the configured domain, e.g., `mysql.yourdomain.com`.
+
+      ## Connecting to the Database Step-by-Step
+
+      Follow these steps to connect to your MySQL database:
+
+      1. **Install a MySQL Client:** If not already available, download and install a MySQL client on your local machine.
+      MySQL Workbench is a popular GUI client, while the `mysql` command-line tool is widely used
