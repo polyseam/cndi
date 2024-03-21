@@ -201,8 +201,8 @@ outputs:
       Once Apache Hop is deployed and access is configured (via port forwarding, Ingress, or ExternalDNS), it's important to verify that the platform is accessible:
 
       **Access the Web Interface**:
-        - Open a web browser and navigate to the domain set up for Apache Hop, e.g., `http://hop.yourdomain.com`.
-        - The Apache Hop web browser should appear, indicating successful deployment and accessibility.
+        - Open a web browser and navigate to the domain set up for Apache Hop, e.g., `https://hop.yourdomain.com`.
+        - The Apache Hop browser application should appear, indicating successful deployment and accessibility.
 
       Ensure to adapt the steps and URLs mentioned to fit the specific setup and configuration of your Apache Hop environment.
 
