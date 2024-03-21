@@ -372,7 +372,7 @@ outputs:
 
       ## Configuration
 
-      Customizing your Airflow deployment is straightforward with the Helm chart's extensive configuration options, adjustable in the `config.yaml` file under `application.airflow.values`. Key configuration areas include:
+      Customizing your Airflow deployment is straightforward with the Helm chart's extensive configuration options, adjustable in the `cndi_config.yaml` file under `applications.airflow.values`. Key configuration areas include:
 
       - **Executor:** Choose between Sequential, Local, Celery, and Kubernetes executors for task execution.
       - **Persistence:** Configure persistent storage solutions for DAGs and logs, ensuring data durability.
