@@ -413,9 +413,28 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
+    const git_credentials_mode = templateResult?.responses.git_credentials_mode;
+    const git_repo = templateResult?.responses.git_repo as string;
+
+    if (git_credentials_mode === "ssh") {
+      if (git_repo && git_repo.startsWith("https://")) {
+        console.error(
+          initLabel,
+          "git_repo",
+          ccolors.error(
+            `must be specified as an ssh URL when ${
+              ccolors.key_name("git_credentials_mode")
+            } is set to ${ccolors.user_input("ssh")}`,
+          ),
+        );
+        await emitExitEvent(4500);
+        Deno.exit(4500);
+      }
+    }
+
     // there is one case where we don't want to persist the staged files
     if (options.create) {
-      if (templateResult?.responses.git_credentials_mode === "ssh") {
+      if (git_credentials_mode === "ssh") {
         // not implemented!
         console.error(
           initLabel,
