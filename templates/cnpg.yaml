@@ -383,7 +383,7 @@ outputs:
 
       ## Configuration
 
-      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `config.yaml` file under `application.cnpg.values`. Key areas of configuration include:
+      Customizing your CloudNativePG application is straightforward with the Helm chart's extensive configuration options, adjustable in the `cndi_config.yaml` file under `applications.cnpg.values`. Key areas of configuration include:
 
       - **Instances:** To adjust the number of PostgreSQL instances for scalability or redundancy, modify the `instances` value.
       - **Storage:** Customize the persistent volume size and specify the storage class to meet your storage requirements.
