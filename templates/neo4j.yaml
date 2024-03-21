@@ -58,6 +58,16 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -67,6 +77,7 @@ outputs:
             number: 7687
             service: neo4j
             namespace: neo4j
+            
     cluster_manifests:
       $cndi.comment(neo4j-auth-secret): Neo4j Credentials
       neo4j-auth-secret:
@@ -88,7 +99,6 @@ outputs:
             service_name: argocd-server
             service_port: 443
             namespace: argocd
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
@@ -103,9 +113,15 @@ outputs:
             service_name: neo4j
             service_port: 7473
             namespace: neo4j
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_neo4j_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 

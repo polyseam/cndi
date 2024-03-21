@@ -69,27 +69,31 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
       - ==
       - true
-  - message: Please enter the number of ReplicaSet you want to deploy
+
+  - name: mongodb_replica_sets
+    message: Please enter the number of ReplicaSet you want to deploy
     default: 3
-    name: mongodb_replica_sets
     type: Number
-  - message: Please enter the username for your mongodb admin
-    default: admin
-    name: mongodb_user
+  - name: mongodb_user
+    message: Please enter the username for your mongodb admin
+    default: admin  
     type: Input
-  - message: >-
+
+  - name: mongodb_password
+    message: >-
       Please enter the mongodb password you want to use for your mongodb
       database:
     default: password
-    name: mongodb_password
     type: Secret
-  - message: 'Please enter the name for the mongodb database you want to use:'
+
+  - name: mongodb_name
+    message: 'Please enter the name for the mongodb database you want to use:'
     default: my-mongodb-database
-    name: mongodb_name
     type: Input
-  - message: 'Please enter your destination namespace for your mongoDb database:'
+
+  - name: mongodb_namespace
+    message: 'Please enter your destination namespace for your mongoDb database:'
     default: mongodb
-    name: mongodb_namespace
     type: Input
 
 outputs:
@@ -102,6 +106,16 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+          
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+              
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -124,6 +138,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
+
       mongodb-ingress:
         $cndi.get_block(mongodb-server-ingress):
           args:
@@ -132,6 +147,13 @@ outputs:
             namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
           condition:
             - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
@@ -144,6 +166,7 @@ outputs:
         type: Opaque
         stringData:
           password: $cndi_on_ow.seal_secret_from_env_var(MONGODB_PASSWORD)
+
       mongodb-community-crd:
         apiVersion: mongodbcommunity.mongodb.com/v1
         kind: MongoDBCommunity
@@ -171,6 +194,7 @@ outputs:
                 - name: userAdminAnyDatabase
                   db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
               scramCredentialsSecretName: my-scram
+
     applications:
       mongodb:
         targetRevision: 0.8.0

@@ -69,6 +69,7 @@ blocks:
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
+      
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
       {}
    
@@ -222,6 +223,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
+
       cnpg-namespace:
         apiVersion: v1
         kind: Namespace
@@ -321,7 +323,6 @@ outputs:
             service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
             service_port: 5432
             namespace: postgres
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
             - ==
@@ -340,6 +341,7 @@ outputs:
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+
       pgadmin:
         $cndi.get_block(deploy_pgadmin_application_blk):
           condition:
