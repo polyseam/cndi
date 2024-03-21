@@ -215,7 +215,7 @@ outputs:
     mysql: |
       # MySQL Deployment Guide
 
-      This template deploys a standalone production-ready MySQL datbase on a Kubernetes cluster using Helm.
+      This Template deploys a standalone production-ready MySQL datbase on a Kubernetes cluster using Helm.
        MySQL is a widely used open-source relational database management system that is an essential part of the LAMP (Linux, Apache, MySQL, PHP/Python/Perl) stack. 
        It offers a comprehensive range of features that allow for efficient data storage, retrieval, and management, making it suitable for a vast array of applications, from small web projects to large-scale enterprise solutions.
 

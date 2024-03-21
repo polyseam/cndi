@@ -58,7 +58,7 @@ outputs:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
+    # this is a Template comment
     infrastructure:
       cndi:
         cert_manager:

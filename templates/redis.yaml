@@ -322,7 +322,7 @@ outputs:
     redis: |
       # Redis Deployment Guide
 
-      This template deploys a standalone production-ready Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator). 
+      This Template deploys a standalone production-ready Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator). 
       It also deploys Redis-Sentinel as a monitoring solution for Redis instances on a Kubernetes cluster using Helm.
       Redis is an open-source, in-memory data structure store, used as a database, cache, and message broker. 
       It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes, and streams.

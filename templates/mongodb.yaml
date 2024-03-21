@@ -223,7 +223,7 @@ outputs:
     mongodb: |
       # MongoDB Deployment Guide
 
-      This template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm. 
+      This Template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm. 
       MongoDB is a powerful, open-source, NoSQL database designed with scalability and developer agility in mind. 
       It supports a wide variety of data types and is ideal for applications requiring rapid iteration and flexible schema designs.
 

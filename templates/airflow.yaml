@@ -354,13 +354,13 @@ outputs:
     airflow-section: |
       # Apache Airflow Deployment Guide
 
-      This template deploys a standalone production-ready [Apache Airflow](https://airflow.apache.org) application using Helm on a Kubernetes cluster.
+      This Template deploys a standalone production-ready [Apache Airflow](https://airflow.apache.org) application using Helm on a Kubernetes cluster.
       Apache Airflow is an open-source platform designed to programmatically author, schedule, and monitor workflows, offering a robust foundation for managing complex data pipelines.
 
       ## Walkthroughs 
       
       For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target.
-      These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` template on various platforms:
+      These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` Template on various platforms:
 
       - **AWS EC2:** [ec2/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/ec2/airflow.md)
       - **AWS EKS:** [eks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/airflow.md)

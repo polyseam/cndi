@@ -53,7 +53,7 @@ outputs:
     cndi_version: v2
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
+    # this is a Template comment
     infrastructure:
       cndi:
         cert_manager:
@@ -187,7 +187,7 @@ outputs:
     neo4j: |
       # Neo4j Deployment Guide
 
-      This template deploys a standalone production-ready Neo4j database on a Kubernetes cluster using Helm.
+      This Template deploys a standalone production-ready Neo4j database on a Kubernetes cluster using Helm.
       Neo4j is a highly powerful, open-source graph database management system, known for its ability to efficiently manage and query highly connected data.
        With its graph-based model, Neo4j is especially suited for applications requiring complex queries and data relationships, such as social networks, recommendation systems, and fraud detection.
 

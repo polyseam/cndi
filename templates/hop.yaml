@@ -181,7 +181,7 @@ outputs:
     hop: |
       # Apache Hop Deployment Guide
 
-      This template deploys a Standalone production ready [Apache Hop](https://hop.apache.org) application on a Kubernetes cluster using Helm.
+      This Template deploys a Standalone production ready [Apache Hop](https://hop.apache.org) application on a Kubernetes cluster using Helm.
       Apache Hop (Hop Orchestration Platform) is an open-source data integration platform designed to facilitate efficient and flexible data transformation and orchestration.
       With its lightweight, extensible architecture, Apache Hop supports a wide range of data sources and destinations, making it ideal for complex data pipelines and ETL processes.
 

@@ -360,7 +360,7 @@ outputs:
     superset: |
       # Apache Superset Deployment Guide
 
-      This template deploys a standalone production-ready [Apache Superset](https://superset.apache.org) application on a Kubernetes cluster using Helm.
+      This Template deploys a standalone production-ready [Apache Superset](https://superset.apache.org) application on a Kubernetes cluster using Helm.
       Apache Superset is an open-source data exploration and visualization platform designed to be intuitive and easy to use. 
       It supports connection to a wide variety of databases and data warehouses, allowing you to visualize your data through rich, interactive dashboards.
 
