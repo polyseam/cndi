@@ -181,7 +181,7 @@ outputs:
     hop: |
       # Apache Hop Deployment Guide
 
-      This template deploys a Standalone production ready (Apache Hop)[https://hop.apache.org/] application on a Kubernetes cluster using Helm.
+      This template deploys a Standalone production ready [Apache Hop](https://hop.apache.org) application on a Kubernetes cluster using Helm.
       Apache Hop (Hop Orchestration Platform) is an open-source data integration platform designed to facilitate efficient and flexible data transformation and orchestration.
       With its lightweight, extensible architecture, Apache Hop supports a wide range of data sources and destinations, making it ideal for complex data pipelines and ETL processes.
 
@@ -194,7 +194,7 @@ outputs:
       - **Resources:** Define CPU and memory limits and requests to optimize the performance of Apache Hop pods.
       - **Ingress:** Adjust Ingress configurations to facilitate external access to the Apache Hop Web interface.
 
-      For a comprehensive list of all configuration options, refer to the Helm chart's documentation or the (values.yaml)[https://github.com/apache/hop/blob/master/helm/hop/values.yaml] file within the chart repository.
+      For a comprehensive list of all configuration options, refer to the Helm chart's documentation or the [values.yaml](https://github.com/apache/hop/blob/master/helm/hop/values.yaml) file within the chart repository.
 
       ## Verifying Apache Hop 
 

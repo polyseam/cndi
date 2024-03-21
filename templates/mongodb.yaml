@@ -223,7 +223,7 @@ outputs:
     mongodb: |
       # MongoDB Deployment Guide
 
-      This template deploys a Standalone production ready (MongoDB database)[https://github.com/mongodb/mongodb-kubernetes-operator] on Kubernetes cluster using Helm. 
+      This template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm. 
       MongoDB is a powerful, open-source, NoSQL database designed with scalability and developer agility in mind. 
       It supports a wide variety of data types and is ideal for applications requiring rapid iteration and flexible schema designs.
 
@@ -250,7 +250,7 @@ outputs:
 
       To connect to your MongoDB database, follow these steps:
 
-      1. **Install MongoDB Client:** Ensure that you have a (MongoDB client)[https://www.mongodb.com/docs/mongodb-shell/install/] installed on your local machine.
+      1. **Install MongoDB Client:** Ensure that you have a [MongoDB client](https://www.mongodb.com/docs/mongodb-shell/install) installed on your local machine.
 
       2. **Gather Connection Details:** Obtain the necessary connection details such as the hostname (e.g., `mongodb.yourdomain.com`), port (default is `27017`), and credentials if authentication is enabled.
 
