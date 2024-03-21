@@ -51,7 +51,7 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
 
     if (useSshRepoAuth()) {
       userData = Fn.templatefile(
-        "microk8s-cloud-init-leader-ssh.yml.tftpl",
+        "microk8s-cloud-init-leader.yml.tftpl",
         {
           bootstrap_token: this.locals.bootstrap_token.asString!,
           git_repo_encoded: Fn.base64encode(
