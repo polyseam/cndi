@@ -221,17 +221,44 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     mongodb: |
-      # mongodb 
+      # MongoDB Deployment Guide
 
-      This template deploys a Standalone production ready
-      [mongodb-community-operator](https://github.com/mongodb/mongodb-kubernetes-operator) 
+      This Template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm. 
+      MongoDB is a powerful, open-source, NoSQL database designed with scalability and developer agility in mind. 
+      It supports a wide variety of data types and is ideal for applications requiring rapid iteration and flexible schema designs.
 
+      ## Customizing Your Deployment
 
-      To test the connection you will need to [Install Mongo
-      shell](https://www.mongodb.com/docs/mongodb-shell/install/).
+      To tailor your MongoDB deployment according to your requirements, you can modify the `values.yaml` file in the Helm chart. Key configuration options to consider include:
 
+      - **Persistence:** Enable persistent storage to ensure data is safely stored outside of pod lifecycles.
+      - **Replication:** Configure replication settings to enhance data availability and durability.
+      - **Resources:** Specify CPU and memory limits and requests to manage the resource usage of MongoDB pods effectively.
+      - **Authentication:** Set up authentication mechanisms to secure access to your MongoDB databases.
 
-      Once the `mongosh` is installed, test the connection from terminal
+      For detailed information on all configurable parameters, refer to the Helm chart's documentation or the `values.yaml` file within the chart repository.
+
+      ## Verifying MongoDB Accessibility
+
+      After deploying MongoDB and setting up  access (either through port forwarding, Ingress, or ExternalDNS), ensure that the database is properly accessible:
+
+      **Connect to the Database**:
+        - Use a MongoDB client to connect to your instance, specifying the domain you've configured, e.g., `mongodb://mongodb.yourdomain.com:27017`.
+        - Successful connection indicates that your MongoDB instance is ready for use.
+
+      ## Connecting to the Database Step-by-Step
+
+      To connect to your MongoDB database, follow these steps:
+
+      1. **Install MongoDB Client:** Ensure that you have a [MongoDB client](https://www.mongodb.com/docs/mongodb-shell/install) installed on your local machine.
+
+      2. **Gather Connection Details:** Obtain the necessary connection details such as the hostname (e.g., `mongodb.yourdomain.com`), port (default is `27017`), and credentials if authentication is enabled.
+
+      3. **Open Your Terminal:** Launch the terminal on your local machine.
+
+      4. **Construct the Connection String:** Create the connection string using the format `mongodb://<username>:<password>@<hostname>:<port>/<database>`, replacing placeholders with your actual details. If authentication is not enabled, the connection string may simply be `mongodb://<hostname>:<port>`.
+
+      5. **Connect to MongoDB:** Enter the command `mongo <connection-string>` in your terminal, replacing `<connection-string>` with your actual connection string. For example:
       `mongosh mongodb://admin:password@mongodb.example.com`
 
-      You can find the MONGODB_CONNECTION_STRING in the .env file.
+      You can find the `MONGODB_CONNECTION_STRING` in the `.env` file in your project directory
