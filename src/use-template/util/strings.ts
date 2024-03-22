@@ -41,6 +41,8 @@ export function removeWhitespaceBetweenBraces(input: string): string {
   });
 }
 
+// This function finds the position of the closing parenthesis of a CNDI call
+// ignoring those which occur inside curly braces {{ ... }}
 export function findPositionOfCNDICallEndToken(
   input: string,
   startPosition: number = 0,

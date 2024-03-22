@@ -212,6 +212,7 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
 
+    assert(!parsed.infrastructure?.cndi?.external_dns);
     assert(!parsed.infrastructure?.cndi?.external_dns?.enabled);
     assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
   },

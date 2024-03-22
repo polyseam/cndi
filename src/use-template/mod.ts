@@ -27,7 +27,6 @@ import {
 } from "./util/strings.ts";
 
 import { unsetValueForKeyPath } from "deps";
-import { getPrettyJSONString } from "src/utils.ts";
 
 type BuiltInValidator = keyof typeof BuiltInValidators;
 
@@ -694,15 +693,12 @@ async function processCNDIConfigOutput(
     cndiConfigObj = YAML.parse(output) as object;
 
     const key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
-    Deno.writeTextFileSync(`key-${ax}.yaml`, key);
     const pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
 
     // load value of key
     const body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      console.log("responses");
-      console.log(getPrettyJSONString($cndi.getResponsesAsRecord()));
       return { error: new Error(`No value found for key: ${key}`) };
     }
 
