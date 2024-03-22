@@ -20,12 +20,14 @@ import type {
 import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "consts";
 
 import {
+  findPositionOfCNDICallEndToken,
   processBlockBodyArgs,
   removeWhitespaceBetweenBraces,
   unwrapQuotes,
 } from "./util/strings.ts";
 
 import { unsetValueForKeyPath } from "deps";
+import { getPrettyJSONString } from "src/utils.ts";
 
 type BuiltInValidator = keyof typeof BuiltInValidators;
 
@@ -198,6 +200,9 @@ async function getBlockForIdentifier(
       // Bare Name
       const blockContent = $cndi.blocks.get(blockIdentifier);
       if (!blockContent) {
+        if (blockContent === null) {
+          return { value: YAML.stringify(null) };
+        }
         return {
           error: new Error(
             [
@@ -684,16 +689,20 @@ async function processCNDIConfigOutput(
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
   let ax = 0;
+
   while (indexOpen > -1 && indexClose > -1) {
     cndiConfigObj = YAML.parse(output) as object;
 
     const key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
+    Deno.writeTextFileSync(`key-${ax}.yaml`, key);
     const pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
 
     // load value of key
     const body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
+      console.log("responses");
+      console.log(getPrettyJSONString($cndi.getResponsesAsRecord()));
       return { error: new Error(`No value found for key: ${key}`) };
     }
 
@@ -705,36 +714,41 @@ async function processCNDIConfigOutput(
       }
     }
 
-    const identifier = output
-      .split(getBlockBeginToken)[1]
-      .split(getBlockEndToken)[0];
+    if (shouldOutput) { // only try to load in a block if the condition is met
+      const statement = output.slice(indexOpen, indexClose + 1);
+      const identifier = statement.slice(statement.indexOf("(") + 1, -1);
+      const obj = await getBlockForIdentifier(identifier);
 
-    const obj = await getBlockForIdentifier(identifier);
+      if (obj.error) {
+        return { error: obj.error };
+      }
 
-    if (obj.error) {
-      return { error: obj.error };
-    }
+      obj.value = literalizeGetPromptResponseCalls(
+        removeWhitespaceBetweenBraces(unwrapQuotes(obj.value)),
+      );
 
-    obj.value = literalizeGetPromptResponseCalls(
-      removeWhitespaceBetweenBraces(unwrapQuotes(obj.value)),
-    );
+      // get_arg evals
+      obj.value = processBlockBodyArgs(obj.value, body?.args);
 
-    // get_arg evals
-    obj.value = processBlockBodyArgs(obj.value, body?.args);
-
-    if (shouldOutput) {
       setValueForKeyPath(
         cndiConfigObj,
         pathToKey.slice(0, -1),
-        YAML.parse(obj.value), // What if there are multiple blocks in a given key
+        YAML.parse(obj.value),
       );
     } else {
-      unsetValueForKeyPath(cndiConfigObj, pathToKey);
+      const numChilden =
+        Object.keys(getValueFromKeyPath(cndiConfigObj, pathToKey.slice(0, -1)))
+          .length;
+      if (numChilden === 1) {
+        unsetValueForKeyPath(cndiConfigObj, pathToKey.slice(0, -1));
+      } else {
+        unsetValueForKeyPath(cndiConfigObj, pathToKey);
+      }
     }
 
     output = YAML.stringify(cndiConfigObj);
     indexOpen = output.indexOf(getBlockBeginToken);
-    indexClose = output.indexOf(getBlockEndToken, indexOpen);
+    indexClose = findPositionOfCNDICallEndToken(output, indexOpen) || -1;
     ax++;
   }
 
