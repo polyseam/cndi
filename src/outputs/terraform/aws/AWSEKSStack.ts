@@ -748,7 +748,27 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
-
+      const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
+        .LaunchTemplate(
+        this,
+        `cndi_aws_launch_template_${nodeGroupIndex}`,
+        {
+          name: `cndi-${nodeGroupName}-${nodeGroupIndex}`,
+          tagSpecifications: [
+            {
+              resourceType: "instance",
+              tags: {
+                Name: `cndi-${project_name}-${nodeGroupName}-workers`,
+              },
+            },
+          ],
+          dependsOn: [
+            workerNodePolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+          ],
+        },
+      );
       const ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
         this,
         `cndi_aws_eks_node_group_${nodeGroupIndex}`,
@@ -767,6 +787,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             workerNodePolicyAttachment,
             cniPolicyAttachment,
             containerRegistryAttachment,
+            nodegroupLaunchTemplate,
           ],
         },
       );
