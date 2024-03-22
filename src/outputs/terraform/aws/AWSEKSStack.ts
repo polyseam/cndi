@@ -782,6 +782,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           scalingConfig,
           capacityType: "ON_DEMAND",
           subnetIds: [subnetPrivateA.id],
+          launchTemplate: {
+            id: nodegroupLaunchTemplate.id,
+            version: nodegroupLaunchTemplate.latestVersion,
+          },
           updateConfig: { maxUnavailable: 1 },
           dependsOn: [
             workerNodePolicyAttachment,
