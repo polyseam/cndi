@@ -64,22 +64,13 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServicesReady = new CDKTFProviderTime.sleep.Sleep(
-      this,
-      "cndi_time_sleep_services_ready",
-      {
-        createDuration: "60s",
-        dependsOn: [projectServiceCloudResourceManager, projectServiceCompute],
-      },
-    );
-
     const computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
       this,
       "cndi_google_compute_network",
       {
         name: "cndi-compute-network", // rename to cndi-compute-network
         autoCreateSubnetworks: false,
-        dependsOn: [projectServicesReady],
+        dependsOn: [projectServiceCompute],
       },
     );
 
@@ -195,7 +186,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             size: volumeSize,
             zone: this.locals.gcp_zone.asString,
             type: "pd-ssd",
-            dependsOn: [projectServicesReady],
+            dependsOn: [projectServiceCompute],
           },
         );
 
@@ -307,7 +298,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         tcpHealthCheck: {
           port: 80,
         },
-        dependsOn: [projectServicesReady],
+        dependsOn: [projectServiceCompute],
       },
     );
 
