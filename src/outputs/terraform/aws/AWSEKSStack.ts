@@ -731,7 +731,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       const instanceType = nodeGroup?.instance_type ||
         DEFAULT_INSTANCE_TYPES.aws;
 
-      const diskSize = nodeGroup?.volume_size ||
+      const volumeSize = nodeGroup?.volume_size ||
         nodeGroup?.disk_size ||
         nodeGroup?.disk_size_gb ||
         DEFAULT_NODE_DISK_SIZE_MANAGED;
@@ -754,11 +754,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         `cndi_aws_launch_template_${nodeGroupIndex}`,
         {
           name: `cndi-${nodeGroupName}-${nodeGroupIndex}`,
+          blockDeviceMappings: [
+            {
+              deviceName: "/dev/sdf",
+              ebs: {
+                volumeSize,
+              },
+            },
+          ],
           tagSpecifications: [
             {
               resourceType: "instance",
               tags: {
-                Name: `cndi-${project_name}-${nodeGroupName}-workers`,
+                Name: nodeGroupName,
+                CNDIProject: project_name,
               },
             },
           ],
@@ -775,7 +784,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           clusterName: eksCluster.name,
           amiType: "AL2_x86_64",
-          diskSize, // GiB
           instanceTypes: [instanceType],
           nodeGroupName,
           nodeRoleArn: computeRole.arn,
