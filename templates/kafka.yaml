@@ -227,26 +227,8 @@ outputs:
         chart: strimzi-kafka-operator
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
-      {}
-
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
-
-    $cndi.comment(neo4j-heading): PostgreSQL Connection Parameters
-    POSTGRESQL_DB: airflow-db
-    POSTGRESQL_USER: airflow
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_password) }}"
-    POSTGRESQL_PROTOCOL: postgresql
-    POSTGRESQL_HOST: cnpg-airflow-cluster-rw
-    POSTGRESQL_PORT: 5432
-    POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
-    POSTGRESQL_CLUSTER_SUPERUSER: postgres
-    $cndi.get_block(git_sync_dedicated_env_block):
-      condition:
-        - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-        - ==
-        - false
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
