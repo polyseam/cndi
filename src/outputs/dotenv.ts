@@ -20,17 +20,19 @@ export default function getFinalEnvString(
   }
 
   return `
-  # Sealed Secrets Keys
-  SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
-  SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
-  
-  # SSH Keys
-  SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'
-  
-  # Terraform State Passphrase
-  TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
-  
-  # Argo UI Admin Password
-  ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
+# CNDI Environment Variables
+
+# Sealed Secrets Keys
+SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
+SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
+
+# SSH Keys
+SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'
+
+# Terraform State Passphrase
+TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
+
+# Argo UI Admin Password
+ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
   ${templatePartial}`.trim();
 }

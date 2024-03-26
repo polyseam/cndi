@@ -30,8 +30,10 @@ export default async function createRepo(options: CreateRepoOptions) {
     }
   }
 
+  const envPath = path.join(options.output, ".env");
+
   await loadEnv({
-    envPath: path.join(options.output, ".env"),
+    envPath,
     export: true,
   });
 
@@ -53,7 +55,7 @@ export default async function createRepo(options: CreateRepoOptions) {
     Deno.exit(4000);
   }
 
-  const git = simpleGit();
+  const git = simpleGit(options.output);
 
   repoUrl.username = GIT_USERNAME;
   repoUrl.password = GIT_TOKEN;
@@ -104,6 +106,7 @@ export default async function createRepo(options: CreateRepoOptions) {
     env: {
       GH_TOKEN: GIT_TOKEN,
     },
+    cwd: options.output,
   });
 
   try {
@@ -122,12 +125,13 @@ export default async function createRepo(options: CreateRepoOptions) {
       "secret",
       "set",
       "-f",
-      ".env",
+      envPath,
       repoUrlStringWithCredentials,
     ],
     env: {
       GH_TOKEN: GIT_TOKEN,
     },
+    cwd: options.output,
   });
 
   let setSecretOutputCode = 1;

@@ -518,10 +518,22 @@ async function emitExitEvent(exit_code: number) {
   console.log();
 }
 
-const getProjectDirectoryFromFlag = (value: string | boolean) => (
+function absolutifyPath(p: string): string {
+  if (path.isAbsolute(p)) {
+    return p;
+  }
+
+  if (p.startsWith("~")) {
+    return path.join(homedir(), p.slice(1));
+  }
+
+  return path.resolve(p);
+}
+
+const getProjectDirectoryFromFlag = (value: string | boolean) => {
   // only executed if the flag is provided
-  typeof value === "boolean" ? Deno.cwd() : path.normalize(value)
-);
+  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+};
 
 export {
   checkInitialized,
