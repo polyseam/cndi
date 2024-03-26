@@ -72,7 +72,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true      
-      cluster-issuer-dns01:
+      cert-manager-cluster-issuer:
         apiVersion: cert-manager.io/v1
         kind: ClusterIssuer
         namespace: cert-manager
