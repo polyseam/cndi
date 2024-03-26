@@ -195,7 +195,8 @@ const initCommand = new Command()
     let cndi_config: string;
     let env: string;
     let readme: string;
-    let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
+    let project_name = destinationDirectory.split(SEP).pop() ||
+      "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
       console.error(
