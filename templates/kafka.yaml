@@ -75,6 +75,7 @@ outputs:
       cluster-issuer-dns01:
         apiVersion: cert-manager.io/v1
         kind: ClusterIssuer
+        namespace: cert-manager
         metadata:
           name: cluster-issuer-dns01
         spec:
@@ -97,10 +98,14 @@ outputs:
                     name: cluster-issuer-dns01-secret
               selector:
                 dnsZones:
-                - "{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+                - "bootstrap.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+                - "broker-0.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+                - "broker-1.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+                - "broker-2.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
       cluster-issuer-dns01-certificate:
         apiVersion: cert-manager.io/v1
         kind: Certificate
+        namespace: cert-manager
         metadata:
           name: cluster-issuer-dns01-certificate
         spec:
@@ -136,7 +141,7 @@ outputs:
             app: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
         spec:
           kafka:
-            replicas: 3
+            replicas: 1
             listeners:
               - name: plain
                 port: 9092
@@ -160,51 +165,56 @@ outputs:
                       external-dns.alpha.kubernetes.io/hostname: "bootstrap.{{ $cndi.get_prompt_response(aws_dns_zone) }}."
                       external-dns.alpha.kubernetes.io/ttl: "60"
                       cert-manager.io/cluster-issuer: cluster-issuer-dns01
+                      nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
                   brokers:
                     - broker: 0
                       annotations:
                         external-dns.alpha.kubernetes.io/hostname: "broker-0.{{ $cndi.get_prompt_response(aws_dns_zone) }}."
                         external-dns.alpha.kubernetes.io/ttl: "60"
                         cert-manager.io/cluster-issuer: cluster-issuer-dns01
+                        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
                       host: "broker-0.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
                     - broker: 1
                       annotations:
                         external-dns.alpha.kubernetes.io/hostname: "broker-1.{{ $cndi.get_prompt_response(aws_dns_zone) }}."
                         external-dns.alpha.kubernetes.io/ttl: "60"
                         cert-manager.io/cluster-issuer: cluster-issuer-dns01
+                        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
                       host: "broker-1.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
                     - broker: 2
                       annotations:
                         external-dns.alpha.kubernetes.io/hostname: "broker-2.{{ $cndi.get_prompt_response(aws_dns_zone) }}."
                         external-dns.alpha.kubernetes.io/ttl: "60"
                         cert-manager.io/cluster-issuer: cluster-issuer-dns01
+                        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
                       host: "broker-2.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
                   brokerCertChainAndKey:
                     secretName: cluster-issuer-private-key
                     certificate: tls.crt
                     key: tls.key
             config:
-              auto.create.topics.enable: "false"
-              offsets.topic.replication.factor: 3
-              transaction.state.log.replication.factor: 3
-              transaction.state.log.min.isr: 2
+              auto.create.topics.enable: "true"
+              offsets.topic.replication.factor: 1
+              transaction.state.log.replication.factor: 1
+              transaction.state.log.min.isr: 1
+              inter.broker.protocol.version: "3.7"
+              min.insync.replicas: 1
             storage:
               type: jbod
               volumes:
                 - id: 0
                   type: persistent-claim
                   size: 10Gi
-                  deleteClaim: true
+                  deleteClaim: true           
           zookeeper:
-            replicas: 3
+            replicas: 1
             storage:
               type: persistent-claim
               size: 10Gi
               deleteClaim: true
           entityOperator:
             topicOperator: {}
-            userOperator: {} 
-       
+            userOperator: {}    
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
