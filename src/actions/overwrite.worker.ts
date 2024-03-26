@@ -85,7 +85,10 @@ self.Deno.exit = (code?: number): never => {
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
+    console.log("beginning overwrite");
+    console.log(message.data.args);
     const options = message.data.args as OverwriteActionArgs;
+
     const pathToKubernetesManifests = path.join(
       options.output,
       "cndi",
@@ -103,7 +106,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     let pathToConfig: string;
 
     try {
-      const result = await loadCndiConfig(options?.file);
+      const result = await loadCndiConfig(options.output);
       config = result.config;
       pathToConfig = result.pathToConfig;
     } catch (errorLoadingCndiConfig) {
@@ -115,10 +118,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       return;
     }
 
-    if (options.initializing) {
-      await loadEnv({ export: true, envPath });
-      console.log();
-    }
+    await loadEnv({ export: true, envPath });
 
     try {
       await validateConfig(config, pathToConfig);

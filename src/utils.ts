@@ -93,9 +93,13 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
 
 // attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
-  providedPath?: string,
+  projectDirectory: string,
 ): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
-  const pathToConfig = await getPathToCndiConfig(providedPath);
+  let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
+
+  if (!await exists(pathToConfig)) {
+    pathToConfig = path.join(projectDirectory, "cndi_config.yml");
+  }
 
   try {
     const config = await loadYAML(pathToConfig) as CNDIConfig;
@@ -514,6 +518,23 @@ async function emitExitEvent(exit_code: number) {
   console.log();
 }
 
+function absolutifyPath(p: string): string {
+  if (path.isAbsolute(p)) {
+    return p;
+  }
+
+  if (p.startsWith("~")) {
+    return path.join(homedir(), p.slice(1));
+  }
+
+  return path.resolve(p);
+}
+
+const getProjectDirectoryFromFlag = (value: string | boolean) => {
+  // only executed if the flag is provided
+  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+};
+
 export {
   checkInitialized,
   checkInstalled,
@@ -525,6 +546,7 @@ export {
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
   getTFData,
