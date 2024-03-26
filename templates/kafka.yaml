@@ -78,6 +78,8 @@ outputs:
         namespace: cert-manager
         metadata:
           name: cluster-issuer-dns01
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
           acme:
             email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
@@ -108,6 +110,8 @@ outputs:
         namespace: cert-manager
         metadata:
           name: cluster-issuer-dns01-certificate
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
           secretName: cluster-issuer-private-key
           issuerRef:
@@ -125,6 +129,8 @@ outputs:
         metadata:
           name: cluster-issuer-dns01-secret
           namespace: cert-manager
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         type: Opaque
         stringData:
           access-key-id : $cndi_on_ow.seal_secret_from_env_var(AWS_ACCESS_KEY_ID)
