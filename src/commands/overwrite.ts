@@ -1,5 +1,5 @@
 import { Command, Spinner } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -67,9 +67,7 @@ const overwriteCommand = new Command()
   .option(
     "-o, --output <output:string>",
     "Path to your cndi cluster git repository.",
-    {
-      default: Deno.cwd(),
-    },
+    getProjectDirectoryFromFlag,
   )
   .option(
     "--initializing <initializing:boolean>",

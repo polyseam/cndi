@@ -1,5 +1,4 @@
 import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
-import type { SealedSecretsKeys } from "src/types.ts";
 
 const { Input, Select } = PromptTypes;
 
@@ -7,6 +6,7 @@ import {
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -27,6 +27,7 @@ import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
@@ -62,41 +63,6 @@ function checkForRequiredMissingCreateRepoValues(
   return missingKeys;
 }
 
-function getFinalEnvString(
-  templatePartial = "",
-  cndiGeneratedValues: {
-    sshPublicKey: string;
-    sealedSecretsKeys: SealedSecretsKeys;
-    terraformStatePassphrase: string;
-    argoUIAdminPassword: string;
-    debugMode: boolean;
-  },
-) {
-  const { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword } =
-    cndiGeneratedValues;
-
-  let telemetryMode = "";
-
-  if (cndiGeneratedValues.debugMode) {
-    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
-  }
-
-  return `
-# Sealed Secrets Keys
-SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
-SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
-
-# SSH Keys
-SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'
-
-# Terraform State Passphrase
-TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
-
-# Argo UI Admin Password
-ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
-${templatePartial}`.trim();
-}
-
 /**
  * COMMAND cndi init
  * Creates a CNDI cluster by reading the contents of ./cndi
@@ -104,9 +70,9 @@ ${templatePartial}`.trim();
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p <output:string>",
+    "-o, --output, --project, -p [output:string]",
     "Destination for new cndi project files.",
-    { default: Deno.cwd() },
+    getProjectDirectoryFromFlag,
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
@@ -140,8 +106,14 @@ const initCommand = new Command()
     "Specify a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
-  .option("-c, --create", "Create a new cndi cluster repo")
+  .option(
+    "-c, --create",
+    "Create a new cndi cluster repo",
+  )
   .action(async (options) => {
+    // default to the current working directory if -o, --output is ommitted
+    const destinationDirectory = options.output ?? Deno.cwd();
+
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
@@ -291,7 +263,9 @@ const initCommand = new Command()
       overrides.deployment_target_distribution = deployment_target_distribution;
     }
 
-    const directoryContainsCNDIFiles = await checkInitialized(options.output);
+    const directoryContainsCNDIFiles = await checkInitialized(
+      destinationDirectory,
+    );
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
@@ -299,7 +273,7 @@ const initCommand = new Command()
           ccolors.warn(
             "it looks like you have already initialized a cndi project in this directory:",
           ),
-          ccolors.user_input(options.output),
+          ccolors.user_input(destinationDirectory),
           ccolors.prompt("\n\noverwrite existing artifacts?"),
         ].join(" "),
       )
@@ -385,7 +359,7 @@ const initCommand = new Command()
     await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 
     // write a readme, extend via Template.readmeBlock if it exists
-    const readmePath = path.join(options.output, "README.md");
+    const readmePath = path.join(destinationDirectory, "README.md");
     try {
       await Deno.stat(readmePath);
       console.log(
@@ -467,9 +441,9 @@ const initCommand = new Command()
       }
     }
 
-    await persistStagedFiles(options.output);
+    await persistStagedFiles(destinationDirectory);
     await owAction({
-      output: options.output,
+      output: destinationDirectory,
       initializing: true,
       create: options.create,
     });

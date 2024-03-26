@@ -103,7 +103,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     let pathToConfig: string;
 
     try {
-      const result = await loadCndiConfig(options?.file);
+      const result = await loadCndiConfig(options.output);
       config = result.config;
       pathToConfig = result.pathToConfig;
     } catch (errorLoadingCndiConfig) {
