@@ -12,6 +12,10 @@ const owAction = (args: any) => {
     }
   }
 
+  if (!args.output) {
+    args.output = Deno.cwd();
+  }
+
   const spinner = new Spinner({
     interval: 80,
     color: "cyan",
