@@ -75,9 +75,10 @@ outputs:
       cert-manager-cluster-issuer:
         apiVersion: cert-manager.io/v1
         kind: ClusterIssuer
-        namespace: cert-manager
+        
         metadata:
           name: cluster-issuer-dns01
+          namespace: cert-manager
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
@@ -107,8 +108,8 @@ outputs:
       cluster-issuer-dns01-certificate:
         apiVersion: cert-manager.io/v1
         kind: Certificate
-        namespace: cert-manager
-        metadata:
+        metadata: 
+          namespace: cert-manager
           name: cluster-issuer-dns01-certificate
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
