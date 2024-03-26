@@ -109,7 +109,7 @@ outputs:
         apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata: 
-          namespace: cert-manager
+          namespace: kafka
           name: cluster-issuer-dns01-certificate
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
