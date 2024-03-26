@@ -75,7 +75,7 @@ outputs:
       cert-manager-cluster-issuer:
         apiVersion: cert-manager.io/v1
         kind: ClusterIssuer
-        
+        namespace: cert-manager
         metadata:
           name: cluster-issuer-dns01
           namespace: cert-manager
@@ -101,10 +101,7 @@ outputs:
                     name: cluster-issuer-dns01-secret
               selector:
                 dnsZones:
-                - "bootstrap.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
-                - "broker-0.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
-                - "broker-1.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
-                - "broker-2.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+                  - "{{ $cndi.get_prompt_response(aws_dns_zone) }}"
       cluster-issuer-dns01-certificate:
         apiVersion: cert-manager.io/v1
         kind: Certificate
@@ -123,7 +120,10 @@ outputs:
             organizations:
               - my-org
           dnsNames:
-            - "{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+            - "bootstrap.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+            - "broker-0.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+            - "broker-1.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
+            - "broker-2.{{ $cndi.get_prompt_response(aws_dns_zone) }}"
       cluster-issuer-dns01-secret:
         apiVersion: v1
         kind: Secret
