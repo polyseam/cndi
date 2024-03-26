@@ -40,3 +40,31 @@ export function removeWhitespaceBetweenBraces(input: string): string {
     return `{{${match.slice(2, -2).replace(/\s+/g, "")}}}`;
   });
 }
+
+// This function finds the position of the closing parenthesis of a CNDI call
+// ignoring those which occur inside curly braces {{ ... }}
+export function findPositionOfCNDICallEndToken(
+  input: string,
+  startPosition: number = 0,
+): number | null {
+  const stack: string[] = [];
+
+  for (let i = startPosition; i < input.length; i++) {
+    const char = input[i];
+
+    // If it's an opening curly brace, push it onto the stack
+    if (char === "{") {
+      stack.push(char);
+    } // If it's a closing curly brace and there's a corresponding opening, pop the stack
+    else if (
+      char === "}" && stack.length > 0 && stack[stack.length - 1] === "{"
+    ) {
+      stack.pop();
+    } // If it's a closing parenthesis and the stack is empty (meaning we're not inside curly braces)
+    else if (char === ")" && stack.length === 0) {
+      return i; // Return the index of the closing parenthesis
+    }
+  }
+
+  return null; // Return null if no such closing parenthesis is found
+}

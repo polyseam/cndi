@@ -192,3 +192,28 @@ Deno.test(
     assert(parsed.provider === "azure");
   },
 );
+
+Deno.test(
+  "template execution: when external_dns is disabled the 'basic' template should not have external_dns in cndi_config.yaml",
+  mySanity,
+  async () => {
+    // Deno.cwd() is the root of the project
+
+    const template = await useTemplate("basic", {
+      interactive: false,
+      overrides: {
+        deployment_target_provider: "azure",
+        enable_external_dns: false,
+      },
+    });
+
+    console.log(template.files["cndi_config.yaml"]);
+
+    // deno-lint-ignore no-explicit-any
+    const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
+
+    assert(!parsed.infrastructure?.cndi?.external_dns);
+    assert(!parsed.infrastructure?.cndi?.external_dns?.enabled);
+    assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
+  },
+);
