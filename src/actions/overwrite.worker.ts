@@ -85,8 +85,6 @@ self.Deno.exit = (code?: number): never => {
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
-    console.log("beginning overwrite");
-    console.log(message.data.args);
     const options = message.data.args as OverwriteActionArgs;
 
     const pathToKubernetesManifests = path.join(
