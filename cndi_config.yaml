@@ -1,11 +1,9 @@
 cndi_version: v2
-project_name: mj-ec2-airflow
+project_name: basic-ec2
 provider: aws
 distribution: microk8s
 infrastructure:
   cndi:
-    functions:
-      myfunc: $cndi_on_ow.load_func(mytypescript.ts)
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
