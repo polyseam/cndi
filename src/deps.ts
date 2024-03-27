@@ -33,12 +33,12 @@ export {
   CompletionsCommand,
   HelpCommand,
   UpgradeCommand,
-} from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+} from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 
-export { GithubProvider } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
+export { GithubProvider } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/upgrade/mod.ts";
 
-import { UpgradeOptions } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+import { UpgradeOptions } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/upgrade/mod.ts";
+import { colors } from "https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts";
 
 import {
   Checkbox,
@@ -49,9 +49,9 @@ import {
   Secret,
   Select,
   Toggle,
-} from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+} from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
 
-export { prompt as cprompt } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+export { prompt as cprompt } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
 
 // used to have keys, should not matter
 export const PromptTypes = {
