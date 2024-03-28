@@ -18,13 +18,15 @@
     "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
   },
   "imports": {
-    "src/": "./src/",
-    "deps": "./src/deps.ts",
+    "@std/fs": "jsr:@std/fs@^0.221.0",
+    "@std/path": "jsr:@std/path@^0.221.0",
     "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
+    "child_process": "node:child_process",
     "consts": "./src/constants.ts",
-    "test-deps": "./src/tests/deps.ts",
+    "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
-    "child_process": "node:child_process"
+    "src/": "./src/",
+    "test-deps": "./src/tests/deps.ts"
   },
   "lint": {
     "exclude": ["dist/*"]

@@ -30,7 +30,7 @@ export default async function cndi() {
   }
 
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-
+  console.log("Deno.mainModule:", Deno.mainModule);
   if (isDebug) {
     console.log(
       "using",
