@@ -25,7 +25,7 @@
     "consts": "./src/constants.ts",
     "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
-    "src/": "./src/",
+    "src/": "./src",
     "test-deps": "./src/tests/deps.ts"
   },
   "lint": {
