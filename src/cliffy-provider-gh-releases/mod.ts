@@ -7,6 +7,7 @@ import {
   Provider,
   semver,
   Spinner,
+  UpgradeCommand,
   walkSync,
 } from "./deps.ts";
 
@@ -45,7 +46,7 @@ export class GHRError extends Error {
   }
 }
 
-interface GithubReleaseProviderOptions extends GithubProviderOptions {
+interface GithubReleasesProviderOptions extends GithubProviderOptions {
   destinationDir: string;
   displaySpinner?: boolean;
   prerelease?: boolean;
@@ -72,7 +73,7 @@ function latestSemVerFirst(a: string, b: string): number {
   }
 }
 
-export class GithubReleaseProvider extends Provider {
+export class GithubReleasesProvider extends Provider {
   name: string = "GithubReleaseProvider";
   displaySpinner: boolean = true;
   prerelease: boolean = false;
@@ -85,8 +86,10 @@ export class GithubReleaseProvider extends Provider {
   onComplete?: (version: string) => void | never;
   onError?: (error: GHRError) => void | never;
 
-  constructor(options: GithubReleaseProviderOptions) {
+  constructor(options: GithubReleasesProviderOptions) {
     super();
+    console.log("this.prerelease", this.prerelease);
+
     const [owner, repo] = options.repository.split("/");
 
     if (!owner || !repo) {
@@ -420,5 +423,25 @@ export class GithubReleaseProvider extends Provider {
   ): Promise<void> {
     const { versions } = await this.getVersions(name);
     super.printVersions(versions, currentVersion, { indent: 0 });
+  }
+}
+
+interface GithubReleasesUpgradeOptions extends UpgradeOptions {
+  name: string;
+  args: string[];
+  provider: GithubReleasesProvider;
+}
+
+export class GithubReleasesUpgradeCommand extends UpgradeCommand {
+  name: "upgrade";
+  constructor(options: GithubReleasesUpgradeOptions) {
+    super(options);
+    this.option(
+      "--pre-release",
+      "Include GitHub Releases marked pre-release",
+      () => {
+        options.provider.prerelease = true;
+      },
+    );
   }
 }

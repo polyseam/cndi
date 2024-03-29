@@ -1,5 +1,8 @@
 // cliffy
-export { Provider } from "@cliffy/cliffy/command/upgrade/mod.ts";
+export {
+  Provider,
+  UpgradeCommand,
+} from "@cliffy/cliffy/command/upgrade/mod.ts";
 
 export type {
   GithubProviderOptions,

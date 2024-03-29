@@ -1,12 +1,13 @@
 import {
   GHRError,
-  GithubReleaseProvider,
+  GithubReleasesProvider,
+  GithubReleasesUpgradeCommand,
 } from "src/cliffy-provider-gh-releases/mod.ts";
-import { UpgradeCommand } from "deps";
+
 import { emitExitEvent } from "src/utils.ts";
 
-const upgradeCommand = new UpgradeCommand({
-  provider: new GithubReleaseProvider({
+const upgradeCommand = new GithubReleasesUpgradeCommand({
+  provider: new GithubReleasesProvider({
     repository: "polyseam/cndi",
     destinationDir: "~/.cndi/bin",
     osAssetMap: {
