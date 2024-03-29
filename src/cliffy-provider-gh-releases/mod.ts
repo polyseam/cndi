@@ -436,6 +436,7 @@ export class GithubReleasesUpgradeCommand extends UpgradeCommand {
       "--pre-release, --prerelease",
       "Include GitHub Releases marked pre-release",
       () => {
+        // this is strange, but seems to work
         options.provider.prerelease = true;
       },
     );
