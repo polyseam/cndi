@@ -16,7 +16,7 @@ const upgradeCommand = new GithubReleasesUpgradeCommand({
       darwin: "cndi-mac.tar.gz",
     },
     onError: async (error: GHRError) => {
-      const exit_code = parseInt(`8${error.code}`);
+      const exit_code = parseInt(`11${error.code}`);
       await emitExitEvent(exit_code);
       Deno.exit(exit_code);
     },
