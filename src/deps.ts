@@ -40,7 +40,6 @@ export {
 } from "@cliffy/cliffy/command/mod.ts";
 
 export { GithubProvider } from "@cliffy/cliffy/command/upgrade/mod.ts";
-
 import { UpgradeOptions } from "@cliffy/cliffy/command/upgrade/mod.ts";
 import { colors } from "@cliffy/cliffy/ansi/colors.ts";
 
@@ -83,8 +82,6 @@ export { simpleGit } from "npm:simple-git@3.18.0";
 
 //  - crypto-js
 import CryptoJS from "npm:crypto-js@4.1.1";
-
-// spinners
 
 // import/export required
 export { CryptoJS };
