@@ -207,7 +207,7 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
   await stageCDKTFStack(app);
 
   const cndi_multipass_instance = getMultipassResource(cndi_config);
-  const input: TFBlocks = deepMerge({
+  const input = deepMerge({
     resource: {
       multipass_instance: {
         cndi_multipass_instance,
@@ -228,5 +228,5 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
     ...cndi_config?.infrastructure?.terraform,
   });
 
-  await patchAndStageTerraformFilesWithInput(input);
+  await patchAndStageTerraformFilesWithInput(input as TFBlocks);
 }
