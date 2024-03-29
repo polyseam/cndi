@@ -1,23 +1,27 @@
 // Deno std lib
 export { homedir, platform } from "node:os";
-export { copy } from "https://deno.land/std@0.201.0/streams/copy.ts";
-export { SEP } from "https://deno.land/std@0.201.0/path/mod.ts";
-export * as path from "https://deno.land/std@0.211.0/path/mod.ts";
-import * as yaml from "https://deno.land/std@0.196.0/yaml/mod.ts";
-export { deepMerge } from "https://deno.land/std@0.201.0/collections/deep_merge.ts";
-export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export * as JSONC from "https://deno.land/std@0.201.0/jsonc/mod.ts";
-export { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
-export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export { ensureDirSync } from "https://deno.land/std@0.201.0/fs/ensure_dir.ts";
-export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export { load as loadEnv } from "https://deno.land/std@0.205.0/dotenv/mod.ts";
-export { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
-export * as silky from "https://deno.land/x/silky@v1.1.0/mod.ts";
-export { inflateResponse } from "https://deno.land/x/inflate_response@v1.1.0/mod.ts";
-export { writeAll } from "https://deno.land/std@0.217.0/io/write_all.ts";
+export { SEPARATOR } from "@std/path/constants";
+export * as path from "@std/path";
+import * as yaml from "@std/yaml";
+export { deepMerge } from "@std/collections";
+export { walk } from "@std/fs";
+export * as JSONC from "@std/jsonc";
+export { delay } from "@std/async";
+export { exists } from "@std/fs";
+export { ensureDirSync } from "@std/fs";
+export { existsSync } from "@std/fs";
+export { load as loadEnv } from "@std/dotenv";
+export { walkSync } from "@std/fs";
+export { writeAll } from "@std/io";
+
+export { Spinner } from "@std/cli";
+export { type SpinnerOptions } from "@std/cli";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
+
+// Polyseam Modules
+export * as silky from "@polyseam/silky";
+export { inflateResponse } from "@polyseam/inflate-response";
 
 export const YAML = {
   ...yaml,
@@ -82,8 +86,6 @@ import CryptoJS from "npm:crypto-js@4.1.1";
 
 // spinners
 
-export { Spinner } from "https://deno.land/std@0.216.0/cli/spinner.ts";
-export { type SpinnerOptions } from "https://deno.land/std@0.216.0/cli/spinner.ts";
 // import/export required
 export { CryptoJS };
 export type { UpgradeOptions };
