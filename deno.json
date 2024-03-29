@@ -12,7 +12,6 @@
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
     "clean-dist": "rm dist/mac/cndi dist/mac/cndi.zip dist/linux/cndi dist/linux/cndi.zip dist/win/cndi.exe dist/win/cndi.exe.zip || true",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all && deno task tar-all",
-    "build-linux": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux",
     "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000",
     "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
     "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
@@ -32,6 +31,7 @@
     "@std/streams": "jsr:@std/streams@^0.221.0",
     "@std/testing": "jsr:@std/testing@^0.221.0",
     "@std/yaml": "jsr:@std/yaml@^0.221.0",
+    "@cliffy/cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
     "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
     "child_process": "node:child_process",
     "consts": "./src/constants.ts",
