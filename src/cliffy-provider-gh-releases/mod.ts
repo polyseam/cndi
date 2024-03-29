@@ -433,11 +433,10 @@ interface GithubReleasesUpgradeOptions extends UpgradeOptions {
 }
 
 export class GithubReleasesUpgradeCommand extends UpgradeCommand {
-  name: "upgrade";
   constructor(options: GithubReleasesUpgradeOptions) {
     super(options);
     this.option(
-      "--pre-release",
+      "--pre-release, --prerelease",
       "Include GitHub Releases marked pre-release",
       () => {
         options.provider.prerelease = true;
