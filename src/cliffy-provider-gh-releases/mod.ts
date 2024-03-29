@@ -88,7 +88,6 @@ export class GithubReleasesProvider extends Provider {
 
   constructor(options: GithubReleasesProviderOptions) {
     super();
-    console.log("this.prerelease", this.prerelease);
 
     const [owner, repo] = options.repository.split("/");
 
@@ -426,9 +425,7 @@ export class GithubReleasesProvider extends Provider {
   }
 }
 
-interface GithubReleasesUpgradeOptions extends UpgradeOptions {
-  name: string;
-  args: string[];
+interface GithubReleasesUpgradeOptions {
   provider: GithubReleasesProvider;
 }
 
