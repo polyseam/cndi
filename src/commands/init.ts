@@ -3,6 +3,7 @@ import { ccolors, Command, path, PromptTypes, SEPARATOR, YAML } from "deps";
 const { Input, Select } = PromptTypes;
 
 import {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
@@ -32,36 +33,6 @@ import getFinalEnvString from "src/outputs/dotenv.ts";
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
-
-function checkForRequiredMissingCreateRepoValues(
-  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
-): string[] {
-  const git_credentials_mode = responses?.git_credentials_mode || "token";
-
-  const requiredKeys = [
-    "git_username",
-    "git_repo",
-  ];
-
-  if (git_credentials_mode === "token") {
-    requiredKeys.push("git_token");
-  } else if (git_credentials_mode === "ssh") {
-    requiredKeys.push("git_ssh_private_key");
-  }
-
-  const missingKeys: Array<string> = [];
-
-  for (const key of requiredKeys) {
-    const envVarName = key.toUpperCase();
-    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
-      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
-
-    if (missingValue) {
-      missingKeys.push(key);
-    }
-  }
-  return missingKeys;
-}
 
 type EchoInitOptions = {
   interactive?: boolean;
@@ -131,8 +102,8 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-l, --deployment-target-label <deployment_target_label:string>",
-    "Specify a deployment target",
+    "--deployment-target-label, -l <deployment_target_label:string>",
+    "Label in the form of <provider/distribution> slug to specifying a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
   .option(
@@ -253,14 +224,18 @@ const initCommand = new Command()
       console.error(
         initLabel,
         ccolors.error("you can set this value using"),
-        ccolors.key_name("--set"),
-        ccolors.key_name("deployment_target_provider=<provider>"),
+        ccolors.key_name(
+          "--deployment-target-label (-l) <provider>/<distribution>",
+        ),
+        ccolors.error("or"),
       );
       console.error(
         initLabel,
-        ccolors.error("or"),
-        ccolors.key_name("-l <provider>/<distribution>"),
+        ccolors.error("using"),
+        ccolors.key_name("--set"),
+        ccolors.key_name("deployment_target_provider=<provider>"),
       );
+
       await emitExitEvent(490);
       Deno.exit(490);
     }
@@ -273,7 +248,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(490);
@@ -284,7 +259,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(491);
