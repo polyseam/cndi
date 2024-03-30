@@ -63,6 +63,35 @@ function checkForRequiredMissingCreateRepoValues(
   return missingKeys;
 }
 
+type EchoInitOptions = {
+  interactive?: boolean;
+  template?: string;
+  output?: string;
+  deploymentTargetLabel?: string;
+  keep?: boolean;
+  create?: boolean;
+};
+
+const echoInit = (options: EchoInitOptions) => {
+  const cndiInit = "cndi init";
+  const cndiInitCreate = options.create ? " --create" : "";
+  const cndiInitInteractive = options.interactive ? " --interactive" : "";
+  const cndiInitTemplate = options.template
+    ? ` --template ${options.template}`
+    : "";
+
+  const cndiInitOutput = options.output === Deno.cwd()
+    ? ""
+    : ` --output ${options.output}`;
+
+  const deploymentTargetLabel = options.deploymentTargetLabel
+    ? ` --deployment-target-label ${options.deploymentTargetLabel}`
+    : "";
+  console.log(
+    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}\n`,
+  );
+};
+
 /**
  * COMMAND cndi init
  * Creates a CNDI cluster by reading the contents of ./cndi
@@ -114,11 +143,12 @@ const initCommand = new Command()
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options.output ?? Deno.cwd();
 
+    echoInit({ ...options, output: destinationDirectory });
+
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
     if (!template && !options.interactive) {
-      console.log("cndi init\n");
       console.error(
         initLabel,
         ccolors.error(
@@ -207,32 +237,32 @@ const initCommand = new Command()
       Deno.exit(400);
     }
 
-    if (options.interactive && !template) {
-      console.log("cndi init --interactive\n");
-    }
+    const noProvider = !options.interactive &&
+      !options.deploymentTargetLabel && !overrides.deployment_target_provider;
 
-    if (options.interactive && template) {
-      console.log(`cndi init --interactive --template ${template}\n`);
-    }
-
-    if (!options.interactive && template) {
-      if (!options.deploymentTargetLabel) {
-        console.log(`cndi init --template ${template}\n`);
-        if (!overrides.deployment_target_provider) {
-          console.error(
-            initLabel,
-            ccolors.error(
-              `--deployment-target-label (-l) flag is required when not running in interactive mode`,
-            ),
-          );
-          await emitExitEvent(490);
-          Deno.exit(490);
-        }
-      } else {
-        console.log(
-          `cndi init --template ${template} --deployment-target-label ${options.deploymentTargetLabel}\n`,
-        );
-      }
+    if (noProvider) {
+      console.error(
+        initLabel,
+        ccolors.key_name("deployment_target_provider"),
+        ccolors.error(
+          `is required when not running in`,
+        ),
+        ccolors.key_name("--interactive"),
+        ccolors.error(`mode`),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("you can set this value using"),
+        ccolors.key_name("--set"),
+        ccolors.key_name("deployment_target_provider=<provider>"),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("or"),
+        ccolors.key_name("-l <provider>/<distribution>"),
+      );
+      await emitExitEvent(490);
+      Deno.exit(490);
     }
 
     if (options.deploymentTargetLabel) {

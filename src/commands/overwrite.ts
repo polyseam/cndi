@@ -2,18 +2,26 @@ import { Command, Spinner } from "deps";
 import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
-// deno-lint-ignore no-explicit-any
-const owAction = (args: any) => {
-  if (!args.initializing) {
-    if (args.file) {
-      console.log(`cndi overwrite --file "${args.file}"\n`);
-    } else {
-      console.log(`cndi overwrite\n`);
-    }
-  }
+type EchoOwOptions = {
+  file?: string;
+  output?: string;
+};
 
-  if (!args.output) {
-    args.output = Deno.cwd();
+const echoOw = (options: EchoOwOptions) => {
+  const cndiOverwrite = "cndi overwrite";
+  const cndiOverwriteFile = options.file ? ` --file ${options.file}` : "";
+  const cndiOverwriteOutput = options.output
+    ? ` --output ${options.output}`
+    : "";
+  console.log(`${cndiOverwrite}${cndiOverwriteFile}${cndiOverwriteOutput}\n`);
+};
+
+// deno-lint-ignore no-explicit-any
+const owAction = (options: any) => {
+  echoOw(options);
+
+  if (!options.output) {
+    options.output = Deno.cwd();
   }
 
   const spinner = new Spinner({
@@ -37,15 +45,15 @@ const owAction = (args: any) => {
     type: "module",
   });
 
-  w.postMessage({ args, type: "begin-overwrite" });
+  w.postMessage({ options, type: "begin-overwrite" });
 
   w.onmessage = async (e) => {
     console.log();
     if (e.data.type === "complete-overwrite") {
       w.terminate();
       spinner.stop();
-      if (args.create) {
-        await createRepo(args);
+      if (options.create) {
+        await createRepo(options);
       }
       await emitExitEvent(0);
       Deno.exit(0);

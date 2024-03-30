@@ -157,7 +157,7 @@ export class GithubReleasesProvider extends Provider {
   }
 
   getRepositoryUrl(_name: string): string {
-    return `https://github.com/${this.owner}/${this.repo}`;
+    return `https://github.com/${this.owner}/${this.repo}/releases`;
   }
 
   getRegistryUrl(_name: string, version: string): string {
@@ -179,8 +179,18 @@ export class GithubReleasesProvider extends Provider {
     );
   }
 
+  echoUpgrade(options: UpgradeOptions): void {
+    const { to } = options;
+    const prereleaseFlag = this.prerelease ? " --prerelease" : "";
+    const versionFlag = to !== "latest" ? ` --version ${to}` : "";
+    console.log(`cndi upgrade${prereleaseFlag}${versionFlag}\n`);
+  }
+
   // Add your custom code here
-  async upgrade({ name, from, to }: UpgradeOptions): Promise<void> {
+  async upgrade(options: UpgradeOptions): Promise<void> {
+    let { name, from, to } = options;
+    this.echoUpgrade(options);
+
     const spinner = new Spinner({
       message: `Upgrading ${colors.cyan(name)} from ${
         colors.yellow(
@@ -432,6 +442,7 @@ interface GithubReleasesUpgradeOptions {
 export class GithubReleasesUpgradeCommand extends UpgradeCommand {
   constructor(options: GithubReleasesUpgradeOptions) {
     super(options);
+
     this.option(
       "--pre-release, --prerelease",
       "Include GitHub Releases marked pre-release",

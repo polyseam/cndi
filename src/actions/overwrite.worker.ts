@@ -45,7 +45,7 @@ import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
-interface OverwriteActionArgs {
+interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
@@ -53,7 +53,7 @@ interface OverwriteActionArgs {
 
 type OverwriteWorkerMessage = {
   data: {
-    args?: OverwriteActionArgs;
+    options?: OverwriteActionOptions;
     type: "begin-overwrite" | "complete-overwrite" | "error-overwrite";
     code?: number;
   };
@@ -85,7 +85,7 @@ self.Deno.exit = (code?: number): never => {
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
-    const options = message.data.args as OverwriteActionArgs;
+    const options = message.data.options as OverwriteActionOptions;
 
     const pathToKubernetesManifests = path.join(
       options.output,
