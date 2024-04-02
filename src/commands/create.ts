@@ -387,14 +387,18 @@ const createCommand = new Command()
     );
 
     await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+
     await stageFile("README.md", readme);
+
     await stageFile(
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
     );
+
     await stageFile(".gitignore", getGitignoreContents());
+
     await stageFile(
-      ".github/workflows/cndi-run.yaml",
+      path.join(".github", "workflows", "cndi-run.yaml"),
       getCndiRunGitHubWorkflowYamlContents(
         options.workflowSourceRef,
         deployment_target_provider === "dev",
