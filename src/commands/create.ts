@@ -288,9 +288,6 @@ const createCommand = new Command()
       Deno.exit(1504);
     }
 
-    let cndi_config: string;
-    let env: string;
-    let readme: string;
     let project_name = repo;
 
     if (interactive) {
@@ -357,7 +354,6 @@ const createCommand = new Command()
     };
 
     let templateResult;
-    let deployment_target_provider;
 
     try {
       templateResult = await useTemplate(template, {
@@ -376,14 +372,14 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    cndi_config = templateResult.files["cndi_config.yaml"];
-    await stageFile("cndi_config.yaml", cndi_config);
-
-    readme = templateResult.files["README.md"];
-    env = templateResult.files[".env"];
-
-    deployment_target_provider =
+    const deployment_target_provider =
       templateResult.responses.deployment_target_provider;
+
+    const cndi_config = templateResult.files["cndi_config.yaml"];
+    const env = templateResult.files[".env"];
+    const readme = templateResult.files["README.md"];
+
+    await stageFile("cndi_config.yaml", cndi_config);
 
     await stageFile(
       "cndi_responses.yaml",
