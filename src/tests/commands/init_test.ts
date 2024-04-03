@@ -274,11 +274,15 @@ Deno.test(
         "-t",
         "neo4j",
         "--set",
+        "dns_provider=google",
+        "--set",
         "deployment_target_provider=gcp",
         "--set",
-        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
+        "--loud",
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
+      console.log("dotenv", dotenv);
 
       assert(dotenv.indexOf(`GCP_REGION`) > -1);
       assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
@@ -400,7 +404,9 @@ Deno.test(
         "-l",
         "gcp/gke",
         "--set",
-        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
+        "dns_provider=google",
+        "--set",
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       );
       assert(status.success);
     });
@@ -430,7 +436,9 @@ Deno.test(
         "-l",
         "gcp/microk8s",
         "--set",
-        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
+        "dns_provider=google",
+        "--set",
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       );
       assert(status.success);
     });
