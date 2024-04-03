@@ -13,6 +13,7 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 
