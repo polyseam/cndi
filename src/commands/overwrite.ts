@@ -5,9 +5,12 @@ import createRepo from "src/actions/createRepo.ts";
 type EchoOwOptions = {
   file?: string;
   output?: string;
+  initializing?: boolean;
 };
 
 const echoOw = (options: EchoOwOptions) => {
+  if (options?.initializing) return;
+
   const cndiOverwrite = "cndi overwrite";
   const cndiOverwriteFile = options.file ? ` --file ${options.file}` : "";
   const cndiOverwriteOutput = options.output
