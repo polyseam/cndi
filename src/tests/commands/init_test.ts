@@ -269,18 +269,20 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      const _run = await runCndi(
+      const run = await runCndi(
         "init",
         "-t",
         "neo4j",
         "--set",
         "deployment_target_provider=gcp",
+        "--set",
+        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
 
       assert(dotenv.indexOf(`GCP_REGION`) > -1);
       assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
-      // _run.status.success is false because we don't have a valid GOOGLE_CREDENTIALS
+      assert(run.status.success);
     });
     await t.step("cleanup", async () => {
       Deno.chdir("..");
