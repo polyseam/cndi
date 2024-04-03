@@ -472,7 +472,7 @@ Deno.test(
 );
 
 Deno.test(
-  "'cndi init -t basic -l azure/microk8s should succeed",
+  "'cndi init -t basic -l aws/microk8s should succeed",
   async (t) => {
     let dir = "";
 
