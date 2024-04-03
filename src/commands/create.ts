@@ -145,7 +145,16 @@ const createCommand = new Command()
     // default to repo component of slug
     const [owner, repo] = slug.split("/"); // by this point, slug is valid
 
-    const destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+    let destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+
+    if (interactive && !options.output) {
+      destinationDirectory = await PromptTypes.Input.prompt({
+        message: ccolors.prompt(
+          "Please confirm the destination directory for your CNDI project:",
+        ),
+        default: destinationDirectory,
+      });
+    }
 
     if (!template && !interactive) {
       console.error(
