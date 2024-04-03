@@ -3,6 +3,7 @@ import { ccolors, Command, path, PromptTypes, SEPARATOR, YAML } from "deps";
 const { Input, Select } = PromptTypes;
 
 import {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
@@ -33,35 +34,34 @@ const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 
-function checkForRequiredMissingCreateRepoValues(
-  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
-): string[] {
-  const git_credentials_mode = responses?.git_credentials_mode || "token";
+type EchoInitOptions = {
+  interactive?: boolean;
+  template?: string;
+  output?: string;
+  deploymentTargetLabel?: string;
+  keep?: boolean;
+  create?: boolean;
+};
 
-  const requiredKeys = [
-    "git_username",
-    "git_repo",
-  ];
+const echoInit = (options: EchoInitOptions) => {
+  const cndiInit = "cndi init";
+  const cndiInitCreate = options.create ? " --create" : "";
+  const cndiInitInteractive = options.interactive ? " --interactive" : "";
+  const cndiInitTemplate = options.template
+    ? ` --template ${options.template}`
+    : "";
 
-  if (git_credentials_mode === "token") {
-    requiredKeys.push("git_token");
-  } else if (git_credentials_mode === "ssh") {
-    requiredKeys.push("git_ssh_private_key");
-  }
+  const cndiInitOutput = options.output === Deno.cwd()
+    ? ""
+    : ` --output ${options.output}`;
 
-  const missingKeys: Array<string> = [];
-
-  for (const key of requiredKeys) {
-    const envVarName = key.toUpperCase();
-    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
-      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
-
-    if (missingValue) {
-      missingKeys.push(key);
-    }
-  }
-  return missingKeys;
-}
+  const deploymentTargetLabel = options.deploymentTargetLabel
+    ? ` --deployment-target-label ${options.deploymentTargetLabel}`
+    : "";
+  console.log(
+    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}\n`,
+  );
+};
 
 /**
  * COMMAND cndi init
@@ -102,8 +102,8 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-l, --deployment-target-label <deployment_target_label:string>",
-    "Specify a deployment target",
+    "--deployment-target-label, -l <deployment_target_label:string>",
+    "Label in the form of <provider/distribution> slug to specifying a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
   .option(
@@ -114,11 +114,12 @@ const initCommand = new Command()
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options.output ?? Deno.cwd();
 
+    echoInit({ ...options, output: destinationDirectory });
+
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
     if (!template && !options.interactive) {
-      console.log("cndi init\n");
       console.error(
         initLabel,
         ccolors.error(
@@ -207,32 +208,36 @@ const initCommand = new Command()
       Deno.exit(400);
     }
 
-    if (options.interactive && !template) {
-      console.log("cndi init --interactive\n");
-    }
+    const noProvider = !options.interactive &&
+      !options.deploymentTargetLabel && !overrides.deployment_target_provider;
 
-    if (options.interactive && template) {
-      console.log(`cndi init --interactive --template ${template}\n`);
-    }
+    if (noProvider) {
+      console.error(
+        initLabel,
+        ccolors.key_name("deployment_target_provider"),
+        ccolors.error(
+          `is required when not running in`,
+        ),
+        ccolors.key_name("--interactive"),
+        ccolors.error(`mode`),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("you can set this value using"),
+        ccolors.key_name(
+          "--deployment-target-label (-l) <provider>/<distribution>",
+        ),
+        ccolors.error("or"),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("using"),
+        ccolors.key_name("--set"),
+        ccolors.key_name("deployment_target_provider=<provider>"),
+      );
 
-    if (!options.interactive && template) {
-      if (!options.deploymentTargetLabel) {
-        console.log(`cndi init --template ${template}\n`);
-        if (!overrides.deployment_target_provider) {
-          console.error(
-            initLabel,
-            ccolors.error(
-              `--deployment-target-label (-l) flag is required when not running in interactive mode`,
-            ),
-          );
-          await emitExitEvent(490);
-          Deno.exit(490);
-        }
-      } else {
-        console.log(
-          `cndi init --template ${template} --deployment-target-label ${options.deploymentTargetLabel}\n`,
-        );
-      }
+      await emitExitEvent(490);
+      Deno.exit(490);
     }
 
     if (options.deploymentTargetLabel) {
@@ -243,7 +248,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(490);
@@ -254,7 +259,7 @@ const initCommand = new Command()
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target-label (-l) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(491);

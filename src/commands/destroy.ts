@@ -9,6 +9,21 @@ import { PROCESS_ERROR_CODE_PREFIX } from "consts";
 
 const destroyLabel = ccolors.faded("\nsrc/commands/destroy.ts:");
 
+type EchoDestroyOptions = {
+  yes?: unknown;
+  path: string;
+};
+
+const echoDestroy = (options: EchoDestroyOptions) => {
+  const cndiDestroy = "cndi destroy";
+  const cndiDestroyAutoApprove = options.yes
+    ? ccolors.user_input(" --yes (-y)")
+    : "";
+  console.log(
+    `${cndiDestroy}${cndiDestroyAutoApprove}\n`,
+  );
+};
+
 /**
  * COMMAND cndi destroy
  * Destroys the CNDI cluster represented in the target directory
@@ -17,9 +32,6 @@ const destroyCommand = new Command()
   .description(
     `Destroy cluster infrastructure corresponding to project files.`,
   )
-  .option("-p, --path <path:string>", "path to your cndi git repository", {
-    default: Deno.cwd(),
-  })
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
@@ -59,13 +71,17 @@ const destroyCommand = new Command()
     "SSH Private Key ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
+  .option("-p, --path <path:string>", "path to your cndi git repository", {
+    default: Deno.cwd(),
+  })
   .option(
     "-y, --auto-approve",
     "Skip interactive approval of plan before applying.",
   )
   .action(async (options) => {
+    echoDestroy(options);
+
     const cmd = "cndi destroy";
-    console.log(`${cmd}\n`);
 
     const pathToTerraformResources = path.join(
       options.path,

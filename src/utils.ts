@@ -391,6 +391,36 @@ async function checkInstalled(CNDI_HOME: string) {
   }
 }
 
+function checkForRequiredMissingCreateRepoValues(
+  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
+): string[] {
+  const git_credentials_mode = responses?.git_credentials_mode || "token";
+
+  const requiredKeys = [
+    "git_username",
+    "git_repo",
+  ];
+
+  if (git_credentials_mode === "token") {
+    requiredKeys.push("git_token");
+  } else if (git_credentials_mode === "ssh") {
+    requiredKeys.push("git_ssh_private_key");
+  }
+
+  const missingKeys: Array<string> = [];
+
+  for (const key of requiredKeys) {
+    const envVarName = key.toUpperCase();
+    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
+      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
+
+    if (missingValue) {
+      missingKeys.push(key);
+    }
+  }
+  return missingKeys;
+}
+
 async function checkInitialized(output: string) {
   // if any of these files/folders don't exist, return false
   try {
@@ -536,6 +566,7 @@ const getProjectDirectoryFromFlag = (value: string | boolean) => {
 };
 
 export {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
   emitExitEvent,
