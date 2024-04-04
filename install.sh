@@ -73,6 +73,8 @@ main() {
         $exe --help
         echo
         echo "cndi was installed successfully! Please restart your terminal."
+        echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
+        echo
         exit 0
     fi
     
@@ -85,8 +87,12 @@ main() {
         $exe --help
         echo
         echo "cndi was installed successfully! Please restart your terminal."
+        echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
+        echo
         exit 0
     fi
+
+
 }
 
 main "$@"
