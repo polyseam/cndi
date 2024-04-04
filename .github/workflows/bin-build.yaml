@@ -14,9 +14,9 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.42
-      - name: deno build
+      - name: deno build-linux
         run: deno task build-linux
-      - name: cndi --help linux
+      - name: linux cndi --help
         run: ./dist/linux/in/cndi --help
         timeout-minutes: 1
   bin-build-test-macos:
@@ -27,9 +27,9 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.42
-      - name: deno build
+      - name: deno build-mac
         run: deno task build-mac
-      - name: cndi --help
+      - name: mac cndi --help
         run: ./dist/mac/in/cndi --help
         timeout-minutes: 1
   bin-build-test-windows:
@@ -40,8 +40,8 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.42
-      - name: deno build
+      - name: deno build-win
         run: deno task build-win
-      - name: cndi --help
+      - name: win cndi --help
         run: ./dist/win/in/cndi.exe --help
         timeout-minutes: 1
