@@ -71,6 +71,8 @@ main() {
         echo "finalizing installation..."
         # running 'cndi --help' will save the user wait time on first run
         $exe --help
+        echo
+        echo "cndi was installed successfully! Please restart your terminal."
         exit 0
     fi
     
@@ -81,6 +83,8 @@ main() {
         echo "finalizing installation..."
         # running 'cndi --help' will save the user wait time on first run
         $exe --help
+        echo
+        echo "cndi was installed successfully! Please restart your terminal."
         exit 0
     fi
 }
