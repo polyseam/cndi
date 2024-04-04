@@ -48,7 +48,7 @@ Deno.test(
     await t.step("test", async () => {
       assert(
         await hasSameFilesAfter(async () => {
-          const { status } = await runCndi("init", "-d", "--loud");
+          const { status } = await runCndi("init", "-d");
 
           assert(!status.success);
         }),
@@ -279,7 +279,6 @@ Deno.test(
         "deployment_target_provider=gcp",
         "--set",
         `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
-        "--loud",
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
       console.log("dotenv", dotenv);
