@@ -47,7 +47,7 @@ type EchoCreateOptions = {
   nonInteractive?: unknown;
   output?: string;
   deploymentTargetLabel?: string;
-  responses: string;
+  responsesFile: string;
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -85,8 +85,8 @@ const createCommand = new Command()
     "CNDI Template to use for the new project.",
   )
   .option(
-    "-r, --responses <responses:string>",
-    "Responses file to use for the new project.",
+    "-r, --responses-file <responses_file:string>",
+    "Path to YAML 'responses file' to supply to Template prompts.",
     {
       default: path.join(Deno.cwd(), "cndi_responses.yaml"),
     },
@@ -181,7 +181,7 @@ const createCommand = new Command()
     let responsesFileText = "";
     try {
       responsesFileText = await Deno.readTextFile(
-        options.responses,
+        options.responsesFile,
       );
     } catch (errorLoadingResponses) {
       if (errorLoadingResponses instanceof Deno.errors.NotFound) {

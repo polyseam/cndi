@@ -81,7 +81,7 @@ const initCommand = new Command()
   })
   .option(
     "-r, --responses-file <responses_file:string>",
-    "A path to a set of responses to supply to your template",
+    "Path to YAML 'responses file' to supply to Template prompts.",
     {
       default: defaultResponsesFilePath,
     },
