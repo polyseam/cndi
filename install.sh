@@ -59,9 +59,10 @@ main() {
     # if $cndi_install is not in $PATH
     if ! command -v cndi >/dev/null; then
         # if $cndi_install is not in $shell_profile
-        if ! grep -q "$cndi_install" "$HOME/$shell_profile"; then
-            echo "adding $cndi_install to \$PATH"
-            command printf '\nexport PATH="%s:$PATH"' "$cndi_install" >>"$HOME/$shell_profile"
+
+        if ! grep -q "$bin_dir" "$HOME/$shell_profile"; then
+            echo "adding $bin_dir to \$PATH"
+            command printf '\nexport PATH="%s:$PATH"' "$bin_dir" >>"$HOME/$shell_profile"
         fi
     fi
     
