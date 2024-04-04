@@ -38,6 +38,7 @@
     "@std/semver/compare": "https://deno.land/std@0.221.0/semver/compare.ts",
     "@std/streams": "https://deno.land/std@0.221.0/streams/mod.ts",
     "@std/testing": "https://deno.land/std@0.221.0/testing/mod.ts",
+    "@std/testing/bdd": "https://deno.land/std@0.221.0/testing/bdd.ts",
     "@std/yaml": "https://deno.land/std@0.221.0/yaml/mod.ts",
     "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
     "child_process": "node:child_process",
