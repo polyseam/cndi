@@ -281,8 +281,6 @@ Deno.test(
         `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
-      console.log("dotenv", dotenv);
-
       assert(dotenv.indexOf(`GCP_REGION`) > -1);
       assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
       assert(run.status.success);
