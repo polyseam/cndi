@@ -19,10 +19,6 @@ export { type SpinnerOptions } from "@std/cli";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 
-// Polyseam Modules
-export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate-response";
-
 export const YAML = {
   ...yaml,
   // deno-lint-ignore no-explicit-any
@@ -101,3 +97,7 @@ export const ccolors = {
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
   },
 };
+
+// Polyseam Modules
+export * as silky from "@polyseam/silky";
+export { inflateResponse } from "@polyseam/inflate_response";
