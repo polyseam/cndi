@@ -59,17 +59,22 @@ main() {
     # if $cndi_install is not in $PATH
     if ! command -v cndi >/dev/null; then
         # if $cndi_install is not in $shell_profile
-        if ! grep -q "$cndi_install" "$HOME/$shell_profile"; then
-            echo "adding $cndi_install to \$PATH"
-            command printf '\nexport PATH="%s:$PATH"' "$cndi_install" >>"$HOME/$shell_profile"
-            echo "Please restart your terminal then run 'cndi --help' to get started!"
-            exit 0 # exit early because sourcing $shell_profile will cause an error
+
+        if ! grep -q "$bin_dir" "$HOME/$shell_profile"; then
+            echo "adding $bin_dir to \$PATH"
+            command printf '\nexport PATH="%s:$PATH"' "$bin_dir" >>"$HOME/$shell_profile"
         fi
     fi
     
     # if $shell_profile is .zshrc exit because sourcing it will cause an error
     if [ "$shell_profile" = ".zshrc" ]; then
-        echo "Run 'cndi --help' to get started!"
+        echo "finalizing installation..."
+        # running 'cndi --help' will save the user wait time on first run
+        $exe --help
+        echo
+        echo "cndi was installed successfully! Please restart your terminal."
+        echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
+        echo
         exit 0
     fi
     
@@ -77,11 +82,17 @@ main() {
     if [ -f "$HOME/$shell_profile" ]; then
         echo "sourcing $HOME/$shell_profile"
         . "$HOME/$shell_profile"
+        echo "finalizing installation..."
+        # running 'cndi --help' will save the user wait time on first run
+        $exe --help
+        echo
+        echo "cndi was installed successfully! Please restart your terminal."
+        echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
+        echo
+        exit 0
     fi
-    
-    echo "Please restart your terminal then run 'cndi --help' to get started!"
-    echo
-    echo "Stuck? Join our Discord https://cndi.run/di?utm_id=5096"
+
+
 }
 
 main "$@"

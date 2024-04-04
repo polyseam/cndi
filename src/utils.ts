@@ -277,7 +277,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform${fileSuffixForPlatform}`,
+    `terraform-cndi${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -289,7 +289,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal${fileSuffixForPlatform}`,
+    `kubeseal-cndi${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
