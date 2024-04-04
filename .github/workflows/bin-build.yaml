@@ -2,6 +2,9 @@ on:
   pull_request:
     branches:    
       - main
+  push:
+    branches:
+      - 'main'
 jobs:
   bin-build-test-ubuntu:
     runs-on: ubuntu-latest
