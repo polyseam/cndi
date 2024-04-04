@@ -69,7 +69,7 @@ main() {
     
     # if $shell_profile is .zshrc exit because sourcing it will cause an error
     if [ "$shell_profile" = ".zshrc" ]; then
-        echo "Run 'cndi --help' to get started!"
+        $exe --help
         exit 0
     fi
     
