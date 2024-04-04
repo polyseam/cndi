@@ -43,8 +43,8 @@ main() {
     tar -xzf "$exe.tar.gz" -C "$bin_dir"
     
     chmod +x "$exe"
-    chmod +x "$bin_dir/kubeseal"
-    chmod +x "$bin_dir/terraform"
+    chmod +x "$bin_dir/kubeseal-cndi"
+    chmod +x "$bin_dir/terraform-cndi"
     
     rm "$exe.tar.gz"
     
