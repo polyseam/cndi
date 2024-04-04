@@ -1,0 +1,44 @@
+on:
+  pull_request:
+    branches:    
+      - main
+jobs:
+  bin-build-test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.42
+      - name: deno build
+        run: deno task build
+      - name: cndi --help linux
+        run: ./dist/linux/in/cndi --help
+        timeout-minutes: 1
+  bin-build-test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.42
+      - name: deno build
+        run: deno task build
+      - name: cndi --help macos
+        run: ./dist/mac/in/cndi --help
+        timeout-minutes: 1
+  bin-build-test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.42
+      - name: deno build
+        run: deno task build
+      - name: cndi --help windows
+        run: ./dist/windows/in/cndi --help
+        timeout-minutes: 1
