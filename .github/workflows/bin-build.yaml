@@ -12,7 +12,7 @@ jobs:
         with:
           deno-version: v1.42
       - name: deno build
-        run: deno task build
+        run: deno task build-linux
       - name: cndi --help linux
         run: ./dist/linux/in/cndi --help
         timeout-minutes: 1
@@ -25,8 +25,8 @@ jobs:
         with:
           deno-version: v1.42
       - name: deno build
-        run: deno task build
-      - name: cndi --help macos
+        run: deno task build-mac
+      - name: cndi --help
         run: ./dist/mac/in/cndi --help
         timeout-minutes: 1
   bin-build-test-windows:
@@ -38,7 +38,7 @@ jobs:
         with:
           deno-version: v1.42
       - name: deno build
-        run: deno task build
-      - name: cndi --help windows
-        run: ./dist/windows/in/cndi --help
+        run: deno task build-win
+      - name: cndi --help
+        run: ./dist/win/in/cndi.exe --help
         timeout-minutes: 1
