@@ -30,4 +30,4 @@ export { ensureDirSync, walkSync } from "@std/fs";
 export { Octokit } from "npm:octokit";
 
 // homegrown
-export { inflateResponse } from "@polyseam/inflate-response";
+export { inflateResponse } from "https://deno.land/x/inflate_response@v1.1.0/mod.ts";
