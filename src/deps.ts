@@ -1,6 +1,5 @@
 // Deno std lib
 export { homedir, platform } from "node:os";
-export { SEPARATOR } from "@std/path/constants";
 export * as path from "@std/path";
 import * as yaml from "@std/yaml";
 export { deepMerge } from "@std/collections";
@@ -33,11 +32,11 @@ export {
   CompletionsCommand,
   HelpCommand,
   UpgradeCommand,
-} from "@cliffy/cliffy/command/mod.ts";
+} from "@cliffy/command";
 
-export { GithubProvider } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { UpgradeOptions } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { colors } from "@cliffy/cliffy/ansi/colors.ts";
+export { GithubProvider } from "@cliffy/command";
+import { UpgradeOptions } from "@cliffy/command";
+import { colors } from "@cliffy/ansi";
 
 import {
   Checkbox,
@@ -48,9 +47,9 @@ import {
   Secret,
   Select,
   Toggle,
-} from "@cliffy/cliffy/prompt/mod.ts";
+} from "@cliffy/prompt";
 
-export { prompt as cprompt } from "@cliffy/cliffy/prompt/mod.ts";
+export { prompt as cprompt } from "@cliffy/prompt";
 
 // used to have keys, should not matter
 export const PromptTypes = {
@@ -100,4 +99,4 @@ export const ccolors = {
 
 // Polyseam Modules
 export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate_response";
+export { inflateResponse } from "@polyseam/inflate-response";

@@ -4,12 +4,14 @@ import {
   GithubReleasesUpgradeCommand,
 } from "src/cliffy-provider-gh-releases/mod.ts";
 
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getPathToCndiBinary } from "src/utils.ts";
+
+const destinationDir = "~/.cndi/bin";
 
 const upgradeCommand = new GithubReleasesUpgradeCommand({
   provider: new GithubReleasesProvider({
     repository: "polyseam/cndi",
-    destinationDir: "~/.cndi/bin",
+    destinationDir,
     osAssetMap: {
       windows: "cndi-win.tar.gz",
       linux: "cndi-linux.tar.gz",
@@ -20,7 +22,16 @@ const upgradeCommand = new GithubReleasesUpgradeCommand({
       await emitExitEvent(exit_code);
       Deno.exit(exit_code);
     },
-    onComplete: async (_version) => {
+    onComplete: async (_metadata, printSuccessMessage) => {
+      const pathToCndiBinary = getPathToCndiBinary();
+      // preheat binary before logging success message
+      const cmd = new Deno.Command(pathToCndiBinary, { args: ["--help"] });
+      await cmd.output();
+
+      // print success message
+      printSuccessMessage();
+
+      // exit successfully
       await emitExitEvent(0);
       Deno.exit(0);
     },
