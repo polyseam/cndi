@@ -566,6 +566,16 @@ const getProjectDirectoryFromFlag = (value: string | boolean) => {
   return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
 };
 
+function getPathToCndiBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
+  let suffix = "";
+  if (platform() === "win32") {
+    suffix = ".exe";
+  }
+  return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
+}
+
 export {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
@@ -574,6 +584,7 @@ export {
   getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
+  getPathToCndiBinary,
   getPathToCndiConfig,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
