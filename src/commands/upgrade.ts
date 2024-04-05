@@ -5,7 +5,6 @@ import {
 } from "src/cliffy-provider-gh-releases/mod.ts";
 
 import { emitExitEvent, getPathToCndiBinary } from "src/utils.ts";
-import { ccolors } from "deps";
 
 const destinationDir = "~/.cndi/bin";
 
@@ -23,19 +22,16 @@ const upgradeCommand = new GithubReleasesUpgradeCommand({
       await emitExitEvent(exit_code);
       Deno.exit(exit_code);
     },
-    onComplete: async ({ to, from }, spinner) => {
+    onComplete: async (_metadata, printSuccessMessage) => {
       const pathToCndiBinary = getPathToCndiBinary();
+      // preheat binary before logging success message
       const cmd = new Deno.Command(pathToCndiBinary, { args: ["--help"] });
-      await cmd.output(); // wait for warm bin before logging success message
-      spinner.stop();
-      const fromMsg = from ? ` from version ${ccolors.warn(from)}` : "";
-      console.log(
-        `Successfully upgraded ${
-          ccolors.success(
-            "cndi",
-          )
-        }${fromMsg} to version ${ccolors.success(to)}!\n`,
-      );
+      await cmd.output();
+
+      // print success message
+      printSuccessMessage();
+
+      // exit successfully
       await emitExitEvent(0);
       Deno.exit(0);
     },

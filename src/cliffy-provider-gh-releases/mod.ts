@@ -51,6 +51,8 @@ type OnCompleteMetadata = {
   from?: string;
 };
 
+type OnCompleteFinalCallback = () => void;
+
 interface GithubReleasesProviderOptions extends GithubProviderOptions {
   destinationDir: string;
   displaySpinner?: boolean;
@@ -58,7 +60,10 @@ interface GithubReleasesProviderOptions extends GithubProviderOptions {
   untar?: boolean;
   cleanupOld?: boolean;
   osAssetMap: OSAssetMap;
-  onComplete?: (metadata: OnCompleteMetadata, spinner: Spinner) => void | never;
+  onComplete?: (
+    metadata: OnCompleteMetadata,
+    cb: OnCompleteFinalCallback,
+  ) => void | never;
   onError?: (error: GHRError) => void | never;
 }
 
@@ -88,7 +93,10 @@ export class GithubReleasesProvider extends Provider {
   repo: string;
   osAssetMap: OSAssetMap;
   cleanupOld: boolean = true;
-  onComplete?: (metadata: OnCompleteMetadata, spinner: Spinner) => void | never;
+  onComplete?: (
+    metadata: OnCompleteMetadata,
+    cb: OnCompleteFinalCallback,
+  ) => void | never;
   onError?: (error: GHRError) => void | never;
 
   constructor(options: GithubReleasesProviderOptions) {
@@ -135,7 +143,7 @@ export class GithubReleasesProvider extends Provider {
       this.cleanOldVersions();
     }
     this.onComplete = options?.onComplete ||
-      ((_meta: OnCompleteMetadata, _spinner: Spinner) => {});
+      ((_meta: OnCompleteMetadata, _cb: OnCompleteFinalCallback) => {});
     this.onError = options?.onError || ((_error: Error) => {});
   }
 
@@ -185,6 +193,7 @@ export class GithubReleasesProvider extends Provider {
     );
   }
 
+  // CNDI Specific
   echoUpgrade(options: UpgradeOptions): void {
     const { to } = options;
     const prereleaseFlag = this.prerelease ? " --prerelease" : "";
@@ -297,11 +306,17 @@ export class GithubReleasesProvider extends Provider {
         }
       }
 
-      if (this.displaySpinner) {
-        // spinner.stop();
-        // console.log();
-        this?.onComplete?.({ to, from }, spinner);
-      }
+      this?.onComplete?.({ to, from }, function printSuccessMessage() {
+        spinner.stop();
+        const fromMsg = from ? ` from version ${colors.yellow(from)}` : "";
+        console.log(
+          `Successfully upgraded ${
+            colors.green(
+              name,
+            )
+          }${fromMsg} to version ${colors.green(to)}!\n`,
+        );
+      });
     } else {
       if (response.status === 404) {
         const error = new GHRError("GitHub Release Asset Not Found", 1404, {
