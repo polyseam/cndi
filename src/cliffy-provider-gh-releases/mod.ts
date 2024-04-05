@@ -46,6 +46,11 @@ export class GHRError extends Error {
   }
 }
 
+type OnCompleteMetadata = {
+  to: string;
+  from?: string;
+};
+
 interface GithubReleasesProviderOptions extends GithubProviderOptions {
   destinationDir: string;
   displaySpinner?: boolean;
@@ -53,7 +58,7 @@ interface GithubReleasesProviderOptions extends GithubProviderOptions {
   untar?: boolean;
   cleanupOld?: boolean;
   osAssetMap: OSAssetMap;
-  onComplete?: (version: string) => void | never;
+  onComplete?: (metadata: OnCompleteMetadata, spinner: Spinner) => void | never;
   onError?: (error: GHRError) => void | never;
 }
 
@@ -83,7 +88,7 @@ export class GithubReleasesProvider extends Provider {
   repo: string;
   osAssetMap: OSAssetMap;
   cleanupOld: boolean = true;
-  onComplete?: (version: string) => void | never;
+  onComplete?: (metadata: OnCompleteMetadata, spinner: Spinner) => void | never;
   onError?: (error: GHRError) => void | never;
 
   constructor(options: GithubReleasesProviderOptions) {
@@ -129,7 +134,8 @@ export class GithubReleasesProvider extends Provider {
       // however it's the only way to ensure that the cleanup happens
       this.cleanOldVersions();
     }
-    this.onComplete = options?.onComplete || ((_version: string) => {});
+    this.onComplete = options?.onComplete ||
+      ((_meta: OnCompleteMetadata, _spinner: Spinner) => {});
     this.onError = options?.onError || ((_error: Error) => {});
   }
 
@@ -292,17 +298,9 @@ export class GithubReleasesProvider extends Provider {
       }
 
       if (this.displaySpinner) {
-        spinner.stop();
-        console.log();
-        const fromMsg = from ? ` from version ${colors.yellow(from)}` : "";
-        console.log(
-          `Successfully upgraded ${
-            colors.cyan(
-              name,
-            )
-          }${fromMsg} to version ${colors.green(to)}!\n\n`,
-        );
-        this?.onComplete?.(to);
+        // spinner.stop();
+        // console.log();
+        this?.onComplete?.({ to, from }, spinner);
       }
     } else {
       if (response.status === 404) {
