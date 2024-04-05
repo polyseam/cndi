@@ -311,7 +311,7 @@ export class GithubReleasesProvider extends Provider {
         const fromMsg = from ? ` from version ${colors.yellow(from)}` : "";
         console.log(
           `Successfully upgraded ${
-            colors.green(
+            colors.cyan(
               name,
             )
           }${fromMsg} to version ${colors.green(to)}!\n`,
