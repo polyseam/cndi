@@ -235,7 +235,6 @@ export type CNDINetworkMode = "encapsulated" | "external";
 export interface CNDINetworkConfig {
   mode?: CNDINetworkMode;
   subnet_identifier?: string;
-  vnet_identifier?: string;
 }
 
 export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfig {
@@ -245,7 +244,6 @@ export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfig {
 export interface CNDINetworkConfigExternal extends CNDINetworkConfig {
   mode: "external";
   subnet_identifier: string;
-  vnet_identifier: string;
 }
 
 // incomplete type, config will have more options
