@@ -104,8 +104,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     let vnetSubnetId: string;
 
-    let subnet: CDKTFProviderAzure.subnet.Subnet;
-
     if (network.mode === "encapsulated") {
       // Create a virtual network (VNet) in Azure with a dynamic address space.
       // The address space is partially determined by the random integer generated above.
@@ -123,7 +121,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
       // Create a subnet within the above VNet.
       // The subnet address prefix is dynamically calculated using the address space multiplier.
-      subnet = new CDKTFProviderAzure.subnet.Subnet(
+      const subnet = new CDKTFProviderAzure.subnet.Subnet(
         this,
         "cndi_azure_subnet",
         {
@@ -136,13 +134,13 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
       );
 
+      // Subnet ID is used to associate the AKS node_pools with the subnet.
       vnetSubnetId = subnet.id;
     } else if (network.mode === "external") {
-      // If the network mode is external, the subnet and VNet IDs are provided in the CNDI config.
-
+      // If the network mode is 'external', the subnet_identifier must be provided in the CNDI config.
       if (!network?.subnet_identifier) {
         throw new Error('no "subnet_identifier" provided in "external" mode');
-        // TODO: we should be able to create a subnet in the VNet provided
+        // TODO: with a provided vnet_id we could create a subnet here
       } else {
         vnetSubnetId = network.subnet_identifier;
       }
