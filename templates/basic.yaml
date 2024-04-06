@@ -1,3 +1,10 @@
+blocks:
+  - name: external_net_config
+    content:
+      mode: external
+      subnet_identifier: "{{ $cndi.get_prompt_response(external_subnet_id) }}"
+      vnet_identifier: "{{ $cndi.get_prompt_response(external_network_name) }}"
+      vnet_rg: "{{ $cndi.get_prompt_response(external_network_rg) }}"
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
@@ -21,7 +28,44 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
-
+  - name: use_external_network
+    message: >-
+      Would you like to use an existing Virtual Network?
+    type: Confirm
+    default: false
+  - name: external_network_name
+    message: >-
+      What is the name of the existing Virtual Network?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(use_external_network) }}"
+      - ==
+      - true
+  - name: external_network_rg
+    message: >-
+      What Resource Group holds the existing Virtual Network?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(use_external_network) }}"
+      - ==
+      - true
+  - name: create_new_subnet
+    message: >-
+      Would you like to create a new Subnet in your external network?
+    type: Confirm
+    default: true
+    condition:
+      - "{{ $cndi.get_prompt_response(use_external_network) }}"
+      - ==
+      - true
+  - name: external_subnet_id
+    message: >-
+      Please provide a Subnet ID for CNDI to use:
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(create_new_subnet) }}"
+      - ==
+      - false
 outputs:
   cndi_config:
     # source_control_platform: github ?
@@ -32,6 +76,13 @@ outputs:
     # this is a Template comment
     infrastructure:
       cndi:
+        network:
+          $cndi.get_block(external_net_config):
+            condition:
+              - "{{ $cndi.get_prompt_response(use_external_network) }}"
+              - ==
+              - true
+
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 

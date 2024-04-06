@@ -230,6 +230,24 @@ export type ExternalDNSProvider =
 
 export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
 
+export type CNDINetworkMode = "encapsulated" | "external";
+
+export interface CNDINetworkConfig {
+  mode?: CNDINetworkMode;
+  subnet_identifier?: string;
+  vnet_identifier?: string;
+}
+
+export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfig {
+  mode?: "encapsulated";
+}
+
+export interface CNDINetworkConfigExternal extends CNDINetworkConfig {
+  mode: "external";
+  subnet_identifier: string;
+  vnet_identifier: string;
+}
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
@@ -238,6 +256,7 @@ interface CNDIConfig {
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      network?: CNDINetworkConfig;
       deployment_target_configuration?: DeploymentTargetConfiguration;
       external_dns: {
         enabled?: boolean; // default: true
