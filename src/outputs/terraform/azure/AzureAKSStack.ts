@@ -144,6 +144,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       } else {
         vnetSubnetId = network.subnet_identifier;
       }
+    } else {
+      throw new Error(`unsupported network mode: ${network.mode}`);
     }
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
