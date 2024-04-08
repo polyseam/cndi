@@ -57,8 +57,13 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const network = cndi_config.infrastructure.cndi.network ??
-      { mode: "encapsulated" };
+    const network = cndi_config?.infrastructure?.cndi?.network || {
+      mode: "encapsulated",
+    };
+
+    if (!network.mode) {
+      network.mode = "encapsulated";
+    }
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});

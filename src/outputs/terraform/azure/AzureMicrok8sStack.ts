@@ -25,9 +25,13 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const network = cndi_config.infrastructure.cndi.network ?? {
+    const network = cndi_config?.infrastructure?.cndi?.network || {
       mode: "encapsulated",
     };
+
+    if (!network.mode) {
+      network.mode = "encapsulated";
+    }
 
     const open_ports = resolveCNDIPorts(cndi_config);
     const _nodeIdList: string[] = [];
