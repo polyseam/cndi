@@ -57,12 +57,12 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const network = cndi_config?.infrastructure?.cndi?.network || {
+    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
       mode: "encapsulated",
     };
 
-    if (!network.mode) {
-      network.mode = "encapsulated";
+    if (!netconfig.mode) {
+      netconfig.mode = "encapsulated";
     }
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
@@ -109,7 +109,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     let vnetSubnetId: string;
 
-    if (network.mode === "encapsulated") {
+    if (netconfig.mode === "encapsulated") {
       // Create a virtual network (VNet) in Azure with a dynamic address space.
       // The address space is partially determined by the random integer generated above.
       const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
@@ -141,16 +141,16 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
       // Subnet ID is used to associate the AKS node_pools with the subnet.
       vnetSubnetId = subnet.id;
-    } else if (network.mode === "external") {
+    } else if (netconfig.mode === "external") {
       // If the network mode is 'external', the subnet_identifier must be provided in the CNDI config.
-      if (!network?.subnet_identifier) {
+      if (!netconfig?.subnet_identifier) {
         throw new Error('no "subnet_identifier" provided in "external" mode');
         // TODO: with a provided vnet_id we could create a subnet here
       } else {
-        vnetSubnetId = network.subnet_identifier;
+        vnetSubnetId = netconfig.subnet_identifier;
       }
     } else {
-      throw new Error(`unsupported network mode: ${network.mode}`);
+      throw new Error(`unsupported network mode: ${netconfig.mode}`);
     }
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config

@@ -25,12 +25,12 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const network = cndi_config?.infrastructure?.cndi?.network || {
+    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
       mode: "encapsulated",
     };
 
-    if (!network.mode) {
-      network.mode = "encapsulated";
+    if (!netconfig.mode) {
+      netconfig.mode = "encapsulated";
     }
 
     const open_ports = resolveCNDIPorts(cndi_config);
@@ -57,7 +57,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     );
 
     let subnetId: string;
-    if (network.mode === "encapsulated") {
+    if (netconfig.mode === "encapsulated") {
       const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
         this,
         "cndi_azure_vnet",
@@ -81,13 +81,13 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         },
       );
       subnetId = subnet.id;
-    } else if (network.mode === "external") {
-      if (!network.subnet_identifier) {
+    } else if (netconfig.mode === "external") {
+      if (!netconfig.subnet_identifier) {
         throw new Error('no "subnet_identifier" provided in "external" mode');
       }
-      subnetId = network.subnet_identifier;
+      subnetId = netconfig.subnet_identifier;
     } else {
-      throw new Error(`unsupported network mode: ${network.mode}`);
+      throw new Error(`unsupported network mode: ${netconfig.mode}`);
     }
 
     const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
