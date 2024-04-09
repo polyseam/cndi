@@ -34,6 +34,15 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
     const project_id = this.locals.gcp_project_id.asString;
+
+    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
+      mode: "encapsulated",
+    };
+
+    if (!netconfig.mode) {
+      netconfig.mode = "encapsulated";
+    }
+
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
@@ -101,27 +110,63 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
-      this,
-      "cndi_google_compute_network",
-      {
-        autoCreateSubnetworks: false,
-        name: "cndi-compute-network",
-        dependsOn: [projectServicesReady],
-      },
-    );
+    let subnet:
+      | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
+      | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork;
+    let network:
+      | CDKTFProviderGCP.computeNetwork.ComputeNetwork
+      | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
 
-    const subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
-      this,
-      "cndi_google_compute_subnetwork",
-      {
-        name: "cndi-compute-subnetwork",
-        ipCidrRange: "10.0.0.0/16",
-        network: network.selfLink,
-        privateIpGoogleAccess: true,
-        dependsOn: [network],
-      },
-    );
+    if (netconfig.mode === "encapsulated") {
+      network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          autoCreateSubnetworks: false,
+          name: "cndi-compute-network",
+          dependsOn: [projectServicesReady],
+        },
+      );
+      subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          name: "cndi-compute-subnetwork",
+          ipCidrRange: "10.0.0.0/16",
+          network: network.selfLink,
+          privateIpGoogleAccess: true,
+          dependsOn: [network],
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      if (!netconfig.network_identifier) {
+        throw new Error("External network mode requires networkIdentifier");
+      }
+
+      if (!netconfig.subnet_identifier) {
+        throw new Error("External network mode requires subnetIdentifier");
+      }
+
+      network = new CDKTFProviderGCP.dataGoogleComputeNetwork
+        .DataGoogleComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: netconfig.network_identifier!,
+        },
+      );
+
+      subnet = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
+        .DataGoogleComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          selfLink: netconfig.subnet_identifier,
+        },
+      );
+    } else {
+      throw new Error(`Unknown network mode: ${netconfig.mode}`);
+    }
 
     const _computeFirewallInternal = new CDKTFProviderGCP.computeFirewall
       .ComputeFirewall(

@@ -31,6 +31,9 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
 
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
+    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
+      mode: "encapsulated",
+    };
 
     const serviceProjectListService = new CDKTFProviderGCP
       .projectService.ProjectService(
@@ -64,26 +67,55 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
-      this,
-      "cndi_google_compute_network",
-      {
-        name: "cndi-compute-network", // rename to cndi-compute-network
-        autoCreateSubnetworks: false,
-        dependsOn: [projectServiceCompute],
-      },
-    );
+    let network:
+      | CDKTFProviderGCP.computeNetwork.ComputeNetwork
+      | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
+    let subnetwork:
+      | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
+      | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork;
 
-    const computeSubnetwork = new CDKTFProviderGCP.computeSubnetwork
-      .ComputeSubnetwork(
-      this,
-      "cndi_google_compute_subnetwork",
-      {
-        name: "cndi-compute-subnetwork",
-        ipCidrRange: "10.0.0.0/16",
-        network: computeNetwork.selfLink,
-      },
-    );
+    if (netconfig.mode === "encapsulated") {
+      network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: "cndi-compute-network", // rename to cndi-compute-network
+          autoCreateSubnetworks: false,
+          dependsOn: [projectServiceCompute],
+        },
+      );
+
+      subnetwork = new CDKTFProviderGCP.computeSubnetwork
+        .ComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          name: "cndi-compute-subnetwork",
+          ipCidrRange: "10.0.0.0/16",
+          network: network.selfLink,
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      network = new CDKTFProviderGCP.dataGoogleComputeNetwork
+        .DataGoogleComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: netconfig.network_identifier!,
+        },
+      );
+
+      subnetwork = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
+        .DataGoogleComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          selfLink: netconfig.subnet_identifier!,
+        },
+      );
+    } else {
+      throw new Error(`Unknown network mode: ${netconfig.mode}`);
+    }
 
     new CDKTFProviderGCP.computeFirewall.ComputeFirewall(
       this,
@@ -92,7 +124,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         name: "cndi-compute-firewall-allow-internal",
         description: "Allow internal traffic between cluster nodes",
         direction: "INGRESS",
-        network: computeNetwork.selfLink,
+        network: network.selfLink,
         allow: [
           {
             ports: ["0-65535"],
@@ -106,7 +138,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             protocol: "icmp",
           },
         ],
-        sourceRanges: [computeSubnetwork.ipCidrRange],
+        sourceRanges: [subnetwork.ipCidrRange],
       },
     );
 
@@ -115,7 +147,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       "cndi_google_compute_router",
       {
         name: "cndi-compute-router",
-        network: computeNetwork.selfLink,
+        network: network.selfLink,
       },
     );
 
@@ -137,7 +169,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         name: "cndi-compute-firewall-allow-external",
         description: "Allow external traffic to open ports",
         direction: "INGRESS",
-        network: computeNetwork.selfLink,
+        network: network.selfLink,
         allow: open_ports.map((port) => ({
           ports: [`${port.number}`],
           protocol: "tcp",
@@ -171,8 +203,8 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         DEFAULT_INSTANCE_TYPES.gcp;
 
       const networkInterface = {
-        network: computeNetwork.selfLink,
-        subnetwork: computeSubnetwork.selfLink,
+        network: network.selfLink,
+        subnetwork: subnetwork.selfLink,
         accessConfig: [{ networkTier: "STANDARD" }],
       };
 
