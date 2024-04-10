@@ -1,4 +1,4 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import { CNDIConfig, CNDINetworkConfigAzure, TFBlocks } from "src/types.ts";
 
 import { ccolors } from "deps";
 
@@ -32,6 +32,8 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import getNetConfig from "src/outputs/terraform/netConfig.ts";
+
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 function isValidAzureAKSNodePoolName(inputString: string): boolean {
@@ -57,13 +59,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
-      mode: "encapsulated",
-    };
-
-    if (!netconfig.mode) {
-      netconfig.mode = "encapsulated";
-    }
+    let netconfig = getNetConfig(cndi_config, "azure");
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
@@ -107,7 +103,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
     );
 
-    let vnetSubnetId: string;
+    const subnets: Array<string> = [];
 
     if (netconfig.mode === "encapsulated") {
       // Create a virtual network (VNet) in Azure with a dynamic address space.
@@ -140,21 +136,24 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       );
 
       // Subnet ID is used to associate the AKS node_pools with the subnet.
-      vnetSubnetId = subnet.id;
+      subnets.push(subnet.id);
     } else if (netconfig.mode === "external") {
-      // If the network mode is 'external', the subnet_identifier must be provided in the CNDI config.
-      if (!netconfig?.subnet_identifier) {
-        throw new Error('no "subnet_identifier" provided in "external" mode');
-        // TODO: with a provided vnet_id we could create a subnet here
-      } else {
-        vnetSubnetId = netconfig.subnet_identifier;
+      netconfig = netconfig as CNDINetworkConfigAzure;
+      const network_resource_id = netconfig.azure.network_resource_id;
+
+      for (const subnet of netconfig.azure.subnets) {
+        subnets.push(`${network_resource_id}/subnets/${subnet}`);
       }
     } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
       throw new Error(`unsupported network mode: ${netconfig.mode}`);
     }
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
-      .infrastructure.cndi.nodes.map((nodeSpec) => {
+      .infrastructure.cndi.nodes.map((nodeSpec, index) => {
+        const vnetSubnetId = subnets[index % subnets.length];
+
         const count = nodeSpec.count || 1;
 
         const scale = {
@@ -187,7 +186,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         return nodePoolSpec;
       });
 
-    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec array entry is the default
 
     this.variables.arm_client_id = new TerraformVariable(
       this,

@@ -1,4 +1,4 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import { CNDIConfig, CNDINetworkConfigGCP, TFBlocks } from "src/types.ts";
 
 import {
   App,
@@ -25,6 +25,8 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import getNetConfig from "src/outputs/terraform/netConfig.ts";
+
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 // TODO: ensure that splicing project_name into tags.Name is safe
@@ -35,13 +37,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     const project_name = this.locals.cndi_project_name.asString;
     const project_id = this.locals.gcp_project_id.asString;
 
-    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
-      mode: "encapsulated",
-    };
-
-    if (!netconfig.mode) {
-      netconfig.mode = "encapsulated";
-    }
+    let netconfig = getNetConfig(cndi_config, "gcp");
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
@@ -139,12 +135,16 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         },
       );
     } else if (netconfig.mode === "external") {
-      if (!netconfig.network_identifier) {
-        throw new Error("External network mode requires networkIdentifier");
+      netconfig = netconfig as CNDINetworkConfigGCP;
+
+      if (netconfig.gcp.subnets.length > 1) {
+        console.warn(
+          "GCP GKE only supports a single subnet, ignoring additional subnets",
+        );
       }
 
-      if (!netconfig.subnet_identifier) {
-        throw new Error("External network mode requires subnetIdentifier");
+      if (netconfig.gcp.subnets.length === 0) {
+        throw new Error("GCP GKE requires exactly one subnet");
       }
 
       network = new CDKTFProviderGCP.dataGoogleComputeNetwork
@@ -152,7 +152,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         this,
         "cndi_google_compute_network",
         {
-          name: netconfig.network_identifier!,
+          name: netconfig.gcp.network_name,
+          project: netconfig.gcp.project, // if undefined in config, default to current project
         },
       );
 
@@ -161,10 +162,13 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         this,
         "cndi_google_compute_subnetwork",
         {
-          selfLink: netconfig.subnet_identifier,
+          name: netconfig.gcp.subnets[0],
+          dependsOn: [network],
         },
       );
     } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
       throw new Error(`Unknown network mode: ${netconfig.mode}`);
     }
 

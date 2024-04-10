@@ -19,8 +19,13 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-
-import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+import getNetConfig from "src/outputs/terraform/netConfig.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigGCP,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 export class GCPMicrok8sStack extends GCPCoreTerraformStack {
@@ -31,9 +36,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
 
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
-    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
-      mode: "encapsulated",
-    };
+    let netconfig = getNetConfig(cndi_config, "gcp");
 
     const serviceProjectListService = new CDKTFProviderGCP
       .projectService.ProjectService(
@@ -96,12 +99,14 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         },
       );
     } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigGCP;
       network = new CDKTFProviderGCP.dataGoogleComputeNetwork
         .DataGoogleComputeNetwork(
         this,
         "cndi_google_compute_network",
         {
-          name: netconfig.network_identifier!,
+          name: netconfig.gcp.network,
+          project: netconfig.gcp.project,
         },
       );
 
@@ -110,10 +115,13 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         this,
         "cndi_google_compute_subnetwork",
         {
-          selfLink: netconfig.subnet_identifier!,
+          name: netconfig.gcp.public_subnet,
+          project: netconfig.gcp.project,
         },
       );
     } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
       throw new Error(`Unknown network mode: ${netconfig.mode}`);
     }
 

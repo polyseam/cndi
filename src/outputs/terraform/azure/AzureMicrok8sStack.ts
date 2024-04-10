@@ -18,20 +18,21 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+import getNetConfig from "src/outputs/terraform/netConfig.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigAzure,
+  CNDINetworkConfigEncapsulated,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const netconfig = cndi_config?.infrastructure?.cndi?.network || {
-      mode: "encapsulated",
-    };
-
-    if (!netconfig.mode) {
-      netconfig.mode = "encapsulated";
-    }
+    let netconfig = getNetConfig(cndi_config, "azure");
 
     const open_ports = resolveCNDIPorts(cndi_config);
     const _nodeIdList: string[] = [];
@@ -56,8 +57,10 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    let subnetId: string;
+    const subnets: Array<string> = [];
+
     if (netconfig.mode === "encapsulated") {
+      netconfig = netconfig as CNDINetworkConfigEncapsulated;
       const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
         this,
         "cndi_azure_vnet",
@@ -80,15 +83,21 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           addressPrefixes: ["10.0.0.0/24"],
         },
       );
-      subnetId = subnet.id;
+      subnets.push(subnet.id);
     } else if (netconfig.mode === "external") {
-      if (!netconfig.subnet_identifier) {
-        throw new Error('no "subnet_identifier" provided in "external" mode');
+      netconfig = netconfig as CNDINetworkConfigAzure;
+      const network_resource_id = netconfig.azure.network_resource_id;
+
+      for (const subnet of netconfig.azure.subnets) {
+        subnets.push(`${network_resource_id}/subnets/${subnet}`);
       }
-      subnetId = netconfig.subnet_identifier;
     } else {
-      throw new Error(`unsupported network mode: ${netconfig.mode}`);
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
+      throw new Error(`unsupported network mode: ${netconfig?.mode}`);
     }
+
+    const subnetId = subnets[0];
 
     const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
       frontendIpConfiguration: [

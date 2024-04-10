@@ -33,6 +33,28 @@ prompts:
     type: Confirm
     default: false
 
+  - name: use_existing_subnets
+    message: >-
+      Would you like to use existing subnets from that Virtual Network?
+    type: Confirm
+    default: false
+    condition:
+      - "{{ $cndi.get_prompt_response(use_external_network) }}"
+      - ==
+      - true
+    
+  - name: subnets
+    message: >-
+      Please list your subnet names:
+    type: List
+    default: false
+    condition:
+      - "{{ $cndi.get_prompt_response(use_external_network) }}"
+      - ==
+      - true
+    
+  
+
   - name: external_subnet_id
     message: >-
       Please provide a Subnet ID for CNDI to use:

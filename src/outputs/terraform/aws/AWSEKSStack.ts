@@ -405,7 +405,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           endpointPrivateAccess: true,
           endpointPublicAccess: true,
           securityGroupIds: [securityGroup.id],
-          subnetIds: [subnetPrivateA.id, subnetPrivateB.id, subnetPublicA.id],
+          subnetIds: [/** all subnets? */],
         },
         enabledClusterLogTypes: [
           "api",
@@ -761,7 +761,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           nodeRoleArn: computeRole.arn,
           scalingConfig,
           capacityType: "ON_DEMAND",
-          subnetIds: [subnetPrivateA.id],
+          subnetIds: [/** all private subnets (if exist else public) */],
           updateConfig: { maxUnavailable: 1 },
           dependsOn: [
             workerNodePolicyAttachment,

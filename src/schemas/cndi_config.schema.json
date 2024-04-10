@@ -124,6 +124,78 @@
               },
               "additionalProperties": false
             },
+            "network": {
+              "type": "object",
+              "description": "An optional object which enables the configuration of various available network topologies.",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "description": "The network mode to deploy the cluster in.",
+                  "enum": ["encapsulated", "external"],
+                  "default": "encapsulated"
+                },
+                "aws": {
+                  "type": "object",
+                  "properties": {
+                    "vpc": {
+                      "type": "string",
+                      "description": "The VPC to deploy the cluster into."
+                    },
+                    "public_subnet": {
+                      "type": "string",
+                      "description": "The public subnet to deploy the cluster into."
+                    },
+                    "private_subnet": {
+                      "type": "string",
+                      "description": "The private subnet to deploy the cluster into."
+                    }
+                  }
+                },
+                "gcp": {
+                  "type": "object",
+                  "properties": {
+                    "network_name": {
+                      "type": "string",
+                      "description": "The network to deploy the cluster into."
+                    },
+                    "public_subnet_name": {
+                      "type": "string",
+                      "description": "The subnet to deploy the cluster into."
+                    },
+                    "private_subnet_name": {
+                      "type": "string",
+                      "description": "The subnet to deploy the cluster into."
+                    },
+                    "project": {
+                      "type": "string",
+                      "description": "The GCP project id to deploy the cluster into."
+                    }
+                  }
+                },
+                "azure": {
+                  "type": "object",
+                  "properties": {
+                    "resource_group": {
+                      "type": "string",
+                      "description": "The resource group to deploy the cluster into."
+                    },
+                    "vnet": {
+                      "type": "string",
+                      "description": "The VNet to deploy the cluster into."
+                    },
+                    "public_subnet_id": {
+                      "type": "string",
+                      "description": "The subnet to deploy the cluster into."
+                    },
+                    "private_subnet_id": {
+                      "type": "string",
+                      "description": "The subnet to deploy the cluster into."
+                    }
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
             "cert_manager": {
               "properties": {
                 "enabled": {

@@ -232,27 +232,54 @@ export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
 
 export type CNDINetworkMode = "encapsulated" | "external";
 
-export interface CNDINetworkConfig {
+export interface CNDINetworkConfigBase {
   mode?: CNDINetworkMode;
-  subnet_identifier?: string;
-  network_identifier?: string;
 }
 
-export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfig {
-  mode?: "encapsulated";
+export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
+  mode: "encapsulated";
 }
 
-export interface CNDINetworkConfigExternal extends CNDINetworkConfig {
+export interface CNDINetworkConfigExternal extends CNDINetworkConfigBase {
   mode: "external";
-  subnet_identifier: string;
-  network_identifier?: string;
 }
+
+export interface CNDINetworkConfigAWS extends CNDINetworkConfigExternal {
+  aws: {
+    vpc_id: string;
+    subnets: Array<string>;
+  };
+}
+
+export interface CNDINetworkConfigAzure extends CNDINetworkConfigExternal {
+  azure: {
+    subnets: Array<string>;
+    network_resource_id: string; // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
+  };
+}
+
+export interface CNDINetworkConfigGCP extends CNDINetworkConfigExternal {
+  gcp: {
+    network_name: string;
+    private_subnets?: Array<string>;
+    public_subnet: string;
+    project?: string;
+  };
+}
+
+export type CNDIDistribution = "microk8s" | "eks" | "gke" | "aks";
+
+export type CNDINetworkConfig =
+  | CNDINetworkConfigEncapsulated
+  | CNDINetworkConfigAWS
+  | CNDINetworkConfigAzure
+  | CNDINetworkConfigGCP;
 
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
-  distribution: "microk8s" | "eks" | "gke" | "aks";
+  distribution: CNDIDistribution;
   provider: CNDIProvider;
   infrastructure: {
     cndi: {

@@ -1,9 +1,14 @@
 cndi_version: v2
 project_name: basic-ec2
-provider: aws
+provider: gcp
 distribution: microk8s
 infrastructure:
   cndi:
+    network:
+      mode: external
+      network_name: cndi-compute-network
+      public_subnets:
+        - cndi-compute-subnetwork
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
