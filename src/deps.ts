@@ -27,15 +27,8 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export {
-  Command,
-  CompletionsCommand,
-  HelpCommand,
-  UpgradeCommand,
-} from "@cliffy/command";
+export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
 
-export { GithubProvider } from "@cliffy/command";
-import { UpgradeOptions } from "@cliffy/command";
 import { colors } from "@cliffy/ansi";
 
 import {
@@ -80,7 +73,6 @@ import CryptoJS from "npm:crypto-js@4.1.1";
 
 // import/export required
 export { CryptoJS };
-export type { UpgradeOptions };
 
 // custom colors
 export const ccolors = {
