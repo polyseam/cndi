@@ -39,7 +39,6 @@
     "@std/semver/compare": "jsr:@std/semver/compare.ts",
     "@std/streams": "jsr:@std/streams@^0.221.0",
     "@std/testing": "jsr:@std/testing@^0.221.0",
-    "@std/testing/bdd": "jsr:@std/testing/bdd@^0.221.0",
     "@std/yaml": "jsr:@std/yaml@^0.221.0",
     "octokit": "npm:octokit@^3.1.2",
     "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
