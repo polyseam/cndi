@@ -2,19 +2,13 @@
 export { homedir, platform } from "node:os";
 export * as path from "@std/path";
 import * as yaml from "@std/yaml";
-export { deepMerge } from "@std/collections";
-export { walk } from "@std/fs";
 export * as JSONC from "@std/jsonc";
+export { deepMerge } from "@std/collections";
 export { delay } from "@std/async";
-export { exists } from "@std/fs";
-export { ensureDirSync } from "@std/fs";
-export { existsSync } from "@std/fs";
+export { ensureDirSync, exists, existsSync, walk, walkSync } from "@std/fs";
 export { load as loadEnv } from "@std/dotenv";
-export { walkSync } from "@std/fs";
 export { writeAll } from "@std/io";
-
-export { Spinner } from "@std/cli";
-export { type SpinnerOptions } from "@std/cli";
+export { Spinner, type SpinnerOptions } from "@std/cli";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 
@@ -37,12 +31,13 @@ import {
   Input,
   List,
   Number,
+  prompt,
   Secret,
   Select,
   Toggle,
 } from "@cliffy/prompt";
 
-export { prompt as cprompt } from "@cliffy/prompt";
+export { prompt as cprompt };
 
 // used to have keys, should not matter
 export const PromptTypes = {
