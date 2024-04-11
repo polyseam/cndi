@@ -1,7 +1,6 @@
 // Deno std lib
-export { homedir, platform } from "node:os";
-export * as path from "@std/path";
 import * as yaml from "@std/yaml";
+export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
 export { deepMerge } from "@std/collections";
 export { delay } from "@std/async";
@@ -9,6 +8,9 @@ export { ensureDirSync, exists, existsSync, walk, walkSync } from "@std/fs";
 export { load as loadEnv } from "@std/dotenv";
 export { writeAll } from "@std/io";
 export { Spinner, type SpinnerOptions } from "@std/cli";
+
+// node std lib
+export { homedir, platform } from "node:os";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 
