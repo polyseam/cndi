@@ -1,22 +1,19 @@
 // cliffy
-export {
-  Provider,
-  UpgradeCommand,
-} from "@cliffy/cliffy/command/upgrade/mod.ts";
+export { Provider, UpgradeCommand } from "@cliffy/command";
 
 export type {
   GithubProviderOptions,
   GithubVersions,
   UpgradeOptions,
-} from "@cliffy/cliffy/command/upgrade/mod.ts";
+} from "@cliffy/command";
 
-export { colors } from "@cliffy/cliffy/ansi/colors.ts";
+export { colors } from "@cliffy/ansi";
 
 // std
 export { homedir } from "node:os";
 export { Spinner } from "@std/cli/spinner";
 export { type SpinnerOptions } from "@std/cli/spinner";
-import { compare } from "@std/semver/compare";
+import { compare } from "@std/semver";
 import { tryParse } from "@std/semver";
 
 export const semver = {
@@ -27,7 +24,7 @@ export const semver = {
 export { ensureDirSync, walkSync } from "@std/fs";
 
 // github
-export { Octokit } from "npm:octokit";
+export { Octokit } from "octokit";
 
 // homegrown
-export { inflateResponse } from "https://deno.land/x/inflate_response@v1.1.0/mod.ts";
+export { inflateResponse } from "@polyseam/inflate-response";
