@@ -792,7 +792,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           subnetIds: [subnetPrivateA.id],
           launchTemplate: {
             id: nodegroupLaunchTemplate.id,
-            version: nodegroupLaunchTemplate.latestVersion,
+            version: `${nodegroupLaunchTemplate.latestVersion}`,
           },
           updateConfig: { maxUnavailable: 1 },
           dependsOn: [
