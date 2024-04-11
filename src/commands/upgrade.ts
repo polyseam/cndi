@@ -2,7 +2,7 @@ import {
   GHRError,
   GithubReleasesProvider,
   GithubReleasesUpgradeCommand,
-} from "@polyseam/cliffy-provider-gh-releases";
+} from "deps";
 
 import { emitExitEvent, getPathToCndiBinary } from "src/utils.ts";
 
