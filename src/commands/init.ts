@@ -1,23 +1,24 @@
-import { ccolors, Command, path, PromptTypes, SEP, YAML } from "deps";
-import type { SealedSecretsKeys } from "src/types.ts";
+import { ccolors, Command, path, PromptTypes, SEPARATOR, YAML } from "deps";
 
 const { Input, Select } = PromptTypes;
 
 import {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
 
-import {
-  CNDITemplatePromptResponsePrimitive,
-  getKnownTemplates,
-  useTemplate,
-} from "src/templates/templates.ts";
+import { useTemplate } from "src/use-template/mod.ts";
 
-import { getOwModule } from "src/commands/overwrite.ts";
+import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
+
+import { KNOWN_TEMPLATES } from "consts";
+
+import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
@@ -27,45 +28,40 @@ import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 
-function getFinalEnvString(
-  templatePartial = "",
-  cndiGeneratedValues: {
-    sshPublicKey: string;
-    sealedSecretsKeys: SealedSecretsKeys;
-    terraformStatePassphrase: string;
-    argoUIAdminPassword: string;
-    debugMode: boolean;
-  },
-) {
-  const { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword } =
-    cndiGeneratedValues;
+type EchoInitOptions = {
+  interactive?: boolean;
+  template?: string;
+  output?: string;
+  deploymentTargetLabel?: string;
+  keep?: boolean;
+  create?: boolean;
+};
 
-  let telemetryMode = "";
+const echoInit = (options: EchoInitOptions) => {
+  const cndiInit = "cndi init";
+  const cndiInitCreate = options.create ? " --create" : "";
+  const cndiInitInteractive = options.interactive ? " --interactive" : "";
+  const cndiInitTemplate = options.template
+    ? ` --template ${options.template}`
+    : "";
 
-  if (cndiGeneratedValues.debugMode) {
-    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
-  }
+  const cndiInitOutput = options.output === Deno.cwd()
+    ? ""
+    : ` --output ${options.output}`;
 
-  return `
-# Sealed Secrets Keys
-SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
-SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
-
-# SSH Keys
-SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'
-
-# Terraform State Passphrase
-TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
-
-# Argo UI Admin Password
-ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
-${templatePartial}`.trim();
-}
+  const deploymentTargetLabel = options.deploymentTargetLabel
+    ? ` --deployment-target-label ${options.deploymentTargetLabel}`
+    : "";
+  console.log(
+    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}\n`,
+  );
+};
 
 /**
  * COMMAND cndi init
@@ -74,9 +70,9 @@ ${templatePartial}`.trim();
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p <output:string>",
+    "-o, --output, --project, -p [output:string]",
     "Destination for new cndi project files.",
-    { default: Deno.cwd() },
+    getProjectDirectoryFromFlag,
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
@@ -85,7 +81,7 @@ const initCommand = new Command()
   })
   .option(
     "-r, --responses-file <responses_file:string>",
-    "A path to a set of responses to supply to your template",
+    "Path to YAML 'responses file' to supply to Template prompts.",
     {
       default: defaultResponsesFilePath,
     },
@@ -106,16 +102,24 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-l, --deployment-target-label <deployment_target_label:string>",
-    "Specify a deployment target",
+    "--deployment-target-label, -l <deployment_target_label:string>",
+    "Label in the form of <provider/distribution> slug to specifying a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
+  .option(
+    "-c, --create",
+    "Create a new cndi cluster repo",
+  )
   .action(async (options) => {
+    // default to the current working directory if -o, --output is ommitted
+    const destinationDirectory = options.output ?? Deno.cwd();
+
+    echoInit({ ...options, output: destinationDirectory });
+
     let template: string | undefined = options.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
     if (!template && !options.interactive) {
-      console.log("cndi init\n");
       console.error(
         initLabel,
         ccolors.error(
@@ -192,7 +196,8 @@ const initCommand = new Command()
     let cndi_config: string;
     let env: string;
     let readme: string;
-    let project_name = Deno.cwd().split(SEP).pop() || "my-cndi-project"; // default to the current working directory name
+    let project_name = destinationDirectory.split(SEPARATOR).pop() ||
+      "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
       console.error(
@@ -203,36 +208,58 @@ const initCommand = new Command()
       Deno.exit(400);
     }
 
-    if (options.interactive && !template) {
-      console.log("cndi init --interactive\n");
-    }
+    const noProvider = !options.interactive &&
+      !options.deploymentTargetLabel && !overrides.deployment_target_provider;
 
-    if (options.interactive && template) {
-      console.log(`cndi init --interactive --template ${template}\n`);
-    }
+    if (noProvider) {
+      console.error(
+        initLabel,
+        ccolors.key_name("deployment_target_provider"),
+        ccolors.error(
+          `is required when not running in`,
+        ),
+        ccolors.key_name("--interactive"),
+        ccolors.error(`mode`),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("you can set this value using"),
+        ccolors.key_name(
+          "--deployment-target-label (-l) <provider>/<distribution>",
+        ),
+        ccolors.error("or"),
+      );
+      console.error(
+        initLabel,
+        ccolors.error("using"),
+        ccolors.key_name("--set"),
+        ccolors.key_name("deployment_target_provider=<provider>"),
+      );
 
-    if (!options.interactive && template) {
-      console.log(`cndi init --template ${template}\n`);
+      await emitExitEvent(490);
+      Deno.exit(490);
     }
 
     if (options.deploymentTargetLabel) {
       const [deployment_target_provider, deployment_target_distribution] =
         options.deploymentTargetLabel.split("/");
+
       if (!deployment_target_distribution) {
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(490);
         Deno.exit(490);
       }
+
       if (!deployment_target_provider) {
         console.error(
           initLabel,
           ccolors.error(
-            `--deployment-target (-dt) flag requires a value in the form of <provider>/<distribution>`,
+            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
         await emitExitEvent(491);
@@ -242,7 +269,9 @@ const initCommand = new Command()
       overrides.deployment_target_distribution = deployment_target_distribution;
     }
 
-    const directoryContainsCNDIFiles = await checkInitialized(options.output);
+    const directoryContainsCNDIFiles = await checkInitialized(
+      destinationDirectory,
+    );
 
     const shouldContinue = directoryContainsCNDIFiles
       ? confirm(
@@ -250,7 +279,7 @@ const initCommand = new Command()
           ccolors.warn(
             "it looks like you have already initialized a cndi project in this directory:",
           ),
-          ccolors.user_input(options.output),
+          ccolors.user_input(destinationDirectory),
           ccolors.prompt("\n\noverwrite existing artifacts?"),
         ].join(" "),
       )
@@ -261,7 +290,7 @@ const initCommand = new Command()
       Deno.exit(0); // this event isn't handled by telemetry, it's just not very interesting
     }
 
-    const templateNamesList: string[] = getKnownTemplates().map((t) => t.name);
+    const templateNamesList: string[] = KNOWN_TEMPLATES.map((t) => t.name);
 
     if (options.interactive) {
       project_name = (await Input.prompt({
@@ -293,17 +322,32 @@ const initCommand = new Command()
     };
 
     let deployment_target_provider;
+    let templateResult;
 
     if (template) {
-      const templateResult = await useTemplate(
-        template!,
-        !!options.interactive,
-        { project_name, ...overrides },
-      );
-      cndi_config = templateResult.cndi_config;
+      try {
+        templateResult = await useTemplate(
+          template!,
+          {
+            interactive: !!options.interactive,
+            overrides: {
+              project_name,
+              ...overrides,
+            },
+          },
+        );
+      } catch (e) {
+        console.log(e.message);
+        await emitExitEvent(e.cause);
+        Deno.exit(e.cause);
+      }
+
+      cndi_config = templateResult.files["cndi_config.yaml"];
       await stageFile("cndi_config.yaml", cndi_config);
-      readme = templateResult.readme;
-      env = templateResult.env;
+
+      readme = templateResult.files["README.md"];
+      env = templateResult.files[".env"];
+
       deployment_target_provider = templateResult?.responses
         ?.deployment_target_provider;
       if (options.keep) {
@@ -321,7 +365,7 @@ const initCommand = new Command()
     await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 
     // write a readme, extend via Template.readmeBlock if it exists
-    const readmePath = path.join(options.output, "README.md");
+    const readmePath = path.join(destinationDirectory, "README.md");
     try {
       await Deno.stat(readmePath);
       console.log(
@@ -349,20 +393,66 @@ const initCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    const owMod = await getOwModule();
+    const git_credentials_mode = templateResult?.responses.git_credentials_mode;
+    const git_repo = templateResult?.responses.git_repo as string;
 
-    if (template) {
-      await persistStagedFiles(options.output);
-
-      // because there is no "pathToConfig" when using a template, we need to set it here
-      await owMod.overwriteAction({
-        output: options.output,
-        initializing: true,
-      });
-      return;
+    if (git_credentials_mode === "ssh") {
+      if (git_repo && git_repo.startsWith("https://")) {
+        console.error(
+          initLabel,
+          "git_repo",
+          ccolors.error(
+            `must be specified as an ssh URL when ${
+              ccolors.key_name("git_credentials_mode")
+            } is set to ${ccolors.user_input("ssh")}`,
+          ),
+        );
+        await emitExitEvent(4500);
+        Deno.exit(4500);
+      }
     }
-    await persistStagedFiles(options.output);
-    await owMod.overwriteAction({ output: options.output, initializing: true });
+
+    // there is one case where we don't want to persist the staged files
+    if (options.create) {
+      if (git_credentials_mode === "ssh") {
+        // not implemented!
+        console.error(
+          initLabel,
+          "git_credentials_mode",
+          ccolors.error(
+            `must be ${ccolors.key_name("token")} when using ${
+              ccolors.key_name("--create")
+            }`,
+          ),
+        );
+        await emitExitEvent(4501);
+        Deno.exit(4501);
+      }
+
+      const missingRequiredValuesForCreateRepo =
+        checkForRequiredMissingCreateRepoValues({
+          ...templateResult?.responses,
+        });
+
+      if (missingRequiredValuesForCreateRepo.length > 0) {
+        console.error(
+          initLabel,
+          ccolors.error(
+            `The following required values are missing for creating a new cndi cluster repo:`,
+          ),
+          ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
+        );
+        await emitExitEvent(400);
+        Deno.exit(400);
+      }
+    }
+
+    await persistStagedFiles(destinationDirectory);
+    await owAction({
+      output: destinationDirectory,
+      initializing: true,
+      create: options.create,
+    });
   });
 
 export default initCommand;

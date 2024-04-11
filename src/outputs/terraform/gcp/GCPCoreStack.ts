@@ -1,7 +1,7 @@
 import { CDKTFProviderGCP, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
-import { emitExitEvent } from "src/utils.ts";
+import { ccolors } from "deps";
 
 type GCPKeyJSON = {
   type: string;
@@ -17,38 +17,44 @@ type GCPKeyJSON = {
   universe_domain: string;
 };
 
+const gcpCoreTerraformStackLabel = ccolors.faded(
+  "src/outputs/terraform/gcp/GCPCoreTerraformStack.ts:",
+);
+
 export default class GCPCoreTerraformStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
     const key = Deno.env.get("GOOGLE_CREDENTIALS");
 
+    // redundant check
     if (!key) {
       throw new Error("'GOOGLE_CREDENTIALS' env variable not set");
     }
 
-    let parsedKey: GCPKeyJSON;
-
-    try {
-      parsedKey = JSON.parse(key) as GCPKeyJSON;
-    } catch (e) {
-      console.error("'GOOGLE_CREDENTIALS' env variable is not valid JSON");
-      console.error(e);
-      emitExitEvent(609);
-      Deno.exit(609);
-    }
+    // assumes key was validated earlier
+    const parsedKey = JSON.parse(key) as GCPKeyJSON;
 
     const project = parsedKey?.project_id;
 
     if (!project) {
-      throw new Error(
-        "'GOOGLE_CREDENTIALS' env variable does not contain a project_id",
-      );
+      throw new Error([
+        gcpCoreTerraformStackLabel,
+        ccolors.key_name(`'GOOGLE_CREDENTIALS'`),
+        ccolors.error("is invalid"),
+      ].join(" "));
     }
 
     const region = Deno.env.get("GCP_REGION");
 
     if (!region) {
-      throw new Error("'GCP_REGION' env variable not set");
+      throw new Error(
+        [
+          gcpCoreTerraformStackLabel,
+          ccolors.key_name(`'GCP_REGION'`),
+          ccolors.error("env var is not set"),
+        ].join(" "),
+        { cause: 4300 },
+      );
     }
 
     const zone = `${region}-a`;

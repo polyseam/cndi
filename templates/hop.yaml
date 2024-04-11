@@ -29,16 +29,18 @@ blocks:
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
       {}
+
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
       {}
+
   - name: deploy_argocd_ingress
     default: true
     message: >-
       Do you want to install ArgoCD and expose it via an ingress?
     type: Confirm
 
-  - message: 'Please enter the domain name you want argocd to be accessible on:'
-    name: argocd_hostname
+  - name: argocd_hostname
+    message: 'Please enter the domain name you want argocd to be accessible on:'
     default: argocd.example.com
     type: Input
     validators:
@@ -47,14 +49,15 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
+
   - name: deploy_hop_ingress
     default: true
     message: >-
       Do you want to expose Hop to the web?
     type: Confirm
 
-  - message: 'Please enter the domain name you want hop to be accessible on:'
-    name: hop_hostname
+  - name: hop_hostname
+    message: 'Please enter the domain name you want hop to be accessible on:'
     default: hop.example.com
     type: Input
     validators:
@@ -63,8 +66,9 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_hop_ingress) }}"
       - ==
       - true
-  - message: Please enter the hop server password you want to use for hop
-    name: hop_server_password
+
+  - name: hop_server_password
+    message: Please enter the hop server password you want to use for hop
     default: admin
     type: Secret
 
@@ -78,6 +82,16 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -92,6 +106,7 @@ outputs:
         type: Opaque
         stringData:
           pass:  $cndi_on_ow.seal_secret_from_env_var(HOP_SERVER_PASSWORD)
+
       hop-server-pvc:
         apiVersion: v1
         kind: PersistentVolumeClaim
@@ -104,6 +119,7 @@ outputs:
           resources:
             requests:
               storage: 1Gi
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -117,6 +133,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
+
       hop-web-ingress:
         $cndi.get_block(hop-web-ingress):
           args:
@@ -124,6 +141,13 @@ outputs:
             hostname: "{{ $cndi.get_prompt_response(hop_hostname) }}"
           condition:
             - "{{ $cndi.get_prompt_response(deploy_hop_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
@@ -138,6 +162,7 @@ outputs:
             persistence:
               enabled: true
               existingClaim: hop-server-pvc
+              
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -148,9 +173,36 @@ outputs:
     HOP_SERVER_PASSWORD:  "{{ $cndi.get_prompt_response(hop_server_password) }}"
   
   readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     hop: |
-    # hop
+      # Apache Hop Deployment Guide
+
+      This Template deploys a Standalone production ready [Apache Hop](https://hop.apache.org) application on a Kubernetes cluster using Helm.
+      Apache Hop (Hop Orchestration Platform) is an open-source data integration platform designed to facilitate efficient and flexible data transformation and orchestration.
+      With its lightweight, extensible architecture, Apache Hop supports a wide range of data sources and destinations, making it ideal for complex data pipelines and ETL processes.
+
+      ## Customizing Your Deployment
+
+      Tailor your Apache Hop deployment to your specific needs by adjusting the values in the `values.yaml` file. Important configuration options include:
+
+      - **Persistence:** Activate and configure persistent storage options for Apache Hop projects and workflows.
+      - **Database:** Set up external database connections for storing metadata or handling transformation data more effectively.
+      - **Resources:** Define CPU and memory limits and requests to optimize the performance of Apache Hop pods.
+      - **Ingress:** Adjust Ingress configurations to facilitate external access to the Apache Hop Web interface.
+
+      For a comprehensive list of all configuration options, refer to the Helm chart's documentation or the [values.yaml](https://github.com/apache/hop/blob/master/helm/hop/values.yaml) file within the chart repository.
+
+      ## Verifying Apache Hop 
+
+      Once Apache Hop is deployed and access is configured (via port forwarding, Ingress, or ExternalDNS), it's important to verify that the platform is accessible:
+
+      **Access the Web Interface**:
+        - Open a web browser and navigate to the domain set up for Apache Hop, e.g., `https://hop.yourdomain.com`.
+        - The Apache Hop browser application should appear, indicating successful deployment and accessibility.
+
+      Ensure to adapt the steps and URLs mentioned to fit the specific setup and configuration of your Apache Hop environment.
+

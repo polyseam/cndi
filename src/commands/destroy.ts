@@ -1,11 +1,28 @@
 import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 import setTF_VARs from "src/setTF_VARs.ts";
-import { getPathToTerraformBinary } from "src/utils.ts";
+import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { ccolors, Command, path } from "deps";
 
+import { PROCESS_ERROR_CODE_PREFIX } from "consts";
+
 const destroyLabel = ccolors.faded("\nsrc/commands/destroy.ts:");
+
+type EchoDestroyOptions = {
+  yes?: unknown;
+  path: string;
+};
+
+const echoDestroy = (options: EchoDestroyOptions) => {
+  const cndiDestroy = "cndi destroy";
+  const cndiDestroyAutoApprove = options.yes
+    ? ccolors.user_input(" --yes (-y)")
+    : "";
+  console.log(
+    `${cndiDestroy}${cndiDestroyAutoApprove}\n`,
+  );
+};
 
 /**
  * COMMAND cndi destroy
@@ -15,9 +32,6 @@ const destroyCommand = new Command()
   .description(
     `Destroy cluster infrastructure corresponding to project files.`,
   )
-  .option("-p, --path <path:string>", "path to your cndi git repository", {
-    default: Deno.cwd(),
-  })
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
@@ -57,13 +71,17 @@ const destroyCommand = new Command()
     "SSH Private Key ArgoCD will use to authenticate to your git repository.",
     { required: false },
   )
+  .option("-p, --path <path:string>", "path to your cndi git repository", {
+    default: Deno.cwd(),
+  })
   .option(
     "-y, --auto-approve",
     "Skip interactive approval of plan before applying.",
   )
   .action(async (options) => {
+    echoDestroy(options);
+
     const cmd = "cndi destroy";
-    console.log(`${cmd}\n`);
 
     const pathToTerraformResources = path.join(
       options.path,
@@ -75,9 +93,21 @@ const destroyCommand = new Command()
 
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
+    } catch (setTF_VARsError) {
+      console.log(setTF_VARsError.message);
+      await emitExitEvent(setTF_VARsError.cause);
+      Deno.exit(setTF_VARsError.cause);
+    }
 
+    try {
       await pullStateForRun({ pathToTerraformResources, cmd });
+    } catch (pullStateForRunError) {
+      console.log(pullStateForRunError.message);
+      await emitExitEvent(pullStateForRunError.cause);
+      Deno.exit(pullStateForRunError.cause);
+    }
 
+    try {
       console.log(ccolors.faded("\n-- terraform init --\n"));
 
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
@@ -98,7 +128,17 @@ const destroyCommand = new Command()
         console.log(destroyLabel, ccolors.error("terraform init failed"));
         Deno.exit(terraformInitCommandOutput.code);
       }
+    } catch (terraformInitError) {
+      console.error(
+        destroyLabel,
+        ccolors.error("failed to spawn 'terraform init'"),
+      );
+      console.log(ccolors.caught(terraformInitError, 1400));
+      await emitExitEvent(1400);
+      Deno.exit(1400);
+    }
 
+    try {
       console.log(ccolors.faded("\n-- terraform destroy --\n"));
 
       const destroyArgs = [
@@ -130,19 +170,32 @@ const destroyCommand = new Command()
 
       const status = await terraformDestroyChildProcess.status;
 
-      await pushStateFromRun({ pathToTerraformResources, cmd });
+      try {
+        await pushStateFromRun({ pathToTerraformResources, cmd });
+      } catch (pushStateFromRunError) {
+        console.log(pushStateFromRunError.message);
+        await emitExitEvent(pushStateFromRunError.cause);
+        Deno.exit(pushStateFromRunError.cause);
+      }
 
       // if `terraform destroy` fails, exit with the code
       if (status.code !== 0) {
+        const cndiExitCode = parseInt(
+          `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
+        );
+        await emitExitEvent(cndiExitCode);
         Deno.exit(status.code);
       }
     } catch (cndiDestroyError) {
-      console.error(
+      console.log(
         destroyLabel,
-        ccolors.error("failed to destroy your cndi terraform resources"),
+        ccolors.error("failed to spawn 'terraform destroy'"),
       );
-      console.log(ccolors.caught(cndiDestroyError));
+      console.log(ccolors.caught(cndiDestroyError, 1401));
+      await emitExitEvent(1401);
+      Deno.exit(1401);
     }
+    await emitExitEvent(0);
   });
 
 export default destroyCommand;

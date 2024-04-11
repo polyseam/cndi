@@ -32,13 +32,24 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
 
-    const projectServiceCloudResourseManager = new CDKTFProviderGCP
+    const serviceProjectListService = new CDKTFProviderGCP
+      .projectService.ProjectService(
+      this,
+      "cndi_google_project_service_serviceusage",
+      {
+        disableOnDestroy: false,
+        service: "serviceusage.googleapis.com",
+      },
+    );
+
+    const projectServiceCloudResourceManager = new CDKTFProviderGCP
       .projectService.ProjectService(
       this,
       "cndi_google_project_service_cloudresourcemanager",
       {
         disableOnDestroy: false,
         service: "cloudresourcemanager.googleapis.com",
+        dependsOn: [serviceProjectListService],
       },
     );
 
@@ -49,16 +60,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       {
         disableOnDestroy: false,
         service: "compute.googleapis.com",
-        dependsOn: [projectServiceCloudResourseManager],
-      },
-    );
-
-    const projectServicesReady = new CDKTFProviderTime.sleep.Sleep(
-      this,
-      "cndi_time_sleep_services_ready",
-      {
-        createDuration: "60s",
-        dependsOn: [projectServiceCloudResourseManager, projectServiceCompute],
+        dependsOn: [projectServiceCloudResourceManager],
       },
     );
 
@@ -68,7 +70,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       {
         name: "cndi-compute-network", // rename to cndi-compute-network
         autoCreateSubnetworks: false,
-        dependsOn: [projectServicesReady],
+        dependsOn: [projectServiceCompute],
       },
     );
 
@@ -184,6 +186,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             size: volumeSize,
             zone: this.locals.gcp_zone.asString,
             type: "pd-ssd",
+            dependsOn: [projectServiceCompute],
           },
         );
 
@@ -192,7 +195,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         if (role === "leader") {
           if (useSshRepoAuth()) {
             userData = Fn.templatefile(
-              "microk8s-cloud-init-leader-ssh.yml.tftpl",
+              "microk8s-cloud-init-leader.yml.tftpl",
               {
                 bootstrap_token: this.locals.bootstrap_token.asString!,
                 git_repo_encoded: Fn.base64encode(
@@ -295,7 +298,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         tcpHealthCheck: {
           port: 80,
         },
-        dependsOn: [projectServicesReady],
+        dependsOn: [projectServiceCompute],
       },
     );
 

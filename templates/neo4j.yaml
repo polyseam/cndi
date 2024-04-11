@@ -53,11 +53,21 @@ outputs:
     cndi_version: v2
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a template comment
+    # this is a Template comment
     infrastructure:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -67,6 +77,7 @@ outputs:
             number: 7687
             service: neo4j
             namespace: neo4j
+            
     cluster_manifests:
       $cndi.comment(neo4j-auth-secret): Neo4j Credentials
       neo4j-auth-secret:
@@ -88,7 +99,6 @@ outputs:
             service_name: argocd-server
             service_port: 443
             namespace: argocd
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
@@ -103,9 +113,15 @@ outputs:
             service_name: neo4j
             service_port: 7473
             namespace: neo4j
-
           condition:
             - "{{ $cndi.get_prompt_response(deploy_neo4j_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
@@ -163,9 +179,54 @@ outputs:
     NEO4J_PASSWORD: "neo4j/{{ $cndi.get_prompt_response(neo4j_password) }}"
 
   readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     neo4j: |
-    # neo4j
+      # Neo4j Deployment Guide
+
+      This Template deploys a standalone production-ready Neo4j database on a Kubernetes cluster using Helm.
+      Neo4j is a highly powerful, open-source graph database management system, known for its ability to efficiently manage and query highly connected data.
+       With its graph-based model, Neo4j is especially suited for applications requiring complex queries and data relationships, such as social networks, recommendation systems, and fraud detection.
+
+      ## Customizing Your Deployment
+
+      You can customize your Neo4j deployment to suit your specific needs by altering the `values.yaml` file in the Helm chart. Essential configuration options to consider include:
+
+      - **Persistence:** Enable persistent storage to protect your graph data across pod restarts and deployments.
+      - **Replication:** Configure replication settings to ensure data redundancy and high availability.
+      - **Resources:** Define CPU and memory limits and requests to manage the resource utilization of Neo4j pods efficiently.
+      - **Authentication:** Implement authentication mechanisms to secure access to your graph database.
+
+      Refer to the Helm chart's documentation or the `values.yaml` file for a comprehensive list of all configurable parameters and their descriptions.
+
+      ## Verifying Neo4j Accessibility
+
+      After deploying Neo4j and configuring external access (either through port forwarding, Ingress, or ExternalDNS), ensure that the database is properly accessible:
+
+      **Connect to the Database**:
+        - Use a web browser to navigate to the Neo4j browser interface, typically at `https://neo4j.yourdomain.com:7474`.
+
+      ## Connecting to the Database UI Step-by-Step
+
+      To connect to your Neo4j database, follow these steps:
+
+      1. **Open a Web Browser:** Start by opening your preferred web browser.
+
+      2. **Navigate to the Neo4j Browser:** Enter the URL for your Neo4j browser interface, which is usually formatted as `https://neo4j.yourdomain.com:7474`. Adjust the protocol (`http` or `https`) and port (`7474` for HTTP, `7473` for HTTPS) as necessary, based on your deployment configuration.
+
+      3. **Enter Credentials:** Upon reaching the Neo4j browser login page, input the default or configured credentials. The default credentials are often `neo4j` for both the username and password, unless you've changed them during setup.
+
+      4. **Explore Your Database:** Once logged in, you can start executing Cypher queries, explore the graph, and manage your Neo4j database directly from the browser interface.
+
+      5. **Troubleshooting:** If you encounter any issues accessing the Neo4j browser, check your Kubernetes service and ingress configurations to ensure they are correctly set up for external access. Additionally, verify that any firewall or network settings allow traffic to the appropriate ports.
+
+      Remember to adjust the URL and credentials based on your specific Neo4j deployment and security settings.
+
+      ## Connect to the Database from your Application
+
+      If you've deployed Neo4j with a load balancer you are also able to connect to the database from your application. 
+      
+      Neo4j will listen on port `7687` for the Bolt protocol for programmatic access.

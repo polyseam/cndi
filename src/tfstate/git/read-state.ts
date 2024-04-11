@@ -1,7 +1,6 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import decrypt from "src/tfstate/decrypt.ts";
-import { emitExitEvent } from "src/utils.ts";
 
 const git = simpleGit();
 
@@ -18,13 +17,14 @@ export default async function pullStateForRun({
   const isGitRepo = git.checkIsRepo();
 
   if (!isGitRepo) {
-    console.error(
-      gitReadStateLabel,
-      ccolors.user_input(`"${cmd}"`),
-      ccolors.error("must be executed inside a git repository"),
+    throw new Error(
+      [
+        gitReadStateLabel,
+        ccolors.user_input(`"${cmd}"`),
+        ccolors.error("must be executed inside a git repository"),
+      ].join(" "),
+      { cause: 1001 },
     );
-    await emitExitEvent(1001);
-    Deno.exit(1001);
   }
 
   await git.raw("config", "user.email", "bot@cndi.dev"); // this is needed for git to work
@@ -35,26 +35,28 @@ export default async function pullStateForRun({
   const originalBranch = (await git.branch()).current;
 
   if (!originalBranch) {
-    console.error(
-      gitReadStateLabel,
-      ccolors.error("you must make a commit on your branch before running"),
-      ccolors.user_input(`"${cmd}"`),
+    throw new Error(
+      [
+        gitReadStateLabel,
+        ccolors.error("you must make a commit on your branch before running"),
+        ccolors.user_input(`"${cmd}"`),
+      ].join(" "),
+      { cause: 1002 },
     );
-    await emitExitEvent(1002);
-    Deno.exit(1002);
   }
 
   // we can't have any uncommitted changes
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
-    console.error(
-      gitReadStateLabel,
-      ccolors.error("your branch must be clean before running"),
-      ccolors.user_input(`"${cmd}"`),
+    throw new Error(
+      [
+        gitReadStateLabel,
+        ccolors.error("your branch must be clean before running"),
+        ccolors.user_input(`"${cmd}"`),
+      ].join(" "),
+      { cause: 1003 },
     );
-    await emitExitEvent(1003);
-    Deno.exit(1003);
   }
 
   try {
@@ -81,27 +83,25 @@ export default async function pullStateForRun({
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
   if (!secret) {
-    console.error(
-      gitReadStateLabel,
-      ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-      "is not set in your environment",
+    throw new Error(
+      [
+        gitReadStateLabel,
+        ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+        "is not set in your environment",
+      ].join(" "),
+      {
+        cause: 1004,
+      },
     );
-    await emitExitEvent(1004);
-    Deno.exit(1004);
   }
 
   await git.checkout(originalBranch);
 
   if (state) {
     const decryptedState = await decrypt(state, secret);
-    try {
-      Deno.writeTextFileSync(
-        path.join(pathToTerraformResources, "terraform.tfstate"),
-        decryptedState,
-      );
-    } catch (error) {
-      console.log("error in reading state to workspace:");
-      console.log(error);
-    }
+    Deno.writeTextFileSync(
+      path.join(pathToTerraformResources, "terraform.tfstate"),
+      decryptedState,
+    );
   }
 }

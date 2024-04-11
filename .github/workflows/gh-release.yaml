@@ -7,12 +7,14 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.40
+          deno-version: v1.42
 
       - name: Checkout
         uses: actions/checkout@v3

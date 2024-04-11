@@ -21,6 +21,10 @@ import { ccolors, deepMerge } from "deps";
 const LOCAL_CLOUDINIT_FILE_NAME =
   "microk8s-cloud-init-leader.sensitive.yml.tftpl";
 
+const devMultipassMicrok8sStackLabel = ccolors.faded(
+  "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts:",
+);
+
 export class DevMultipassMicrok8sStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
@@ -47,7 +51,7 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
 
     if (useSshRepoAuth()) {
       userData = Fn.templatefile(
-        "microk8s-cloud-init-leader-ssh.yml.tftpl",
+        "microk8s-cloud-init-leader.yml.tftpl",
         {
           bootstrap_token: this.locals.bootstrap_token.asString!,
           git_repo_encoded: Fn.base64encode(
@@ -123,8 +127,15 @@ export default function getMultipassResource(
   cndi_config: CNDIConfig,
 ) {
   if (cndi_config.infrastructure.cndi.nodes.length !== 1) {
-    console.log("dev clusters must have exactly one node");
-    Deno.exit(1);
+    throw new Error(
+      [
+        devMultipassMicrok8sStackLabel,
+        ccolors.error("dev clusters must have exactly one node"),
+      ].join(" "),
+      {
+        cause: 4777,
+      },
+    );
   }
   const node = cndi_config.infrastructure.cndi
     .nodes[0] as MultipassNodeItemSpec;
@@ -196,7 +207,7 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
   await stageCDKTFStack(app);
 
   const cndi_multipass_instance = getMultipassResource(cndi_config);
-  const input: TFBlocks = deepMerge({
+  const input = deepMerge({
     resource: {
       multipass_instance: {
         cndi_multipass_instance,
@@ -217,5 +228,5 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
     ...cndi_config?.infrastructure?.terraform,
   });
 
-  await patchAndStageTerraformFilesWithInput(input);
+  await patchAndStageTerraformFilesWithInput(input as TFBlocks);
 }

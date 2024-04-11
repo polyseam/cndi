@@ -13,6 +13,7 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 
@@ -37,17 +38,6 @@ async function sha256Digest(message: string): Promise<string> {
   return hashHex;
 }
 
-const loadYAMLorJSONC = async (
-  filePath: string,
-): Promise<JSONC.JsonValue | unknown> => {
-  if (filePath.endsWith(".yaml") || filePath.endsWith(".yml")) {
-    return await loadYAML(filePath);
-  }
-  if (filePath.endsWith(".jsonc") || filePath.endsWith(".json")) {
-    return await loadJSONC(filePath);
-  }
-};
-
 const removeOldBinaryIfRequired = async (
   CNDI_HOME: string,
 ): Promise<boolean> => {
@@ -64,59 +54,69 @@ const removeOldBinaryIfRequired = async (
   return true;
 };
 
+const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
+  if (providedPath) {
+    const normalized = path.normalize(providedPath);
+    if (await exists(normalized)) {
+      return normalized;
+    } else {
+      throw new Error(
+        [
+          utilsLabel,
+          ccolors.error("could not find cndi_config file at"),
+          ccolors.user_input(`"${providedPath}"`),
+        ].join(" "),
+        {
+          cause: 500,
+        },
+      );
+    }
+  }
+
+  if (await exists(path.join(Deno.cwd(), "cndi_config.yaml"))) {
+    return path.join(Deno.cwd(), "cndi_config.yaml");
+  } else if (await exists(path.join(Deno.cwd(), "cndi_config.yml"))) {
+    return path.join(Deno.cwd(), "cndi_config.yml");
+  } else {
+    throw new Error(
+      [
+        utilsLabel,
+        ccolors.error("there is no"),
+        ccolors.key_name('"cndi_config.yaml"'),
+        ccolors.error("file in your current directory"),
+      ].join(" "),
+      {
+        cause: 500,
+      },
+    );
+  }
+};
+
 // attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
-  providedPath?: string,
-): Promise<[CNDIConfig, string]> => {
-  let pathToConfig;
-  let configIsYAML = true;
-  const isFile = true;
-  const cwd = Deno.cwd();
+  projectDirectory: string,
+): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
+  let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
 
-  // the user provided a direct path to a cndi_config file
-  if (providedPath) {
-    return [(await loadYAMLorJSONC(providedPath)) as CNDIConfig, providedPath];
+  if (!await exists(pathToConfig)) {
+    pathToConfig = path.join(projectDirectory, "cndi_config.yml");
   }
 
-  if (await exists(path.join(cwd, "cndi_config.yaml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi_config.yaml");
-  } else if (await exists(path.join(cwd, "cndi_config.yml"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi_config.yml");
-  } else if (await exists(path.join(cwd, "cndi_config.jsonc"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi_config.jsonc");
-    configIsYAML = false;
-  } else if (await exists(path.join(cwd, "cndi_config.json"), { isFile })) {
-    pathToConfig = path.join(cwd, "cndi_config.json");
-    configIsYAML = false;
-  } else {
-    console.error(
-      utilsLabel,
-      ccolors.error("there is no"),
-      ccolors.key_name('"cndi_config.yaml"'),
-      ccolors.error("file in your current directory"),
-    );
-    console.log(
-      "if you don't have a cndi_config file try",
-      ccolors.prompt("cndi init --interactive"),
-    );
-    await emitExitEvent(500);
-    Deno.exit(500);
-  }
   try {
-    const config = configIsYAML
-      ? await loadYAML(pathToConfig)
-      : await loadJSONC(pathToConfig);
-    return [config as CNDIConfig, pathToConfig];
-  } catch (error) {
-    console.error(
-      utilsLabel,
-      ccolors.error("your cndi config file at"),
-      ccolors.user_input(`"${pathToConfig}"`),
-      ccolors.error("is not valid"),
+    const config = await loadYAML(pathToConfig) as CNDIConfig;
+    return { config, pathToConfig };
+  } catch {
+    throw new Error(
+      [
+        utilsLabel,
+        ccolors.error("your cndi_config file at"),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("could not be read"),
+      ].join(" "),
+      {
+        cause: 504,
+      },
     );
-    ccolors.caught(error, 504);
-    await emitExitEvent(504);
-    Deno.exit(504);
   }
 };
 
@@ -129,27 +129,45 @@ const loadJSONC = async (path: string) => {
 
 // helper function to load a YAML file
 const loadYAML = async (path: string) => {
-  return YAML.parse(await Deno.readTextFile(path));
+  let txt: string;
+  let y: unknown;
+  try {
+    txt = await Deno.readTextFile(path);
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      throw new Error(
+        [
+          utilsLabel,
+          ccolors.error("could not find file at"),
+          ccolors.user_input(`"${path}"`),
+        ].join(" "),
+        {
+          cause: 1301,
+        },
+      );
+    }
+    throw error;
+  }
+
+  try {
+    y = await YAML.parse(txt);
+  } catch {
+    throw new Error(
+      [
+        utilsLabel,
+        ccolors.error("could not parse file as YAML at"),
+        ccolors.user_input(`"${path}"`),
+      ].join(" "),
+      {
+        cause: 1300,
+      },
+    );
+  }
+  return y;
 };
 
 function getPrettyJSONString(object: unknown) {
   return JSON.stringify(object, null, 2);
-}
-
-async function getLeaderNodeNameFromConfig(
-  config: CNDIConfig,
-): Promise<string> {
-  try {
-    return config.infrastructure.cndi.nodes[0].name;
-  } catch {
-    console.error(
-      utilsLabel,
-      ccolors.error("cndi_config exists"),
-      ccolors.error("but we could not assign a named node as leader"),
-    );
-    await emitExitEvent(200);
-    Deno.exit(200);
-  }
 }
 
 function getTFResource(
@@ -259,7 +277,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform${fileSuffixForPlatform}`,
+    `terraform-cndi${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -271,7 +289,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal${fileSuffixForPlatform}`,
+    `kubeseal-cndi${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -314,7 +332,7 @@ type CDKTFAppConfig = {
 };
 
 async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
-  const stagingDirectory = await getStagingDir();
+  const stagingDirectory = getStagingDir();
   const outdir = path.join(stagingDirectory, "cndi", "terraform");
   await Deno.mkdir(path.dirname(outdir), { recursive: true });
   return {
@@ -322,22 +340,24 @@ async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
   };
 }
 
-async function getStagingDir(): Promise<string> {
+function getStagingDir(): string {
   const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
   if (!stagingDirectory) {
-    console.error(
-      utilsLabel,
-      `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
-      ccolors.error(`is not set!`),
+    throw new Error(
+      [
+        utilsLabel,
+        `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
+        ccolors.error(`is not set!`),
+      ].join(" "),
+      { cause: 202 },
     );
-    await emitExitEvent(202);
-    Deno.exit(202);
   }
   return stagingDirectory;
 }
 
 async function persistStagedFiles(targetDirectory: string) {
-  const stagingDirectory = await getStagingDir();
+  const stagingDirectory = getStagingDir();
+
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
       const destinationAbsPath = entry.path.replace(
@@ -370,6 +390,36 @@ async function checkInstalled(CNDI_HOME: string) {
   } catch {
     return false;
   }
+}
+
+function checkForRequiredMissingCreateRepoValues(
+  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
+): string[] {
+  const git_credentials_mode = responses?.git_credentials_mode || "token";
+
+  const requiredKeys = [
+    "git_username",
+    "git_repo",
+  ];
+
+  if (git_credentials_mode === "token") {
+    requiredKeys.push("git_token");
+  } else if (git_credentials_mode === "ssh") {
+    requiredKeys.push("git_ssh_private_key");
+  }
+
+  const missingKeys: Array<string> = [];
+
+  for (const key of requiredKeys) {
+    const envVarName = key.toUpperCase();
+    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
+      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
+
+    if (missingValue) {
+      missingKeys.push(key);
+    }
+  }
+  return missingKeys;
 }
 
 async function checkInitialized(output: string) {
@@ -499,17 +549,47 @@ async function emitExitEvent(exit_code: number) {
   console.log();
 }
 
+function absolutifyPath(p: string): string {
+  if (path.isAbsolute(p)) {
+    return p;
+  }
+
+  if (p.startsWith("~")) {
+    return path.join(homedir(), p.slice(1));
+  }
+
+  return path.resolve(p);
+}
+
+const getProjectDirectoryFromFlag = (value: string | boolean) => {
+  // only executed if the flag is provided
+  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+};
+
+function getPathToCndiBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
+  let suffix = "";
+  if (platform() === "win32") {
+    suffix = ".exe";
+  }
+  return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
+}
+
 export {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
-  getLeaderNodeNameFromConfig,
+  getPathToCndiBinary,
+  getPathToCndiConfig,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
   getTFData,

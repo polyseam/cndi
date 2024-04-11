@@ -1,6 +1,6 @@
-import { assert /*beforeEach, describe, it*/ } from "test-deps";
+import { assert } from "test-deps";
 
-import { path } from "deps";
+import { path, SEPARATOR, YAML } from "deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
@@ -48,7 +48,7 @@ Deno.test(
     await t.step("test", async () => {
       assert(
         await hasSameFilesAfter(async () => {
-          const { status } = await runCndi("init", "-d", "--loud");
+          const { status } = await runCndi("init", "-d");
 
           assert(!status.success);
         }),
@@ -71,7 +71,7 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      const project_name = Deno.cwd().split(path.SEP).pop();
+      const project_name = Deno.cwd().split(SEPARATOR).pop();
       const { status } = await runCndi(
         "init",
         "-t",
@@ -199,6 +199,37 @@ Deno.test(
 );
 
 Deno.test(
+  "'cndi init -t airflow -l aws/microk8s' should generate a cndi_responses.yaml which parses successfully",
+  async (t) => {
+    let dir = "";
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      /* const { status } = */ await runCndi(
+        "init",
+        "-t",
+        "airflow",
+        "-l",
+        "aws/microk8s",
+        "-k",
+      );
+
+      const cndi_responses = Deno.readTextFileSync(
+        path.join(Deno.cwd(), `cndi_responses.yaml`),
+      );
+      assert(YAML.parse(cndi_responses));
+    });
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+Deno.test(
   "'cndi init -t airflow -l aws/microk8s' should successfully bootstrap an ec2/microk8s cluster",
   async (t) => {
     let dir = "";
@@ -238,18 +269,21 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      const _run = await runCndi(
+      const run = await runCndi(
         "init",
         "-t",
         "neo4j",
         "--set",
+        "dns_provider=google",
+        "--set",
         "deployment_target_provider=gcp",
+        "--set",
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       );
       const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
-
       assert(dotenv.indexOf(`GCP_REGION`) > -1);
       assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
-      // _run.status.success is false because we don't have a valid GOOGLE_CREDENTIALS
+      assert(run.status.success);
     });
     await t.step("cleanup", async () => {
       Deno.chdir("..");
@@ -284,6 +318,185 @@ Deno.test(
       assert(dotenv.indexOf(`ARM_SUBSCRIPTION_ID`) > -1);
       assert(status.success);
     });
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+// Azure AKS and Microk8s Basic
+Deno.test(
+  "'cndi init -t basic -l azure/aks should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "azure/aks",
+      );
+      assert(status.success);
+    });
+
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t basic -l azure/microk8s should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "azure/microk8s",
+      );
+      assert(status.success);
+    });
+
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+// Google GKE and Microk8s Basic
+Deno.test(
+  "'cndi init -t basic -l gcp/gke should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "gcp/gke",
+        "--set",
+        "dns_provider=google",
+        "--set",
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
+      );
+      assert(status.success);
+    });
+
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t basic -l gcp/microk8s should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "gcp/microk8s",
+        "--set",
+        "dns_provider=google",
+        "--set",
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
+      );
+      assert(status.success);
+    });
+
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+// AWS EKS and Microk8s Basic
+Deno.test(
+  "'cndi init -t basic -l aws/eks should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "aws/eks",
+      );
+      assert(status.success);
+    });
+
+    await t.step("cleanup", async () => {
+      Deno.chdir("..");
+      await Deno.remove(dir, { recursive: true });
+    });
+  },
+);
+
+Deno.test(
+  "'cndi init -t basic -l aws/microk8s should succeed",
+  async (t) => {
+    let dir = "";
+
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+    });
+
+    await t.step("test", async () => {
+      const { status } = await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "aws/microk8s",
+      );
+      assert(status.success);
+    });
+
     await t.step("cleanup", async () => {
       Deno.chdir("..");
       await Deno.remove(dir, { recursive: true });

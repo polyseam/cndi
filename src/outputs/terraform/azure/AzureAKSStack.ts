@@ -22,12 +22,10 @@ import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  RELOADER_VERSION,
   SEALED_SECRETS_VERSION,
 } from "consts";
 
 import {
-  emitExitEvent,
   getCDKTFAppConfig,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
@@ -49,6 +47,10 @@ type AnonymousClusterNodePoolConfig = Omit<
 >;
 
 const DEFAULT_AZURE_NODEPOOL_ZONE = "1";
+
+const AKSStackLabel = ccolors.faded(
+  "\nsrc/outputs/terraform/azure/AzureAKSStack.ts:",
+);
 
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
@@ -125,22 +127,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         ],
       },
     );
+
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
-        if (!isValidAzureAKSNodePoolName(nodeSpec.name)) {
-          console.log(
-            ccolors.error(
-              `ERROR: invalid node pool name '${
-                ccolors.user_input(nodeSpec.name)
-              }'`,
-            ),
-          );
-          console.log(
-            "node pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
-          );
-          emitExitEvent(810);
-          Deno.exit(810);
-        }
         const count = nodeSpec.count || 1;
 
         const scale = {
@@ -290,14 +279,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_kubernetes_storage_class_azure_disk",
       {
         metadata: {
-          name: "cndi-managed-premium-v2-disk",
+          name: "rwo",
           annotations: {
             "storageclass.kubernetes.io/is-default-class": "true",
           },
         },
         storageProvisioner: "disk.csi.azure.com",
         parameters: {
-          skuName: "PremiumV2_LRS",
+          skuName: "Standard_LRS",
         },
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
@@ -463,28 +452,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const _helmReleaseCertManager = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_cert_manager",
-      {
-        chart: "cert-manager",
-        createNamespace: true,
-        dependsOn: [cluster],
-        name: "cert-manager",
-        namespace: "cert-manager",
-        repository: "https://charts.jetstack.io",
-        timeout: 600,
-        atomic: true,
-        set: [
-          {
-            name: "installCRDs",
-            value: "true",
-          },
-        ],
-        version: "1.12.3",
-      },
-    );
-
     const argocdAdminPasswordHashed = Fn.sensitive(
       Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
     );
@@ -538,24 +505,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
             value: "argocd-cm",
           },
         ],
-      },
-    );
-
-    const _helmReleaseReloader = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_reloader",
-      {
-        chart: "reloader",
-        cleanupOnFail: true,
-        createNamespace: true,
-        dependsOn: [cluster],
-        timeout: 600,
-        atomic: true,
-        name: "reloader",
-        namespace: "reloader",
-        replace: true,
-        repository: "https://stakater.github.io/stakater-charts",
-        version: RELOADER_VERSION,
       },
     );
 
@@ -700,9 +649,37 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   }
 }
 
+function validateCNDIConfigAzureAKS(cndi_config: CNDIConfig) {
+  const nodes = cndi_config?.infrastructure?.cndi?.nodes;
+  if (Array.isArray(nodes)) {
+    for (const n of nodes) {
+      if (!isValidAzureAKSNodePoolName(n.name)) {
+        throw new Error(
+          [
+            AKSStackLabel,
+            ccolors.error("Your AKS node name"),
+            ccolors.key_name(`"${n.name}"`),
+            ccolors.error("is invalid"),
+            "\n",
+            ccolors.error(
+              "AKS Node Pool names must be at most 12 characters long and only contain lowercase alphanumeric characters",
+            ),
+          ].join(" "),
+          {
+            cause: 9101,
+          },
+        );
+      }
+    }
+  }
+}
+
 export async function stageTerraformSynthAzureAKS(cndi_config: CNDIConfig) {
+  validateCNDIConfigAzureAKS(cndi_config);
+
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
+
   new AzureAKSTerraformStack(app, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory

@@ -14,6 +14,7 @@ import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 // commands
 import upgradeCommand from "src/commands/upgrade.ts";
 import runCommand from "src/commands/run.ts";
+import createCommand from "src/commands/create.ts";
 import initCommand from "src/commands/init.ts";
 import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
@@ -72,6 +73,7 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
+    .command("create", createCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)
