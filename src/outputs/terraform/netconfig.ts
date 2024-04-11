@@ -1,9 +1,9 @@
 import {
   CNDIConfig,
-  CNDINetworkConfigAWS,
-  CNDINetworkConfigAzure,
   CNDINetworkConfigEncapsulated,
-  CNDINetworkConfigGCP,
+  CNDINetworkConfigExternalAWS,
+  CNDINetworkConfigExternalAzure,
+  CNDINetworkConfigExternalGCP,
   CNDIProvider,
 } from "src/types.ts";
 
@@ -15,32 +15,37 @@ export default function getNetConfig(
 
   if (netconfig?.mode === "external") {
     if (provider === "azure") {
-      netconfig = netconfig as CNDINetworkConfigAzure;
-      const subnets = netconfig?.azure?.subnets;
+      netconfig = netconfig as CNDINetworkConfigExternalAzure;
+      const primary_subnet = netconfig?.azure?.primary_subnet;
+      const private_subnets = netconfig?.azure?.private_subnets;
       const network_resource_id = netconfig?.azure?.network_resource_id;
+
       if (!network_resource_id) {
         throw new Error(
           'no "network_resource_id" provided in azure "external" mode',
         );
       }
+
       return {
         mode: "external",
         azure: {
           network_resource_id,
-          subnets,
+          primary_subnet,
+          private_subnets,
         },
-      } as CNDINetworkConfigAzure;
+      } as CNDINetworkConfigExternalAzure;
     }
 
     if (provider === "aws") {
-      netconfig = netconfig as CNDINetworkConfigAWS;
+      netconfig = netconfig as CNDINetworkConfigExternalAWS;
       const vpc_id = netconfig?.aws?.vpc_id;
-      const subnets = netconfig?.aws?.subnets;
+      const primary_subnet = netconfig?.aws?.primary_subnet;
+      const private_subnets = netconfig?.aws?.private_subnets;
 
       if (!vpc_id) {
         throw new Error('no "network" provided in aws "external" mode');
       }
-      if (!subnets) {
+      if (!private_subnets) {
         throw new Error('no "subnets" provided in aws "external" mode');
       }
 
@@ -48,33 +53,36 @@ export default function getNetConfig(
         mode: "external",
         aws: {
           vpc_id,
-          subnets,
+          primary_subnet,
+          private_subnets,
         },
-      } as CNDINetworkConfigAWS;
+      } as CNDINetworkConfigExternalAWS;
     }
 
     if (provider === "gcp") {
-      netconfig = netconfig as CNDINetworkConfigGCP;
+      netconfig = netconfig as CNDINetworkConfigExternalGCP;
       const network_name = netconfig?.gcp?.network_name;
-      const subnets = netconfig?.gcp?.subnets;
+      const private_subnets = netconfig?.gcp?.private_subnets;
+      const primary_subnet = netconfig?.gcp?.primary_subnet;
       const project = netconfig?.gcp?.project;
 
       if (!network_name) {
         throw new Error('no "network" provided in "external" mode');
       }
 
-      if (!subnets) {
-        throw new Error('no "public_subnet" provided in "external" mode');
+      if (!primary_subnet) {
+        throw new Error('no "primary_subnet" provided in "external" mode');
       }
 
       return {
         mode: "external",
         gcp: {
-          project,
           network_name,
-          subnets,
+          primary_subnet,
+          private_subnets,
+          project,
         },
-      } as CNDINetworkConfigGCP;
+      } as CNDINetworkConfigExternalGCP;
     }
   }
 

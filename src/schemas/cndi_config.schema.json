@@ -141,7 +141,7 @@
                       "type": "string",
                       "description": "The VPC to deploy the cluster into."
                     },
-                    "public_subnet": {
+                    "primary_subnet": {
                       "type": "string",
                       "description": "The public subnet to deploy the cluster into."
                     },
@@ -158,7 +158,7 @@
                       "type": "string",
                       "description": "The network to deploy the cluster into."
                     },
-                    "public_subnet_name": {
+                    "primary_subnet_name": {
                       "type": "string",
                       "description": "The subnet to deploy the cluster into."
                     },
@@ -183,7 +183,7 @@
                       "type": "string",
                       "description": "The VNet to deploy the cluster into."
                     },
-                    "public_subnet_id": {
+                    "primary_subnet_id": {
                       "type": "string",
                       "description": "The subnet to deploy the cluster into."
                     },

@@ -1,4 +1,8 @@
-import { CNDIConfig, CNDINetworkConfigGCP, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalGCP,
+  TFBlocks,
+} from "src/types.ts";
 
 import {
   App,
@@ -25,7 +29,7 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
-import getNetConfig from "src/outputs/terraform/netConfig.ts";
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
@@ -106,9 +110,16 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    let subnet:
+    let primary_subnet:
       | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
       | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork;
+
+    // stub for when we support GKE private subnets
+    const _node_subnets: Array<
+      | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
+      | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork
+    > = [];
+
     let network:
       | CDKTFProviderGCP.computeNetwork.ComputeNetwork
       | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
@@ -123,7 +134,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           dependsOn: [projectServicesReady],
         },
       );
-      subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
+      primary_subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
         this,
         "cndi_google_compute_subnetwork",
         {
@@ -135,17 +146,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         },
       );
     } else if (netconfig.mode === "external") {
-      netconfig = netconfig as CNDINetworkConfigGCP;
-
-      if (netconfig.gcp.subnets.length > 1) {
-        console.warn(
-          "GCP GKE only supports a single subnet, ignoring additional subnets",
-        );
-      }
-
-      if (netconfig.gcp.subnets.length === 0) {
-        throw new Error("GCP GKE requires exactly one subnet");
-      }
+      netconfig = netconfig as CNDINetworkConfigExternalGCP;
 
       network = new CDKTFProviderGCP.dataGoogleComputeNetwork
         .DataGoogleComputeNetwork(
@@ -157,15 +158,23 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         },
       );
 
-      subnet = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
+      primary_subnet = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
         .DataGoogleComputeSubnetwork(
         this,
         "cndi_google_compute_subnetwork",
         {
-          name: netconfig.gcp.subnets[0],
+          name: netconfig.gcp.primary_subnet,
           dependsOn: [network],
         },
       );
+
+      const private_subnets = Array.isArray(netconfig?.gcp?.private_subnets)
+        ? netconfig.gcp.private_subnets
+        : [];
+
+      if (private_subnets.length) {
+        console.warn("Private subnets are not yet supported in GCP GKE");
+      }
     } else {
       // deno-lint-ignore no-explicit-any
       netconfig = netconfig as any;
@@ -196,7 +205,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           },
         ],
         sourceRanges: [
-          subnet.ipCidrRange,
+          primary_subnet.ipCidrRange,
         ],
       },
     );
@@ -215,9 +224,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         removeDefaultNodePool: true,
         initialNodeCount: 1, // ^
         project: this.locals.gcp_project_id.asString,
-        dependsOn: [projectServicesReady, subnet, network],
+        dependsOn: [projectServicesReady, primary_subnet, network],
         network: network.selfLink,
-        subnetwork: subnet.selfLink,
+        subnetwork: primary_subnet.selfLink,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
@@ -241,7 +250,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     );
 
     let nodePoolIndex = 0;
-    for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
+
+    const nodePoolSpecs = cndi_config.infrastructure.cndi.nodes;
+    for (const nodePoolSpec of nodePoolSpecs) {
       const nodeCount = nodePoolSpec.count || 1;
 
       const diskSizeGb = nodePoolSpec?.disk_size_gb ||

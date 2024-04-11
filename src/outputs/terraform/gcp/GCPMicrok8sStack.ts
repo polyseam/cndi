@@ -19,10 +19,10 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import getNetConfig from "src/outputs/terraform/netConfig.ts";
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
 import {
   CNDIConfig,
-  CNDINetworkConfigGCP,
+  CNDINetworkConfigExternalGCP,
   NodeRole,
   TFBlocks,
 } from "src/types.ts";
@@ -73,7 +73,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     let network:
       | CDKTFProviderGCP.computeNetwork.ComputeNetwork
       | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
-    let subnetwork:
+    let primary_subnet:
       | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
       | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork;
 
@@ -88,7 +88,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         },
       );
 
-      subnetwork = new CDKTFProviderGCP.computeSubnetwork
+      primary_subnet = new CDKTFProviderGCP.computeSubnetwork
         .ComputeSubnetwork(
         this,
         "cndi_google_compute_subnetwork",
@@ -99,23 +99,23 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
         },
       );
     } else if (netconfig.mode === "external") {
-      netconfig = netconfig as CNDINetworkConfigGCP;
+      netconfig = netconfig as CNDINetworkConfigExternalGCP;
       network = new CDKTFProviderGCP.dataGoogleComputeNetwork
         .DataGoogleComputeNetwork(
         this,
         "cndi_google_compute_network",
         {
-          name: netconfig.gcp.network,
+          name: netconfig.gcp.network_name,
           project: netconfig.gcp.project,
         },
       );
 
-      subnetwork = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
+      primary_subnet = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
         .DataGoogleComputeSubnetwork(
         this,
         "cndi_google_compute_subnetwork",
         {
-          name: netconfig.gcp.public_subnet,
+          name: netconfig.gcp.primary_subnet,
           project: netconfig.gcp.project,
         },
       );
@@ -146,7 +146,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
             protocol: "icmp",
           },
         ],
-        sourceRanges: [subnetwork.ipCidrRange],
+        sourceRanges: [primary_subnet.ipCidrRange],
       },
     );
 
@@ -212,7 +212,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
 
       const networkInterface = {
         network: network.selfLink,
-        subnetwork: subnetwork.selfLink,
+        subnetwork: primary_subnet.selfLink,
         accessConfig: [{ networkTier: "STANDARD" }],
       };
 

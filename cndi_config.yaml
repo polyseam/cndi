@@ -4,11 +4,6 @@ provider: gcp
 distribution: microk8s
 infrastructure:
   cndi:
-    network:
-      mode: external
-      network_name: cndi-compute-network
-      public_subnets:
-        - cndi-compute-subnetwork
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:

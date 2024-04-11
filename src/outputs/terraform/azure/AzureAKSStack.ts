@@ -1,4 +1,8 @@
-import { CNDIConfig, CNDINetworkConfigAzure, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalAzure,
+  TFBlocks,
+} from "src/types.ts";
 
 import { ccolors } from "deps";
 
@@ -32,9 +36,10 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
-import getNetConfig from "src/outputs/terraform/netConfig.ts";
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
 
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
+import { parseNetworkResourceId } from "./utils.ts";
 
 function isValidAzureAKSNodePoolName(inputString: string): boolean {
   if (inputString.match(/^[0-9a-z]+$/) && inputString.length <= 12) {
@@ -103,7 +108,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
     );
 
-    const subnets: Array<string> = [];
+    const _node_subnets: Array<
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet
+    > = [];
+
+    let primary_subnet:
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet;
 
     if (netconfig.mode === "encapsulated") {
       // Create a virtual network (VNet) in Azure with a dynamic address space.
@@ -122,7 +134,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
       // Create a subnet within the above VNet.
       // The subnet address prefix is dynamically calculated using the address space multiplier.
-      const subnet = new CDKTFProviderAzure.subnet.Subnet(
+      primary_subnet = new CDKTFProviderAzure.subnet.Subnet(
         this,
         "cndi_azure_subnet",
         {
@@ -134,16 +146,20 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           ],
         },
       );
-
-      // Subnet ID is used to associate the AKS node_pools with the subnet.
-      subnets.push(subnet.id);
     } else if (netconfig.mode === "external") {
-      netconfig = netconfig as CNDINetworkConfigAzure;
-      const network_resource_id = netconfig.azure.network_resource_id;
+      netconfig = netconfig as CNDINetworkConfigExternalAzure;
+      const { resourceGroupName, virtualNetworkName } = parseNetworkResourceId(
+        netconfig.azure.network_resource_id,
+      );
 
-      for (const subnet of netconfig.azure.subnets) {
-        subnets.push(`${network_resource_id}/subnets/${subnet}`);
-      }
+      const subnet_name = netconfig.azure.primary_subnet;
+
+      primary_subnet = new CDKTFProviderAzure.dataAzurermSubnet
+        .DataAzurermSubnet(this, "cndi_azure_primary_subnet", {
+        name: subnet_name,
+        resourceGroupName,
+        virtualNetworkName,
+      });
     } else {
       // deno-lint-ignore no-explicit-any
       netconfig = netconfig as any;
@@ -151,8 +167,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     }
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
-      .infrastructure.cndi.nodes.map((nodeSpec, index) => {
-        const vnetSubnetId = subnets[index % subnets.length];
+      .infrastructure.cndi.nodes.map((nodeSpec) => {
+        const vnetSubnetId = primary_subnet.id;
 
         const count = nodeSpec.count || 1;
 

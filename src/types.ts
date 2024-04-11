@@ -244,25 +244,30 @@ export interface CNDINetworkConfigExternal extends CNDINetworkConfigBase {
   mode: "external";
 }
 
-export interface CNDINetworkConfigAWS extends CNDINetworkConfigExternal {
+export interface CNDINetworkConfigExternalAWS
+  extends CNDINetworkConfigExternal {
   aws: {
     vpc_id: string;
-    subnets: Array<string>;
+    primary_subnet: string;
+    private_subnets: Array<string>;
   };
 }
 
-export interface CNDINetworkConfigAzure extends CNDINetworkConfigExternal {
+export interface CNDINetworkConfigExternalAzure
+  extends CNDINetworkConfigExternal {
   azure: {
-    subnets: Array<string>;
     network_resource_id: string; // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
+    primary_subnet: string;
+    private_subnets: Array<string>;
   };
 }
 
-export interface CNDINetworkConfigGCP extends CNDINetworkConfigExternal {
+export interface CNDINetworkConfigExternalGCP
+  extends CNDINetworkConfigExternal {
   gcp: {
     network_name: string;
+    primary_subnet: string;
     private_subnets?: Array<string>;
-    public_subnet: string;
     project?: string;
   };
 }
@@ -271,9 +276,9 @@ export type CNDIDistribution = "microk8s" | "eks" | "gke" | "aks";
 
 export type CNDINetworkConfig =
   | CNDINetworkConfigEncapsulated
-  | CNDINetworkConfigAWS
-  | CNDINetworkConfigAzure
-  | CNDINetworkConfigGCP;
+  | CNDINetworkConfigExternalAWS
+  | CNDINetworkConfigExternalAzure
+  | CNDINetworkConfigExternalGCP;
 
 // incomplete type, config will have more options
 interface CNDIConfig {

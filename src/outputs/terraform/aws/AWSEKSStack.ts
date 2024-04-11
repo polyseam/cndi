@@ -1,4 +1,8 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalAWS,
+  TFBlocks,
+} from "src/types.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
@@ -29,50 +33,18 @@ import {
 
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
+
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
+    const netconfig = getNetConfig(cndi_config, "aws");
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
-
-    const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
-      cidrBlock: "10.0.0.0/16",
-      enableDnsHostnames: true,
-      enableDnsSupport: true,
-      tags: {
-        Name: `cndi-vpc_${project_name}`,
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-    });
-
-    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
-      this,
-      "cndi_aws_internet_gateway",
-      {
-        vpcId: vpc.id,
-        tags: {
-          Name: `cndi-igw_${project_name}`,
-        },
-      },
-    );
-
-    const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
-      vpc: true,
-      tags: {
-        Name: `cndi-elastic-ip_${project_name}`,
-      },
-      dependsOn: [igw],
-    });
-
-    new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
-      this,
-      "cndi_aws_caller_identity",
-      {},
-    );
 
     // TODO: should this be further filtered according to instance_type avaiability?
     const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
@@ -82,6 +54,98 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         state: "available",
       },
+    );
+
+    let primary_subnet:
+      | CDKTFProviderAWS.subnet.Subnet
+      | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet;
+
+    const node_subnets: Array<
+      | CDKTFProviderAWS.subnet.Subnet
+      | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet
+    > = [];
+
+    if (netconfig.mode === "encapsulated") {
+      const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
+        cidrBlock: "10.0.0.0/16",
+        enableDnsHostnames: true,
+        enableDnsSupport: true,
+        tags: {
+          Name: `cndi-vpc_${project_name}`,
+          [`kubernetes.io/cluster/${project_name}`]: "owned",
+        },
+      });
+
+      const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+        this,
+        "cndi_aws_internet_gateway",
+        {
+          vpcId: vpc.id,
+          tags: {
+            Name: `cndi-igw_${project_name}`,
+          },
+        },
+      );
+
+      const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
+        vpc: true,
+        tags: {
+          Name: `cndi-elastic-ip_${project_name}`,
+        },
+        dependsOn: [igw],
+      });
+
+      primary_subnet = new CDKTFProviderAWS.subnet.Subnet(
+        this,
+        "cndi_aws_subnet_primary",
+        {
+          availabilityZone: Fn.element(availabilityZones.names, 0),
+          cidrBlock: "10.0.1.0/24",
+          mapPublicIpOnLaunch: true,
+          tags: {
+            Name: `cndi-public-subnet-a_${project_name}`,
+            [`kubernetes.io/cluster/${project_name}`]: "owned",
+            "kubernetes.io/role/elb": "1",
+          },
+          vpcId: vpc.id,
+        },
+      );
+
+      node_subnets = [
+        new CDKTFProviderAWS.subnet.Subnet(
+          this,
+          "cndi_aws_subnet_private_a",
+          {
+            availabilityZone: Fn.element(availabilityZones.names, 0),
+            cidrBlock: "10.0.3.0/24",
+            mapPublicIpOnLaunch: true,
+            tags: {
+              Name: `cndi-private-subnet-a_${project_name}`,
+              [`kubernetes.io/cluster/${project_name}`]: "owned",
+              "kubernetes.io/role/internal-elb": "1",
+            },
+            vpcId: vpc.id,
+          },
+        ),
+      ];
+    } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalAWS;
+      primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
+        this,
+        "cndi_aws_subnet_primary",
+        {
+          id: netconfig.aws.primary_subnet,
+        },
+      );
+    } else {
+      netconfig = netconfig as any;
+      throw new Error(`unsupported network mode: ${netconfig.mode}`);
+    }
+
+    new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
+      this,
+      "cndi_aws_caller_identity",
+      {},
     );
 
     const securityGroupIngresses = [
@@ -138,54 +202,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const subnetPrivateA = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_private_a",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 0),
-        cidrBlock: "10.0.3.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-private-subnet-a_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/internal-elb": "1",
-        },
-        vpcId: vpc.id,
-      },
-    );
-
-    const subnetPrivateB = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_private_b",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 1),
-        cidrBlock: "10.0.4.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-private-subnet-b_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/internal-elb": "1",
-        },
-        vpcId: vpc.id,
-      },
-    );
-
-    const subnetPublicA = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_public_a",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 0),
-        cidrBlock: "10.0.1.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-public-subnet-a_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/elb": "1",
-        },
-        vpcId: vpc.id,
-      },
-    );
-
     const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
       this,
       "cndi_aws_efs_file_system",
@@ -214,7 +230,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         fileSystemId: efsFs.id,
         securityGroups: [securityGroup.id],
-        subnetId: subnetPrivateA.id,
+        subnetId: node_subnets[0].id,
       },
     );
 
@@ -258,7 +274,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         allocationId: eip.id,
         dependsOn: [igw],
-        subnetId: subnetPublicA.id,
+        subnetId: primary_subnet.id,
         tags: {
           Name: `cndi-nat-gateway_${project_name}`,
         },
@@ -390,7 +406,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_route_table_association_public_a",
       {
         routeTableId: publicRouteTable.id,
-        subnetId: subnetPublicA.id,
+        subnetId: primary_subnet.id,
       },
     );
 
