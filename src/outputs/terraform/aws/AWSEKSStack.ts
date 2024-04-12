@@ -41,7 +41,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     super(scope, name, cndi_config);
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
-    const netconfig = getNetConfig(cndi_config, "aws");
+    let netconfig = getNetConfig(cndi_config, "aws");
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
@@ -60,10 +60,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       | CDKTFProviderAWS.subnet.Subnet
       | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet;
 
-    const node_subnets: Array<
+    let node_subnets: Array<
       | CDKTFProviderAWS.subnet.Subnet
       | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet
     > = [];
+
+    let vpc: CDKTFProviderAWS.vpc.Vpc | CDKTFProviderAWS.dataAwsVpc.DataAwsVpc;
 
     if (netconfig.mode === "encapsulated") {
       const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
@@ -76,24 +78,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         },
       });
 
-      const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
-        this,
-        "cndi_aws_internet_gateway",
-        {
-          vpcId: vpc.id,
-          tags: {
-            Name: `cndi-igw_${project_name}`,
-          },
-        },
-      );
 
-      const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
-        vpc: true,
-        tags: {
-          Name: `cndi-elastic-ip_${project_name}`,
-        },
-        dependsOn: [igw],
-      });
 
       primary_subnet = new CDKTFProviderAWS.subnet.Subnet(
         this,
@@ -129,6 +114,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ),
       ];
     } else if (netconfig.mode === "external") {
+      vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(this, "cndi_aws_vpc", {
+        
+      })
       netconfig = netconfig as CNDINetworkConfigExternalAWS;
       primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
         this,
@@ -141,6 +129,25 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       netconfig = netconfig as any;
       throw new Error(`unsupported network mode: ${netconfig.mode}`);
     }
+
+    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+      this,
+      "cndi_aws_internet_gateway",
+      {
+        vpcId: vpc.id,
+        tags: {
+          Name: `cndi-igw_${project_name}`,
+        },
+      },
+    );
+
+    const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
+      vpc: true,
+      tags: {
+        Name: `cndi-elastic-ip_${project_name}`,
+      },
+      dependsOn: [igw],
+    });
 
     new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
       this,
