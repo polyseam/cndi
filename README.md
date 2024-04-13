@@ -86,13 +86,16 @@ cndi create <owner>/<repo> -t airflow && cd <repo>
 so we can call it out by name, but Templates are just YAML, so they can also be
 loaded from a URL or file path!
 
+When in interactive mode, `cndi` will prompt you for the information a Template
+needs step-by-step.
+
 The first prompt `cndi create` displays asks you where you want to store your
 project on disk, defaulting to a new folder called `<repo>` in the current
-directory.
+working directory.
 
 There will be a few more prompts that are asked for every new CNDI project,
-including asking for GitHub credentials, which CNDI Template you want to use,
-and where you want to deploy your new cluster.
+including asking for GitHub credentials and where you want to deploy your new
+cluster.
 
 These prompts are called
 [core prompts](https://github.com/polyseam/common-blocks/tree/main/common/core-prompts.yaml),
