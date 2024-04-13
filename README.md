@@ -62,13 +62,13 @@ out our [tiny install guide](./docs/install.md).
 
 ## usage 👩‍💻
 
-CNDI is a tool with which to deploy GitOps enabled Kubernetes application
-clusters on any platform as quickly and easily as possible. Every CNDI project
-starts with a Template.
+Use CNDI to deploy GitOps enabled Kubernetes application clusters on any
+platform, as quickly and easily as possible. Every CNDI project starts with a
+Template.
 
 ### create 🚀
 
-he best way to bootstrap a CNDI project is by using cndi create. It's best
+the best way to bootstrap a CNDI project is by using `cndi create`. It's best
 because it is easy and interactive, to some folks it may even feel like _too
 much magic_ 🪄 but fear not! We will explain everything soon.
 
@@ -87,7 +87,7 @@ name, but Templates are just YAML, so they can also be loaded from a URL or file
 path!
 
 The first prompt asks where you want to store your project on disk, defaulting
-to a new folder called <repo> in the current directory.
+to a new folder called `<repo>` in the current directory.
 
 There will be a few more prompts that are asked for every new CNDI project,
 including asking for GitHub credentials, which CNDI Template you want to use,
