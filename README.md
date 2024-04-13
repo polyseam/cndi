@@ -82,12 +82,13 @@ Let's run with that:
 cndi create <owner>/<repo> -t airflow && cd <repo>
 ```
 
-`airflow` is one of the Templates bundled with CNDI, so we can call it out by
-name, but Templates are just YAML, so they can also be loaded from a URL or file
-path!
+[Airflow](https://airflow.apache.org) is one of the Templates bundled with CNDI,
+so we can call it out by name, but Templates are just YAML, so they can also be
+loaded from a URL or file path!
 
-The first prompt asks where you want to store your project on disk, defaulting
-to a new folder called `<repo>` in the current directory.
+The first prompt `cndi create` displays asks you where you want to store your
+project on disk, defaulting to a new folder called `<repo>` in the current
+directory.
 
 There will be a few more prompts that are asked for every new CNDI project,
 including asking for GitHub credentials, which CNDI Template you want to use,
@@ -108,6 +109,8 @@ The last set of questions relate directly to the Template you selected, and
 generally it is fine to accept the defaults if you aren't completely familiar
 with the stack you are deploying.
 
+---
+
 Once you've answered all of the prompts, CNDI will create a number of project
 files we call [outputs](./docs/outputs.md).
 
@@ -125,6 +128,8 @@ a couple things that are important to know now:
 
 The CLI will provide info about the files it is creating for you, then provide a
 link to the new repo where you can watch the GitHub Action deployment progress!
+
+---
 
 ### overwrite ♻️
 
@@ -169,6 +174,8 @@ works. This can be especially insightful when examining a git diff, but
 remember, those files are for machines and you can be productive with CNDI
 without ever reading or understanding them - that's by design.
 
+---
+
 ### run 🌥️
 
 Once you've made changes using `cndi ow`, the next step is to git push a commit
@@ -188,6 +195,8 @@ Calling cndi run doesn't do anything directly with the other half of your config
 pulled into your cluster by [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
 when it has been successfully deployed by [Terraform](https://terraform.io).
 
+---
+
 ### destroy 🗑️
 
 The last cndi command you should know about is `cndi destroy`. This command
@@ -195,6 +204,8 @@ takes no arguments, and it is responsible for pulling and decrypting Terraform
 state, then calling `terraform destroy` for you under the hood, which will blast
 away every resource that cndi has created. Once the command exits successfully,
 you can safely delete your git repo or achive it for reference later.
+
+---
 
 ## Walkthroughs 🥾
 
