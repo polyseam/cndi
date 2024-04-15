@@ -120,7 +120,7 @@ files we call [outputs](./docs/outputs.md).
 We have a dedicated section that covers [outputs](./docs/outputs.md), but there
 a couple things that are important to know now:
 
-1. cndi create will create a GitHub repo on your behalf and push the code
+1. `cndi create` will create a GitHub repo on your behalf and push the code
    ([outputs](./docs/outputs.md)) it generates for you to that repo
 2. All of your responses that are sensitive are written to a `.env` file, and
    that file will not be included in your repo. Instead, CNDI will push these to
@@ -140,9 +140,11 @@ After a Template has been initialized with either cndi init or cndi create ,
 CNDI projects are managed from only 2 files:
 
 `.env` : adheres to the dotenv pattern, its .gitignored, it contains all secret
-values which must not be included in source control `cndi_config.yaml` : this
-file is the center of your cndi project, it provides an abstraction which
-unifies _infrastructure_, _applications_, and _configuration_
+values which must not be included in source control
+
+`cndi_config.yaml` : this file is the center of your cndi project, it provides
+an abstraction which unifies **infrastructure**, **applications**, and
+**configuration**.
 
 Though these files are the only ones required to manage your project as a user,
 they are not natively understood by Infrastructure as Code tools, and they are
