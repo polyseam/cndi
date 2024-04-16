@@ -9,7 +9,7 @@
       "jsr:@cliffy/keycode@1.0.0-rc.4": "jsr:@cliffy/keycode@1.0.0-rc.4",
       "jsr:@cliffy/prompt@^1.0.0-rc.4": "jsr:@cliffy/prompt@1.0.0-rc.4",
       "jsr:@cliffy/table@1.0.0-rc.4": "jsr:@cliffy/table@1.0.0-rc.4",
-      "jsr:@polyseam/cliffy-provider-gh-releases@^0.1.1": "jsr:@polyseam/cliffy-provider-gh-releases@0.1.1",
+      "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0": "jsr:@polyseam/cliffy-provider-gh-releases@0.3.0",
       "jsr:@polyseam/inflate-response@^1.1.2": "jsr:@polyseam/inflate-response@1.1.2",
       "jsr:@polyseam/silky@^1.1.1": "jsr:@polyseam/silky@1.1.1",
       "jsr:@std/archive@0.214.0": "jsr:@std/archive@0.214.0",
@@ -88,8 +88,8 @@
           "jsr:@std/console@0.221"
         ]
       },
-      "@polyseam/cliffy-provider-gh-releases@0.1.1": {
-        "integrity": "3a02a6c683cc92ee1f8423edc2d2486c0a20df3076c6cdb65a30be66a02dc55d",
+      "@polyseam/cliffy-provider-gh-releases@0.3.0": {
+        "integrity": "52254879592ae6b293c1387252fecafe06afbfad803239e60a54897e16585907",
         "dependencies": [
           "jsr:@cliffy/command@^1.0.0-rc.4",
           "jsr:@std/cli@^0.221.0",
@@ -802,7 +802,7 @@
       "jsr:@cliffy/ansi@^1.0.0-rc.4",
       "jsr:@cliffy/command@^1.0.0-rc.4",
       "jsr:@cliffy/prompt@^1.0.0-rc.4",
-      "jsr:@polyseam/cliffy-provider-gh-releases@^0.1.1",
+      "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0",
       "jsr:@polyseam/inflate-response@^1.1.2",
       "jsr:@polyseam/silky@^1.1.1",
       "jsr:@std/assert@^0.221.0",
