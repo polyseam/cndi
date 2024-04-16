@@ -136,13 +136,13 @@ link to the new repo where you can watch the GitHub Action deployment progress!
 
 ### overwrite ♻️
 
-After a Template has been initialized with either cndi init or cndi create ,
+After a Template has been initialized with either `cndi init` or `cndi create` ,
 CNDI projects are managed from only 2 files:
 
 `.env` : adheres to the dotenv pattern, its .gitignored, it contains all secret
 values which must not be included in source control
 
-`cndi_config.yaml` : this file is the center of your cndi project, it provides
+`cndi_config.yaml` : this file is the center of your CNDI project, it provides
 an abstraction which unifies **infrastructure**, **applications**, and
 **configuration**.
 
@@ -155,7 +155,7 @@ code that can be processed by [Terraform](https://terraform.io), and manifests
 which can be processed by [Kubernetes](https://kubernetes.io) through
 [ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
 
-The cndi overwrite command is responsible for taking both your `.env` file and
+The `cndi overwrite` command is responsible for taking both your `.env` file and
 your `cndi_config.yaml` file and transforming them into a set of Kubernetes
 manifests, and Terraform objects.
 
@@ -165,7 +165,7 @@ The `cndi_config.yaml` file is structured into 4 main sections:
 - applications - used to define Helm Charts which should be installed and
   configured
 - cluster_manifests - used for arbitrary Kubernetes configuration
-- infrastructure - used to define infrastructure cndi exposes and optionally raw
+- infrastructure - used to define infrastructure CNDI exposes and optionally raw
   Terraform objects
 
 The workflow is simple, modify your `cndi_config.yaml` fields and call
@@ -195,19 +195,20 @@ The run command is responsible for calling Terraform against all of the objects
 in the `./cndi/terraform/` folder, then encrypting and persisting
 [Terraform state](https://developer.hashicorp.com/terraform/cli/state) in git.
 
-Calling cndi run doesn't do anything directly with the other half of your config
-`./cndi/cluster_manifests`, and that is because those manifests are instead
-pulled into your cluster by [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
-when it has been successfully deployed by [Terraform](https://terraform.io).
+Calling `cndi run` doesn't do anything directly with the other half of your
+config `./cndi/cluster_manifests`, and that is because those manifests are
+instead pulled into your cluster by
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) when it has been
+successfully deployed by [Terraform](https://terraform.io).
 
 ---
 
 ### destroy 🗑️
 
-The last cndi command you should know about is `cndi destroy`. This command
+The last CNDI command you should know about is `cndi destroy`. This command
 takes no arguments, and it is responsible for pulling and decrypting Terraform
 state, then calling `terraform destroy` for you under the hood, which will blast
-away every resource that cndi has created. Once the command exits successfully,
+away every resource that CNDI has created. Once the command exits successfully,
 you can safely delete your git repo or achive it for reference later.
 
 ---
@@ -243,13 +244,13 @@ all the configuration options, check out the
 ## outputs 📂
 
 There are a few other files beyond `cndi_config.yaml` which all play a part in
-your cndi project. To learn more about each file cndi create generated, check
+your CNDI project. To learn more about each file `cndi create` generated, check
 out [CNDI Outputs Guide](./docs/outputs.md).
 
 ## up and running 🏃
 
 Once you have a cluster and know the basics, how can you make the most of it?
-For a guide focused on operating a cndi cluster and suppporting it over time,
+For a guide focused on operating a CNDI cluster and suppporting it over time,
 check out [Up and Running with CNDI Guide](./docs/up-and-running.md).
 
 ## templates 🏗️
@@ -263,7 +264,7 @@ Templates or bump existing requests, check out
 
 ## building cndi 🛠️
 
-If you're hoping to contribute to cndi, please reach out to
+If you're hoping to contribute to CNDI, please reach out to
 [johnstonmatt](https://github.com/johnstonmatt)! To learn more about setting up
 your development environment and other contributor info, check out
 [CNDI Contributor Guide](./docs/contributing.md).
