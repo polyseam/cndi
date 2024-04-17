@@ -1,7 +1,6 @@
 # a demo that is very cool
 
-This doc is going to walk through the "golden path" for CNDI. It uses the GitHub
-CLI for creating GitHub Actions Secrets, but that isn't necessary.
+This doc is going to walk through the "golden path" for CNDI.
 
 1. Ensure you have the GitHub CLI
    [installed and configured](https://docs.github.com/en/github-cli/github-cli/quickstart)
