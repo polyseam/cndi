@@ -55,11 +55,14 @@ CNDI is designed around a GitOps workflow, so all of your cluster configuration
 and infrastructure will be stored as code within a git repo, let's create that
 now!
 
-```bash
-cndi create <owner>/my-repo && cd my-repo
+```shell
+# cndi create <owner>/<repo> && cd <repo>
+
+ cndi create polyseam/my-cndi-cluster && cd my-cndi-cluster
 ```
 
-You will first be prompted to enter the name of your cndi project
+my-cndi-cluster You will first be prompted to enter the name of your cndi
+project
 
 ```
 Please enter a name for your CNDI project: (my-cndi-cluster)
@@ -68,8 +71,8 @@ Please enter a name for your CNDI project: (my-cndi-cluster)
 When you're prompted to choose a template for your project, select the airflow
 template.
 
-```
-Pick a template
+```shell
+"Pick a template"
   basic
 ❯ airflow 
   cnpg
@@ -83,8 +86,8 @@ Next, you'll need to decide where you want to deploy your cluster. For this
 project, choose aws if you're deploying to Amazon Web Services, The prompt will
 appear as follows:
 
-```
-Where do you want to deploy your cluster?
+```shell
+"Where do you want to deploy your cluster?"
 ❯ aws 
   azure
   gcp
@@ -98,7 +101,7 @@ Finally, select a Kubernetes distribution for your deployment. The `eks`
 Kubernetes service that simplifies running Kubernetes applications. The prompt
 will be:
 
-```
+```shell
 Select a distribution
   microk8s
 ❯ eks
@@ -121,7 +124,7 @@ Would you like ArgoCD to connect to your repo using a Git token or SSH key? » t
 What is your git username? () » IamTamika
 Please enter your Git Personal Access Token: () » ****************************
 Please enter your Git Repo URL: () »
-What email address should be used for Let"s Encrypt certificate registration?  » tamika.taylor@untribe.com
+What email address should be used for Lets Encrypt certificate registration?  » tamika.taylor@untribe.com
 Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
 Please select your DNS provider (aws) » aws
 Please enter your AWS Access Key ID: () »  *****************   
@@ -132,7 +135,7 @@ What hostname should ArgoCD be accessible at? » argocd.untribe.com
 Do you want to expose the Airflow UI to the web? (Y/n) » Yes
 What hostname should Airflow be accessible at? » airflow.untribe.com
 What is the URL of the Git repository containing your Airflow DAGs? (https://github.com/polyseam/demo-dag-bag) » https://github.com/polyseam/demo-dag-bag
-Do you want to use your cluster credentials for Airflow's Git Sync? (Y/n) » Yes
+Do you want to use your cluster credentials for Airflows Git Sync? (Y/n) » Yes
 
 created cndi cluster repo at https://github.com/polyseam/my-cndi-cluster
 ```
@@ -180,7 +183,7 @@ To log in, use the username `admin` and the password which is the value of the
 
 <details >
 <summary>
-Attach the load balancer to your domain manually 🌐
+Attach the load balancer to your domain manually (Optional)
 </summary>
 <div>
 
@@ -203,6 +206,13 @@ changes may take a few minutes to propagate.
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
+
+![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
+
+To log in, use the username `admin` and the password which is the value of the
+`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
+
+![.env file](/docs/walkthroughs/eks/img/argocd-admin-password.png)
 
 </div>
 
@@ -248,14 +258,19 @@ Airflow and Argocd
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/eks/img/cndi_config.png)
+![cndi config](/docs/walkthroughs/ec2/img/cndi-config.png)
 
 - Go to the `cndi_config.yaml`
-- In the `infrastructure.cndi.nodes` section, add increase the number of nodes
-  and save the file
+- In the `infrastructure.cndi.nodes` section, add a new airflow node and save
+  the file
 - Run `cndi ow`
-- Commit changes
-- Push your code changes to the repository
+- `Add`, `commit` and `push` the config to your GitHub repository:
+
+```shell
+git add .
+git commit -m "add instance"
+git push
+```
 
 ## destroying resources in the cluster! 💣
 
@@ -263,8 +278,13 @@ Airflow and Argocd
 
 - Delete that application or manifest from your `cndi_config.yaml`
 - Run `cndi ow`
-- Commit changes
-- Push your code changes to the repository
+- `Add`, `commit` and `push` the config to your GitHub repository:
+
+```shell
+git add .
+git commit -m "add instance"
+git push
+```
 
 **If you want to take down the entire cluster run:**
 

@@ -51,149 +51,101 @@ Run the following command within your terminal to download and install cndi:
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-## create your cndi repository 📂
+## create your cndi project 📂
 
 CNDI is designed around a GitOps workflow, so all of your cluster configuration
 and infrastructure will be stored as code within a git repo, let's create that
 now!
 
-```bash
-gh repo create my-cndi-cluster --private --clone && cd my-cndi-cluster
+```shell
+# cndi create <owner>/<repo> && cd <repo>
+
+ cndi create polyseam/my-cndi-cluster && cd my-cndi-cluster
 ```
 
-## creating cluster config with cndi templates using the interactive cli 🛠️
+my-cndi-cluster You will first be prompted to enter the name of your cndi
+project
 
-Now that we have a repo, let's use `cndi` to generate all of our Infrastructure
-as Code and Cluster Configuration:
+```
+Please enter a name for your CNDI project: (my-cndi-cluster)
+```
+
+When you're prompted to choose a template for your project, select the airflow
+template.
 
 ```shell
-cndi init --interactive
+"Pick a template"
+  basic
+❯ airflow 
+  cnpg
+  neo4j
+  mssqlserver
 ```
 
-You will get an interactive prompt where you'll name your project, then one to
-specify the CNDI template you want.
+Make sure airflow is highlighted and press Enter to confirm your selection.
 
-For this project select the `aks/airflow` Template.
+Next, you'll need to decide where you want to deploy your cluster. For this
+project, choose azure if you're deploying to Microsoft, The prompt will appear
+as follows:
 
 ```shell
-? Pick a template
-   avm/basic
-   gce/basic
-   ec2/basic
- ❯ aks/airflow
-   ec2/airflow
-   avm/airflow
-   gce/airflow
+"Where do you want to deploy your cluster?"
+  aws 
+❯ azure
+  gcp
+  dev
 ```
 
-Below is the list of all of the interactive prompt values that should be
-supplied for this project:
+Ensure `azure` is highlighted and press Enter to proceed.
 
-- **Cndi Project Name**: _name of project_
-- **Template**: _list of templates to choose from_
-
----
-
-- **GitHub Username**: _a user's handle on GitHub._
-- **GitHub Repository URL**: _the url for the GitHub repository that will hold
-  all cluster configuration_
-- **GitHub Personal Access Token**: _the access token CNDI will use to access
-  your repo for cluster creation and synchronization_
-
----
-
-- **Azure Subscription ID**: _access keys are long-term credentials for an IAM
-  user_
-- **Azure Client ID**: _access keys are long-term credentials for an IAM user_
-- **Azure Client Secret**: _region where the infastructure is being created_
-- **Azure Tenant ID**: _access keys are long-term credentials for an IAM user_
-- **Azure Region**: _region where the infastructure is being created_
-
----
-
-- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
-  synchronize Airflow DAGs_
-- **Git Password for Airflow DAG Storage**: _a personal access token used to
-  synchronize Airflow DAGs_
-- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
-  will be stored_
-
----
-
-- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
-  be hosted_
-- **Domain name you want Airflow to be accessible on**: _domain where Airflow
-  will be hosted_
-
----
-
-- **Email address you want to use for lets encrypt:** _an email for lets encrypt
-  to use when generating certificates_
-- **Username you want to use for airflow cnpg database:** _username you want to
-  use for airflow database_
-- **Password you want to use for airflow cnpg database:** _password you want to
-  use for airflow database_
-- **Name of the postgresql database you want to use for airflow cnpg database:**
-  _name of the postgresql database you want to use for airflow cnpg database_
-
-![cndi-init](/docs/walkthroughs/aks/img/cndi-init-interactive-1.png)
-
-This process will generate a `cndi_config.yaml` file, and `cndi` directory at
-the root of your repository containing all the necessary files for the
-configuration. It will also store all the values in a file called `.env` at the
-root of your repository.
-
-The structure of the generated CNDI project will be something like this:
+Finally, select a Kubernetes distribution for your deployment. The `aks` option
+is for deploying on Azure, offering a managed Kubernetes service that simplifies
+running Kubernetes applications. The prompt will be:
 
 ```shell
-├── 📁 cndi
-│   ├── 📁 cluster_manifests
-│   │   ├── 📁 applications
-│   │   │   └── airflow.application.json
-│   │   ├── argo-ingress.json
-│   │   ├── cert-manager-cluster-issuer.json
-│   │   └── git-credentials-secret.json
-│   └── 📁 terraform
-│       ├── airflow-nodes.cndi-node.tf.json
-│       └── etc 
-├── cndi_config.yaml
-├── .env
-├── .gitignore
-├── .github
-└── README.md
+Select a distribution
+  microk8s
+❯ aks
 ```
 
-For a breakdown of all of these files, checkout the
-[outputs](/README.md#outputs-📂) section of the repo's main README.
+After confirming that `aks` is highlighted, press `Enter` to finalize your
+choice. You will then need to provide specific information at various
+interactive prompts. Below is a comprehensive list of the prompts used during
+this init process:
 
-## upload environment variables to GitHub ⬆️
+```
+cndi create polyseam/my-cndi-cluster
 
-GitHub Actions is responsible for calling the `cndi run` command to deploy our
-cluster, so it is important that our secrets are available in the Actions
-runtime. However we don't want these to be visible in our source code, so we
-will use GitHub Actions Secrets to store them. The
-[gh](https://github.com/cli/cli) CLI makes this very easy.
+Please confirm the destination directory for your CNDI project: »  (C:\Users\Taylor\polyseam\my-cndi-cluster)
+Please enter a name for your CNDI project: (my-cndi-cluster) » my-cndi-cluster
+Pick a template » airflow
+Where do you want to deploy your cluster? » azure
+Select a distribution » aks
+Would you like ArgoCD to connect to your repo using a Git token or SSH key? » token
+What is your git username? () » IamTamika
+Please enter your Git Personal Access Token: () » ****************************
+Please enter your Git Repo URL: () »
+What email address should be used for Lets Encrypt certificate registration?  » tamika.taylor@untribe.com
+Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
+Please select your DNS provider (azure) » azure
+Please enter your Azure Subscription ID: () »  *****************   
+Please enter your Azure Client ID: () » ******************
+Please enter your Azure Client Secret: () »  *****************   
+Please enter your Azure Tenant ID: () » ******************
+Please enter your Azure Region: (us-east-1) » us-east-1 
+Do you want to expose ArgoCD with an Ingress? (Y/n) » Yes
+What hostname should ArgoCD be accessible at? » argocd.untribe.com
+Do you want to expose the Airflow UI to the web? (Y/n) » Yes
+What hostname should Airflow be accessible at? » airflow.untribe.com
+What is the URL of the Git repository containing your Airflow DAGs? (https://github.com/polyseam/demo-dag-bag) » https://github.com/polyseam/demo-dag-bag
+Do you want to use your cluster credentials for Airflows Git Sync? (Y/n) » Yes
 
-```shell
-gh secret set -f .env
-# if this does not complete the first time, try running it again!
+created cndi cluster repo at https://github.com/polyseam/my-cndi-cluster
 ```
 
-![GitHub secrets](/docs/walkthroughs/aks/img/upload-git-secrets.png)
-
----
-
-## deploy your templated cluster configration 🚀
-
-Once all the config is created and environment variables are uploaded to GitHub,
-add, commit and push the config to your GitHub repository:
-
-```shell
-git add .
-git status # take a quick look and make sure these are all files you want to push
-git commit -m "initial commit"
-git push --set-upstream origin main
-```
+Once complete you should click on the link of the newly created repo cluster,
+and scroll down to the readme for more infomation about about your airflow
+deployment
 
 You should now see the cluster configuration has been uploaded to GitHub:
 
@@ -218,63 +170,72 @@ project.
 
 ---
 
-## attach the load balancer to your domain 🌐
+## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
+
+Instead of manually creating a CNAME record in your domain's DNS settings, if
+you enabled & configured ExternalDNS during the cndi init process then
+ExternalDNS will automatically create a CNAME, or A record in your domain
+registar, pointing to your load balancer's public host. This process eliminates
+the need for manual DNS record management. If everything is working correctly
+you should now open the domain name you've assigned for ArgoCD in your browser
+to see the ArgoCD login page. The DNS changes may take a few minutes to
+propagate
+
+- (Optional if you dont have an domain name)
+  [Here's a guide of how to connect to your AKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/aks/port-forwarding.md)
+
+![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0.png)
+
+To log in, use the username `admin` and the password which is the value of the
+`ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
+
+<details >
+<summary>
+Attach the load balancer to your domain manually (Optional)
+</summary>
+<div>
 
 At the end of the cndi run there is also an output called `public host`, which
-is the **IP address** (A record) of the load Balancer thats attached to your AKS
+is the **DNS** (CNAME) of the load Balancer thats attached to your AKS
 instances.
 
 ![cndi outputs](/docs/walkthroughs/aks/img/outputs.png)
 
 - Copy `public host`
 - Go to your custom domain,
-- Create an A record to route traffic to the load balancer IP address
+- Create an CNAME record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
-![google domains](/docs/walkthroughs/aks/img/google-domains-a-record.png)
+![google domains](/docs/walkthroughs/aks/img/google-domains-cname.png)
+
+If everything is working correctly you should now open the domain name you've
+assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
+changes may take a few minutes to propagate.
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your AKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/aks/port-forwarding.md)
-
-Wait 2 to 5 mins to open the domain name you've assigned for ArgoCD in your
-browser in order to see the Argocd UI Login page.
 
 ![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
+
+![.env file](/docs/walkthroughs/aks/img/argocd-admin-password.png)
+
+</div>
+
+</details>
+
+<br>
+
 ![.env file](/docs/walkthroughs/aks/img/argocd-admin-password.png)
 
 ![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-1.png)
-
-Notice that the `cluster_manifests` in the GitHub repository matches config in
-the ArgoCD UI
-
-```shell
-└── 📁 cndi
-   └── 📁 cluster_manifests
-       ├── 📁 applications
-       │   └── airflow.application.json
-       ├────── git-credentials-secret.json
-       ├────── cert-manager-cluster-issuer.json
-       └────── argo-ingress.json
-```
 
 Verify all applications and manifests in the GitHub repository are present and
 their status is healthy in the ArgoCD UI
 
 ![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-2.png)
-
-## verify that Airflow is accessible on the chosen domain 🧐
-
-After setting up your Airflow application on the chosen domain, it is necessary
-to verify that Airflow is accessible. To do this, the user can simply go to the
-chosen domain and see if they can see Airflow's login page. The default username
-is `admin` and the password is `admin`. If the page is accessible, then the user
-can log in and begin using Airflow. If not, the user should go back and make
-sure the previous steps were done correctly.
-
-![Airflow UI](/docs/walkthroughs/aks/img/airflow-ui-0.png)
 
 ## verify Airflow is connected to the private DAG repository 🧐
 
@@ -294,16 +255,19 @@ Airflow and ArgoCD.
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/aks/img/cndi_config.png)
+![cndi config](/docs/walkthroughs/aks/img/cndi-config.png)
 
 - Go to the `cndi_config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save
   the file
 - Run `cndi ow`
-- Commit changes
-- Push your code changes to the repository
-- You can confirm your resources are being created with the github actions or in
-  the google console
+- `Add`, `commit` and `push` the config to your GitHub repository:
+
+```shell
+git add .
+git commit -m "add instance"
+git push
+```
 
 ## destroying resources in the cluster! 💣
 
@@ -311,8 +275,13 @@ Airflow and ArgoCD.
 
 - Delete that application or manifest from your `cndi_config.yaml`
 - Run `cndi ow`
-- Commit changes
-- Push your code changes to the repository
+- `Add`, `commit` and `push` the config to your GitHub repository:
+
+```shell
+git add .
+git commit -m "destroy instance"
+git push
+```
 
 **If you want to take down the entire cluster run:**
 
