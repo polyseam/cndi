@@ -68,7 +68,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     let vpc: CDKTFProviderAWS.vpc.Vpc | CDKTFProviderAWS.dataAwsVpc.DataAwsVpc;
 
     if (netconfig.mode === "encapsulated") {
-      const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
+      vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
         cidrBlock: "10.0.0.0/16",
         enableDnsHostnames: true,
         enableDnsSupport: true,
@@ -77,8 +77,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           [`kubernetes.io/cluster/${project_name}`]: "owned",
         },
       });
-
-
 
       primary_subnet = new CDKTFProviderAWS.subnet.Subnet(
         this,
@@ -114,9 +112,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ),
       ];
     } else if (netconfig.mode === "external") {
-      vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(this, "cndi_aws_vpc", {
-        
-      })
+      vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(
+        this,
+        "cndi_aws_vpc",
+        {},
+      );
       netconfig = netconfig as CNDINetworkConfigExternalAWS;
       primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
         this,
@@ -126,6 +126,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         },
       );
     } else {
+      // deno-lint-ignore no-explicit-any
       netconfig = netconfig as any;
       throw new Error(`unsupported network mode: ${netconfig.mode}`);
     }
@@ -390,27 +391,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
-      this,
-      "cndi_aws_route_table_association_private_a",
-      {
-        routeTableId: privateRouteTable.id,
-        subnetId: subnetPrivateA.id,
-      },
-    );
+    for (const subnet of node_subnets) {
+      new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+        this,
+        `cndi_aws_route_table_association_${subnet.id}`,
+        {
+          routeTableId: privateRouteTable.id,
+          subnetId: subnet.id,
+        },
+      );
+    }
 
     new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
       this,
-      "cndi_aws_route_table_association_private_b",
-      {
-        routeTableId: privateRouteTable.id,
-        subnetId: subnetPrivateB.id,
-      },
-    );
-
-    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
-      this,
-      "cndi_aws_route_table_association_public_a",
+      "cndi_aws_route_table_association_primary",
       {
         routeTableId: publicRouteTable.id,
         subnetId: primary_subnet.id,
@@ -746,6 +740,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     let nodeGroupIndex = 0;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
+      const nodeSubnet = node_subnets[nodeGroupIndex % node_subnets.length];
       const count = nodeGroup?.count || 1;
       const maxCount = nodeGroup?.max_count;
       const minCount = nodeGroup?.min_count;
@@ -812,7 +807,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           nodeRoleArn: computeRole.arn,
           scalingConfig,
           capacityType: "ON_DEMAND",
-          subnetIds: [subnetPrivateA.id],
+          subnetIds: [nodeSubnet.id],
           launchTemplate: {
             id: nodegroupLaunchTemplate.id,
             version: `${nodegroupLaunchTemplate.latestVersion}`,
