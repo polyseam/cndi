@@ -112,12 +112,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ),
       ];
     } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalAWS;
       vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(
         this,
         "cndi_aws_vpc",
         {},
       );
-      netconfig = netconfig as CNDINetworkConfigExternalAWS;
       primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
         this,
         "cndi_aws_subnet_primary",

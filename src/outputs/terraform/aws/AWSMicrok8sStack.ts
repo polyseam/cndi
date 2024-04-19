@@ -18,8 +18,14 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalAWS,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
+import getNetConfig from "../netconfig.ts";
 
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
 
@@ -29,26 +35,6 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
     const nodeList: Array<{ name: string; id: string }> = [];
-
-    const vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
-      cidrBlock: "10.0.0.0/16",
-      enableDnsHostnames: true,
-      enableDnsSupport: true,
-      tags: {
-        Name: `CNDIVPC_${project_name}`,
-      },
-    });
-
-    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
-      this,
-      `cndi_aws_internet_gateway`,
-      {
-        tags: {
-          Name: `CNDIInternetGateway_${project_name}`,
-        },
-        vpcId: vpc.id,
-      },
-    );
 
     // TODO: should this be further filtered according to instance_type avaiability?
     const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
@@ -60,15 +46,65 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const cndiPrimarySubnet = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      `cndi_aws_subnet`,
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 0),
-        cidrBlock: "10.0.1.0/24",
-        mapPublicIpOnLaunch: true,
+    let netconfig = getNetConfig(cndi_config, "aws");
+
+    let vpc: CDKTFProviderAWS.vpc.Vpc | CDKTFProviderAWS.dataAwsVpc.DataAwsVpc;
+    let primary_subnet:
+      | CDKTFProviderAWS.subnet.Subnet
+      | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet;
+    const _node_subnets: Array<
+      | CDKTFProviderAWS.subnet.Subnet
+      | CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet
+    > = [];
+
+    if (netconfig.mode === "encapsulated") {
+      vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
+        cidrBlock: "10.0.0.0/16",
+        enableDnsHostnames: true,
+        enableDnsSupport: true,
         tags: {
-          Name: `CNDIPrimarySubnet_${project_name}`,
+          Name: `CNDIVPC_${project_name}`,
+        },
+      });
+      primary_subnet = new CDKTFProviderAWS.subnet.Subnet(
+        this,
+        `cndi_aws_subnet`,
+        {
+          availabilityZone: Fn.element(availabilityZones.names, 0),
+          cidrBlock: "10.0.1.0/24",
+          mapPublicIpOnLaunch: true,
+          tags: {
+            Name: `CNDIPrimarySubnet_${project_name}`,
+          },
+          vpcId: vpc.id,
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalAWS;
+      vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(
+        this,
+        "cndi_aws_vpc",
+        {},
+      );
+      primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
+        this,
+        "cndi_aws_subnet",
+        {
+          id: netconfig.aws.primary_subnet,
+        },
+      );
+    } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
+      throw new Error(`unsupported network mode: ${netconfig.mode}`);
+    }
+
+    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+      this,
+      `cndi_aws_internet_gateway`,
+      {
+        tags: {
+          Name: `CNDIInternetGateway_${project_name}`,
         },
         vpcId: vpc.id,
       },
@@ -92,7 +128,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       {
         count: 1,
         routeTableId: routeTable.id,
-        subnetId: cndiPrimarySubnet.id,
+        subnetId: primary_subnet.id,
       },
     );
 
@@ -255,7 +291,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
               deleteOnTermination: true,
             },
             userDataReplaceOnChange: false,
-            subnetId: cndiPrimarySubnet.id,
+            subnetId: primary_subnet.id,
             vpcSecurityGroupIds: [securityGroup.id],
           },
         );
@@ -269,7 +305,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const cndiNLB = new CDKTFProviderAWS.lb.Lb(this, `cndi_aws_lb`, {
       internal: false,
       loadBalancerType: "network",
-      subnets: [cndiPrimarySubnet.id],
+      subnets: [primary_subnet.id],
       tags: {
         Name: `cndi-nlb_${project_name}`,
       },
