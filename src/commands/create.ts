@@ -48,6 +48,7 @@ type EchoCreateOptions = {
   output?: string;
   deploymentTargetLabel?: string;
   responsesFile: string;
+  skipPush?: boolean;
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -64,8 +65,9 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
   const cndiCreateDeploymentTargetLabel = options.deploymentTargetLabel
     ? ` --deployment-target-label ${options.deploymentTargetLabel}`
     : "";
+  const cndiCreateSkipPush = options.skipPush ? " --skip-push" : "";
   console.log(
-    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateOutput}${cndiCreateDeploymentTargetLabel}${cndiCreateSet}\n`,
+    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateOutput}${cndiCreateDeploymentTargetLabel}${cndiCreateSet}${cndiCreateSkipPush}\n`,
   );
 };
 
@@ -91,6 +93,7 @@ const createCommand = new Command()
       default: path.join(Deno.cwd(), "cndi_responses.yaml"),
     },
   )
+  .option("--skip-push", "Skip pushing to remote repository")
   .option(
     `-s, --set <set>`,
     `Override a response, usage: --set responseName=responseValue`,
@@ -120,6 +123,7 @@ const createCommand = new Command()
   )
   .action(async (options, slug) => {
     echoCreate(options, slug);
+    const skipPush = options.skipPush;
     const interactive = !options.nonInteractive;
     let template: string | undefined = options?.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
@@ -460,6 +464,7 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
+      skipPush,
     });
   });
 
