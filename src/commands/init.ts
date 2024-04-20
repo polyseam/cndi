@@ -41,11 +41,13 @@ type EchoInitOptions = {
   deploymentTargetLabel?: string;
   keep?: boolean;
   create?: boolean;
+  skipPush?: boolean;
 };
 
 const echoInit = (options: EchoInitOptions) => {
   const cndiInit = "cndi init";
   const cndiInitCreate = options.create ? " --create" : "";
+  const cndiInitSkipPush = options.skipPush ? " --skip-push" : "";
   const cndiInitInteractive = options.interactive ? " --interactive" : "";
   const cndiInitTemplate = options.template
     ? ` --template ${options.template}`
@@ -59,7 +61,7 @@ const echoInit = (options: EchoInitOptions) => {
     ? ` --deployment-target-label ${options.deploymentTargetLabel}`
     : "";
   console.log(
-    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}\n`,
+    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}${cndiInitSkipPush}\n`,
   );
 };
 
@@ -110,6 +112,9 @@ const initCommand = new Command()
     "-c, --create",
     "Create a new cndi cluster repo",
   )
+  .option("--skip-push", "Skip pushing to the remote repository", {
+    depends: ["create"],
+  })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options.output ?? Deno.cwd();
