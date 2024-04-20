@@ -12,7 +12,6 @@ export default function getNetConfig(
   provider: CNDIProvider,
 ) {
   let netconfig = cndi_config?.infrastructure?.cndi?.network;
-
   if (netconfig?.mode === "external") {
     if (provider === "azure") {
       netconfig = netconfig as CNDINetworkConfigExternalAzure;
@@ -40,13 +39,14 @@ export default function getNetConfig(
       netconfig = netconfig as CNDINetworkConfigExternalAWS;
       const vpc_id = netconfig?.aws?.vpc_id;
       const primary_subnet = netconfig?.aws?.primary_subnet;
-      const private_subnets = netconfig?.aws?.private_subnets;
+      const private_subnets = netconfig?.aws?.private_subnets ?? [];
 
       if (!vpc_id) {
         throw new Error('no "network" provided in aws "external" mode');
-      }
-      if (!private_subnets) {
-        throw new Error('no "subnets" provided in aws "external" mode');
+      } else {
+        if (!primary_subnet) {
+          throw new Error('no "primary_subnet" provided in "external" mode');
+        }
       }
 
       return {

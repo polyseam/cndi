@@ -84,7 +84,9 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       vpc = new CDKTFProviderAWS.dataAwsVpc.DataAwsVpc(
         this,
         "cndi_aws_vpc",
-        {},
+        {
+          id: netconfig.aws.vpc_id,
+        },
       );
       primary_subnet = new CDKTFProviderAWS.dataAwsSubnet.DataAwsSubnet(
         this,
