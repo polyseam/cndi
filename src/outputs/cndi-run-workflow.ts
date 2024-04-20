@@ -66,6 +66,16 @@ const generalSteps = [
     run: "cndi run",
   },
   {
+    id: "upload-outputs",
+    uses: "actions/upload-artifact@v4",
+    with: {
+      name: "terraform-output.json",
+      path: "./cndi/terraform/terraform-output.json",
+      overwrite: true,
+      "compression-level": 0, // this thing is like 100 bytes, don't compress
+    },
+  },
+  {
     id: "lock-release",
     uses: "github/lock@v2.0.1",
     if: "always()", // always release the lock even if `cndi run` fails
@@ -81,89 +91,113 @@ function getSteps(sourceRef?: string) {
     return generalSteps;
   }
 
-  return [{
-    name: "welcome",
-    run: `echo "welcome to cndi@${sourceRef}!"`,
-  }, {
-    id: "lock-check",
-    uses: "github/lock@v2.0.1",
-    with: {
-      mode: "check",
-      environment: "global",
+  return [
+    {
+      name: "welcome",
+      run: `echo "welcome to cndi@${sourceRef}!"`,
     },
-  }, {
-    name: "fail if locked",
-    if: "${{ steps.lock-check.outputs.locked != 'false' }}",
-    run: "echo \"cndi cannot 'run': deployment in progress\" && exit 1",
-  }, {
-    id: "lock-acquire",
-    uses: "github/lock@v2.0.1",
-    with: {
-      mode: "lock",
-      environment: "global",
+    {
+      id: "lock-check",
+      uses: "github/lock@v2.0.1",
+      with: {
+        mode: "check",
+        environment: "global",
+      },
     },
-  }, {
-    name: "checkout cndi repo",
-    uses: "actions/checkout@v3",
-    with: {
-      repository: "polyseam/cndi",
-      "fetch-depth": 0,
-      ref: sourceRef,
+    {
+      name: "fail if locked",
+      if: "${{ steps.lock-check.outputs.locked != 'false' }}",
+      run: "echo \"cndi cannot 'run': deployment in progress\" && exit 1",
     },
-  }, {
-    name: "setup deno",
-    uses: "denoland/setup-deno@v1",
-  }, {
-    name: "build cndi",
-    run: "deno task build-linux",
-  }, {
-    name: "persist cndi",
-    run:
-      "mkdir -p $HOME/.cndi/bin && mv ./dist/cndi-linux $HOME/.cndi/bin/cndi",
-  }, {
-    name: "cndi install",
-    run: "$HOME/.cndi/bin/cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
-  }, {
-    name: "checkout repo",
-    uses: "actions/checkout@v3",
-    with: {
-      "fetch-depth": 0,
+    {
+      id: "lock-acquire",
+      uses: "github/lock@v2.0.1",
+      with: {
+        mode: "lock",
+        environment: "global",
+      },
     },
-  }, {
-    name: "install awscli 1",
-    run: "pip install -U awscli",
-  }, {
-    name: "cndi run",
-    run: "$HOME/.cndi/bin/cndi run",
-    env: {
-      ARM_REGION: "${{ vars.ARM_REGION }}",
-      AWS_REGION: "${{ vars.AWS_REGION }}",
-      GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
-      GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
-      GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
-      SSH_PUBLIC_KEY: "${{ secrets.SSH_PUBLIC_KEY }}",
-      TERRAFORM_STATE_PASSPHRASE: "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
-      SEALED_SECRETS_PRIVATE_KEY: "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
-      SEALED_SECRETS_PUBLIC_KEY: "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
-      ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
-      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
-      ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
-      ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
-      ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
-      ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
-      CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+    {
+      name: "checkout cndi repo",
+      uses: "actions/checkout@v3",
+      with: {
+        repository: "polyseam/cndi",
+        "fetch-depth": 0,
+        ref: sourceRef,
+      },
     },
-  }, {
-    id: "lock-release",
-    uses: "github/lock@v2.0.1",
-    if: "always()", // always release the lock even if `cndi run` fails
-    with: {
-      mode: "unlock",
-      environment: "global",
+    {
+      name: "setup deno",
+      uses: "denoland/setup-deno@v1",
     },
-  }];
+    {
+      name: "build cndi",
+      run: "deno task build-linux",
+    },
+    {
+      name: "persist cndi",
+      run:
+        "mkdir -p $HOME/.cndi/bin && mv ./dist/cndi-linux $HOME/.cndi/bin/cndi",
+    },
+    {
+      name: "cndi install",
+      run: "$HOME/.cndi/bin/cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
+    },
+    {
+      name: "checkout repo",
+      uses: "actions/checkout@v3",
+      with: {
+        "fetch-depth": 0,
+      },
+    },
+    {
+      name: "install awscli 1",
+      run: "pip install -U awscli",
+    },
+    {
+      name: "cndi run",
+      run: "$HOME/.cndi/bin/cndi run",
+      env: {
+        ARM_REGION: "${{ vars.ARM_REGION }}",
+        AWS_REGION: "${{ vars.AWS_REGION }}",
+        GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
+        GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
+        GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
+        SSH_PUBLIC_KEY: "${{ secrets.SSH_PUBLIC_KEY }}",
+        TERRAFORM_STATE_PASSPHRASE: "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
+        SEALED_SECRETS_PRIVATE_KEY: "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
+        SEALED_SECRETS_PUBLIC_KEY: "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
+        ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
+        AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
+        AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
+        GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
+        ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+        ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
+        ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
+        ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+        CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+      },
+    },
+    {
+      id: "upload-outputs",
+      uses: "actions/upload-artifact@v4",
+      with: {
+        name: "terraform-output.json",
+        path: "./cndi/terraform/terraform-output.json",
+        overwrite: true,
+        "compression-level": 0,
+      },
+    },
+    {
+      id: "lock-release",
+      uses: "github/lock@v2.0.1",
+      if: "always()", // always release the lock even if `cndi run` fails
+      with: {
+        mode: "unlock",
+        environment: "global",
+      },
+    },
+  ];
 }
 
 const getWorkflowYaml = (sourceRef?: string, disable = false) => {

@@ -4,7 +4,12 @@ import pullStateForRun from "src/tfstate/git/read-state.ts";
 import pushStateFromRun from "src/tfstate/git/write-state.ts";
 
 import setTF_VARs from "src/setTF_VARs.ts";
-import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getPathToTerraformBinary,
+  getPrettyJSONString,
+  loadJSONC,
+} from "src/utils.ts";
 
 import { PROCESS_ERROR_CODE_PREFIX } from "consts";
 
@@ -163,6 +168,55 @@ const runCommand = new Command()
       await emitExitEvent(1403);
       Deno.exit(1403);
     }
+
+    try {
+      console.log(ccolors.faded("\n-- terraform output --\n"));
+
+      const terraformOutputCommand = new Deno.Command(pathToTerraformBinary, {
+        args: [
+          `-chdir=${pathToTerraformResources}`,
+          "output",
+          "-json",
+        ],
+        stderr: "piped",
+        stdout: "piped",
+      });
+
+      const terraformOutputChildProcess = terraformOutputCommand.spawn();
+      const dest = path.join(pathToTerraformResources, "terraform_output.json");
+      const outputJson = Deno.openSync(dest, { write: true });
+
+      for await (const chunk of terraformOutputChildProcess.stdout) {
+        outputJson.write(chunk);
+      }
+
+      for await (const chunk of terraformOutputChildProcess.stderr) {
+        Deno.stderr.write(chunk);
+      }
+
+      const status = await terraformOutputChildProcess.status;
+
+      console.log("terraform-output.json");
+      console.log(getPrettyJSONString(await loadJSONC(dest)));
+
+      // if `terraform output` fails, exit with the code
+      if (status.code !== 0) {
+        const cndiExitCode = parseInt(
+          `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
+        );
+        await emitExitEvent(cndiExitCode);
+        Deno.exit(status.code);
+      }
+    } catch (err) {
+      console.log(
+        runLabel,
+        ccolors.error("failed to spawn 'terraform output'"),
+      );
+      console.log(ccolors.caught(err));
+      await emitExitEvent(1404);
+      Deno.exit(1404);
+    }
+
     await emitExitEvent(0);
   });
 
