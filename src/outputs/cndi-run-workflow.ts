@@ -69,8 +69,8 @@ const generalSteps = [
     id: "upload-outputs",
     uses: "actions/upload-artifact@v4",
     with: {
-      name: "terraform-output.json",
-      path: "./cndi/terraform/terraform-output.json",
+      name: "terraform_output.json",
+      path: "./cndi/terraform/terraform_output.json",
       overwrite: true,
       "compression-level": 0, // this thing is like 100 bytes, don't compress
     },
@@ -182,8 +182,8 @@ function getSteps(sourceRef?: string) {
       id: "upload-outputs",
       uses: "actions/upload-artifact@v4",
       with: {
-        name: "terraform-output.json",
-        path: "./cndi/terraform/terraform-output.json",
+        name: "terraform_output.json",
+        path: "./cndi/terraform/terraform_output.json",
         overwrite: true,
         "compression-level": 0,
       },
