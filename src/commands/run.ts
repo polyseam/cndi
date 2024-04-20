@@ -184,7 +184,7 @@ const runCommand = new Command()
 
       const terraformOutputChildProcess = terraformOutputCommand.spawn();
       const dest = path.join(pathToTerraformResources, "terraform_output.json");
-      const outputJson = Deno.openSync(dest, { write: true });
+      const outputJson = Deno.openSync(dest, { write: true, create: true });
 
       for await (const chunk of terraformOutputChildProcess.stdout) {
         outputJson.write(chunk);
