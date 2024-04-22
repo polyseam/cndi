@@ -97,7 +97,7 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --workflow-ref <ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi workflow with",
     {
       hidden: true,
@@ -392,7 +392,7 @@ const initCommand = new Command()
     if (deployment_target_provider !== "dev") {
       await stageFile(
         path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
+        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
       );
     }
 
