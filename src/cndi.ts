@@ -74,12 +74,6 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
-    .globalOption("-q, --quiet", "Suppress non-critical output")
-    .globalAction(({ quiet }) => {
-      if (quiet) {
-        console.log = () => {};
-      }
-    })
     .command("create", createCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
