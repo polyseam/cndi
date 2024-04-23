@@ -39,5 +39,22 @@ If you are using `microk8s` as your distribution, it is sometimes necessary to
 debug the system by running commands directly on the cluster. This is not the
 intended way to interact with your cluster. but sometimes bad things happen.
 
-To access your cluster, find the command which is shown at the end of the
-successeful `cndi run` job in GitHub Actions.
+To access your cluster, please use the command exported as `get_kubeconfig_command`
+when you run the following command:
+
+```bash
+cndi show-outputs
+# example output:
+get_kubeconfig_command = "ssh -i 'cndi_rsa' ubuntu@my-node.compute-1.amazonaws.com -t 'sudo microk8s config'"
+public_host = "tf-lb-myloadbalancer.elb.us-east-1.amazonaws.com"
+resource_group_url = "https://us-east-1.console.aws.amazon.com/resource-groups/group/cndi-rg_my-project"
+# ...
+```
+
+`cndi show-outputs` and the resulting `get_kubeconfig_command` must both be run inside of your repository. When we get the output we must replace the existing `clusters[0].server` value, which is typically a private IP, with the public address for the node, in the above case `my-node.compute-1.amazonaws.com`. This also requires that the port to expose the cluster `16443` is open to the internet.
+
+To use portforwarding to access the cluster after this configuration is set, run the following command:
+
+```bash
+```
+
