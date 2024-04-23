@@ -97,7 +97,7 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --workflow-ref <ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi workflow with",
     {
       hidden: true,
@@ -156,7 +156,7 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.log(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
 
         console.error(
           initLabel,
@@ -177,7 +177,7 @@ const initCommand = new Command()
           >;
         }
       } catch (errorParsingResponsesFile) {
-        console.log(ccolors.caught(errorParsingResponsesFile, 2001));
+        console.error(ccolors.caught(errorParsingResponsesFile, 2001));
 
         console.error(
           initLabel,
@@ -342,7 +342,7 @@ const initCommand = new Command()
           },
         );
       } catch (e) {
-        console.log(e.message);
+        console.error(e.message);
         await emitExitEvent(e.cause);
         Deno.exit(e.cause);
       }
@@ -392,7 +392,7 @@ const initCommand = new Command()
     if (deployment_target_provider !== "dev") {
       await stageFile(
         path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
+        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
       );
     }
 

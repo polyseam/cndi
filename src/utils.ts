@@ -544,7 +544,7 @@ const getErrorDiscussionLinkMessageForCode = (code: number): string => {
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-  if (exit_code) console.log(getErrorDiscussionLinkMessageForCode(exit_code));
+  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
   if (isDebug) console.log("\nevent_uuid", event_uuid);
   console.log();
 }

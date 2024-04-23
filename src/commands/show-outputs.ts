@@ -1,24 +1,25 @@
 import { ccolors, Command, path } from "deps";
 
-import pullStateForRun from "src/tfstate/git/read-state.ts";
-import pushStateFromRun from "src/tfstate/git/write-state.ts";
+import pullStateForShowOutputs from "src/tfstate/git/read-state.ts";
 
 import setTF_VARs from "src/setTF_VARs.ts";
+
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { PROCESS_ERROR_CODE_PREFIX } from "consts";
 
-const runLabel = ccolors.faded("\nsrc/commands/run.ts:");
+const showoutputsLabel = ccolors.faded("\nsrc/commands/showoutputs.ts:");
 
 /**
- * COMMAND cndi run
- * Creates a CNDI cluster by reading the contents of ./cndi
+ * COMMAND cndi show-outputs
+ * Shows terraform outputs pushing state
  */
-const runCommand = new Command()
-  .description(`Deploy cndi cluster with project files.`)
+const showOutputsCommand = new Command()
+  .description(`Show outputs from the most recent run.`)
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
+  .option("--json", "output as JSON")
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
@@ -60,7 +61,7 @@ const runCommand = new Command()
     { required: false },
   )
   .action(async (options) => {
-    const cmd = "cndi run";
+    const cmd = "cndi show-outputs";
     console.log(`${cmd}\n`);
 
     const pathToTerraformResources = path.join(
@@ -74,17 +75,17 @@ const runCommand = new Command()
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
-      console.error(setTF_VARsError.message);
+      console.log(setTF_VARsError.message);
       await emitExitEvent(setTF_VARsError.cause);
       Deno.exit(setTF_VARsError.cause);
     }
 
     try {
-      await pullStateForRun({ pathToTerraformResources, cmd });
-    } catch (pullStateForRunError) {
-      console.error(pullStateForRunError.message);
-      await emitExitEvent(pullStateForRunError.cause);
-      Deno.exit(pullStateForRunError.cause);
+      await pullStateForShowOutputs({ pathToTerraformResources, cmd });
+    } catch (pullStateForShowOutputsError) {
+      console.log(pullStateForShowOutputsError.message);
+      await emitExitEvent(pullStateForShowOutputsError.cause);
+      Deno.exit(pullStateForShowOutputsError.cause);
     }
 
     try {
@@ -102,7 +103,7 @@ const runCommand = new Command()
       await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
       if (terraformInitCommandOutput.code !== 0) {
-        console.error(runLabel, ccolors.error("terraform init failed"));
+        console.log(showoutputsLabel, ccolors.error("terraform init failed"));
         const cndiExitCode = parseInt(
           `${PROCESS_ERROR_CODE_PREFIX.terraform}${terraformInitCommandOutput.code}`,
         );
@@ -110,49 +111,46 @@ const runCommand = new Command()
         Deno.exit(terraformInitCommandOutput.code);
       }
     } catch (err) {
-      console.error(
-        runLabel,
+      console.log(
+        showoutputsLabel,
         ccolors.error("failed to spawn 'terraform init'"),
       );
-      console.error(ccolors.caught(err));
+      console.log(ccolors.caught(err));
       await emitExitEvent(1402);
       Deno.exit(1402);
     }
 
     try {
-      console.log(ccolors.faded("\n-- terraform apply --\n"));
+      console.log(ccolors.faded("\n-- terraform output --\n"));
 
-      const terraformApplyCommand = new Deno.Command(pathToTerraformBinary, {
-        args: [
-          `-chdir=${pathToTerraformResources}`,
-          "apply",
-          "-auto-approve",
-        ],
+      const outputArgs = [
+        `-chdir=${pathToTerraformResources}`,
+        "output",
+      ];
+
+      if (options.json) {
+        outputArgs.push("-json");
+      }
+
+      const terraformOutputCommand = new Deno.Command(pathToTerraformBinary, {
+        args: outputArgs,
         stderr: "piped",
         stdout: "piped",
       });
 
-      const terraformApplyChildProcess = terraformApplyCommand.spawn();
+      const terraformOutputChildProcess = terraformOutputCommand.spawn();
 
-      for await (const chunk of terraformApplyChildProcess.stdout) {
+      for await (const chunk of terraformOutputChildProcess.stdout) {
         Deno.stdout.write(chunk);
       }
 
-      for await (const chunk of terraformApplyChildProcess.stderr) {
+      for await (const chunk of terraformOutputChildProcess.stderr) {
         Deno.stderr.write(chunk);
       }
 
-      const status = await terraformApplyChildProcess.status;
+      const status = await terraformOutputChildProcess.status;
 
-      try {
-        await pushStateFromRun({ pathToTerraformResources, cmd });
-      } catch (pushStateFromRunError) {
-        console.error(pushStateFromRunError.message);
-        await emitExitEvent(pushStateFromRunError.cause);
-        Deno.exit(pushStateFromRunError.cause);
-      }
-
-      // if `terraform apply` fails, exit with the code
+      // if `terraform output` fails, exit with the code
       if (status.code !== 0) {
         const cndiExitCode = parseInt(
           `${PROCESS_ERROR_CODE_PREFIX.terraform}${status.code}`,
@@ -161,15 +159,15 @@ const runCommand = new Command()
         Deno.exit(status.code);
       }
     } catch (err) {
-      console.error(
-        runLabel,
-        ccolors.error("failed to spawn 'terraform apply'"),
+      console.log(
+        showoutputsLabel,
+        ccolors.error("failed to spawn 'terraform output'"),
       );
-      console.error(ccolors.caught(err));
+      console.log(ccolors.caught(err));
       await emitExitEvent(1403);
       Deno.exit(1403);
     }
     await emitExitEvent(0);
   });
 
-export default runCommand;
+export default showOutputsCommand;

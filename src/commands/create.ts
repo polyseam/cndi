@@ -117,7 +117,7 @@ const createCommand = new Command()
     "Label in the form of <provider>/<distribution> slug to specifying a deployment target",
   )
   .option(
-    "--workflow-source-ref, -w <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
     { hidden: true },
   )
@@ -388,7 +388,7 @@ const createCommand = new Command()
         },
       });
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       await emitExitEvent(error.cause);
       Deno.exit(error.cause);
     }
