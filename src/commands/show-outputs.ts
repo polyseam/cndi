@@ -19,8 +19,8 @@ const showOutputsCommand = new Command()
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
-  .option("--json", "output as JSON")
-  .option("-q, --quiet", "eliminate unnecessary output")
+  .option("--json", "Output as JSON.")
+  .option("-q, --quiet", "Eliminate unnecessary output.")
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
