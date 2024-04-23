@@ -19,7 +19,8 @@ const showOutputsCommand = new Command()
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
-  .option("--json", "output as JSON")
+  .option("--json", "Output as JSON.")
+  .option("-q, --quiet", "Eliminate unnecessary output.")
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
@@ -62,8 +63,9 @@ const showOutputsCommand = new Command()
   )
   .action(async (options) => {
     const cmd = "cndi show-outputs";
-    console.log(`${cmd}\n`);
-
+    if (!options?.quiet) {
+      console.log(`${cmd}\n`);
+    }
     const pathToTerraformResources = path.join(
       options.path,
       "cndi",
@@ -89,8 +91,9 @@ const showOutputsCommand = new Command()
     }
 
     try {
-      console.log(ccolors.faded("\n-- terraform init --\n"));
-
+      if (!options?.quiet) {
+        console.log(ccolors.faded("\n-- terraform init --\n"));
+      }
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [`-chdir=${pathToTerraformResources}`, "init"],
         stderr: "piped",
@@ -99,7 +102,9 @@ const showOutputsCommand = new Command()
 
       const terraformInitCommandOutput = await terraformInitCommand.output();
 
-      await Deno.stdout.write(terraformInitCommandOutput.stdout);
+      if (!options?.quiet) {
+        await Deno.stdout.write(terraformInitCommandOutput.stdout);
+      }
       await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
       if (terraformInitCommandOutput.code !== 0) {
@@ -121,8 +126,9 @@ const showOutputsCommand = new Command()
     }
 
     try {
-      console.log(ccolors.faded("\n-- terraform output --\n"));
-
+      if (!options?.quiet) {
+        console.log(ccolors.faded("\n-- terraform output --\n"));
+      }
       const outputArgs = [
         `-chdir=${pathToTerraformResources}`,
         "output",
