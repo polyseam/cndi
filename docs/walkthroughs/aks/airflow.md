@@ -24,22 +24,26 @@ successfully:**
 
 - **Your cloud credentials**: cndi will leverage your AKS web services's
 - ARM_CLIENT_SECRET
-- ARM_TENANT_ID & ARM_CLIENT_ID
+- ARM_CLIENT_ID
+- ARM_TENANT_ID
 - ARM_SUBSCRIPTION_ID
 
-- **A Domain Name**: Because the `aks/airflow` template sets up TLS
-  certificates, we need to have a domain on which to apply them. We also need
-  access to the domain registrar so we can add a couple `A` records there for
-  our cluster ingresses.
+- **A Domain Name**: The most convenient way to access your cluster is by
+  attaching a domain name to the load balancer, if you provide this domain
+  during `cndi create` in an upcoming step we should be able to wire it up
+  automatically.
 
 - (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your Azure Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](docs/walkthroughs/aks/port-forwarding.md)
+  [Here's a guide of how to connect to your Azure Kubernetes Cluster once its deployed and Port Forward ArgoCD and the Airflow Web Server](docs/walkthroughs/aks/port-forwarding.md)
 
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+
+- **GitHub CLI**: You will need to have the GitHub CLI installed on your
+  machine. You can download it [here](https://cli.github.com/).
 
 - [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
 
@@ -83,7 +87,7 @@ template.
   mssqlserver
 ```
 
-Make sure airflow is highlighted and press Enter to confirm your selection.
+Make sure `airflow` is highlighted and press Enter to confirm your selection.
 
 Next, you'll need to decide where you want to deploy your cluster. For this
 project, choose azure if you're deploying to Microsoft, The prompt will appear

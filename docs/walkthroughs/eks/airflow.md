@@ -27,16 +27,19 @@ successfully:**
   [credentials](https://docs.eks.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
   to deploy resources.
 
-- **A Domain Name**: Because the `eks/airflow` template sets up TLS
-  certificates, we need to have a domain on which to apply them. We also need
-  access to the domain registrar so we can add a couple `CNAME` records there
-  for our cluster Ingresses.
+- **A Domain Name**: The most convenient way to access your cluster is by
+  attaching a domain name to the load balancer, if you provide this domain
+  during `cndi create` in an upcoming step we should be able to wire it up
+  automatically.
 
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
   with a valid
   [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+
+- **GitHub CLI**: You will need to have the GitHub CLI installed on your
+  machine. You can download it [here](https://cli.github.com/).
 
 - [Here's a guide of how to set up your Amazon Web Services account including roles and permissions](/docs/cloud-setup-guide/aws/aws-setup.md)
 
