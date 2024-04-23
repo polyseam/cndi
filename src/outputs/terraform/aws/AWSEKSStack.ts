@@ -753,7 +753,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         `cndi_aws_launch_template_${nodeGroupIndex}`,
         {
-          name: `cndi-${nodeGroupName}-${nodeGroupIndex}`,
+          namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
           blockDeviceMappings: [
             {
               deviceName: "/dev/sdf",
