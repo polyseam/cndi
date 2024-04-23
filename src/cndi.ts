@@ -20,6 +20,7 @@ import { overwriteCommand } from "src/commands/overwrite.ts";
 import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
+import showOutputsCommand from "src/commands/show-outputs.ts";
 
 import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
@@ -81,6 +82,7 @@ export default async function cndi() {
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
     .command("install", installCommand)
+    .command("show-outputs", showOutputsCommand)
     .command("completions", new CompletionsCommand().global())
     .command("help", new HelpCommand().global())
     .parse(Deno.args);
