@@ -105,8 +105,6 @@ export default async function pushStateFromRun({
     "terraform.tfstate.encrypted",
   );
 
-  // console.log("encrypted state!");
-
   try {
     Deno.writeTextFileSync(pathToNewState, encryptedState);
   } catch (errorWritingState) {
@@ -114,7 +112,7 @@ export default async function pushStateFromRun({
       gitWriteStateLabel,
       ccolors.error("failed to write encrypted tfstate to disk"),
     );
-    console.log(ccolors.caught(errorWritingState));
+    console.error(ccolors.caught(errorWritingState));
   }
   try {
     await git.raw("add", pathToNewState, "--force"); // add the file regardless of if it is in .gitignore
@@ -129,7 +127,7 @@ export default async function pushStateFromRun({
       ccolors.key_name(`"_state"`),
       ccolors.error(`branch`),
     );
-    console.log(ccolors.caught(errorCommitingState));
+    console.error(ccolors.caught(errorCommitingState));
   }
 
   try {
@@ -143,8 +141,8 @@ export default async function pushStateFromRun({
       ccolors.key_name(`"_state"`),
       ccolors.error(`branch`),
     );
-    console.log('did you forget to add an "origin" remote?');
-    console.log(ccolors.caught(pushError));
+    console.error('did you forget to add an "origin" remote?');
+    console.error(ccolors.caught(pushError));
   }
 
   await git.checkout(originalBranch || "main");

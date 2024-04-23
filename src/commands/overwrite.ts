@@ -64,7 +64,7 @@ const owAction = (options: any) => {
       spinner.stop();
       w.terminate();
       console.log();
-      console.log(e?.data?.message || "");
+      console.error(e?.data?.message || "");
       await emitExitEvent(e.data.code);
       Deno.exit(e.data.code);
     }
