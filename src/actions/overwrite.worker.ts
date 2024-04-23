@@ -200,7 +200,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           path.join(options.output, "cndi", "cluster_manifests", `${key}.yaml`),
         );
       } catch {
-        console.log(
+        console.error(
           ccolors.warn(
             `failed to read SealedSecret: "${
               ccolors.key_name(key + ".yaml")

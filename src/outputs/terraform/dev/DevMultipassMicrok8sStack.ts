@@ -36,7 +36,7 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
     const numberOfNodes = nodes.length;
 
     if (numberOfNodes !== 1) {
-      console.log("dev clusters must have exactly one node");
+      console.warn("dev clusters must have exactly one node");
     }
 
     const node = nodes[0] as MultipassNodeItemSpec;
@@ -159,7 +159,7 @@ export default function getMultipassResource(
         memory = `${node.memory!}`; // eg. 500G | 5000M | 100000K
       } else {
         // TODO: fail validation here?
-        console.log(
+        console.error(
           ccolors.warn(`Invalid multipass node memory value:`),
           ccolors.user_input(`"${node.memory!}"`),
         );
@@ -180,7 +180,7 @@ export default function getMultipassResource(
         disk = `${node.disk!}`;
       } else {
         // TODO: fail validation here?
-        console.log(
+        console.warn(
           ccolors.warn(`Invalid multipass node disk value:`),
           ccolors.user_input(`"${node.disk!}"`),
         );

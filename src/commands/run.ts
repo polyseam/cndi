@@ -74,7 +74,7 @@ const runCommand = new Command()
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
-      console.log(setTF_VARsError.message);
+      console.error(setTF_VARsError.message);
       await emitExitEvent(setTF_VARsError.cause);
       Deno.exit(setTF_VARsError.cause);
     }
@@ -82,7 +82,7 @@ const runCommand = new Command()
     try {
       await pullStateForRun({ pathToTerraformResources, cmd });
     } catch (pullStateForRunError) {
-      console.log(pullStateForRunError.message);
+      console.error(pullStateForRunError.message);
       await emitExitEvent(pullStateForRunError.cause);
       Deno.exit(pullStateForRunError.cause);
     }
@@ -102,7 +102,7 @@ const runCommand = new Command()
       await Deno.stderr.write(terraformInitCommandOutput.stderr);
 
       if (terraformInitCommandOutput.code !== 0) {
-        console.log(runLabel, ccolors.error("terraform init failed"));
+        console.error(runLabel, ccolors.error("terraform init failed"));
         const cndiExitCode = parseInt(
           `${PROCESS_ERROR_CODE_PREFIX.terraform}${terraformInitCommandOutput.code}`,
         );
@@ -110,8 +110,11 @@ const runCommand = new Command()
         Deno.exit(terraformInitCommandOutput.code);
       }
     } catch (err) {
-      console.log(runLabel, ccolors.error("failed to spawn 'terraform init'"));
-      console.log(ccolors.caught(err));
+      console.error(
+        runLabel,
+        ccolors.error("failed to spawn 'terraform init'"),
+      );
+      console.error(ccolors.caught(err));
       await emitExitEvent(1402);
       Deno.exit(1402);
     }
@@ -144,7 +147,7 @@ const runCommand = new Command()
       try {
         await pushStateFromRun({ pathToTerraformResources, cmd });
       } catch (pushStateFromRunError) {
-        console.log(pushStateFromRunError.message);
+        console.error(pushStateFromRunError.message);
         await emitExitEvent(pushStateFromRunError.cause);
         Deno.exit(pushStateFromRunError.cause);
       }
@@ -158,8 +161,11 @@ const runCommand = new Command()
         Deno.exit(status.code);
       }
     } catch (err) {
-      console.log(runLabel, ccolors.error("failed to spawn 'terraform apply'"));
-      console.log(ccolors.caught(err));
+      console.error(
+        runLabel,
+        ccolors.error("failed to spawn 'terraform apply'"),
+      );
+      console.error(ccolors.caught(err));
       await emitExitEvent(1403);
       Deno.exit(1403);
     }

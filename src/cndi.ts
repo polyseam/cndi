@@ -62,7 +62,7 @@ export default async function cndi() {
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
     );
-    console.log(ccolors.caught(failedToCreateStagingDirectoryError, 1));
+    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 1));
     await emitExitEvent(1);
     Deno.exit(1);
   }
@@ -73,6 +73,12 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
+    .globalOption("-q, --quiet", "Suppress non-critical output")
+    .globalAction(({ quiet }) => {
+      if (quiet) {
+        console.log = () => {};
+      }
+    })
     .command("create", createCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
