@@ -6,8 +6,30 @@ prompts by following `cndi create -t <template>` and answering the questions.
 If you have done this and are now hoping to learn how to interact with it,
 you've come to the right place!
 
-This guide will provide different information based on your `provider` and
-`distribution`, and in the best case you won't need this guide at all!
+## ExternalDNS on `microk8s` Deployments
+
+The best way to enable ExternalDNS on a `microk8s` deployment is to use the
+`cndi show-outputs` command to get the `public_host` value:
+
+```bash
+cndi show-outputs
+# example output:
+get_kubeconfig_command = "aws eks update-kubeconfig --region us-east-1 --name my-cluster-project"
+public_host = "ae79fd5d9e53e4e1f8efcf58c26c3a74-992606bf807ddf5f.elb.us-east-1.amazonaws.com"
+resource_group_url = "https://us-east-1.console.aws.amazon.com/resource-groups/group/cndi-rg_mj-show-outputs"
+```
+
+Now we can use this `public_host` value to configure ExternalDNS to use the
+correct host:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/target: ae79fd5d9e53e4e1f8efcf58c26c3a74-992606bf807ddf5f.elb.us-east-1.amazonaws.com
+spec: {...}
+```
 
 ## Accessing your cluster
 
@@ -35,8 +57,9 @@ If you are in one of these categories, read on!
 
 ### Using non-microk8s distributions
 
-If you are using a distribution that isn't based on Microk8s, you should be able
-to get access to your cluster locally with 2 simple steps:
+If you are using a distribution that isn't based on Microk8s
+(`eks`,`aks`,`gke`), you should be able to get access to your cluster locally
+with 2 simple steps:
 
 1. After a successful deployment, run the following command to get the outputs
    from your cluster's latest deployment
