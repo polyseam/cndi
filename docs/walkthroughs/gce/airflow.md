@@ -30,10 +30,10 @@ successfully:**
   [credentials](https://cloud.google.com/iam/docs/service-accounts) file to
   deploy resources.
 
-- **A Domain Name**: Because the `gce/airflow` template sets up TLS
-  certificates, we need to have a domain on which to apply them. We also need
-  access to the domain registrar so we can add a couple `A` records there for
-  our cluster Ingresses.
+- **A domain name**: The most convenient way to access your cluster is by
+  attaching a domain name to the load balancer, if you provide this domain
+  during `cndi create` in an upcoming step we should be able to wire it up
+  automatically.
 
 - **A GitHub account**: cndi helps you manage the state of your infrastructure
   using a GitOps workflow, so you'll need a
@@ -144,9 +144,9 @@ project. ![cndi outputs](/docs/walkthroughs/gce/img/outputs.png)
 
 ## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
 
-Instead of manually creating a A record in your domain's DNS settings, if you
+Instead of manually creating a a record in your domain's DNS settings, if you
 enabled & configured ExternalDNS during the cndi init process then ExternalDNS
-will automatically create a A record in your Domain registar,
+will automatically create a a record in your Domain registar,
 
 At the end of the cndi run there is also an output called `public host`, which
 is the **DNS** (CNAME) of your newly created load Balancer.

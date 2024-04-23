@@ -27,7 +27,7 @@ successfully:**
   [credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
   to deploy resources.
 
-- **A Domain Name**: Because the `ec2/airflow` template sets up TLS
+- **A domain name**: Because the `ec2/airflow` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `CNAME` records there
   for our cluster Ingresses.

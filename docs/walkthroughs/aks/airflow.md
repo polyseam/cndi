@@ -17,10 +17,10 @@ workflow you are already comfortable with.
 
 ## prerequisites ✅
 
-**You will need the following things to get up and running with cndi
+**You will need the following things to get up and running with CNDI
 successfully:**
 
-- **An Azure cloud account**: cndi will deploy infrastructure within AKS
+- **An Azure cloud account**: CNDI will deploy infrastructure within AKS
 
 - **Your cloud credentials**: cndi will leverage your AKS web services's
 - ARM_CLIENT_SECRET
@@ -28,7 +28,7 @@ successfully:**
 - ARM_TENANT_ID
 - ARM_SUBSCRIPTION_ID
 
-- **A Domain Name**: The most convenient way to access your cluster is by
+- **A domain name**: The most convenient way to access your cluster is by
   attaching a domain name to the load balancer, if you provide this domain
   during `cndi create` in an upcoming step we should be able to wire it up
   automatically.
@@ -90,7 +90,7 @@ template.
 Make sure `airflow` is highlighted and press Enter to confirm your selection.
 
 Next, you'll need to decide where you want to deploy your cluster. For this
-project, choose azure if you're deploying to Microsoft, The prompt will appear
+project, choose `azure` if you're deploying to Microsoft, The prompt will appear
 as follows:
 
 ```shell
@@ -179,7 +179,7 @@ project.
 
 Instead of manually creating a CNAME record in your domain's DNS settings, if
 you enabled & configured ExternalDNS during the cndi init process then
-ExternalDNS will automatically create a CNAME, or A record in your domain
+ExternalDNS will automatically create a CNAME, or a record in your domain
 registar, pointing to your load balancer's public host. This process eliminates
 the need for manual DNS record management. If everything is working correctly
 you should now open the domain name you've assigned for ArgoCD in your browser

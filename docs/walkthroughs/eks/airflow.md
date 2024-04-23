@@ -27,7 +27,7 @@ successfully:**
   [credentials](https://docs.eks.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
   to deploy resources.
 
-- **A Domain Name**: The most convenient way to access your cluster is by
+- **A domain name**: The most convenient way to access your cluster is by
   attaching a domain name to the load balancer, if you provide this domain
   during `cndi create` in an upcoming step we should be able to wire it up
   automatically.

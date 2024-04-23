@@ -25,10 +25,11 @@ successfully:**
 
 - **Your cloud credentials**: cndi will leverage your Azure web services's
 - ARM_CLIENT_SECRET
-- ARM_TENANT_ID & ARM_CLIENT_ID
+- ARM_TENANT_ID
+- ARM_CLIENT_ID
 - ARM_SUBSCRIPTION_ID
 
-- **A Domain Name**: Because the `azure/airflow` template sets up TLS
+- **A domain name**: Because the `azure/airflow` template sets up TLS
   certificates, we need to have a domain on which to apply them. We also need
   access to the domain registrar so we can add a couple `A` records there for
   our cluster ingresses.
@@ -155,7 +156,7 @@ You should now see the cluster configuration has been uploaded to GitHub:
 
 Instead of manually creating a CNAME record in your domain's DNS settings, if
 you enabled & configured ExternalDNS during the cndi init process then
-ExternalDNS will automatically create a CNAME, or A record in your domain
+ExternalDNS will automatically create a CNAME, or a record in your domain
 registar,
 
 At the end of the cndi run there is also an output called `public host`, which
@@ -205,7 +206,7 @@ is the **DNS** (CNAME) of the load Balancer thats attached to your instances.
 
 - Copy `public host`
 - Go to your custom domain,
-- Create an A or CNAME record to route traffic to the load balancer IP address
+- Create an a or CNAME record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
 ![google domains](/docs/walkthroughs/avm/img/google-domains-cname.png)
