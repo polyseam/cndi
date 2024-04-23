@@ -48,6 +48,7 @@ type EchoCreateOptions = {
   output?: string;
   deploymentTargetLabel?: string;
   responsesFile: string;
+  skipPush?: boolean;
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -64,8 +65,9 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
   const cndiCreateDeploymentTargetLabel = options.deploymentTargetLabel
     ? ` --deployment-target-label ${options.deploymentTargetLabel}`
     : "";
+  const cndiCreateSkipPush = options.skipPush ? " --skip-push" : "";
   console.log(
-    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateOutput}${cndiCreateDeploymentTargetLabel}${cndiCreateSet}\n`,
+    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateOutput}${cndiCreateDeploymentTargetLabel}${cndiCreateSet}${cndiCreateSkipPush}\n`,
   );
 };
 
@@ -91,6 +93,7 @@ const createCommand = new Command()
       default: path.join(Deno.cwd(), "cndi_responses.yaml"),
     },
   )
+  .option("--skip-push", "Skip pushing to remote repository")
   .option(
     `-s, --set <set>`,
     `Override a response, usage: --set responseName=responseValue`,
@@ -114,12 +117,13 @@ const createCommand = new Command()
     "Label in the form of <provider>/<distribution> slug to specifying a deployment target",
   )
   .option(
-    "--workflow-source-ref, -w <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
     { hidden: true },
   )
   .action(async (options, slug) => {
     echoCreate(options, slug);
+    const skipPush = options.skipPush;
     const interactive = !options.nonInteractive;
     let template: string | undefined = options?.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
@@ -384,7 +388,7 @@ const createCommand = new Command()
         },
       });
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       await emitExitEvent(error.cause);
       Deno.exit(error.cause);
     }
@@ -460,6 +464,7 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
+      skipPush,
     });
   });
 

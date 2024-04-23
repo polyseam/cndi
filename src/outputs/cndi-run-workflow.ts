@@ -118,11 +118,7 @@ function getSteps(sourceRef?: string) {
     run: "deno task build-linux",
   }, {
     name: "persist cndi",
-    run:
-      "mkdir -p $HOME/.cndi/bin && mv ./dist/cndi-linux $HOME/.cndi/bin/cndi",
-  }, {
-    name: "cndi install",
-    run: "$HOME/.cndi/bin/cndi install", // even though we install automatically in run.ts, we expect this has more performant caching
+    run: "mkdir -p $HOME/.cndi/bin && mv ./dist/linux/in/* $HOME/.cndi/bin/",
   }, {
     name: "checkout repo",
     uses: "actions/checkout@v3",
