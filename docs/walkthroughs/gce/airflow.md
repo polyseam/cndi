@@ -5,12 +5,14 @@ in Google Cloud Platform
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `gce/airflow` Template.
-In just a few minutes we will be able to deploy a new Kubernetes cluster to GCP
-that has been optimally configured for Airflow, including GitOps with Secrets
-management, TLS and High Availibility right out-of-the-box. This framework will
-enable quick iteration of infrastructure, applications and manifests in a GitHub
-workflow you are already comfortable with.
+This walkthough uses `cndi` to customize and deploy our `airflow` Template to
+[Google's Compute Engine](https://cloud.google.com/products/compute) powered by
+[microk8s](https://microk8s.io). In just a few minutes we will be able to deploy
+a new Kubernetes cluster to GCP that has been optimally configured for Airflow,
+including GitOps with Secrets management, TLS and High Availibility right
+out-of-the-box. This framework will enable quick iteration of infrastructure,
+applications and manifests in a GitHub workflow you are already comfortable
+with.
 
 ![cndi cluster](/docs/walkthroughs/gce/img/cndi-cluster-0.png)
 

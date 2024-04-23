@@ -5,7 +5,8 @@ in Amazon Web Services
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `aws/airflow` Template.
+This walkthough uses `cndi` to customize and deploy our `airflow` Template to
+[EC2](https://aws.amazon.com/ec2/), powered by [microk8s](https://microk8s.io).
 In just a few minutes we will be able to deploy a new Kubernetes cluster that
 has been optimally configured for Airflow, including GitOps with Secrets
 management, TLS and High Availibility right out-of-the-box. This framework will

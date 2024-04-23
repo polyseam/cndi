@@ -5,12 +5,13 @@ in Google Cloud Platform
 
 ## overview 🔭
 
-This walkthough uses `cndi` to customize and deploy our `gke/airflow` Template.
-In just a few minutes we will be able to deploy a new Kubernetes cluster to GKE
-that has been optimally configured for Airflow, including GitOps with Secrets
-management, TLS and High Availibility right out-of-the-box. This framework will
-enable quick iteration of infrastructure, applications and manifests in a GitHub
-workflow you are already comfortable with.
+This walkthough uses `cndi` to customize and deploy our `airflow` Template to
+[GKE](https://cloud.google.com/kubernetes-engine). In just a few minutes we will
+be able to deploy a new Kubernetes cluster to GKE that has been optimally
+configured for Airflow, including GitOps with Secrets management, TLS and High
+Availibility right out-of-the-box. This framework will enable quick iteration of
+infrastructure, applications and manifests in a GitHub workflow you are already
+comfortable with.
 
 ![cndi cluster](/docs/walkthroughs/gke/img/cndi-cluster-0.png)
 
