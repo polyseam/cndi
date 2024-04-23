@@ -19,6 +19,7 @@ const showOutputsCommand = new Command()
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
+  .option("--json", "output as JSON")
   .env(
     "GIT_REPO=<value:string>",
     "URL of your git repository where your cndi project is hosted.",
@@ -122,11 +123,17 @@ const showOutputsCommand = new Command()
     try {
       console.log(ccolors.faded("\n-- terraform output --\n"));
 
+      const outputArgs = [
+        `-chdir=${pathToTerraformResources}`,
+        "output",
+      ];
+
+      if (options.json) {
+        outputArgs.push("-json");
+      }
+
       const terraformOutputCommand = new Deno.Command(pathToTerraformBinary, {
-        args: [
-          `-chdir=${pathToTerraformResources}`,
-          "output",
-        ],
+        args: outputArgs,
         stderr: "piped",
         stdout: "piped",
       });
