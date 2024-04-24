@@ -61,6 +61,7 @@ const generalSteps = [
       ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
       ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
       ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+      DIGITALOCEAN_TOKEN: "${{ secrets.DIGITALOCEAN_TOKEN }}",
       CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
     },
     run: "cndi run",
@@ -149,6 +150,7 @@ function getSteps(sourceRef?: string) {
       ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
       ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
       ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+      DIGITALOCEAN_TOKEN: "${{ secrets.DIGITALOCEAN_TOKEN }}",
       CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
     },
   }, {

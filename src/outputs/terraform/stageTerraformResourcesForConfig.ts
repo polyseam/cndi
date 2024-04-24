@@ -7,6 +7,7 @@ import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/Az
 import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
 import { stageTerraformSynthGCPMicrok8s } from "src/outputs/terraform/gcp/GCPMicrok8sStack.ts";
 import { stageTerraformSynthGCPGKE } from "src/outputs/terraform/gcp/GCPGKEStack.ts";
+import { stageTerraformSynthDigitalOceanDOKS } from "src/outputs/terraform/digitalocean/DigitalOceanDOKSStack.ts";
 import { stageTerraformSynthDevMultipassMicrok8s } from "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts";
 
 import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
@@ -57,6 +58,9 @@ export default async function stageTerraformResourcesForConfig(
   const label = `${provider}/${distribution}`;
 
   switch (label) {
+    case "digitalocean/doks":
+      await stageTerraformSynthDigitalOceanDOKS(config);
+      break;
     case "aws/microk8s":
       await stageTerraformSynthAWSMicrok8s(config);
       break;
