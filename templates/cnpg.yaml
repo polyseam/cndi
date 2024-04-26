@@ -340,6 +340,7 @@ outputs:
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        valuesSchema: https://raw.githubusercontent.com/cloudnative-pg/charts/main/charts/cloudnative-pg/values.schema.json
       pgadmin:
         $cndi.get_block(deploy_pgadmin_application_blk):
           condition:
