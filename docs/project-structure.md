@@ -1,4 +1,4 @@
-# cndi outputs 📂
+# cndi project structure 📂
 
 When `cndi create` is called it bootstraps the following files and folders:
 

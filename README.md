@@ -115,13 +115,13 @@ with the stack you are deploying.
 ---
 
 Once you've answered all of the prompts, CNDI will create a number of project
-files we call [outputs](./docs/outputs.md).
+files and we have a dedicated section that covers the
+[CNDI Project Structure](./docs/project-structure.md), but there a couple things
+that are important to know now:
 
-We have a dedicated section that covers [outputs](./docs/outputs.md), but there
-a couple things that are important to know now:
-
-1. `cndi create` will create a GitHub repo on your behalf and push the code
-   ([outputs](./docs/outputs.md)) it generates for you to that repo
+1. `cndi create` will create a GitHub repo on your behalf and push the project
+   ([files and folders](./docs/project-structure.md)) it generates for you to
+   that repo
 2. All of your responses that are sensitive are written to a `.env` file, and
    that file will not be included in your repo. Instead, CNDI will push these to
    GitHub for use in automation by using the
@@ -221,11 +221,8 @@ deploying [Airflow](https://cndi.dev/templates-airflow) to the provider and
 distribution of your choice. They include info about how to get credentials,
 explanations about prompts, screenshots, and more.
 
-- [ec2/airflow](docs/walkthroughs/ec2/airflow.md) - AWS EC2
 - [eks/airflow](docs/walkthroughs/eks/airflow.md) - AWS EKS
-- [gce/airflow](docs/walkthroughs/gce/airflow.md) - GCP Compute Engine
 - [gke/airflow](docs/walkthroughs/gke/airflow.md) - GCP GKE
-- [avm/airflow](docs/walkthroughs/avm/airflow.md) - Azure Virtual Machines
 - [aks/airflow](docs/walkthroughs/aks/airflow.md) - Azure AKS
 - [dev/airflow](docs/walkthroughs/dev/airflow.md) - Local Development
 
@@ -241,11 +238,18 @@ Manifests and Terraform objects, yielding endless possibilities. To learn about
 all the configuration options, check out the
 [CNDI Config Guide](./docs/config.md) and accompanying jsonschema file.
 
-## outputs 📂
+## project structure 📂
 
 There are a few other files beyond `cndi_config.yaml` which all play a part in
 your CNDI project. To learn more about each file `cndi create` generated, check
-out [CNDI Outputs Guide](./docs/outputs.md).
+out [CNDI Project Structure Guide](./docs/project-structure.md).
+
+## connecting remotely 🔗
+
+Sometimes you need to connect to your cluster in order to debug applications,
+especially if you have not exposed your ArgoCD instance to the internet. To
+learn more about how to connect to your cluster, check out
+[Connecting Remotely to CNDI Clusters](./docs/connect.md) Guide.
 
 ## up and running 🏃
 
@@ -255,7 +259,7 @@ check out [Up and Running with CNDI Guide](./docs/up-and-running.md).
 
 ## templates 🏗️
 
-Templates are YAML files which define a relationship between prompts and
+Templates are YAML files which define a relationship between prompts and file
 outputs. To learn more about building new CNDI Templates and distributing them
 to your team, checkout the
 [CNDI Template Authoring Guide](./docs/template-authoring.md). To request new
