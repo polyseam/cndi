@@ -1,6 +1,7 @@
 export function parseNetworkResourceId(networkResourceId: string) {
   // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
   const [
+    _leadingSlash,
     _subscriptions, // 'subscriptions'
     _subscription, // '123456'
     _resourceGroups, // 'resourceGroups'
