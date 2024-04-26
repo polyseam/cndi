@@ -1,4 +1,8 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalAzure,
+  TFBlocks,
+} from "src/types.ts";
 
 import { ccolors } from "deps";
 
@@ -32,7 +36,10 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
+
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
+import { parseNetworkResourceId } from "./utils.ts";
 
 function isValidAzureAKSNodePoolName(inputString: string): boolean {
   if (inputString.match(/^[0-9a-z]+$/) && inputString.length <= 12) {
@@ -56,6 +63,8 @@ const AKSStackLabel = ccolors.faded(
 export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+
+    let netconfig = getNetConfig(cndi_config, "azure");
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
@@ -99,37 +108,68 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
     );
 
-    // Create a virtual network (VNet) in Azure with a dynamic address space.
-    // The address space is partially determined by the random integer generated above.
-    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
-      this,
-      "cndi_azure_vnet",
-      {
-        name: `cndi-azure-vnet-${project_name}`,
-        resourceGroupName: this.rg.name,
-        addressSpace: [`10.${randomIntegerAddressRange0to255.id}.0.0/16`],
-        location: this.rg.location,
-        tags,
-      },
-    );
+    const _node_subnets: Array<
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet
+    > = [];
 
-    // Create a subnet within the above VNet.
-    // The subnet address prefix is dynamically calculated using the address space multiplier.
-    const subnet = new CDKTFProviderAzure.subnet.Subnet(
-      this,
-      "cndi_azure_subnet",
-      {
-        name: `cndi-azure-subnet-${project_name}`,
-        resourceGroupName: this.rg.name,
-        virtualNetworkName: vnet.name,
-        addressPrefixes: [
-          `10.${randomIntegerAddressRange0to255.id}.${this.locals.address_space_random_multiplier_16}.0/20`,
-        ],
-      },
-    );
+    let primary_subnet:
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet;
+
+    if (netconfig.mode === "encapsulated") {
+      // Create a virtual network (VNet) in Azure with a dynamic address space.
+      // The address space is partially determined by the random integer generated above.
+      const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+        this,
+        "cndi_azure_vnet",
+        {
+          name: `cndi-azure-vnet-${project_name}`,
+          resourceGroupName: this.rg.name,
+          addressSpace: [`10.${randomIntegerAddressRange0to255.id}.0.0/16`],
+          location: this.rg.location,
+          tags,
+        },
+      );
+
+      // Create a subnet within the above VNet.
+      // The subnet address prefix is dynamically calculated using the address space multiplier.
+      primary_subnet = new CDKTFProviderAzure.subnet.Subnet(
+        this,
+        "cndi_azure_subnet",
+        {
+          name: `cndi-azure-subnet-${project_name}`,
+          resourceGroupName: this.rg.name,
+          virtualNetworkName: vnet.name,
+          addressPrefixes: [
+            `10.${randomIntegerAddressRange0to255.id}.${this.locals.address_space_random_multiplier_16}.0/20`,
+          ],
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalAzure;
+      const { resourceGroupName, virtualNetworkName } = parseNetworkResourceId(
+        netconfig.azure.network_resource_id,
+      );
+
+      const subnet_name = netconfig.azure.primary_subnet;
+
+      primary_subnet = new CDKTFProviderAzure.dataAzurermSubnet
+        .DataAzurermSubnet(this, "cndi_azure_primary_subnet", {
+        name: subnet_name,
+        resourceGroupName,
+        virtualNetworkName,
+      });
+    } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
+      throw new Error(`unsupported network mode: ${netconfig.mode}`);
+    }
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
+        const vnetSubnetId = primary_subnet.id;
+
         const count = nodeSpec.count || 1;
 
         const scale = {
@@ -155,14 +195,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
-          vnetSubnetId: subnet.id,
+          vnetSubnetId,
           tags,
           zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
         };
         return nodePoolSpec;
       });
 
-    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec array entry is the default
 
     this.variables.arm_client_id = new TerraformVariable(
       this,
@@ -200,6 +240,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         dnsPrefix: `cndi-aks-${project_name}`,
         networkProfile: {
           loadBalancerSku: "standard",
+          // Azure CNI= networkPlugin: "azure"
+          // in this mode pods share address space with nodes (vnetSubnetId)
+          // we could alternatively use podSubnetId to specify a different address space for pods
           networkPlugin: "azure",
           networkPolicy: "azure",
         },

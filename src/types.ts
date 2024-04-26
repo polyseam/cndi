@@ -230,14 +230,65 @@ export type ExternalDNSProvider =
 
 export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
 
+export type CNDINetworkMode = "encapsulated" | "external";
+
+export interface CNDINetworkConfigBase {
+  mode?: CNDINetworkMode;
+}
+
+export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
+  mode: "encapsulated";
+}
+
+export interface CNDINetworkConfigExternal extends CNDINetworkConfigBase {
+  mode: "external";
+}
+
+export interface CNDINetworkConfigExternalAWS
+  extends CNDINetworkConfigExternal {
+  aws: {
+    vpc_id: string;
+    primary_subnet: string;
+    private_subnets: Array<string>;
+  };
+}
+
+export interface CNDINetworkConfigExternalAzure
+  extends CNDINetworkConfigExternal {
+  azure: {
+    network_resource_id: string; // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
+    primary_subnet: string;
+    private_subnets: Array<string>;
+  };
+}
+
+export interface CNDINetworkConfigExternalGCP
+  extends CNDINetworkConfigExternal {
+  gcp: {
+    network_name: string;
+    primary_subnet: string;
+    private_subnets?: Array<string>;
+    project?: string;
+  };
+}
+
+export type CNDIDistribution = "microk8s" | "eks" | "gke" | "aks";
+
+export type CNDINetworkConfig =
+  | CNDINetworkConfigEncapsulated
+  | CNDINetworkConfigExternalAWS
+  | CNDINetworkConfigExternalAzure
+  | CNDINetworkConfigExternalGCP;
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
-  distribution: "microk8s" | "eks" | "gke" | "aks";
+  distribution: CNDIDistribution;
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      network?: CNDINetworkConfig;
       deployment_target_configuration?: DeploymentTargetConfiguration;
       external_dns: {
         enabled?: boolean; // default: true

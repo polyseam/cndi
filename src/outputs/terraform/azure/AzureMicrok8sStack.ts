@@ -18,12 +18,24 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
+
+import {
+  CNDIConfig,
+  CNDINetworkConfigEncapsulated,
+  CNDINetworkConfigExternalAzure,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
+import { parseNetworkResourceId } from "./utils.ts";
 
 export class AzureMicrok8sStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+
+    let netconfig = getNetConfig(cndi_config, "azure");
 
     const open_ports = resolveCNDIPorts(cndi_config);
     const _nodeIdList: string[] = [];
@@ -48,28 +60,57 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
-      this,
-      "cndi_azure_vnet",
-      {
-        name: `cndi_azure_vnet`,
-        resourceGroupName: this.rg.name,
-        addressSpace: ["10.0.0.0/16"],
-        location: this.rg.location,
-        tags,
-      },
-    );
+    const _node_subnets: Array<
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet
+    > = [];
 
-    const subnet = new CDKTFProviderAzure.subnet.Subnet(
-      this,
-      "cndi_azure_subnet",
-      {
-        name: `cndi-azure-subnet`,
-        resourceGroupName: this.rg.name,
-        virtualNetworkName: vnet.name,
-        addressPrefixes: ["10.0.0.0/24"],
-      },
-    );
+    let primary_subnet:
+      | CDKTFProviderAzure.subnet.Subnet
+      | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet;
+
+    if (netconfig.mode === "encapsulated") {
+      netconfig = netconfig as CNDINetworkConfigEncapsulated;
+      const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+        this,
+        "cndi_azure_vnet",
+        {
+          name: `cndi_azure_vnet`,
+          resourceGroupName: this.rg.name,
+          addressSpace: ["10.0.0.0/16"],
+          location: this.rg.location,
+          tags,
+        },
+      );
+
+      primary_subnet = new CDKTFProviderAzure.subnet.Subnet(
+        this,
+        "cndi_azure_subnet",
+        {
+          name: `cndi-azure-subnet`,
+          resourceGroupName: this.rg.name,
+          virtualNetworkName: vnet.name,
+          addressPrefixes: ["10.0.0.0/24"],
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalAzure;
+      const network_resource_id = netconfig.azure.network_resource_id;
+      const { resourceGroupName, virtualNetworkName } = parseNetworkResourceId(
+        network_resource_id,
+      );
+
+      primary_subnet = new CDKTFProviderAzure.dataAzurermSubnet
+        .DataAzurermSubnet(this, "cndi_azure_subnet", {
+        name: netconfig.azure.primary_subnet,
+        resourceGroupName,
+        virtualNetworkName,
+      });
+    } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
+      throw new Error(`unsupported network mode: ${netconfig?.mode}`);
+    }
 
     const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
       frontendIpConfiguration: [
@@ -163,7 +204,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       this,
       "cndi_azure_subnet_nsg_association",
       {
-        subnetId: subnet.id,
+        subnetId: primary_subnet.id,
         networkSecurityGroupId: cndiNsg.id,
       },
     );
@@ -245,7 +286,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
               {
                 name:
                   `cndi-azure-network-interface-ip-configuration_${nodeName}`,
-                subnetId: subnet.id,
+                subnetId: primary_subnet.id,
                 publicIpAddressId: nodePublicIp.id,
                 privateIpAddressAllocation: "Dynamic",
               },

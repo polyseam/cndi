@@ -22,3 +22,5 @@ cndi
 benchee.json
 
 src/tests/cwd
+
+*scratch.txt

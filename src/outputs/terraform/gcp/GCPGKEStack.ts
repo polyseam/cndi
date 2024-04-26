@@ -1,4 +1,8 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDINetworkConfigExternalGCP,
+  TFBlocks,
+} from "src/types.ts";
 
 import {
   App,
@@ -25,6 +29,8 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import getNetConfig from "src/outputs/terraform/netconfig.ts";
+
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 // TODO: ensure that splicing project_name into tags.Name is safe
@@ -34,6 +40,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
     const project_id = this.locals.gcp_project_id.asString;
+
+    let netconfig = getNetConfig(cndi_config, "gcp");
+
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
@@ -101,27 +110,76 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
-      this,
-      "cndi_google_compute_network",
-      {
-        autoCreateSubnetworks: false,
-        name: "cndi-compute-network",
-        dependsOn: [projectServicesReady],
-      },
-    );
+    let primary_subnet:
+      | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
+      | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork;
 
-    const subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
-      this,
-      "cndi_google_compute_subnetwork",
-      {
-        name: "cndi-compute-subnetwork",
-        ipCidrRange: "10.0.0.0/16",
-        network: network.selfLink,
-        privateIpGoogleAccess: true,
-        dependsOn: [network],
-      },
-    );
+    // stub for when we support GKE private subnets
+    const _node_subnets: Array<
+      | CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork
+      | CDKTFProviderGCP.dataGoogleComputeSubnetwork.DataGoogleComputeSubnetwork
+    > = [];
+
+    let network:
+      | CDKTFProviderGCP.computeNetwork.ComputeNetwork
+      | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
+
+    if (netconfig.mode === "encapsulated") {
+      network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          autoCreateSubnetworks: false,
+          name: "cndi-compute-network",
+          dependsOn: [projectServicesReady],
+        },
+      );
+      primary_subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          name: "cndi-compute-subnetwork",
+          ipCidrRange: "10.0.0.0/16",
+          network: network.selfLink,
+          privateIpGoogleAccess: true,
+          dependsOn: [network],
+        },
+      );
+    } else if (netconfig.mode === "external") {
+      netconfig = netconfig as CNDINetworkConfigExternalGCP;
+
+      network = new CDKTFProviderGCP.dataGoogleComputeNetwork
+        .DataGoogleComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: netconfig.gcp.network_name,
+          project: netconfig.gcp.project, // if undefined in config, default to current project
+        },
+      );
+
+      primary_subnet = new CDKTFProviderGCP.dataGoogleComputeSubnetwork
+        .DataGoogleComputeSubnetwork(
+        this,
+        "cndi_google_compute_subnetwork",
+        {
+          name: netconfig.gcp.primary_subnet,
+          dependsOn: [network],
+        },
+      );
+
+      const private_subnets = Array.isArray(netconfig?.gcp?.private_subnets)
+        ? netconfig.gcp.private_subnets
+        : [];
+
+      if (private_subnets.length) {
+        console.warn("Private subnets are not yet supported in GCP GKE");
+      }
+    } else {
+      // deno-lint-ignore no-explicit-any
+      netconfig = netconfig as any;
+      throw new Error(`Unknown network mode: ${netconfig.mode}`);
+    }
 
     const _computeFirewallInternal = new CDKTFProviderGCP.computeFirewall
       .ComputeFirewall(
@@ -147,7 +205,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           },
         ],
         sourceRanges: [
-          subnet.ipCidrRange,
+          primary_subnet.ipCidrRange,
         ],
       },
     );
@@ -166,9 +224,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         removeDefaultNodePool: true,
         initialNodeCount: 1, // ^
         project: this.locals.gcp_project_id.asString,
-        dependsOn: [projectServicesReady, subnet, network],
+        dependsOn: [projectServicesReady, primary_subnet, network],
         network: network.selfLink,
-        subnetwork: subnet.selfLink,
+        subnetwork: primary_subnet.selfLink,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
@@ -192,7 +250,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     );
 
     let nodePoolIndex = 0;
-    for (const nodePoolSpec of cndi_config.infrastructure.cndi.nodes) {
+
+    const nodePoolSpecs = cndi_config.infrastructure.cndi.nodes;
+    for (const nodePoolSpec of nodePoolSpecs) {
       const nodeCount = nodePoolSpec.count || 1;
 
       const diskSizeGb = nodePoolSpec?.disk_size_gb ||
