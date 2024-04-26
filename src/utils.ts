@@ -13,6 +13,7 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
 
@@ -93,9 +94,13 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
 
 // attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
-  providedPath?: string,
+  projectDirectory: string,
 ): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
-  const pathToConfig = await getPathToCndiConfig(providedPath);
+  let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
+
+  if (!await exists(pathToConfig)) {
+    pathToConfig = path.join(projectDirectory, "cndi_config.yml");
+  }
 
   try {
     const config = await loadYAML(pathToConfig) as CNDIConfig;
@@ -272,7 +277,7 @@ function getPathToTerraformBinary() {
   const pathToTerraformBinary = path.join(
     CNDI_HOME,
     "bin",
-    `terraform${fileSuffixForPlatform}`,
+    `terraform-cndi${fileSuffixForPlatform}`,
   );
   return pathToTerraformBinary;
 }
@@ -284,7 +289,7 @@ function getPathToKubesealBinary() {
   const pathToKubesealBinary = path.join(
     CNDI_HOME,
     "bin",
-    `kubeseal${fileSuffixForPlatform}`,
+    `kubeseal-cndi${fileSuffixForPlatform}`,
   );
   return pathToKubesealBinary;
 }
@@ -385,6 +390,36 @@ async function checkInstalled(CNDI_HOME: string) {
   } catch {
     return false;
   }
+}
+
+function checkForRequiredMissingCreateRepoValues(
+  responses: Record<string, CNDITemplatePromptResponsePrimitive>,
+): string[] {
+  const git_credentials_mode = responses?.git_credentials_mode || "token";
+
+  const requiredKeys = [
+    "git_username",
+    "git_repo",
+  ];
+
+  if (git_credentials_mode === "token") {
+    requiredKeys.push("git_token");
+  } else if (git_credentials_mode === "ssh") {
+    requiredKeys.push("git_ssh_private_key");
+  }
+
+  const missingKeys: Array<string> = [];
+
+  for (const key of requiredKeys) {
+    const envVarName = key.toUpperCase();
+    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
+      Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
+
+    if (missingValue) {
+      missingKeys.push(key);
+    }
+  }
+  return missingKeys;
 }
 
 async function checkInitialized(output: string) {
@@ -509,22 +544,52 @@ const getErrorDiscussionLinkMessageForCode = (code: number): string => {
 async function emitExitEvent(exit_code: number) {
   const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-  if (exit_code) console.log(getErrorDiscussionLinkMessageForCode(exit_code));
+  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
   if (isDebug) console.log("\nevent_uuid", event_uuid);
   console.log();
 }
 
+function absolutifyPath(p: string): string {
+  if (path.isAbsolute(p)) {
+    return p;
+  }
+
+  if (p.startsWith("~")) {
+    return path.join(homedir(), p.slice(1));
+  }
+
+  return path.resolve(p);
+}
+
+const getProjectDirectoryFromFlag = (value: string | boolean) => {
+  // only executed if the flag is provided
+  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+};
+
+function getPathToCndiBinary() {
+  const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
+  const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
+  let suffix = "";
+  if (platform() === "win32") {
+    suffix = ".exe";
+  }
+  return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
+}
+
 export {
+  checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
+  getPathToCndiBinary,
   getPathToCndiConfig,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
   getTFData,

@@ -81,7 +81,7 @@ const terraformCommand = new Command()
     try {
       setTF_VARs(); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
-      console.log(setTF_VARsError.message);
+      console.error(setTF_VARsError.message);
       await emitExitEvent(setTF_VARsError.cause);
       Deno.exit(setTF_VARsError.cause);
     }
@@ -89,7 +89,7 @@ const terraformCommand = new Command()
     try {
       await pullStateForRun({ pathToTerraformResources, cmd });
     } catch (pullStateForRunError) {
-      console.log(pullStateForRunError.message);
+      console.error(pullStateForRunError.message);
       await emitExitEvent(pullStateForRunError.cause);
       Deno.exit(pullStateForRunError.cause);
     }
@@ -119,7 +119,7 @@ const terraformCommand = new Command()
     try {
       await pushStateFromRun({ pathToTerraformResources, cmd });
     } catch (pushStateFromRunError) {
-      console.log(pushStateFromRunError.message);
+      console.error(pushStateFromRunError.message);
       await emitExitEvent(pushStateFromRunError.cause);
       Deno.exit(pushStateFromRunError.cause);
     }

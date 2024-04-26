@@ -13,6 +13,9 @@ const getProductionClusterIssuerManifest = (
     kind: "ClusterIssuer",
     metadata: {
       name: "cluster-issuer",
+      annotations: {
+        "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+      },
     },
     spec: {
       acme: {

@@ -1,21 +1,21 @@
 // Deno std lib
 export { homedir, platform } from "node:os";
-export { copy } from "https://deno.land/std@0.201.0/streams/copy.ts";
-export { SEP } from "https://deno.land/std@0.201.0/path/mod.ts";
-export * as path from "https://deno.land/std@0.211.0/path/mod.ts";
-import * as yaml from "https://deno.land/std@0.196.0/yaml/mod.ts";
-export { deepMerge } from "https://deno.land/std@0.201.0/collections/deep_merge.ts";
-export { walk } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export * as JSONC from "https://deno.land/std@0.201.0/jsonc/mod.ts";
-export { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
-export { exists } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export { ensureDirSync } from "https://deno.land/std@0.201.0/fs/ensure_dir.ts";
-export { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
-export { load as loadEnv } from "https://deno.land/std@0.205.0/dotenv/mod.ts";
-export { walkSync } from "https://deno.land/std@0.201.0/fs/walk.ts";
-export * as silky from "https://deno.land/x/silky@v1.1.0/mod.ts";
-export { inflateResponse } from "https://deno.land/x/inflate_response@v1.1.0/mod.ts";
-export { writeAll } from "https://deno.land/std@0.217.0/io/write_all.ts";
+export { SEPARATOR } from "@std/path/constants";
+export * as path from "@std/path";
+import * as yaml from "@std/yaml";
+export { deepMerge } from "@std/collections";
+export { walk } from "@std/fs";
+export * as JSONC from "@std/jsonc";
+export { delay } from "@std/async";
+export { exists } from "@std/fs";
+export { ensureDirSync } from "@std/fs";
+export { existsSync } from "@std/fs";
+export { load as loadEnv } from "@std/dotenv";
+export { walkSync } from "@std/fs";
+export { writeAll } from "@std/io";
+
+export { Spinner } from "@std/cli";
+export { type SpinnerOptions } from "@std/cli";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 export { default as Ajv } from "npm:ajv";
@@ -35,12 +35,11 @@ export {
   CompletionsCommand,
   HelpCommand,
   UpgradeCommand,
-} from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
+} from "@cliffy/cliffy/command/mod.ts";
 
-export { GithubProvider } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
-
-import { UpgradeOptions } from "https://deno.land/x/cliffy@v0.25.7/command/upgrade/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.7/ansi/colors.ts";
+export { GithubProvider } from "@cliffy/cliffy/command/upgrade/mod.ts";
+import { UpgradeOptions } from "@cliffy/cliffy/command/upgrade/mod.ts";
+import { colors } from "@cliffy/cliffy/ansi/colors.ts";
 
 import {
   Checkbox,
@@ -51,9 +50,9 @@ import {
   Secret,
   Select,
   Toggle,
-} from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+} from "@cliffy/cliffy/prompt/mod.ts";
 
-export { prompt } from "https://deno.land/x/cliffy@v0.25.7/prompt/mod.ts";
+export { prompt as cprompt } from "@cliffy/cliffy/prompt/mod.ts";
 
 // used to have keys, should not matter
 export const PromptTypes = {
@@ -82,10 +81,6 @@ export { simpleGit } from "npm:simple-git@3.18.0";
 //  - crypto-js
 import CryptoJS from "npm:crypto-js@4.1.1";
 
-// spinners
-
-export { Spinner } from "https://deno.land/std@0.216.0/cli/spinner.ts";
-export { type SpinnerOptions } from "https://deno.land/std@0.216.0/cli/spinner.ts";
 // import/export required
 export { CryptoJS };
 export type { UpgradeOptions };
@@ -104,3 +99,7 @@ export const ccolors = {
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
   },
 };
+
+// Polyseam Modules
+export * as silky from "@polyseam/silky";
+export { inflateResponse } from "@polyseam/inflate_response";

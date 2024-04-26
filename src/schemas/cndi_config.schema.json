@@ -113,8 +113,23 @@
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
           "required": ["nodes"],
           "properties": {
+            "reloader": {
+              "type": "object",
+              "description": "An optional object which permits disabling the reloader Kubernetes controller.",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                }
+              },
+              "additionalProperties": false
+            },
             "cert_manager": {
               "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
                 "self_signed": {
                   "type": "boolean",
                   "description": "Whether or not the certificate should be self-signed (insecure).\n Can only be true if \"email\" is not defined.",
@@ -131,6 +146,10 @@
                     "self_signed": { "const": true },
                     "email": {
                       "not": {}
+                    },
+                    "enabled": {
+                      "type": "boolean",
+                      "default": true
                     }
                   },
                   "required": ["self_signed"],
@@ -139,7 +158,11 @@
                 {
                   "properties": {
                     "self_signed": { "enum": [false] },
-                    "email": {}
+                    "email": {},
+                    "enabled": {
+                      "type": "boolean",
+                      "default": true
+                    }
                   },
                   "required": ["email"],
                   "additionalProperties": false

@@ -66,7 +66,7 @@ const getFollowerCloudInitYaml = (
 
       // the following used to retry every 180 seconds until success:
       loopUntilSuccess(
-        `while ! sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`,
+        `sudo snap install microk8s --classic --channel=${microk8sVersion}/${microk8sChannel}`,
         `snap failed to install 'microk8s'`,
       ),
 

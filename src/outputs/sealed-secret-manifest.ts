@@ -42,7 +42,7 @@ const parseCndiSecret = (
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
-          console.log(
+          console.error(
             ccolors.warn(
               `\n\n${
                 ccolors.error(
@@ -54,7 +54,7 @@ const parseCndiSecret = (
             ),
           );
 
-          console.log(
+          console.error(
             `You need to replace`,
             ccolors.key_name(placeholder),
             `\nwith the desired value in`,
@@ -110,7 +110,7 @@ const parseCndiSecret = (
         const secretValueIsPlaceholder = secretEnvVal === placeholder;
 
         if (secretValueIsPlaceholder || !secretEnvVal) {
-          console.log(
+          console.error(
             sealedSecretManifestLabel,
             ccolors.error(
               "ERROR",
@@ -118,7 +118,7 @@ const parseCndiSecret = (
             ccolors.key_name(`"${secretEnvName}"`),
             ccolors.warn("not found in environment"),
           );
-          console.log(
+          console.error(
             ccolors.warn(`You need to replace`),
             ccolors.key_name(placeholder),
             ccolors.warn("with the desired value in"),
@@ -188,7 +188,7 @@ function addSecretPlaceholder(secretEnvName: string, dotEnvPath: string) {
     if (needsHeading) {
       dotEnvLines.push(`\n${secretHeading}\n${secretEnvName}='${placeholder}'`);
     } else {
-      dotEnvLines.push(`\n${secretEnvName}='${placeholder}'`);
+      dotEnvLines.push(`${secretEnvName}='${placeholder}'`);
     }
 
     Deno.writeTextFileSync(dotEnvPath, dotEnvLines.join("\n"));

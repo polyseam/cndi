@@ -101,6 +101,16 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+          
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+            args:
+              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/standard-nodes.yaml):
             {}
@@ -114,6 +124,7 @@ outputs:
           kind: Namespace
           metadata:
             name: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -127,6 +138,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
+
       superset-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
           args:
@@ -140,6 +152,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_superset_ingress) }}"
             - ==
             - true
+
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -164,6 +177,7 @@ outputs:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
+
       cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -174,6 +188,7 @@ outputs:
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER_PASSWORD)
+
       cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -184,6 +199,7 @@ outputs:
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
+
       redis-secret:
         apiVersion: v1
         kind: Secret
@@ -193,6 +209,7 @@ outputs:
         type: Opaque
         stringData:
           password: $cndi_on_ow.seal_secret_from_env_var(REDISPASSWORD)
+
       redis-replication:
         apiVersion: redis.redis.opstreelabs.in/v1beta1
         kind: RedisReplication
@@ -226,6 +243,7 @@ outputs:
                 resources:
                   requests:
                     storage: 1Gi
+
       redis-sentinel:
         apiVersion: redis.redis.opstreelabs.in/v1beta1
         kind: RedisSentinel
@@ -255,6 +273,7 @@ outputs:
               limits:
                 cpu: 101m
                 memory: 228Mi
+
       superset-secrets:
         apiVersion: v1
         kind: Secret
@@ -273,6 +292,14 @@ outputs:
           DB_USER: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER)
           DB_PASS: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER_PASSWORD)
           DB_NAME: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DATABASE)
+
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+
     applications: 
       cnpg:
         targetRevision: 0.18.0
@@ -325,9 +352,34 @@ outputs:
     POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(database_user_password) }}"
 
   readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}/readme-section.md):
       {}
     superset: |
-    # superset
+      # Apache Superset Deployment Guide
+
+      This Template deploys a standalone production-ready [Apache Superset](https://superset.apache.org) application on a Kubernetes cluster using Helm.
+      Apache Superset is an open-source data exploration and visualization platform designed to be intuitive and easy to use. 
+      It supports connection to a wide variety of databases and data warehouses, allowing you to visualize your data through rich, interactive dashboards.
+
+      ## Customizing Your Deployment
+
+      Customize your Superset deployment by modifying the values.yaml file. Key configuration options include:
+
+      - **Persistence:** Enable and configure persistent storage for Superset metadata.
+      - **Database:** Configure external database connections for better performance and scalability.
+      - **Resources:** Set CPU and memory limits and requests for the Superset pods.
+      - **Ingress:** Customize Ingress settings for external access.
+
+      For a full list of configurable values, consult the Helm chart's documentation or the [values.yaml](https://github.com/apache/superset/tree/master/helm/superset/values.yaml) file in the chart source.
+      
+      ## Verifying Superset Accessibility
+
+      After deploying your Superset instance and configuring external access (either via port forwarding, Ingress, or ExternalDNS), it's crucial to ensure that Superset is properly accessible through your chosen domain.
+
+      **Access the Web Interface**:
+        - Open a web browser and navigate to the domain you've configured for Superset, e.g., `http://superset.yourdomain.com`.
+        - You should be greeted with Superset's login screen.
+

@@ -36,7 +36,7 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
     const numberOfNodes = nodes.length;
 
     if (numberOfNodes !== 1) {
-      console.log("dev clusters must have exactly one node");
+      console.warn("dev clusters must have exactly one node");
     }
 
     const node = nodes[0] as MultipassNodeItemSpec;
@@ -51,7 +51,7 @@ export class DevMultipassMicrok8sStack extends CNDITerraformStack {
 
     if (useSshRepoAuth()) {
       userData = Fn.templatefile(
-        "microk8s-cloud-init-leader-ssh.yml.tftpl",
+        "microk8s-cloud-init-leader.yml.tftpl",
         {
           bootstrap_token: this.locals.bootstrap_token.asString!,
           git_repo_encoded: Fn.base64encode(
@@ -159,7 +159,7 @@ export default function getMultipassResource(
         memory = `${node.memory!}`; // eg. 500G | 5000M | 100000K
       } else {
         // TODO: fail validation here?
-        console.log(
+        console.error(
           ccolors.warn(`Invalid multipass node memory value:`),
           ccolors.user_input(`"${node.memory!}"`),
         );
@@ -180,7 +180,7 @@ export default function getMultipassResource(
         disk = `${node.disk!}`;
       } else {
         // TODO: fail validation here?
-        console.log(
+        console.warn(
           ccolors.warn(`Invalid multipass node disk value:`),
           ccolors.user_input(`"${node.disk!}"`),
         );
@@ -207,7 +207,7 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
   await stageCDKTFStack(app);
 
   const cndi_multipass_instance = getMultipassResource(cndi_config);
-  const input: TFBlocks = deepMerge({
+  const input = deepMerge({
     resource: {
       multipass_instance: {
         cndi_multipass_instance,
@@ -228,5 +228,5 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
     ...cndi_config?.infrastructure?.terraform,
   });
 
-  await patchAndStageTerraformFilesWithInput(input);
+  await patchAndStageTerraformFilesWithInput(input as TFBlocks);
 }

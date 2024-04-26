@@ -43,6 +43,7 @@ if (!(";${Path};".ToLower() -like "*;${BinDir};*".ToLower())) {
   $Env:Path += ";${BinDir}"
 }
 
+& $CNDIExe '--help'
+
 Write-Output "CNDI was installed successfully to ${CNDIExe}"
-Write-Output "Run 'cndi --help' to get started"
 Write-Output "Stuck? Join our Discord https://cndi.run/di?utm_id=5095"

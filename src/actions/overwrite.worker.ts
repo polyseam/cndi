@@ -23,13 +23,15 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifestPublic from "../outputs/custom-port-manifests/managed/ingress-service-public.ts";
-import getEKSIngressTcpServicesConfigMapManifestPublic from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
+import getEKSIngressServiceManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-service-public.ts";
+import getEKSIngressTcpServicesConfigMapManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
 
-import getEKSIngressServiceManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-service-private.ts";
+import getEKSIngressServiceManifestPrivate from "src/outputs/custom-port-manifests/managed/ingress-service-private.ts";
 import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
 
-import getExternalDNSManifest from "../outputs/core-applications/external-dns.application.yaml.ts";
+import getExternalDNSManifest from "src/outputs/core-applications/external-dns.application.yaml.ts";
+import getCertManagerApplicationManifest from "src/outputs/core-applications/cert-manager.application.yaml.ts";
+import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -44,7 +46,7 @@ import validateValuesWithSchema from "src/validate/valuesSchema.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
-interface OverwriteActionArgs {
+interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
@@ -52,7 +54,7 @@ interface OverwriteActionArgs {
 
 type OverwriteWorkerMessage = {
   data: {
-    args?: OverwriteActionArgs;
+    options?: OverwriteActionOptions;
     type: "begin-overwrite" | "complete-overwrite" | "error-overwrite";
     code?: number;
   };
@@ -84,7 +86,8 @@ self.Deno.exit = (code?: number): never => {
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
-    const options = message.data.args as OverwriteActionArgs;
+    const options = message.data.options as OverwriteActionOptions;
+
     const pathToKubernetesManifests = path.join(
       options.output,
       "cndi",
@@ -102,7 +105,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     let pathToConfig: string;
 
     try {
-      const result = await loadCndiConfig(options?.file);
+      const result = await loadCndiConfig(options.output);
       config = result.config;
       pathToConfig = result.pathToConfig;
     } catch (errorLoadingCndiConfig) {
@@ -114,10 +117,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       return;
     }
 
-    if (options.initializing) {
-      await loadEnv({ export: true, envPath });
-      console.log();
-    }
+    await loadEnv({ export: true, envPath });
 
     try {
       await validateConfig(config, pathToConfig);
@@ -201,7 +201,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           path.join(options.output, "cndi", "cluster_manifests", `${key}.yaml`),
         );
       } catch {
-        console.log(
+        console.error(
           ccolors.warn(
             `failed to read SealedSecret: "${
               ccolors.key_name(key + ".yaml")
@@ -266,12 +266,30 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     console.log();
-    // console.log();
+
     console.log(ccolors.success("staged terraform stack"));
 
     const cert_manager = config?.infrastructure?.cndi?.cert_manager;
 
-    if (cert_manager) {
+    const skipCertManager = // explicitly disabled cert-manager
+      config?.infrastructure?.cndi?.cert_manager?.enabled === false;
+
+    if (cert_manager && !skipCertManager) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "cert-manager.application.yaml",
+        ),
+        getCertManagerApplicationManifest(),
+      );
+
+      console.log(
+        ccolors.success("staged application manifest:"),
+        ccolors.key_name("cert-manager.application.yaml"),
+      );
+
       if (cert_manager?.self_signed) {
         await stageFile(
           path.join(
@@ -291,6 +309,21 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           getProductionClusterIssuerManifest(cert_manager?.email),
         );
       }
+    }
+
+    const skipReloader = // explicitly disabled reloader
+      config?.infrastructure?.cndi?.reloader?.enabled === false;
+
+    if (!skipReloader) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "reloader.application.yaml",
+        ),
+        getReloaderApplicationManifest(),
+      );
     }
 
     const open_ports = config?.infrastructure?.cndi?.open_ports || [];
@@ -503,8 +536,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     const completionMessage = options?.initializing
-      ? "initialized your cndi project in the ./cndi directory!"
-      : "overwrote your cndi project in the ./cndi directory!";
+      ? `initialized your cndi project at ${ccolors.key_name(options.output)}!`
+      : `overwrote your cndi project files in ${
+        ccolors.key_name(path.join(options.output, "cndi"))
+      }!`;
 
     console.log("\n" + completionMessage);
 

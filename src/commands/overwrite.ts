@@ -1,14 +1,30 @@
 import { Command, Spinner } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
+import createRepo from "src/actions/createRepo.ts";
+
+type EchoOwOptions = {
+  file?: string;
+  output?: string;
+  initializing?: boolean;
+};
+
+const echoOw = (options: EchoOwOptions) => {
+  if (options?.initializing) return;
+
+  const cndiOverwrite = "cndi overwrite";
+  const cndiOverwriteFile = options.file ? ` --file ${options.file}` : "";
+  const cndiOverwriteOutput = options.output
+    ? ` --output ${options.output}`
+    : "";
+  console.log(`${cndiOverwrite}${cndiOverwriteFile}${cndiOverwriteOutput}\n`);
+};
 
 // deno-lint-ignore no-explicit-any
-const owAction = (args: any) => {
-  if (!args.initializing) {
-    if (args.file) {
-      console.log(`cndi overwrite --file "${args.file}"\n`);
-    } else {
-      console.log(`cndi overwrite\n`);
-    }
+const owAction = (options: any) => {
+  echoOw(options);
+
+  if (!options.output) {
+    options.output = Deno.cwd();
   }
 
   const spinner = new Spinner({
@@ -32,20 +48,23 @@ const owAction = (args: any) => {
     type: "module",
   });
 
-  w.postMessage({ args, type: "begin-overwrite" });
+  w.postMessage({ options, type: "begin-overwrite" });
 
   w.onmessage = async (e) => {
     console.log();
     if (e.data.type === "complete-overwrite") {
       w.terminate();
       spinner.stop();
+      if (options.create) {
+        await createRepo(options);
+      }
       await emitExitEvent(0);
       Deno.exit(0);
     } else if (e.data.type === "error-overwrite") {
       spinner.stop();
       w.terminate();
       console.log();
-      console.log(e?.data?.message || "");
+      console.error(e?.data?.message || "");
       await emitExitEvent(e.data.code);
       Deno.exit(e.data.code);
     }
@@ -63,13 +82,16 @@ const overwriteCommand = new Command()
   .option(
     "-o, --output <output:string>",
     "Path to your cndi cluster git repository.",
-    {
-      default: Deno.cwd(),
-    },
+    getProjectDirectoryFromFlag,
   )
   .option(
     "--initializing <initializing:boolean>",
     'true if "cndi init" is the caller of this command',
+    { hidden: true, default: false },
+  )
+  .option(
+    "--create <create:boolean>",
+    "Create a new cndi cluster repository",
     { hidden: true, default: false },
   )
   .action(owAction);
