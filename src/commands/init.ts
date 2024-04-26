@@ -156,7 +156,7 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.log(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
 
         console.error(
           initLabel,
@@ -177,7 +177,7 @@ const initCommand = new Command()
           >;
         }
       } catch (errorParsingResponsesFile) {
-        console.log(ccolors.caught(errorParsingResponsesFile, 2001));
+        console.error(ccolors.caught(errorParsingResponsesFile, 2001));
 
         console.error(
           initLabel,
@@ -342,7 +342,7 @@ const initCommand = new Command()
           },
         );
       } catch (e) {
-        console.log(e.message);
+        console.error(e.message);
         await emitExitEvent(e.cause);
         Deno.exit(e.cause);
       }

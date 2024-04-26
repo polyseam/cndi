@@ -388,7 +388,7 @@ const createCommand = new Command()
         },
       });
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       await emitExitEvent(error.cause);
       Deno.exit(error.cause);
     }
