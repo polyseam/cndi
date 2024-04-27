@@ -1,7 +1,7 @@
 cndi_version: v2
 project_name: basic-ec2
 provider: aws
-distribution: microk8s
+distribution: eks # harvester, RKE2, K3S
 infrastructure:
   cndi:
     cert_manager:

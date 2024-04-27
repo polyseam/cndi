@@ -1,7 +1,7 @@
 # installing cndi
 
-Installing CNDI is all about getting the binary from our latest release, and
-putting it in the right spot.
+Installing CNDI is all about getting the binaries from our latest release, and
+putting them in the right spot.
 
 ## macos and linux
 

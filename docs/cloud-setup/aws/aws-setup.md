@@ -1,6 +1,6 @@
-## Amazon Web Services (AWS) Console Setup
+## Amazon Web Services (AWS) Console Setup Guide
 
-### Step 1: Sign up to AWS
+### Step 1: Sign up / Sign in to AWS
 
 If you do not have an AWS account, complete the following steps to create one.
 
