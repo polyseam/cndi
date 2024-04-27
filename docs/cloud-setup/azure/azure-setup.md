@@ -1,9 +1,9 @@
-## Setting up Microsoft Azure for CNDI
+## Microsoft Azure Console Setup Guide
 
 To create and use Azure services, you first need to sign up. If you’ve never
 tried or paid for Azure before, you can sign up for the Azure free account.
 
-### Step 1: Sign up to Azure
+### Step 1: Sign up / Sign in to Azure
 
 1. In a web browser, go to
    [https://azure.microsoft.com/free](https://azure.microsoft.com/free).
