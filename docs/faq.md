@@ -1,32 +1,5 @@
 # Frequently Asked Questions (FAQ)
 
-## General Questions
-
-### What is CNDI?
-
-CNDI is an open-source self-serve infrastructure deployment tool
-
-### What are the benifits of CNDI?
-
-#### Developer experience
-
-- Store your data infrastructure as code
-- Leverage the scale of Kubernetes, let us handle the setup
-- Automatically secured including ingress authentication and SSL certificates
-
-#### Only pay for your infrastructure
-
-- CNDI is totally free, all you pay for is the infrastructure you deploy
-- The cheapest option on the market, without needing to roll your own cluster
-
-#### Scalable
-
-- We can start small and then grow with your needs
-- From a single node local install to massive 100+ node clusters and anything in
-  between
-
-## Technical Questions
-
 ### Where I get the argocd admin password, how do I change it?
 
 You can find the password in the `.env` file in the cndi project directory.

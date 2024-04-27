@@ -256,12 +256,6 @@ especially if you have not exposed your ArgoCD instance to the internet. To
 learn more about how to connect to your cluster, check out
 [Connecting Remotely to CNDI Clusters](./docs/connect.md) Guide.
 
-## up and running 🏃
-
-Once you have a cluster and know the basics, how can you make the most of it?
-For a guide focused on operating a CNDI cluster and suppporting it over time,
-check out [Up and Running with CNDI Guide](./docs/up-and-running.md).
-
 ## templates 🏗️
 
 Templates are YAML files which define a relationship between prompts and file
@@ -274,7 +268,7 @@ Templates or bump existing requests, check out
 ## building cndi 🛠️
 
 If you're hoping to contribute to CNDI, please reach out to
-[johnstonmatt](https://github.com/johnstonmatt)! To learn more about setting up
+[johnstonmatt](mailto:matt.johnston@polyseam.io)! To learn more about setting up
 your development environment and other contributor info, check out
 [CNDI Contributor Guide](./docs/contributing.md).
 
