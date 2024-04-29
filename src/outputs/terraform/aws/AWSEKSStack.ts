@@ -863,6 +863,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             value: "700",
           },
         ],
+        version: "3.0.0",
       },
     );
 
@@ -890,7 +891,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_helm_release_ingress_nginx_controller_private",
       {
-        chart: "ingress-nginx",
+        chart: "version:",
         createNamespace: false,
         dependsOn: [firstNodeGroup!, nginxPrivateNS],
         name: "ingress-nginx-private",
