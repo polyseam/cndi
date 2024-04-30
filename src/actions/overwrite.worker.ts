@@ -200,7 +200,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           path.join(options.output, "cndi", "cluster_manifests", `${key}.yaml`),
         );
       } catch {
-        console.log(
+        console.error(
           ccolors.warn(
             `failed to read SealedSecret: "${
               ccolors.key_name(key + ".yaml")
@@ -517,8 +517,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     const completionMessage = options?.initializing
-      ? "initialized your cndi project in the ./cndi directory!"
-      : "overwrote your cndi project in the ./cndi directory!";
+      ? `initialized your cndi project at ${ccolors.key_name(options.output)}!`
+      : `overwrote your cndi project files in ${
+        ccolors.key_name(path.join(options.output, "cndi"))
+      }!`;
 
     console.log("\n" + completionMessage);
 

@@ -5,6 +5,7 @@ const createRepoLabel = ccolors.faded("\nsrc/actions/createRepo.ts:");
 
 type CreateRepoOptions = {
   output: string;
+  skipPush?: boolean;
 };
 
 export default async function createRepo(options: CreateRepoOptions) {
@@ -66,14 +67,14 @@ export default async function createRepo(options: CreateRepoOptions) {
     await git.init();
   } catch (e) {
     console.error(e);
-    console.log("git init failed");
+    console.error("git init failed");
   }
 
   try {
     await git.addRemote("origin", repoUrlStringWithCredentials);
   } catch (e) {
     console.error(e);
-    console.log(
+    console.error(
       ccolors.warn("git remote add origin"),
       ccolors.error("failed"),
     );
@@ -83,14 +84,14 @@ export default async function createRepo(options: CreateRepoOptions) {
     await git.add(".");
   } catch (e) {
     console.error(e);
-    console.log(ccolors.warn("git add"), ccolors.error("failed"));
+    console.error(ccolors.warn("git add"), ccolors.error("failed"));
   }
 
   try {
     await git.commit("initial commit");
   } catch (e) {
     console.error(e);
-    console.log(
+    console.error(
       ccolors.warn("git commit -m 'initial commit'"),
       ccolors.error("failed"),
     );
@@ -149,20 +150,21 @@ export default async function createRepo(options: CreateRepoOptions) {
     }
   }
 
-  try {
-    await git.push("origin", "main", ["--set-upstream"]);
-  } catch (e) {
-    console.error(e);
+  if (!options?.skipPush) {
+    try {
+      await git.push("origin", "main", ["--set-upstream"]);
+    } catch (e) {
+      console.error(e);
+      console.error(
+        ccolors.warn("git push origin main"),
+        ccolors.error("failed"),
+      );
+    }
     console.log(
-      ccolors.warn("git push origin main"),
-      ccolors.error("failed"),
+      ccolors.success(
+        `created cndi cluster repo at`,
+      ),
+      ccolors.key_name(`${repoUrlString}`),
     );
   }
-
-  console.log(
-    ccolors.success(
-      `created cndi cluster repo at`,
-    ),
-    ccolors.key_name(`${repoUrlString}`),
-  );
 }

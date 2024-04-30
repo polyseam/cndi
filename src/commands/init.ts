@@ -41,11 +41,13 @@ type EchoInitOptions = {
   deploymentTargetLabel?: string;
   keep?: boolean;
   create?: boolean;
+  skipPush?: boolean;
 };
 
 const echoInit = (options: EchoInitOptions) => {
   const cndiInit = "cndi init";
   const cndiInitCreate = options.create ? " --create" : "";
+  const cndiInitSkipPush = options.skipPush ? " --skip-push" : "";
   const cndiInitInteractive = options.interactive ? " --interactive" : "";
   const cndiInitTemplate = options.template
     ? ` --template ${options.template}`
@@ -59,7 +61,7 @@ const echoInit = (options: EchoInitOptions) => {
     ? ` --deployment-target-label ${options.deploymentTargetLabel}`
     : "";
   console.log(
-    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}\n`,
+    `${cndiInit}${cndiInitCreate}${cndiInitInteractive}${cndiInitTemplate}${deploymentTargetLabel}${cndiInitOutput}${cndiInitSkipPush}\n`,
   );
 };
 
@@ -95,7 +97,7 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --workflow-ref <ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi workflow with",
     {
       hidden: true,
@@ -110,6 +112,9 @@ const initCommand = new Command()
     "-c, --create",
     "Create a new cndi cluster repo",
   )
+  .option("--skip-push", "Skip pushing to the remote repository", {
+    depends: ["create"],
+  })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options.output ?? Deno.cwd();
@@ -151,7 +156,7 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.log(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
 
         console.error(
           initLabel,
@@ -172,7 +177,7 @@ const initCommand = new Command()
           >;
         }
       } catch (errorParsingResponsesFile) {
-        console.log(ccolors.caught(errorParsingResponsesFile, 2001));
+        console.error(ccolors.caught(errorParsingResponsesFile, 2001));
 
         console.error(
           initLabel,
@@ -337,7 +342,7 @@ const initCommand = new Command()
           },
         );
       } catch (e) {
-        console.log(e.message);
+        console.error(e.message);
         await emitExitEvent(e.cause);
         Deno.exit(e.cause);
       }
@@ -387,7 +392,7 @@ const initCommand = new Command()
     if (deployment_target_provider !== "dev") {
       await stageFile(
         path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowRef),
+        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
       );
     }
 
