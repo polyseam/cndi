@@ -53,19 +53,25 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_aws_internet_gateway",
       {
-        vpcId: vpc.id,
         tags: {
           Name: `cndi-igw_${project_name}`,
         },
       },
     );
 
+    const gwAttachment = new CDKTFProviderAWS.internetGatewayAttachment
+      .InternetGatewayAttachment(this, "cndi_aws_internet_gateway_attachment", {
+      internetGatewayId: igw.id,
+      vpcId: vpc.id,
+      dependsOn: [igw, vpc],
+    });
+
     const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
-      vpc: true,
+      domain: "vpc",
       tags: {
         Name: `cndi-elastic-ip_${project_name}`,
       },
-      dependsOn: [igw],
+      dependsOn: [gwAttachment],
     });
 
     new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
@@ -151,6 +157,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "kubernetes.io/role/internal-elb": "1",
         },
         vpcId: vpc.id,
+        dependsOn: [gwAttachment],
       },
     );
 
@@ -167,6 +174,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "kubernetes.io/role/internal-elb": "1",
         },
         vpcId: vpc.id,
+        dependsOn: [gwAttachment],
       },
     );
 
@@ -183,6 +191,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           "kubernetes.io/role/elb": "1",
         },
         vpcId: vpc.id,
+        dependsOn: [gwAttachment],
       },
     );
 
@@ -800,6 +809,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             cniPolicyAttachment,
             containerRegistryAttachment,
             nodegroupLaunchTemplate,
+            gwAttachment,
           ],
         },
       );
