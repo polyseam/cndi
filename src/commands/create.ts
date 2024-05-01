@@ -399,8 +399,10 @@ const createCommand = new Command()
       YAML.stringify(templateResult.responses),
     );
 
+    const shouldSkipSSH =
+      templateResult?.responses?.deployment_target_distribution !== "microk8s";
     const sshPublicKey = await createSshKeys(
-      templateResult.responses.distribution !== "microk8s",
+      shouldSkipSSH,
     );
 
     const cndiGeneratedValues = {

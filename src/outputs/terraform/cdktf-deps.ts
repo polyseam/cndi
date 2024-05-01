@@ -8,7 +8,7 @@ import {
   TerraformOutput,
   TerraformStack,
   TerraformVariable,
-} from "npm:cdktf";
+} from "npm:cdktf@0.19.0";
 
 export {
   App,
@@ -41,7 +41,9 @@ export async function stageCDKTFStack(app: App) {
   const tfHome = path.join(stagingDirectory, "cndi", "terraform");
   const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
   Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli
+
   const synthFiles = walkSync(synthDir, { includeDirs: false });
+
   for (const entry of synthFiles) {
     const destinationAbsPath = entry.path.replace(synthDir, tfHome);
     if (entry.path.endsWith("cdk.tf.json")) {

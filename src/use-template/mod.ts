@@ -119,6 +119,10 @@ function fixUndefinedDistributionIfRequired(config: string): string {
   if (!obj?.distribution || obj.distribution === "undefined") {
     const provider = obj.provider as CNDIProvider;
     obj.distribution = distributionMap[provider] || null;
+    $cndi.responses.set(
+      "deployment_target_distribution",
+      obj.distribution as unknown as CNDITemplatePromptResponsePrimitive,
+    );
   }
   return YAML.stringify(obj);
 }
