@@ -1,21 +1,16 @@
 // Deno std lib
-export { homedir, platform } from "node:os";
-export { SEPARATOR } from "@std/path/constants";
-export * as path from "@std/path";
 import * as yaml from "@std/yaml";
-export { deepMerge } from "@std/collections";
-export { walk } from "@std/fs";
+export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
+export { deepMerge } from "@std/collections";
 export { delay } from "@std/async";
-export { exists } from "@std/fs";
-export { ensureDirSync } from "@std/fs";
-export { existsSync } from "@std/fs";
+export { ensureDirSync, exists, existsSync, walk, walkSync } from "@std/fs";
 export { load as loadEnv } from "@std/dotenv";
-export { walkSync } from "@std/fs";
 export { writeAll } from "@std/io";
+export { Spinner, type SpinnerOptions } from "@std/cli";
 
-export { Spinner } from "@std/cli";
-export { type SpinnerOptions } from "@std/cli";
+// node std lib
+export { homedir, platform } from "node:os";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 
@@ -28,16 +23,9 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export {
-  Command,
-  CompletionsCommand,
-  HelpCommand,
-  UpgradeCommand,
-} from "@cliffy/cliffy/command/mod.ts";
+export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
 
-export { GithubProvider } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { UpgradeOptions } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { colors } from "@cliffy/cliffy/ansi/colors.ts";
+import { colors } from "@cliffy/ansi";
 
 import {
   Checkbox,
@@ -45,12 +33,13 @@ import {
   Input,
   List,
   Number,
+  prompt,
   Secret,
   Select,
   Toggle,
-} from "@cliffy/cliffy/prompt/mod.ts";
+} from "@cliffy/prompt";
 
-export { prompt as cprompt } from "@cliffy/cliffy/prompt/mod.ts";
+export { prompt as cprompt };
 
 // used to have keys, should not matter
 export const PromptTypes = {
@@ -81,7 +70,6 @@ import CryptoJS from "npm:crypto-js@4.1.1";
 
 // import/export required
 export { CryptoJS };
-export type { UpgradeOptions };
 
 // custom colors
 export const ccolors = {
@@ -100,4 +88,10 @@ export const ccolors = {
 
 // Polyseam Modules
 export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate_response";
+export { inflateResponse } from "@polyseam/inflate-response";
+
+export {
+  GHRError,
+  GithubReleasesProvider,
+  GithubReleasesUpgradeCommand,
+} from "@polyseam/cliffy-provider-gh-releases";

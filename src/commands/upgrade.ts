@@ -2,7 +2,7 @@ import {
   GHRError,
   GithubReleasesProvider,
   GithubReleasesUpgradeCommand,
-} from "src/cliffy-provider-gh-releases/mod.ts";
+} from "deps";
 
 import { emitExitEvent, getPathToCndiBinary } from "src/utils.ts";
 

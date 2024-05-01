@@ -1,4 +1,4 @@
-import { ccolors, Command, path, PromptTypes, SEPARATOR, YAML } from "deps";
+import { ccolors, Command, path, PromptTypes, YAML } from "deps";
 
 const { Input, Select } = PromptTypes;
 
@@ -201,7 +201,7 @@ const initCommand = new Command()
     let cndi_config: string;
     let env: string;
     let readme: string;
-    let project_name = destinationDirectory.split(SEPARATOR).pop() ||
+    let project_name = destinationDirectory.split(path.SEPARATOR).pop() ||
       "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
