@@ -106,20 +106,12 @@ export default function setTF_VARs() {
   }
 
   const ssh_public_key = Deno.env.get("SSH_PUBLIC_KEY");
-  if (!ssh_public_key) {
-    throw new Error(
-      [
-        setTF_VARsLabel,
-        ccolors.key_name(`"SSH_PUBLIC_KEY"`),
-        ccolors.error("env var is not set"),
-      ].join(" "),
-      {
-        cause: 106,
-      },
-    );
+
+  // only required for microk8s
+  if (ssh_public_key) {
+    Deno.env.set("TF_VAR_ssh_public_key", ssh_public_key);
   }
 
-  Deno.env.set("TF_VAR_ssh_public_key", ssh_public_key);
   Deno.env.set("TF_VAR_git_repo", git_repo);
   Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
   Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);
