@@ -1,8 +1,7 @@
 export { Construct } from "npm:constructs";
-import { App } from "npm:cdktf";
-export { App };
 
-export {
+import {
+  App,
   Fn,
   LocalBackend,
   TerraformLocal,
@@ -10,6 +9,16 @@ export {
   TerraformStack,
   TerraformVariable,
 } from "npm:cdktf";
+
+export {
+  App,
+  Fn,
+  LocalBackend,
+  TerraformLocal,
+  TerraformOutput,
+  TerraformStack,
+  TerraformVariable,
+};
 
 // Terraform CDKTF Providers
 export * as CDKTFProviderRandom from "npm:@cdktf/provider-random";
