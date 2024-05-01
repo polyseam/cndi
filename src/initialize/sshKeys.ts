@@ -3,7 +3,8 @@ import { getStagingDir } from "src/utils.ts";
 
 const sshKeysLabel = ccolors.faded("\nsrc/initialize/sshKeys.ts:");
 
-const createSshKeys = async (): Promise<string> => {
+const createSshKeys = async (skip?: boolean): Promise<string | null> => {
+  if (skip) return null;
   const stagingDir = getStagingDir();
 
   const ssh_private_key_path = path.join(stagingDir, "cndi_rsa");
@@ -54,16 +55,4 @@ const createSshKeys = async (): Promise<string> => {
   return ssh_public_key;
 };
 
-const loadSshPublicKey = (): string | null => {
-  const ssh_public_key = Deno.env.get(
-    "SSH_PUBLIC_KEY",
-  ) as string;
-
-  if (!ssh_public_key) {
-    return null;
-  }
-
-  return ssh_public_key;
-};
-
-export { createSshKeys, loadSshPublicKey };
+export { createSshKeys };

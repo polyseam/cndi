@@ -362,17 +362,9 @@ const createCommand = new Command()
 
     // GENERATE ENV VARS
     const sealedSecretsKeys = await createSealedSecretsKeys();
-    const sshPublicKey = await createSshKeys();
+
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
-
-    const cndiGeneratedValues = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
-      debugMode: !!options.debug,
-    };
 
     let templateResult;
 
@@ -406,6 +398,20 @@ const createCommand = new Command()
       "cndi_responses.yaml",
       YAML.stringify(templateResult.responses),
     );
+
+    const shouldSkipSSH =
+      templateResult?.responses?.deployment_target_distribution !== "microk8s";
+    const sshPublicKey = await createSshKeys(
+      shouldSkipSSH,
+    );
+
+    const cndiGeneratedValues = {
+      sshPublicKey,
+      sealedSecretsKeys,
+      terraformStatePassphrase,
+      argoUIAdminPassword,
+      debugMode: !!options.debug,
+    };
 
     await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 
