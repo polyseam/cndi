@@ -55,18 +55,18 @@ export const PromptTypes = {
 } as const;
 
 //  - validator
-export { default as validator } from "npm:validator";
+export { default as validator } from "validator";
 
 // - lodash
-export { default as getValueFromKeyPath } from "npm:lodash.get@4.4.2";
-export { default as setValueForKeyPath } from "npm:lodash.set@4.3.2";
-export { default as unsetValueForKeyPath } from "npm:lodash.unset@4.5.2";
+export { default as getValueFromKeyPath } from "lodash.get";
+export { default as setValueForKeyPath } from "lodash.set";
+export { default as unsetValueForKeyPath } from "lodash.unset";
 
 //  - simple-git
-export { simpleGit } from "npm:simple-git@3.18.0";
+export { simpleGit } from "simple-git";
 
 //  - crypto-js
-import CryptoJS from "npm:crypto-js@4.1.1";
+import CryptoJS from "crypto-js";
 
 // import/export required
 export { CryptoJS };
