@@ -1,4 +1,4 @@
-export { Construct } from "constructs";
+export { Construct } from "npm:constructs";
 
 import {
   App,
@@ -8,7 +8,7 @@ import {
   TerraformOutput,
   TerraformStack,
   TerraformVariable,
-} from "cdktf";
+} from "npm:cdktf@0.19.0";
 
 export {
   App,
@@ -21,15 +21,15 @@ export {
 };
 
 // Terraform CDKTF Providers
-export * as CDKTFProviderRandom from "@cdktf/provider-random";
-export * as CDKTFProviderAWS from "@cdktf/provider-aws";
-export * as CDKTFProviderAzure from "@cdktf/provider-azurerm";
-export * as CDKTFProviderGCP from "@cdktf/provider-google";
-export * as CDKTFProviderHelm from "@cdktf/provider-helm";
-export * as CDKTFProviderKubernetes from "@cdktf/provider-kubernetes";
-export * as CDKTFProviderTime from "@cdktf/provider-time";
-export * as CDKTFProviderTls from "@cdktf/provider-tls";
-export * as CDKTFProviderLocal from "@cdktf/provider-local";
+export * as CDKTFProviderRandom from "npm:@cdktf/provider-random";
+export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";
+export * as CDKTFProviderAzure from "npm:@cdktf/provider-azurerm";
+export * as CDKTFProviderGCP from "npm:@cdktf/provider-google";
+export * as CDKTFProviderHelm from "npm:@cdktf/provider-helm";
+export * as CDKTFProviderKubernetes from "npm:@cdktf/provider-kubernetes@9";
+export * as CDKTFProviderTime from "npm:@cdktf/provider-time";
+export * as CDKTFProviderTls from "npm:@cdktf/provider-tls";
+export * as CDKTFProviderLocal from "npm:@cdktf/provider-local";
 
 import { getPrettyJSONString, getStagingDir } from "src/utils.ts";
 import { path, walkSync } from "deps";
