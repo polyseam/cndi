@@ -25,8 +25,13 @@
 </p>
 
 Start with a [Template](https://www.cndi.dev/templates) for a popular service
-and CNDI will help you deploy it on your own infrastructure, just as easily as
-you can sign up for a Platform as a Service.
+like [Airflow](https://airflow.apache.org) or
+[PostgreSQL](https://cloudnative-pg.io) and CNDI will help you deploy it on your
+own infrastructure - just as easily as you can sign up for a cloud-based
+Platform as a Service.
+
+You can also develop your own Templates to provide fill-in-the-blanks style
+wizards to your team.
 
 Once your cluster is set up, manage the infrastructure and applications with
 ease using GitOps and Infrastructure as Code.
@@ -42,500 +47,242 @@ checkout this demo:
 
 ## installation 🥁
 
-To install CNDI we just need to download the binary and add it to our PATH. This
-can be done using the script below:
+To install CNDI you just need to download the "tarball" for your system from
+[GitHub Releases](https://github.com/polyseam/cndi/releases) and extract it to
+disk.
+
+This script automates that job:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-If you'd prefer to use Windows we have a one-liner for that too described in
-this [short guide](docs/install.md).
+If you run into trouble or if you want to install the Windows executable, check
+out our [tiny install guide](./docs/install.md).
 
-In either case once the script has finished running, the `cndi` binary and
-dependencies are installed to `~/.cndi/bin`.
+## usage 👩‍💻
 
-## usage
+Use CNDI to deploy GitOps enabled Kubernetes application clusters on any
+platform, as quickly and easily as possible. Every CNDI project starts with a
+Template.
 
-CNDI is a tool with which to deploy GitOps enabled Kubernetes application
-clusters on any platform as quickly and easily as possible. The best way to
-understand this process is to look at it as a lifecycle.
+### create 🚀
 
-### lifecycle: init 🌱
+the best way to bootstrap a CNDI project is by using `cndi create`. It's best
+because it is easy and interactive, to some folks it may even feel like _too
+much magic_ 🪄 but fear not! We will explain everything soon.
 
-The first step in the lifecycle is to initialize the CNDI project. Because
-CNDI's mechanics are based on the GitOps workflow, we should initialize a Git
-repository before we do anything else.
+We start by picking a CNDI Template, and [airflow](https://airflow.apache.org)
+is one of our favourites.
 
-The best way to create a repo this as a GitHub user is to install the
-[gh cli](https://cli.github.com), and we'll use this tool a bit later too for
-managing secrets.
+Let's run with that:
 
 ```bash
-gh repo create cndi-example --private --clone && cd cndi-example
+# cndi create johnstonmatt/my-airflow --template airflow && cd my-airflow
+cndi create <owner>/<repo> -t airflow && cd <repo>
 ```
 
-Now that we have a Git repository, we can initialize a new CNDI project.
+[Airflow](https://airflow.apache.org) is one of the Templates bundled with CNDI,
+so we can call it out by name, but Templates are just YAML, so they can also be
+loaded from a URL or file path!
 
-The best way to get started if you are new to CNDI is to use the interactive
-cli, so let's look at that first.
+When in interactive mode, `cndi` will prompt you for the information a Template
+needs step-by-step.
 
-```bash
-# once cndi is in your "PATH" you can run it from anywhere
-cndi init --interactive
-```
+The first prompt `cndi create` displays asks you where you want to store your
+project on disk, defaulting to a new folder called `<repo>` in the current
+working directory.
 
-This will start an interactive cli that will ask you a series of questions, the
-first prompt is to select a Template. Templates are a CNDI concept, and they can
-be thought of as a "blueprint" for a cloud-native stack. Once you select a
-Template, CNDI will ask you some general questions about your project and some
-template-specific questions. Then it will write out a few files inside your
-project repo.
+There will be a few more prompts that are asked for every new CNDI project,
+including asking for GitHub credentials and where you want to deploy your new
+cluster.
 
-It's also possible to specify a Template URL to initialize with. A Template URL
-resolves to a CNDI Template file, this means that you are not limited to only
-Templates the CNDI team has put together, you can point to any arbitrary
-template file that follows the
-[Template Schema](/src/schemas/cndi_template.schema.json).
+These prompts are called
+[core prompts](https://github.com/polyseam/common-blocks/tree/main/common/core-prompts.yaml),
+and depending how you answer that first set, you'll be shown more prompts. One
+of the more important decisions is to choose your cloud provider and cndi
+natively supports 4 today: [aws](https://aws.com),
+[gcp](https://cloud.google.com/gcp), [azure](https://azure.microsoft.com), and
+`dev` for deploying experiments locally.
 
-These Template URLs can be `file://` URLs which have an absolute path to the
-file locally, or typical remote or `https://` URLs over the net.
+CNDI shines brightest when deploying to the cloud, so we encourage that if you
+have access!
 
-```bash
-# file:// URLs must be absolute paths
-cndi init -i --template file:///absolute/path/to/template.yaml
-# or
-cndi init -i --template https://example.com/path/to/template.yaml
-```
+When you are asked for credentials to your deployment target, you can follow the
+corresponding setup guide for [AWS](docs/cloud-setup-guide/aws/aws-setup.md),
+[GCP](docs/cloud-setup-guide/gcp/gcp-setup.md), or
+[Azure](docs/cloud-setup-guide/azure/azure-setup.md).
+
+The last set of questions relate directly to the Template you selected, and
+generally it is fine to accept the defaults if you aren't completely familiar
+with the stack you are deploying.
 
 ---
 
-CNDI has generated a few files and folders for us based on our Template file. If
-you want to learn about what CNDI is really creating, the best file to look at
-is the `cndi_config.yaml` file in the root of your repository.
+Once you've answered all of the prompts, CNDI will create a number of project
+files and we have a dedicated section that covers the
+[CNDI Project Structure](./docs/project-structure.md), but there a couple things
+that are important to know now:
 
-We break down all of the generated files later in this document in the
-[outputs](#outputs-) section.
+1. `cndi create` will create a GitHub repo on your behalf and push the project
+   ([files and folders](./docs/project-structure.md)) it generates for you to
+   that repo
+2. All of your responses that are sensitive are written to a `.env` file, and
+   that file will not be included in your repo. Instead, CNDI will push these to
+   GitHub for use in automation by using the
+   [GitHub Secrets API](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+3. CNDI created a file called `.github/workflows/cndi-run.yaml` which will
+   trigger any time code is pushed to your repo
 
-The next step for our one-time project setup is to make sure that we have all
-the required environment variables for our project in our `.env` file that CNDI
-generated.
-
-Some of these values are required for every deployment. For example, you always
-need to have `GIT_USERNAME`, `GIT_TOKEN` and `GIT_REPO`. Some are only required
-for a specific `provider`, like `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`,
-which are only needed for `aws` deployments. Lastly, some are only required for
-certain Templates, for example all `airflow` templates require
-`GIT_SYNC_PASSWORD` for accessing repos that hold Airflow DAGs.
-
-If you didn't use interactive mode you may have some placeholders in that file
-to overwrite, and they should be easy to spot. CNDI should also tell you if it
-is missing expected values.
-
-When all of the values have been set in your `.env` file, we want to use the
-[gh cli](https://cli.github.com) again, this time to push our secret environment
-variables to GitHub.
-
-```bash
-# cndi requires version 2.23.0 or later of the GitHub CLI
-gh secret set -f .env
-```
-
-Now we are ready for the next phase of the lifecycle!
+The CLI will provide info about the files it is creating for you, then provide a
+link to the new repo where you can watch the GitHub Action deployment progress!
 
 ---
 
-### lifecycle: push 🚀
+### overwrite ♻️
 
-Now that we have initialized our project, CNDI has given us files that describe
-our infrastructure resources and files that describe what to run on that
-infrastructure.
+After a Template has been initialized with either `cndi init` or `cndi create` ,
+CNDI projects are managed from only 2 files:
 
-CNDI has also created a GitHub Action for us which is responsible for calling
-`cndi run`. The `run` command provided in the cndi binary is responsible for
-calling `terraform apply` to deploy our infrastructure. To trigger the process
-we just need to push our changes to repository:
+`.env` : adheres to the dotenv pattern, its .gitignored, it contains all secret
+values which must not be included in source control
 
-```bash
-git add .
-git commit -m "initial commit"
-git push
-```
+`cndi_config.yaml` : this file is the center of your CNDI project, it provides
+an abstraction which unifies **infrastructure**, **applications**, and
+**configuration**.
 
-After `cndi run` has exited successfully you should be able to see new resources
-spinning up in the deployment target you selected. When the nodes come online in
-that destination, they will join together to form a Kubernetes cluster.
+Though these files are the only ones required to manage your project as a user,
+they are not natively understood by Infrastructure as Code tools, and they are
+not understood by Kubernetes natively either.
 
-As the nodes join the cluster automatically, they are going to begin sharing
-workloads. Some workloads come bundled, we will call these CNDI platform
-services. There are a couple such services, one is
-[sealed-secrets](https://github.com/bitnami-labs/sealed-secrets), and another is
-[ArgoCD](https://argo-cd.readthedocs.io/en/stable/). Sealed Secrets enables
-storing Kubernetes Secrets within git securely, and ArgoCD is a GitOps tool
-which monitors a repo for Kubernetes manifests, and applies them.
+You manage your cluster using `cndi_config.yaml`, but you must transform it into
+code that can be processed by [Terraform](https://terraform.io), and manifests
+which can be processed by [Kubernetes](https://kubernetes.io) through
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
 
-When ArgoCD comes online, it will begin reading files from the
-`cndi/cluster_manifests` directory in the GitHub repo we have been pushing to.
-Ultimately `cndi run` is only used within GitHub for infrastructure, and ArgoCD
-is solely responsible for what to run on the cluster.
+The `cndi overwrite` command is responsible for taking both your `.env` file and
+your `cndi_config.yaml` file and transforming them into a set of Kubernetes
+manifests, and Terraform objects.
 
-Your cluster will be online in no time!
+The `cndi_config.yaml` file is structured into 4 main sections:
 
----
+- metadata - eg. project_name, cndi_version, provider, distribution
+- applications - used to define Helm Charts which should be installed and
+  configured
+- cluster_manifests - used for arbitrary Kubernetes configuration
+- infrastructure - used to define infrastructure CNDI exposes and optionally raw
+  Terraform objects
 
-### lifecycle: overwrite ♻️
+The workflow is simple, modify your `cndi_config.yaml` fields and call
+`cndi ow`, it will transform your configuration into files which can be
+processed by [ArgoCD](https://argo-cd.readthedocs.io/en/stable/) and
+[Terraform](https://terraform.io), and it will output the resulting files to the
+`./cndi` folder at the root of your repo.
 
-The next phase of the lifecycle is about making changes to your cluster. These
-changes can be `cluster_manifests` oriented, if you are making changes to the
-software running on your infrastructure, or they can be infrastructure oriented
-if you are horizontally or vertically scaling your cluster.
-
-In either case, the approach is the same. Open your `cndi_config.yaml` file in
-your editor and make changes to your `applications`, `cluster_manifests`, or
-`infrastructure` then run:
-
-```bash
-# shorthand for cndi overwrite
-cndi ow
-```
-
-Upon execution of the command you should see that some of the files cndi
-generated for us before have been modified or supplemented with new files. So
-far no changes have been made to our cluster. Just like before we need to push
-the changes up for them to take effect. This is what GitOps is all about, we
-don't login to our servers to make changes, we simply modify our config, and
-`git push`!
-
-With these 3 phases you have everything you need to deploy a data infrastructure
-cluster using CNDI and evolve it over time!
+Feel free to examine the result of calling `cndi ow` to better understand how it
+works. This can be especially insightful when examining a git diff, but
+remember, those files are for machines and you can be productive with CNDI
+without ever reading or understanding them - that's by design.
 
 ---
 
-### lifecycle: destroy 🗑️
+### run 🌥️
 
-When it comes down time to teardown your cluster, there is only one step, just
-call:
+Once you've made changes using `cndi ow`, the next step is to git push a commit
+so that those changes to infrastructure and applications can be applied. The
+`.github/workflows/cndi-run.yaml` file we've generated for you is very simple.
 
-```bash
-cndi destroy # in your project repo, and we will take care of the rest!
-```
+The workflow checks to ensure there is no active instance of the workflow in
+progress to prevent corruption, it loads the credentials which are required for
+the deployment of infrastructure, and then it calls `cndi run`.
 
-This will delete all of the infrastructure resources that CNDI created for you,
-and from there you can choose either to delete the repo or keep it around for
-later.
+The run command is responsible for calling Terraform against all of the objects
+in the `./cndi/terraform/` folder, then encrypting and persisting
+[Terraform state](https://developer.hashicorp.com/terraform/cli/state) in git.
+
+Calling `cndi run` doesn't do anything directly with the other half of your
+config `./cndi/cluster_manifests`, and that is because those manifests are
+instead pulled into your cluster by
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) when it has been
+successfully deployed by [Terraform](https://terraform.io).
 
 ---
 
-### Walkthroughs 🥾
+### destroy 🗑️
+
+The last CNDI command you should know about is `cndi destroy`. This command
+takes no arguments, and it is responsible for pulling and decrypting Terraform
+state, then calling `terraform destroy` for you under the hood, which will blast
+away every resource that CNDI has created. Once the command exits successfully,
+you can safely delete your git repo or achive it for reference later.
+
+---
+
+## Walkthroughs 🥾
 
 We've got a few walkthroughs you can follow if you'd like, one for each
-deployment target. The walkthroughs demonstrate how to deploy a production grade
-Airflow cluster using CNDI's `airflow` Template.
+deployment target. These walkthroughs hold your hand through the process of
+deploying [Airflow](https://cndi.dev/templates-airflow) to the provider and
+distribution of your choice. They include info about how to get credentials,
+explanations about prompts, screenshots, and more.
 
-- [ec2/airflow](docs/walkthroughs/ec2/airflow.md) - AWS EC2
 - [eks/airflow](docs/walkthroughs/eks/airflow.md) - AWS EKS
-- [gce/airflow](docs/walkthroughs/gce/airflow.md) - GCP Compute Engine
 - [gke/airflow](docs/walkthroughs/gke/airflow.md) - GCP GKE
-- [avm/airflow](docs/walkthroughs/avm/airflow.md) - Azure Virtual Machines
 - [aks/airflow](docs/walkthroughs/aks/airflow.md) - Azure AKS
 - [dev/airflow](docs/walkthroughs/dev/airflow.md) - Local Development
 
 If you are interested in using CNDI, these walkthroughs will be entirely
-transferrable to other applications beyond Airflow.
-
----
+transferrable to other applications beyond Airflow!
 
 ## configuration 📝
 
-Let's run through the 3 parts of a `cndi_config.yaml` file. This one file is the
-key to understanding CNDI, and it's really pretty simple.
+If you understand a `cndi_config.yaml` file, you will be successful in using
+CNDI. The file enables configuring existing systems like cert-manager for TLS
+certs, external-dns, and ingress. It also enables adding arbitrary Kubernetes
+Manifests and Terraform objects, yielding endless possibilities. To learn about
+all the configuration options, check out the
+[CNDI Config Guide](./docs/config.md) and accompanying jsonschema file.
 
-### infrastructure.cndi 🏗️
+## project structure 📂
 
-The `infrastructure` section is used to define the infrastructure that will
-power our cluster. The infrastructure section is broken out into 2 distinct
-categories. The first category is `cndi`, and it refers to infrastructure
-abstractions our team has invented that CNDI exposes for you.
+There are a few other files beyond `cndi_config.yaml` which all play a part in
+your CNDI project. To learn more about each file `cndi create` generated, check
+out [CNDI Project Structure Guide](./docs/project-structure.md).
 
-Currently CNDI exposes only one abstraction, the `nodes` interface, and it's a
-wrapper that simplifies deploying Kubernetes cluster nodes. The CNDI `nodes`
-interface wraps the compute resources from every deployment target we support.
+## connecting remotely 🔗
 
-All `nodes` entries are nearly identical, the most substantial difference is the
-`kind` field which is used to specify the deployment target. These `node`
-resources and their supporting infrastructure are ultimately provisioned by
-Terraform, but we've abstracted a lot of complexity through this interface.
+Sometimes you need to connect to your cluster in order to debug applications,
+especially if you have not exposed your ArgoCD instance to the internet. To
+learn more about how to connect to your cluster, check out
+[Connecting Remotely to CNDI Clusters](./docs/connect.md) Guide.
 
-Declaring a node is simple, we give it a name, we give it some specs, and we add
-it to the array!
+## templates 🏗️
 
-```yaml
-cndi_version: v2
-provider: gcp
-distribution: microk8s
-infrastructure:
-  cndi:
-    nodes:
-      - name: gcp-alpha
-        kind: gce
-        role: leader # node responsible for instantiating the cluster
-        machine_type: n2-standard-16
-      - name: gcp-beta # node runs the control plane by default
-        kind: gce
-      - name: gcp-charlie
-        kind: gce
-      - name: gcp-delta
-        kind: gce
-        role: worker # node does not run the control plane
-```
+Templates are YAML files which define a relationship between prompts and file
+outputs. To learn more about building new CNDI Templates and distributing them
+to your team, checkout the
+[CNDI Template Authoring Guide](./docs/template-authoring.md). To request new
+Templates or bump existing requests, check out
+[our Template wishlist](https://github.com/orgs/polyseam/projects/6/views/7)
 
-Currently we have support for Cloud Providers `aws` , `azure`, and `gcp` using
-[Microk8s](https://microk8s.io), as well as their managed offerings, `eks` ,
-`aks`, and `gke`. Finally we support running a `dev` cluster locally using
-`multipass`.
+## building cndi 🛠️
 
-Just like every other component in CNDI, nodes can be updated in our
-`cndi_config.yaml` and we can call `cndi ow` and push the changes to our git
-remote to modify the cluster accordingly.
+If you're hoping to contribute to CNDI, please reach out to
+[johnstonmatt](mailto:matt.johnston@polyseam.io)! To learn more about setting up
+your development environment and other contributor info, check out
+[CNDI Contributor Guide](./docs/contributing.md).
 
-Don't forget to push up your changes after running `cndi ow` so that we can kick
-off automation for you!
+## getting help ❤️
 
-### infrastructure.terraform 🧱
+CNDI is in active development and there may be bugs, rough edges, or missing
+docs. We are commited to help you succeed with the project. If you need help
+reach out however you can.
 
-The second category within `infrastructure` is `terraform`. This is where you
-can define any Terraform resources you want to be provisioned alongside your
-cluster.
+We aim to maintain a discussion post for every possible exception
+[here](https://github.com/orgs/polyseam/discussions/categories/error-message-discussion),
+so those are a great place to start, but don't hesitate to create an issue if
+you aren't able to find a discussion thread for your error.
 
-```yaml
-infrastructure:
-  cndi: {}
-  terraform:
-    resource:
-      aws_s3_bucket:
-        my-bucket:
-          acl: public-read
-          bucket: s3-website-test.hashicorp.com
-          cors_rule:
-            - allowed_headers:
-                - "*"
-              allowed_methods:
-                - PUT
-                - POST
-              allowed_origins:
-                - https://s3-website-test.hashicorp.com
-              expose_headers:
-                - ETag
-              max_age_seconds: 3000
-```
-
-💡 You can also use this section to override any of the default Terraform
-objects that CNDI deploys.
-
-_Generally, you should be able to customize CNDI resources through the `cndi`
-section instead._
-
-But, if you do need to patch a Terraform resource CNDI has created for you, you
-simply need to match the resource name we have used, and specify the fields you
-want to update.
-
-```yaml
-infrastructure:
-  cndi: {}
-  terraform:
-    resource:
-      aws_vpc:
-        cndi_aws_vpc:
-          cidr_block: 10.0.0.0/24
-```
-
-### applications 💽
-
-The next thing we need to configure is the applications that will actually run
-on the cluster. With CNDIv1 we focused on making it a breeze to deploy
-[Apache Airflow](https://github.com/apache/airflow) in Kubernetes.
-
-Lets see how we accomplish this here in this new and improved CNDI:
-
-```yaml
-infrastructure: {}
-applications:
-  airflow:
-    targetRevision: 1.7.0 # version of Helm chart to use
-    destinationNamespace: airflow # kubernetes namespace in which to install application
-    repoURL: https://airflow.apache.org
-    chart: airflow
-    # where you configure your Helm chart values.yaml
-    values:
-      dags:
-        gitSync:
-          enabled: true
-          repo: https://github.com/polyseam/demo-dag-bag
-          branch: main
-          wait: 70
-          subPath: dags
-      # These options are required by Airflow in this context
-      createUserJob:
-        useHelmHooks: false
-      migrateDatabaseJob:
-        useHelmHooks: false
-```
-
-This is built on top of ArgoCD's Application CRDs and Helm Charts. If you have a
-Helm Chart, CNDI can deploy it!
-
-### cluster_manifests 📑
-
-The third aspect of a `cndi_config` file is the `cluster_manifests` object. Any
-objects here will be used as Kubernetes Manifests and they'll be applied to your
-cluster through ArgoCD. This gives you full access to all the Kubernetes systems
-and APIs.
-
-```yaml
-infrastructure: {}
-applications: {}
-cluster_manifests: # inside the "cluster_manifests" object you can put all of your custom Kubernetes manifests
-  ingress:
-    apiVersion: networking.k8s.io/v1
-    kind: Ingress
-    metadata:
-      name: minimal-ingress
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: "/"
-    spec: {}
-```
-
-If you are new to Kubernetes and are unsure what any of that meant, don't sweat
-it. CNDI is designed to help with that knowledge gap with templates, and you'll
-learn along the way too!
-
-Pro tip! 🤫
-
-If you want to add a new Kubernetes Secret to use inside of your Kubernetes
-cluster via GitOps, we make this possible by encrypting your secrets with
-[sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) so they can
-live in your repo securely and be picked up by ArgoCD automatically. To add a
-secret to your cluster add the value to your `.env` file and then add a
-`cluster_manifest` entry like the one below. After that just call `cndi ow` to
-seal your secret.
-
-The example below results in sealing the environment variables `"GIT_USERNAME"`
-and `"GIT_TOKEN"`, into the destination secret key names `"GIT_SYNC_USERNAME"`
-and `"GIT_SYNC_PASSWORD"` respectively.
-
-```yaml
-infrastructure: {}
-applications: {}
-cluster_manifests:
-  airflow-git-credentials-secret:
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: airflow-git-credentials
-      namespace: airflow
-    stringData:
-      GIT_SYNC_USERNAME: "$cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)"
-      GIT_SYNC_PASSWORD: "$cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)"
-```
-
----
-
-## outputs 📂
-
-When `cndi init` is called there are a few files that it produces:
-
-1. a `cndi_config.yaml` - autogenerated in interactive mode only, described in
-   the [configuration](#configuration) section above
-
-2. a `.github/workflows` folder, with a GitHub Action inside. The workflow is
-   mostly just wrapping the `cndi run` command in the CNDI binary executable. As
-   such, if you have a different CI system, you can execute the `cndi run`
-   command on the binary there instead.
-
-3. a `cndi/terraform` folder, containing the infrastructure resources cndi has
-   generated for terraform, which cndi will apply automatically every time
-   `cndi run` is executed.
-
-4. a `cndi/cluster_manifests` folder, containing Kubernetes manifests that will
-   be installed on your new cluster when it is up and running. This includes
-   manifests like `Ingress` from the `cluster_manifests` section of your
-   `cndi_config.jsonc`.
-
-5. a `cndi/cluster_manifests/applications` folder, which contains a folder for
-   each application defined in the `applications` section of your
-   `cndi_config.yaml`, and a generated ArgoCD Application CRD inside that
-   contains our expertly chosen defaults for that App, and the spefic parameters
-   you've specified yourself in the `applications` section of your
-   `cndi_config.yaml`.
-
-6. a `.env` file which contains all of your environment variables that CNDI
-   relies on, these values must be environment variables that are defined and
-   valid when `cndi run` is executed.
-
-7. a `.gitginore` file to ensure secret values never get published as source
-   files to your repo
-
-8. a `./README.md` file that explains how you can use and modify these files
-   yourself for the lifetime of the cluster
-
-## up and running
-
-### logging into ArgoCD 🔐
-
-ArgoCD's Web UI is a useful tool for visualizing and debugging your cluster
-resources. Some of our templates setup Ingress for ArgoCD automatically, if you
-don't have an Ingress you can still access it by following our
-[port-forwarding doc](docs/port-forwarding.md). Once you can see the login
-screen for ArgoCD you can login with the username `admin` and the password we
-set for you in your `.env` file under the key `ARGOCD_ADMIN_PASSWORD`.
-
-### dns 🌐
-
-Setting up DNS for your cluster is a critical step if your cluster will be
-served online. The solution depends on your "deployment target". We have a doc
-coming soon walking through setting up DNS for AWS and GCP coming soon, but in
-short you just need to point DNS to the load balancer we provisioned for you. In
-AWS this means using a `CNAME` record, or an `A` record for a cluster running on
-GCP or Azure.
-
----
-
-## building cndi (contributor guide) 🛠️
-
-If you are hoping to contribute to this project and want to learn the ropes, you
-are in the right place. Let's start with setting up your environment:
-
-### setup 🦕
-
-The first step as you might expect is to clone this repo. Take note of where you
-clone to, it will matter later when we setup some convenience aliases.
-
-**1. Clone Repo:**
-
-```bash
-git clone https://github.com/polyseam/cndi
-```
-
-**2. Install Deno:**
-
-Next let's [install deno](https://deno.land/#installation), though it can be
-installed with a package manager, I would recommend that you install it without
-one. Once Deno is installed, make sure you add it to your PATH.
-
-**3. Setup cndi Alias:** Let's setup an alias that allows us to use the deno
-source code as if it were the regular CLI, without colliding with the released
-`cndi` binary
-
-```bash
-# make sure the path below is correct, pointing to the main.ts file in the repo
-alias cndi-next="deno run -A ~/dev/polyseam/cndi/main.ts"
-```
-
-We're continuously improving CNDI, but if you have an issue, checkout
-[frequently-asked-questions](docs/frequently-asked-questions/faq.md) to get
-unblocked quickly.
-
-If you have any other issues or questions please message
-[Matt](https://github.com/johnstonmatt) or
-[Tamika](https://github.com/IamTamika) in the
-[Polyseam Discord Chat](https://discord.gg/ygt2rpegJ5).
+We'd love to see you in the
+[Polyseam Discord Channel](https://discord.gg/ygt2rpegJ5) too, for help or just
+to hang out.

@@ -1,26 +1,35 @@
-export { Construct } from "npm:constructs";
-import { App } from "npm:cdktf";
-export { App };
+export { Construct } from "constructs";
 
-export {
+import {
+  App,
   Fn,
   LocalBackend,
   TerraformLocal,
   TerraformOutput,
   TerraformStack,
   TerraformVariable,
-} from "npm:cdktf";
+} from "cdktf";
+
+export {
+  App,
+  Fn,
+  LocalBackend,
+  TerraformLocal,
+  TerraformOutput,
+  TerraformStack,
+  TerraformVariable,
+};
 
 // Terraform CDKTF Providers
-export * as CDKTFProviderRandom from "npm:@cdktf/provider-random";
-export * as CDKTFProviderAWS from "npm:@cdktf/provider-aws";
-export * as CDKTFProviderAzure from "npm:@cdktf/provider-azurerm";
-export * as CDKTFProviderGCP from "npm:@cdktf/provider-google";
-export * as CDKTFProviderHelm from "npm:@cdktf/provider-helm";
-export * as CDKTFProviderKubernetes from "npm:@cdktf/provider-kubernetes@9";
-export * as CDKTFProviderTime from "npm:@cdktf/provider-time";
-export * as CDKTFProviderTls from "npm:@cdktf/provider-tls";
-export * as CDKTFProviderLocal from "npm:@cdktf/provider-local";
+export * as CDKTFProviderRandom from "@cdktf/provider-random";
+export * as CDKTFProviderAWS from "@cdktf/provider-aws";
+export * as CDKTFProviderAzure from "@cdktf/provider-azurerm";
+export * as CDKTFProviderGCP from "@cdktf/provider-google";
+export * as CDKTFProviderHelm from "@cdktf/provider-helm";
+export * as CDKTFProviderKubernetes from "@cdktf/provider-kubernetes";
+export * as CDKTFProviderTime from "@cdktf/provider-time";
+export * as CDKTFProviderTls from "@cdktf/provider-tls";
+export * as CDKTFProviderLocal from "@cdktf/provider-local";
 
 import { getPrettyJSONString, getStagingDir } from "src/utils.ts";
 import { path, walkSync } from "deps";
@@ -32,7 +41,9 @@ export async function stageCDKTFStack(app: App) {
   const tfHome = path.join(stagingDirectory, "cndi", "terraform");
   const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
   Deno.removeSync(path.join(tfHome, "manifest.json")); // this file is useless and confusing unless using cdktf-cli
+
   const synthFiles = walkSync(synthDir, { includeDirs: false });
+
   for (const entry of synthFiles) {
     const destinationAbsPath = entry.path.replace(synthDir, tfHome);
     if (entry.path.endsWith("cdk.tf.json")) {

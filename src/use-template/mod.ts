@@ -106,6 +106,27 @@ interface TemplateObject {
   };
 }
 
+type CNDIProvider = "aws" | "azure" | "gcp";
+
+const distributionMap = {
+  aws: "eks",
+  azure: "aks",
+  gcp: "gke",
+};
+
+function fixUndefinedDistributionIfRequired(config: string): string {
+  const obj = YAML.parse(config) as Record<string, unknown>;
+  if (!obj?.distribution || obj.distribution === "undefined") {
+    const provider = obj.provider as CNDIProvider;
+    obj.distribution = distributionMap[provider] || null;
+    $cndi.responses.set(
+      "deployment_target_distribution",
+      obj.distribution as unknown as CNDITemplatePromptResponsePrimitive,
+    );
+  }
+  return YAML.stringify(obj);
+}
+
 const $cndi = {
   responses: new Map<string, CNDITemplatePromptResponsePrimitive>(),
   getResponsesAsRecord: (skipUndefined = false) => {
@@ -751,6 +772,7 @@ async function processCNDIConfigOutput(
   // get_prompt_response evals (again)
   output = literalizeGetPromptResponseCalls(output);
   output = processCNDICommentCalls(output);
+  output = fixUndefinedDistributionIfRequired(output);
 
   return { value: output };
 }

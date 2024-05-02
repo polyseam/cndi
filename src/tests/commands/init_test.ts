@@ -1,6 +1,6 @@
 import { assert } from "test-deps";
 
-import { path, SEPARATOR, YAML } from "deps";
+import { path, YAML } from "deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
@@ -71,7 +71,7 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      const project_name = Deno.cwd().split(SEPARATOR).pop();
+      const project_name = Deno.cwd().split(path.SEPARATOR).pop();
       const { status } = await runCndi(
         "init",
         "-t",

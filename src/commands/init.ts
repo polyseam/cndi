@@ -1,4 +1,4 @@
-import { ccolors, Command, path, PromptTypes, SEPARATOR, YAML } from "deps";
+import { ccolors, Command, path, PromptTypes, YAML } from "deps";
 
 const { Input, Select } = PromptTypes;
 
@@ -201,7 +201,7 @@ const initCommand = new Command()
     let cndi_config: string;
     let env: string;
     let readme: string;
-    let project_name = destinationDirectory.split(SEPARATOR).pop() ||
+    let project_name = destinationDirectory.split(path.SEPARATOR).pop() ||
       "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
@@ -306,7 +306,6 @@ const initCommand = new Command()
 
     // GENERATE ENV VARS
     const sealedSecretsKeys = await createSealedSecretsKeys();
-    const sshPublicKey = await createSshKeys();
     const terraformStatePassphrase = createTerraformStatePassphrase();
     const argoUIAdminPassword = createArgoUIAdminPassword();
 
@@ -317,14 +316,6 @@ const initCommand = new Command()
         options: templateNamesList,
       });
     }
-
-    const cndiGeneratedValues = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
-      debugMode: !!options.debug,
-    };
 
     let deployment_target_provider;
     let templateResult;
@@ -366,6 +357,20 @@ const initCommand = new Command()
       readme = `# ${project_name}\n`;
       env = "";
     }
+    const shouldSkipSSH =
+      templateResult?.responses?.deployment_target_distribution !== "microk8s";
+
+    const sshPublicKey = await createSshKeys(
+      shouldSkipSSH,
+    );
+
+    const cndiGeneratedValues = {
+      sshPublicKey,
+      sealedSecretsKeys,
+      terraformStatePassphrase,
+      argoUIAdminPassword,
+      debugMode: !!options.debug,
+    };
 
     await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
 

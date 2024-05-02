@@ -84,28 +84,30 @@ export default async function stageTerraformResourcesForConfig(
       throw new Error(`Unknown label: ${label}`);
   }
 
-  await Promise.all([
-    // write tftpl terraform template for the user_data bootstrap script
-    stageFile(
-      path.join("cndi", "terraform", "microk8s-cloud-init-leader.yml.tftpl"),
-      microk8sCloudInitLeaderTerraformTemplate(config, {
-        useSshRepoAuth: useSshRepoAuth(),
-        useClusterHA: config.infrastructure.cndi.nodes.length > 2,
-      }),
-    ),
-    // this file may be extra
-    stageFile(
-      path.join(
-        "cndi",
-        "terraform",
-        "microk8s-cloud-init-controller.yml.tftpl",
+  if (distribution === "microk8s") {
+    await Promise.all([
+      // write tftpl terraform template for the user_data bootstrap script
+      stageFile(
+        path.join("cndi", "terraform", "microk8s-cloud-init-leader.yml.tftpl"),
+        microk8sCloudInitLeaderTerraformTemplate(config, {
+          useSshRepoAuth: useSshRepoAuth(),
+          useClusterHA: config.infrastructure.cndi.nodes.length > 2,
+        }),
       ),
-      microk8sCloudInitFollowerTerraformTemplate(config),
-    ),
-    // this file may be extra
-    stageFile(
-      path.join("cndi", "terraform", "microk8s-cloud-init-worker.yml.tftpl"),
-      microk8sCloudInitFollowerTerraformTemplate(config, { isWorker: true }),
-    ),
-  ]);
+      // this file may be extra
+      stageFile(
+        path.join(
+          "cndi",
+          "terraform",
+          "microk8s-cloud-init-controller.yml.tftpl",
+        ),
+        microk8sCloudInitFollowerTerraformTemplate(config),
+      ),
+      // this file may be extra
+      stageFile(
+        path.join("cndi", "terraform", "microk8s-cloud-init-worker.yml.tftpl"),
+        microk8sCloudInitFollowerTerraformTemplate(config, { isWorker: true }),
+      ),
+    ]);
+  }
 }

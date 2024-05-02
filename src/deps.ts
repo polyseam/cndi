@@ -1,21 +1,16 @@
 // Deno std lib
-export { homedir, platform } from "node:os";
-export { SEPARATOR } from "@std/path/constants";
-export * as path from "@std/path";
 import * as yaml from "@std/yaml";
-export { deepMerge } from "@std/collections";
-export { walk } from "@std/fs";
+export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
+export { deepMerge } from "@std/collections";
 export { delay } from "@std/async";
-export { exists } from "@std/fs";
-export { ensureDirSync } from "@std/fs";
-export { existsSync } from "@std/fs";
+export { ensureDirSync, exists, existsSync, walk, walkSync } from "@std/fs";
 export { load as loadEnv } from "@std/dotenv";
-export { walkSync } from "@std/fs";
 export { writeAll } from "@std/io";
+export { Spinner, type SpinnerOptions } from "@std/cli";
 
-export { Spinner } from "@std/cli";
-export { type SpinnerOptions } from "@std/cli";
+// node std lib
+export { homedir, platform } from "node:os";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
 export { default as Ajv } from "npm:ajv";
@@ -30,16 +25,9 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export {
-  Command,
-  CompletionsCommand,
-  HelpCommand,
-  UpgradeCommand,
-} from "@cliffy/cliffy/command/mod.ts";
+export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
 
-export { GithubProvider } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { UpgradeOptions } from "@cliffy/cliffy/command/upgrade/mod.ts";
-import { colors } from "@cliffy/cliffy/ansi/colors.ts";
+import { colors } from "@cliffy/ansi";
 
 import {
   Checkbox,
@@ -47,12 +35,13 @@ import {
   Input,
   List,
   Number,
+  prompt,
   Secret,
   Select,
   Toggle,
-} from "@cliffy/cliffy/prompt/mod.ts";
+} from "@cliffy/prompt";
 
-export { prompt as cprompt } from "@cliffy/cliffy/prompt/mod.ts";
+export { prompt as cprompt };
 
 // used to have keys, should not matter
 export const PromptTypes = {
@@ -68,22 +57,21 @@ export const PromptTypes = {
 } as const;
 
 //  - validator
-export { default as validator } from "npm:validator";
+export { default as validator } from "validator";
 
 // - lodash
-export { default as getValueFromKeyPath } from "npm:lodash.get@4.4.2";
-export { default as setValueForKeyPath } from "npm:lodash.set@4.3.2";
-export { default as unsetValueForKeyPath } from "npm:lodash.unset@4.5.2";
+export { default as getValueFromKeyPath } from "lodash.get";
+export { default as setValueForKeyPath } from "lodash.set";
+export { default as unsetValueForKeyPath } from "lodash.unset";
 
 //  - simple-git
-export { simpleGit } from "npm:simple-git@3.18.0";
+export { simpleGit } from "simple-git";
 
 //  - crypto-js
-import CryptoJS from "npm:crypto-js@4.1.1";
+import CryptoJS from "crypto-js";
 
 // import/export required
 export { CryptoJS };
-export type { UpgradeOptions };
 
 // custom colors
 export const ccolors = {
@@ -102,4 +90,10 @@ export const ccolors = {
 
 // Polyseam Modules
 export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate_response";
+export { inflateResponse } from "@polyseam/inflate-response";
+
+export {
+  GHRError,
+  GithubReleasesProvider,
+  GithubReleasesUpgradeCommand,
+} from "@polyseam/cliffy-provider-gh-releases";
