@@ -39,24 +39,35 @@
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
       "jsr:@std/yaml@^0.221.0": "jsr:@std/yaml@0.221.0",
       "npm:@cdktf/provider-aws": "npm:@cdktf/provider-aws@19.3.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-aws@19.3.0": "npm:@cdktf/provider-aws@19.3.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@12.3.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-azurerm@12.3.0": "npm:@cdktf/provider-azurerm@12.3.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-google": "npm:@cdktf/provider-google@13.12.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-google@13.12.0": "npm:@cdktf/provider-google@13.12.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-helm": "npm:@cdktf/provider-helm@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-helm@10.0.0": "npm:@cdktf/provider-helm@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-kubernetes@9": "npm:@cdktf/provider-kubernetes@9.0.0_cdktf@0.18.2__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-kubernetes@9.0.0": "npm:@cdktf/provider-kubernetes@9.0.0_cdktf@0.18.2__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-local": "npm:@cdktf/provider-local@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-local@10.0.0": "npm:@cdktf/provider-local@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-random": "npm:@cdktf/provider-random@11.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-random@11.0.0": "npm:@cdktf/provider-random@11.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-time": "npm:@cdktf/provider-time@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-time@10.0.0": "npm:@cdktf/provider-time@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-tls": "npm:@cdktf/provider-tls@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
+      "npm:@cdktf/provider-tls@10.0.0": "npm:@cdktf/provider-tls@10.0.0_cdktf@0.20.6__constructs@10.3.0_constructs@10.3.0",
       "npm:@peculiar/x509@^1.9.7": "npm:@peculiar/x509@1.9.7",
       "npm:cdktf@0.19.0": "npm:cdktf@0.19.0_constructs@10.3.0",
       "npm:constructs": "npm:constructs@10.3.0",
+      "npm:constructs@10.3.0": "npm:constructs@10.3.0",
       "npm:crypto-js@4.1.1": "npm:crypto-js@4.1.1",
       "npm:lodash.get@4.4.2": "npm:lodash.get@4.4.2",
       "npm:lodash.set@4.3.2": "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2": "npm:lodash.unset@4.5.2",
       "npm:octokit@^3.1.2": "npm:octokit@3.2.0_@octokit+core@5.2.0",
       "npm:simple-git@3.18.0": "npm:simple-git@3.18.0",
-      "npm:validator": "npm:validator@13.11.0"
+      "npm:validator": "npm:validator@13.11.0",
+      "npm:validator@13.11.0": "npm:validator@13.11.0"
     },
     "jsr": {
       "@cliffy/ansi@1.0.0-rc.4": {
@@ -1410,7 +1421,13 @@
       "npm:@cdktf/provider-tls@10.0.0",
       "npm:cdktf@0.19.0",
       "npm:constructs@10.3.0",
-      "npm:octokit@^3.1.2"
+      "npm:crypto-js@4.1.1",
+      "npm:lodash.get@4.4.2",
+      "npm:lodash.set@4.3.2",
+      "npm:lodash.unset@4.5.2",
+      "npm:octokit@^3.1.2",
+      "npm:simple-git@3.18.0",
+      "npm:validator@13.11.0"
     ]
   }
 }
