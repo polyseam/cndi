@@ -110,6 +110,8 @@ export default function setTF_VARs() {
   // only required for microk8s
   if (ssh_public_key) {
     Deno.env.set("TF_VAR_ssh_public_key", ssh_public_key);
+  } else {
+    Deno.env.set("TF_VAR_ssh_public_key", "");
   }
 
   Deno.env.set("TF_VAR_git_repo", git_repo);
