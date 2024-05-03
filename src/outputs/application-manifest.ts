@@ -56,7 +56,7 @@ const manifestFramework = {
   spec: {
     project: DEFAULT_PROJECT,
     source: {
-      helm: {
+      helm: { // should be opt-out-able for "pile of yaml" sources
         version: DEFAULT_HELM_VERSION,
       },
     },
