@@ -22,11 +22,11 @@ tried or paid for Azure before, you can sign up for the Azure free account.
 
 1. Search for and select Azure Active Directory.
 
-![app registrations in searchbar](/docs/cloud-setup-guide/azure/img/search-app-registrations.png)
+![app registrations in searchbar](/docs/cloud-setup/azure/img/search-app-registrations.png)
 
 2. Under Manage, select App registrations > New registration.
 
-![Register an application](/docs/cloud-setup-guide/azure/img/register-application-1.png)
+![Register an application](/docs/cloud-setup/azure/img/register-application-1.png)
 
 3. Enter a display Name for your application. The app registration's
    automatically generated Application (client) ID, not its display name,
@@ -36,14 +36,14 @@ tried or paid for Azure before, you can sign up for the Azure free account.
 
 5. Don't enter anything for Redirect URI
 
-![Add role assignment](/docs/cloud-setup-guide/azure/img/register-application-2.png)
+![Add role assignment](/docs/cloud-setup/azure/img/register-application-2.png)
 
 5. When registration finishes, the Azure portal displays the app registration's
    Overview pane. You see the Application (client) ID. Also called the client
    ID, this value uniquely identifies your application in the Microsoft identity
    platform.
 
-![Credentials](/docs/cloud-setup-guide/azure/img/register-application-3.png)
+![Credentials](/docs/cloud-setup/azure/img/register-application-3.png)
 
 ### Step 3: Add credentials
 
@@ -62,7 +62,7 @@ authenticate as itself, requiring no interaction from a user at runtime.
 7. Record the secret's value for use in your client application code. This
    secret value is never displayed again after you leave this page.
 
-![Certificates-secrets](/docs/cloud-setup-guide/azure/img/certificates-secrets.png)
+![Certificates-secrets](/docs/cloud-setup/azure/img/certificates-secrets.png)
 
 ### Step 4: Set up [Access Control (IAM)](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal?tabs=current)
 
@@ -81,11 +81,11 @@ groups, service principals, or managed identities at a particular scope.
 
 4. Click Access control (IAM).
 
-![Access control (IAM) page](/docs/cloud-setup-guide/azure/img/sub-access-control.png)
+![Access control (IAM) page](/docs/cloud-setup/azure/img/sub-access-control.png)
 
 6. Click the Role assignments tab to view the role assignments at this scope.
 
-![Add role assignment](/docs/cloud-setup-guide/azure/img/add-role-assignment-menu.png)
+![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-menu.png)
 
 7. Click Add > Add role assignment.\
    If you don't have permissions to assign roles, the Add role assignment option
@@ -98,7 +98,7 @@ groups, service principals, or managed identities at a particular scope.
 Add the Contributor Role and if your using a AKS cluster add the Network
 contributor role once you finish adding the Contributor role
 
-![Add role assignment](/docs/cloud-setup-guide/azure/img/roles.png)
+![Add role assignment](/docs/cloud-setup/azure/img/roles.png)
 
 9. Click Next.
 
@@ -106,7 +106,7 @@ contributor role once you finish adding the Contributor role
     selected role to one or more Azure AD users, groups, or service principals
     (applications).
 
-![Add role assignment](/docs/cloud-setup-guide/azure/img/members.png)
+![Add role assignment](/docs/cloud-setup/azure/img/members.png)
 
 1. Click Select members.
 
@@ -116,27 +116,27 @@ contributor role once you finish adding the Contributor role
 
 4. Click Next.
 
-![Select-member](/docs/cloud-setup-guide/azure/img/select-members.png)
+![Select-member](/docs/cloud-setup/azure/img/select-members.png)
 
 5. On the Review + assign tab, review the role assignment settings.
 
-![Assign role](/docs/cloud-setup-guide/azure/img/review-assign.png)
+![Assign role](/docs/cloud-setup/azure/img/review-assign.png)
 
 6. Click Review + assign to assign the role.\
    After a few moments, the security principal is assigned the role at the
    selected scope.
 
-![Review Assigned role](/docs/cloud-setup-guide/azure/img/r-role-assignments.png)
+![Review Assigned role](/docs/cloud-setup/azure/img/r-role-assignments.png)
 
 ## Conclusion
 
 In the end you should have all the credentials for a cluster deployment on azure
 
 - ARM_CLIENT_SECRET from Secret Value
-  ![Certificates-secrets](/docs/cloud-setup-guide/azure/img/certificates-secrets.png)
+  ![Certificates-secrets](/docs/cloud-setup/azure/img/certificates-secrets.png)
 
 - ARM_TENANT_ID & ARM_CLIENT_ID from App Overview
-  ![Credentials](/docs/cloud-setup-guide/azure/img/register-application-3.png)
+  ![Credentials](/docs/cloud-setup/azure/img/register-application-3.png)
 
 - ARM_SUBSCRIPTION_ID from subscription overview
 

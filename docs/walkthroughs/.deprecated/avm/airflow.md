@@ -43,7 +43,7 @@ successfully:**
 - **GitHub CLI**: You will need to have the GitHub CLI installed on your
   machine. You can download it [here](https://cli.github.com/).
 
-- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup/azure/azure-setup.md)
 
 ## download cndi ⬇️
 

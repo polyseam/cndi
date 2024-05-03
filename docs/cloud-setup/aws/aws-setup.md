@@ -22,27 +22,27 @@ infomation go to
    entering your AWS account email address. On the next page, enter your
    password.
 
-![Sign in](/docs/cloud-setup-guide/aws/img/sign-in.jpg)
+![Sign in](/docs/cloud-setup/aws/img/sign-in.jpg)
 
 2. Select the Users menu. Navigate to the Users screen. You'll find it in the
    IAM dashboard, under the Identity and Access Management (IAM) drop-down menu
    on the left side of the screen. Click on Users.
 
-![Select the Users menu](/docs/cloud-setup-guide/aws/img/select-users-menu.jpg)
+![Select the Users menu](/docs/cloud-setup/aws/img/select-users-menu.jpg)
 
 3. Provide all details, such as the username and access type. In this tutorial,
    we use the name cli-user, and check the Programmatic access box under Access
    type. This option gives the user access to AWS development tools, such as the
    command line interface used later in this tutorial.
 
-![Add a user](/docs/cloud-setup-guide/aws/img/add-a-user.jpg)
+![Add a user](/docs/cloud-setup/aws/img/add-a-user.jpg)
 
 4. Set the user permissions. Click Attach existing policies directly and then
    filter the policies by keyword: IAM. For this user, select IAMFullAccess from
    the list of available policies. The IAMFullAccess policy enables this user to
    create and manage user permissions in AWS
 
-![Set the user permissions](/docs/cloud-setup-guide/aws/img/set-user-permissions.jpg)
+![Set the user permissions](/docs/cloud-setup/aws/img/set-user-permissions.jpg)
 
 5. Choose Next: Tags.
 
@@ -80,7 +80,7 @@ have access keys, you can create them from the AWS Management Console.
    secure location. You will not have access to the secret access key again
    after this dialog box closes.
 
-![Download secret access key](/docs/cloud-setup-guide/aws/img/download-secret-access-key.jpg)
+![Download secret access key](/docs/cloud-setup/aws/img/download-secret-access-key.jpg)
 
 ## Conclusion
 
