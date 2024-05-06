@@ -101,6 +101,24 @@ prompts:
       
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
       {}
+
+  - name: deploy_coder_ingress
+    message: >-
+      Do you want to expose Coder to the web?
+    type: Confirm
+    default: true
+
+  - name: coder_hostname
+    default: coder.example.com
+    message: >-
+      What hostname should Coder be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_coder_ingress) }}"
+      - ==
+      - true
    
   - name: deploy_argocd_ingress
     default: true
@@ -198,24 +216,6 @@ prompts:
     message: >-
       What will be your default password for your PostgreSQL admin user?
     type: Secret
-
-  - name: deploy_coder_ingress
-    message: >-
-      Do you want to expose Coder to the web?
-    type: Confirm
-    default: true
-
-  - name: coder_hostname
-    default: coder.example.com
-    message: >-
-      What hostname should Coder be accessible at?
-    type: Input
-    validators:
-      - hostname # FQDN
-    condition:
-      - "{{ $cndi.get_prompt_response(deploy_coder_ingress) }}"
-      - ==
-      - true
 
 outputs:
   cndi_config:
