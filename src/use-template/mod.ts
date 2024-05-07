@@ -555,7 +555,7 @@ async function presentCliffyPrompt(
                     ccolors.error("not found"),
                   ].join(" "),
                   {
-                    cause: 4500,
+                    cause: 1203,
                   },
                 );
               } else {

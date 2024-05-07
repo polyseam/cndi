@@ -63,9 +63,9 @@ export default async function cndi() {
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
     );
-    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 1));
-    await emitExitEvent(1);
-    Deno.exit(1);
+    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 10));
+    await emitExitEvent(10);
+    Deno.exit(10);
   }
 
   return await new Command()

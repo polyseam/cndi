@@ -25,8 +25,10 @@ export default async function createRepo(options: CreateRepoOptions) {
             "'gh' CLI must be installed and added to PATH when using",
           ),
           ccolors.key_name("cndi init --create"),
+          ccolors.error('or'),
+          ccolors.key_name("cndi create"),
         ].join(" "),
-        { cause: 45000 },
+        { cause: 1300 },
       );
     }
   }
@@ -50,10 +52,10 @@ export default async function createRepo(options: CreateRepoOptions) {
       ccolors.error(
         `Could not parse the provided 'GIT_REPO' url as a valid URL`,
       ),
-      ccolors.caught(error, 4000),
+      ccolors.caught(error, 1301),
     );
-    await emitExitEvent(4000);
-    Deno.exit(4000);
+    await emitExitEvent(1301);
+    Deno.exit(1301);
   }
 
   const git = simpleGit(options.output);

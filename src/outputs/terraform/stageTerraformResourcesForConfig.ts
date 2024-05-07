@@ -27,7 +27,20 @@ const ensureValidGoogleCredentials = () => {
         ccolors.error("env variable not set"),
       ].join(" "),
       {
-        cause: 4300,
+        cause: 803,
+      },
+    );
+  }
+
+  if(key === '__GOOGLE_CREDENTIALS_PLACEHOLDER__') {
+    throw new Error(
+      [
+        stageTerraformResourcesForConfigLabel,
+        ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
+        ccolors.error("placeholder value must be replaced with a valid JSON key"),
+      ].join(" "),
+      {
+        cause: 804,
       },
     );
   }
@@ -42,7 +55,7 @@ const ensureValidGoogleCredentials = () => {
         ccolors.error("env variable is not valid JSON"),
       ].join(" "),
       {
-        cause: 4301,
+        cause: 805,
       },
     );
   }

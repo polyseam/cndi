@@ -1,6 +1,11 @@
 [
   {
     "code": 1,
+    "message": "Undefined Exception: this error has not yet been assigned a code and discussion",
+    "discussion_link": ""
+  },
+  {
+    "code": 10,
     "message": "Could not create staging directory",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
   },
@@ -324,7 +329,8 @@
   },
   {
     "code": 1008,
-    "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set",
+    "discussion_link": ""
   },
   {
     "code": 1009,
@@ -355,6 +361,11 @@
     "code": 1202,
     "message": "failed to parse template JSONC or YAML during 'cndi init'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
+  },
+  {
+    "code": 1203,
+    "message": "failed to run validator for prompt validator not found",
+    "discussion_link": ""
   },
   {
     "code": 1300,
@@ -395,5 +406,15 @@
     "code": 1405,
     "message": "failed to spawn 'terraform ...' during 'cndi terraform ...'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/744"
+  },
+  {
+    "code": 1300,
+    "message": "failed to create repo because 'gh' CLI is not in PATH",
+    "discussion_link": ""
+  },
+  {
+    "code": 1301,
+    "message": "failed to create repo because GIT_REPO could not be parsed as URL",
+    "discussion_link": ""
   }
 ]
