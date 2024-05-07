@@ -34,6 +34,8 @@ const templatesLabel = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
 
+// TODO: 1200 codes
+
 /**
  * Options for `useTemplate`.
  * - `overrides` is a record of prompt names and their values.
