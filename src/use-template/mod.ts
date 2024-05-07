@@ -106,12 +106,13 @@ interface TemplateObject {
   };
 }
 
-type CNDIProvider = "aws" | "azure" | "gcp";
+type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
 
 const distributionMap = {
   aws: "eks",
   azure: "aks",
   gcp: "gke",
+  dev: "microk8s",
 };
 
 function fixUndefinedDistributionIfRequired(config: string): string {
