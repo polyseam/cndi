@@ -248,8 +248,8 @@ export default class DevKinDStack extends CNDITerraformStack {
         set: [{
           name: "controller.ingressClassResource.name",
           value: "public",
-        }],
-        values: [`
+        }], // https://github.com/kubernetes/ingress-nginx/blob/main/hack/manifest-templates/provider/kind/values.yaml
+        values: [`         
 # Kind - https://kind.sigs.k8s.io/docs/user/ingress/
 controller:
   ingressClassResource:
