@@ -23,6 +23,8 @@ import { useTemplate } from "src/use-template/mod.ts";
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
+
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 // Error Domain: 15XX
@@ -430,6 +432,11 @@ const createCommand = new Command()
         options.workflowSourceRef,
         deployment_target_provider === "dev",
       ),
+    );
+
+    await stageFile(
+      path.join(".github", "workflows", "cndi-onpull.yaml"),
+      getCndiOnPullGitHubWorkflowYamlContents(options?.workflowSourceRef),
     );
 
     const git_credentials_mode = templateResult.responses.git_credentials_mode;

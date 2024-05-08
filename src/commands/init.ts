@@ -28,6 +28,7 @@ import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
@@ -400,6 +401,11 @@ const initCommand = new Command()
         getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
       );
     }
+
+    await stageFile(
+      path.join(".github", "workflows", "cndi-onpull.yaml"),
+      getCndiOnPullGitHubWorkflowYamlContents(options?.workflowSourceRef),
+    );
 
     await stageFile(".gitignore", getGitignoreContents());
 
