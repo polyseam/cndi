@@ -13,6 +13,8 @@ export { Spinner, type SpinnerOptions } from "@std/cli";
 export { homedir, platform } from "node:os";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
+export { default as Ajv } from "npm:ajv";
+export type { DefinedError } from "npm:ajv";
 
 export const YAML = {
   ...yaml,
