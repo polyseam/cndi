@@ -137,6 +137,7 @@ function getSteps(sourceRef?: string) {
     with: {
       directory: "cndi/terraform",
       framework: "terraform",
+      output_format: "github_failed_only",
     },
   }, {
     name: "Test Kubernetes with Checkov",
@@ -145,6 +146,7 @@ function getSteps(sourceRef?: string) {
     with: {
       directory: "cndi/cluster_manifests",
       framework: "kubernetes",
+      output_format: "github_failed_only",
     },
   }];
 }
