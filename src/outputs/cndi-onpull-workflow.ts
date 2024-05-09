@@ -6,6 +6,8 @@ const NO_CHECKOV_FAILURES_EXPRESSION =
 const CHECKOV_FAILURES_EXPRESSION =
   "${{ steps.checkov.outputs.results != '\n\n---' }}";
 
+const comment_tag = "checkov-failures-comment";
+
 const cndiCheckovSteps = [
   [
     {
@@ -25,8 +27,8 @@ const cndiCheckovSteps = [
       if: CHECKOV_FAILURES_EXPRESSION,
       uses: "thollander/actions-comment-pull-request@v2",
       with: {
-        mode: "recreate",
-        comment_tag: "checkov-failures-comment",
+        mode: "recreate", // recreate the comment if it already exists
+        comment_tag,
         message: `## Checkov Failures
           
 Checkov found issues in your pull request. Please review and fix them.
@@ -39,15 +41,15 @@ Checkov found issues in your pull request. Please review and fix them.
       if: NO_CHECKOV_FAILURES_EXPRESSION,
       uses: "thollander/actions-comment-pull-request@v2",
       with: {
-        mode: "delete",
-        comment_tag: "checkov-failures-comment",
+        mode: "delete", // delete the comment if it exists: no errors
+        comment_tag,
         message: "Checkov found no issues",
       },
     },
     {
       name: "Print Checkov Results",
       if: NO_CHECKOV_FAILURES_EXPRESSION,
-      run: 'echo "Checkov found no issues"',
+      run: 'echo "Checkov found no issues"', // log to console if no issues
     },
   ],
 ];
