@@ -197,7 +197,10 @@ const getWorkflowYaml = (sourceRef?: string, disable = false) => {
           GIT_REPO: "${{ secrets.GIT_REPO }}",
           CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
         },
-        steps: [...getCndiExecutionSteps(sourceRef), ...cndiCheckovSteps],
+        steps: [
+          ...getCndiExecutionSteps(sourceRef), // run `cndi ow` because it should pass
+          ...cndiCheckovSteps, // run checkov
+        ],
       },
     },
   };
