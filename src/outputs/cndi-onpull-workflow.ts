@@ -156,7 +156,7 @@ function getSteps(sourceRef?: string) {
     uses: "bridgecrewio/checkov-action@master",
     with: {
       directory: "cndi/terraform",
-      framework: "terraform",
+      framework: "terraform_json",
       output_format: "github_failed_only",
       output_file_path: "checkov-tf.md",
     },
