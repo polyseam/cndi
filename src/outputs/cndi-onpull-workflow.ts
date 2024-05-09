@@ -9,49 +9,47 @@ const CHECKOV_FAILURES_EXPRESSION =
 const comment_tag = "checkov-failures-comment";
 
 const cndiCheckovSteps = [
-  [
-    {
-      name: "Test with Checkov",
-      id: "checkov",
-      uses: "bridgecrewio/checkov-action@master",
-      "continue-on-error": true,
-      with: {
-        directory: "./cndi", // run on all cndi artifacts
-        output_format: "github_failed_only", // github markdown of failed checks
-        output_file_path: "console,checkov", // Save results to ./checkov and print to console
-        skip_check: "CKV_SECRET_6", // Skip check for hardcoded secrets by entropy (we encrypt them)
-      },
+  {
+    name: "Test with Checkov",
+    id: "checkov",
+    uses: "bridgecrewio/checkov-action@master",
+    "continue-on-error": true,
+    with: {
+      directory: "./cndi", // run on all cndi artifacts
+      output_format: "github_failed_only", // github markdown of failed checks
+      output_file_path: "console,checkov", // Save results to ./checkov and print to console
+      skip_check: "CKV_SECRET_6", // Skip check for hardcoded secrets by entropy (we encrypt them)
     },
-    {
-      name: "Comment Checkov Issues",
-      if: CHECKOV_FAILURES_EXPRESSION,
-      uses: "thollander/actions-comment-pull-request@v2",
-      with: {
-        mode: "recreate", // recreate the comment if it already exists
-        comment_tag,
-        message: `## Checkov Failures
+  },
+  {
+    name: "Comment Checkov Issues",
+    if: CHECKOV_FAILURES_EXPRESSION,
+    uses: "thollander/actions-comment-pull-request@v2",
+    with: {
+      mode: "recreate", // recreate the comment if it already exists
+      comment_tag,
+      message: `## Checkov Failures
           
 Checkov found issues in your pull request. Please review and fix them.
 
 \${{ steps.checkov.outputs.results }}`,
-      },
     },
-    {
-      name: "Delete Comment Checkov",
-      if: NO_CHECKOV_FAILURES_EXPRESSION,
-      uses: "thollander/actions-comment-pull-request@v2",
-      with: {
-        mode: "delete", // delete the comment if it exists: no errors
-        comment_tag,
-        message: "Checkov found no issues",
-      },
+  },
+  {
+    name: "Delete Comment Checkov",
+    if: NO_CHECKOV_FAILURES_EXPRESSION,
+    uses: "thollander/actions-comment-pull-request@v2",
+    with: {
+      mode: "delete", // delete the comment if it exists: no errors
+      comment_tag,
+      message: "Checkov found no issues",
     },
-    {
-      name: "Print Checkov Results",
-      if: NO_CHECKOV_FAILURES_EXPRESSION,
-      run: 'echo "Checkov found no issues"', // log to console if no issues
-    },
-  ],
+  },
+  {
+    name: "Print Checkov Results",
+    if: NO_CHECKOV_FAILURES_EXPRESSION,
+    run: 'echo "Checkov found no issues"', // log to console if no issues
+  },
 ];
 
 const runCndiReleaseSteps = [
