@@ -38,10 +38,6 @@ const runCndiReleaseSteps = [
     uses: "polyseam/setup-cndi@v2",
   },
   {
-    name: "install awscli 1",
-    run: "pip install -U awscli",
-  },
-  {
     name: "cndi run",
     env: {
       ARM_REGION: "${{ vars.ARM_REGION }}",
@@ -134,10 +130,6 @@ function getSteps(sourceRef?: string) {
       with: {
         "fetch-depth": 0,
       },
-    },
-    {
-      name: "install awscli 1",
-      run: "pip install -U awscli",
     },
     {
       name: "cndi run",
