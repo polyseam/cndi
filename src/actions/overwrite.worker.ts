@@ -23,24 +23,14 @@ import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifes
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-import getEKSIngressServiceManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-service-public.ts";
-import getEKSIngressTcpServicesConfigMapManifestPublic from "src/outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-public.ts";
-
-import getEKSIngressServiceManifestPrivate from "src/outputs/custom-port-manifests/managed/ingress-service-private.ts";
-import getEKSIngressTcpServicesConfigMapManifestPrivate from "../outputs/custom-port-manifests/managed/ingress-tcp-services-configmap-private.ts";
-
 import getExternalDNSManifest from "src/outputs/core-applications/external-dns.application.yaml.ts";
 import getCertManagerApplicationManifest from "src/outputs/core-applications/cert-manager.application.yaml.ts";
+import getPrivateNginxApplicationManifest from "src/outputs/core-applications/private-nginx.application.yaml.ts";
+import getPublicNginxApplicationManifest from "src/outputs/core-applications/public-nginx.application.yaml.ts";
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
-
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import {
-  CNDIConfig,
-  KubernetesManifest,
-  KubernetesSecret,
-  ManagedNodeKind,
-} from "src/types.ts";
+import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
@@ -325,6 +315,34 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       );
     }
 
+    const ingress = config?.infrastructure?.cndi?.ingress;
+    const skipIngress = // explicitly disabled ingress
+      config?.infrastructure?.cndi?.ingress?.nginx?.public?.enabled === false ||
+      config?.infrastructure?.cndi?.ingress?.nginx?.private?.enabled === false;
+
+    if (!skipIngress && ingress?.nginx?.public) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "public_nginx.application.yaml",
+        ),
+        getPublicNginxApplicationManifest(),
+      );
+    }
+    if (!skipIngress && ingress?.nginx?.private) {
+      await stageFile(
+        path.join(
+          "cndi",
+          "cluster_manifests",
+          "applications",
+          "private_nginx.application.yaml",
+        ),
+        getPrivateNginxApplicationManifest(),
+      );
+    }
+
     const open_ports = config?.infrastructure?.cndi?.open_ports || [];
 
     const isMicrok8sCluster = config?.distribution === "microk8s";
@@ -346,36 +364,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           getMicrok8sIngressDaemonsetManifest(open_ports),
         ),
       ]);
-    } else {
-      const managedKind = config.distribution as ManagedNodeKind; //aks
-
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-private.yaml"),
-        getEKSIngressServiceManifestPrivate(open_ports, managedKind),
-      );
-
-      await stageFile(
-        path.join("cndi", "cluster_manifests", "ingress-service-public.yaml"),
-        getEKSIngressServiceManifestPublic(open_ports, managedKind),
-      );
-
-      await stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap-public.yaml",
-        ),
-        getEKSIngressTcpServicesConfigMapManifestPublic(open_ports),
-      );
-
-      await stageFile(
-        path.join(
-          "cndi",
-          "cluster_manifests",
-          "ingress-tcp-services-configmap-private.yaml",
-        ),
-        getEKSIngressTcpServicesConfigMapManifestPrivate(open_ports),
-      );
     }
     console.log(ccolors.success("staged open ports manifests"));
 
