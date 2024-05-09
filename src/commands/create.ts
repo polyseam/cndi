@@ -436,7 +436,7 @@ const createCommand = new Command()
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(options?.workflowSourceRef),
+      getCndiOnPullGitHubWorkflowYamlContents(),
     );
 
     const git_credentials_mode = templateResult.responses.git_credentials_mode;

@@ -404,7 +404,7 @@ const initCommand = new Command()
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(options?.workflowSourceRef),
+      getCndiOnPullGitHubWorkflowYamlContents(),
     );
 
     await stageFile(".gitignore", getGitignoreContents());
