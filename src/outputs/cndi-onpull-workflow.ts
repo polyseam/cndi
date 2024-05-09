@@ -54,6 +54,8 @@ const generalSteps = [
     with: {
       directory: "cndi/terraform",
       framework: "terraform",
+      output_format: "github_failed_only",
+      output_file_path: "checkov-tf.md",
     },
   },
   {
@@ -63,6 +65,24 @@ const generalSteps = [
     with: {
       directory: "cndi/cluster_manifests",
       framework: "kubernetes",
+      output_format: "github_failed_only",
+      output_file_path: "checkov-k8s.md",
+    },
+  },
+  {
+    name: "Comment Checkov K8s",
+    uses: "thollander/actions-comment-pull-request@v2",
+    "continue-on-error": true,
+    with: {
+      filePath: "./checkov-k8s.md",
+    },
+  },
+  {
+    name: "Comment Checkov Terraform",
+    uses: "thollander/actions-comment-pull-request@v2",
+    "continue-on-error": true,
+    with: {
+      filePath: "./checkov-tf.md",
     },
   },
 ];
@@ -138,6 +158,7 @@ function getSteps(sourceRef?: string) {
       directory: "cndi/terraform",
       framework: "terraform",
       output_format: "github_failed_only",
+      output_file_path: "checkov-tf.md",
     },
   }, {
     name: "Test Kubernetes with Checkov",
@@ -147,6 +168,21 @@ function getSteps(sourceRef?: string) {
       directory: "cndi/cluster_manifests",
       framework: "kubernetes",
       output_format: "github_failed_only",
+      output_file_path: "checkov-k8s.md",
+    },
+  }, {
+    name: "Comment Checkov K8s",
+    uses: "thollander/actions-comment-pull-request@v2",
+    "continue-on-error": true,
+    with: {
+      filePath: "./checkov-k8s.md",
+    },
+  }, {
+    name: "Comment Checkov Terraform",
+    uses: "thollander/actions-comment-pull-request@v2",
+    "continue-on-error": true,
+    with: {
+      filePath: "./checkov-tf.md",
     },
   }];
 }
