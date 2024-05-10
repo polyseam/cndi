@@ -1,6 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
-import type { CNDIProvider } from "src/types.ts";
 import { NGINX_VERSION } from "consts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
@@ -19,38 +18,36 @@ const getDefaultControllerConfig = () => ({
   },
 });
 
-const getDefaultNginxValuesForCNDIProvider = (
-  cndiProvider: CNDIProvider,
-  cndi_config: CNDIConfig,
-) => {
-  const awsValues = {
-    controller: {
-      ...getDefaultControllerConfig(),
-      service: {
-        internal: {
-          enabled: "true",
-        },
-        annotations: {
-          "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal",
-        },
+const eksValues = (cndi_config: CNDIConfig) => ({
+  controller: {
+    ...getDefaultControllerConfig(),
+    service: {
+      internal: {
+        enabled: "true",
+      },
+      annotations: {
+        "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal",
       },
     },
-    ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {},
-  };
-  const gcpValues = {
-    controller: {
-      ...getDefaultControllerConfig(),
-      service: {
-        annotations: {
-          "service.beta.kubernetes.io/networking.gke.io/load-balancer-type":
-            "Internal",
-        },
-      },
-    },
-    ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {},
-  };
+  },
+  ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {},
+});
 
-  const azureValues = {
+const gkeValues = (cndi_config: CNDIConfig) => ({
+  controller: {
+    ...getDefaultControllerConfig(),
+    service: {
+      annotations: {
+        "service.beta.kubernetes.io/networking.gke.io/load-balancer-type":
+          "Internal",
+      },
+    },
+  },
+  ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {},
+});
+
+const aksValues = (cndi_config: CNDIConfig) => (
+  {
     controller: {
       ...getDefaultControllerConfig(),
       service: {
@@ -74,16 +71,28 @@ const getDefaultNginxValuesForCNDIProvider = (
       },
     },
     ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private.values || {},
-  };
+  }
+);
 
-  if (cndiProvider === "gcp") return gcpValues;
-  if (cndiProvider === "aws") return awsValues;
-  if (cndiProvider === "azure") return azureValues;
-  return cndiProvider;
+const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
+  const cndiDistribution = cndi_config.distribution;
+  const providerConfigs = {
+    eks: eksValues(cndi_config),
+    gke: gkeValues(cndi_config),
+    aks: aksValues(cndi_config),
+    microk8s: gkeValues(cndi_config),
+  };
+  const config = providerConfigs[cndiDistribution];
+
+  return config;
 };
 
-export default function getNginxApplicationManifest(): string {
+export default function getNginxApplicationManifest(
+  cndi_config: CNDIConfig,
+) {
   const releaseName = "ingress-nginx-private";
+  const config = cndi_config;
+  const values = getDefaultNginxValuesForCNDIProvider(config);
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -100,7 +109,7 @@ export default function getNginxApplicationManifest(): string {
         chart: "ingress-nginx",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString(getDefaultNginxValuesForCNDIProvider),
+          values: getYAMLString(values),
         },
         targetRevision: NGINX_VERSION,
       },
