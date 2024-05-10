@@ -36,6 +36,7 @@ import { path, walkSync } from "deps";
 
 export async function stageCDKTFStack(app: App) {
   app.synth();
+
   const stagingDirectory = getStagingDir();
 
   const tfHome = path.join(stagingDirectory, "cndi", "terraform");
