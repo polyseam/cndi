@@ -431,17 +431,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const kubernetes = {
-      clusterCaCertificate: Fn.base64decode(
-        eksCluster.certificateAuthority.get(0).data,
-      ),
-      host: eksCluster.endpoint,
-      exec: {
-        apiVersion: "client.authentication.k8s.io/v1beta1",
-        args: ["eks", "get-token", "--cluster-name", eksCluster.name],
-        command: "aws",
-      },
+    const exec = {
+      apiVersion: "client.authentication.k8s.io/v1beta1",
+      args: ["eks", "get-token", "--cluster-name", eksCluster.name],
+      command: "aws",
     };
+
+    const kubernetes:
+      CDKTFProviderKubernetes.provider.KubernetesProviderConfig = {
+        clusterCaCertificate: Fn.base64decode(
+          eksCluster.certificateAuthority.get(0).data,
+        ),
+        host: eksCluster.endpoint,
+        exec: [exec],
+      };
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
@@ -450,7 +453,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     );
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
-      kubernetes,
+      kubernetes: {
+        ...kubernetes,
+        exec,
+      },
     });
 
     const tlsCertificate = new CDKTFProviderTls.dataTlsCertificate
