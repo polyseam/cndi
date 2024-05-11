@@ -316,10 +316,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     const ingress = config?.infrastructure?.cndi?.ingress;
-    const skipIngress = // explicitly disabled ingress
-      config?.infrastructure?.cndi?.ingress?.nginx?.public?.enabled === false ||
-      config?.infrastructure?.cndi?.ingress?.nginx?.private?.enabled === false;
-    if (!skipIngress && ingress?.nginx?.public) {
+    const skipPrivateIngress = ingress?.nginx?.private?.enabled === false; // explicitly disabled private ingress
+    const skipPublicIngress = ingress?.nginx?.public?.enabled === false; // explicitly disabled public ingress
+
+    if (!skipPublicIngress) {
       await stageFile(
         path.join(
           "cndi",
@@ -334,7 +334,8 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         ccolors.key_name("public_nginx.application.yaml"),
       );
     }
-    if (!skipIngress && ingress?.nginx?.private) {
+
+    if (!skipPrivateIngress) {
       await stageFile(
         path.join(
           "cndi",
