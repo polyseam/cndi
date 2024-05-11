@@ -20,7 +20,7 @@ const getDefaultControllerConfig = () => ({
 const getBaseValues = (cndi_config: CNDIConfig) =>
   deepMerge({
     controller: getDefaultControllerConfig(),
-  }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {});
+  }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {});
 
 const eksValues = (cndi_config: CNDIConfig) =>
   deepMerge(getBaseValues(cndi_config), {
