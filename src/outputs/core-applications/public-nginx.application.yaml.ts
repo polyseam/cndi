@@ -1,8 +1,7 @@
 import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
-import type { CNDIProvider } from "src/types.ts";
 import { NGINX_VERSION } from "consts";
-
+import { deepMerge } from "deps";
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
 const DEFAULT_HELM_VERSION = "v3";
@@ -19,33 +18,29 @@ const getDefaultControllerConfig = () => ({
   },
 });
 
-const getDefaultNginxValuesForCNDIProvider = (
-  cndiProvider: CNDIProvider,
-  cndi_config: CNDIConfig,
-) => {
-  const awsValues = {
+const getBaseValues = (cndi_config: CNDIConfig) =>
+  deepMerge({
+    controller: getDefaultControllerConfig(),
+  }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {});
+
+const eksValues = (cndi_config: CNDIConfig) =>
+  deepMerge(getBaseValues(cndi_config), {
     controller: {
-      ...getDefaultControllerConfig(),
       service: {
         annotations: {
           "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
           "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
-            `${cndi_config.project_name}`,
+            cndi_config.project_name,
         },
       },
     },
-    ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {},
-  };
-  const gcpValues = {
-    controller: {
-      ...getDefaultControllerConfig(),
-    },
-    ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {},
-  };
+  });
 
-  const azureValues = {
+const gkeValues = (cndi_config: CNDIConfig) => getBaseValues(cndi_config);
+
+const aksValues = (cndi_config: CNDIConfig) =>
+  deepMerge(getBaseValues(cndi_config), {
     controller: {
-      ...getDefaultControllerConfig(),
       service: {
         annotations: {
           "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
@@ -59,23 +54,30 @@ const getDefaultNginxValuesForCNDIProvider = (
         patch: {
           "nodeSelector.kubernetes.io/os": "linux",
         },
-        "nodeSelector.kubernetes.io/os": "linux",
       },
       rbac: {
         create: "false",
       },
     },
-    ...cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public.values || {},
+  });
+
+const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
+  const cndiDistribution = cndi_config.distribution;
+  const providerConfigs = {
+    eks: eksValues(cndi_config),
+    gke: gkeValues(cndi_config),
+    aks: aksValues(cndi_config),
+    microk8s: gkeValues(cndi_config), // Not ready
   };
 
-  if (cndiProvider === "gcp") return gcpValues;
-  if (cndiProvider === "aws") return awsValues;
-  if (cndiProvider === "azure") return azureValues;
-  return cndiProvider;
+  return providerConfigs[cndiDistribution];
 };
 
-export default function getNginxApplicationManifest(): string {
+export default function getNginxApplicationManifest(
+  cndi_config: CNDIConfig,
+) {
   const releaseName = "ingress-nginx-public";
+  const values = getDefaultNginxValuesForCNDIProvider(cndi_config);
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -92,7 +94,7 @@ export default function getNginxApplicationManifest(): string {
         chart: "ingress-nginx",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString(getDefaultNginxValuesForCNDIProvider),
+          values: getYAMLString(values),
         },
         targetRevision: NGINX_VERSION,
       },

@@ -319,7 +319,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     const skipIngress = // explicitly disabled ingress
       config?.infrastructure?.cndi?.ingress?.nginx?.public?.enabled === false ||
       config?.infrastructure?.cndi?.ingress?.nginx?.private?.enabled === false;
-
     if (!skipIngress && ingress?.nginx?.public) {
       await stageFile(
         path.join(
@@ -328,7 +327,11 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           "applications",
           "public_nginx.application.yaml",
         ),
-        getPublicNginxApplicationManifest(),
+        getPublicNginxApplicationManifest(config),
+      );
+      console.log(
+        ccolors.success("staged application manifest:"),
+        ccolors.key_name("public_nginx.application.yaml"),
       );
     }
     if (!skipIngress && ingress?.nginx?.private) {
@@ -339,7 +342,11 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           "applications",
           "private_nginx.application.yaml",
         ),
-        getPrivateNginxApplicationManifest(),
+        getPrivateNginxApplicationManifest(config),
+      );
+      console.log(
+        ccolors.success("staged application manifest:"),
+        ccolors.key_name("private_nginx.application.yaml"),
       );
     }
 
