@@ -41,8 +41,7 @@ const gkeValues = (cndi_config: CNDIConfig) =>
     controller: {
       service: {
         annotations: {
-          "service.beta.kubernetes.io/networking.gke.io/load-balancer-type":
-            "Internal",
+          "networking.gke.io/load-balancer-type": "Internal",
         },
       },
     },
