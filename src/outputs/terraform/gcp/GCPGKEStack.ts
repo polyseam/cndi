@@ -178,6 +178,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [projectServicesReady, subnet, network],
         network: network.selfLink,
         subnetwork: subnet.selfLink,
+        deletionProtection: false,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
