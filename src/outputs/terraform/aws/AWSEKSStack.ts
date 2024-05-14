@@ -431,17 +431,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const kubernetes = {
-      clusterCaCertificate: Fn.base64decode(
-        eksCluster.certificateAuthority.get(0).data,
-      ),
-      host: eksCluster.endpoint,
-      exec: {
-        apiVersion: "client.authentication.k8s.io/v1beta1",
-        args: ["eks", "get-token", "--cluster-name", eksCluster.name],
-        command: "aws",
-      },
+    const exec = {
+      apiVersion: "client.authentication.k8s.io/v1beta1",
+      args: ["eks", "get-token", "--cluster-name", eksCluster.name],
+      command: "aws",
     };
+
+    const kubernetes:
+      CDKTFProviderKubernetes.provider.KubernetesProviderConfig = {
+        clusterCaCertificate: Fn.base64decode(
+          eksCluster.certificateAuthority.get(0).data,
+        ),
+        host: eksCluster.endpoint,
+        exec: [exec],
+      };
 
     new CDKTFProviderKubernetes.provider.KubernetesProvider(
       this,
@@ -450,7 +453,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     );
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
-      kubernetes,
+      kubernetes: {
+        ...kubernetes,
+        exec,
+      },
     });
 
     const tlsCertificate = new CDKTFProviderTls.dataTlsCertificate
@@ -877,121 +883,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const nginxPublicNS = new CDKTFProviderKubernetes.namespace.Namespace(
-      this,
-      "cndi_kubernetes_namespace_ingress_public",
-      {
-        metadata: {
-          name: "ingress-public",
-        },
-      },
-    );
-
-    const nginxPrivateNS = new CDKTFProviderKubernetes.namespace.Namespace(
-      this,
-      "cndi_kubernetes_namespace_ingress_private",
-      {
-        metadata: {
-          name: "ingress-private",
-        },
-      },
-    );
-
-    const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_private",
-      {
-        chart: "ingress-nginx",
-        createNamespace: false,
-        dependsOn: [firstNodeGroup!, nginxPrivateNS],
-        name: "ingress-nginx-private",
-        namespace: "ingress-private",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name: "controller.service.internal.enabled",
-            value: "true",
-          },
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-            value: "nlb",
-          },
-          {
-            name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "private",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-private/ingress-nginx-private-controller",
-          },
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme",
-            value: "internal",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/ingress-nginx-private",
-          },
-          {
-            name: "controller.electionID",
-            value: "private-controller-leader",
-          },
-        ],
-        version: "4.8.3",
-      },
-    );
-
-    const helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_public",
-      {
-        chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [firstNodeGroup!, nginxPublicNS],
-        name: "ingress-nginx-public",
-        namespace: "ingress-public",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-            value: "nlb",
-          },
-          {
-            name: "controller.ingressClassResource.default",
-            value: "true",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "public",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-public/ingress-nginx-public-controller",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/ingress-nginx-public",
-          },
-          {
-            name: "controller.electionID",
-            value: "public-controller-leader",
-          },
-        ],
-        version: "4.8.3",
-      },
-    );
-
     const argocdAdminPasswordHashed = Fn.sensitive(
       Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
     );
@@ -1157,19 +1048,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const cndiNlb = new CDKTFProviderAWS.dataAwsLb.DataAwsLb(
-      this,
-      "cndi_aws_lb",
-      {
-        tags: {
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/service-name":
-            "ingress-public/ingress-nginx-public-controller",
-        },
-        dependsOn: [helmReleaseNginxPublic],
-      },
-    );
-
     const argoAppsValues = {
       applications: [
         {
@@ -1216,10 +1094,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         values: [Fn.yamlencode(argoAppsValues)],
       },
     );
-
-    new TerraformOutput(this, "public_host", {
-      value: cndiNlb.dnsName,
-    });
 
     new TerraformOutput(this, "resource_group_url", {
       value:

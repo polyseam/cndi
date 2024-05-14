@@ -239,6 +239,18 @@ interface CNDIConfig {
   infrastructure: {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
+      ingress: {
+        nginx: {
+          public: {
+            enabled?: boolean; // default: true
+            values: Record<string, unknown>;
+          };
+          private: {
+            enabled?: boolean; // default: true
+            values: Record<string, unknown>;
+          };
+        };
+      };
       external_dns: {
         enabled?: boolean; // default: true
         provider: ExternalDNSProvider;

@@ -1,5 +1,6 @@
 import { ccolors } from "deps";
 import { CNDIConfig } from "src/types.ts";
+import { isSlug } from "src/utils.ts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
@@ -47,6 +48,23 @@ export default function validateConfig(
       ].join(" "),
       { cause: 900 },
     );
+  } else if (config?.project_name) {
+    if (!isSlug(config?.project_name)) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but the"),
+          ccolors.key_name('"project_name"'),
+          ccolors.error("is not a valid slug"),
+          ccolors.error(
+            "it must only contain lowercase letters, numbers, and hyphens",
+          ),
+        ].join(" "),
+        { cause: 903 },
+      );
+    }
   }
 
   if (!config?.infrastructure) {

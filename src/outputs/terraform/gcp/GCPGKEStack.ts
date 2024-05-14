@@ -27,6 +27,13 @@ import {
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
+function truncateString(str: string, num = 63) {
+  if (str.length <= num) {
+    return str;
+  }
+  return str.slice(0, num);
+}
+
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -105,8 +112,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_network",
       {
+        name: truncateString(`cndi-compute-network-${project_name}`),
         autoCreateSubnetworks: false,
-        name: "cndi-compute-network",
         dependsOn: [projectServicesReady],
       },
     );
@@ -115,7 +122,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_subnetwork",
       {
-        name: "cndi-compute-subnetwork",
+        name: truncateString(`cndi-compute-subnetwork-${project_name}`),
         ipCidrRange: "10.0.0.0/16",
         network: network.selfLink,
         privateIpGoogleAccess: true,
@@ -128,7 +135,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_firewall",
       {
-        name: "cndi-compute-firewall-allow-internal",
+        name: truncateString(
+          `cndi-compute-firewall-allow-internal-${project_name}`,
+        ),
         description: "Allow internal traffic inside cluster",
         network: network.selfLink,
         direction: "INGRESS",
@@ -169,6 +178,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [projectServicesReady, subnet, network],
         network: network.selfLink,
         subnetwork: subnet.selfLink,
+        deletionProtection: false,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
@@ -252,17 +262,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
     });
-
-    const computeAddress = new CDKTFProviderGCP.computeAddress.ComputeAddress(
-      this,
-      "cndi_google_compute_address",
-      {
-        name: "cndi-compute-address-lb",
-        networkTier: "PREMIUM",
-        addressType: "EXTERNAL",
-        dependsOn: [projectServicesReady],
-      },
-    );
 
     const argocdAdminPasswordHashed = Fn.sensitive(
       Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
@@ -446,91 +445,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_public",
-      {
-        chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [gkeCluster, computeAddress],
-        name: "ingress-nginx-public",
-        namespace: "ingress-public",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name: "controller.service.loadBalancerIP",
-            value: computeAddress.address,
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/public-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "public",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-public/ingress-nginx-public-controller",
-          },
-        ],
-        version: "4.8.3",
-      },
-    );
-
-    const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_private",
-      {
-        chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [gkeCluster],
-        name: "ingress-nginx-private",
-        namespace: "ingress-private",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/private-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "private",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-private/ingress-nginx-private-controller",
-          },
-          {
-            name:
-              "controller.service.annotations.networking\\.gke\\.io/load-balancer-type",
-            value: "Internal",
-          },
-        ],
-        version: "4.8.3",
-      },
-    );
-
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
       "cndi_kubernetes_storage_class_filestore",
@@ -548,10 +462,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [gkeCluster],
       },
     );
-
-    new TerraformOutput(this, "public_host", {
-      value: computeAddress.address,
-    });
 
     new TerraformOutput(this, "resource_group_url", {
       value: `https://console.cloud.google.com/welcome?project=${project_id}`,

@@ -576,6 +576,11 @@ function getPathToCndiBinary() {
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 }
 
+function isSlug(input: string): boolean {
+  const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  return slugPattern.test(input);
+}
+
 export {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
@@ -597,6 +602,7 @@ export {
   getTFResource,
   getUserDataTemplateFileString,
   getYAMLString,
+  isSlug,
   loadCndiConfig,
   loadJSONC,
   loadYAML,
