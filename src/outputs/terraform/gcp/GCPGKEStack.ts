@@ -27,6 +27,13 @@ import {
 
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
+function truncateString(str: string, num = 63) {
+  if (str.length <= num) {
+    return str;
+  }
+  return str.slice(0, num);
+}
+
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -105,8 +112,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_network",
       {
+        name: truncateString(`cndi-compute-network-${project_name}`),
         autoCreateSubnetworks: false,
-        name: "cndi-compute-network",
         dependsOn: [projectServicesReady],
       },
     );
@@ -115,7 +122,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_subnetwork",
       {
-        name: "cndi-compute-subnetwork",
+        name: truncateString(`cndi-compute-subnetwork-${project_name}`),
         ipCidrRange: "10.0.0.0/16",
         network: network.selfLink,
         privateIpGoogleAccess: true,
@@ -128,7 +135,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_firewall",
       {
-        name: "cndi-compute-firewall-allow-internal",
+        name: truncateString(
+          `cndi-compute-firewall-allow-internal-${project_name}`,
+        ),
         description: "Allow internal traffic inside cluster",
         network: network.selfLink,
         direction: "INGRESS",
@@ -257,7 +266,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_address",
       {
-        name: "cndi-compute-address-lb",
+        name: truncateString(`cndi-compute-address-lb-${project_name}`),
         networkTier: "PREMIUM",
         addressType: "EXTERNAL",
         dependsOn: [projectServicesReady],
