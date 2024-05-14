@@ -135,7 +135,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       this,
       "cndi_google_compute_firewall",
       {
-        name: truncateString(`cndi-compute-firewall-allow-internal-${project_name}`),
+        name: truncateString(
+          `cndi-compute-firewall-allow-internal-${project_name}`,
+        ),
         description: "Allow internal traffic inside cluster",
         network: network.selfLink,
         direction: "INGRESS",
