@@ -32,12 +32,14 @@ const ensureValidGoogleCredentials = () => {
     );
   }
 
-  if(key === '__GOOGLE_CREDENTIALS_PLACEHOLDER__') {
+  if (key === "__GOOGLE_CREDENTIALS_PLACEHOLDER__") {
     throw new Error(
       [
         stageTerraformResourcesForConfigLabel,
         ccolors.key_name(`"GOOGLE_CREDENTIALS"`),
-        ccolors.error("placeholder value must be replaced with a valid JSON key"),
+        ccolors.error(
+          "placeholder value must be replaced with a valid JSON key",
+        ),
       ].join(" "),
       {
         cause: 804,

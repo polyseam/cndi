@@ -949,10 +949,10 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
           error: new Error([
             templatesLabel,
             "template error:\n",
-            `template error: '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+            `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
             ccolors.caught(error),
           ].join(" ")),
-          cause: 4501,
+          cause: 1204,
         };
       }
     }

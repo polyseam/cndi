@@ -53,7 +53,7 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
           ccolors.key_name(`'GCP_REGION'`),
           ccolors.error("env var is not set"),
         ].join(" "),
-        { cause: 4300 },
+        { cause: 811 },
       );
     }
 
