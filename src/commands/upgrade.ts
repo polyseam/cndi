@@ -12,6 +12,7 @@ const upgradeCommand = new GithubReleasesUpgradeCommand({
   provider: new GithubReleasesProvider({
     repository: "polyseam/cndi",
     destinationDir,
+    skipAuth: true,
     osAssetMap: {
       windows: "cndi-win.tar.gz",
       linux: "cndi-linux.tar.gz",
