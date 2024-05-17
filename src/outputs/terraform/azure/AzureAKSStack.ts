@@ -156,10 +156,17 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         if (nodeSpec.min_count) {
           scale.minCount = nodeSpec.min_count;
         }
+        const nodeTaints = nodeSpec.taints?.map((taint) =>
+          `${taint.key}=${taint.value}:${aksmapTaintEffect(taint.effect)}`
+        ) || [];
+
+        const nodeLabels = nodeSpec.labels || {};
 
         const nodePoolSpec: AnonymousClusterNodePoolConfig = {
           name: nodeSpec.name,
           ...scale,
+          nodeTaints,
+          nodeLabels,
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",

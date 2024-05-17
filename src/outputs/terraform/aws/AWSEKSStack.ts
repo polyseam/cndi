@@ -776,6 +776,14 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
+
+      const taint = nodeGroup.taints?.map((taint) => ({
+        key: taint.key,
+        value: taint.value,
+        effect: eksmapTaintEffect(taint.effect),
+      })) || [];
+
+      const labels = nodeGroup.labels || {};
       const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
         .LaunchTemplate(
         this,
@@ -823,6 +831,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             version: `${nodegroupLaunchTemplate.latestVersion}`,
           },
           updateConfig: { maxUnavailable: 1 },
+          taint,
+          labels,
           dependsOn: [
             workerNodePolicyAttachment,
             cniPolicyAttachment,

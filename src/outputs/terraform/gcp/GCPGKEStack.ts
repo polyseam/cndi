@@ -229,9 +229,19 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         nodePoolSpec?.instance_type ||
         DEFAULT_INSTANCE_TYPES.gcp;
 
+      const taint = nodePoolSpec?.taints?.map((taint) => ({
+        key: taint.key,
+        value: taint.value,
+        effect: gkemapTaintEffect(taint.effect),
+      })) || [];
+
+      const labels = nodePoolSpec.labels || {};
+
       const nodeConfig = {
         diskSizeGb,
         diskType,
+        labels,
+        taint,
         serviceAccount,
         machineType,
       };
