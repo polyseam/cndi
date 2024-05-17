@@ -31,7 +31,7 @@ jobs:
         run: deno task build-mac
       - name: mac cndi --help
         run: ./dist/mac/in/cndi --help
-        timeout-minutes: 1
+        timeout-minutes: 5
   bin-build-test-windows:
     runs-on: windows-latest
     steps:
