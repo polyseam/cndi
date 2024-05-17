@@ -27,6 +27,19 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+function eksmapTaintEffect(effect: string): string {
+  switch (effect) {
+    case "PREFER_NO_SCHEDULE":
+      return "PreferNoSchedule";
+    case "NO_EXECUTE":
+      return "NoExecute";
+    case "NO_SCHEDULE":
+      return "NoSchedule";
+    default:
+      return "NoSchedule";
+  }
+}
+
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
 // TODO: ensure that splicing project_name into tags.Name is safe

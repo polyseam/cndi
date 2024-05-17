@@ -40,7 +40,18 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   }
   return false;
 }
-
+function aksmapTaintEffect(effect: string): string {
+  switch (effect) {
+    case "PREFER_NO_SCHEDULE":
+      return "PreferNoSchedule";
+    case "NO_EXECUTE":
+      return "NoExecute";
+    case "NO_SCHEDULE":
+      return "NoSchedule";
+    default:
+      return "NoSchedule";
+  }
+}
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"

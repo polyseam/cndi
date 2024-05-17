@@ -33,7 +33,18 @@ function truncateString(str: string, num = 63) {
   }
   return str.slice(0, num);
 }
-
+function gkemapTaintEffect(effect: string): string {
+  switch (effect) {
+    case "PreferNoSchedule":
+      return "PREFER_NO_SCHEDULE";
+    case "NoExecute":
+      return "NO_EXECUTE";
+    case "NoSchedule":
+      return "NO_SCHEDULE";
+    default:
+      return "NO_SCHEDULE";
+  }
+}
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
