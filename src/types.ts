@@ -66,6 +66,18 @@ interface BaseNodeItemSpec {
   max_count?: number;
   count?: number;
   disk_type?: string;
+  labels?: Label;
+  taints?: Taint[];
+}
+
+interface Label {
+  [key: string]: string;
+}
+
+interface Taint {
+  key: string;
+  value: string;
+  effect: string;
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]
@@ -88,6 +100,7 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
 }
+
 interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
   agents_min_count?: number;
   agents_max_count?: number;
@@ -368,9 +381,11 @@ export type {
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
+  Label,
   Microk8sAddon,
   MultipassNodeItemSpec,
   SealedSecretsKeys,
   SshKeys,
+  Taint,
   TFBlocks,
 };
