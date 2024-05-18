@@ -202,101 +202,107 @@ export default function validateConfig(
     );
   }
 
-  if (!config?.distribution) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it does not have the required"),
-        ccolors.key_name('"distribution"'),
-        ccolors.error("key"),
-      ].join(" "),
-      { cause: 917 },
-    );
-  }
+  const isClusterless = config?.distribution === "clusterless";
 
-  if (!config?.infrastructure?.cndi?.nodes?.[0]) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it does not have any"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries"),
-      ].join(" "),
-      { cause: 902 },
-    );
-  }
-
-  if (
-    config?.provider === "dev" &&
-    config?.infrastructure?.cndi?.nodes?.length > 1
-  ) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it has multiple"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries with the"),
-        ccolors.key_name('"kind"'),
-        ccolors.error(
-          'value of "dev". Only one node can be deployed when doing dev deployments.',
-        ),
-      ].join(" "),
-      { cause: 911 },
-    );
-  }
-
-  if (!config?.cndi_version) {
-    console.log(
-      cndiConfigLabel,
-      ccolors.warn(`You haven't specified a`),
-      ccolors.key_name(`"cndi_version"`),
-      ccolors.warn(`in your config file, defaulting to "v2"`),
-    );
-  }
-
-  const nodeNameSet = new Set();
-
-  for (const node of config?.infrastructure?.cndi?.nodes) {
-    if (!node.name) {
+  if (isClusterless) {
+    console.log("clusterless!");
+  } else {
+    if (!config?.distribution) {
       throw new Error(
         [
           cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
-          ccolors.error("but it has at least one"),
-          ccolors.key_name('"infrastructure.cndi.nodes"'),
-          ccolors.error("entry that is missing a"),
-          ccolors.key_name('"name"'),
-          ccolors.error("value. Node names must be specified."),
+          ccolors.error("but it does not have the required"),
+          ccolors.key_name('"distribution"'),
+          ccolors.error("key"),
         ].join(" "),
-        { cause: 905 },
+        { cause: 917 },
       );
     }
-    nodeNameSet.add(node.name);
-  }
 
-  const nodeNamesAreUnique =
-    nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
+    if (!config?.infrastructure?.cndi?.nodes?.[0]) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it does not have any"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries"),
+        ].join(" "),
+        { cause: 902 },
+      );
+    }
 
-  if (!nodeNamesAreUnique) {
-    throw new Error(
-      [
+    if (
+      config?.provider === "dev" &&
+      config?.infrastructure?.cndi?.nodes?.length > 1
+    ) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has multiple"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries with the"),
+          ccolors.key_name('"kind"'),
+          ccolors.error(
+            'value of "dev". Only one node can be deployed when doing dev deployments.',
+          ),
+        ].join(" "),
+        { cause: 911 },
+      );
+    }
+
+    if (!config?.cndi_version) {
+      console.log(
         cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it has multiple "),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries with the same"),
-        ccolors.key_name('"name"'),
-        ccolors.error("values. Node names must be unique."),
-      ].join(" "),
-      { cause: 906 },
-    );
+        ccolors.warn(`You haven't specified a`),
+        ccolors.key_name(`"cndi_version"`),
+        ccolors.warn(`in your config file, defaulting to "v2"`),
+      );
+    }
+
+    const nodeNameSet = new Set();
+
+    for (const node of config?.infrastructure?.cndi?.nodes) {
+      if (!node.name) {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error("but it has at least one"),
+            ccolors.key_name('"infrastructure.cndi.nodes"'),
+            ccolors.error("entry that is missing a"),
+            ccolors.key_name('"name"'),
+            ccolors.error("value. Node names must be specified."),
+          ].join(" "),
+          { cause: 905 },
+        );
+      }
+      nodeNameSet.add(node.name);
+    }
+
+    const nodeNamesAreUnique =
+      nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
+
+    if (!nodeNamesAreUnique) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has multiple "),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries with the same"),
+          ccolors.key_name('"name"'),
+          ccolors.error("values. Node names must be unique."),
+        ].join(" "),
+        { cause: 906 },
+      );
+    }
   }
 }
