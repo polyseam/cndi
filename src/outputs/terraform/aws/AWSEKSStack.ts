@@ -29,14 +29,14 @@ import {
 
 function eksmapTaintEffect(effect: string): string {
   switch (effect) {
-    case "PREFER_NO_SCHEDULE":
-      return "PreferNoSchedule";
-    case "NO_EXECUTE":
-      return "NoExecute";
-    case "NO_SCHEDULE":
-      return "NoSchedule";
+    case "PreferNoSchedule":
+      return "PREFER_NO_SCHEDULE";
+    case "NoExecute":
+      return "NO_EXECUTE";
+    case "NoSchedule":
+      return "NO_SCHEDULE";
     default:
-      return "NoSchedule";
+      return "NO_SCHEDULE";
   }
 }
 
