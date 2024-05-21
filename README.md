@@ -45,6 +45,14 @@ checkout this demo:
   <img src="/docs/img/demo-yt-thumb.png" alt="CNDI Airflow Walkthrough" width="360px"/>
 </a>
 
+## prerequisites 📦
+
+- [gh](https://cli.github.com) CLI: CNDI uses the [gh](https://cli.github.com)
+  CLI to create a project repo for you and configure
+  [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
+  for use in
+  [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions).
+
 ## installation 🥁
 
 To install CNDI you just need to download the "tarball" for your system from
