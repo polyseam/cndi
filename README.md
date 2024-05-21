@@ -45,28 +45,34 @@ checkout this demo:
   <img src="/docs/img/demo-yt-thumb.png" alt="CNDI Airflow Walkthrough" width="360px"/>
 </a>
 
-## prerequisites 📦
-
-- [gh](https://cli.github.com) CLI: CNDI uses the [gh](https://cli.github.com)
-  CLI to create a project repo for you and configure
-  [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
-  for use in
-  [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions).
-
 ## installation 🥁
 
-To install CNDI you just need to download the "tarball" for your system from
-[GitHub Releases](https://github.com/polyseam/cndi/releases) and extract it to
-disk.
+**prerequisites 📦**
 
-This script automates that job:
+[GitHub CLI](https://cli.github.com): CNDI uses the [gh](https://cli.github.com)
+CLI to create a project repo for you and configure
+[Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
+for use in
+[GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions).
+
+---
+
+Run the command below that corresponds to your operating system to download
+install the latest release of CNDI:
+
+**macos and linux**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-If you run into trouble or if you want to install the Windows executable, check
-out our [tiny install guide](./docs/install.md).
+**windows**
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
+```
+
+For more information check out our [tiny install guide](./docs/install.md).
 
 ## usage 👩‍💻
 
