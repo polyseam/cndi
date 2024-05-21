@@ -218,7 +218,7 @@ you can safely delete your git repo or achive it for reference later.
 
 ---
 
-## Walkthroughs 🥾
+## walkthroughs 🥾
 
 We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. These walkthroughs hold your hand through the process of
