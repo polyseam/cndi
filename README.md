@@ -49,9 +49,9 @@ checkout this demo:
 
 <!-- The below table Markdown is outrageous and I'm sorry -->
 
-| Prerequisite                  | Description                                                                                                                                                                                                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [gh](https://cli.github.com/) | GitHub CLI used to create a project repo for you and configure [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for use in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions). |
+| Prerequisite                  | Description                                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [gh](https://cli.github.com/) | [Official GitHub CLI](https://cli.github.com/) used to create a project repo for you and configure [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for use in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions). |
 
 ---
 
