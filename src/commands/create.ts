@@ -427,14 +427,6 @@ const createCommand = new Command()
     await stageFile(".gitignore", getGitignoreContents());
 
     await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(
-        options.workflowSourceRef,
-        deployment_target_provider === "dev",
-      ),
-    );
-
-    await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
       getCndiOnPullGitHubWorkflowYamlContents(),
     );
@@ -478,6 +470,7 @@ const createCommand = new Command()
       initializing: true,
       create: true,
       skipPush,
+      workflowSourceRef: options.workflowSourceRef,
     });
   });
 

@@ -395,13 +395,6 @@ const initCommand = new Command()
       getPrettyJSONString(vscodeSettings),
     );
 
-    if (deployment_target_provider !== "dev") {
-      await stageFile(
-        path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
-      );
-    }
-
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
       getCndiOnPullGitHubWorkflowYamlContents(),
@@ -468,6 +461,7 @@ const initCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: options.create,
+      workflowSourceRef: options.workflowSourceRef,
     });
   });
 

@@ -206,6 +206,7 @@ export default function validateConfig(
 
   if (isClusterless) {
     console.log("clusterless!");
+    // TODO: throw if cluster things are present in clusterless mode
   } else {
     if (!config?.distribution) {
       throw new Error(

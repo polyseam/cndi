@@ -173,6 +173,12 @@ type Microk8sAddon = {
   args?: string[];
 };
 
+type TFBlockVariable = {
+  type: "string" | "number" | "bool" | "list" | "map";
+  description?: string;
+  sensitive?: boolean;
+};
+
 type TFBlocks = {
   terraform?: {
     [key: string]: unknown;
@@ -181,7 +187,7 @@ type TFBlocks = {
     [key: string]: unknown;
   };
   variable?: {
-    [key: string]: unknown;
+    [key: string]: TFBlockVariable;
   };
   locals?: {
     [key: string]: unknown;

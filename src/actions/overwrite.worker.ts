@@ -16,6 +16,7 @@ import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
+import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -39,6 +40,7 @@ interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
+  workflowSourceRef?: string;
 }
 
 type OverwriteWorkerMessage = {
@@ -118,10 +120,19 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       });
     }
 
+    await stageFile(
+      path.join(".github", "workflows", "cndi-run.yaml"),
+      getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef, config),
+    );
+
+    if (config?.infrastructure?.terraform?.variable) {
+      // TODO: Overwrite cndi-run.yaml to inject terraform variables
+    }
+
     const isClusterless = config?.distribution === "clusterless";
 
-    if (isClusterless) {}
-    else {
+    if (isClusterless) {
+    } else {
       const sealedSecretsKeys = loadSealedSecretsKeys();
       const terraformStatePassphrase = loadTerraformStatePassphrase();
       const argoUIAdminPassword = loadArgoUIAdminPassword();

@@ -1,0 +1,53 @@
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml): {}
+  - name: rds_password
+    message: "Enter the master password for the RDS cluster"
+    type: Secret
+    required: true
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: mj-managed-rds
+    provider: aws
+    distribution: clusterless
+    infrastructure:
+      terraform:
+        variable:
+          rds_password:
+            type: string
+            description: "The master password for the RDS cluster."
+            sensitive: true
+        resource:
+          aws_db_instance:
+            mj_rds_db_instance:
+              allocated_storage: 10
+              db_name: "mydb"
+              engine: "postgres"
+              instance_class: "db.t3.micro"
+              username: "foo"
+              password: "${var.rds_password}"
+              skip_final_snapshot  : true
+              multi_az: false
+
+
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+
+    TF_VAR_rds_password: "{{ $cndi.get_prompt_response(rds_password) }}"
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+      {}
+    rds: |
+      # AWS RDS
+
+      This Template provides a clusterless configuration for an AWS RDS instance.
