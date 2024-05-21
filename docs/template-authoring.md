@@ -149,21 +149,21 @@ blocks:
       stringData:
         GIT_SYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
-
-cndi_config:
-    cluster_manifests:
-        $cndi.comment(airflow-git-sync-secret): Airflow Credentials
-        git-sync-credentials-secret:
-        $cndi.get_block(git_sync_dedicated):
-            condition:
-            - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-            - ==
-            - false
-        $cndi.get_block(git_sync_shared):
-            condition:
-            - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-            - ==
-            - true
+outputs:
+  cndi_config:
+      cluster_manifests:
+          $cndi.comment(airflow-git-sync-secret): Airflow Credentials
+          git-sync-credentials-secret:
+          $cndi.get_block(git_sync_dedicated):
+              condition:
+              - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
+              - ==
+              - false
+          $cndi.get_block(git_sync_shared):
+              condition:
+              - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
+              - ==
+              - true
 ```
 
 In this example, we have two blocks, `git_sync_dedicated` and `git_sync_shared`,
