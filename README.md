@@ -47,7 +47,7 @@ checkout this demo:
 
 ## installation 🥁
 
-### prerequisites 📦
+**prerequisites 📦**
 
 [GitHub CLI](https://cli.github.com): CNDI uses the [gh](https://cli.github.com)
 CLI to create a project repo for you and configure
@@ -57,28 +57,22 @@ for use in
 
 ---
 
-To install CNDI you just need to download the "tarball" for your system from
-[GitHub Releases](https://github.com/polyseam/cndi/releases) and extract it to
-disk.
+Run the command below that corresponds to your operating system to download
+install the latest release of CNDI:
 
-This script automates that job:
-
-### MacOS and Linux
+**macos and linux**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-### Windows
+**windows**
 
 ```powershell
 irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
----
-
-If you run into trouble or if you want to install the Windows executable, check
-out our [tiny install guide](./docs/install.md).
+For more information check out our [tiny install guide](./docs/install.md).
 
 ## usage 👩‍💻
 
