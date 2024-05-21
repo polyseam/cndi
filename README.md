@@ -47,32 +47,29 @@ checkout this demo:
 
 ## installation 🥁
 
-**prerequisites 📦**
+<!-- The below table Markdown is outrageous and I'm sorry -->
 
-[GitHub CLI](https://cli.github.com): CNDI uses the [gh](https://cli.github.com)
-CLI to create a project repo for you and configure
-[Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
-for use in
-[GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions).
+| Prerequisite                  | Description                                                                                                                                                                                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [gh](https://cli.github.com/) | GitHub CLI used to create a project repo for you and configure [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for use in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions). |
 
 ---
 
-Run the command below that corresponds to your operating system to download
-install the latest release of CNDI:
+Install the latest CNDI release on your system using one of the commands below:
 
-**macos and linux**
+Shell (Mac, Linux):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-**windows**
+PowerShell (Windows):
 
 ```powershell
 irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
-For more information check out our [tiny install guide](./docs/install.md).
+For more information check out our [install guide](./docs/install.md).
 
 ## usage 👩‍💻
 
