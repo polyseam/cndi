@@ -71,6 +71,8 @@ irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 
 For more information check out our [install guide](./docs/install.md).
 
+---
+
 ## usage 👩‍💻
 
 Use CNDI to deploy GitOps enabled Kubernetes application clusters on any
