@@ -47,7 +47,7 @@ checkout this demo:
 
 ## prerequisites 📦
 
-- [gh](https://cli.github.com) CLI - CNDI uses the [gh](https://cli.github.com)
+- [gh](https://cli.github.com) CLI: CNDI uses the [gh](https://cli.github.com)
   CLI to create a project repo for you and configure
   [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
   for use in
