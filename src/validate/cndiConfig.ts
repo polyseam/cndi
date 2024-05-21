@@ -215,8 +215,8 @@ export default function validateConfig(
       { cause: 917 },
     );
   }
-
-  if (!config?.infrastructure?.cndi?.nodes?.[0]) {
+  const firstNode = config?.infrastructure?.cndi?.nodes?.[0];
+  if (!firstNode) {
     throw new Error(
       [
         cndiConfigLabel,
@@ -227,6 +227,18 @@ export default function validateConfig(
         ccolors.error("entries"),
       ].join(" "),
       { cause: 902 },
+    );
+  } else if (firstNode.taints?.length) {
+    throw new Error(
+      [
+        cndiConfigLabel,
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.error("but taints are not allowed on the first "),
+        ccolors.key_name('"infrastructure.cndi.nodes"'),
+        ccolors.error("entry"),
+      ].join(" "),
+      { cause: 918 },
     );
   }
 
