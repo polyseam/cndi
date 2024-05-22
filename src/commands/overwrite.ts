@@ -8,6 +8,14 @@ type EchoOwOptions = {
   initializing?: boolean;
 };
 
+export type OwActionOptions = {
+  initializing: boolean;
+  create: boolean;
+  skipPush: boolean;
+  file?: string;
+  output: string;
+};
+
 const echoOw = (options: EchoOwOptions) => {
   if (options?.initializing) return;
 
@@ -19,13 +27,8 @@ const echoOw = (options: EchoOwOptions) => {
   console.log(`${cndiOverwrite}${cndiOverwriteFile}${cndiOverwriteOutput}\n`);
 };
 
-// deno-lint-ignore no-explicit-any
-const owAction = (options: any) => {
+const owAction = (options: OwActionOptions) => {
   echoOw(options);
-
-  if (!options.output) {
-    options.output = Deno.cwd();
-  }
 
   const spinner = new Spinner({
     interval: 80,
@@ -81,7 +84,7 @@ const overwriteCommand = new Command()
   .option("-f, --file <file:string>", "Path to your cndi_config file.")
   .option(
     "-o, --output <output:string>",
-    "Path to your cndi cluster git repository.",
+    "File system path to your cndi project's git repository.",
     getProjectDirectoryFromFlag,
   )
   .option(
@@ -94,6 +97,17 @@ const overwriteCommand = new Command()
     "Create a new cndi cluster repository",
     { hidden: true, default: false },
   )
-  .action(owAction);
+  .option(
+    "--skip-push <skip-push:boolean>",
+    "Skip pushing to remote repository",
+    { hidden: true, default: false },
+  )
+  .action((options) => {
+    const output = options?.output || Deno.cwd();
+    owAction({
+      ...options,
+      output,
+    });
+  });
 
 export { overwriteCommand, owAction };
