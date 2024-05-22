@@ -38,5 +38,6 @@ TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
 
 # Argo UI Admin Password
 ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
-  ${templatePartial}`.trim();
+
+${templatePartial}`.trim();
 }
