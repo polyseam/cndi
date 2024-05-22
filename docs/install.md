@@ -33,3 +33,6 @@ the binaries to a directory in your `PATH`.
 
 If you are still having issues, please add to the following
 [Discussion Post](https://github.com/orgs/polyseam/discussions/871)!
+
+We're also available on [Discord](https://discord.gg/ygt2rpegJ5) to help
+troubleshoot any issue!
