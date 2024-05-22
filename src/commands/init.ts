@@ -7,7 +7,6 @@ import {
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
-  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -73,9 +72,8 @@ const echoInit = (options: EchoInitOptions) => {
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p [output:string]",
+    "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
-    getProjectDirectoryFromFlag,
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")
@@ -118,7 +116,7 @@ const initCommand = new Command()
   })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
-    const destinationDirectory = options.output ?? Deno.cwd();
+    const destinationDirectory = options?.output || Deno.cwd();
 
     echoInit({ ...options, output: destinationDirectory });
 

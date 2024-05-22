@@ -549,23 +549,6 @@ async function emitExitEvent(exit_code: number) {
   console.log();
 }
 
-function absolutifyPath(p: string): string {
-  if (path.isAbsolute(p)) {
-    return p;
-  }
-
-  if (p.startsWith("~")) {
-    return path.join(homedir(), p.slice(1));
-  }
-
-  return path.resolve(p);
-}
-
-const getProjectDirectoryFromFlag = (value: string | boolean): string => {
-  // only executed if the flag is provided
-  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
-};
-
 function getPathToCndiBinary() {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
   const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
@@ -594,7 +577,6 @@ export {
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
-  getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
   getTFData,

@@ -4,7 +4,6 @@ import {
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
-  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -110,8 +109,7 @@ const createCommand = new Command()
   )
   .option(
     "-o, --output <output:string>",
-    "Output directory",
-    getProjectDirectoryFromFlag,
+    "Destination for new cndi project files.",
   )
   .option("--debug, -d", "Enable debug mode", { hidden: true })
   .option(
@@ -159,7 +157,7 @@ const createCommand = new Command()
     // default to repo component of slug
     const [owner, repo] = slug.split("/"); // by this point, slug is valid
 
-    let destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+    let destinationDirectory = options?.output || path.join(Deno.cwd(), repo);
 
     if (interactive && !options.output) {
       destinationDirectory = await PromptTypes.Input.prompt({
