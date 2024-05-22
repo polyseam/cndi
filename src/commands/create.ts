@@ -477,7 +477,7 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      skipPush,
+      skipPush: !!skipPush,
     });
   });
 

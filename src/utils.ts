@@ -561,7 +561,7 @@ function absolutifyPath(p: string): string {
   return path.resolve(p);
 }
 
-const getProjectDirectoryFromFlag = (value: string | boolean) => {
+const getProjectDirectoryFromFlag = (value: string | boolean): string => {
   // only executed if the flag is provided
   return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
 };

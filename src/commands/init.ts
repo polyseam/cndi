@@ -467,7 +467,8 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
-      create: options.create,
+      create: !!options.create,
+      skipPush: !!options.skipPush,
     });
   });
 
