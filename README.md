@@ -47,18 +47,31 @@ checkout this demo:
 
 ## installation 🥁
 
-To install CNDI you just need to download the "tarball" for your system from
-[GitHub Releases](https://github.com/polyseam/cndi/releases) and extract it to
-disk.
+<!-- The below table Markdown is outrageous and I'm sorry -->
 
-This script automates that job:
+| Prerequisite                  | Description                                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [gh](https://cli.github.com/) | [Official GitHub CLI](https://cli.github.com/) used to create a project repo for you and configure [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for use in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions). |
+
+---
+
+Install the latest CNDI release on your system using one of the commands below:
+
+Shell (Mac, Linux):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-If you run into trouble or if you want to install the Windows executable, check
-out our [tiny install guide](./docs/install.md).
+PowerShell (Windows):
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
+```
+
+For more information check out our [install guide](./docs/install.md).
+
+---
 
 ## usage 👩‍💻
 
@@ -218,7 +231,7 @@ you can safely delete your git repo or achive it for reference later.
 
 ---
 
-## Walkthroughs 🥾
+## walkthroughs 🥾
 
 We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. These walkthroughs hold your hand through the process of
