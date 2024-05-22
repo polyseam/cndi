@@ -71,7 +71,7 @@
   },
   {
     "code": 400,
-    "message": "cndi init --template was called without a template name",
+    "message": "cndi init --template was called without a template identifier",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/505"
   },
   {
