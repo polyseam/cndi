@@ -1,5 +1,5 @@
 import { Command, Spinner } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
 type EchoOwOptions = {
@@ -85,6 +85,7 @@ const overwriteCommand = new Command()
   .option(
     "-o, --output <output:string>",
     "File system path to your cndi project's git repository.",
+    getProjectDirectoryFromFlag,
   )
   .option(
     "--initializing <initializing:boolean>",

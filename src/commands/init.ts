@@ -7,6 +7,7 @@ import {
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -74,6 +75,7 @@ const initCommand = new Command()
   .option(
     "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
+    getProjectDirectoryFromFlag,
   )
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-t, --template <template:string>", "CNDI Template to use.")

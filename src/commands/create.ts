@@ -4,6 +4,7 @@ import {
   checkInitialized,
   emitExitEvent,
   getPrettyJSONString,
+  getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -110,6 +111,7 @@ const createCommand = new Command()
   .option(
     "-o, --output <output:string>",
     "Destination for new cndi project files.",
+    getProjectDirectoryFromFlag,
   )
   .option("--debug, -d", "Enable debug mode", { hidden: true })
   .option(
