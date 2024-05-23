@@ -122,16 +122,23 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     await stageFile(
       path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef, config),
+      getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
     );
 
-    if (config?.infrastructure?.terraform?.variable) {
-      // TODO: Overwrite cndi-run.yaml to inject terraform variables
-    }
+    const cluster_manifests = config?.cluster_manifests || {};
+    // this ks_checks will be written to cndi/ks_checks.json
+    let ks_checks: Record<string, string> = {};
+
+    // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
+    let ksc: Record<string, string> = {};
+
+    // create temporary key for sealing secrets
+    const tempPublicKeyFilePath = await Deno.makeTempFile();
 
     const isClusterless = config?.distribution === "clusterless";
 
     if (isClusterless) {
+      // do nothing
     } else {
       const sealedSecretsKeys = loadSealedSecretsKeys();
       const terraformStatePassphrase = loadTerraformStatePassphrase();
@@ -177,14 +184,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         });
         return;
       }
-
-      const cluster_manifests = config?.cluster_manifests || {};
-
-      // this ks_checks will be written to cndi/ks_checks.json
-      let ks_checks: Record<string, string> = {};
-
-      // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
-      let ksc: Record<string, string> = {};
 
       try {
         ksc = await loadJSONC(
@@ -254,9 +253,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       } catch {
         // folder did not exist
       }
-
-      // create temporary key for sealing secrets
-      const tempPublicKeyFilePath = await Deno.makeTempFile();
 
       await Deno.writeTextFile(
         tempPublicKeyFilePath,

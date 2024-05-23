@@ -205,7 +205,19 @@ export default function validateConfig(
   const isClusterless = config?.distribution === "clusterless";
 
   if (isClusterless) {
-    console.log("clusterless!");
+    if (config?.infrastructure?.cndi) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"infrastructure.cndi"'),
+          ccolors.error("entries in clusterless mode"),
+        ].join(" "),
+        { cause: 919 },
+      );
+    }
     // TODO: throw if cluster things are present in clusterless mode
   } else {
     if (!config?.distribution) {

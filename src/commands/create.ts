@@ -22,7 +22,6 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
@@ -386,9 +385,6 @@ const createCommand = new Command()
       await emitExitEvent(error.cause);
       Deno.exit(error.cause);
     }
-
-    const deployment_target_provider =
-      templateResult.responses.deployment_target_provider;
 
     const cndi_config = templateResult.files["cndi_config.yaml"];
     const env = templateResult.files[".env"];

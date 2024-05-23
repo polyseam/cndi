@@ -85,8 +85,6 @@ async function stageTerraformSynthAWSClusterless(cndi_config: CNDIConfig) {
     ...cndi_config?.infrastructure?.terraform,
   };
 
-  console.log("patching clusterless");
-
   // patch cdk.tf.json with user's terraform pass-through
   await patchAndStageTerraformFilesWithInput(input);
 }

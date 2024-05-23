@@ -10,8 +10,6 @@ infrastructure:
       - name: airflow-alpha
         instance_type: t3.medium
         disk_size: 100
-      - name: airflow-beta
-        instance_type: t3.medium
-        disk_size: 100
+
 cluster_manifests: {}
 applications: {}

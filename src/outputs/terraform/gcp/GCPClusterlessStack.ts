@@ -35,9 +35,13 @@ const gcpClusterlessStackLabel = ccolors.faded(
 class GCPClusterlessTerraformStack extends TerraformStack {
   variables: Record<string, TerraformVariable> = {};
   locals: Record<string, TerraformLocal> = {};
-
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name);
+    this.locals.cndi_project_name = new TerraformLocal(
+      this,
+      "cndi_project_name",
+      cndi_config.project_name,
+    );
     const key = Deno.env.get("GOOGLE_CREDENTIALS");
 
     // redundant check
@@ -110,8 +114,6 @@ async function stageTerraformSynthGCPClusterless(cndi_config: CNDIConfig) {
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
-
-  console.log("patching clusterless");
 
   // patch cdk.tf.json with user's terraform pass-through
   await patchAndStageTerraformFilesWithInput(input);
