@@ -52,8 +52,6 @@ blocks:
         enabled: true
         annotations:
           cert-manager.io/cluster-issuer: cluster-issuer
-          $cndi.comment(unmanaged_target_description): "if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname"
-          $cndi.comment(unmanaged_target): "external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com"
         ingressClassName: public
         hosts:
           - name: "{{ $cndi.get_arg(hostname) }}"
@@ -362,11 +360,8 @@ outputs:
       For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target.
       These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` Template on various platforms:
 
-      - **AWS EC2:** [ec2/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/ec2/airflow.md)
       - **AWS EKS:** [eks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/airflow.md)
-      - **GCP Compute Engine:** [gce/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gce/airflow.md)
       - **GCP GKE:** [gke/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gke/airflow.md)
-      - **Azure Virtual Machines:** [avm/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/avm/airflow.md)
       - **Azure AKS:** [aks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/aks/airflow.md)
       - **Local Development:** [dev/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/dev/airflow.md)
 
