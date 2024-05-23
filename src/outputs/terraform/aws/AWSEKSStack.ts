@@ -848,7 +848,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
-          { name: "storageClasses[0].name", value: "nfs" },
+          { name: "storageClasses[0].name", value: "rwm" },
           { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com" },
           {
             name:
@@ -1042,6 +1042,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             name:
               "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
+          },
+          { name: "storageClasses[0].name", value: "rwo" },
+          {
+            name:
+              "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+            value: '"true"',
           },
         ],
         version: "2.22.0",
