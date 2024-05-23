@@ -561,9 +561,10 @@ function absolutifyPath(p: string): string {
   return path.resolve(p);
 }
 
-const getProjectDirectoryFromFlag = (value: string | boolean) => {
+// used to take a user provided filesystem path and return the absolute path
+const getProjectDirectoryFromFlag = (value: string): string => {
   // only executed if the flag is provided
-  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+  return !value ? Deno.cwd() : absolutifyPath(value);
 };
 
 function getPathToCndiBinary() {

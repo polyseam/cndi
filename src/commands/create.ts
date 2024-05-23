@@ -109,7 +109,7 @@ const createCommand = new Command()
   )
   .option(
     "-o, --output <output:string>",
-    "Output directory",
+    "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
   .option("--debug, -d", "Enable debug mode", { hidden: true })
@@ -119,8 +119,10 @@ const createCommand = new Command()
   )
   .option(
     "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
-    { hidden: true },
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
   )
   .action(async (options, slug) => {
     echoCreate(options, slug);
@@ -158,7 +160,7 @@ const createCommand = new Command()
     // default to repo component of slug
     const [owner, repo] = slug.split("/"); // by this point, slug is valid
 
-    let destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+    let destinationDirectory = options?.output || path.join(Deno.cwd(), repo);
 
     if (interactive && !options.output) {
       destinationDirectory = await PromptTypes.Input.prompt({
@@ -465,8 +467,8 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      skipPush,
       workflowSourceRef: options.workflowSourceRef,
+      skipPush: !!skipPush,
     });
   });
 

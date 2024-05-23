@@ -72,7 +72,7 @@ const echoInit = (options: EchoInitOptions) => {
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p [output:string]",
+    "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
@@ -117,7 +117,7 @@ const initCommand = new Command()
   })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
-    const destinationDirectory = options.output ?? Deno.cwd();
+    const destinationDirectory = options?.output || Deno.cwd();
 
     echoInit({ ...options, output: destinationDirectory });
 
@@ -456,8 +456,9 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
-      create: options.create,
       workflowSourceRef: options.workflowSourceRef,
+      create: !!options.create,
+      skipPush: !!options.skipPush,
     });
   });
 
