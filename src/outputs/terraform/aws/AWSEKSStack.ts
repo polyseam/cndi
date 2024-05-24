@@ -1077,6 +1077,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             name: "storageClasses[0].volumeBindingMode",
             value: "WaitForFirstConsumer",
           },
+          {
+            name: "storageClasses[0].allowVolumeExpansion",
+            value: "true",
+          },
         ],
         version: "2.22.0",
       },
