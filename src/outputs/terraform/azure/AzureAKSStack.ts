@@ -265,9 +265,13 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         storageProvisioner: "file.csi.azure.com",
         parameters: {
-          skuName: "Premium_LRS",
-          protocol: "rwm",
+          skuName: "Standard_LRS",
         },
+        mountOptions: [
+          "mfsymlinks",
+          "actimeo=30",
+          "nosharesock",
+        ],
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
