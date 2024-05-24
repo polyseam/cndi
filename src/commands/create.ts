@@ -16,8 +16,6 @@ import { KNOWN_TEMPLATES } from "consts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
@@ -362,12 +360,6 @@ const createCommand = new Command()
       throw new Error("template is undefined");
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     let templateResult;
 
     try {
@@ -401,21 +393,27 @@ const createCommand = new Command()
       YAML.stringify(templateResult.responses),
     );
 
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndiGeneratedValues = {
+    // GENERATE ENV VARS
+    const sealedSecretsKeys = isClusterless
+      ? null
+      : await createSealedSecretsKeys();
+
+    const doSSH =
+      templateResult?.responses?.deployment_target_distribution === "microk8s";
+
+    const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+    const dotEnvOptions = {
       sshPublicKey,
       sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
       debugMode: !!options.debug,
     };
 
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
 
     await stageFile("README.md", readme);
 

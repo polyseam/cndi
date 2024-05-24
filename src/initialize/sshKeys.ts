@@ -3,8 +3,7 @@ import { getStagingDir } from "src/utils.ts";
 
 const sshKeysLabel = ccolors.faded("\nsrc/initialize/sshKeys.ts:");
 
-const createSshKeys = async (skip?: boolean): Promise<string | null> => {
-  if (skip) return null;
+const createSshKeys = async (): Promise<string | null> => {
   const stagingDir = getStagingDir();
 
   const ssh_private_key_path = path.join(stagingDir, "cndi_rsa");
