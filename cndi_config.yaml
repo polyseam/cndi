@@ -1,14 +1,14 @@
 cndi_version: v2
-project_name: basic-ec2
-provider: aws
-distribution: null # harvester, RKE2, K3S
+project_name: basic-cluster
+provider: aws # or 'gcp', 'azure'
+distribution: eks # or 'clusterless'
 infrastructure:
   cndi:
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
       - name: airflow-alpha
-        instance_type: t3.medium
+        instance_type: t3.medium # or 'n1-standard-2', 'Standard_D2_v2'
         disk_size: 100
 
 cluster_manifests: {}
