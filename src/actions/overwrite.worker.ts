@@ -125,6 +125,8 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
     );
 
+    // ------ CLUSTERLESS ------
+
     const cluster_manifests = config?.cluster_manifests || {};
     // this ks_checks will be written to cndi/ks_checks.json
     let ks_checks: Record<string, string> = {};
