@@ -91,7 +91,10 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformSynthAzureClusterless(config);
       break;
     case "dev/clusterless":
-      await stageTerraformSynthDevClusterless(config);
+      console.log(
+        ccolors.user_input("dev/clusterless"),
+        ccolors.error("is not available"),
+      );
       break;
     case "dev/microk8s":
       await stageTerraformSynthDevMultipassMicrok8s(config);
