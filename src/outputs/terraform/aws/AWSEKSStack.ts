@@ -853,6 +853,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             name:
               "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+            type: "string",
             value: "false",
           },
           {
@@ -1055,6 +1056,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             name:
               "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+            type: "string",
             value: "true",
           },
           {
