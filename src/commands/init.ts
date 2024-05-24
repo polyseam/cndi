@@ -25,7 +25,6 @@ import { createSshKeys } from "src/initialize/sshKeys.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
@@ -311,7 +310,6 @@ const initCommand = new Command()
       });
     }
 
-    let deployment_target_provider;
     let templateResult;
 
     if (template) {
@@ -338,8 +336,6 @@ const initCommand = new Command()
       readme = templateResult.files["README.md"];
       env = templateResult.files[".env"];
 
-      deployment_target_provider = templateResult?.responses
-        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
@@ -393,13 +389,6 @@ const initCommand = new Command()
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
     );
-
-    if (deployment_target_provider !== "dev") {
-      await stageFile(
-        path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
-      );
-    }
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
@@ -466,6 +455,7 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
+      workflowSourceRef: options.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
     });

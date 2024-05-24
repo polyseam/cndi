@@ -1,84 +1,97 @@
 import { YAML } from "deps";
 
-const generalSteps = [
-  {
-    name: "welcome",
-    run: 'echo "welcome to cndi!"',
-  },
-  {
-    id: "lock-check",
-    uses: "github/lock@v2.0.1",
-    with: {
-      mode: "check",
-      environment: "global",
-    },
-  },
-  {
-    name: "fail if locked",
-    if: "${{ steps.lock-check.outputs.locked != 'false' }}",
-    run: "echo \"cndi cannot 'run': deployment in progress\" && exit 1",
-  },
-  {
-    id: "lock-acquire",
-    uses: "github/lock@v2.0.1",
-    with: {
-      mode: "lock",
-      environment: "global",
-    },
-  },
-  {
-    name: "checkout repo",
-    uses: "actions/checkout@v3",
-    with: {
-      "fetch-depth": 0,
-    },
-  },
-  {
-    name: "setup cndi",
-    uses: "polyseam/setup-cndi@v2",
-  },
-  {
-    name: "install awscli 1",
-    run: "pip install -U awscli",
-  },
-  {
-    name: "cndi run",
-    env: {
-      ARM_REGION: "${{ vars.ARM_REGION }}",
-      AWS_REGION: "${{ vars.AWS_REGION }}",
-      GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
-      GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
-      GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
-      SSH_PUBLIC_KEY: "${{ secrets.SSH_PUBLIC_KEY }}",
-      TERRAFORM_STATE_PASSPHRASE: "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
-      SEALED_SECRETS_PRIVATE_KEY: "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
-      SEALED_SECRETS_PUBLIC_KEY: "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
-      ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
-      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
-      ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
-      ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
-      ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
-      ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
-      CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
-    },
-    run: "cndi run",
-  },
-  {
-    id: "lock-release",
-    uses: "github/lock@v2.0.1",
-    if: "always()", // always release the lock even if `cndi run` fails
-    with: {
-      mode: "unlock",
-      environment: "global",
-    },
-  },
-];
+import { CNDIConfig } from "src/types.ts";
 
-function getSteps(sourceRef?: string) {
+function getSteps(config: CNDIConfig, sourceRef?: string) {
+  const injectEnv: Record<string, string> = {};
+
+  for (
+    const key of Object.keys(config?.infrastructure?.terraform?.variable || {})
+  ) {
+    const envKey = `TF_VAR_${key.toLowerCase()}`;
+    const envVal = `\${{ secrets.TF_VAR_${key.toLowerCase()} }}`;
+    injectEnv[envKey] = envVal;
+  }
+
   if (!sourceRef) {
-    return generalSteps;
+    return [
+      {
+        name: "welcome",
+        run: 'echo "welcome to cndi!"',
+      },
+      {
+        id: "lock-check",
+        uses: "github/lock@v2.0.1",
+        with: {
+          mode: "check",
+          environment: "global",
+        },
+      },
+      {
+        name: "fail if locked",
+        if: "${{ steps.lock-check.outputs.locked != 'false' }}",
+        run: "echo \"cndi cannot 'run': deployment in progress\" && exit 1",
+      },
+      {
+        id: "lock-acquire",
+        uses: "github/lock@v2.0.1",
+        with: {
+          mode: "lock",
+          environment: "global",
+        },
+      },
+      {
+        name: "checkout repo",
+        uses: "actions/checkout@v3",
+        with: {
+          "fetch-depth": 0,
+        },
+      },
+      {
+        name: "setup cndi",
+        uses: "polyseam/setup-cndi@v2",
+      },
+      {
+        name: "install awscli 1",
+        run: "pip install -U awscli",
+      },
+      {
+        name: "cndi run",
+        env: {
+          ARM_REGION: "${{ vars.ARM_REGION }}",
+          AWS_REGION: "${{ vars.AWS_REGION }}",
+          GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
+          GIT_TOKEN: "${{ secrets.GIT_TOKEN }}",
+          GIT_SSH_PRIVATE_KEY: "${{ secrets.GIT_SSH_PRIVATE_KEY }}",
+          SSH_PUBLIC_KEY: "${{ secrets.SSH_PUBLIC_KEY }}",
+          TERRAFORM_STATE_PASSPHRASE:
+            "${{ secrets.TERRAFORM_STATE_PASSPHRASE }}",
+          SEALED_SECRETS_PRIVATE_KEY:
+            "${{ secrets.SEALED_SECRETS_PRIVATE_KEY }}",
+          SEALED_SECRETS_PUBLIC_KEY: "${{ secrets.SEALED_SECRETS_PUBLIC_KEY }}",
+          ARGOCD_ADMIN_PASSWORD: "${{ secrets.ARGOCD_ADMIN_PASSWORD }}",
+          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
+          GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
+          ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+          ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
+          ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
+          ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+          CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+          ...injectEnv,
+        },
+        run: "cndi run",
+      },
+      {
+        id: "lock-release",
+        uses: "github/lock@v2.0.1",
+        if: "always()", // always release the lock even if `cndi run` fails
+        with: {
+          mode: "unlock",
+          environment: "global",
+        },
+      },
+    ];
   }
 
   return [{
@@ -150,6 +163,7 @@ function getSteps(sourceRef?: string) {
       ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
       ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
       CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
+      ...injectEnv,
     },
   }, {
     id: "lock-release",
@@ -162,7 +176,11 @@ function getSteps(sourceRef?: string) {
   }];
 }
 
-const getWorkflowYaml = (sourceRef?: string, disable = false) => {
+const getWorkflowYaml = (
+  config: CNDIConfig,
+  sourceRef?: string,
+  disable = false,
+) => {
   const on = disable ? {} : {
     push: {
       branches: ["main", "releases/**"],
@@ -181,7 +199,7 @@ const getWorkflowYaml = (sourceRef?: string, disable = false) => {
           GIT_REPO: "${{ secrets.GIT_REPO }}",
           CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
         },
-        steps: getSteps(sourceRef),
+        steps: getSteps(config, sourceRef),
       },
     },
   };
