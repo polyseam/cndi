@@ -853,7 +853,15 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             name:
               "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-            value: '"false"',
+            value: "false",
+          },
+          {
+            name: "storageClasses[0].reclaimPolicy",
+            value: "Delete",
+          },
+          {
+            name: "storageClasses[0].volumeBindingMode",
+            value: "WaitForFirstConsumer",
           },
           {
             name: "storageClasses[0].parameters.provisioningMode",
@@ -1047,7 +1055,27 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           {
             name:
               "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-            value: '"true"',
+            value: "true",
+          },
+          {
+            name: "storageClasses[0].provisioner",
+            value: "ebs.csi.aws.com",
+          },
+          {
+            name: "storageClasses[0].parameters.fsType",
+            value: "ext4",
+          },
+          {
+            name: "storageClasses[0].parameters.type",
+            value: "gp3",
+          },
+          {
+            name: "storageClasses[0].reclaimPolicy",
+            value: "Delete",
+          },
+          {
+            name: "storageClasses[0].volumeBindingMode",
+            value: "WaitForFirstConsumer",
           },
         ],
         version: "2.22.0",
