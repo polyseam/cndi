@@ -22,7 +22,6 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
@@ -120,8 +119,10 @@ const createCommand = new Command()
   )
   .option(
     "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
-    { hidden: true },
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
   )
   .action(async (options, slug) => {
     echoCreate(options, slug);
@@ -387,9 +388,6 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    const deployment_target_provider =
-      templateResult.responses.deployment_target_provider;
-
     const cndi_config = templateResult.files["cndi_config.yaml"];
     const env = templateResult.files[".env"];
     const readme = templateResult.files["README.md"];
@@ -425,14 +423,6 @@ const createCommand = new Command()
     );
 
     await stageFile(".gitignore", getGitignoreContents());
-
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(
-        options.workflowSourceRef,
-        deployment_target_provider === "dev",
-      ),
-    );
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
@@ -477,6 +467,7 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
+      workflowSourceRef: options.workflowSourceRef,
       skipPush: !!skipPush,
     });
   });
