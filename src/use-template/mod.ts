@@ -1000,8 +1000,8 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
   }
 
   for (const key in envSpec) {
-    const val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
-
+    let val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
+    val = literalizeGetRandomStringCalls(val);
     if (key.startsWith("$cndi.comment")) {
       envLines.push(`\n# ${val}`);
     } else if (key.startsWith("$cndi.get_block")) {
