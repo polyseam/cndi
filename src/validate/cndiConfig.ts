@@ -205,6 +205,25 @@ export default function validateConfig(
   const isClusterless = config?.distribution === "clusterless";
 
   if (isClusterless) {
+    if (config?.provider === "dev") {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"distribution"'),
+          ccolors.error("set to"),
+          ccolors.user_input('"clusterless"'),
+          ccolors.error("while the"),
+          ccolors.key_name('"provider"'),
+          ccolors.error("is set to"),
+          ccolors.user_input('"dev"'),
+          ccolors.error("which is not supported"),
+        ].join(" "),
+        { cause: 918 },
+      );
+    }
     if (config?.infrastructure?.cndi) {
       throw new Error(
         [
