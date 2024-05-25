@@ -1,0 +1,90 @@
+# these are the core prompts that are used in CNDI
+# every response is available in the host template
+- name: project_name
+  message: >-
+    Please name your CNDI project:
+  type: Input
+  default: "my-cndi-project"
+
+- name: deployment_target_provider
+  type: Select
+  message: Where do you want to deploy your cluster?
+  required: true
+  options:
+    - aws
+    - azure
+    - gcp
+    - dev
+
+- name: deployment_target_distribution
+  type: Select
+  message: What distribution do you want to use?
+  condition:
+    - "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    - ==
+    - aws
+  options:
+    - clusterless
+
+- name: deployment_target_distribution
+  type: Select
+  message: What distribution do you want to use?
+  condition:
+    - "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    - ==
+    - gcp
+  options:
+    - clusterless
+
+- name: deployment_target_distribution
+  type: Select
+  message: What distribution do you want to use?
+  condition:
+    - "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    - ==
+    - azure
+  options:
+    - clusterless
+
+- name: git_credentials_mode
+  default: token
+  message: Would you like to connect your repo using a Git token or SSH key?
+  type: Select
+  options:
+    - token
+    - ssh
+
+- name: git_username
+  message: >-
+    What is your git username?
+  type: Input
+  default: ""
+
+- name: git_token
+  condition:
+    - "{{ $cndi.get_prompt_response(git_credentials_mode) }}"
+    - ==
+    - "token"
+  message: "Please enter your Git Personal Access Token:"
+  type: Secret
+  default: ""
+
+- name: git_ssh_private_key
+  condition:
+    - "{{ $cndi.get_prompt_response(git_credentials_mode) }}"
+    - ==
+    - "ssh"
+  message: "Please enter a path to your SSH private key:"
+  type: File
+  default: ""
+
+- name: git_repo
+  message: "Please enter your Git Repo URL:"
+  type: Input
+  default: ""
+
+- name: terraform_state_passphrase
+  message: >-
+    Enter an override for the default Terraform State Passphrase?
+  type: Input
+  default: '{{ $cndi.get_random_string(32) }}'

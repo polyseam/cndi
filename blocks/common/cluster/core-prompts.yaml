@@ -1,5 +1,4 @@
-# these are the core prompts that are used in CNDI
-# every response is available in the host template
+# these are the core prompts that are used in CNDI Cluster Projects
 - name: project_name
   message: >-
     Please name your CNDI project:
@@ -25,7 +24,6 @@
     - aws
   options:
     - eks
-    - clusterless
 
 - name: deployment_target_distribution
   type: Select
@@ -36,7 +34,6 @@
     - gcp
   options:
     - gke
-    - clusterless
 
 - name: deployment_target_distribution
   type: Select
@@ -47,7 +44,6 @@
     - azure
   options:
     - aks
-    - clusterless
 
 - name: git_credentials_mode
   default: token
@@ -86,9 +82,42 @@
   type: Input
   default: ""
 
+- name: cert_manager_email
+  message: >-
+    What email address should be used for Let"s Encrypt certificate
+    registration?
+  type: Input
+  default: jane.doe@example.com
+
+- name: enable_external_dns
+  message: >-
+    Would you like to enable external-dns for automatic DNS management?
+  type: Confirm
+  default: true
+
+- name: dns_provider
+  message: >-
+    Please select your DNS provider
+  type: Select
+  options:
+    - aws
+    - azure
+    - google
+    - cloudflare
+  default: aws
+  condition:
+    - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+    - ==
+    - true
+
 - name: terraform_state_passphrase
   message: >-
     Enter an override for the default Terraform State Passphrase?
   type: Input
   default: '{{ $cndi.get_random_string(32) }}'
-  
+
+- name: argocd_admin_password
+  message: >-
+    Enter an override for the default ArgoCD Admin Password?
+  type: Input
+  default: '{{ $cndi.get_random_string(32) }}'

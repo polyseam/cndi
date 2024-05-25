@@ -1,11 +1,9 @@
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-prompts.yaml):
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster-core-prompts.yaml):
-      {}
-    
+
   - name: deploy_argocd_ingress
     default: true
     message: >-
@@ -52,7 +50,7 @@ outputs:
 
     cluster_manifests:
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -79,16 +77,16 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
 
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/env.yaml):
       {}
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster-core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-readme.md):
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/cluster.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution)} }.md):
       {}
 
     basic: |
@@ -98,7 +96,7 @@ outputs:
       and can be extended to meet any need. If there is no existing 
       CNDI Template for your use-case, we recommend deploying this `basic`
       Template as is. 
-      
+
       After you verify the Template is deployed successfully to your 
       infrastructure, it can be enhanced using the `cndi_config.yaml` fields 
       `applications` and `cluster_manifests` with Kubernetes manifests 

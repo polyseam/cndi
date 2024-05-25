@@ -1003,7 +1003,7 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
     let val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
     val = literalizeGetRandomStringCalls(val);
     if (key.startsWith("$cndi.comment")) {
-      envLines.push(`\n# ${val}`);
+      envLines.push(`\n# ${unwrapQuotes(val)}`);
     } else if (key.startsWith("$cndi.get_block")) {
       // do nothing, already handled
     } else if (val === "" || val === "''") {
@@ -1166,8 +1166,8 @@ export async function useTemplate(
     responses,
     files,
   };
-  
-  console.log() // let it breathe
+
+  console.log(); // let it breathe
 
   return useTemplateResult;
 }
