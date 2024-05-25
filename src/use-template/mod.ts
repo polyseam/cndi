@@ -1166,6 +1166,8 @@ export async function useTemplate(
     responses,
     files,
   };
+  
+  console.log() // let it breathe
 
   return useTemplateResult;
 }
