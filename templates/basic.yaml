@@ -86,7 +86,7 @@ outputs:
       {}
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution)} }.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
 
     basic: |
