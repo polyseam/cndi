@@ -10,8 +10,6 @@ import {
 } from "src/utils.ts";
 
 import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { loadTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { loadArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
@@ -125,26 +123,47 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
     );
 
-    // ------ CLUSTERLESS ------
+    try {
+      // remove all files in cndi/terraform
+      await Deno.remove(pathToTerraformResources, {
+        recursive: true,
+      });
+    } catch {
+      // folder did not exist
+    }
 
-    const cluster_manifests = config?.cluster_manifests || {};
-    // this ks_checks will be written to cndi/ks_checks.json
-    let ks_checks: Record<string, string> = {};
+    const terraformStatePassphrase = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
-    // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
-    let ksc: Record<string, string> = {};
-
-    // create temporary key for sealing secrets
-    const tempPublicKeyFilePath = await Deno.makeTempFile();
+    if (!terraformStatePassphrase) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: 503,
+        message: [
+          owLabel,
+          ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
+          ccolors.error(`is not set in environment`),
+        ].join(" "),
+      });
+      return;
+    }
 
     const isClusterless = config?.distribution === "clusterless";
 
-    if (isClusterless) {
-      // do nothing
-    } else {
+    if (!isClusterless) {
+      const cluster_manifests = config?.cluster_manifests || {};
+      // this ks_checks will be written to cndi/ks_checks.json
+      let ks_checks: Record<string, string> = {};
+
+      // ⚠️ ks_checks.json is being loaded into ksc here from a previous run of `cndi overwrite`
+      let ksc: Record<string, string> = {};
+
+      // create temporary key for sealing secrets
+      const tempPublicKeyFilePath = await Deno.makeTempFile();
+
+      // these environment variables are required for clusters
       const sealedSecretsKeys = loadSealedSecretsKeys();
-      const terraformStatePassphrase = loadTerraformStatePassphrase();
-      const argoUIAdminPassword = loadArgoUIAdminPassword();
+
+      const argoUIAdminPassword = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
 
       if (!sealedSecretsKeys) {
         self.postMessage({
@@ -174,19 +193,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         return;
       }
 
-      if (!terraformStatePassphrase) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: 503,
-          message: [
-            owLabel,
-            ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
-            ccolors.error(`is not set in environment`),
-          ].join(" "),
-        });
-        return;
-      }
-
+      // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
       try {
         ksc = await loadJSONC(
           path.join(options.output, "cndi", "ks_checks.json"),
@@ -247,39 +254,11 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         // folder did not exist
       }
 
-      try {
-        // remove all files in cndi/terraform
-        await Deno.remove(pathToTerraformResources, {
-          recursive: true,
-        });
-      } catch {
-        // folder did not exist
-      }
-
       await Deno.writeTextFile(
         tempPublicKeyFilePath,
         sealedSecretsKeys.sealed_secrets_public_key,
       );
-    }
 
-    try {
-      await stageTerraformResourcesForConfig(config); //, options);
-    } catch (error) {
-      self.postMessage({
-        type: "error-overwrite",
-        code: error.cause,
-        message: error.message,
-      });
-      return;
-    }
-
-    console.log();
-
-    console.log(ccolors.success("staged terraform stack"));
-
-    if (config.distribution === "clusterless") {
-      // do nothing
-    } else {
       const cert_manager = config?.infrastructure?.cndi?.cert_manager;
 
       const skipCertManager = // explicitly disabled cert-manager
@@ -511,6 +490,21 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         );
       }
     }
+
+    try {
+      await stageTerraformResourcesForConfig(config); //, options);
+    } catch (error) {
+      self.postMessage({
+        type: "error-overwrite",
+        code: error.cause,
+        message: error.message,
+      });
+      return;
+    }
+
+    console.log();
+
+    console.log(ccolors.success("staged terraform stack"));
 
     try {
       await persistStagedFiles(options.output);
