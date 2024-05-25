@@ -51,7 +51,7 @@
 
 - name: git_credentials_mode
   default: token
-  message: Would you like ArgoCD to connect to your repo using a Git token or SSH key?
+  message: Would you like to connect your repo using a Git token or SSH key?
   type: Select
   options:
     - token
@@ -85,3 +85,9 @@
   message: "Please enter your Git Repo URL:"
   type: Input
   default: ""
+
+- name: terraform_state_passphrase
+  message: >-
+    Enter an override for the default Terraform State Passphrase?
+  type: Input
+  default: '{{ $cndi.get_random_string(32) }}'
