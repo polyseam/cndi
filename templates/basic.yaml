@@ -38,7 +38,7 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
         external_dns:
-          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/external-dns/config.yaml):
+          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/external-dns/config.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
@@ -47,7 +47,7 @@ outputs:
               dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
 
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
     cluster_manifests:
