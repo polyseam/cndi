@@ -1,0 +1,22 @@
+# AWS Core Prompts
+- name: aws_access_key_id
+  message: >-
+    Please enter your AWS Access Key ID:
+  type: Secret
+  default: ""
+  # validators:
+  #   - min_length: 16
+
+- name: aws_secret_access_key
+  message: >-
+    Please enter your AWS Secret Access Key:
+  type: Secret
+  default: ""
+  # validators:
+  #   - min_length: 40
+
+- name: aws_region
+  default: us-east-1
+  message: >-
+    Please enter your AWS Region:
+  type: Input

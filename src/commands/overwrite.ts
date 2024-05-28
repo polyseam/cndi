@@ -14,6 +14,7 @@ export type OwActionOptions = {
   skipPush: boolean;
   file?: string;
   output: string;
+  workflowSourceRef?: string;
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -101,6 +102,13 @@ const overwriteCommand = new Command()
     "--skip-push <skip-push:boolean>",
     "Skip pushing to remote repository",
     { hidden: true, default: false },
+  )
+  .option(
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
   )
   .action((options) => {
     const output = options?.output || Deno.cwd();
