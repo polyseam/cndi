@@ -69,16 +69,6 @@ export const BuiltInValidators: Record<string, CNDIValidator> = {
     }
     return `'${val}' is not at least ${len} characters long`;
   },
-  max_length: ({ value, type, arg }: CNDIValidatorInput) => {
-    const len = arg as number;
-    if ((value as string).length <= len) {
-      return null;
-    }
-    if (type === "Secret") {
-      value = redact(value as string);
-    }
-    return `'${value}' is longer than ${len} characters`;
-  },
   is_json: ({ value, type }: CNDIValidatorInput) => {
     try {
       JSON.parse(value as string);
