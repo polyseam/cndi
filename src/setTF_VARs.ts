@@ -1,7 +1,17 @@
-import { ccolors } from "deps";
+import { ccolors, loadEnvSync, path } from "deps";
 const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
-export default function setTF_VARs() {
+export default function setTF_VARs(projectDir: string) {
+  const envPath = path.join(projectDir, ".env");
+
+  const envMap = loadEnvSync({ export: true, envPath });
+
+  for (const [key, value] of Object.entries(envMap)) {
+    if (key.indexOf("TF_VAR_") === 0) { // only set TF_VARs
+      Deno.env.set(key, value);
+    } // reserved keywords below
+  }
+
   const git_ssh_private_key = Deno.env.get("GIT_SSH_PRIVATE_KEY");
   const git_token = Deno.env.get("GIT_TOKEN");
   const git_username = Deno.env.get("GIT_USERNAME");
