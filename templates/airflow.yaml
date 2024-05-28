@@ -136,7 +136,10 @@ prompts:
       - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
       - ==
       - false
-
+  - name: postgresql_password
+    message: "Please enter a password for the PostgreSQL database used as Airflow's storage backend:"
+    type: Secret
+    default: '{{ $cndi.get_random_string(12) }}'
 
 outputs:
   cndi_config:
@@ -328,11 +331,11 @@ outputs:
     $cndi.comment(neo4j-heading): PostgreSQL Connection Parameters
     POSTGRESQL_DB: airflow-db
     POSTGRESQL_USER: airflow
-    POSTGRESQL_PASSWORD: letmeinplease!
+    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_password) }}"
     POSTGRESQL_PROTOCOL: postgresql
     POSTGRESQL_HOST: cnpg-airflow-cluster-rw
     POSTGRESQL_PORT: 5432
-    POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:letmeinplease!@cnpg-airflow-cluster-rw:5432/airflow-db"
+    POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
     POSTGRESQL_CLUSTER_SUPERUSER: postgres
     $cndi.get_block(git_sync_dedicated_env_block):
       condition:
