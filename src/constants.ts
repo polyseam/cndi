@@ -10,7 +10,7 @@ const CERT_MANAGER_VERSION = "1.14.3";
 const NGINX_VERSION = "4.8.3";
 
 const POLYSEAM_TEMPLATE_DIRECTORY_URL =
-  "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
+  "https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/templates/";
 
 const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
