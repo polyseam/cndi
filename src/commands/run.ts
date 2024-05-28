@@ -32,17 +32,17 @@ const runCommand = new Command()
   .env(
     "SEALED_SECRETS_PRIVATE_KEY=<value:string>",
     "Private key used to encrypt your sealed secrets.",
-    { required: true },
+    { required: false },
   )
   .env(
     "SEALED_SECRETS_PUBLIC_KEY=<value:string>",
     "Public key used to encrypt your sealed secrets.",
-    { required: true },
+    { required: false },
   )
   .env(
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
-    { required: true },
+    { required: false },
   )
   .env(
     "GIT_USERNAME=<value:string>",
