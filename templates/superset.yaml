@@ -1,7 +1,7 @@
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_argocd_ingress
@@ -104,7 +104,7 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
         external_dns: 
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/external-dns/config.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
@@ -113,7 +113,7 @@ outputs:
               dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
 
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
             
         open_ports:
@@ -127,7 +127,7 @@ outputs:
             name: "{{ $cndi.get_prompt_response(superset_namespace) }}"
 
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -141,7 +141,7 @@ outputs:
             - true
 
       superset-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/cluster/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/cluster/default-ingress.yaml):
           args:
             ingress_name: superset-ingress
             ingress_class_name: public
@@ -295,7 +295,7 @@ outputs:
           DB_NAME: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DATABASE)
 
       external-dns-secret: 
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
@@ -334,11 +334,11 @@ outputs:
             enabled: false
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
     $cndi.comment(superset-heading): Superset Connection Parameters
@@ -355,13 +355,13 @@ outputs:
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
-      
+
     superset: |
       # Apache Superset Deployment Guide
 

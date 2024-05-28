@@ -96,9 +96,9 @@ blocks:
       password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
 
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_coder_ingress
@@ -226,7 +226,7 @@ outputs:
     infrastructure:
       cndi:
         external_dns:
-          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/external-dns/config.yaml):
+          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
@@ -241,12 +241,12 @@ outputs:
             namespace: postgres
             service: "coder-cluster-rw"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
     cluster_manifests:
       external-dns-secret: 
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
@@ -330,7 +330,7 @@ outputs:
             - true
 
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -344,7 +344,7 @@ outputs:
             - true
 
       postgres-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: postgres-cluster-ingress
             ingress_class_name: public
@@ -411,11 +411,11 @@ outputs:
             - true
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
     $cndi.comment(neo4j-heading): Postgres Connection Parameters
@@ -434,11 +434,11 @@ outputs:
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/common/cluster/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/simplify-template-processing/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
     coder: |
       # Coder
