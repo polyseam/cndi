@@ -111,7 +111,7 @@ including asking for GitHub credentials and where you want to deploy your new
 cluster.
 
 These prompts are called
-[core prompts](https://github.com/polyseam/common-blocks/tree/main/common/core-prompts.yaml),
+[core prompts](https://github.com/polyseam/cndi/tree/main/blocks/cluster/core-prompts.yaml),
 and depending how you answer that first set, you'll be shown more prompts. One
 of the more important decisions is to choose your cloud provider and cndi
 natively supports 4 today: [aws](https://aws.com),

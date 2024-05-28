@@ -24,18 +24,21 @@
       "jsr:@std/dotenv@^0.221.0": "jsr:@std/dotenv@0.221.0",
       "jsr:@std/encoding@0.221": "jsr:@std/encoding@0.221.0",
       "jsr:@std/fmt@0.221": "jsr:@std/fmt@0.221.0",
+      "jsr:@std/fmt@^0.221.0": "jsr:@std/fmt@0.221.0",
       "jsr:@std/fs@0.214.0": "jsr:@std/fs@0.214.0",
       "jsr:@std/fs@^0.221.0": "jsr:@std/fs@0.221.0",
       "jsr:@std/io@0.214.0": "jsr:@std/io@0.214.0",
       "jsr:@std/io@0.221": "jsr:@std/io@0.221.0",
       "jsr:@std/io@^0.214.0": "jsr:@std/io@0.214.0",
       "jsr:@std/io@^0.221.0": "jsr:@std/io@0.221.0",
+      "jsr:@std/json@^0.221.0": "jsr:@std/json@0.221.0",
       "jsr:@std/jsonc@^0.221.0": "jsr:@std/jsonc@0.221.0",
       "jsr:@std/path@0.214.0": "jsr:@std/path@0.214.0",
       "jsr:@std/path@0.221": "jsr:@std/path@0.221.0",
       "jsr:@std/path@^0.214.0": "jsr:@std/path@0.214.0",
       "jsr:@std/path@^0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/semver@^0.221.0": "jsr:@std/semver@0.221.0",
+      "jsr:@std/testing@^0.221.0": "jsr:@std/testing@0.221.0",
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
       "jsr:@std/yaml@^0.221.0": "jsr:@std/yaml@0.221.0",
       "npm:@cdktf/provider-aws@19.17.0": "npm:@cdktf/provider-aws@19.17.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
@@ -47,7 +50,9 @@
       "npm:@cdktf/provider-random@11.0.1": "npm:@cdktf/provider-random@11.0.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-time@10.1.0": "npm:@cdktf/provider-time@10.1.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
       "npm:@cdktf/provider-tls@10.0.0": "npm:@cdktf/provider-tls@10.0.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+      "npm:@octokit/types@^13.4.1": "npm:@octokit/types@13.5.0",
       "npm:@peculiar/x509@^1.9.7": "npm:@peculiar/x509@1.9.7",
+      "npm:@types/node": "npm:@types/node@18.16.19",
       "npm:cdktf@0.20.7": "npm:cdktf@0.20.7_constructs@10.3.0",
       "npm:constructs@10.3.0": "npm:constructs@10.3.0",
       "npm:crypto-js@4.1.1": "npm:crypto-js@4.1.1",
@@ -105,6 +110,7 @@
           "jsr:@cliffy/command@^1.0.0-rc.4",
           "jsr:@std/cli@^0.221.0",
           "jsr:@std/semver@^0.221.0",
+          "npm:@octokit/types@^13.4.1",
           "npm:octokit@^3.1.2"
         ]
       },
@@ -133,7 +139,10 @@
         "integrity": "55d398de76a9828fd3b1aa653f4dba3eee4c6985d90c514865d2be9bd082b140"
       },
       "@std/assert@0.221.0": {
-        "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
+        "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a",
+        "dependencies": [
+          "jsr:@std/fmt@^0.221.0"
+        ]
       },
       "@std/async@0.221.0": {
         "integrity": "f5519861754a1bb2898d227dd8ccb545abc975534aa9063e53911d6cb4e365cf",
@@ -194,10 +203,14 @@
           "jsr:@std/bytes@^0.221.0"
         ]
       },
+      "@std/json@0.221.0": {
+        "integrity": "3e63d5fe37c5256b9db345d42c11b57c850aa501bc6464d310e4836b85631b5e"
+      },
       "@std/jsonc@0.221.0": {
         "integrity": "097f41a228cf9959a1de4f7638a0cc81a69d6580766f6c84a32959429501f284",
         "dependencies": [
-          "jsr:@std/assert@^0.221.0"
+          "jsr:@std/assert@^0.221.0",
+          "jsr:@std/json@^0.221.0"
         ]
       },
       "@std/path@0.214.0": {
@@ -214,6 +227,9 @@
       },
       "@std/semver@0.221.0": {
         "integrity": "836a446cd1d054d08c7498c243199ddf0b604740d72dec56df96e2833413f039"
+      },
+      "@std/testing@0.221.0": {
+        "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e"
       },
       "@std/text@0.221.0": {
         "integrity": "a2f89ceb0d8851cd33e6774064621a1da9fbc36578cf4f02c5b5bcd7e8c84b67"

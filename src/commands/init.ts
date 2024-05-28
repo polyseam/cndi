@@ -22,8 +22,6 @@ import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
@@ -304,11 +302,6 @@ const initCommand = new Command()
       })) as string;
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
@@ -354,22 +347,28 @@ const initCommand = new Command()
       readme = `# ${project_name}\n`;
       env = "";
     }
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
 
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndiGeneratedValues = {
+    // GENERATE ENV VARS
+    const sealedSecretsKeys = isClusterless
+      ? null
+      : await createSealedSecretsKeys();
+
+    const doSSH =
+      templateResult?.responses?.deployment_target_distribution === "microk8s";
+
+    const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+    const dotEnvOptions = {
       sshPublicKey,
       sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
       debugMode: !!options.debug,
     };
 
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
 
     // write a readme, extend via Template.readmeBlock if it exists
     const readmePath = path.join(destinationDirectory, "README.md");

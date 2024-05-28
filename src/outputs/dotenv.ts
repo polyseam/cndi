@@ -1,43 +1,42 @@
 import type { SealedSecretsKeys } from "src/types.ts";
 
+type GetFinalEnvOptions = {
+  sshPublicKey: string | null;
+  sealedSecretsKeys: SealedSecretsKeys | null;
+  debugMode: boolean;
+};
+
+const HEADING_COMMENT = "# CNDI Environment Variables";
+
 export default function getFinalEnvString(
   templatePartial = "",
-  cndiGeneratedValues: {
-    sshPublicKey: string | null;
-    sealedSecretsKeys: SealedSecretsKeys;
-    terraformStatePassphrase: string;
-    argoUIAdminPassword: string;
-    debugMode: boolean;
-  },
+  envOptions: GetFinalEnvOptions,
 ) {
-  const { sealedSecretsKeys, terraformStatePassphrase, argoUIAdminPassword } =
-    cndiGeneratedValues;
+  const lines = [HEADING_COMMENT, ""];
 
-  let telemetryMode = "";
+  const { sealedSecretsKeys, debugMode, sshPublicKey } = envOptions;
 
-  if (cndiGeneratedValues.debugMode) {
-    telemetryMode = "\n\n# Telemetry Mode\nCNDI_TELEMETRY=debug";
+  if (debugMode) {
+    lines.push("# Telemetry Mode", "CNDI_TELEMETRY=debug");
   }
 
-  const sshKeysPartial = cndiGeneratedValues.sshPublicKey
-    ? `
-# SSH Keys
-SSH_PUBLIC_KEY='${cndiGeneratedValues.sshPublicKey}'`
-    : "";
+  if (sshPublicKey) {
+    lines.push("# SSH Keys", `SSH_PUBLIC_KEY='${sshPublicKey}'`);
+  }
 
-  return `
-# CNDI Environment Variables
+  if (sealedSecretsKeys) {
+    lines.push("# Sealed Secrets Keys");
+    lines.push(
+      `SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'`,
+    );
+    lines.push(
+      `SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'`,
+    );
+  }
 
-# Sealed Secrets Keys
-SEALED_SECRETS_PRIVATE_KEY='${sealedSecretsKeys.sealed_secrets_private_key}'
-SEALED_SECRETS_PUBLIC_KEY='${sealedSecretsKeys.sealed_secrets_public_key}'
-${sshKeysPartial}
+  if (templatePartial) {
+    lines.push(templatePartial);
+  }
 
-# Terraform State Passphrase
-TERRAFORM_STATE_PASSPHRASE=${terraformStatePassphrase}
-
-# Argo UI Admin Password
-ARGOCD_ADMIN_PASSWORD=${argoUIAdminPassword}${telemetryMode}
-
-${templatePartial}`.trim();
+  return lines.join("\n");
 }
