@@ -75,7 +75,7 @@ const showOutputsCommand = new Command()
     const pathToTerraformBinary = getPathToTerraformBinary();
 
     try {
-      setTF_VARs(options.path); // set TF_VARs using CNDI's .env variables
+      await setTF_VARs(options.path); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
       console.log(setTF_VARsError.message);
       await emitExitEvent(setTF_VARsError.cause);
