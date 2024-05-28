@@ -9,5 +9,5 @@ is the best way to reference these.
 outputs:
     cndi_config:
         cluster_manifests: # it may be wise to use a commit SHA in place of "main"
-            my_ingress: '{{ $cndi.get_block("https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml") }}'
+            my_ingress: '{{ $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml) }}'
 ```
