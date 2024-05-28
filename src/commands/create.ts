@@ -16,13 +16,10 @@ import { KNOWN_TEMPLATES } from "consts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
@@ -110,7 +107,7 @@ const createCommand = new Command()
   )
   .option(
     "-o, --output <output:string>",
-    "Output directory",
+    "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
   .option("--debug, -d", "Enable debug mode", { hidden: true })
@@ -120,8 +117,10 @@ const createCommand = new Command()
   )
   .option(
     "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
-    { hidden: true },
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
   )
   .action(async (options, slug) => {
     echoCreate(options, slug);
@@ -159,7 +158,7 @@ const createCommand = new Command()
     // default to repo component of slug
     const [owner, repo] = slug.split("/"); // by this point, slug is valid
 
-    let destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+    let destinationDirectory = options?.output || path.join(Deno.cwd(), repo);
 
     if (interactive && !options.output) {
       destinationDirectory = await PromptTypes.Input.prompt({
@@ -362,12 +361,6 @@ const createCommand = new Command()
       throw new Error("template is undefined");
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     let templateResult;
 
     try {
@@ -387,9 +380,6 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    const deployment_target_provider =
-      templateResult.responses.deployment_target_provider;
-
     const cndi_config = templateResult.files["cndi_config.yaml"];
     const env = templateResult.files[".env"];
     const readme = templateResult.files["README.md"];
@@ -401,21 +391,27 @@ const createCommand = new Command()
       YAML.stringify(templateResult.responses),
     );
 
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndiGeneratedValues = {
+    // GENERATE ENV VARS
+    const sealedSecretsKeys = isClusterless
+      ? null
+      : await createSealedSecretsKeys();
+
+    const doSSH =
+      templateResult?.responses?.deployment_target_distribution === "microk8s";
+
+    const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+    const dotEnvOptions = {
       sshPublicKey,
       sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
       debugMode: !!options.debug,
     };
 
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
 
     await stageFile("README.md", readme);
 
@@ -425,14 +421,6 @@ const createCommand = new Command()
     );
 
     await stageFile(".gitignore", getGitignoreContents());
-
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(
-        options.workflowSourceRef,
-        deployment_target_provider === "dev",
-      ),
-    );
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
@@ -477,7 +465,8 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      skipPush,
+      workflowSourceRef: options.workflowSourceRef,
+      skipPush: !!skipPush,
     });
   });
 

@@ -3,10 +3,13 @@ import { CNDIConfig } from "src/types.ts";
 import { stageFile, useSshRepoAuth } from "src/utils.ts";
 import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
 import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
+import { stageTerraformSynthAWSClusterless } from "src/outputs/terraform/aws/AWSClusterlessStack.ts";
 import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
 import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
+import { stageTerraformSynthAzureClusterless } from "src/outputs/terraform/azure/AzureClusterlessStack.ts";
 import { stageTerraformSynthGCPMicrok8s } from "src/outputs/terraform/gcp/GCPMicrok8sStack.ts";
 import { stageTerraformSynthGCPGKE } from "src/outputs/terraform/gcp/GCPGKEStack.ts";
+import { stageTerraformSynthGCPClusterless } from "src/outputs/terraform/gcp/GCPClusterlessStack.ts";
 import { stageTerraformSynthDevMultipassMicrok8s } from "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts";
 
 import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
@@ -78,9 +81,16 @@ export default async function stageTerraformResourcesForConfig(
     case "aws/eks":
       await stageTerraformSynthAWSEKS(config);
       break;
+    case "aws/clusterless":
+      await stageTerraformSynthAWSClusterless(config);
+      break;
     case "gcp/gke":
       ensureValidGoogleCredentials();
       await stageTerraformSynthGCPGKE(config);
+      break;
+    case "gcp/clusterless":
+      ensureValidGoogleCredentials();
+      await stageTerraformSynthGCPClusterless(config);
       break;
     case "gcp/microk8s":
       ensureValidGoogleCredentials();
@@ -91,6 +101,15 @@ export default async function stageTerraformResourcesForConfig(
       break;
     case "azure/aks":
       await stageTerraformSynthAzureAKS(config);
+      break;
+    case "azure/clusterless":
+      await stageTerraformSynthAzureClusterless(config);
+      break;
+    case "dev/clusterless":
+      console.log(
+        ccolors.user_input("dev/clusterless"),
+        ccolors.error("is not available"),
+      );
       break;
     case "dev/microk8s":
       await stageTerraformSynthDevMultipassMicrok8s(config);

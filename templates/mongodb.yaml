@@ -29,9 +29,9 @@ blocks:
                         port:
                           name: mongodb
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_argocd_ingress
@@ -108,17 +108,18 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
         external_dns: 
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
             args:
               dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
-              
+
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam//polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
+
         open_ports:
           - number: 27017
             name: mongodb
@@ -126,7 +127,7 @@ outputs:
             service: mongodb-replica-set-svc
     cluster_manifests:
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -151,7 +152,7 @@ outputs:
             - true
 
       external-dns-secret: 
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
@@ -202,11 +203,13 @@ outputs:
         repoURL: 'https://mongodb.github.io/helm-charts'
         chart: community-operator
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
-      {}
     $cndi.comment(mongodb-heading): Mongodb Connection Parameters
     MONGODB_DATABASE: "{{ $cndi.get_prompt_response(mongodb_name) }}"
     MONGODB_USER: "{{ $cndi.get_prompt_response(mongodb_user) }}"
@@ -214,11 +217,14 @@ outputs:
     MONGODB_CONNECTION_STRING: "mongodb://{{ $cndi.get_prompt_response(mongodb_user) }}:{{ $cndi.get_prompt_response(mongodb_password) }}@{{$cndi.get_prompt_response(mongodb_hostname) }}/{{ $cndi.get_prompt_response(mongodb_name) }}"
     MONGODB_REPLICA_SETS: "{{ $cndi.get_prompt_response(mongodb_replica_sets) }}"
     MONGODB_NAMESPACE: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
+
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
     mongodb: |
       # MongoDB Deployment Guide
