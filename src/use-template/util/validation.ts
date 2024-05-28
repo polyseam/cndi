@@ -16,6 +16,7 @@ function redact(s: string): string {
   return "*".repeat(s.length);
 }
 
+// returns an error message or null
 export const BuiltInValidators: Record<string, CNDIValidator> = {
   is_slug: ({ value, type }: CNDIValidatorInput) => {
     if (isSlug(value as string)) {
@@ -67,6 +68,16 @@ export const BuiltInValidators: Record<string, CNDIValidator> = {
       val = redact(value as string);
     }
     return `'${val}' is not at least ${len} characters long`;
+  },
+  max_length: ({ value, type, arg }: CNDIValidatorInput) => {
+    const len = arg as number;
+    if ((value as string).length <= len) {
+      return null;
+    }
+    if (type === "Secret") {
+      value = redact(value as string);
+    }
+    return `'${value}' is longer than ${len} characters`;
   },
   is_json: ({ value, type }: CNDIValidatorInput) => {
     try {

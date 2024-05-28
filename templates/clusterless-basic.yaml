@@ -3,6 +3,11 @@ prompts:
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
+  - name: visitor
+    type: Input
+    message: "Who would you like to greet?"
+    default: "World"
+    required: true
 
 outputs:
   cndi_config:
@@ -11,7 +16,14 @@ outputs:
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "clusterless"
     infrastructure:
-      terraform: {}
+      terraform:
+        variable:
+          visitor:
+            type: "string"
+            description: "The name of the visitor"
+        output:
+          greeting:
+            value: "Hello, ${var.visitor}!"
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
@@ -22,7 +34,9 @@ outputs:
 
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/clusterless/env.yaml):
       {}
-
+    $cndi.comment(configure_greeter): 'Change who you are greeting:'
+    TF_VAR_visitor: "{{ $cndi.get_prompt_response(visitor) }}"
+    
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/clusterless/core-readme.md):
