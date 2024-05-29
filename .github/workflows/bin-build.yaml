@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - 'main'
-env:
+env: # this is a Read-Only token for Public Repositories see: https://github.com/polyseam/cndi/pull/863
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 jobs:
   bin-build-test-ubuntu:
