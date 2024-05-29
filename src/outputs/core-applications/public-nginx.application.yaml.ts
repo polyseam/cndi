@@ -69,6 +69,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
     gke: gkeValues(cndi_config),
     aks: aksValues(cndi_config),
     microk8s: gkeValues(cndi_config), // Not ready
+    clusterless: null,
   };
 
   return providerConfigs[cndiDistribution];
@@ -77,6 +78,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
 export default function getNginxApplicationManifest(
   cndi_config: CNDIConfig,
 ) {
+  if (cndi_config.distribution === "clusterless") return "";
   const releaseName = "ingress-nginx-public";
   const values = getDefaultNginxValuesForCNDIProvider(cndi_config);
 

@@ -1,6 +1,6 @@
 {
-  "version": "2.10.0",
-  "deno_version": "1.43.3",
+  "version": "2.11.0",
+  "deno_version": "1.43.6",
   "tasks": {
     "tar-win": "tar -czvf dist/release-archives/cndi-win.tar.gz -C dist/win/in .",
     "tar-linux": "tar -czvf dist/release-archives/cndi-linux.tar.gz -C dist/linux/in .",
@@ -10,7 +10,10 @@
     "compile-linux": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux/in/cndi main.ts",
     "compile-mac": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac/in/cndi main.ts",
     "compile-all": "deno task compile-win && deno task compile-linux && deno task compile-mac",
-    "clean-dist": "rm dist/mac/cndi dist/mac/cndi.zip dist/linux/cndi dist/linux/cndi.zip dist/win/cndi.exe dist/win/cndi.exe.zip || true",
+    "clean-mac": "rm dist/mac/in/cndi || true && rm dist/release-archives/cndi-mac.tar.gz || true",
+    "clean-win": "rm dist/win/in/cndi.exe || true && rm dist/release-archives/cndi-win.tar.gz || true",
+    "clean-linux": "rm dist/linux/in/cndi || true && rm dist/release-archives/cndi-linux.tar.gz || true",
+    "clean-dist": "deno task clean-mac && deno task clean-win && deno task clean-linux",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all && deno task tar-all",
     "build-mac": "deno lint && deno fmt && deno task clean-dist && deno task compile-mac",
     "build-linux": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux",

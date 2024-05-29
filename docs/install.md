@@ -1,21 +1,20 @@
 # installing cndi
 
-Installing CNDI is all about getting the binaries from our latest release, and
-putting them in the right spot.
+Installing CNDI is all about getting the binaries from our latest release from
+[GitHub Releases](https://github.com/polyseam/cndi/releases), and putting them
+in the right spot.
+
+We provide scripts below which automate the process of downloading the latest
+"tarball" and adding the contained binaries to your `PATH`.
 
 ## macos and linux
 
-Installing for macOS and Linux is the way to go if you have that option. This is
-how it's done, the same line from the top of our [README](/README.md):
+Installing for macOS and Linux is the way to go if you have that option. Simply
+run the following:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
-
-If you open a fresh terminal window and `cndi --help` is not working, the path
-to the `cndi` binary by default is `~/.cndi/bin`. Adding this directory to your
-`PATH` environment variable should allow the CLI to be called from any
-directory.
 
 ## windows
 
@@ -25,3 +24,15 @@ CNDI on Windows:
 ```powershell
 irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
+
+## stuck?
+
+If you are having issues installing CNDI, you can try downloading the tarball
+from [GitHub Releases](https://github.com/polyseam/cndi/releases) and extracting
+the binaries to a directory in your `PATH`.
+
+If you are still having issues, please add to the following
+[Discussion Post](https://github.com/orgs/polyseam/discussions/871)!
+
+We're also available on [Discord](https://discord.gg/ygt2rpegJ5) to help
+troubleshoot any issue!

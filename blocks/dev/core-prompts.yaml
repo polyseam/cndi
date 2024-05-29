@@ -1,0 +1,7 @@
+# Dev Prompts
+- name: deployment_target_distribution
+  message: Which Kubernetes distribution would you like to use locally?
+  type: Select
+  default: microk8s
+  options:
+    - microk8s

@@ -186,6 +186,12 @@ type Microk8sAddon = {
   args?: string[];
 };
 
+type TFBlockVariable = {
+  type: "string" | "number" | "bool" | "list" | "map";
+  description?: string;
+  sensitive?: boolean;
+};
+
 type TFBlocks = {
   terraform?: {
     [key: string]: unknown;
@@ -194,7 +200,7 @@ type TFBlocks = {
     [key: string]: unknown;
   };
   variable?: {
-    [key: string]: unknown;
+    [key: string]: TFBlockVariable;
   };
   locals?: {
     [key: string]: unknown;
@@ -242,12 +248,18 @@ export type ExternalDNSProvider =
   | "oci";
 
 export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
+export type CNDIDistribution =
+  | "microk8s"
+  | "eks"
+  | "gke"
+  | "aks"
+  | "clusterless";
 
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
-  distribution: "microk8s" | "eks" | "gke" | "aks";
+  distribution: CNDIDistribution;
   provider: CNDIProvider;
   infrastructure: {
     cndi: {

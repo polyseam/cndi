@@ -22,12 +22,9 @@ import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
@@ -73,7 +70,7 @@ const echoInit = (options: EchoInitOptions) => {
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p [output:string]",
+    "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
@@ -118,7 +115,7 @@ const initCommand = new Command()
   })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
-    const destinationDirectory = options.output ?? Deno.cwd();
+    const destinationDirectory = options?.output || Deno.cwd();
 
     echoInit({ ...options, output: destinationDirectory });
 
@@ -305,11 +302,6 @@ const initCommand = new Command()
       })) as string;
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
@@ -318,7 +310,6 @@ const initCommand = new Command()
       });
     }
 
-    let deployment_target_provider;
     let templateResult;
 
     if (template) {
@@ -345,8 +336,6 @@ const initCommand = new Command()
       readme = templateResult.files["README.md"];
       env = templateResult.files[".env"];
 
-      deployment_target_provider = templateResult?.responses
-        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
@@ -358,22 +347,28 @@ const initCommand = new Command()
       readme = `# ${project_name}\n`;
       env = "";
     }
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
 
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndiGeneratedValues = {
+    // GENERATE ENV VARS
+    const sealedSecretsKeys = isClusterless
+      ? null
+      : await createSealedSecretsKeys();
+
+    const doSSH =
+      templateResult?.responses?.deployment_target_distribution === "microk8s";
+
+    const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+    const dotEnvOptions = {
       sshPublicKey,
       sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
       debugMode: !!options.debug,
     };
 
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
 
     // write a readme, extend via Template.readmeBlock if it exists
     const readmePath = path.join(destinationDirectory, "README.md");
@@ -394,13 +389,6 @@ const initCommand = new Command()
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
     );
-
-    if (deployment_target_provider !== "dev") {
-      await stageFile(
-        path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
-      );
-    }
 
     await stageFile(
       path.join(".github", "workflows", "cndi-onpull.yaml"),
@@ -467,7 +455,9 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
-      create: options.create,
+      workflowSourceRef: options.workflowSourceRef,
+      create: !!options.create,
+      skipPush: !!options.skipPush,
     });
   });
 
