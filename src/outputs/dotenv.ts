@@ -17,7 +17,7 @@ export default function getFinalEnvString(
   const { sealedSecretsKeys, debugMode, sshPublicKey } = envOptions;
 
   if (debugMode) {
-    lines.push("# Telemetry Mode", "CNDI_TELEMETRY=debug");
+    lines.push("# Telemetry Mode", "CNDI_TELEMETRY='debug'");
   }
 
   if (sshPublicKey) {

@@ -21,7 +21,7 @@ export default async function emitTelemetryEvent(
   if (telemetryMode === "none") return;
 
   let repo_url = Deno.env.get("GIT_REPO") || "";
-  if (repo_url === "GIT_REPO_PLACEHOLDER__") repo_url = "";
+  if (repo_url === "__GIT_REPO_PLACEHOLDER__") repo_url = "";
   const repo_id = repo_url ? await sha256Digest(repo_url) : "";
 
   const telemetryEvent = {
