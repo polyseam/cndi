@@ -215,13 +215,13 @@ export default function validateConfig(
       ].join(" "),
       { cause: 902 },
     );
-  } else if (firstNode.taints?.length) {
+  } else if (firstNode.taints?.length && config?.distribution === "aks") {
     throw new Error(
       [
         cndiConfigLabel,
         ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but taints are not allowed on the first "),
+        ccolors.error("but taints are not allowed on the first node in aks"),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
         ccolors.error("entry"),
       ].join(" "),

@@ -286,7 +286,7 @@
   },
   {
     "code": 918,
-    "message": "cndi_config invalid: taint on first node pool",
+    "message": "cndi_config invalid: taint on first node pool in aks is not allowed",
     "discussion_link": ""
   },
   {
