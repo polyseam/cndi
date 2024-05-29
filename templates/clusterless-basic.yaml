@@ -23,7 +23,7 @@ outputs:
             description: "The name of the visitor"
         output:
           greeting:
-            value: "Hello, ${var.visitor}!"
+            value: "Hello, ${upper(var.visitor)}!"
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
