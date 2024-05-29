@@ -183,6 +183,12 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
           },
+          gcePersistentDiskCsiDriverConfig: {
+            enabled: true,
+          },
+          gcsFuseCsiDriverConfig: {
+            enabled: false,
+          },
         },
       },
     );
@@ -447,10 +453,30 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
+      "cndi_kubernetes_storage_class_pd",
+      {
+        metadata: {
+          name: "rwo",
+          annotations: {
+            "storageclass.kubernetes.io/is-default-class": "true",
+          },
+        },
+        parameters: {
+          type: "pd-balanced",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        storageProvisioner: "pd.csi.storage.gke.io",
+        volumeBindingMode: "WaitForFirstConsumer",
+        dependsOn: [gkeCluster],
+      },
+    );
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
       "cndi_kubernetes_storage_class_filestore",
       {
         metadata: {
-          name: "nfs",
+          name: "rwm",
         },
         parameters: {
           network: network.name,
@@ -462,7 +488,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [gkeCluster],
       },
     );
-
     new TerraformOutput(this, "resource_group_url", {
       value: `https://console.cloud.google.com/welcome?project=${project_id}`,
     });

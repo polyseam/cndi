@@ -848,12 +848,21 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
           },
-          { name: "storageClasses[0].name", value: "nfs" },
+          { name: "storageClasses[0].name", value: "rwm" },
           { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com" },
           {
             name:
               "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-            value: '"false"',
+            type: "string",
+            value: "false",
+          },
+          {
+            name: "storageClasses[0].reclaimPolicy",
+            value: "Delete",
+          },
+          {
+            name: "storageClasses[0].volumeBindingMode",
+            value: "WaitForFirstConsumer",
           },
           {
             name: "storageClasses[0].parameters.provisioningMode",
@@ -1042,6 +1051,37 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             name:
               "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
             value: webIdentityRole.arn,
+          },
+          { name: "storageClasses[0].name", value: "rwo" },
+          {
+            name:
+              "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
+            type: "string",
+            value: "true",
+          },
+          {
+            name: "storageClasses[0].provisioner",
+            value: "ebs.csi.aws.com",
+          },
+          {
+            name: "storageClasses[0].parameters.fsType",
+            value: "ext4",
+          },
+          {
+            name: "storageClasses[0].parameters.type",
+            value: "gp3",
+          },
+          {
+            name: "storageClasses[0].reclaimPolicy",
+            value: "Delete",
+          },
+          {
+            name: "storageClasses[0].volumeBindingMode",
+            value: "WaitForFirstConsumer",
+          },
+          {
+            name: "storageClasses[0].allowVolumeExpansion",
+            value: "true",
           },
         ],
         version: "2.22.0",
