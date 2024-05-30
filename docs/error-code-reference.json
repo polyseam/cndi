@@ -285,6 +285,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/751"
   },
   {
+    "code": 918,
+    "message": "cndi_config invalid: taint on first node pool in aks is not allowed",
+    "discussion_link": ""
+  },
+  {
     "code": 1000,
     "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
   },

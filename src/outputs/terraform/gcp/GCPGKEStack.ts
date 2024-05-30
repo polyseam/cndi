@@ -21,6 +21,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -224,9 +225,19 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         nodePoolSpec?.instance_type ||
         DEFAULT_INSTANCE_TYPES.gcp;
 
+      const taint = nodePoolSpec?.taints?.map((taint) => ({
+        key: taint.key,
+        value: taint.value,
+        effect: getTaintEffectForDistribution(taint.effect, "gke"), // taint.effect must be valid by now
+      })) || [];
+
+      const labels = nodePoolSpec.labels || {};
+
       const nodeConfig = {
         diskSizeGb,
         diskType,
+        labels,
+        taint,
         serviceAccount,
         machineType,
       };

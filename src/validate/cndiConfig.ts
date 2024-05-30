@@ -1,6 +1,12 @@
 import { ccolors } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { isSlug } from "src/utils.ts";
+import {
+  EFFECT_VALUES,
+  NO_EXECUTE,
+  NO_SCHEDULE,
+  PREFER_NO_SCHEDULE,
+} from "consts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
@@ -253,7 +259,9 @@ export default function validateConfig(
       );
     }
 
-    if (!config?.infrastructure?.cndi?.nodes?.[0]) {
+    const firstNode = config?.infrastructure?.cndi?.nodes?.[0];
+
+    if (!firstNode) {
       throw new Error(
         [
           cndiConfigLabel,
@@ -264,6 +272,39 @@ export default function validateConfig(
           ccolors.error("entries"),
         ].join(" "),
         { cause: 902 },
+      );
+    } else if (firstNode.taints?.length) {
+      // throw on AKS
+      if (config?.distribution === "aks") {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              "but taints are not allowed on the first node in aks",
+            ),
+            ccolors.key_name('"infrastructure.cndi.nodes"'),
+            ccolors.error("entry"),
+          ].join(" "),
+          { cause: 918 },
+        );
+      }
+      // warn on other distributions
+      console.log(
+        cndiConfigLabel,
+        ccolors.warn(
+          "Warning:",
+        ),
+        ccolors.key_name("taints"),
+        ccolors.warn(
+          "are only supported in the first node group when using",
+        ),
+        ccolors.key_name("distribution"),
+        ccolors.user_input(`gke`),
+        ccolors.warn("or"),
+        ccolors.user_input(`eks`),
+        ccolors.warn("!\n"),
       );
     }
 
@@ -316,6 +357,58 @@ export default function validateConfig(
         );
       }
       nodeNameSet.add(node.name);
+
+      for (const taint of node.taints || []) {
+        if (!taint?.effect) {
+          throw new Error(
+            [
+              cndiConfigLabel,
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.error("\nbut the"),
+              ccolors.key_name('"infrastructure.cndi.nodes"'),
+              ccolors.error("entry named"),
+              ccolors.user_input(`"${node.name}"`),
+              ccolors.error("has a taint without an"),
+              ccolors.key_name('"effect"'),
+              ccolors.error("value."),
+              ccolors.error("\n\nTaint effects must be:"),
+              ccolors.error(
+                `${ccolors.key_name(NO_SCHEDULE)}, ${
+                  ccolors.key_name(PREFER_NO_SCHEDULE)
+                }, or ${ccolors.key_name(NO_EXECUTE)}`,
+              ),
+            ].join(" "),
+            { cause: 920 },
+          );
+        } else {
+          if (!EFFECT_VALUES.includes(taint.effect)) {
+            throw new Error(
+              [
+                cndiConfigLabel,
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"`),
+                ccolors.error("\nbut the"),
+                ccolors.key_name('"infrastructure.cndi.nodes"'),
+                ccolors.error("entry named"),
+                ccolors.user_input(`${node.name}`),
+                ccolors.error("has a taint with an invalid"),
+                ccolors.key_name("effect"),
+                ccolors.error("value."),
+                ccolors.error("\n\nTaint effects must be:"),
+                ccolors.error(
+                  `${ccolors.key_name(NO_SCHEDULE)}, ${
+                    ccolors.key_name(PREFER_NO_SCHEDULE)
+                  }, or ${ccolors.key_name(NO_EXECUTE)}`,
+                ),
+                ccolors.error("\nYou supplied:"),
+                ccolors.user_input(`"${taint.effect}"`),
+              ].join(" "),
+              { cause: 920 },
+            );
+          }
+        }
+      }
     }
 
     const nodeNamesAreUnique =

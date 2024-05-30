@@ -22,6 +22,7 @@ import {
 import {
   getCDKTFAppConfig,
   getPrettyJSONString,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
@@ -763,6 +764,14 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
+
+      const taint = nodeGroup.taints?.map((taint) => ({
+        key: taint.key,
+        value: taint.value,
+        effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
+      })) || [];
+
+      const labels = nodeGroup.labels || {};
       const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
         .LaunchTemplate(
         this,
@@ -810,6 +819,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             version: `${nodegroupLaunchTemplate.latestVersion}`,
           },
           updateConfig: { maxUnavailable: 1 },
+          taint,
+          labels,
           dependsOn: [
             workerNodePolicyAttachment,
             cniPolicyAttachment,
