@@ -332,7 +332,7 @@
   {
     "code": 918,
     "message": "cndi_config invalid: taint on first node pool in aks is not allowed",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/905"
   },
   {
     "code": 1000,
@@ -461,32 +461,37 @@
   {
     "code": 1500,
     "message": "failed to run `cndi create` in non-interactive mode because it was called without a slug argument",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/896"
   },
   {
     "code": 1501,
     "message": "failed to run `cndi create` in non-interactive mode because it was called without a '--template' option",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/897"
+  },
+  {
+    "code": 1502,
+    "message": "failed to read `./cndi_responses.yaml` during 'cndi create'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/898"
   },
   {
     "code": 1503,
     "message": "failed to parse `./cndi_responses.yaml` during 'cndi create'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/899"
   },
   {
     "code": 1504,
     "message": "failed to parse provided '--deployment-target-label' as 2 segment <provider>/<distribution> slug'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/900"
   },
   {
     "code": 1505,
     "message": "failed to run `cndi create` because the user has selected 'ssh' as the git_credential_mode",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/901"
   },
   {
     "code": 1506,
     "message": "failed to run `cndi create` because the user has not provided the necessary 'git_username' and 'git_repo' responses",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/902"
   },
   {
     "code": 1600,
@@ -501,11 +506,11 @@
   {
     "code": 1700,
     "message": "failed to spawn 'terraform init' during 'cndi show-outputs'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/903"
   },
   {
     "code": 1701,
     "message": "failed to spawn 'terraform output' during 'cndi show-outputs'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/904"
   }
 ]
