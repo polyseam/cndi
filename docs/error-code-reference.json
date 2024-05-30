@@ -77,37 +77,37 @@
   {
     "code": 401,
     "message": "failed to load `./cndi_responses.yaml` during 'cndi init'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/889"
   },
   {
     "code": 402,
     "message": "failed to parse `./cndi_responses.yaml` during 'cndi init'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/890"
   },
   {
     "code": 403,
     "message": "'cndi init' failed because it did not receive a 'deployment_target_provider'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/891"
   },
   {
     "code": 404,
     "message": "'cndi init' failed because it received an invalid '--deployment-target-label' slug as <provider>/<distribution>",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/892"
   },
   {
     "code": 405,
     "message": "'cndi init' failed because it was in 'git_credentials_mode=ssh' but it received a 'git_repo' https URL",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/893"
   },
   {
     "code": 406,
     "message": "'cndi init' failed because the '--create' flag was supplied, but the 'git_credentials_mode' was not 'token'",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/894"
   },
   {
     "code": 407,
     "message": "failed to run `cndi init` because the user has not provided the necessary 'git_username' and 'git_repo' responses in '--create' mode",
-    "discussion_link": ""
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/895"
   },
   {
     "code": 500,
