@@ -27,6 +27,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
@@ -40,7 +41,6 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   }
   return false;
 }
-
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"
@@ -145,10 +145,19 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         if (nodeSpec.min_count) {
           scale.minCount = nodeSpec.min_count;
         }
+        const nodeTaints = nodeSpec.taints?.map((taint) =>
+          `${taint.key}=${taint.value}:${
+            getTaintEffectForDistribution(taint.effect, "aks") // taint.effect must be valid by now
+          }`
+        ) || [];
+
+        const nodeLabels = nodeSpec.labels || {};
 
         const nodePoolSpec: AnonymousClusterNodePoolConfig = {
           name: nodeSpec.name,
           ...scale,
+          nodeTaints,
+          nodeLabels,
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
@@ -261,13 +270,17 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_kubernetes_storage_class_azure_file",
       {
         metadata: {
-          name: "nfs",
+          name: "rwm",
         },
         storageProvisioner: "file.csi.azure.com",
         parameters: {
-          skuName: "Premium_LRS",
-          protocol: "nfs",
+          skuName: "Standard_LRS",
         },
+        mountOptions: [
+          "mfsymlinks",
+          "actimeo=30",
+          "nosharesock",
+        ],
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",

@@ -12,7 +12,14 @@ import {
 
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIDistribution,
+  CNDIPort,
+  CNDITaintEffect,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
@@ -89,6 +96,22 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
         cause: 500,
       },
     );
+  }
+};
+
+const getTaintEffectForDistribution = (
+  effect: CNDITaintEffect,
+  distribution: CNDIDistribution,
+) => {
+  if (distribution === "aks") {
+    return effect;
+  } else {
+    const effectMap = {
+      "NoSchedule": "NO_SCHEDULE",
+      "PreferNoSchedule": "PREFER_NO_SCHEDULE",
+      "NoExecute": "NO_EXECUTE",
+    };
+    return effectMap[effect];
   }
 };
 
@@ -598,6 +621,7 @@ export {
   getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
+  getTaintEffectForDistribution,
   getTFData,
   getTFModule,
   getTFResource,

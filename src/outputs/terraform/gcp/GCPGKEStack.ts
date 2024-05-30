@@ -21,6 +21,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -183,6 +184,12 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
           },
+          gcePersistentDiskCsiDriverConfig: {
+            enabled: true,
+          },
+          gcsFuseCsiDriverConfig: {
+            enabled: false,
+          },
         },
       },
     );
@@ -218,9 +225,19 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         nodePoolSpec?.instance_type ||
         DEFAULT_INSTANCE_TYPES.gcp;
 
+      const taint = nodePoolSpec?.taints?.map((taint) => ({
+        key: taint.key,
+        value: taint.value,
+        effect: getTaintEffectForDistribution(taint.effect, "gke"), // taint.effect must be valid by now
+      })) || [];
+
+      const labels = nodePoolSpec.labels || {};
+
       const nodeConfig = {
         diskSizeGb,
         diskType,
+        labels,
+        taint,
         serviceAccount,
         machineType,
       };
@@ -447,10 +464,30 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
+      "cndi_kubernetes_storage_class_pd",
+      {
+        metadata: {
+          name: "rwo",
+          annotations: {
+            "storageclass.kubernetes.io/is-default-class": "true",
+          },
+        },
+        parameters: {
+          type: "pd-balanced",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        storageProvisioner: "pd.csi.storage.gke.io",
+        volumeBindingMode: "WaitForFirstConsumer",
+        dependsOn: [gkeCluster],
+      },
+    );
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
       "cndi_kubernetes_storage_class_filestore",
       {
         metadata: {
-          name: "nfs",
+          name: "rwm",
         },
         parameters: {
           network: network.name,
@@ -462,7 +499,6 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [gkeCluster],
       },
     );
-
     new TerraformOutput(this, "resource_group_url", {
       value: `https://console.cloud.google.com/welcome?project=${project_id}`,
     });

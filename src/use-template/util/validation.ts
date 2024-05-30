@@ -16,6 +16,7 @@ function redact(s: string): string {
   return "*".repeat(s.length);
 }
 
+// each validator returns an error message or null
 export const BuiltInValidators: Record<string, CNDIValidator> = {
   is_slug: ({ value, type }: CNDIValidatorInput) => {
     if (isSlug(value as string)) {
