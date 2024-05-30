@@ -203,6 +203,7 @@ export default function validateConfig(
   }
 
   const firstNode = config?.infrastructure?.cndi?.nodes?.[0];
+
   if (!firstNode) {
     throw new Error(
       [
@@ -215,17 +216,37 @@ export default function validateConfig(
       ].join(" "),
       { cause: 902 },
     );
-  } else if (firstNode.taints?.length && config?.distribution === "aks") {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but taints are not allowed on the first node in aks"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entry"),
-      ].join(" "),
-      { cause: 918 },
+  } else if (firstNode.taints?.length) {
+    // throw on AKS
+    if (config?.distribution === "aks") {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but taints are not allowed on the first node in aks"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry"),
+        ].join(" "),
+        { cause: 918 },
+      );
+    }
+    // warn on other distributions
+    console.log(
+      "\n",
+      cndiConfigLabel,
+      ccolors.warn(
+        "Warning:",
+      ),
+      ccolors.key_name("taints"),
+      ccolors.warn(
+        "are only supported in the first node group when using",
+      ),
+      ccolors.key_name("distribution"),
+      ccolors.user_input(`gke`),
+      ccolors.warn("or"),
+      ccolors.user_input(`eks`),
+      ccolors.warn("!\n"),
     );
   }
 
