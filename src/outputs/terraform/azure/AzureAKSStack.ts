@@ -40,7 +40,8 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   }
   return false;
 }
-function aksmapTaintEffect(effect: string): string {
+
+function aksMapTaintEffectEffect(effect: string): string {
   switch (effect) {
     case "PREFER_NO_SCHEDULE":
       return "PreferNoSchedule";
@@ -157,7 +158,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           scale.minCount = nodeSpec.min_count;
         }
         const nodeTaints = nodeSpec.taints?.map((taint) =>
-          `${taint.key}=${taint.value}:${aksmapTaintEffect(taint.effect)}`
+          `${taint.key}=${taint.value}:${aksMapTaintEffectEffect(taint.effect)}`
         ) || [];
 
         const nodeLabels = nodeSpec.labels || {};
