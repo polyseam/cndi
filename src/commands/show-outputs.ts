@@ -121,8 +121,8 @@ const showOutputsCommand = new Command()
         ccolors.error("failed to spawn 'terraform init'"),
       );
       console.log(ccolors.caught(err));
-      await emitExitEvent(1402);
-      Deno.exit(1402);
+      await emitExitEvent(1700);
+      Deno.exit(1700);
     }
 
     try {
@@ -170,8 +170,8 @@ const showOutputsCommand = new Command()
         ccolors.error("failed to spawn 'terraform output'"),
       );
       console.log(ccolors.caught(err));
-      await emitExitEvent(1403);
-      Deno.exit(1403);
+      await emitExitEvent(1701);
+      Deno.exit(1701);
     }
     await emitExitEvent(0);
   });

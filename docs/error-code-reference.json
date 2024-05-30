@@ -1,6 +1,11 @@
 [
   {
     "code": 1,
+    "message": "Undefined Exception: this error has not yet been assigned a code and discussion",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/855"
+  },
+  {
+    "code": 10,
     "message": "Could not create staging directory",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/291"
   },
@@ -66,8 +71,43 @@
   },
   {
     "code": 400,
-    "message": "cndi init --template was called without a template name",
+    "message": "cndi init --template was called without a template identifier",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/505"
+  },
+  {
+    "code": 401,
+    "message": "failed to load `./cndi_responses.yaml` during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/889"
+  },
+  {
+    "code": 402,
+    "message": "failed to parse `./cndi_responses.yaml` during 'cndi init'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/890"
+  },
+  {
+    "code": 403,
+    "message": "'cndi init' failed because it did not receive a 'deployment_target_provider'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/891"
+  },
+  {
+    "code": 404,
+    "message": "'cndi init' failed because it received an invalid '--deployment-target-label' slug as <provider>/<distribution>",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/892"
+  },
+  {
+    "code": 405,
+    "message": "'cndi init' failed because it was in 'git_credentials_mode=ssh' but it received a 'git_repo' https URL",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/893"
+  },
+  {
+    "code": 406,
+    "message": "'cndi init' failed because the '--create' flag was supplied, but the 'git_credentials_mode' was not 'token'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/894"
+  },
+  {
+    "code": 407,
+    "message": "failed to run `cndi init` because the user has not provided the necessary 'git_username' and 'git_repo' responses in '--create' mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/895"
   },
   {
     "code": 500,
@@ -201,8 +241,13 @@
   },
   {
     "code": 810,
-    "message": "failed to stage all aks terraform objects because the node pool name is invalid",
+    "message": "failed to stage all aks terraform objects because the node pool name is invalid during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/707"
+  },
+  {
+    "code": 811,
+    "message": "failed to stage all gke terraform objects because the environment vaiable 'GCP_REGION' is not set during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/856"
   },
   {
     "code": 900,
@@ -291,7 +336,8 @@
   },
   {
     "code": 1000,
-    "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect"
+    "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/857"
   },
   {
     "code": 1001,
@@ -329,7 +375,8 @@
   },
   {
     "code": 1008,
-    "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set"
+    "message": "failed to write tf state: 'TERRAFORM_STATE_PASSPHRASE' env var is not set",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/858"
   },
   {
     "code": 1009,
@@ -360,6 +407,16 @@
     "code": 1202,
     "message": "failed to parse template JSONC or YAML during 'cndi init'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/533"
+  },
+  {
+    "code": 1203,
+    "message": "failed to run validator for prompt validator not found",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/862"
+  },
+  {
+    "code": 1204,
+    "message": "$cndi.get_block must return a flat YAML map of key/value pairs when generating env output",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/861"
   },
   {
     "code": 1300,
@@ -400,5 +457,55 @@
     "code": 1405,
     "message": "failed to spawn 'terraform ...' during 'cndi terraform ...'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/744"
+  },
+  {
+    "code": 1500,
+    "message": "failed to run `cndi create` in non-interactive mode because it was called without a slug argument",
+    "discussion_link": ""
+  },
+  {
+    "code": 1501,
+    "message": "failed to run `cndi create` in non-interactive mode because it was called without a '--template' option",
+    "discussion_link": ""
+  },
+  {
+    "code": 1503,
+    "message": "failed to parse `./cndi_responses.yaml` during 'cndi create'",
+    "discussion_link": ""
+  },
+  {
+    "code": 1504,
+    "message": "failed to parse provided '--deployment-target-label' as 2 segment <provider>/<distribution> slug'",
+    "discussion_link": ""
+  },
+  {
+    "code": 1505,
+    "message": "failed to run `cndi create` because the user has selected 'ssh' as the git_credential_mode",
+    "discussion_link": ""
+  },
+  {
+    "code": 1506,
+    "message": "failed to run `cndi create` because the user has not provided the necessary 'git_username' and 'git_repo' responses",
+    "discussion_link": ""
+  },
+  {
+    "code": 1600,
+    "message": "failed to create repo because 'gh' CLI is not in PATH",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/859"
+  },
+  {
+    "code": 1601,
+    "message": "failed to create repo because GIT_REPO could not be parsed as URL",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/860"
+  },
+  {
+    "code": 1700,
+    "message": "failed to spawn 'terraform init' during 'cndi show-outputs'",
+    "discussion_link": ""
+  },
+  {
+    "code": 1701,
+    "message": "failed to spawn 'terraform output' during 'cndi show-outputs'",
+    "discussion_link": ""
   }
 ]

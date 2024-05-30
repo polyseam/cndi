@@ -154,7 +154,7 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 401));
 
         console.error(
           initLabel,
@@ -162,8 +162,8 @@ const initCommand = new Command()
           ccolors.key_name(`"${options.responsesFile}"`),
         );
 
-        await emitExitEvent(2000);
-        Deno.exit(2000);
+        await emitExitEvent(401);
+        Deno.exit(401);
       }
 
       try {
@@ -175,7 +175,7 @@ const initCommand = new Command()
           >;
         }
       } catch (errorParsingResponsesFile) {
-        console.error(ccolors.caught(errorParsingResponsesFile, 2001));
+        console.error(ccolors.caught(errorParsingResponsesFile, 402));
 
         console.error(
           initLabel,
@@ -184,8 +184,8 @@ const initCommand = new Command()
           ),
           ccolors.key_name(`"${options.responsesFile}"`),
         );
-        await emitExitEvent(2001);
-        Deno.exit(2001);
+        await emitExitEvent(402);
+        Deno.exit(402);
       }
     }
 
@@ -239,8 +239,8 @@ const initCommand = new Command()
         ccolors.key_name("deployment_target_provider=<provider>"),
       );
 
-      await emitExitEvent(490);
-      Deno.exit(490);
+      await emitExitEvent(403);
+      Deno.exit(403);
     }
 
     if (options.deploymentTargetLabel) {
@@ -254,8 +254,8 @@ const initCommand = new Command()
             `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
-        await emitExitEvent(490);
-        Deno.exit(490);
+        await emitExitEvent(404);
+        Deno.exit(404);
       }
 
       if (!deployment_target_provider) {
@@ -265,8 +265,8 @@ const initCommand = new Command()
             `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
-        await emitExitEvent(491);
-        Deno.exit(491);
+        await emitExitEvent(404);
+        Deno.exit(404);
       }
       overrides.deployment_target_provider = deployment_target_provider;
       overrides.deployment_target_distribution = deployment_target_distribution;
@@ -411,8 +411,8 @@ const initCommand = new Command()
             } is set to ${ccolors.user_input("ssh")}`,
           ),
         );
-        await emitExitEvent(4500);
-        Deno.exit(4500);
+        await emitExitEvent(405);
+        Deno.exit(405);
       }
     }
 
@@ -429,8 +429,8 @@ const initCommand = new Command()
             }`,
           ),
         );
-        await emitExitEvent(4501);
-        Deno.exit(4501);
+        await emitExitEvent(406);
+        Deno.exit(406);
       }
 
       const missingRequiredValuesForCreateRepo =
@@ -446,8 +446,8 @@ const initCommand = new Command()
           ),
           ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
         );
-        await emitExitEvent(400);
-        Deno.exit(400);
+        await emitExitEvent(407);
+        Deno.exit(407);
       }
     }
 

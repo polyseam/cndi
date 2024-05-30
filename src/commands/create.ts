@@ -456,8 +456,8 @@ const createCommand = new Command()
         ),
         ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
       );
-      await emitExitEvent(1507);
-      Deno.exit(1507);
+      await emitExitEvent(1506);
+      Deno.exit(1506);
     }
 
     await persistStagedFiles(destinationDirectory);

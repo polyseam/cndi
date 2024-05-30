@@ -50,6 +50,8 @@ function getRandomString(len = 32) {
   return Array.from(values, base10intToHex).join("");
 }
 
+// TODO: 1200 codes
+
 /**
  * Options for `useTemplate`.
  * - `overrides` is a record of prompt names and their values.
@@ -595,7 +597,7 @@ async function presentCliffyPrompt(
                     ccolors.error("not found"),
                   ].join(" "),
                   {
-                    cause: 4500,
+                    cause: 1203,
                   },
                 );
               } else {
@@ -990,10 +992,10 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
           error: new Error([
             templatesLabel,
             "template error:\n",
-            `template error: '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+            `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
             ccolors.caught(error),
           ].join(" ")),
-          cause: 4501,
+          cause: 1204,
         };
       }
     }
