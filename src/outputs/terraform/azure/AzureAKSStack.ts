@@ -27,6 +27,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
@@ -39,19 +40,6 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
     return true;
   }
   return false;
-}
-
-function aksMapTaintEffect(effect: string): string {
-  switch (effect) {
-    case "PREFER_NO_SCHEDULE":
-      return "PreferNoSchedule";
-    case "NO_EXECUTE":
-      return "NoExecute";
-    case "NO_SCHEDULE":
-      return "NoSchedule";
-    default:
-      return "NoSchedule";
-  }
 }
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
@@ -158,7 +146,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           scale.minCount = nodeSpec.min_count;
         }
         const nodeTaints = nodeSpec.taints?.map((taint) =>
-          `${taint.key}=${taint.value}:${aksMapTaintEffect(taint.effect)}`
+          `${taint.key}=${taint.value}:${
+            getTaintEffectForDistribution(taint.effect, "aks") // taint.effect must be valid by now
+          }`
         ) || [];
 
         const nodeLabels = nodeSpec.labels || {};

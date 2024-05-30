@@ -82,6 +82,16 @@ const KNOWN_TEMPLATES = [
   },
 ] as const;
 
+export const NO_SCHEDULE = "NoSchedule" as const;
+export const PREFER_NO_SCHEDULE = "PreferNoSchedule" as const;
+export const NO_EXECUTE = "NoExecute" as const;
+
+export const EFFECT_VALUES = [
+  NO_SCHEDULE,
+  PREFER_NO_SCHEDULE,
+  NO_EXECUTE,
+] as const;
+
 export {
   ARGOCD_VERSION,
   CERT_MANAGER_VERSION,

@@ -22,23 +22,11 @@ import {
 import {
   getCDKTFAppConfig,
   getPrettyJSONString,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-
-function eksMapTaintEffect(effect: string): string {
-  switch (effect) {
-    case "PreferNoSchedule":
-      return "PREFER_NO_SCHEDULE";
-    case "NoExecute":
-      return "NO_EXECUTE";
-    case "NoSchedule":
-      return "NO_SCHEDULE";
-    default:
-      return "NO_SCHEDULE";
-  }
-}
 
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
@@ -780,7 +768,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
-        effect: eksMapTaintEffect(taint.effect),
+        effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
       })) || [];
 
       const labels = nodeGroup.labels || {};

@@ -74,10 +74,11 @@ interface Label {
   [key: string]: string;
 }
 
+type CNDITaintEffect = "NoSchedule" | "PreferNoSchedule" | "NoExecute";
 interface Taint {
   key: string;
   value: string;
-  effect: string;
+  effect: CNDITaintEffect;
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]
@@ -383,6 +384,7 @@ export type {
   CNDIApplicationSpec,
   CNDIConfig,
   CNDIPort,
+  CNDITaintEffect,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,

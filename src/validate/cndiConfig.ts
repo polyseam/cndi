@@ -1,6 +1,12 @@
 import { ccolors } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { isSlug } from "src/utils.ts";
+import {
+  EFFECT_VALUES,
+  NO_EXECUTE,
+  NO_SCHEDULE,
+  PREFER_NO_SCHEDULE,
+} from "consts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
@@ -352,6 +358,53 @@ export default function validateConfig(
         );
       }
       nodeNameSet.add(node.name);
+
+      for (const taint of node.taints || []) {
+        if (!taint?.effect) {
+          throw new Error(
+            [
+              cndiConfigLabel,
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.error("but the"),
+              ccolors.key_name('"infrastructure.cndi.nodes"'),
+              ccolors.error("entry named"),
+              ccolors.user_input(`"${node.name}"`),
+              ccolors.error("has a taint without an"),
+              ccolors.key_name('"effect"'),
+              ccolors.error("value."),
+              ccolors.error("Taint effects must be specified."),
+            ].join(" "),
+            { cause: 920 },
+          );
+        } else {
+          if (!EFFECT_VALUES.includes(taint.effect)) {
+            throw new Error(
+              [
+                cndiConfigLabel,
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"`),
+                ccolors.error("but the"),
+                ccolors.key_name('"infrastructure.cndi.nodes"'),
+                ccolors.error("entry named"),
+                ccolors.user_input(`"${node.name}"`),
+                ccolors.error("has a taint with an invalid"),
+                ccolors.key_name('"effect"'),
+                ccolors.error("value."),
+                ccolors.error("Taint effects must be:"),
+                ccolors.key_name(NO_SCHEDULE),
+                ccolors.error(","),
+                ccolors.key_name(PREFER_NO_SCHEDULE),
+                ccolors.error(", or"),
+                ccolors.key_name(NO_EXECUTE),
+                ccolors.error("\nYou supplied:"),
+                ccolors.user_input(`"${taint.effect}"`),
+              ].join(" "),
+              { cause: 920 },
+            );
+          }
+        }
+      }
     }
 
     const nodeNamesAreUnique =

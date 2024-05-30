@@ -21,6 +21,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   useSshRepoAuth,
 } from "src/utils.ts";
@@ -34,18 +35,6 @@ function truncateString(str: string, num = 63) {
   return str.slice(0, num);
 }
 
-function gkeMapTaintEffect(effect: string): string {
-  switch (effect) {
-    case "PreferNoSchedule":
-      return "PREFER_NO_SCHEDULE";
-    case "NoExecute":
-      return "NO_EXECUTE";
-    case "NoSchedule":
-      return "NO_SCHEDULE";
-    default:
-      return "NO_SCHEDULE";
-  }
-}
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -239,7 +228,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       const taint = nodePoolSpec?.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
-        effect: gkeMapTaintEffect(taint.effect),
+        effect: getTaintEffectForDistribution(taint.effect, "gke"), // taint.effect must be valid by now
       })) || [];
 
       const labels = nodePoolSpec.labels || {};
