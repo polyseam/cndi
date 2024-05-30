@@ -292,7 +292,6 @@ export default function validateConfig(
       }
       // warn on other distributions
       console.log(
-        "\n",
         cndiConfigLabel,
         ccolors.warn(
           "Warning:",
@@ -366,14 +365,19 @@ export default function validateConfig(
               cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
-              ccolors.error("but the"),
+              ccolors.error("\nbut the"),
               ccolors.key_name('"infrastructure.cndi.nodes"'),
               ccolors.error("entry named"),
               ccolors.user_input(`"${node.name}"`),
               ccolors.error("has a taint without an"),
               ccolors.key_name('"effect"'),
               ccolors.error("value."),
-              ccolors.error("Taint effects must be specified."),
+              ccolors.error("\n\nTaint effects must be:"),
+              ccolors.error(
+                `${ccolors.key_name(NO_SCHEDULE)}, ${
+                  ccolors.key_name(PREFER_NO_SCHEDULE)
+                }, or ${ccolors.key_name(NO_EXECUTE)}`,
+              ),
             ].join(" "),
             { cause: 920 },
           );
@@ -384,19 +388,19 @@ export default function validateConfig(
                 cndiConfigLabel,
                 ccolors.error("cndi_config file found was at "),
                 ccolors.user_input(`"${pathToConfig}"`),
-                ccolors.error("but the"),
+                ccolors.error("\nbut the"),
                 ccolors.key_name('"infrastructure.cndi.nodes"'),
                 ccolors.error("entry named"),
-                ccolors.user_input(`"${node.name}"`),
+                ccolors.user_input(`${node.name}`),
                 ccolors.error("has a taint with an invalid"),
-                ccolors.key_name('"effect"'),
+                ccolors.key_name("effect"),
                 ccolors.error("value."),
-                ccolors.error("Taint effects must be:"),
-                ccolors.key_name(NO_SCHEDULE),
-                ccolors.error(","),
-                ccolors.key_name(PREFER_NO_SCHEDULE),
-                ccolors.error(", or"),
-                ccolors.key_name(NO_EXECUTE),
+                ccolors.error("\n\nTaint effects must be:"),
+                ccolors.error(
+                  `${ccolors.key_name(NO_SCHEDULE)}, ${
+                    ccolors.key_name(PREFER_NO_SCHEDULE)
+                  }, or ${ccolors.key_name(NO_EXECUTE)}`,
+                ),
                 ccolors.error("\nYou supplied:"),
                 ccolors.user_input(`"${taint.effect}"`),
               ].join(" "),
