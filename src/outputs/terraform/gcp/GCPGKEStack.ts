@@ -34,7 +34,7 @@ function truncateString(str: string, num = 63) {
   return str.slice(0, num);
 }
 
-function gkeMapTaintEffectEffect(effect: string): string {
+function gkeMapTaintEffect(effect: string): string {
   switch (effect) {
     case "PreferNoSchedule":
       return "PREFER_NO_SCHEDULE";
@@ -239,7 +239,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       const taint = nodePoolSpec?.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
-        effect: gkeMapTaintEffectEffect(taint.effect),
+        effect: gkeMapTaintEffect(taint.effect),
       })) || [];
 
       const labels = nodePoolSpec.labels || {};

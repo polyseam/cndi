@@ -27,7 +27,7 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
-function eksMapTaintEffectEffect(effect: string): string {
+function eksMapTaintEffect(effect: string): string {
   switch (effect) {
     case "PreferNoSchedule":
       return "PREFER_NO_SCHEDULE";
@@ -780,7 +780,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
-        effect: eksMapTaintEffectEffect(taint.effect),
+        effect: eksMapTaintEffect(taint.effect),
       })) || [];
 
       const labels = nodeGroup.labels || {};
