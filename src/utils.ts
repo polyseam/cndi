@@ -12,7 +12,14 @@ import {
 
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIDistribution,
+  CNDIPort,
+  CNDITaintEffect,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
@@ -89,6 +96,22 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
         cause: 500,
       },
     );
+  }
+};
+
+const getTaintEffectForDistribution = (
+  effect: CNDITaintEffect,
+  distribution: CNDIDistribution,
+) => {
+  if (distribution === "aks") {
+    return effect;
+  } else {
+    const effectMap = {
+      "NoSchedule": "NO_SCHEDULE",
+      "PreferNoSchedule": "PREFER_NO_SCHEDULE",
+      "NoExecute": "NO_EXECUTE",
+    };
+    return effectMap[effect];
   }
 };
 
@@ -561,9 +584,10 @@ function absolutifyPath(p: string): string {
   return path.resolve(p);
 }
 
-const getProjectDirectoryFromFlag = (value: string | boolean) => {
+// used to take a user provided filesystem path and return the absolute path
+const getProjectDirectoryFromFlag = (value: string): string => {
   // only executed if the flag is provided
-  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+  return !value ? Deno.cwd() : absolutifyPath(value);
 };
 
 function getPathToCndiBinary() {
@@ -574,6 +598,11 @@ function getPathToCndiBinary() {
     suffix = ".exe";
   }
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
+}
+
+function isSlug(input: string): boolean {
+  const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  return slugPattern.test(input);
 }
 
 export {
@@ -592,11 +621,13 @@ export {
   getProjectDirectoryFromFlag,
   getSecretOfLength,
   getStagingDir,
+  getTaintEffectForDistribution,
   getTFData,
   getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
   getYAMLString,
+  isSlug,
   loadCndiConfig,
   loadJSONC,
   loadYAML,

@@ -27,6 +27,7 @@ import {
 
 import {
   getCDKTFAppConfig,
+  getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
   resolveCNDIPorts,
   useSshRepoAuth,
@@ -40,7 +41,6 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   }
   return false;
 }
-
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"
@@ -145,10 +145,19 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         if (nodeSpec.min_count) {
           scale.minCount = nodeSpec.min_count;
         }
+        const nodeTaints = nodeSpec.taints?.map((taint) =>
+          `${taint.key}=${taint.value}:${
+            getTaintEffectForDistribution(taint.effect, "aks") // taint.effect must be valid by now
+          }`
+        ) || [];
+
+        const nodeLabels = nodeSpec.labels || {};
 
         const nodePoolSpec: AnonymousClusterNodePoolConfig = {
           name: nodeSpec.name,
           ...scale,
+          nodeTaints,
+          nodeLabels,
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
@@ -261,13 +270,17 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_kubernetes_storage_class_azure_file",
       {
         metadata: {
-          name: "nfs",
+          name: "rwm",
         },
         storageProvisioner: "file.csi.azure.com",
         parameters: {
-          skuName: "Premium_LRS",
-          protocol: "nfs",
+          skuName: "Standard_LRS",
         },
+        mountOptions: [
+          "mfsymlinks",
+          "actimeo=30",
+          "nosharesock",
+        ],
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
@@ -291,164 +304,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
-      },
-    );
-
-    const publicIp = new CDKTFProviderAzure.publicIp.PublicIp(
-      this,
-      "cndi_azurerm_public_ip",
-      {
-        allocationMethod: "Static",
-        location: this.rg.location,
-        name: "cndi-azurerm-public-ip-lb",
-        resourceGroupName: this.rg.name,
-        sku: "Standard",
-        tags: { CNDIProject: this.locals.cndi_project_name.asString },
-        zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
-      },
-    );
-
-    const _helmReleaseNginxPublic = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_public",
-      {
-        chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [cluster],
-        name: "ingress-nginx-public",
-        namespace: "ingress-public",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group",
-            value: this.rg.name,
-          },
-          {
-            name: "controller.service.loadBalancerIP",
-            value: publicIp.ipAddress,
-          },
-          {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
-            value: "/healthz",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/public-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "public",
-          },
-          {
-            name: "controller.electionID",
-            value: "public-controller-leader",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-public/ingress-nginx-public-controller",
-          },
-          {
-            name: "rbac.create",
-            value: "false",
-          },
-        ],
-        version: "4.8.3",
-      },
-    );
-
-    const _helmReleaseNginxPrivate = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_ingress_nginx_controller_private",
-      {
-        chart: "ingress-nginx",
-        createNamespace: true,
-        dependsOn: [cluster],
-        name: "ingress-nginx-private",
-        namespace: "ingress-private",
-        repository: "https://kubernetes.github.io/ingress-nginx",
-        timeout: 300,
-        atomic: true,
-        set: [
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal",
-            value: "true",
-          },
-          {
-            name:
-              "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path",
-            value: "/healthz",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name:
-              "controller.admissionWebhooks.patch.nodeSelector\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "defaultBackend.nodeSelector\\.beta\\.kubernetes\\.io/os",
-            value: "linux",
-          },
-          {
-            name: "controller.ingressClassResource.default",
-            value: "false",
-          },
-          {
-            name: "controller.ingressClassResource.controllerValue",
-            value: "k8s.io/private-nginx",
-          },
-          {
-            name: "controller.ingressClassResource.enabled",
-            value: "true",
-          },
-          {
-            name: "controller.ingressClassResource.name",
-            value: "private",
-          },
-          {
-            name: "controller.electionID",
-            value: "private-controller-leader",
-          },
-          {
-            name: "controller.extraArgs.tcp-services-configmap",
-            value: "ingress-private/ingress-nginx-private-controller",
-          },
-          {
-            name: "rbac.create",
-            value: "false",
-          },
-        ],
-        version: "4.8.3",
       },
     );
 
@@ -632,10 +487,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         values: [Fn.yamlencode(argoAppsValues)],
       },
     );
-
-    new TerraformOutput(this, "public_host", {
-      value: publicIp.ipAddress,
-    });
 
     new TerraformOutput(this, "resource_group_url", {
       value:

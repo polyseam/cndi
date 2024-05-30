@@ -1,5 +1,6 @@
 import { validator } from "deps";
 import { CNDITemplatePromptResponsePrimitive, PromptType } from "../types.ts";
+import { isSlug } from "src/utils.ts";
 
 type CNDIValidatorInput = {
   value: CNDITemplatePromptResponsePrimitive;
@@ -15,7 +16,18 @@ function redact(s: string): string {
   return "*".repeat(s.length);
 }
 
+// each validator returns an error message or null
 export const BuiltInValidators: Record<string, CNDIValidator> = {
+  is_slug: ({ value, type }: CNDIValidatorInput) => {
+    if (isSlug(value as string)) {
+      return null;
+    }
+    let val = value;
+    if (type === "Secret") {
+      val = redact(value as string);
+    }
+    return `'${val}' is not a valid slug, must be lowercase and contain only letters, numbers, and hyphens`;
+  },
   email: ({ value, type }: CNDIValidatorInput) => {
     if (validator.isEmail(value as string)) {
       return null;

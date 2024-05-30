@@ -34,6 +34,24 @@ const templatesLabel = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
 
+function base10intToHex(decimal: number): string {
+  // if the int8 in hex is less than 2 characters, prepend 0
+  const hex = decimal.toString(16).padStart(2, "0");
+  return hex;
+}
+
+function getRandomString(len = 32) {
+  if (len % 2) {
+    throw new Error("password length must be even");
+  }
+
+  const values = new Uint8Array(len / 2);
+  crypto.getRandomValues(values);
+  return Array.from(values, base10intToHex).join("");
+}
+
+// TODO: 1200 codes
+
 /**
  * Options for `useTemplate`.
  * - `overrides` is a record of prompt names and their values.
@@ -435,6 +453,19 @@ function resolveCNDIPromptCondition(
   }
 }
 
+function literalizeGetRandomStringCalls(input: string): string {
+  let output = removeWhitespaceBetweenBraces(input);
+  const get_random_string_regexp =
+    /\{\{\s*\$cndi\.get_random_string\((\d*)\)\s*\}\}/g;
+
+  output = output.replace(get_random_string_regexp, (_match, len) => {
+    const length = parseInt(len) || 32;
+    return getRandomString(length);
+  });
+
+  return output;
+}
+
 async function presentCliffyPrompt(
   promptDefinition: CNDITemplateStaticPromptEntry,
 ) {
@@ -449,6 +480,17 @@ async function presentCliffyPrompt(
 
   if (!shouldShowPrompt) {
     return;
+  }
+
+  if (promptDefinition.default) {
+    if (typeof promptDefinition.default === "string") {
+      promptDefinition.default = literalizeGetPromptResponseCalls(
+        promptDefinition.default,
+      );
+      promptDefinition.default = literalizeGetRandomStringCalls(
+        promptDefinition.default,
+      );
+    }
   }
 
   await cprompt([
@@ -555,7 +597,7 @@ async function presentCliffyPrompt(
                     ccolors.error("not found"),
                   ].join(" "),
                   {
-                    cause: 4500,
+                    cause: 1203,
                   },
                 );
               } else {
@@ -701,6 +743,9 @@ async function processCNDIConfigOutput(
 
   // get_prompt_response evals
   output = literalizeGetPromptResponseCalls(output);
+
+  // get_random_string evals
+  output = literalizeGetRandomStringCalls(output);
 
   // get_block evals
   const getBlockBeginToken = "$cndi.get_block(";
@@ -947,20 +992,20 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
           error: new Error([
             templatesLabel,
             "template error:\n",
-            `template error: '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+            `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
             ccolors.caught(error),
           ].join(" ")),
-          cause: 4501,
+          cause: 1204,
         };
       }
     }
   }
 
   for (const key in envSpec) {
-    const val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
-
+    let val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
+    val = literalizeGetRandomStringCalls(val);
     if (key.startsWith("$cndi.comment")) {
-      envLines.push(`\n# ${val}`);
+      envLines.push(`\n# ${unwrapQuotes(val)}`);
     } else if (key.startsWith("$cndi.get_block")) {
       // do nothing, already handled
     } else if (val === "" || val === "''") {
@@ -1123,6 +1168,8 @@ export async function useTemplate(
     responses,
     files,
   };
+
+  console.log(); // let it breathe
 
   return useTemplateResult;
 }

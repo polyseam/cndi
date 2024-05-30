@@ -1,0 +1,1 @@
+provider: "{{ $cndi.get_arg(dns_provider) }}"
