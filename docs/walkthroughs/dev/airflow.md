@@ -30,11 +30,22 @@ successfully:**
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download and install cndi:
+### macos and linux
 
-```shell
-# this will download the correct binary for your OS
+Installing for macOS and Linux is the way to go if you have that option. Simply
+run the following:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+```
+
+### windows
+
+Installing for Windows should be just as easy. Here is the command to install
+CNDI on Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
 ## create your cndi repository 📂
@@ -102,8 +113,6 @@ supplied for this project:
   use for airflow database_
 - **Name of the postgresql database you want to use for airflow cnpg database:**
   _name of the postgresql database you want to use for airflow cnpg database_
-
-![DEV instances dashboard](/docs/walkthroughs/dev/img/cndi-init-interactive.png)
 
 This process will generate a `cndi_config.yaml` file, and `cndi` directory at
 the root of your repository containing all the necessary files for the
