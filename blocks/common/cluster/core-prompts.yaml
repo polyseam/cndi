@@ -120,6 +120,16 @@
     - ==
     - google
 
+- name: arm_resource_group
+  message: >-
+    Please enter the Resource Group ID where we can find your DNS Zone:
+  type: Input
+  default: ""
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - azure
+
 - name: terraform_state_passphrase
   message: >-
     Enter an override for the default Terraform State Passphrase?
