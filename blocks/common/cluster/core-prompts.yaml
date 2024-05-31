@@ -124,7 +124,7 @@
   message: >-
     Please enter the Resource Group ID where we can find your DNS Zone:
   type: Input
-  default: ""
+  default: "my-resource-group"
   condition:
     - "{{ $cndi.get_prompt_response(dns_provider) }}"
     - ==

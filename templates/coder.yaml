@@ -416,11 +416,7 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/env/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
-      condition:
-        - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
-        - ==
-        - true
+
 
     $cndi.comment(neo4j-heading): Postgres Connection Parameters
     POSTGRESQL_DB: "coderdb"

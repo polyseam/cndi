@@ -232,11 +232,7 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/env/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
-      condition:
-        - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
-        - ==
-        - true
+
 
     $cndi.comment(mssql-sa-password-comment): "Should contain uppercase, lowercase, number, special character and muste be greater than 8 letters"
     MSSQL_SA_PASSWORD: "{{ $cndi.get_prompt_response(mssql_sa_password) }}"
