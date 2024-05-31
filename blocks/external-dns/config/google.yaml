@@ -1,0 +1,5 @@
+provider: google
+values:
+  google:
+    project: "{{ $cndi.get_prompt_response(google_external_dns_project) }}"
+    serviceAccountSecret: "{{ $cndi.get_prompt_response(google_external_dns_service_account_secret) }}"

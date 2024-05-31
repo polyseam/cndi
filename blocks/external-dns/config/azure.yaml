@@ -1,0 +1,5 @@
+provider: azure
+values:
+  azure:
+    secretName: "{{ $cndi.get_prompt_response(azure_external_dns_secret_name) }}"
+    resourceGroup: "{{ $cndi.get_prompt_response(azure_external_dns_resource_group) }}"
