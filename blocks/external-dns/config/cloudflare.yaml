@@ -1,0 +1,5 @@
+provider: cloudflare
+values:
+  cloudflare:
+    $cndi.comment(cloudflare-api-key): Proxy Disabled to Enable Cert-Manager
+    proxied: false

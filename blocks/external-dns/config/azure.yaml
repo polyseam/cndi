@@ -1,0 +1,4 @@
+provider: azure
+values:
+  azure:
+    resourceGroup: "{{ $cndi.get_prompt_response(external_dns_azure_rg) }}"
