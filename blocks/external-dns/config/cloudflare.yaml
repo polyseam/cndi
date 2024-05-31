@@ -1,4 +1,4 @@
 provider: cloudflare
 values:
   cloudflare:
-    proxy: false
+    proxied: false
