@@ -1,2 +1,0 @@
-$cndi.comment(cloudflare-creds): ExternalDNS Cloudflare API Key
-EXTERNAL_DNS_CLOUDFLARE_API_TOKEN: "{{ $cndi.get_prompt_response(external_dns_cloudflare_api_token) }}"
