@@ -110,6 +110,26 @@
     - ==
     - true
 
+- name: external_dns_gcp_project
+  message: >-
+    Please enter the GCP Project containing your CloudDNS Zone
+  type: Input
+  default: ""
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - google
+
+- name: external_dns_azure_resource_group
+  message: >-
+    Please enter the Resource Group ID where we can find your DNS Zone:
+  type: Input
+  default: ""
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - azure
+
 - name: terraform_state_passphrase
   message: >-
     Enter an override for the default Terraform State Passphrase?

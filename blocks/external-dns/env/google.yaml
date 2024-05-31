@@ -1,0 +1,2 @@
+$cndi.comment(googlejson): ExternalDNS Google Credentials
+EXTERNAL_DNS_GOOGLE_CREDENTIALS: '{{ $cndi.get_prompt_response(google_credentials) }}'

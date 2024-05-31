@@ -150,14 +150,12 @@ outputs:
     infrastructure:
       cndi:
         external_dns: 
-          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config.yaml):
+          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-            args:
-              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
-
+              
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
@@ -327,7 +325,11 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/env/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+      condition:
+        - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+        - ==
+        - true
     $cndi.comment(neo4j-heading): PostgreSQL Connection Parameters
     POSTGRESQL_DB: airflow-db
     POSTGRESQL_USER: airflow

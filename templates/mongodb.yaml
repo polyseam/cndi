@@ -108,14 +108,11 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
         external_dns: 
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config.yaml):
+          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-            args:
-              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
-
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam//polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
@@ -209,6 +206,11 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/env/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+      condition:
+        - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+        - ==
+        - true
 
     $cndi.comment(mongodb-heading): Mongodb Connection Parameters
     MONGODB_DATABASE: "{{ $cndi.get_prompt_response(mongodb_name) }}"
