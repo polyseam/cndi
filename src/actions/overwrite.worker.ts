@@ -34,6 +34,8 @@ import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
+const PROVIDERS_SUPPORTING_KEYLESS = ["aws"];
+
 interface OverwriteActionOptions {
   output: string;
   file?: string;
@@ -116,6 +118,33 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         code: errorValidatingConfig.cause,
         message: errorValidatingConfig.message,
       });
+    }
+
+    const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
+
+    if (tryKeyless) {
+      if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+        try {
+          throw new Error(
+            [
+              owLabel,
+              ccolors.error(
+                `'keyless' infrastructure is not yet supported for provider`,
+              ),
+              ccolors.key_name(config?.provider),
+            ].join(" "),
+            { cause: 510 },
+          );
+        } catch (error) {
+          self.postMessage({
+            type: "error-overwrite",
+            code: error.cause,
+            message: error.message,
+          });
+          return;
+        }
+        // TODO: do keyless stuff
+      }
     }
 
     await stageFile(
