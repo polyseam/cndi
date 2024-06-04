@@ -1,6 +1,5 @@
 import deno_json from "../deno.json" with { type: "json" };
 import { loadSync } from "@std/dotenv";
-// import "@std/dotenv/load";
 
 import {
   ccolors,
@@ -32,6 +31,7 @@ export default async function cndi() {
     throw new Error("deno.json is missing a version");
   }
 
+  // load only the .env file from the current working directory
   loadSync({
     export: true,
     envPath: path.join(Deno.cwd(), ".env"),
