@@ -115,7 +115,7 @@ const AWS_KEYLESS_STEPS: Array<WorkflowStep> = [{
   name: "configure aws credentials",
   uses: "aws-actions/configure-aws-credentials@v3",
   with: {
-    "role-to-assume": `${Deno.env.get("OIDC_RESOURCE_IDENTIFIER")}`, // Universal or AWS Specific?
+    "role-to-assume": "${{ secrets.OIDC_AWS_ROLE_TO_ASSUME_ARN }}",
     "aws-region": "${{ env.AWS_REGION }}",
   },
 }];
