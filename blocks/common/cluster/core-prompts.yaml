@@ -105,10 +105,11 @@
     - google
     - cloudflare
   default: aws
-  condition:
-    - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
-    - ==
-    - true
+  # always enable_external_dns:
+  # condition:
+  #   - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+  #   - ==
+  #   - true
 
 - name: external_dns_gcp_project
   message: >-
