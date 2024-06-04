@@ -1,5 +1,7 @@
 import deno_json from "../deno.json" with { type: "json" };
-import "@std/dotenv/load";
+import { loadSync } from "@std/dotenv";
+// import "@std/dotenv/load";
+
 import {
   ccolors,
   Command,
@@ -29,6 +31,13 @@ export default async function cndi() {
   if (!deno_json?.version) {
     throw new Error("deno.json is missing a version");
   }
+
+  loadSync({
+    export: true,
+    envPath: path.join(Deno.cwd(), ".env"),
+    examplePath: null,
+    defaultsPath: null,
+  });
 
   const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
 
