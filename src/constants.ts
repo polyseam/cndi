@@ -2,7 +2,8 @@ const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.26.0"; // used to install binary on client
 const SEALED_SECRETS_VERSION = "2.15.0"; // used to install controller on cluster
 const DEFAULT_K8S_VERSION = "1.28";
-const ARGOCD_VERSION = "2.10.1";
+const ARGOCD_VERSION = "2.11.2";
+const ARGOCD_HELM_VERSION = "7.1.1";
 const RELOADER_VERSION = "1.0.69";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 const EXTERNAL_DNS_VERSION = "6.35.0";
@@ -93,6 +94,7 @@ export const EFFECT_VALUES = [
 ] as const;
 
 export {
+  ARGOCD_HELM_VERSION,
   ARGOCD_VERSION,
   CERT_MANAGER_VERSION,
   CLOUDINIT_RETRY_INTERVAL,
