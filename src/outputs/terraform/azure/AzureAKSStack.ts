@@ -448,7 +448,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           name: "root-application",
           namespace: "argocd",
           project: "default",
-          finalizers: ["resources-finalizer.argocd.argoproj.io"],
+          finalizers: ["resources-finalizer.argocd.argoproj.io/background"],
           source: {
             repoURL: this.variables.git_repo.value,
             path: "cndi/cluster_manifests",
