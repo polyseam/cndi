@@ -46,15 +46,26 @@ successfully:**
 - **GitHub CLI**: You will need to have the GitHub CLI installed on your
   machine. You can download it [here](https://cli.github.com/).
 
-- [Here's a guide of how to set up your Google Cloud account including roles and permissions](/docs/cloud-setup-guide/gcp/gcp-setup.md)
+- [Here's a guide of how to set up your Google Cloud account including roles and permissions](/docs/cloud-setup/gcp/gcp-setup.md)
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download and install cndi:
+### macos and linux
 
-```shell
-# this will download the correct binary for your OS
+Installing for macOS and Linux is the way to go if you have that option. Simply
+run the following:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+```
+
+### windows
+
+Installing for Windows should be just as easy. Here is the command to install
+CNDI on Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
 ## create your cndi project 📂
@@ -91,8 +102,8 @@ template.
 Make sure airflow is highlighted and press Enter to confirm your selection.
 
 Next, you'll need to decide where you want to deploy your cluster. For this
-project, choose aws if you're deploying to Amazon Web Services, The prompt will
-appear as follows:
+project, choose gcp if you're deploying to GCP, The prompt will appear as
+follows:
 
 ```shell
 "Where do you want to deploy your cluster?"
@@ -102,16 +113,13 @@ appear as follows:
   dev
 ```
 
-Ensure `aws` is highlighted and press Enter to proceed.
+Ensure `gke` is highlighted and press Enter to proceed.
 
-Finally, select a Kubernetes distribution for your deployment. The `gke`
-(Elastic Kubernetes Service) option is for deploying on AWS, offering a managed
-Kubernetes service that simplifies running Kubernetes applications. The prompt
-will be:
+Finally, select a Kubernetes distribution for your deployment. The `gke` (Google
+Kubernetes Engine) option is for deploying on Google. The prompt will be:
 
 ```shell
 Select a distribution
-  microk8s
 ❯ gke
 ```
 
@@ -119,6 +127,76 @@ After confirming that `gke` is highlighted, press `Enter` to finalize your
 choice. You will then need to provide specific information at various
 interactive prompts. Below is a comprehensive list of the prompts used during
 this init process:
+
+- **Cndi Project Name**: _name of project_
+- **Template**: _list of templates to choose from_
+
+---
+
+- **GitHub Username**: _a user's handle on GitHub._
+- **GitHub Repository URL**: _the url for the GitHub repository that will hold
+  all cluster configuration_
+- **GitHub Personal Access Token**: _the access token CNDI will use to access
+  your repo for cluster creation and synchronization_
+
+---
+
+- **GCP Region**: _region where the infastructure is being created_
+- **Path to GCP service account key json**: _path to JSON credentials file for
+  GCP Service Account_
+
+---
+
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
+  synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to
+  synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
+  will be stored_
+
+---
+
+- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
+  be hosted_
+- **Domain name you want Airflow to be accessible on**: _domain where Airflow
+  will be hosted_
+
+---
+
+- **Email address you want to use for lets encrypt:** _an email for lets encrypt
+  to use when generating certificates_
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
+
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
+the root of your repository containing all the necessary cluster and
+infrastructure resources. It will also generate a `.env` file that will be used
+to store sensitive information that we don't want to commit to our repository as
+source code.
+
+The structure of the generated CNDI project will be as follows:
+
+```shell
+├── 📁 cndi
+│   ├── 📁 cluster_manifests
+│   │   ├── 📁 applications
+│   │   │   └── airflow.application.yaml
+│   │   ├── argo-ingress.yaml
+│   │   ├── cert-manager-cluster-issuer.yaml
+│   │   └── git-credentials-secret.yaml
+│   └── 📁 terraform
+│       ├── gke_cluster_airflow_nodes.tf.json
+│       └── etc 
+├── cndi_config.yaml
+├── .env
+├── .gitignore
+├── .github
+└── README.md
+```
 
 ```
 cndi create polyseam/my-cndi-cluster
@@ -128,16 +206,15 @@ Please enter a name for your CNDI project: (my-cndi-cluster) » my-cndi-cluster
 Pick a template » airflow
 Where do you want to deploy your cluster? » gcp
 Select a distribution » gke
+Please in your GCP Region: us-central1
+Please enter the path GCP credentials JSON to your () »  ~/polyseam/gcp-testing.json   
 Would you like ArgoCD to connect to your repo using a Git token or SSH key? » token
 What is your git username? () » IamTamika
 Please enter your Git Personal Access Token: () » ****************************
 Please enter your Git Repo URL: () »
 What email address should be used for Lets Encrypt certificate registration?  » tamika.taylor@untribe.com
 Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes
-Please select your DNS provider (aws) » aws
-Please enter your AWS Access Key ID: () »  *****************   
-Please enter your AWS Secret Access Key: () » ******************
-Please enter your AWS Region: (us-east-1) » us-east-1 
+Please select your DNS provider (aws) » gke
 Do you want to expose ArgoCD with an Ingress? (Y/n) » Yes
 What hostname should ArgoCD be accessible at? » argocd.untribe.com
 Do you want to expose the Airflow UI to the web? (Y/n) » Yes
@@ -173,13 +250,13 @@ project. ![cndi outputs](/docs/walkthroughs/gke/img/outputs.png)
 
 ## attach the Load Balancer to Your Domain 🌐 with ExternalDNS
 
-Instead of manually creating a CNAME record in your domain's DNS settings, if
-you enabled & configured ExternalDNS during the cndi init process then
-ExternalDNS will automatically create a CNAME record in Route 53, pointing to
-your load balancer's public host. This process eliminates the need for manual
-DNS record management.If everything is working correctly you should now open the
-domain name you've assigned for ArgoCD in your browser to see the ArgoCD login
-page. The DNS changes may take a few minutes to propagate
+Instead of manually creating an A record in your domain's DNS settings, if you
+enabled & configured ExternalDNS during the cndi init process then ExternalDNS
+will automatically create a A record in Route 53, pointing to your load
+balancer's public host. This process eliminates the need for manual DNS record
+management.If everything is working correctly you should now open the domain
+name you've assigned for ArgoCD in your browser to see the ArgoCD login page.
+The DNS changes may take a few minutes to propagate
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your GKE Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/gke/port-forwarding.md)
@@ -195,32 +272,29 @@ Attach the load balancer to your domain manually (Optional)
 </summary>
 <div>
 
-At the end of the cndi run there is also an output called `public host`, which
-is the **DNS** (CNAME) of the load Balancer thats attached to your GKE
-instances.
+At the end of the cndi run there is also an output called `resource groups`,
+which will have public loadbalancer. Copy the IP address(public host) of the
+loadbalancer thats attached to your GKE instances.
 
 ![cndi outputs](/docs/walkthroughs/gke/img/outputs.png)
 
+![gcp lb](/docs/walkthroughs/gke/img/gcp-nlb.png)
+
 - Copy `public host`
 - Go to your custom domain,
-- Create an CNAME record to route traffic to the load balancer IP address
+- Create an A record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
-![google domains](/docs/walkthroughs/gke/img/google-domains-cname.png)
+![google domains](/docs/walkthroughs/gke/img/google-domains-a-record.png)
 
 If everything is working correctly you should now open the domain name you've
 assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
 changes may take a few minutes to propagate.
 
-- (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your GKE Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/gke/port-forwarding.md)
-
 ![Argocd UI](/docs/walkthroughs/gke/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
-
-![.env file](/docs/walkthroughs/gke/img/argocd-admin-password.png)
 
 </div>
 

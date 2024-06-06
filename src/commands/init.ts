@@ -22,12 +22,10 @@ import { owAction } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
@@ -72,7 +70,7 @@ const echoInit = (options: EchoInitOptions) => {
 const initCommand = new Command()
   .description(`Initialize new cndi project.`)
   .option(
-    "-o, --output, --project, -p [output:string]",
+    "-o, --output, --project, -p <output:string>",
     "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
@@ -117,7 +115,7 @@ const initCommand = new Command()
   })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
-    const destinationDirectory = options.output ?? Deno.cwd();
+    const destinationDirectory = options?.output || Deno.cwd();
 
     echoInit({ ...options, output: destinationDirectory });
 
@@ -156,7 +154,7 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 2000));
+        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 401));
 
         console.error(
           initLabel,
@@ -164,8 +162,8 @@ const initCommand = new Command()
           ccolors.key_name(`"${options.responsesFile}"`),
         );
 
-        await emitExitEvent(2000);
-        Deno.exit(2000);
+        await emitExitEvent(401);
+        Deno.exit(401);
       }
 
       try {
@@ -177,7 +175,7 @@ const initCommand = new Command()
           >;
         }
       } catch (errorParsingResponsesFile) {
-        console.error(ccolors.caught(errorParsingResponsesFile, 2001));
+        console.error(ccolors.caught(errorParsingResponsesFile, 402));
 
         console.error(
           initLabel,
@@ -186,8 +184,8 @@ const initCommand = new Command()
           ),
           ccolors.key_name(`"${options.responsesFile}"`),
         );
-        await emitExitEvent(2001);
-        Deno.exit(2001);
+        await emitExitEvent(402);
+        Deno.exit(402);
       }
     }
 
@@ -241,8 +239,8 @@ const initCommand = new Command()
         ccolors.key_name("deployment_target_provider=<provider>"),
       );
 
-      await emitExitEvent(490);
-      Deno.exit(490);
+      await emitExitEvent(403);
+      Deno.exit(403);
     }
 
     if (options.deploymentTargetLabel) {
@@ -256,8 +254,8 @@ const initCommand = new Command()
             `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
-        await emitExitEvent(490);
-        Deno.exit(490);
+        await emitExitEvent(404);
+        Deno.exit(404);
       }
 
       if (!deployment_target_provider) {
@@ -267,8 +265,8 @@ const initCommand = new Command()
             `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
           ),
         );
-        await emitExitEvent(491);
-        Deno.exit(491);
+        await emitExitEvent(404);
+        Deno.exit(404);
       }
       overrides.deployment_target_provider = deployment_target_provider;
       overrides.deployment_target_distribution = deployment_target_distribution;
@@ -304,11 +302,6 @@ const initCommand = new Command()
       })) as string;
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     if (options.interactive && !template) {
       template = await Select.prompt({
         message: ccolors.prompt("Pick a template"),
@@ -317,7 +310,6 @@ const initCommand = new Command()
       });
     }
 
-    let deployment_target_provider;
     let templateResult;
 
     if (template) {
@@ -344,8 +336,6 @@ const initCommand = new Command()
       readme = templateResult.files["README.md"];
       env = templateResult.files[".env"];
 
-      deployment_target_provider = templateResult?.responses
-        ?.deployment_target_provider;
       if (options.keep) {
         await stageFile(
           "cndi_responses.yaml",
@@ -357,22 +347,28 @@ const initCommand = new Command()
       readme = `# ${project_name}\n`;
       env = "";
     }
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
 
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndiGeneratedValues = {
+    // GENERATE ENV VARS
+    const sealedSecretsKeys = isClusterless
+      ? null
+      : await createSealedSecretsKeys();
+
+    const doSSH =
+      templateResult?.responses?.deployment_target_distribution === "microk8s";
+
+    const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+    const dotEnvOptions = {
       sshPublicKey,
       sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
       debugMode: !!options.debug,
     };
 
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
+    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
 
     // write a readme, extend via Template.readmeBlock if it exists
     const readmePath = path.join(destinationDirectory, "README.md");
@@ -394,12 +390,10 @@ const initCommand = new Command()
       getPrettyJSONString(vscodeSettings),
     );
 
-    if (deployment_target_provider !== "dev") {
-      await stageFile(
-        path.join(".github", "workflows", "cndi-run.yaml"),
-        getCndiRunGitHubWorkflowYamlContents(options?.workflowSourceRef),
-      );
-    }
+    await stageFile(
+      path.join(".github", "workflows", "cndi-onpull.yaml"),
+      getCndiOnPullGitHubWorkflowYamlContents(),
+    );
 
     await stageFile(".gitignore", getGitignoreContents());
 
@@ -417,8 +411,8 @@ const initCommand = new Command()
             } is set to ${ccolors.user_input("ssh")}`,
           ),
         );
-        await emitExitEvent(4500);
-        Deno.exit(4500);
+        await emitExitEvent(405);
+        Deno.exit(405);
       }
     }
 
@@ -435,8 +429,8 @@ const initCommand = new Command()
             }`,
           ),
         );
-        await emitExitEvent(4501);
-        Deno.exit(4501);
+        await emitExitEvent(406);
+        Deno.exit(406);
       }
 
       const missingRequiredValuesForCreateRepo =
@@ -452,8 +446,8 @@ const initCommand = new Command()
           ),
           ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
         );
-        await emitExitEvent(400);
-        Deno.exit(400);
+        await emitExitEvent(407);
+        Deno.exit(407);
       }
     }
 
@@ -461,7 +455,9 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
-      create: options.create,
+      workflowSourceRef: options.workflowSourceRef,
+      create: !!options.create,
+      skipPush: !!options.skipPush,
     });
   });
 

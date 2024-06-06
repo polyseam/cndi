@@ -17,40 +17,55 @@ comfortable with.
 
 ## prerequisites ✅
 
-**You will need the following things to get up and running with cndi
-successfully:**
+Before you start using CNDI, ensure you have the following prerequisites set up.
+These are necessary to successfully deploy and manage your infrastructure using
+CNDI:
 
-- **An AWS cloud account**: cndi will deploy infrastructure within AWS
+- **AWS Cloud Account**: You'll need an active AWS account as CNDI deploys
+  infrastructure within Amazon Web Services.
 
-- **Your cloud credentials**: cndi will leverage your amazon web services's
-  **AWS ACCESS KEY ID** and **AWS_SECRET_ACCESS_KEY**
-  [credentials](https://docs.eks.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
-  to deploy resources.
+- **AWS Credentials**: CNDI requires your AWS Access Key ID and AWS Secret
+  Access Key to authenticate and deploy resources. Learn how to obtain your
+  credentials from the
+  [official AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey).
 
-- **A domain name**: The most convenient way to access your cluster is by
-  attaching a domain name to the load balancer, if you provide this domain
-  during `cndi create` in an upcoming step we should be able to wire it up
-  automatically.
+- **Domain Name**: For easy access to your cluster, attach a domain name to the
+  load balancer. Provide this domain during the `cndi create` command, and CNDI
+  will configure it automatically.
 
-- **A GitHub account**: cndi helps you manage the state of your infrastructure
-  using a GitOps workflow, so you'll need a
+- **GitHub Account**: Manage your infrastructure's state using a GitOps
+  workflow. Ensure you have a
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
-  with a valid
-  [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+  and a
+  [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+  set up.
 
-- **GitHub CLI**: You will need to have the GitHub CLI installed on your
-  machine. You can download it [here](https://cli.github.com/).
+- **GitHub CLI**: Install the GitHub Command Line Interface (CLI) to interact
+  with GitHub from your terminal. Download it from the
+  [GitHub CLI page](https://cli.github.com/).
 
-- [Here's a guide of how to set up your Amazon Web Services account including roles and permissions](/docs/cloud-setup-guide/aws/aws-setup.md)
+- **AWS Setup Guide**: For a detailed guide on setting up your Amazon Web
+  Services account, including roles and permissions, refer to our
+  [AWS Setup Documentation](/docs/cloud-setup/aws/aws-setup.md).
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download and install cndi:
+### macos and linux
 
-> [!NOTE] this will download the correct binary for your OS
+Installing for macOS and Linux is the way to go if you have that option. Simply
+run the following:
 
-```shell
+```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+```
+
+### windows
+
+Installing for Windows should be just as easy. Here is the command to install
+CNDI on Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
 ## create your cndi project 📂
@@ -107,7 +122,6 @@ will be:
 
 ```shell
 Select a distribution
-  microk8s
 ❯ eks
 ```
 
@@ -115,6 +129,78 @@ After confirming that `eks` is highlighted, press `Enter` to finalize your
 choice. You will then need to provide specific information at various
 interactive prompts. Below is a comprehensive list of the prompts used during
 this init process:
+
+#### Project Setup:
+
+- **Cndi Project Name**: Specify the name of your project.
+- **Template**: Choose from a provided list of templates, each tailored to
+  different project needs.
+
+#### GitHub Configuration:
+
+- **GitHub Username**: Your GitHub handle.
+- **GitHub Repository URL**: The URL of the GitHub repository for storing all
+  cluster configurations.
+- **GitHub Personal Access Token**: An access token allowing CNDI to interact
+  with your repository for cluster creation and synchronization.
+
+#### AWS Credentials:
+
+- **AWS Access Key ID**: Long-term credentials for an IAM user.
+- **AWS Secret Access Key**: Long-term credentials for an IAM user.
+- **AWS Region**: The AWS region where the infrastructure will be deployed.
+
+#### Airflow DAG Storage:
+
+- **Git Username for Airflow DAG Storage**: Your GitHub handle for syncing
+  Airflow DAGs.
+- **Git Password for Airflow DAG Storage**: A personal access token for DAG
+  synchronization.
+- **Git Repo for Airflow DAG Storage**: The URL of the repository where your
+  Airflow DAGs will be stored.
+
+#### Domain Configuration:
+
+- **Domain for ArgoCD**: The domain where ArgoCD will be accessible.
+- **Domain for Airflow**: The domain where Airflow will be accessible.
+
+#### Security and Database:
+
+- **Email for Lets Encrypt**: An email address for Lets Encrypt to use when
+  generating certificates.
+- **Username for Airflow CNPG Database**: The username for accessing the Airflow
+  database.
+- **Password for Airflow CNPG Database**: The password for accessing the Airflow
+  database.
+- **Name of the PostgreSQL Database for Airflow CNPG**: The name of the
+  PostgreSQL database for the Airflow CNPG database.
+
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
+the root of your repository containing all the necessary files for the
+configuration. It will also store all the values in a file called `.env` at the
+root of your repository.
+
+The structure of the generated CNDI project will be something like:
+
+```shell
+├── 📁 cndi
+│   ├── 📁 cluster_manifests
+│   │   ├── 📁 applications
+|   |   |   ├── cnpg.yaml 
+│   │   │   └── airflow.application.yaml
+│   │   ├── argo-ingress.yaml
+│   │   ├── cert-manager-cluster-issuer.yaml
+│   │   ├── git-credentials-secret.yaml
+│   │   └── etc
+│   └── 📁 terraform
+│       ├── airflow-nodes.cndi-node.tf.yaml
+│       └── etc 
+├── cndi_config.yaml
+├── .env
+├── .gitignore
+├── .github
+└── README.md
+```
 
 ```
 cndi create polyseam/my-cndi-cluster
@@ -191,11 +277,12 @@ Attach the load balancer to your domain manually (Optional)
 </summary>
 <div>
 
-At the end of the cndi run there is also an output called `public host`, which
-is the **DNS** (CNAME) of the load Balancer thats attached to your EKS
-instances.
+At the end of the cndi run there is also an output called `resource groups`,
+which will have Cluster which has the loadbalancer url . Copy the CNAME
+address(public host) of the loadbalancer thats attached to your EKS instances.
 
 ![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
+![airflow ingress](/docs/walkthroughs/eks/img/airflow-ingress.png)
 
 - Copy `public host`
 - Go to your custom domain,
@@ -208,15 +295,10 @@ If everything is working correctly you should now open the domain name you've
 assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
 changes may take a few minutes to propagate.
 
-- (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your EKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/eks/port-forwarding.md)
-
 ![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
-
-![.env file](/docs/walkthroughs/eks/img/argocd-admin-password.png)
 
 </div>
 
@@ -262,7 +344,7 @@ Airflow and Argocd
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/ec2/img/cndi-config.png)
+![cndi config](/docs/walkthroughs/eks/img/cndi-config.png)
 
 - Go to the `cndi_config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new airflow node and save

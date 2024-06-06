@@ -2,11 +2,13 @@ const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.26.0"; // used to install binary on client
 const SEALED_SECRETS_VERSION = "2.15.0"; // used to install controller on cluster
 const DEFAULT_K8S_VERSION = "1.28";
-const ARGOCD_VERSION = "2.10.1";
+const ARGOCD_VERSION = "2.11.2";
+const ARGOCD_HELM_VERSION = "7.1.1";
 const RELOADER_VERSION = "1.0.69";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 const EXTERNAL_DNS_VERSION = "6.35.0";
 const CERT_MANAGER_VERSION = "1.14.3";
+const NGINX_VERSION = "4.8.3";
 
 const POLYSEAM_TEMPLATE_DIRECTORY_URL =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
@@ -81,7 +83,18 @@ const KNOWN_TEMPLATES = [
   },
 ] as const;
 
+export const NO_SCHEDULE = "NoSchedule" as const;
+export const PREFER_NO_SCHEDULE = "PreferNoSchedule" as const;
+export const NO_EXECUTE = "NoExecute" as const;
+
+export const EFFECT_VALUES = [
+  NO_SCHEDULE,
+  PREFER_NO_SCHEDULE,
+  NO_EXECUTE,
+] as const;
+
 export {
+  ARGOCD_HELM_VERSION,
   ARGOCD_VERSION,
   CERT_MANAGER_VERSION,
   CLOUDINIT_RETRY_INTERVAL,
@@ -95,6 +108,7 @@ export {
   KUBESEAL_VERSION,
   LARSTOBI_MULTIPASS_PROVIDER_VERSION,
   MANAGED_NODE_KINDS,
+  NGINX_VERSION,
   NODE_DISK_SIZE_KEY,
   POLYSEAM_TEMPLATE_DIRECTORY_URL,
   PROCESS_ERROR_CODE_PREFIX,

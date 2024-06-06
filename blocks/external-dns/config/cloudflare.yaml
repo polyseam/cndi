@@ -1,0 +1,4 @@
+provider: cloudflare
+values:
+  cloudflare:
+    proxied: false

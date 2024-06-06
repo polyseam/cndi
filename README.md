@@ -47,18 +47,31 @@ checkout this demo:
 
 ## installation 🥁
 
-To install CNDI you just need to download the "tarball" for your system from
-[GitHub Releases](https://github.com/polyseam/cndi/releases) and extract it to
-disk.
+<!-- The below table Markdown is outrageous and I'm sorry -->
 
-This script automates that job:
+| Prerequisite                  | Description                                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [gh](https://cli.github.com/) | [Official GitHub CLI](https://cli.github.com/) used to create a project repo for you and configure [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for use in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions). |
+
+---
+
+Install the latest CNDI release on your system using one of the commands below:
+
+Shell (Mac, Linux):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
 ```
 
-If you run into trouble or if you want to install the Windows executable, check
-out our [tiny install guide](./docs/install.md).
+PowerShell (Windows):
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
+```
+
+For more information check out our [install guide](./docs/install.md).
+
+---
 
 ## usage 👩‍💻
 
@@ -98,7 +111,7 @@ including asking for GitHub credentials and where you want to deploy your new
 cluster.
 
 These prompts are called
-[core prompts](https://github.com/polyseam/common-blocks/tree/main/common/core-prompts.yaml),
+[core prompts](https://github.com/polyseam/cndi/tree/main/blocks/cluster/core-prompts.yaml),
 and depending how you answer that first set, you'll be shown more prompts. One
 of the more important decisions is to choose your cloud provider and cndi
 natively supports 4 today: [aws](https://aws.com),
@@ -109,9 +122,9 @@ CNDI shines brightest when deploying to the cloud, so we encourage that if you
 have access!
 
 When you are asked for credentials to your deployment target, you can follow the
-corresponding setup guide for [AWS](docs/cloud-setup-guide/aws/aws-setup.md),
-[GCP](docs/cloud-setup-guide/gcp/gcp-setup.md), or
-[Azure](docs/cloud-setup-guide/azure/azure-setup.md).
+corresponding setup guide for [AWS](docs/cloud-setup/aws/aws-setup.md),
+[GCP](docs/cloud-setup/gcp/gcp-setup.md), or
+[Azure](docs/cloud-setup/azure/azure-setup.md).
 
 The last set of questions relate directly to the Template you selected, and
 generally it is fine to accept the defaults if you aren't completely familiar
@@ -218,7 +231,7 @@ you can safely delete your git repo or achive it for reference later.
 
 ---
 
-## Walkthroughs 🥾
+## walkthroughs 🥾
 
 We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. These walkthroughs hold your hand through the process of

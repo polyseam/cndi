@@ -18,22 +18,22 @@ resources you no longer want.
 
 2. Fill necessary details
 
-![create service account](/docs/cloud-setup-guide/gcp/img/create-service-account-details.png)
+![create service account](/docs/cloud-setup/gcp/img/create-service-account-details.png)
 
 3. Now click `Create and Continue` and then add the following roles: Role:
    `Compute Admin`,`Compute Network Admin`, `Compute Load Balancer Admin`,
    `Service Management Administrator`, `Quota Admin`, and if your using an GKE
    cluster add the `Kubernetes Engine Service Agent` role as well
 
-![service account access](/docs/cloud-setup-guide/gcp/img/service-account-access.png)
+![service account access](/docs/cloud-setup/gcp/img/service-account-access.png)
 
 4. Click Continue and then click Done.
 
-![create service account](/docs/cloud-setup-guide/gcp/img/create-service-account.png)
+![create service account](/docs/cloud-setup/gcp/img/create-service-account.png)
 
 5. At the top, click `Key` > `Add Key` > `Create new key`.
 
-![create service account keys](/docs/cloud-setup-guide/gcp/img/create-service-account-keys.png)
+![create service account keys](/docs/cloud-setup/gcp/img/create-service-account-keys.png)
 
 6. Make sure the key type is set to `JSON` and click `Create`.
 
@@ -43,6 +43,6 @@ resources you no longer want.
 
 8. Click Close.
 
-![create service account keys json](/docs/cloud-setup-guide/gcp/img/create-service-account-keys-json.png)
+![create service account keys json](/docs/cloud-setup/gcp/img/create-service-account-keys-json.png)
 
-![save service account keys json](/docs/cloud-setup-guide/gcp/img/save-json-service-account-details.png)
+![save service account keys json](/docs/cloud-setup/gcp/img/save-json-service-account-details.png)

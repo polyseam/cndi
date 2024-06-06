@@ -46,7 +46,7 @@ const parseCndiSecret = (
             ccolors.warn(
               `\n\n${
                 ccolors.error(
-                  "ERROR",
+                  "IMPORTANT",
                 )
               }: ${
                 ccolors.key_name(`"${secretEnvName}"`)
@@ -113,7 +113,7 @@ const parseCndiSecret = (
           console.error(
             sealedSecretManifestLabel,
             ccolors.error(
-              "ERROR",
+              "IMPORTANT",
             ),
             ccolors.key_name(`"${secretEnvName}"`),
             ccolors.warn("not found in environment"),

@@ -66,6 +66,19 @@ interface BaseNodeItemSpec {
   max_count?: number;
   count?: number;
   disk_type?: string;
+  labels?: Label;
+  taints?: Taint[];
+}
+
+interface Label {
+  [key: string]: string;
+}
+
+type CNDITaintEffect = "NoSchedule" | "PreferNoSchedule" | "NoExecute";
+interface Taint {
+  key: string;
+  value: string;
+  effect: CNDITaintEffect;
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]
@@ -88,6 +101,7 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   disk_size_gb?: number;
   instance_type?: string;
 }
+
 interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
   agents_min_count?: number;
   agents_max_count?: number;
@@ -173,6 +187,12 @@ type Microk8sAddon = {
   args?: string[];
 };
 
+type TFBlockVariable = {
+  type: "string" | "number" | "bool" | "list" | "map";
+  description?: string;
+  sensitive?: boolean;
+};
+
 type TFBlocks = {
   terraform?: {
     [key: string]: unknown;
@@ -181,7 +201,7 @@ type TFBlocks = {
     [key: string]: unknown;
   };
   variable?: {
-    [key: string]: unknown;
+    [key: string]: TFBlockVariable;
   };
   locals?: {
     [key: string]: unknown;
@@ -229,16 +249,34 @@ export type ExternalDNSProvider =
   | "oci";
 
 export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
+export type CNDIDistribution =
+  | "microk8s"
+  | "eks"
+  | "gke"
+  | "aks"
+  | "clusterless";
 
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
-  distribution: "microk8s" | "eks" | "gke" | "aks";
+  distribution: CNDIDistribution;
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
+      ingress: {
+        nginx: {
+          public: {
+            enabled?: boolean; // default: true
+            values: Record<string, unknown>;
+          };
+          private: {
+            enabled?: boolean; // default: true
+            values: Record<string, unknown>;
+          };
+        };
+      };
       external_dns: {
         enabled?: boolean; // default: true
         provider: ExternalDNSProvider;
@@ -346,6 +384,7 @@ export type {
   CNDIApplicationSpec,
   CNDIConfig,
   CNDIPort,
+  CNDITaintEffect,
   DeploymentTargetConfiguration,
   EnvCommentEntry,
   EnvLines,
@@ -356,9 +395,11 @@ export type {
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
+  Label,
   Microk8sAddon,
   MultipassNodeItemSpec,
   SealedSecretsKeys,
   SshKeys,
+  Taint,
   TFBlocks,
 };

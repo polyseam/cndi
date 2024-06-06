@@ -45,15 +45,26 @@ successfully:**
 - **GitHub CLI**: You will need to have the GitHub CLI installed on your
   machine. You can download it [here](https://cli.github.com/).
 
-- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup-guide/azure/azure-setup.md)
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup/azure/azure-setup.md)
 
 ## download cndi ⬇️
 
-Run the following command within your terminal to download and install cndi:
+### macos and linux
 
-```shell
-# this will download the correct binary for your OS
+Installing for macOS and Linux is the way to go if you have that option. Simply
+run the following:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/polyseam/cndi/main/install.sh | sh
+```
+
+### windows
+
+Installing for Windows should be just as easy. Here is the command to install
+CNDI on Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/polyseam/cndi/main/install.ps1 | iex
 ```
 
 ## create your cndi project 📂
@@ -109,7 +120,6 @@ running Kubernetes applications. The prompt will be:
 
 ```shell
 Select a distribution
-  microk8s
 ❯ aks
 ```
 
@@ -117,6 +127,78 @@ After confirming that `aks` is highlighted, press `Enter` to finalize your
 choice. You will then need to provide specific information at various
 interactive prompts. Below is a comprehensive list of the prompts used during
 this init process:
+
+- **Cndi Project Name**: _name of project_
+- **Template**: _list of templates to choose from_
+
+---
+
+- **GitHub Username**: _a user's handle on GitHub._
+- **GitHub Repository URL**: _the url for the GitHub repository that will hold
+  all cluster configuration_
+- **GitHub Personal Access Token**: _the access token CNDI will use to access
+  your repo for cluster creation and synchronization_
+
+---
+
+- **Azure Subscription ID**: _access keys are long-term credentials for an IAM
+  user_
+- **Azure Client ID**: _access keys are long-term credentials for an IAM user_
+- **Azure Client Secret**: _region where the infastructure is being created_
+- **Azure Tenant ID**: _access keys are long-term credentials for an IAM user_
+- **Azure Region**: _region where the infastructure is being created_
+
+---
+
+- **Git Username for Airflow DAG Storage**: _a user's handle on GitHub used to
+  synchronize Airflow DAGs_
+- **Git Password for Airflow DAG Storage**: _a personal access token used to
+  synchronize Airflow DAGs_
+- **Git Repo for Airflow DAG Storage**: _url for repo where your Airflow DAGs
+  will be stored_
+
+---
+
+- **Domain name you want ArgoCD to be accessible on**: _domain where ArgoCD will
+  be hosted_
+- **Domain name you want Airflow to be accessible on**: _domain where Airflow
+  will be hosted_
+
+---
+
+- **Email address you want to use for lets encrypt:** _an email for lets encrypt
+  to use when generating certificates_
+- **Username you want to use for airflow cnpg database:** _username you want to
+  use for airflow database_
+- **Password you want to use for airflow cnpg database:** _password you want to
+  use for airflow database_
+- **Name of the postgresql database you want to use for airflow cnpg database:**
+  _name of the postgresql database you want to use for airflow cnpg database_
+
+This process will generate a `cndi_config.yaml` file, and `cndi` directory at
+the root of your repository containing all the necessary files for the
+configuration. It will also store all the values in a file called `.env` at the
+root of your repository.
+
+The structure of the generated CNDI project will be something like this:
+
+```shell
+├── 📁 cndi
+│   ├── 📁 cluster_manifests
+│   │   ├── 📁 applications
+│   │   │   └── airflow.application.json
+│   │   ├── argo-ingress.json
+│   │   ├── cert-manager-cluster-issuer.json
+│   │   └── git-credentials-secret.json
+│   └── 📁 terraform
+│       ├── airflow-nodes.cndi-node.tf.json
+│       └── etc 
+├── cndi_config.yaml
+├── .env
+├── .gitignore
+├── .github
+└── README.md
+```
 
 ```
 cndi create polyseam/my-cndi-cluster
@@ -179,12 +261,11 @@ project.
 
 Instead of manually creating a CNAME record in your domain's DNS settings, if
 you enabled & configured ExternalDNS during the cndi init process then
-ExternalDNS will automatically create a CNAME, or a record in your domain
-registar, pointing to your load balancer's public host. This process eliminates
-the need for manual DNS record management. If everything is working correctly
-you should now open the domain name you've assigned for ArgoCD in your browser
-to see the ArgoCD login page. The DNS changes may take a few minutes to
-propagate
+ExternalDNS will automatically create A record in your domain registar, pointing
+to your load balancer's public host. This process eliminates the need for manual
+DNS record management. If everything is working correctly you should now open
+the domain name you've assigned for ArgoCD in your browser to see the ArgoCD
+login page. The DNS changes may take a few minutes to propagate
 
 - (Optional if you dont have an domain name)
   [Here's a guide of how to connect to your AKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/aks/port-forwarding.md)
@@ -200,32 +281,28 @@ Attach the load balancer to your domain manually (Optional)
 </summary>
 <div>
 
-At the end of the cndi run there is also an output called `public host`, which
-is the **DNS** (CNAME) of the load Balancer thats attached to your AKS
-instances.
+At the end of the cndi run there is also an output called `resource groups`,
+which will have public loadbalancer. Copy the IP address(public host) of the
+loadbalancer thats attached to your AKS instances.
 
 ![cndi outputs](/docs/walkthroughs/aks/img/outputs.png)
+![AKS LB](/docs/walkthroughs/aks/img/azure-nlb.png)
 
 - Copy `public host`
 - Go to your custom domain,
-- Create an CNAME record to route traffic to the load balancer IP address
+- Create an A record to route traffic to the load balancer IP address
   `public host` for Airflow and Argocd at the domain you provided.
 
-![google domains](/docs/walkthroughs/aks/img/google-domains-cname.png)
+![google domains](/docs/walkthroughs/aks/img/google-domains-a-record.png)
 
 If everything is working correctly you should now open the domain name you've
 assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
 changes may take a few minutes to propagate.
 
-- (Optional if you dont have an domain name)
-  [Here's a guide of how to connect to your AKS Kubernetes Cluster once its deployed and Port Forward Argocd and the Airflow Web Server](/docs/walkthroughs/aks/port-forwarding.md)
-
 ![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
-
-![.env file](/docs/walkthroughs/aks/img/argocd-admin-password.png)
 
 </div>
 

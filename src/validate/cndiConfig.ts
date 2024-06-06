@@ -1,5 +1,12 @@
 import { ccolors } from "deps";
 import { CNDIConfig } from "src/types.ts";
+import { isSlug } from "src/utils.ts";
+import {
+  EFFECT_VALUES,
+  NO_EXECUTE,
+  NO_SCHEDULE,
+  PREFER_NO_SCHEDULE,
+} from "consts";
 
 const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
@@ -47,6 +54,23 @@ export default function validateConfig(
       ].join(" "),
       { cause: 900 },
     );
+  } else if (config?.project_name) {
+    if (!isSlug(config?.project_name)) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but the"),
+          ccolors.key_name('"project_name"'),
+          ccolors.error("is not a valid slug"),
+          ccolors.error(
+            "it must only contain lowercase letters, numbers, and hyphens",
+          ),
+        ].join(" "),
+        { cause: 903 },
+      );
+    }
   }
 
   if (!config?.infrastructure) {
@@ -184,101 +208,226 @@ export default function validateConfig(
     );
   }
 
-  if (!config?.distribution) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it does not have the required"),
-        ccolors.key_name('"distribution"'),
-        ccolors.error("key"),
-      ].join(" "),
-      { cause: 917 },
-    );
-  }
+  const isClusterless = config?.distribution === "clusterless";
 
-  if (!config?.infrastructure?.cndi?.nodes?.[0]) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it does not have any"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries"),
-      ].join(" "),
-      { cause: 902 },
-    );
-  }
-
-  if (
-    config?.provider === "dev" &&
-    config?.infrastructure?.cndi?.nodes?.length > 1
-  ) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it has multiple"),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries with the"),
-        ccolors.key_name('"kind"'),
-        ccolors.error(
-          'value of "dev". Only one node can be deployed when doing dev deployments.',
-        ),
-      ].join(" "),
-      { cause: 911 },
-    );
-  }
-
-  if (!config?.cndi_version) {
-    console.log(
-      cndiConfigLabel,
-      ccolors.warn(`You haven't specified a`),
-      ccolors.key_name(`"cndi_version"`),
-      ccolors.warn(`in your config file, defaulting to "v2"`),
-    );
-  }
-
-  const nodeNameSet = new Set();
-
-  for (const node of config?.infrastructure?.cndi?.nodes) {
-    if (!node.name) {
+  if (isClusterless) {
+    if (config?.provider === "dev") {
       throw new Error(
         [
           cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
-          ccolors.error("but it has at least one"),
-          ccolors.key_name('"infrastructure.cndi.nodes"'),
-          ccolors.error("entry that is missing a"),
-          ccolors.key_name('"name"'),
-          ccolors.error("value. Node names must be specified."),
+          ccolors.error("but it has"),
+          ccolors.key_name('"distribution"'),
+          ccolors.error("set to"),
+          ccolors.user_input('"clusterless"'),
+          ccolors.error("while the"),
+          ccolors.key_name('"provider"'),
+          ccolors.error("is set to"),
+          ccolors.user_input('"dev"'),
+          ccolors.error("which is not supported"),
         ].join(" "),
-        { cause: 905 },
+        { cause: 918 },
       );
     }
-    nodeNameSet.add(node.name);
-  }
+    if (config?.infrastructure?.cndi) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"infrastructure.cndi"'),
+          ccolors.error("entries in clusterless mode"),
+        ].join(" "),
+        { cause: 919 },
+      );
+    }
+    // TODO: throw if cluster things are present in clusterless mode
+  } else {
+    if (!config?.distribution) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it does not have the required"),
+          ccolors.key_name('"distribution"'),
+          ccolors.error("key"),
+        ].join(" "),
+        { cause: 917 },
+      );
+    }
 
-  const nodeNamesAreUnique =
-    nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
+    const firstNode = config?.infrastructure?.cndi?.nodes?.[0];
 
-  if (!nodeNamesAreUnique) {
-    throw new Error(
-      [
+    if (!firstNode) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it does not have any"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries"),
+        ].join(" "),
+        { cause: 902 },
+      );
+    } else if (firstNode.taints?.length) {
+      // throw on AKS
+      if (config?.distribution === "aks") {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error(
+              "but taints are not allowed on the first node in aks",
+            ),
+            ccolors.key_name('"infrastructure.cndi.nodes"'),
+            ccolors.error("entry"),
+          ].join(" "),
+          { cause: 918 },
+        );
+      }
+      // warn on other distributions
+      console.log(
         cndiConfigLabel,
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("but it has multiple "),
-        ccolors.key_name('"infrastructure.cndi.nodes"'),
-        ccolors.error("entries with the same"),
-        ccolors.key_name('"name"'),
-        ccolors.error("values. Node names must be unique."),
-      ].join(" "),
-      { cause: 906 },
-    );
+        ccolors.warn(
+          "Warning:",
+        ),
+        ccolors.key_name("taints"),
+        ccolors.warn(
+          "are only supported in the first node group when using",
+        ),
+        ccolors.key_name("distribution"),
+        ccolors.user_input(`gke`),
+        ccolors.warn("or"),
+        ccolors.user_input(`eks`),
+        ccolors.warn("!\n"),
+      );
+    }
+
+    if (
+      config?.provider === "dev" &&
+      config?.infrastructure?.cndi?.nodes?.length > 1
+    ) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has multiple"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries with the"),
+          ccolors.key_name('"kind"'),
+          ccolors.error(
+            'value of "dev". Only one node can be deployed when doing dev deployments.',
+          ),
+        ].join(" "),
+        { cause: 911 },
+      );
+    }
+
+    if (!config?.cndi_version) {
+      console.log(
+        cndiConfigLabel,
+        ccolors.warn(`You haven't specified a`),
+        ccolors.key_name(`"cndi_version"`),
+        ccolors.warn(`in your config file, defaulting to "v2"`),
+      );
+    }
+
+    const nodeNameSet = new Set();
+
+    for (const node of config?.infrastructure?.cndi?.nodes) {
+      if (!node.name) {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error("but it has at least one"),
+            ccolors.key_name('"infrastructure.cndi.nodes"'),
+            ccolors.error("entry that is missing a"),
+            ccolors.key_name('"name"'),
+            ccolors.error("value. Node names must be specified."),
+          ].join(" "),
+          { cause: 905 },
+        );
+      }
+      nodeNameSet.add(node.name);
+
+      for (const taint of node.taints || []) {
+        if (!taint?.effect) {
+          throw new Error(
+            [
+              cndiConfigLabel,
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.error("\nbut the"),
+              ccolors.key_name('"infrastructure.cndi.nodes"'),
+              ccolors.error("entry named"),
+              ccolors.user_input(`"${node.name}"`),
+              ccolors.error("has a taint without an"),
+              ccolors.key_name('"effect"'),
+              ccolors.error("value."),
+              ccolors.error("\n\nTaint effects must be:"),
+              ccolors.error(
+                `${ccolors.key_name(NO_SCHEDULE)}, ${
+                  ccolors.key_name(PREFER_NO_SCHEDULE)
+                }, or ${ccolors.key_name(NO_EXECUTE)}`,
+              ),
+            ].join(" "),
+            { cause: 920 },
+          );
+        } else {
+          if (!EFFECT_VALUES.includes(taint.effect)) {
+            throw new Error(
+              [
+                cndiConfigLabel,
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"`),
+                ccolors.error("\nbut the"),
+                ccolors.key_name('"infrastructure.cndi.nodes"'),
+                ccolors.error("entry named"),
+                ccolors.user_input(`${node.name}`),
+                ccolors.error("has a taint with an invalid"),
+                ccolors.key_name("effect"),
+                ccolors.error("value."),
+                ccolors.error("\n\nTaint effects must be:"),
+                ccolors.error(
+                  `${ccolors.key_name(NO_SCHEDULE)}, ${
+                    ccolors.key_name(PREFER_NO_SCHEDULE)
+                  }, or ${ccolors.key_name(NO_EXECUTE)}`,
+                ),
+                ccolors.error("\nYou supplied:"),
+                ccolors.user_input(`"${taint.effect}"`),
+              ].join(" "),
+              { cause: 920 },
+            );
+          }
+        }
+      }
+    }
+
+    const nodeNamesAreUnique =
+      nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
+
+    if (!nodeNamesAreUnique) {
+      throw new Error(
+        [
+          cndiConfigLabel,
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has multiple "),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entries with the same"),
+          ccolors.key_name('"name"'),
+          ccolors.error("values. Node names must be unique."),
+        ].join(" "),
+        { cause: 906 },
+      );
+    }
   }
 }
