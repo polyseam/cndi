@@ -194,6 +194,26 @@ outputs:
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
 
+      airflow-fernet-key-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-fernet-key
+          namespace: airflow
+        type: Opaque
+        stringData:
+          fernet-key: $cndi_on_ow.seal_secret_from_env_var(AIRFLOW_FERNET_KEY)
+      
+      airflow-webserver-key-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-webserver-key
+          namespace: airflow
+        type: Opaque
+        stringData:
+          webserver-key: $cndi_on_ow.seal_secret_from_env_var(AIRFLOW_WEBSERVER_KEY)
+              
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -286,6 +306,11 @@ outputs:
               wait: 40
               $cndi.comment(subPath): Folder path in DAG repo to sync
               subPath: dags
+          enableBuiltInSecretEnvVars:
+            AIRFLOW__CORE__FERNET_KEY: false
+            AIRFLOW__WEBSERVER__SECRET_KEY: false
+          fernetKeySecretName: airflow-fernet-key
+          webserverSecretKeySecretName: airflow-webserver-key
           config:
             $cndi.get_block(airflow_public_config):
               args:
@@ -325,8 +350,11 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
-    $cndi.comment(neo4j-heading): PostgreSQL Connection Parameters
+     
+    $cndi.comment(airflow-heading): Airflow Key Parameters 
+    AIRFLOW_FERNET_KEY: '{{ $cndi.get_random_string(32) }}' 
+    AIRFLOW_WEBSERVER_KEY: '{{ $cndi.get_random_string(16) }}'    
+    $cndi.comment(postgres-heading): PostgreSQL Connection Parameters
     POSTGRESQL_DB: airflow-db
     POSTGRESQL_USER: airflow
     POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_password) }}"
