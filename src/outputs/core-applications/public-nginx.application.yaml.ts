@@ -89,9 +89,6 @@ export default function getNginxApplicationManifest(
       name: releaseName,
       finalizers: DEFAULT_FINALIZERS,
       labels: { name: releaseName },
-      annotations: {
-        "argocd.argoproj.io/sync-wave": "-1",
-      },
     },
     spec: {
       project: DEFAULT_PROJECT,
