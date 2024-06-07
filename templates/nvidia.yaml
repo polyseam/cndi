@@ -1,39 +1,42 @@
 blocks:
-  - name: aws-node
+  - name: aws-nodes
     content:
-      name: gpu-enabled
-      $cndi.comment(aws_vantage): https://instances.vantage.sh/aws/ec2/g6.xlarge?region=us-east-1
-      instance_type: g6.xlarge
-      labels:
-        - cuda_capability: 
-          value: '8.9'
-        - key: gpu
-          value: true
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(aws_vantage): https://instances.vantage.sh/aws/ec2/g6.xlarge?region=us-east-1
+          instance_type: g6.xlarge
+          labels:
+            - cuda_capability: 
+              value: '8.9'
+            - key: gpu
+              value: true
 
-  - name: azure-node
+  - name: azure-nodes
     content:
-      name: gpu-enabled
-      $cndi.comment(azure_vantage): https://instances.vantage.sh/azure/vm/nc4ast4-v3
-      instance_type: nc4ast4-v3
-      labels:
-        - cuda_capability: 
-          value: '7.5'
-        - key: gpu
-          value: true
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(azure_vantage): https://instances.vantage.sh/azure/vm/nc4ast4-v3
+          instance_type: nc4ast4-v3
+          labels:
+            - cuda_capability: 
+              value: '7.5'
+            - key: gpu
+              value: true
 
-  - name: gcp-node
+  - name: gcp-nodes
     content:
-      name: gpu-enabled
-      $cndi.comment(gcp_warning): This is not yet functional!
-      $cndi.comment(gcp_contd): The GPUs are addons in GCP, not node types
-      instance_type: g2-standard-3
-      labels:
-        - key: nvidia.com/gpu
-          value: "true"
-        - cuda_capability: 
-          value: '8.9'
-        - key: gpu
-          value: true
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(gcp_warning): This is not yet functional!
+          $cndi.comment(gcp_contd): The GPUs are addons in GCP, not node types
+          instance_type: g2-standard-3
+          labels:
+            - key: nvidia.com/gpu
+              value: "true"
+            - cuda_capability: 
+              value: '8.9'
+            - key: gpu
+              value: true
 
 
 prompts:
@@ -80,9 +83,8 @@ outputs:
               - ==
               - true
 
-        nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
-            {}
+        $cndi.get_block({{ $cndi.get_prompt_response(deployment_target_provider) }}-nodes):
+          {}
 
     cluster_manifests:
       argo-ingress:
