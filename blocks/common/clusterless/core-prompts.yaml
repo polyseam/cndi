@@ -82,9 +82,3 @@
   message: "Please enter your Git Repo URL:"
   type: Input
   default: ""
-
-- name: terraform_state_passphrase
-  message: >-
-    Enter an override for the default Terraform State Passphrase?
-  type: Input
-  default: '{{ $cndi.get_random_string(32) }}'
