@@ -130,12 +130,6 @@
     - ==
     - azure
 
-- name: terraform_state_passphrase
-  message: >-
-    Enter an override for the default Terraform State Passphrase?
-  type: Input
-  default: '{{ $cndi.get_random_string(32) }}'
-
 - name: argocd_admin_password
   message: >-
     Enter an override for the default ArgoCD Admin Password?
