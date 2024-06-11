@@ -173,6 +173,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           diskSize: volumeSize,
           clusterName,
           clusterServiceCidr: eksm.clusterServiceCidrOutput,
+          clusterPrimarySecurityGroupId:
+            eksm.clusterPrimarySecurityGroupIdOutput,
+          vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
         },
       );
       nodeGroupIndex++;
