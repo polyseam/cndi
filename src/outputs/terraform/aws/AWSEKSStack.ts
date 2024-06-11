@@ -41,7 +41,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
-
     const suffix = new CDKTFProviderRandom.stringResource.StringResource(
       this,
       "cluster_name_suffix",
@@ -174,7 +173,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       eksManagedNodeGroupDefaults: {
         amiType: "AL2_x86_64",
       },
-      eksManagedNodeGroups,
     });
 
     const _iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
@@ -190,6 +188,34 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ],
       },
     );
+
+    const cluster = new CDKTFProviderAWS.dataAwsEksCluster.DataAwsEksCluster(
+      this,
+      "cndi_aws_eks_cluster",
+      {
+        name: eksm.clusterNameOutput,
+      },
+    );
+
+    const kubernetes = {
+      host: cluster.endpoint,
+      clusterCaCertificate: cluster.certificateAuthority.get(0).data,
+      exec: {
+        apiVersion: "client.authentication.k8s.io/v1alpha1",
+        command: "aws",
+        args: ["eks", "get-token", "--cluster-name", cluster.name],
+      },
+    };
+
+    new CDKTFProviderKubernetes.provider.KubernetesProvider(
+      this,
+      "cndi_kubernetes_provider",
+      { ...kubernetes, exec: [kubernetes.exec] },
+    );
+
+    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
+      kubernetes,
+    });
 
     const argocdAdminPasswordHashed = Fn.sensitive(
       Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
