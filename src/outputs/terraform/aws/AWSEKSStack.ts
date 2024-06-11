@@ -40,15 +40,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     super(scope, name, cndi_config);
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
-    new CDKTFProviderRandom.provider.RandomProvider(
-      this,
-      "cndi_random_provider",
-      {},
-    );
+
 
     const suffix = new CDKTFProviderRandom.stringResource.StringResource(
       this,
-      "suffix",
+      "cluster_name_suffix",
       {
         length: 6,
         special: false,
