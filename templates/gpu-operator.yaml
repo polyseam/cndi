@@ -101,11 +101,11 @@ outputs:
             - true
 
     applications:
-      nvidia:
+      gpu-operator:
         repoURL: https://helm.ngc.nvidia.com/nvidia
         chart: gpu-operator
         targetRevision: v24.3.0
-        namespace: nvidia
+        destinationNamespace: gpu-operator
         values: {} # https://github.com/NVIDIA/gpu-operator/blob/master/deployments/gpu-operator/values.yaml
         
   env:
