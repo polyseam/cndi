@@ -97,6 +97,26 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     });
 
+    const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
+      clusterName,
+      clusterVersion: DEFAULT_K8S_VERSION,
+      clusterEndpointPublicAccess: true,
+      enableClusterCreatorAdminPermissions: true,
+
+      clusterAddons: {
+        awsEbsCsiDriver: {
+          serviceAccountRoleArn: "",
+        },
+      },
+
+      vpcId: vpcm.vpcIdOutput,
+      subnetIds: vpcm.privateSubnets,
+
+      eksManagedNodeGroupDefaults: {
+        amiType: "AL2_x86_64",
+      },
+    });
+
     const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
       {};
 
@@ -152,30 +172,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           tags,
           diskSize: volumeSize,
           clusterName,
+          clusterServiceCidr: eksm.clusterServiceCidrOutput,
         },
       );
       nodeGroupIndex++;
     }
-
-    const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
-      clusterName,
-      clusterVersion: DEFAULT_K8S_VERSION,
-      clusterEndpointPublicAccess: true,
-      enableClusterCreatorAdminPermissions: true,
-
-      clusterAddons: {
-        awsEbsCsiDriver: {
-          serviceAccountRoleArn: "",
-        },
-      },
-
-      vpcId: vpcm.vpcIdOutput,
-      subnetIds: vpcm.privateSubnets,
-
-      eksManagedNodeGroupDefaults: {
-        amiType: "AL2_x86_64",
-      },
-    });
 
     const _iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
       this,
