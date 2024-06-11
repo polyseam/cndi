@@ -8,23 +8,27 @@ import {
 
 import {
   App,
+  AwsEksManagedNodeGroupModule,
+  AwsEksModule,
+  AwsIamAssumableRoleWithOidcModule,
+  AwsVpcModule,
   CDKTFProviderAWS,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
+  CDKTFProviderRandom,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
   Fn,
   stageCDKTFStack,
+  TerraformLocal,
   TerraformOutput,
 } from "cdktf-deps";
 
 import {
   getCDKTFAppConfig,
-  getPrettyJSONString,
   getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
-  resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
 
@@ -34,708 +38,71 @@ import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
-    const project_name = this.locals.cndi_project_name.asString;
-    const open_ports = resolveCNDIPorts(cndi_config);
-
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
-
-    const vpc = new CDKTFProviderAWS.vpc.Vpc(this, "cndi_aws_vpc", {
-      cidrBlock: "10.0.0.0/16",
-      enableDnsHostnames: true,
-      enableDnsSupport: true,
-      tags: {
-        Name: `cndi-vpc_${project_name}`,
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-    });
-
-    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+    new CDKTFProviderRandom.provider.RandomProvider(
       this,
-      "cndi_aws_internet_gateway",
-      {
-        tags: {
-          Name: `cndi-igw_${project_name}`,
-        },
-      },
-    );
-
-    const gwAttachment = new CDKTFProviderAWS.internetGatewayAttachment
-      .InternetGatewayAttachment(this, "cndi_aws_internet_gateway_attachment", {
-      internetGatewayId: igw.id,
-      vpcId: vpc.id,
-      dependsOn: [igw, vpc],
-    });
-
-    const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
-      domain: "vpc",
-      tags: {
-        Name: `cndi-elastic-ip_${project_name}`,
-      },
-      dependsOn: [gwAttachment],
-    });
-
-    new CDKTFProviderAWS.dataAwsCallerIdentity.DataAwsCallerIdentity(
-      this,
-      "cndi_aws_caller_identity",
+      "cndi_random_provider",
       {},
     );
 
-    // TODO: should this be further filtered according to instance_type avaiability?
-    const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
+    const suffix = new CDKTFProviderRandom.stringResource.StringResource(
+      this,
+      "suffix",
+      {
+        length: 6,
+        special: false,
+      },
+    );
+
+    this.locals.clusterName = new TerraformLocal(this, "cluster_name", {
+      value: `${this.locals.cndi_project_name.asString}-${suffix.result}`,
+    });
+
+    const clusterName = this.locals.clusterName.asString;
+
+    const project_name = this.locals.cndi_project_name.asString;
+
+    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+      this,
+      "ebs_csi_policy",
+      {
+        arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+      },
+    );
+
+    const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
       this,
       "available-zones",
       {
-        state: "available",
+        filter: [{
+          name: "opt-in-status",
+          values: ["opt-in-not-required"],
+        }],
       },
     );
 
-    const securityGroupIngresses = [
-      {
-        cidrBlocks: ["10.0.0.0/16"],
-        description:
-          "Inbound rule that enables traffic between EC2 instances in the VPC ",
-        fromPort: 0,
-        ipv6CidrBlocks: [],
-        prefixListIds: [],
-        protocol: "-1",
-        securityGroups: [],
-        self: false,
-        toPort: 0,
+    const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
+      name: `cndi-vpc_${project_name}`,
+      cidr: "10.0.0.0/16",
+      azs: availableByDefault.names.slice(0, 3),
+      privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
+      publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
+      enableNatGateway: true,
+      singleNatGateway: true,
+      enableDnsHostnames: true,
+      publicSubnetTags: {
+        "kubernetes.io/role/elb": "1",
       },
-    ];
-
-    open_ports.forEach((port) => {
-      securityGroupIngresses.push({
-        cidrBlocks: ["0.0.0.0/0"],
-        description: `Port for ${port.name} traffic`,
-        fromPort: port.number,
-        ipv6CidrBlocks: [],
-        prefixListIds: [],
-        protocol: "tcp",
-        securityGroups: [],
-        self: false,
-        toPort: port.number,
-      });
-    });
-
-    const securityGroup = new CDKTFProviderAWS.securityGroup.SecurityGroup(
-      this,
-      `cndi_aws_security_group`,
-      {
-        description: "Security firewall",
-        vpcId: vpc.id,
-        ingress: securityGroupIngresses,
-        egress: [
-          {
-            cidrBlocks: ["0.0.0.0/0"],
-            description: "All traffic",
-            fromPort: 0,
-            ipv6CidrBlocks: [],
-            prefixListIds: [],
-            protocol: "-1",
-            securityGroups: [],
-            toPort: 0,
-          },
-        ],
-        tags: {
-          Name: `cndi-security-group_${project_name}`,
-        },
-      },
-    );
-
-    const subnetPrivateA = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_private_a",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 0),
-        cidrBlock: "10.0.3.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-private-subnet-a_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/internal-elb": "1",
-        },
-        vpcId: vpc.id,
-        dependsOn: [gwAttachment],
-      },
-    );
-
-    const subnetPrivateB = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_private_b",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 1),
-        cidrBlock: "10.0.4.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-private-subnet-b_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/internal-elb": "1",
-        },
-        vpcId: vpc.id,
-        dependsOn: [gwAttachment],
-      },
-    );
-
-    const subnetPublicA = new CDKTFProviderAWS.subnet.Subnet(
-      this,
-      "cndi_aws_subnet_public_a",
-      {
-        availabilityZone: Fn.element(availabilityZones.names, 0),
-        cidrBlock: "10.0.1.0/24",
-        mapPublicIpOnLaunch: true,
-        tags: {
-          Name: `cndi-public-subnet-a_${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-          "kubernetes.io/role/elb": "1",
-        },
-        vpcId: vpc.id,
-        dependsOn: [gwAttachment],
-      },
-    );
-
-    const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
-      this,
-      "cndi_aws_efs_file_system",
-      {
-        creationToken: `cndi_aws_efs_token_for_${project_name}`,
-        tags: {
-          Name: `cndi-elastic-file-system_${project_name}`,
-        },
-      },
-    );
-
-    const _efsAccessPoint = new CDKTFProviderAWS.efsAccessPoint.EfsAccessPoint(
-      this,
-      "cndi_aws_efs_access_point",
-      {
-        fileSystemId: efsFs.id,
-        tags: {
-          Name: `cndi-elastic-file-system-access-point_${project_name}`,
-        },
-      },
-    );
-
-    const _efsMountTargetA = new CDKTFProviderAWS.efsMountTarget.EfsMountTarget(
-      this,
-      "cndi_aws_efs_mount_target",
-      {
-        fileSystemId: efsFs.id,
-        securityGroups: [securityGroup.id],
-        subnetId: subnetPrivateA.id,
-      },
-    );
-
-    const computePolicy = new CDKTFProviderAWS.dataAwsIamPolicyDocument
-      .DataAwsIamPolicyDocument(
-      this,
-      "cndi_aws_iam_policy_document_eks_ec2",
-      {
-        statement: [
-          {
-            actions: ["sts:AssumeRole"],
-            effect: "Allow",
-            principals: [
-              {
-                identifiers: ["eks.amazonaws.com"],
-                type: "Service",
-              },
-              {
-                identifiers: ["ec2.amazonaws.com"],
-                type: "Service",
-              },
-            ],
-          },
-        ],
-      },
-    );
-
-    // role for cluster and nodegroup
-    const computeRole = new CDKTFProviderAWS.iamRole.IamRole(
-      this,
-      "cndi_aws_iam_role_compute",
-      {
-        namePrefix: "COMPUTE",
-        assumeRolePolicy: computePolicy.json,
-      },
-    );
-
-    const natGateway = new CDKTFProviderAWS.natGateway.NatGateway(
-      this,
-      "cndi_aws_nat_gateway",
-      {
-        allocationId: eip.id,
-        dependsOn: [igw],
-        subnetId: subnetPublicA.id,
-        tags: {
-          Name: `cndi-nat-gateway_${project_name}`,
-        },
-      },
-    );
-
-    const publicRouteTable = new CDKTFProviderAWS.routeTable.RouteTable(
-      this,
-      "cndi_aws_route_table_public",
-      {
-        tags: {
-          Name: `cndi-route-table-public_${project_name}`,
-        },
-        vpcId: vpc.id,
-      },
-    );
-
-    const _publicRoute = new CDKTFProviderAWS.route.Route(
-      this,
-      "cndi_aws_route_public",
-      {
-        routeTableId: publicRouteTable.id,
-        destinationCidrBlock: "0.0.0.0/0",
-        gatewayId: igw.id,
-      },
-    );
-
-    const privateRouteTable = new CDKTFProviderAWS.routeTable.RouteTable(
-      this,
-      "cndi_aws_route_table_private",
-      {
-        tags: {
-          Name: `cndi-route-table-private_${project_name}`,
-        },
-        vpcId: vpc.id,
-      },
-    );
-
-    const _privateRoute = new CDKTFProviderAWS.route.Route(
-      this,
-      "cndi_aws_route_private",
-      {
-        routeTableId: privateRouteTable.id,
-        destinationCidrBlock: "0.0.0.0/0",
-        natGatewayId: natGateway.id,
-      },
-    );
-
-    const clusterPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
-      .IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_eks_cluster_policy",
-      {
-        role: computeRole.name,
-        policyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      },
-    );
-
-    const servicePolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
-      .IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_eks_service_policy",
-      {
-        policyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-        role: computeRole.name,
-      },
-    );
-
-    const workerNodePolicyAttachment = new CDKTFProviderAWS
-      .iamRolePolicyAttachment.IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
-      {
-        policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-        role: computeRole.name,
-      },
-    );
-
-    const cniPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
-      .IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_eks_cni_policy",
-      {
-        policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-        role: computeRole.name,
-      },
-    );
-
-    const containerRegistryAttachment = new CDKTFProviderAWS
-      .iamRolePolicyAttachment.IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
-      {
-        policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-        role: computeRole.name,
-      },
-    );
-
-    const _vpcAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
-      .IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_eks_vpc_resource_controller",
-      {
-        policyArn: "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
-        role: computeRole.name,
-      },
-    );
-
-    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
-      this,
-      "cndi_aws_route_table_association_private_a",
-      {
-        routeTableId: privateRouteTable.id,
-        subnetId: subnetPrivateA.id,
-      },
-    );
-
-    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
-      this,
-      "cndi_aws_route_table_association_private_b",
-      {
-        routeTableId: privateRouteTable.id,
-        subnetId: subnetPrivateB.id,
-      },
-    );
-
-    new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
-      this,
-      "cndi_aws_route_table_association_public_a",
-      {
-        routeTableId: publicRouteTable.id,
-        subnetId: subnetPublicA.id,
-      },
-    );
-
-    const eksCluster = new CDKTFProviderAWS.eksCluster.EksCluster(
-      this,
-      "cndi_aws_eks_cluster",
-      {
-        name: project_name!,
-        roleArn: computeRole.arn,
-        version: DEFAULT_K8S_VERSION,
-        vpcConfig: {
-          endpointPrivateAccess: true,
-          endpointPublicAccess: true,
-          securityGroupIds: [securityGroup.id],
-          subnetIds: [subnetPrivateA.id, subnetPrivateB.id, subnetPublicA.id],
-        },
-        enabledClusterLogTypes: [
-          "api",
-          "audit",
-          "authenticator",
-          "controllerManager",
-          "scheduler",
-        ],
-        tags: {
-          Name: `cndi-eks-cluster-${project_name}`,
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-        },
-        dependsOn: [clusterPolicyAttachment, servicePolicyAttachment],
-      },
-    );
-
-    const exec = {
-      apiVersion: "client.authentication.k8s.io/v1beta1",
-      args: ["eks", "get-token", "--cluster-name", eksCluster.name],
-      command: "aws",
-    };
-
-    const kubernetes:
-      CDKTFProviderKubernetes.provider.KubernetesProviderConfig = {
-        clusterCaCertificate: Fn.base64decode(
-          eksCluster.certificateAuthority.get(0).data,
-        ),
-        host: eksCluster.endpoint,
-        exec: [exec],
-      };
-
-    new CDKTFProviderKubernetes.provider.KubernetesProvider(
-      this,
-      "cndi_kubernetes_provider",
-      kubernetes,
-    );
-
-    new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
-      kubernetes: {
-        ...kubernetes,
-        exec,
+      privateSubnetTags: {
+        "kubernetes.io/role/internal-elb": "1",
       },
     });
 
-    const tlsCertificate = new CDKTFProviderTls.dataTlsCertificate
-      .DataTlsCertificate(
-      this,
-      "cndi_tls_certificate",
-      {
-        url: eksCluster.identity.get(0).oidc.get(0).issuer,
-      },
-    );
+    const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
+      {};
 
-    const iamOpenIdConnectProvider = new CDKTFProviderAWS
-      .iamOpenidConnectProvider.IamOpenidConnectProvider(
-      this,
-      "cndi_aws_iam_openid_connect_provider",
-      {
-        clientIdList: ["sts.amazonaws.com"],
-        thumbprintList: [tlsCertificate.certificates.get(0).sha1Fingerprint],
-        url: tlsCertificate.url,
-      },
-    );
-
-    const webIdentityPolicyDocument = new CDKTFProviderAWS
-      .dataAwsIamPolicyDocument
-      .DataAwsIamPolicyDocument(
-      this,
-      "cndi_aws_iam_policy_document_web_identity",
-      {
-        statement: [
-          {
-            effect: "Allow",
-            principals: [
-              {
-                identifiers: [
-                  iamOpenIdConnectProvider.arn,
-                ],
-                type: "Federated",
-              },
-            ],
-            actions: ["sts:AssumeRoleWithWebIdentity"],
-            condition: [{
-              test: "StringEquals",
-              values: [
-                "system:serviceaccount:kube-system:efs-csi-controller-sa",
-                "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-              ],
-              variable:
-                Fn.replace(iamOpenIdConnectProvider.url, "https://", "") +
-                ":sub",
-            }],
-          },
-        ],
-      },
-    );
-
-    const webIdentityRole = new CDKTFProviderAWS.iamRole.IamRole(
-      this,
-      "cndi_aws_iam_role_web_identity_policy",
-      {
-        namePrefix: "WEBIDROLE",
-        description: "IAM role for web identity",
-        dependsOn: [iamOpenIdConnectProvider],
-        assumeRolePolicy: webIdentityPolicyDocument.json,
-      },
-    );
-
-    const webIdentityPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
-      this,
-      "cndi_aws_iam_policy_web_identity",
-      {
-        namePrefix: "WEBIDPOLICY",
-        policy: getPrettyJSONString({
-          Version: "2012-10-17",
-          Statement: [
-            // Misc
-            {
-              Action: [
-                "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:DescribeAutoScalingInstances",
-                "autoscaling:DescribeLaunchConfigurations",
-                "autoscaling:DescribeTags",
-                "autoscaling:SetDesiredCapacity",
-                "autoscaling:TerminateInstanceInAutoScalingGroup",
-              ],
-              Effect: "Allow",
-              Resource: ["*"],
-            },
-            // EFS CSI Driver
-            {
-              "Effect": "Allow",
-              "Action": [
-                "elasticfilesystem:DescribeAccessPoints",
-                "elasticfilesystem:DescribeFileSystems",
-                "elasticfilesystem:DescribeMountTargets",
-                "ec2:DescribeAvailabilityZones",
-              ],
-              "Resource": "*",
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "elasticfilesystem:CreateAccessPoint",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "aws:RequestTag/efs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "elasticfilesystem:TagResource",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "aws:ResourceTag/efs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": "elasticfilesystem:DeleteAccessPoint",
-              "Resource": "*",
-              "Condition": {
-                "StringEquals": {
-                  "aws:ResourceTag/efs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-            // EBS CSI Driver
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:CreateSnapshot",
-                "ec2:AttachVolume",
-                "ec2:DetachVolume",
-                "ec2:ModifyVolume",
-                "ec2:DescribeAvailabilityZones",
-                "ec2:DescribeInstances",
-                "ec2:DescribeSnapshots",
-                "ec2:DescribeTags",
-                "ec2:DescribeVolumes",
-                "ec2:DescribeVolumesModifications",
-              ],
-              "Resource": "*",
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:CreateTags",
-              ],
-              "Resource": [
-                "arn:aws:ec2:*:*:volume/*",
-                "arn:aws:ec2:*:*:snapshot/*",
-              ],
-              "Condition": {
-                "StringEquals": {
-                  "ec2:CreateAction": [
-                    "CreateVolume",
-                    "CreateSnapshot",
-                  ],
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteTags",
-              ],
-              "Resource": [
-                "arn:aws:ec2:*:*:volume/*",
-                "arn:aws:ec2:*:*:snapshot/*",
-              ],
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:CreateVolume",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "aws:RequestTag/ebs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:CreateVolume",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "aws:RequestTag/CSIVolumeName": "*",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteVolume",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteVolume",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "ec2:ResourceTag/CSIVolumeName": "*",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteVolume",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "ec2:ResourceTag/kubernetes.io/created-for/pvc/name": "*",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteSnapshot",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "ec2:ResourceTag/CSIVolumeSnapshotName": "*",
-                },
-              },
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DeleteSnapshot",
-              ],
-              "Resource": "*",
-              "Condition": {
-                "StringLike": {
-                  "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true",
-                },
-              },
-            },
-          ],
-        }),
-      },
-    );
-
-    const _webIdentityRolePolicyAttachment = new CDKTFProviderAWS
-      .iamRolePolicyAttachment.IamRolePolicyAttachment(
-      this,
-      "cndi_aws_iam_role_policy_attachment_web_identity",
-      {
-        role: webIdentityRole.name,
-        policyArn: webIdentityPolicy.arn,
-      },
-    );
-
-    let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup | null =
-      null;
     let nodeGroupIndex = 0;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
@@ -765,141 +132,66 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         scalingConfig.minSize = minCount;
       }
 
-      const taint = nodeGroup.taints?.map((taint) => ({
+      const taints = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
         effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
       })) || [];
 
+      const tags = {
+        Name: `cndi-eks-node-group-${nodeGroupName}`,
+        CNDIProject: project_name,
+      };
+
       const labels = nodeGroup.labels || {};
-      const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
-        .LaunchTemplate(
+      eksManagedNodeGroups[nodeGroupName] = new AwsEksManagedNodeGroupModule(
         this,
-        `cndi_aws_launch_template_${nodeGroupIndex}`,
+        `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
-          namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
-          blockDeviceMappings: [
-            {
-              deviceName: "/dev/sdf",
-              ebs: {
-                volumeSize,
-              },
-            },
-          ],
-          tagSpecifications: [
-            {
-              resourceType: "instance",
-              tags: {
-                Name: nodeGroupName,
-                CNDIProject: project_name,
-              },
-            },
-          ],
-          dependsOn: [
-            workerNodePolicyAttachment,
-            cniPolicyAttachment,
-            containerRegistryAttachment,
-          ],
-        },
-      );
-      const ng = new CDKTFProviderAWS.eksNodeGroup.EksNodeGroup(
-        this,
-        `cndi_aws_eks_node_group_${nodeGroupIndex}`,
-        {
-          clusterName: eksCluster.name,
-          amiType: "AL2_x86_64",
+          name,
           instanceTypes: [instanceType],
-          nodeGroupName,
-          nodeRoleArn: computeRole.arn,
-          scalingConfig,
-          capacityType: "ON_DEMAND",
-          subnetIds: [subnetPrivateA.id],
-          launchTemplate: {
-            id: nodegroupLaunchTemplate.id,
-            version: `${nodegroupLaunchTemplate.latestVersion}`,
-          },
-          updateConfig: { maxUnavailable: 1 },
-          taint,
           labels,
-          dependsOn: [
-            workerNodePolicyAttachment,
-            cniPolicyAttachment,
-            containerRegistryAttachment,
-            nodegroupLaunchTemplate,
-            gwAttachment,
-          ],
+          taints,
+          tags,
+          diskSize: volumeSize,
+          clusterName,
         },
       );
-      if (!firstNodeGroup) {
-        firstNodeGroup = ng;
-      }
       nodeGroupIndex++;
     }
 
-    const _helmReleaseEFSCSIDriver = new CDKTFProviderHelm.release.Release(
+    const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
+      clusterName,
+      clusterVersion: DEFAULT_K8S_VERSION,
+      clusterEndpointPublicAccess: true,
+      enableClusterCreatorAdminPermissions: true,
+
+      clusterAddons: {
+        awsEbsCsiDriver: {
+          serviceAccountRoleArn: "",
+        },
+      },
+
+      vpcId: vpcm.vpcIdOutput,
+      subnetIds: vpcm.privateSubnets,
+
+      eksManagedNodeGroupDefaults: {
+        amiType: "AL2_x86_64",
+      },
+      eksManagedNodeGroups,
+    });
+
+    const _iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
       this,
-      "cndi_helm_release_aws_efs_csi_driver",
+      "cndi_aws_iam_assumable_role_with_oidc",
       {
-        chart: "aws-efs-csi-driver",
-        createNamespace: true,
-        dependsOn: [efsFs],
-        name: "aws-efs-csi-driver",
-        namespace: "kube-system",
-        repository: "https://kubernetes-sigs.github.io/aws-efs-csi-driver/",
-        timeout: 600,
-        atomic: true,
-        set: [
-          {
-            name:
-              "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-            value: webIdentityRole.arn,
-          },
-          {
-            name:
-              "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-            value: webIdentityRole.arn,
-          },
-          { name: "storageClasses[0].name", value: "rwm" },
-          { name: "storageClasses[0].provisioner", value: "efs.csi.aws.com" },
-          {
-            name:
-              "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-            type: "string",
-            value: "false",
-          },
-          {
-            name: "storageClasses[0].reclaimPolicy",
-            value: "Delete",
-          },
-          {
-            name: "storageClasses[0].volumeBindingMode",
-            value: "WaitForFirstConsumer",
-          },
-          {
-            name: "storageClasses[0].parameters.provisioningMode",
-            value: "efs-ap",
-          },
-          {
-            name: "storageClasses[0].parameters.gidRangeEnd",
-            type: "string",
-            value: "2000",
-          },
-          {
-            name: "storageClasses[0].parameters.gidRangeStart",
-            type: "string",
-            value: "1000",
-          },
-          {
-            name: "storageClasses[0].parameters.fileSystemId",
-            value: efsFs.id,
-          },
-          {
-            name: "storageClasses[0].parameters.directoryPerms",
-            type: "string",
-            value: "700",
-          },
+        createRole: true,
+        roleName: `AmazonEKSTFEBSCSIRole-${clusterName}`,
+        providerUrl: eksm.oidcProviderOutput,
+        rolePolicyArns: [ebsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
         ],
-        version: "3.0.0",
       },
     );
 
@@ -928,8 +220,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         cleanupOnFail: true,
         createNamespace: true,
         dependsOn: [
-          efsFs,
-          firstNodeGroup!,
+          eksm,
         ],
         timeout: 600,
         atomic: true,
@@ -1030,72 +321,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [firstNodeGroup!, sealedSecretsSecret],
+        dependsOn: [eksm, sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
         version: SEALED_SECRETS_VERSION,
         timeout: 300,
         atomic: true,
-      },
-    );
-
-    const _helmReleaseEbsDriver = new CDKTFProviderHelm.release.Release(
-      this,
-      "cndi_helm_release_aws_ebs_csi_driver",
-      {
-        chart: "aws-ebs-csi-driver",
-        createNamespace: true,
-        dependsOn: [efsFs],
-        name: "aws-ebs-csi-driver",
-        namespace: "kube-system",
-        repository: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver/",
-        timeout: 600,
-        atomic: true,
-        set: [
-          {
-            name:
-              "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-            value: webIdentityRole.arn,
-          },
-          {
-            name:
-              "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn",
-            value: webIdentityRole.arn,
-          },
-          { name: "storageClasses[0].name", value: "rwo" },
-          {
-            name:
-              "storageClasses[0].annotations.storageclass\\.kubernetes\\.io/is-default-class",
-            type: "string",
-            value: "true",
-          },
-          {
-            name: "storageClasses[0].provisioner",
-            value: "ebs.csi.aws.com",
-          },
-          {
-            name: "storageClasses[0].parameters.fsType",
-            value: "ext4",
-          },
-          {
-            name: "storageClasses[0].parameters.type",
-            value: "gp3",
-          },
-          {
-            name: "storageClasses[0].reclaimPolicy",
-            value: "Delete",
-          },
-          {
-            name: "storageClasses[0].volumeBindingMode",
-            value: "WaitForFirstConsumer",
-          },
-          {
-            name: "storageClasses[0].allowVolumeExpansion",
-            value: "true",
-          },
-        ],
-        version: "2.22.0",
       },
     );
 
