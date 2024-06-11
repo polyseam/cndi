@@ -171,12 +171,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           taints,
           tags,
           diskSize: volumeSize,
-          clusterName,
+          clusterName: eksm.clusterNameOutput,
           clusterServiceCidr: eksm.clusterServiceCidrOutput,
           clusterPrimarySecurityGroupId:
             eksm.clusterPrimarySecurityGroupIdOutput,
           vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
           subnetIds: vpcm.privateSubnets,
+          dependsOn:[eksm, vpcm],
         },
       );
       nodeGroupIndex++;
@@ -201,6 +202,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_eks_cluster",
       {
         name: eksm.clusterNameOutput,
+        dependsOn: [eksm],
       },
     );
 
