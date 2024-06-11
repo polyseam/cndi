@@ -84,6 +84,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       name: `cndi-vpc_${project_name}`,
       cidr: "10.0.0.0/16",
       azs: availableByDefault.names.slice(0, 3),
+      createVpc: true,
       privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
       publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
       enableNatGateway: true,
@@ -211,7 +212,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       host: cluster.endpoint,
       clusterCaCertificate: cluster.certificateAuthority.get(0).data,
       exec: {
-        apiVersion: "client.authentication.k8s.io/v1alpha1",
+        apiVersion: "client.authentication.k8s.io/v1beta1",
         command: "aws",
         args: ["eks", "get-token", "--cluster-name", cluster.name],
       },
