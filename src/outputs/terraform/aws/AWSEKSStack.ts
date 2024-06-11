@@ -172,6 +172,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           labels,
           taints,
           tags,
+          enableEfaSupport: false,
           diskSize: volumeSize,
           clusterName: eksm.clusterNameOutput,
           clusterServiceCidr: eksm.clusterServiceCidrOutput,
