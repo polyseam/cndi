@@ -98,6 +98,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     });
 
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
+      dependsOn: [vpcm],
       clusterName,
       clusterVersion: DEFAULT_K8S_VERSION,
       clusterEndpointPublicAccess: true,
