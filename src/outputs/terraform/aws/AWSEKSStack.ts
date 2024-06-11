@@ -50,9 +50,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    this.locals.clusterName = new TerraformLocal(this, "cluster_name", {
-      value: `${this.locals.cndi_project_name.asString}-${suffix.result}`,
-    });
+    this.locals.clusterName = new TerraformLocal(
+      this,
+      "cluster_name",
+      `${this.locals.cndi_project_name.asString}-${suffix.result}`,
+    );
 
     const clusterName = this.locals.clusterName.asString;
 
