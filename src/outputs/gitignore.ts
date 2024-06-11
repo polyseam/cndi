@@ -15,6 +15,7 @@ cndi/terraform/stacks/cndi_stack/terraform.tfstate
 .DS_Store
 cndi_responses.yaml
 cndi/terraform/*.sensitive.*
+*-kind-cluster-config
 `;
   return gitignoreContents.trim();
 }

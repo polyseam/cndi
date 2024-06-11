@@ -11,6 +11,7 @@ import { stageTerraformSynthGCPMicrok8s } from "src/outputs/terraform/gcp/GCPMic
 import { stageTerraformSynthGCPGKE } from "src/outputs/terraform/gcp/GCPGKEStack.ts";
 import { stageTerraformSynthGCPClusterless } from "src/outputs/terraform/gcp/GCPClusterlessStack.ts";
 import { stageTerraformSynthDevMultipassMicrok8s } from "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts";
+import { stageTerraformSynthDevKinD } from "src/outputs/terraform/dev/DevKinDStack.ts";
 
 import microk8sCloudInitLeaderTerraformTemplate from "src/cloud-init/microk8s/leader.yml.ts";
 import microk8sCloudInitFollowerTerraformTemplate from "src/cloud-init/microk8s/follower.yml.ts";
@@ -113,6 +114,9 @@ export default async function stageTerraformResourcesForConfig(
       break;
     case "dev/microk8s":
       await stageTerraformSynthDevMultipassMicrok8s(config);
+      break;
+    case "dev/kind":
+      await stageTerraformSynthDevKinD(config);
       break;
     default:
       throw new Error(`Unknown label: ${label}`);
