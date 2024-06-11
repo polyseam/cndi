@@ -180,7 +180,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             eksm.clusterPrimarySecurityGroupIdOutput,
           vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
           subnetIds: vpcm.privateSubnets,
-          dependsOn:[eksm, vpcm],
+          dependsOn: [eksm, vpcm],
         },
       );
       nodeGroupIndex++;
