@@ -80,6 +80,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+
+
     const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
       name: `cndi-vpc_${project_name}`,
       cidr: "10.0.0.0/16",
@@ -98,6 +100,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     });
 
+    // deno-lint-ignore no-explicit-any
+    const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
+
+    const iamRole = new CDKTFProviderAWS.dataAwsIamRole.DataAwsIamRole(this, 'iam_assumable_role_lookup', {
+      name: `AmazonEKSTFEBSCSIRole-${clusterName}`,
+    })
+
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
       dependsOn: [vpcm],
       clusterName,
@@ -107,18 +116,34 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
       clusterAddons: {
         awsEbsCsiDriver: {
-          serviceAccountRoleArn: "",
+          serviceAccountRoleArn: iamRole.arn,
+          
         },
       },
 
       vpcId: vpcm.vpcIdOutput,
-      subnetIds: vpcm.privateSubnets,
+      subnetIds,
 
       eksManagedNodeGroupDefaults: {
         amiType: "AL2_x86_64",
       },
     });
 
+    const iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
+      this,
+      "cndi_aws_iam_assumable_role_with_oidc",
+      {
+        createRole: true,
+        roleName: `AmazonEKSTFEBSCSIRole-${clusterName}`,
+        providerUrl: eksm.oidcProviderOutput,
+        rolePolicyArns: [ebsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+        ],
+        
+      },
+    );
+    
     const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
       {};
 
@@ -186,19 +211,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       nodeGroupIndex++;
     }
 
-    const _iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
-      this,
-      "cndi_aws_iam_assumable_role_with_oidc",
-      {
-        createRole: true,
-        roleName: `AmazonEKSTFEBSCSIRole-${clusterName}`,
-        providerUrl: eksm.oidcProviderOutput,
-        rolePolicyArns: [ebsCsiPolicy.arn],
-        oidcFullyQualifiedSubjects: [
-          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-        ],
-      },
-    );
 
     const cluster = new CDKTFProviderAWS.dataAwsEksCluster.DataAwsEksCluster(
       this,
