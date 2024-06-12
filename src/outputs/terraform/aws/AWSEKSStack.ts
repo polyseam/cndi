@@ -9,8 +9,8 @@ import {
 import {
   App,
   AwsEksManagedNodeGroupModule,
-  AwsEksModule,
   AwsIamAssumableRoleWithOidcModule,
+  AwsEksModule,
   AwsVpcModule,
   CDKTFProviderAWS,
   CDKTFProviderHelm,
@@ -60,13 +60,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+
+    const awsCallerIdentity = new CDKTFProviderAWS.dataAwsCallerIdentity
+      .DataAwsCallerIdentity(
       this,
-      "ebs_csi_policy",
-      {
-        arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-      },
+      "aws-caller-identity",
+      {},
     );
+    const ebsRoleName = `AmazonEKSTFEBSCSIRole-${clusterName}`
+    const ebsArn = `arn:aws:iam::${awsCallerIdentity.accountId}:role/${ebsRoleName}`
+
+    const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`
+    const efsArn = `arn:aws:iam::${awsCallerIdentity.accountId}:role/${efsRoleName}`
 
     const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -79,7 +84,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         }],
       },
     );
-
 
 
     const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
@@ -103,9 +107,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     // deno-lint-ignore no-explicit-any
     const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
 
-    const iamRole = new CDKTFProviderAWS.dataAwsIamRole.DataAwsIamRole(this, 'iam_assumable_role_lookup', {
-      name: `AmazonEKSTFEBSCSIRole-${clusterName}`,
-    })
 
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
       dependsOn: [vpcm],
@@ -113,37 +114,22 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       clusterVersion: DEFAULT_K8S_VERSION,
       clusterEndpointPublicAccess: true,
       enableClusterCreatorAdminPermissions: true,
-
+      vpcId: vpcm.vpcIdOutput,
+      subnetIds: subnetIds,
       clusterAddons: {
         awsEbsCsiDriver: {
-          serviceAccountRoleArn: iamRole.arn,
-          
+          serviceAccountRoleArn: ebsArn,
+          addonVersion: "v1.31-eksbuild.1"
+            
+        },        
+        awsEfsCsiDriver: {
+          serviceAccountRoleArn: efsArn,
+            addonVersion: "v2.0.3-eksbuild.1"   
         },
-      },
+    },
+  });
 
-      vpcId: vpcm.vpcIdOutput,
-      subnetIds,
 
-      eksManagedNodeGroupDefaults: {
-        amiType: "AL2_x86_64",
-      },
-    });
-
-    const iamAssumableRole = new AwsIamAssumableRoleWithOidcModule(
-      this,
-      "cndi_aws_iam_assumable_role_with_oidc",
-      {
-        createRole: true,
-        roleName: `AmazonEKSTFEBSCSIRole-${clusterName}`,
-        providerUrl: eksm.oidcProviderOutput,
-        rolePolicyArns: [ebsCsiPolicy.arn],
-        oidcFullyQualifiedSubjects: [
-          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-        ],
-        
-      },
-    );
-    
     const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
       {};
 
@@ -192,42 +178,78 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
-          name,
+          name: nodeGroupName,
+          clusterName: eksm.clusterNameOutput,
+          clusterVersion:eksm.clusterVersionOutput,
+          subnetIds: subnetIds,
+          clusterServiceCidr: eksm.clusterServiceCidrOutput,
+          clusterPrimarySecurityGroupId: eksm.clusterPrimarySecurityGroupIdOutput,
+          vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
+          amiType: "AL2_x86_64",
+          ...scalingConfig,
           instanceTypes: [instanceType],
+          capacityType: "ON_DEMAND",
           labels,
           taints,
           tags,
           enableEfaSupport: false,
           diskSize: volumeSize,
-          clusterName: eksm.clusterNameOutput,
-          clusterServiceCidr: eksm.clusterServiceCidrOutput,
-          clusterPrimarySecurityGroupId:
-            eksm.clusterPrimarySecurityGroupIdOutput,
-          vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
-          subnetIds: vpcm.privateSubnets,
-          dependsOn: [eksm, vpcm],
         },
       );
       nodeGroupIndex++;
     }
 
-
-    const cluster = new CDKTFProviderAWS.dataAwsEksCluster.DataAwsEksCluster(
+    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
       this,
-      "cndi_aws_eks_cluster",
+      "ebs_csi_policy",
       {
-        name: eksm.clusterNameOutput,
-        dependsOn: [eksm],
+        arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
       },
     );
 
+    const efsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+      this,
+      "efs_csi_policy",
+      {
+        arn: "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
+      },
+    );
+
+    const iamAssumableRoleEbS = new AwsIamAssumableRoleWithOidcModule(
+      this,
+      "cndi_aws_iam_assumable_role_ebs_with_oidc",
+      {
+        createRole: true,
+        roleName: ebsRoleName,
+        providerUrl: eksm.oidcProviderOutput, // find a way to generate url provider
+        rolePolicyArns: [ebsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+        ],
+        
+      },
+    );
+    const iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
+      this,
+      "cndi_aws_iam_assumable_role_efs_with_oidc",
+      {
+        createRole: true,
+        roleName: efsRoleName,
+        providerUrl: eksm.oidcProviderOutput,
+        rolePolicyArns: [efsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:efs-csi-controller-sa",
+        ],
+        
+      },
+    );
     const kubernetes = {
-      host: cluster.endpoint,
-      clusterCaCertificate: cluster.certificateAuthority.get(0).data,
+      host: eksm.clusterEndpointOutput,
+      clusterCaCertificate: Fn.base64decode(eksm.clusterCertificateAuthorityDataOutput),
       exec: {
         apiVersion: "client.authentication.k8s.io/v1beta1",
         command: "aws",
-        args: ["eks", "get-token", "--cluster-name", cluster.name],
+        args: ["eks", "get-token", "--cluster-name", eksm.clusterNameOutput],
       },
     };
 
@@ -431,7 +453,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     new TerraformOutput(this, "get_kubeconfig_command", {
       value:
-        `aws eks update-kubeconfig --region ${this.locals.aws_region.asString} --name ${project_name}`,
+        `aws eks update-kubeconfig --region ${this.locals.aws_region.asString} --name ${eksm.clusterName}`,
     });
   }
 }
