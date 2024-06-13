@@ -213,7 +213,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const iamAssumableRoleEbS = new AwsIamAssumableRoleWithOidcModule(
+    const _iamAssumableRoleEbS = new AwsIamAssumableRoleWithOidcModule(
       this,
       "cndi_aws_iam_assumable_role_ebs_with_oidc",
       {
@@ -226,7 +226,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ],
       },
     );
-    const iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
+    
+    const _iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
       this,
       "cndi_aws_iam_assumable_role_efs_with_oidc",
       {
