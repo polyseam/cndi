@@ -9,8 +9,8 @@ import {
 import {
   App,
   AwsEksManagedNodeGroupModule,
-  AwsIamAssumableRoleWithOidcModule,
   AwsEksModule,
+  AwsIamAssumableRoleWithOidcModule,
   AwsVpcModule,
   CDKTFProviderAWS,
   CDKTFProviderHelm,
@@ -60,18 +60,19 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-
     const awsCallerIdentity = new CDKTFProviderAWS.dataAwsCallerIdentity
       .DataAwsCallerIdentity(
       this,
       "aws-caller-identity",
       {},
     );
-    const ebsRoleName = `AmazonEKSTFEBSCSIRole-${clusterName}`
-    const ebsArn = `arn:aws:iam::${awsCallerIdentity.accountId}:role/${ebsRoleName}`
+    const ebsRoleName = `AmazonEKSTFEBSCSIRole-${clusterName}`;
+    const ebsArn =
+      `arn:aws:iam::${awsCallerIdentity.accountId}:role/${ebsRoleName}`;
 
-    const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`
-    const efsArn = `arn:aws:iam::${awsCallerIdentity.accountId}:role/${efsRoleName}`
+    const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`;
+    const efsArn =
+      `arn:aws:iam::${awsCallerIdentity.accountId}:role/${efsRoleName}`;
 
     const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -84,7 +85,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         }],
       },
     );
-
 
     const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
       name: `cndi-vpc_${project_name}`,
@@ -107,7 +107,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     // deno-lint-ignore no-explicit-any
     const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
 
-
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
       dependsOn: [vpcm],
       clusterName,
@@ -119,16 +118,14 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       clusterAddons: {
         awsEbsCsiDriver: {
           serviceAccountRoleArn: ebsArn,
-          addonVersion: "v1.31-eksbuild.1"
-            
-        },        
+          addonVersion: "v1.31-eksbuild.1",
+        },
         awsEfsCsiDriver: {
           serviceAccountRoleArn: efsArn,
-            addonVersion: "v2.0.3-eksbuild.1"   
+          addonVersion: "v2.0.3-eksbuild.1",
         },
-    },
-  });
-
+      },
+    });
 
     const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
       {};
@@ -180,10 +177,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           name: nodeGroupName,
           clusterName: eksm.clusterNameOutput,
-          clusterVersion:eksm.clusterVersionOutput,
+          clusterVersion: eksm.clusterVersionOutput,
           subnetIds: subnetIds,
           clusterServiceCidr: eksm.clusterServiceCidrOutput,
-          clusterPrimarySecurityGroupId: eksm.clusterPrimarySecurityGroupIdOutput,
+          clusterPrimarySecurityGroupId:
+            eksm.clusterPrimarySecurityGroupIdOutput,
           vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
           amiType: "AL2_x86_64",
           ...scalingConfig,
@@ -226,7 +224,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         oidcFullyQualifiedSubjects: [
           "system:serviceaccount:kube-system:ebs-csi-controller-sa",
         ],
-        
       },
     );
     const iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
@@ -240,12 +237,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         oidcFullyQualifiedSubjects: [
           "system:serviceaccount:kube-system:efs-csi-controller-sa",
         ],
-        
       },
     );
     const kubernetes = {
       host: eksm.clusterEndpointOutput,
-      clusterCaCertificate: Fn.base64decode(eksm.clusterCertificateAuthorityDataOutput),
+      clusterCaCertificate: Fn.base64decode(
+        eksm.clusterCertificateAuthorityDataOutput,
+      ),
       exec: {
         apiVersion: "client.authentication.k8s.io/v1beta1",
         command: "aws",
