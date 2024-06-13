@@ -19,6 +19,7 @@ import {
 } from "cdktf-deps";
 
 import {
+  ARGOCD_HELM_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
@@ -338,7 +339,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         namespace: "argocd",
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
-        version: "5.45.0",
+        version: ARGOCD_HELM_VERSION,
         setSensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",
@@ -447,7 +448,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           name: "root-application",
           namespace: "argocd",
           project: "default",
-          finalizers: ["resources-finalizer.argocd.argoproj.io"],
+          finalizers: ["resources-finalizer.argocd.argoproj.io/background"],
           source: {
             repoURL: this.variables.git_repo.value,
             path: "cndi/cluster_manifests",

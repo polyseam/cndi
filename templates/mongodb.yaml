@@ -108,7 +108,7 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
         external_dns: 
-          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==

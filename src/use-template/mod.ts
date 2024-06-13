@@ -749,7 +749,7 @@ async function processCNDIConfigOutput(
 
   // get_block evals
   const getBlockBeginToken = "$cndi.get_block(";
-  const getBlockEndToken = ")";
+  const getBlockEndToken = ")':"; // depends on serialization wrapping key in ' quotes
 
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);

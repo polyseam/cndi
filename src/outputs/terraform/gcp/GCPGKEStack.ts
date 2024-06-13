@@ -14,6 +14,7 @@ import {
 } from "cdktf-deps";
 
 import {
+  ARGOCD_HELM_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   SEALED_SECRETS_VERSION,
@@ -311,7 +312,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         namespace: "argocd",
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
-        version: "5.45.0",
+        version: ARGOCD_HELM_VERSION,
         setSensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",
@@ -421,7 +422,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           name: "root-application",
           namespace: "argocd",
           project: "default",
-          finalizers: ["resources-finalizer.argocd.argoproj.io"],
+          finalizers: ["resources-finalizer.argocd.argoproj.io/background"],
           source: {
             repoURL: this.variables.git_repo.value,
             path: "cndi/cluster_manifests",

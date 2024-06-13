@@ -1,3 +1,36 @@
+blocks:
+  - name: aws-nodes
+    content:
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(aws_vantage): https://instances.vantage.sh/aws/ec2/g6.xlarge?region=us-east-1
+          instance_type: g6.xlarge
+          labels:
+            cuda_capability: '8.9'
+            gpu: true
+
+  - name: azure-nodes
+    content:
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(azure_vantage): https://instances.vantage.sh/azure/vm/nc4ast4-v3
+          instance_type: nc4ast4-v3
+          labels:
+            cuda_capability: '7.5'
+            gpu: true
+
+  - name: gcp-nodes
+    content:
+      nodes:
+        - name: gpu-enabled
+          $cndi.comment(gcp_warning): This is not yet functional!
+          $cndi.comment(gcp_contd): The GPUs are addons in GCP, not node types
+          instance_type: g2-standard-3
+          labels:
+            cuda_capability: '8.9'
+            gpu: true
+
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -42,9 +75,8 @@ outputs:
               - ==
               - true
 
-        nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
-            {}
+        $cndi.get_block({{ $cndi.get_prompt_response(deployment_target_provider) }}-nodes):
+          {}
 
     cluster_manifests:
       argo-ingress:
@@ -68,6 +100,14 @@ outputs:
             - ==
             - true
 
+    applications:
+      gpu-operator:
+        repoURL: https://helm.ngc.nvidia.com/nvidia
+        chart: gpu-operator
+        targetRevision: v24.3.0
+        destinationNamespace: gpu-operator
+        values: {} # https://github.com/NVIDIA/gpu-operator/blob/master/deployments/gpu-operator/values.yaml
+        
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -86,14 +126,8 @@ outputs:
       {}
 
     basic: |
-      # Basic Deployment Guide
+      ## gpu-operator
 
-      This Template provides the essential building blocks of a CNDI Cluster,
-      and can be extended to meet any need. If there is no existing 
-      CNDI Template for your use-case, we recommend deploying this `basic`
-      Template as is. 
-
-      After you verify the Template is deployed successfully to your 
-      infrastructure, it can be enhanced using the `cndi_config.yaml` fields 
-      `applications` and `cluster_manifests` with Kubernetes manifests 
-      and Helm charts respectively.
+      * [GPU on K8s Webinar](https://info.nvidia.com/how-to-use-gpus-on-kubernetes-webinar.html)
+      * [gpu-operator Blog Post](https://developer.nvidia.com/blog/nvidia-gpu-operator-simplifying-gpu-management-in-kubernetes/)
+      * [Example values.yaml](https://github.com/NVIDIA/gpu-operator/blob/master/deployments/gpu-operator/values.yaml)

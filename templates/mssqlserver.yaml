@@ -106,7 +106,7 @@ outputs:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
         external_dns: 
-          $cndi.get_block(https:/raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
@@ -149,7 +149,7 @@ outputs:
             - true
 
       mssql-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: mssql-ingress
             ingress_class_name: public
