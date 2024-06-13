@@ -227,7 +227,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         ],
       },
     );
-    
+
     const _iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
       this,
       "cndi_aws_iam_assumable_role_efs_with_oidc",
