@@ -111,12 +111,22 @@ const AWS_STEPS: Array<WorkflowStep> = [
   },
 ];
 
-const AWS_KEYLESS_STEPS: Array<WorkflowStep> = [{
+const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   name: "configure aws credentials",
   uses: "aws-actions/configure-aws-credentials@v3",
   with: {
     "role-to-assume": "${{ secrets.OIDC_AWS_ROLE_TO_ASSUME_ARN }}",
     "aws-region": "${{ env.AWS_REGION }}",
+  },
+}];
+
+const AZURE_STEPS_KEYLESS: Array<WorkflowStep> = [{
+  name: "Az CLI login",
+  uses: "azure/login@v1",
+  with: {
+    "client-id": "${{ secrets.AZURE_CLIENT_ID }}",
+    "tenant-id": "${{ secrets.AZURE_TENANT_ID }}",
+    "subscription-id": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
   },
 }];
 
@@ -126,7 +136,9 @@ const getProviderSteps = (
 ): Array<WorkflowStep> => {
   switch (provider) {
     case "aws":
-      return keyless ? AWS_KEYLESS_STEPS : AWS_STEPS;
+      return keyless ? AWS_STEPS_KEYLESS : AWS_STEPS;
+    case "azure":
+      return keyless ? AZURE_STEPS_KEYLESS : [];
     default:
       return [];
   }
@@ -152,6 +164,13 @@ const AZURE_ENV = {
   ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
   ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
   ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}",
+};
+
+const AZURE_ENV_KEYLESS = {
+  ARM_REGION: "${{ vars.ARM_REGION }}",
+  ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+  ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}",
+  ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}",
 };
 
 const getEnv = (
@@ -197,7 +216,7 @@ const getEnv = (
     case "azure":
       env = {
         ...env,
-        ...AZURE_ENV,
+        ...(keyless ? AZURE_ENV_KEYLESS : AZURE_ENV),
       };
       break;
     default:
