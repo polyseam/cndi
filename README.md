@@ -124,7 +124,7 @@ have access!
 When you are asked for credentials to your deployment target, you can follow the
 corresponding setup guide for [AWS](docs/cloud-setup/aws/aws-setup.md),
 [GCP](docs/cloud-setup/gcp/gcp-setup.md), or
-[Azure](docs/cloud-setup/azure/azure-setup.md).
+[Azure](docs/cloud-setup/azure/azure-standard-setup.md).
 
 The last set of questions relate directly to the Template you selected, and
 generally it is fine to accept the defaults if you aren't completely familiar
