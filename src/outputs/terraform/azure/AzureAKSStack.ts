@@ -220,9 +220,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           diskDriverEnabled: true,
           blobDriverEnabled: false,
         },
-        servicePrincipal: {
-          clientId: this.variables.arm_client_id.value,
-          clientSecret: this.variables.arm_client_secret.value,
+        identity: {
+          type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
         dependsOn: [this.rg],
