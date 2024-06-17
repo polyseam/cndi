@@ -3,7 +3,6 @@
 Unfortunately Azure Entra Federated identities can only be created on a
 per-repository basis.
 
-
 To create and use Azure services, you first need to sign up. If you’ve never
 tried or paid for Azure before, you can sign up for the Azure free account.
 
