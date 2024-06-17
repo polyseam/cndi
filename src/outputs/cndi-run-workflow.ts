@@ -124,7 +124,7 @@ const AZURE_STEPS_KEYLESS: Array<WorkflowStep> = [{
   name: "Az CLI login",
   uses: "azure/login@v1",
   with: {
-    "client-id": "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+    "client-id": "${{ secrets.ARM_CLIENT_ID }}",
     "tenant-id": "${{ secrets.ARM_TENANT_ID }}",
     "subscription-id": "${{ secrets.ARM_SUBSCRIPTION_ID }}",
   },
