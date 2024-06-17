@@ -479,12 +479,6 @@ const getCndiInstallPath = (): string => {
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 };
 
-function base10intToHex(decimal: number): string {
-  // if the int8 in hex is less than 2 characters, prepend 0
-  const hex = decimal.toString(16).padStart(2, "0");
-  return hex;
-}
-
 function getUserDataTemplateFileString(
   role?: NodeRole,
   doBase64Encode?: boolean,
@@ -537,16 +531,6 @@ function replaceRange(
   substitute: string,
 ) {
   return s.substring(0, start) + substitute + s.substring(end);
-}
-
-function getSecretOfLength(len = 32): string {
-  if (len % 2) {
-    throw new Error("password length must be even");
-  }
-
-  const values = new Uint8Array(len / 2);
-  crypto.getRandomValues(values);
-  return Array.from(values, base10intToHex).join("");
 }
 
 function useSshRepoAuth(): boolean {
@@ -619,7 +603,6 @@ export {
   getPathToTerraformBinary,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
-  getSecretOfLength,
   getStagingDir,
   getTaintEffectForDistribution,
   getTFData,

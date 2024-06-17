@@ -34,20 +34,13 @@ const templatesLabel = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
 
-function base10intToHex(decimal: number): string {
-  // if the int8 in hex is less than 2 characters, prepend 0
-  const hex = decimal.toString(16).padStart(2, "0");
-  return hex;
-}
+const ALPHANUMERIC_CHARSET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-function getRandomString(len = 32) {
-  if (len % 2) {
-    throw new Error("password length must be even");
-  }
-
-  const values = new Uint8Array(len / 2);
-  crypto.getRandomValues(values);
-  return Array.from(values, base10intToHex).join("");
+function getRandomString(length = 32, charset = ALPHANUMERIC_CHARSET) {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => charset[byte % charset.length]).join("");
 }
 
 // TODO: 1200 codes
