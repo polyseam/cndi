@@ -16,7 +16,6 @@ import {
   CDKTFProviderAWS,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
-  CDKTFProviderRandom,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
@@ -35,45 +34,36 @@ import {
 
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
-// TODO: ensure that splicing project_name into tags.Name is safe
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
-    const suffix = new CDKTFProviderRandom.stringResource.StringResource(
-      this,
-      "cluster_name_suffix",
-      {
-        length: 6,
-        special: false,
-      },
-    );
-
     this.locals.clusterName = new TerraformLocal(
       this,
       "cluster_name",
-      `${this.locals.cndi_project_name.asString}-${suffix.result}`,
+      this.locals.cndi_project_name.asString,
     );
 
     const clusterName = this.locals.clusterName.asString;
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    const awsCallerIdentity = new CDKTFProviderAWS.dataAwsCallerIdentity
-      .DataAwsCallerIdentity(
+    const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
       this,
-      "aws-caller-identity",
-      {},
+      "cndi_aws_efs_file_system",
+      {
+        creationToken: `cndi_aws_efs_token_for_${project_name}`,
+        tags: {
+          Name: `cndi-elastic-file-system_${project_name}`,
+        },
+      },
     );
+
     const ebsRoleName = `AmazonEKSTFEBSCSIRole-${clusterName}`;
-    const ebsArn =
-      `arn:aws:iam::${awsCallerIdentity.accountId}:role/${ebsRoleName}`;
 
     const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`;
-    const efsArn =
-      `arn:aws:iam::${awsCallerIdentity.accountId}:role/${efsRoleName}`;
 
     const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
@@ -87,12 +77,14 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    const privateSubnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"];
+
     const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
       name: `cndi-vpc_${project_name}`,
       cidr: "10.0.0.0/16",
       azs: availableByDefault.names.slice(0, 3),
       createVpc: true,
-      privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
+      privateSubnets,
       publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
       enableNatGateway: true,
       singleNatGateway: true,
@@ -104,6 +96,66 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         "kubernetes.io/role/internal-elb": "1",
       },
     });
+
+    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+      this,
+      "ebs_csi_policy",
+      {
+        arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+      },
+    );
+
+    const efsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+      this,
+      "efs_csi_policy",
+      {
+        arn: "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
+      },
+    );
+
+    const iamAssumableRoleEbS = new AwsIamAssumableRoleWithOidcModule(
+      this,
+      "cndi_aws_iam_assumable_role_ebs_with_oidc",
+      {
+        createRole: true,
+        roleName: ebsRoleName,
+        providerUrl: "${module.cndi_aws_eks_module.oidc_provider}", // find a way to generate url provider
+        rolePolicyArns: [ebsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+        ],
+      },
+    );
+
+    const iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
+      this,
+      "cndi_aws_iam_assumable_role_efs_with_oidc",
+      {
+        createRole: true,
+        roleName: efsRoleName,
+        providerUrl: "${module.cndi_aws_eks_module.oidc_provider}",
+        rolePolicyArns: [efsCsiPolicy.arn],
+        oidcFullyQualifiedSubjects: [
+          "system:serviceaccount:kube-system:efs-csi-controller-sa",
+        ],
+      },
+    );
+
+    const _efsAccessPoint = new CDKTFProviderAWS.efsAccessPoint.EfsAccessPoint(
+      this,
+      "cndi_aws_efs_access_point",
+      {
+        fileSystemId: efsFs.id,
+        tags: {
+          Name: `cndi-elastic-file-system-access-point_${project_name}`,
+        },
+      },
+    );
+
+    const iamRoleAdditionalPolicies = {
+      efsRoleName: efsCsiPolicy.arn,
+      ebsRoleName: ebsCsiPolicy.arn,
+    };
 
     // deno-lint-ignore no-explicit-any
     const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
@@ -117,16 +169,31 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       vpcId: vpcm.vpcIdOutput,
       subnetIds: subnetIds,
       clusterAddons: {
-        awsEbsCsiDriver: {
-          serviceAccountRoleArn: ebsArn,
+        "aws-ebs-csi-driver": {
+          serviceAccountRoleArn: iamAssumableRoleEbS.iamRoleArnOutput,
           addonVersion: "v1.31-eksbuild.1",
         },
-        awsEfsCsiDriver: {
-          serviceAccountRoleArn: efsArn,
+        "aws-efs-csi-driver": {
+          serviceAccountRoleArn: iamAssumableRoleEfs.iamRoleArnOutput,
           addonVersion: "v2.0.3-eksbuild.1",
         },
       },
     });
+
+    let subnetIdx = 0;
+    for (const _subnet of privateSubnets) {
+      const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
+        .EfsMountTarget(
+        this,
+        `cndi_aws_efs_mount_target_${subnetIdx}`,
+        {
+          fileSystemId: efsFs.id,
+          securityGroups: [eksm.clusterPrimarySecurityGroupIdOutput],
+          subnetId: Fn.element(vpcm.privateSubnetsOutput, subnetIdx),
+        },
+      );
+      subnetIdx++;
+    }
 
     const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
       {};
@@ -191,6 +258,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           labels,
           taints,
           tags,
+          iamRoleAdditionalPolicies,
           enableEfaSupport: false,
           diskSize: volumeSize,
         },
@@ -198,49 +266,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       nodeGroupIndex++;
     }
 
-    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
-      this,
-      "ebs_csi_policy",
-      {
-        arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-      },
-    );
-
-    const efsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
-      this,
-      "efs_csi_policy",
-      {
-        arn: "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
-      },
-    );
-
-    const _iamAssumableRoleEbS = new AwsIamAssumableRoleWithOidcModule(
-      this,
-      "cndi_aws_iam_assumable_role_ebs_with_oidc",
-      {
-        createRole: true,
-        roleName: ebsRoleName,
-        providerUrl: eksm.oidcProviderOutput, // find a way to generate url provider
-        rolePolicyArns: [ebsCsiPolicy.arn],
-        oidcFullyQualifiedSubjects: [
-          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-        ],
-      },
-    );
-
-    const _iamAssumableRoleEfs = new AwsIamAssumableRoleWithOidcModule(
-      this,
-      "cndi_aws_iam_assumable_role_efs_with_oidc",
-      {
-        createRole: true,
-        roleName: efsRoleName,
-        providerUrl: eksm.oidcProviderOutput,
-        rolePolicyArns: [efsCsiPolicy.arn],
-        oidcFullyQualifiedSubjects: [
-          "system:serviceaccount:kube-system:efs-csi-controller-sa",
-        ],
-      },
-    );
     const kubernetes = {
       host: eksm.clusterEndpointOutput,
       clusterCaCertificate: Fn.base64decode(
@@ -257,6 +282,51 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_kubernetes_provider",
       { ...kubernetes, exec: [kubernetes.exec] },
+    );
+
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
+      "cndi_kubernetes_storage_class_efs",
+      {
+        metadata: {
+          name: "rwm",
+          annotations: {
+            "storageclass.kubernetes.io/is-default-class": "false",
+          },
+        },
+        storageProvisioner: "efs.csi.aws.com",
+        parameters: {
+          provisioningMode: "efs-ap",
+          fileSystemId: efsFs.id,
+          directoryPerms: "700",
+          gidRangeStart: "1000",
+          gidRangeEnd: "2000",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        volumeBindingMode: "WaitForFirstConsumer",
+      },
+    );
+
+    new CDKTFProviderKubernetes.storageClass.StorageClass(
+      this,
+      "cndi_kubernetes_storage_class_ebs",
+      {
+        metadata: {
+          name: "rwo",
+          annotations: {
+            "storageclass.kubernetes.io/is-default-class": "true",
+          },
+        },
+        storageProvisioner: "ebs.csi.aws.com",
+        parameters: {
+          fsType: "ext4",
+          type: "gp3",
+        },
+        reclaimPolicy: "Delete",
+        allowVolumeExpansion: true,
+        volumeBindingMode: "WaitForFirstConsumer",
+      },
     );
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
