@@ -116,7 +116,7 @@ const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   uses: "aws-actions/configure-aws-credentials@v3",
   with: {
     "role-to-assume": "${{ secrets.OIDC_AWS_ROLE_TO_ASSUME_ARN }}",
-    "aws-region": "${{ vars.AWS_REGION }}",
+    "aws-region": "${{ vars.AWS_REGION }}", // TODO: this does not work
   },
 }];
 
