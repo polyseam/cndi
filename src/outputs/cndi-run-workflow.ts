@@ -114,10 +114,16 @@ const AWS_STEPS: Array<WorkflowStep> = [
 const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   name: "configure aws credentials",
   uses: "aws-actions/configure-aws-credentials@v3",
+  env: {
+    "AWS_REGION": "${{ vars.ARM_REGION }}",
+  },
   with: {
     "role-to-assume": "${{ secrets.OIDC_AWS_ROLE_TO_ASSUME_ARN }}",
     "aws-region": "${{ vars.AWS_REGION }}", // TODO: this does not work
   },
+}, {
+  name: "install awscli 1",
+  run: "pip install -U awscli",
 }];
 
 const AZURE_STEPS_KEYLESS: Array<WorkflowStep> = [{
