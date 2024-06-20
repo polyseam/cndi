@@ -114,12 +114,9 @@ const AWS_STEPS: Array<WorkflowStep> = [
 const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   name: "configure aws credentials",
   uses: "aws-actions/configure-aws-credentials@v3",
-  env: {
-    "AWS_REGION": "${{ vars.ARM_REGION }}",
-  },
   with: {
     "role-to-assume": "${{ secrets.OIDC_AWS_ROLE_TO_ASSUME_ARN }}",
-    "aws-region": "${{ vars.AWS_REGION }}", // TODO: this does not work
+    "aws-region": Deno.env.get("AWS_REGION")!, // TODO: this does not work
   },
 }, {
   name: "install awscli 1",
@@ -153,7 +150,6 @@ const getProviderSteps = (
 const AWS_ENV = {
   AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}",
   AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-  AWS_REGION: "${{ vars.AWS_REGION }}",
 };
 
 const AWS_ENV_KEYLESS = {
