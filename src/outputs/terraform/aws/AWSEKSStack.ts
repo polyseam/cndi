@@ -199,6 +199,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {};
 
     let nodeGroupIndex = 0;
+    let firstNodeGroup: AwsEksManagedNodeGroupModule;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeGroup?.count || 1;
@@ -263,6 +264,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           diskSize: volumeSize,
         },
       );
+
+      if (!nodeGroupIndex) {
+        // save the first node group for use in dependsOn
+        firstNodeGroup = eksManagedNodeGroups[nodeGroupName];
+      }
+
       nodeGroupIndex++;
     }
 
@@ -305,6 +312,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
+        dependsOn: [firstNodeGroup!],
       },
     );
 
@@ -326,6 +334,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
+        dependsOn: [firstNodeGroup!],
       },
     );
 
