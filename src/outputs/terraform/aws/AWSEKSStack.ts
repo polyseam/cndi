@@ -288,6 +288,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_kubernetes_storage_class_efs",
       {
+        dependsOn: [
+          eksm,
+        ],
         metadata: {
           name: "rwm",
           annotations: {
@@ -312,6 +315,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_kubernetes_storage_class_ebs",
       {
+        dependsOn: [
+          eksm,
+        ],
         metadata: {
           name: "rwo",
           annotations: {
@@ -438,6 +444,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_kubernetes_secret_sealed_secrets_key",
       {
+        dependsOn: [
+          eksm,
+        ],
         type: "kubernetes.io/tls",
         metadata: {
           name: "sealed-secrets-key",
