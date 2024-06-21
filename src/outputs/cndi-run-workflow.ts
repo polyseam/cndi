@@ -152,10 +152,6 @@ const AWS_ENV = {
   AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
 };
 
-const AWS_ENV_KEYLESS = {
-  AWS_REGION: "${{ vars.AWS_REGION }}",
-};
-
 const GOOGLE_ENV = {
   GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
 };
@@ -206,7 +202,7 @@ const getEnv = (
     case "aws":
       env = {
         ...env,
-        ...(keyless ? AWS_ENV_KEYLESS : AWS_ENV),
+        ...(keyless ? {} : AWS_ENV),
       };
       break;
     case "gcp":

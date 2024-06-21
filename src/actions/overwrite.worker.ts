@@ -41,6 +41,7 @@ interface OverwriteActionOptions {
   file?: string;
   initializing: boolean;
   workflowSourceRef?: string;
+  updateGhWorkflow?: boolean;
 }
 
 type OverwriteWorkerMessage = {
@@ -147,10 +148,21 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
     }
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
-    );
+    // resources outside of ./cndi should only be staged if initializing or manually requested
+    if (options.initializing || options.updateGhWorkflow) {
+      const p = path.join(".github", "workflows", "cndi-run.yaml");
+      await stageFile(
+        p,
+        getCndiRunGitHubWorkflowYamlContents(
+          config,
+          options?.workflowSourceRef,
+        ),
+      );
+      console.log(
+        ccolors.success("staged GitHub workflow:"),
+        ccolors.key_name(p),
+      );
+    }
 
     try {
       // remove all files in cndi/terraform
