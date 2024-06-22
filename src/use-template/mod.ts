@@ -687,10 +687,24 @@ function literalizeGetPromptResponseCalls(input: string): string {
   let output = removeWhitespaceBetweenBraces(input);
   for (const responseKey in responses) {
     const val = responses[responseKey];
-    output = output.replaceAll(
-      `{{$cndi.get_prompt_response(${responseKey})}}`,
-      `${val}`,
-    );
+    console.log(`${responseKey}:`, val);
+    if (typeof val !== "string") {
+      // replace the macro and surrrounding quotes when it represents the entire value
+      output = output.replaceAll(
+        `'{{$cndi.get_prompt_response(${responseKey})}}'`,
+        `${val}`,
+      );
+      // replace the macro when it is embedded in a string
+      output = output.replaceAll(
+        `{{$cndi.get_prompt_response(${responseKey})}}`,
+        `${val}`,
+      );
+    } else {
+      output = output.replaceAll(
+        `{{$cndi.get_prompt_response(${responseKey})}}`,
+        `${val}`,
+      );
+    }
   }
   return output;
 }
@@ -736,6 +750,8 @@ async function processCNDIConfigOutput(
 
   // get_prompt_response evals
   output = literalizeGetPromptResponseCalls(output);
+
+  Deno.writeTextFileSync("cndi_config.741.yaml", output);
 
   // get_random_string evals
   output = literalizeGetRandomStringCalls(output);

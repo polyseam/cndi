@@ -1,22 +1,37 @@
 # AWS Core Prompts
-- name: aws_access_key_id
-  message: >-
-    Please enter your AWS Access Key ID:
-  type: Secret
-  default: ""
-  # validators:
-  #   - min_length: 16
-
-- name: aws_secret_access_key
-  message: >-
-    Please enter your AWS Secret Access Key:
-  type: Secret
-  default: ""
-  # validators:
-  #   - min_length: 40
 
 - name: aws_region
   default: us-east-1
   message: >-
     Please enter your AWS Region:
   type: Input
+
+- name: aws_oidc_role_to_assume_arn
+  default: ''
+  message: >-
+    Please enter your AWS OIDC Keyless Role ARN:
+  type: Input
+  condition:
+    - "{{ $cndi.get_prompt_response(keyless) }}"
+    - "=="
+    - true
+
+- name: aws_access_key_id
+  message: >-
+    Please enter your AWS Access Key ID:
+  type: Secret
+  default: ""
+  condition:
+    - "{{ $cndi.get_prompt_response(keyless) }}"
+    - "!="
+    - true
+
+- name: aws_secret_access_key
+  message: >-
+    Please enter your AWS Secret Access Key:
+  type: Secret
+  default: ""
+  condition:
+    - "{{ $cndi.get_prompt_response(keyless) }}"
+    - "!="
+    - true

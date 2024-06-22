@@ -82,6 +82,12 @@
   type: Input
   default: ""
 
+- name: keyless
+  message: >-
+    Would you like to use keyless authentication for your cloud provider?
+  type: Confirm
+  default: false
+
 - name: cert_manager_email
   message: >-
     What email address should be used for Let"s Encrypt certificate

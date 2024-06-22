@@ -1,7 +1,7 @@
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+  - $cndi.get_block(file:///Users/m/dev/polyseam/cndi/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+  - $cndi.get_block(file:///Users/m/dev/polyseam/cndi/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_argocd_ingress
@@ -32,7 +32,8 @@ outputs:
     # this is a Template comment
     infrastructure:
       cndi:
-        keyless: true
+        keyless: "{{ $cndi.get_prompt_response(keyless) }}"
+
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
@@ -72,8 +73,18 @@ outputs:
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
-      {}
+    $cndi.get_block(file:///Users/m/dev/polyseam/cndi/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      condition:
+        - "{{ $cndi.get_prompt_response(keyless) }}"
+        - ==
+        - false
+
+    $cndi.get_block(file:///Users/m/dev/polyseam/cndi/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/keyless-env.yaml):
+      condition:
+        - "{{ $cndi.get_prompt_response(keyless) }}"
+        - ==
+        - true
+
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
