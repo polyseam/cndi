@@ -687,19 +687,19 @@ function literalizeGetPromptResponseCalls(input: string): string {
   let output = removeWhitespaceBetweenBraces(input);
   for (const responseKey in responses) {
     const val = responses[responseKey];
-    console.log(`${responseKey}:`, val);
-    if (typeof val !== "string") {
-      // replace the macro and surrrounding quotes when it represents the entire value
-      output = output.replaceAll(
-        `'{{$cndi.get_prompt_response(${responseKey})}}'`,
-        `${val}`,
-      );
-      // replace the macro when it is embedded in a string
+
+    if (typeof val == "string") {
       output = output.replaceAll(
         `{{$cndi.get_prompt_response(${responseKey})}}`,
         `${val}`,
       );
     } else {
+      // replace the macro and remove surrrounding single quotes when it represents the entire value
+      output = output.replaceAll(
+        `'{{$cndi.get_prompt_response(${responseKey})}}'`,
+        `${val}`,
+      );
+      // replace the macro when it is embedded in a string
       output = output.replaceAll(
         `{{$cndi.get_prompt_response(${responseKey})}}`,
         `${val}`,
