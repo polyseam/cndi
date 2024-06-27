@@ -400,8 +400,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
+    let argocdRepoSecret: CDKTFProviderKubernetes.secret.Secret;
+
     if (useSshRepoAuth()) {
-      new CDKTFProviderKubernetes.secret.Secret(
+      argocdRepoSecret = new CDKTFProviderKubernetes.secret.Secret(
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
@@ -421,7 +423,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         },
       );
     } else {
-      new CDKTFProviderKubernetes.secret.Secret(
+      argocdRepoSecret = new CDKTFProviderKubernetes.secret.Secret(
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
