@@ -751,6 +751,8 @@ async function processCNDIConfigOutput(
   // get_prompt_response evals
   output = literalizeGetPromptResponseCalls(output);
 
+  Deno.writeTextFileSync("cndi_config.741.yaml", output);
+
   // get_random_string evals
   output = literalizeGetRandomStringCalls(output);
 

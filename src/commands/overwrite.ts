@@ -15,6 +15,7 @@ export type OwActionOptions = {
   file?: string;
   output: string;
   workflowSourceRef?: string;
+  updateGhWorkflow?: boolean;
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -110,6 +111,7 @@ const overwriteCommand = new Command()
       hidden: true,
     },
   )
+  .option("--update-gh-workflow", "Update the cndi-run GitHub Workflow")
   .action((options) => {
     const output = options?.output || Deno.cwd();
     owAction({

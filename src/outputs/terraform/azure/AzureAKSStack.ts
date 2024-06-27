@@ -363,8 +363,10 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
+    let argocdRepoSecret: CDKTFProviderKubernetes.secret.Secret;
+
     if (useSshRepoAuth()) {
-      new CDKTFProviderKubernetes.secret.Secret(
+      argocdRepoSecret = new CDKTFProviderKubernetes.secret.Secret(
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
@@ -384,7 +386,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
       );
     } else {
-      new CDKTFProviderKubernetes.secret.Secret(
+      argocdRepoSecret = new CDKTFProviderKubernetes.secret.Secret(
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
@@ -447,7 +449,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           name: "root-application",
           namespace: "argocd",
           project: "default",
-          finalizers: ["resources-finalizer.argocd.argoproj.io/background"],
+          finalizers: ["resources-finalizer.argocd.argoproj.io"],
           source: {
             repoURL: this.variables.git_repo.value,
             path: "cndi/cluster_manifests",
@@ -477,7 +479,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         chart: "argocd-apps",
         createNamespace: true,
-        dependsOn: [helmReleaseArgoCD],
+        dependsOn: [helmReleaseArgoCD, argocdRepoSecret],
         name: "root-argo-app",
         namespace: "argocd",
         repository: "https://argoproj.github.io/argo-helm",
@@ -496,6 +498,10 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     new TerraformOutput(this, "get_kubeconfig_command", {
       value:
         `az aks get-credentials --resource-group rg-${project_name} --name cndi-aks-cluster-${project_name} --overwrite-existing`,
+    });
+
+    new TerraformOutput(this, "get_argocd_port_forward_command", {
+      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
     });
   }
 }

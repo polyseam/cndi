@@ -265,6 +265,7 @@ interface CNDIConfig {
   infrastructure: {
     cndi: {
       deployment_target_configuration?: DeploymentTargetConfiguration;
+      keyless?: boolean; // default: false
       ingress: {
         nginx: {
           public: {
