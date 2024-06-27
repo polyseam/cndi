@@ -479,7 +479,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       {
         chart: "argocd-apps",
         createNamespace: true,
-        dependsOn: [helmReleaseArgoCD],
+        dependsOn: [helmReleaseArgoCD, argocdRepoSecret],
         name: "root-argo-app",
         namespace: "argocd",
         repository: "https://argoproj.github.io/argo-helm",

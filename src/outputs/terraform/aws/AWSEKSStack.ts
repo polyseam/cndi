@@ -368,6 +368,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         createNamespace: true,
         dependsOn: [
           eksm,
+          firstNodeGroup!,
         ],
         timeout: 600,
         atomic: true,
@@ -407,7 +408,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
-          dependsOn: [helmReleaseArgoCD],
+          dependsOn: [firstNodeGroup!, helmReleaseArgoCD],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
@@ -427,7 +428,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
-          dependsOn: [helmReleaseArgoCD],
+          dependsOn: [firstNodeGroup!, helmReleaseArgoCD],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
@@ -451,6 +452,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         dependsOn: [
           eksm,
+          firstNodeGroup!,
         ],
         type: "kubernetes.io/tls",
         metadata: {
@@ -473,7 +475,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [eksm, sealedSecretsSecret],
+        dependsOn: [
+          eksm,
+          sealedSecretsSecret,
+          firstNodeGroup!,
+        ],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
@@ -519,7 +525,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "argocd-apps",
         createNamespace: true,
-        dependsOn: [helmReleaseArgoCD],
+        dependsOn: [
+          helmReleaseArgoCD,
+          firstNodeGroup!,
+          argocdRepoSecret,
+        ],
         name: "root-argo-app",
         namespace: "argocd",
         repository: "https://argoproj.github.io/argo-helm",
