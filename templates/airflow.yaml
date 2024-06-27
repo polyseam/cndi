@@ -46,20 +46,6 @@ blocks:
       operators:
         default_owner: Polyseam
 
-  - name: airflow_web_ingress
-    content:
-      web:
-        enabled: true
-        annotations:
-          cert-manager.io/cluster-issuer: cluster-issuer
-        ingressClassName: public
-        hosts:
-          - name: "{{ $cndi.get_arg(hostname) }}"
-            tls:
-              secretName: cluster-issuer-private-key
-              enabled: true
-
-
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -279,6 +265,20 @@ outputs:
             - ==
             - true
 
+      airflow-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: airflow-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            service_name: airflow-webserver
+            service_port: 8080
+            namespace: airflow
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
+            - ==
+            - true
+            
     applications:
       cnpg:
         targetRevision: 0.18.0
