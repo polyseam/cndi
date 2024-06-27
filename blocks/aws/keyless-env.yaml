@@ -1,0 +1,3 @@
+$cndi.comment(aws_credentials): AWS Credentials
+AWS_REGION: "{{ $cndi.get_prompt_response(aws_region) }}"
+AWS_OIDC_ROLE_TO_ASSUME_ARN: "{{ $cndi.get_prompt_response(aws_oidc_role_to_assume_arn) }}"
