@@ -227,7 +227,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
-
       const taints = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
@@ -539,6 +538,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         values: [Fn.yamlencode(argoAppsValues)],
       },
     );
+
+    new TerraformOutput(this, "get_argocd_port_forward_command", {
+      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
+    });
 
     new TerraformOutput(this, "resource_group_url", {
       value:
