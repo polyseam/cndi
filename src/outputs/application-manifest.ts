@@ -98,6 +98,7 @@ const getApplicationManifest = (
       labels: {
         name: releaseName,
       },
+      finalizers: DEFAULT_FINALIZERS,
     },
     spec: {
       ...manifestFramework.spec,
