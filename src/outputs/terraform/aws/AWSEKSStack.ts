@@ -495,7 +495,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           name: "root-application",
           namespace: "argocd",
           project: "default",
-          finalizers: ["resources-finalizer.argocd.argoproj.io/background"],
+          finalizers: ["resources-finalizer.argocd.argoproj.io"],
           source: {
             repoURL: this.variables.git_repo.value,
             path: "cndi/cluster_manifests",
