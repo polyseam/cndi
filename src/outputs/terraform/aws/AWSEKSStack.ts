@@ -539,10 +539,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    new TerraformOutput(this, "get_argocd_port_forward_command", {
-      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
-    });
-
     new TerraformOutput(this, "resource_group_url", {
       value:
         `https://${this.locals.aws_region.asString}.console.aws.amazon.com/resource-groups/group/cndi-rg_${project_name}`,
@@ -551,6 +547,10 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     new TerraformOutput(this, "get_kubeconfig_command", {
       value:
         `aws eks update-kubeconfig --region ${this.locals.aws_region.asString} --name ${eksm.clusterName}`,
+    });
+
+    new TerraformOutput(this, "get_argocd_port_forward_command", {
+      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
     });
   }
 }

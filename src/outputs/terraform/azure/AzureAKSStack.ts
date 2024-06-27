@@ -499,6 +499,10 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       value:
         `az aks get-credentials --resource-group rg-${project_name} --name cndi-aks-cluster-${project_name} --overwrite-existing`,
     });
+
+    new TerraformOutput(this, "get_argocd_port_forward_command", {
+      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
+    });
   }
 }
 

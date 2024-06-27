@@ -508,6 +508,10 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       value:
         `gcloud container clusters get-credentials ${project_name} --region ${this.locals.gcp_region.asString} --project ${project_id}`,
     });
+
+    new TerraformOutput(this, "get_argocd_port_forward_command", {
+      value: `kubectl port-forward svc/argocd-server -n argocd 8080:443`,
+    });
   }
 }
 
