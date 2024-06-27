@@ -71,6 +71,9 @@ export default function getExternalDNSApplicationManifest(
       name: releaseName,
       finalizers: DEFAULT_FINALIZERS,
       labels: { name: releaseName },
+      annotations: {
+        "argocd.argoproj.io/sync-wave": "-1",
+      },
     },
     spec: {
       project: DEFAULT_PROJECT,
@@ -97,7 +100,7 @@ export default function getExternalDNSApplicationManifest(
           "Validate=false",
           "CreateNamespace=true",
           "PrunePropagationPolicy=foreground",
-          "PruneLast=false",
+          "PruneLast=true",
         ],
         retry: {
           limit: 10,
