@@ -46,9 +46,10 @@ export default function getExternalDNSApplicationManifest(
   };
 
   const values: ExternalDNSValues = {
-    txtOwnerId: "cndi",
+    txtOwnerId: cndi_config?.project_name || "external-dns",
     txtSuffix: "txt",
     policy: "sync",
+    interval: "30s",
     ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
     provider: externalDNSProvider,
     domainFilters: domain_filters,
