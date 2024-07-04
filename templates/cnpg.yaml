@@ -130,7 +130,7 @@ prompts:
       - true
 
   - name: pgadmin_login_password
-    default: postgres
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What password do you want to use for your PgAdmin login ?
     type: Secret
@@ -165,7 +165,7 @@ prompts:
     type: Input
 
   - name: postgres_admin_password
-    default: postgres
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What will be your default password for your PostgreSQL admin user?
     type: Secret
@@ -364,7 +364,7 @@ outputs:
     POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
     POSTGRESQL_PORT: "5432"
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
-    POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+    POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
 
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
