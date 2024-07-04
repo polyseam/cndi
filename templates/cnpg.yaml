@@ -206,11 +206,6 @@ outputs:
               
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-        open_ports:
-          - number: 5432
-            name: postgres
-            namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
-            service: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
