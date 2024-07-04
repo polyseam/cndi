@@ -229,11 +229,6 @@ outputs:
             - ==
             - true
 
-      cnpg-namespace:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
       $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
