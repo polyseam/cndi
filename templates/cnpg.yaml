@@ -43,7 +43,7 @@ blocks:
       tls:
         - hosts:
             - "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
-          secretName: cluster-issuer-private-key
+          secretName: cluster-issuer-private-key-pgadmin
       rules:
         - host: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
           http:
