@@ -269,7 +269,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
 
       cnpg-cluster-user-auth-secret:
         apiVersion: v1
@@ -280,7 +280,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
 
       cnpg-connection-string-secret:
         apiVersion: v1
@@ -359,11 +359,12 @@ outputs:
     $cndi.comment(neo4j-heading): Postgres Connection Parameters
     POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
+    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
     POSTGRES_PROTOCOL: postgresql
     POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
     POSTGRESQL_PORT: "5432"
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
+    POSTGRESQL_CLUSTER_SUPERUSER: postgres
     POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
 
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
