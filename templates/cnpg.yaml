@@ -203,7 +203,18 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+      ingress:
+        nginx:
+          public: 
+            enabled: true
+            values:
+              tcp: 
+                5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
+          private: 
+            enabled: true 
+            values:
+              tcp: 
+                5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
