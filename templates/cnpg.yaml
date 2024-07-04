@@ -142,13 +142,13 @@ prompts:
   - name: deploy_postgres_ingress
     default: true
     message: >-
-      Do you want to expose PostgreSQL to the web?
+      Do you want to expose your PostgreSQL database to the web?
     type: Confirm
 
   - name: postgres_hostname
     default: postgres.example.com
     message: >-
-      What hostname should PostgreSQL be accessible at?
+      What hostname should your PostgreSQL database be accessible at?
     type: Input
     validators:
       - hostname # FQDN
@@ -372,6 +372,7 @@ outputs:
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_CLUSTER_SUPERUSER: postgres
     POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
+    PSQL_CONNECTION_COMMAND: "psql -h {{ $cndi.get_prompt_response(postgres_hostname) }} -p 5432 -U {{ $cndi.get_prompt_response(postgres_admin_username) }} -d {{ $cndi.get_prompt_response(postgres_database_name) }}"
 
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
@@ -414,13 +415,13 @@ outputs:
 
       #### Connect to the Database
 
-      Execute the command below, replacing placeholders with your connection details. You'll be prompted for the password.
+      Execute the command below, replacing placeholders with your postgresql host, user and database name. You'll be prompted for the password.
 
       ```bash
-      psql -h <hostname> -p <port> -U <username> -d <database>
+      psql -h <hostname> -p 5432 -U <username> -d <database>
       ```
 
-      The POSTGRESQL_CONNECTION_STRING can be found in the .env file.
+      The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the .env file.
 
       ### Using PgAdmin
 
