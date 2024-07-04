@@ -55,6 +55,8 @@ const aksValues = (cndi_config: CNDIConfig) =>
           "service.beta.kubernetes.io/azure-load-balancer-internal": "/healthz",
           "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
             "/healthz",
+          "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
+            `CNDIProject=${cndi_config.project_name}`,
         },
       },
       defaultBackend: {
