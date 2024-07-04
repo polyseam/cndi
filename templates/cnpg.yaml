@@ -159,7 +159,7 @@ prompts:
       - true
 
   - name: postgres_admin_username
-    default: postgres
+    default: mypostgresuser
     message: >-
       What username should be used for your PostgreSQL admin user?
     type: Input
