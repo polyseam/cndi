@@ -171,7 +171,7 @@ prompts:
     type: Secret
 
   - name: postgres_database_name
-    default: postgres
+    default: mypostgresdb
     message: >-
       What will be the name for your PostgreSQL database?
     type: Input
