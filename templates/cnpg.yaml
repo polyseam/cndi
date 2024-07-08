@@ -362,7 +362,7 @@ outputs:
     POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
     POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
     POSTGRES_PROTOCOL: postgresql
-    POSTGRESQL_SERVICE: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+    POSTGRESQL_FQDN: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw.{{ $cndi.get_prompt_response(postgres_namespace) }}.svc.cluster.local"
     POSTGRESQL_HOST:  "{{ $cndi.get_prompt_response(postgres_hostname) }}"
     POSTGRESQL_PORT: "5432"
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
