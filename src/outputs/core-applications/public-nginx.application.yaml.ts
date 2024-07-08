@@ -31,7 +31,7 @@ const eksValues = (cndi_config: CNDIConfig) =>
         annotations: {
           "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
           "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
-            cndi_config.project_name,
+            `CNDIProject=${cndi_config.project_name}`,
         },
       },
     },
