@@ -9,6 +9,7 @@
       "jsr:@cliffy/keycode@1.0.0-rc.4": "jsr:@cliffy/keycode@1.0.0-rc.4",
       "jsr:@cliffy/prompt@^1.0.0-rc.4": "jsr:@cliffy/prompt@1.0.0-rc.4",
       "jsr:@cliffy/table@1.0.0-rc.4": "jsr:@cliffy/table@1.0.0-rc.4",
+      "jsr:@cndi/cdktf@^0.1.2": "jsr:@cndi/cdktf@0.1.2",
       "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0": "jsr:@polyseam/cliffy-provider-gh-releases@0.3.0",
       "jsr:@polyseam/inflate-response@^1.1.2": "jsr:@polyseam/inflate-response@1.1.2",
       "jsr:@polyseam/silky@^1.1.1": "jsr:@polyseam/silky@1.1.1",
@@ -102,6 +103,13 @@
         "integrity": "990e4e0b3910e6c9cf7a5b4318b8f5e121cf681494c94fd113febb9b4d4c0741",
         "dependencies": [
           "jsr:@std/console@0.221"
+        ]
+      },
+      "@cndi/cdktf@0.1.2": {
+        "integrity": "01f4eb30dd4a53770f04774a7e0cd0c3d069508de42e5bd7f1002cdd260f3872",
+        "dependencies": [
+          "npm:cdktf@0.20.7",
+          "npm:constructs@10.3.0"
         ]
       },
       "@polyseam/cliffy-provider-gh-releases@0.3.0": {
