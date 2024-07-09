@@ -1,7 +1,7 @@
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main//blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_argocd_ingress

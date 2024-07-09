@@ -34,7 +34,7 @@ import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
-const PROVIDERS_SUPPORTING_KEYLESS = ["aws", "azure"];
+const PROVIDERS_SUPPORTING_KEYLESS = ["aws", "azure", "gcp"];
 
 interface OverwriteActionOptions {
   output: string;

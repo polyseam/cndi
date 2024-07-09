@@ -133,6 +133,22 @@ const AZURE_STEPS_KEYLESS: Array<WorkflowStep> = [{
   },
 }];
 
+const GCPAuthActionVersion = "v0.4.0";
+
+const GCP_STEPS_KEYLESS: Array<WorkflowStep> = [
+  {
+    id: "auth",
+    name: "Authenticate with Google Cloud",
+    uses: `google-github-actions/auth@${GCPAuthActionVersion}`,
+    with: {
+      workload_identity_provider:
+        "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}",
+      service_account: "${{ secrets.GCP_SERVICE_ACCOUNT }}",
+      audience: "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}",
+    },
+  },
+];
+
 const getProviderSteps = (
   provider: CNDIProvider,
   keyless = false,
@@ -142,6 +158,8 @@ const getProviderSteps = (
       return keyless ? AWS_STEPS_KEYLESS : AWS_STEPS;
     case "azure":
       return keyless ? AZURE_STEPS_KEYLESS : [];
+    case "gcp":
+      return keyless ? GCP_STEPS_KEYLESS : [];
     default:
       return [];
   }
@@ -154,6 +172,12 @@ const AWS_ENV = {
 
 const GOOGLE_ENV = {
   GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
+};
+
+const GOOGLE_ENV_KEYLESS = {
+  GCP_SERVICE_ACCOUNT: "${{ secrets.GCP_SERVICE_ACCOUNT }}",
+  GCP_WORKLOAD_IDENTITY_PROVIDER:
+    "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}",
 };
 
 const AZURE_ENV = {
@@ -208,7 +232,7 @@ const getEnv = (
     case "gcp":
       env = {
         ...env,
-        ...GOOGLE_ENV,
+        ...(keyless ? GOOGLE_ENV_KEYLESS : GOOGLE_ENV),
       };
       break;
     case "azure":
