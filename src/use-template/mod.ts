@@ -603,12 +603,13 @@ async function presentCliffyPrompt(
                 if (validationError) {
                   console.log(ccolors.error(validationError));
                   await next(promptDefinition.name); // validation failed, run same prompt again
+                  return;
                 } else {
                   validity.push(true);
                   if (validity.length === promptDefinition.validators.length) {
                     // all validations for prompt passed, proceed to next prompt
-                    await next();
                     $cndi.responses.set(promptDefinition.name, value);
+                    await next();
                     return;
                   }
                   continue;

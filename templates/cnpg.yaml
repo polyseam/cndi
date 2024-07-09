@@ -30,7 +30,7 @@ blocks:
     kind: Ingress
     metadata:
       name: pgadmin-ingress
-      namespace: postgres
+      namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
@@ -43,7 +43,7 @@ blocks:
       tls:
         - hosts:
             - "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
-          secretName: cluster-issuer-private-key
+          secretName: cluster-issuer-private-key-pgadmin
       rules:
         - host: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
           http:
@@ -61,7 +61,7 @@ blocks:
     kind: Secret
     metadata:
       name: pgadmin-login-password-secret
-      namespace: "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
+      namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
     type: Opaque
     stringData:
       password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
@@ -130,7 +130,7 @@ prompts:
       - true
 
   - name: pgadmin_login_password
-    default: postgres
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What password do you want to use for your PgAdmin login ?
     type: Secret
@@ -142,13 +142,13 @@ prompts:
   - name: deploy_postgres_ingress
     default: true
     message: >-
-      Do you want to expose PostgreSQL to the web?
+      Do you want to expose your PostgreSQL database to the web?
     type: Confirm
 
   - name: postgres_hostname
     default: postgres.example.com
     message: >-
-      What hostname should PostgreSQL be accessible at?
+      What hostname should your PostgreSQL database be accessible at?
     type: Input
     validators:
       - hostname # FQDN
@@ -159,19 +159,19 @@ prompts:
       - true
 
   - name: postgres_admin_username
-    default: postgres
+    default: mypostgresuser
     message: >-
       What username should be used for your PostgreSQL admin user?
     type: Input
 
   - name: postgres_admin_password
-    default: postgres
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What will be your default password for your PostgreSQL admin user?
     type: Secret
 
   - name: postgres_database_name
-    default: postgres
+    default: mypostgresdb
     message: >-
       What will be the name for your PostgreSQL database?
     type: Input
@@ -203,14 +203,20 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
+            private: 
+              enabled: true 
+              values:
+                tcp: 
+                  5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-        open_ports:
-          - number: 5432
-            name: postgres
-            namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
-            service: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
@@ -223,11 +229,6 @@ outputs:
             - ==
             - true
 
-      cnpg-namespace:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
       $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
@@ -269,7 +270,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
 
       cnpg-cluster-user-auth-secret:
         apiVersion: v1
@@ -280,7 +281,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
 
       cnpg-connection-string-secret:
         apiVersion: v1
@@ -349,7 +350,7 @@ outputs:
             - true
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
@@ -359,12 +360,15 @@ outputs:
     $cndi.comment(neo4j-heading): Postgres Connection Parameters
     POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
+    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
     POSTGRES_PROTOCOL: postgresql
-    POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+    POSTGRESQL_FQDN: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw.{{ $cndi.get_prompt_response(postgres_namespace) }}.svc.cluster.local"
+    POSTGRESQL_HOST:  "{{ $cndi.get_prompt_response(postgres_hostname) }}"
     POSTGRESQL_PORT: "5432"
     POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
-    POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+    POSTGRESQL_CLUSTER_SUPERUSER: postgres
+    POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
+    PSQL_CONNECTION_COMMAND: "psql -h {{ $cndi.get_prompt_response(postgres_hostname) }} -p 5432 -U {{ $cndi.get_prompt_response(postgres_admin_username) }} -d {{ $cndi.get_prompt_response(postgres_database_name) }}"
 
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
@@ -407,13 +411,13 @@ outputs:
 
       #### Connect to the Database
 
-      Execute the command below, replacing placeholders with your connection details. You'll be prompted for the password.
+      Execute the command below, replacing placeholders with your postgresql host, user and database name. You'll be prompted for the password.
 
       ```bash
-      psql -h <hostname> -p <port> -U <username> -d <database>
+      psql -h <hostname> -p 5432 -U <username> -d <database>
       ```
 
-      The POSTGRESQL_CONNECTION_STRING can be found in the .env file.
+      The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the .env file.
 
       ### Using PgAdmin
 
