@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Deploying PostgreSQL vector database on EKS using CNDI
 
 ## overview 🔭
@@ -30,15 +29,6 @@ In this tutorial, you will:
 4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
    Search Queries Using SQL Syntax**: Use Jupyter Notebook to load data, create
    vectors, and perform semantic searches against your PostgreSQL database.
-=======
-# Deploying PostgreSQL with CloudNativePG on EKS using CNDI
-
-## overview 🔭
-
-This guide will walk you through deploying a GitOps-enabled PostgreSQL cluster
-using CloudNativePG (CNPG) on Elastic Kubernetes Service (EKS) with CNDI. This
-setup includes GitOps for state management, TLS, and High Availability.
->>>>>>> 58c788d1d6b30c4a9728d217bfa7ed98856beafe
 
 ## prerequisites ✅
 
@@ -391,6 +381,7 @@ postgres user admin password to connect to your database.
 ![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-3.png)
 
 <<<<<<< HEAD
+
 ## Upload demo dataset and run search queries with Jupyter Notebook
 
 In this section, you upload vectors into a PostgreSQL table and run semantic
@@ -476,15 +467,12 @@ to verify the results.
 
 ### and you are done! ⚡️
 
-By following these steps, you now have a fully-configured 3-node Kubernetes
-cluster with a TLS-enabled PostgreSQL Database Cluster. This setup allows you to
-perform advanced semantic searches and ensures your data is stored securely.
-=======
+# By following these steps, you now have a fully-configured 3-node Kubernetes cluster with a TLS-enabled PostgreSQL Database Cluster. This setup allows you to perform advanced semantic searches and ensures your data is stored securely.
+
 ## and you are done! ⚡️
 
 You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
 Postgresql Database Cluster
->>>>>>> 58c788d1d6b30c4a9728d217bfa7ed98856beafe
 
 ## modifying the cluster! 🛠️
 
@@ -519,12 +507,10 @@ git push
 ```
 
 <<<<<<< HEAD
+
 ## destroying ALL your resources! 💣
 
 **If you want to take down the entire cluster and resources run:**
-=======
-**If you want to take down the entire cluster run:**
->>>>>>> 58c788d1d6b30c4a9728d217bfa7ed98856beafe
 
 ```bash
 cndi destroy
