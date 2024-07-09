@@ -46,20 +46,6 @@ blocks:
       operators:
         default_owner: Polyseam
 
-  - name: airflow_web_ingress
-    content:
-      web:
-        enabled: true
-        annotations:
-          cert-manager.io/cluster-issuer: cluster-issuer
-        ingressClassName: public
-        hosts:
-          - name: "{{ $cndi.get_arg(hostname) }}"
-            tls:
-              secretName: cluster-issuer-private-key
-              enabled: true
-
-
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -221,7 +207,8 @@ outputs:
           name: cnpg-airflow-cluster
           namespace: airflow
           annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
           imageName: "ghcr.io/cloudnative-pg/postgresql:16"
           instances: 3
@@ -278,6 +265,20 @@ outputs:
             - ==
             - true
 
+      airflow-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: airflow-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            service_name: airflow-webserver
+            service_port: 8080
+            namespace: airflow
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
+            - ==
+            - true
+            
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -420,9 +421,3 @@ outputs:
 
       **Verify that Airflow is connected to the private DAG repository**:
         - If correct, the private DAGs should be visible on the Airflow UI. If not,you should go back and make sure that the private DAG repository is properly connected to Airflow with the correct credentials that located in the `.env` file
-      
-      
-
-
-
-
