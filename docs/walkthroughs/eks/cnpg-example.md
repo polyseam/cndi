@@ -1,19 +1,8 @@
-# Deploying PostgreSQL vector database on EKS using CNDI
+# Deploying PostgreSQL Vector Database on EKS using CNDI
 
 ## overview 🔭
 
-This tutorial shows you how to deploy a GitOps-enabled PostgreSQL vector
-database cluster on CNDI.
-
-PostgreSQL comes with a range of modules and extensions that extend the
-database's functionality. In this tutorial, you install the pgvector extension
-on an existing PostgreSQL cluster deployed to EKS. The Pgvector extension lets
-you store vectors in the database tables by adding vector types to PostgreSQL.
-Pgvector also provides similarity searches by running common SQL queries.
-
-We simplify the PGvector extension deployment by first deploying the
-CloudnativePG operator, as the operator provides a bundled version of the
-extension.
+In the realm of modern applications, the need for efficient and scalable databases that can handle complex data types such as vectors is increasing. PostgreSQL, with its extensive range of modules and extensions, has become a go-to solution for such needs. One notable extension is pgvector, which enables storing and querying vectors within PostgreSQL tables. This tutorial walks you through deploying a GitOps-enabled PostgreSQL vector database cluster on Amazon's Elastic Kubernetes Service (EKS) using CNDI.
 
 ## objectives
 
@@ -26,9 +15,7 @@ In this tutorial, you will:
    Service (EKS).
 3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
    instance on your EKS cluster for interactive data analysis.
-4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
-   Search Queries Using SQL Syntax**: Use Jupyter Notebook to load data, create
-   vectors, and perform semantic searches against your PostgreSQL database.
+4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic Search Queries**: Use Jupyter Notebook to load data, create vectors, and perform semantic searches against your PostgreSQL database.
 
 ## prerequisites ✅
 
