@@ -35,14 +35,12 @@ blocks:
         kubernetes.io/tls-acme: 'true'
         nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
         external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
-        # if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname
-        # external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com
     spec:
       ingressClassName: public
       tls:
         - hosts:
             - "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
-          secretName: cluster-issuer-private-key-pgadmin
+          secretName: cluster-issuer-private-key-jupyter
       rules:
         - host: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
           http:
@@ -222,7 +220,7 @@ prompts:
     default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What will be your password for your Jupyter notebook instance?
-    type: Input
+    type: Secret
 
   - name: deploy_jupyter_notebook_ingress
     default: true
@@ -347,7 +345,55 @@ outputs:
         type: Opaque
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
-      
+
+      pgadmin-login-password-secret:
+        $cndi.get_block(pgadmin_login_password_secret_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
+            - ==
+            - true
+
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      postgres-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: postgres-cluster-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(postgres_hostname) }}"
+            service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            service_port: 5432
+            namespace: postgres
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+            - ==
+            - true
+
+      pgadmin-ingress:
+        $cndi.get_block(deploy_pgadmin_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+            - ==
+            - true
+      $cndi.comment(jupyter-notebook): Here are your jupyter-notebook resources
+      jupyter-notebook-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: jupyter-notebook           
+
       jupyter-notebook-login-secret:  
         apiVersion: v1
         kind: Secret
@@ -372,6 +418,7 @@ outputs:
           dbname: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DB)
           host: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_HOST)
           fqdn: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_FQDN)
+
       jupyter-notebook-service:
         apiVersion: v1
         kind: Service
@@ -388,6 +435,13 @@ outputs:
             app: jupyter-notebook
           type: ClusterIP  
 
+      jupyter-notebook-ingress:
+        $cndi.get_block(deploy_jupyter_notebook_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
+            - ==
+            - true      
+            
       jupyter-notebook-deployment:  
         apiVersion: apps/v1
         kind: Deployment
@@ -465,48 +519,6 @@ outputs:
               - name: jupyter-storage
                 emptyDir: {}  
                 
-      pgadmin-login-password-secret:
-        $cndi.get_block(pgadmin_login_password_secret_blk):
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
-            - ==
-            - true
-
-      argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: argocd-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
-            service_name: argocd-server
-            service_port: 443
-            namespace: argocd
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-            - ==
-            - true
-
-      postgres-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: postgres-cluster-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(postgres_hostname) }}"
-            service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
-            service_port: 5432
-            namespace: postgres
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
-            - ==
-            - true
-
-      pgadmin-ingress:
-        $cndi.get_block(deploy_pgadmin_ingress_blk):
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
-            - ==
-            - true
-
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -529,7 +541,7 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-    $cndi.comment(neo4j-heading): Postgres Connection Parameters
+    $cndi.comment(postgres-heading): Postgres Connection Parameters
     POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
     POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
     POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
@@ -542,7 +554,7 @@ outputs:
     POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
     PSQL_CONNECTION_COMMAND: "psql -h {{ $cndi.get_prompt_response(postgres_hostname) }} -p 5432 -U {{ $cndi.get_prompt_response(postgres_admin_username) }} -d {{ $cndi.get_prompt_response(postgres_database_name) }}"
 
-    $cndi.comment(cnpg-heading): PgAdmin Login Parameters
+    $cndi.comment(pgadmin-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
     PGADMIN_LOGIN_EMAIL:  "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
 
