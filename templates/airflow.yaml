@@ -46,6 +46,35 @@ blocks:
       operators:
         default_owner: Polyseam
 
+  - name: deploy_airflow_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: airflow-ingress
+        namespace: airflow
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            secretName: cluster-issuer-private-key-airflow
+        rules:
+          - host: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: airflow-webserver
+                      port:
+                        number: 8080
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -266,19 +295,11 @@ outputs:
             - true
 
       airflow-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: airflow-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
-            service_name: airflow-webserver
-            service_port: 8080
-            namespace: airflow
+        $cndi.get_block(deploy_airflow_ingress_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
             - ==
-            - true
-            
+            - true          
     applications:
       cnpg:
         targetRevision: 0.18.0
@@ -325,15 +346,6 @@ outputs:
                 - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
                 - ==
                 - false
-
-          ingress:
-            $cndi.get_block(airflow_web_ingress):
-              condition:
-                - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
-                - ==
-                - true
-              args:
-                hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
           logs:
             persistence:
               enabled: true
