@@ -151,9 +151,11 @@ prompts:
       - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
       - ==
       - false
-  - name: postgresql_password
+  - name: postgresql_user_password
     message: "Please enter a password for the PostgreSQL database used as Airflow's storage backend:"
     type: Secret
+    validators:
+      - min_length: 3    
     default: '{{ $cndi.get_random_string(12) }}'
 
 outputs:
@@ -207,7 +209,7 @@ outputs:
           namespace: airflow
         type: Opaque
         stringData:
-          connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
+          connection: $cndi_on_ow.seal_secret_from_env_var(FQDN_POSTGRESQL_CONNECTION_STRING)
 
       airflow-fernet-key-secret:
         apiVersion: v1
@@ -268,7 +270,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
       cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -278,7 +280,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
@@ -370,18 +372,15 @@ outputs:
     $cndi.comment(postgres-heading): PostgreSQL Connection Parameters
     POSTGRESQL_DB: airflow-db
     POSTGRESQL_USER: airflow
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_password) }}"
-    POSTGRESQL_PROTOCOL: postgresql
-    POSTGRESQL_HOST: cnpg-airflow-cluster-rw
-    POSTGRESQL_PORT: 5432
-    POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
+    POSTGRESQL_USER_PASSWORD:  "{{ $cndi.get_prompt_response(postgresql_user_password) }}"
+    FQDN_POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_user_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
     POSTGRESQL_CLUSTER_SUPERUSER: postgres
+    POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
     $cndi.get_block(git_sync_dedicated_env_block):
       condition:
         - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
         - ==
         - false
-
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
