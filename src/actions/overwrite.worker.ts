@@ -29,12 +29,17 @@ import getPublicNginxApplicationManifest from "src/outputs/core-applications/pub
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIProvider,
+  KubernetesManifest,
+  KubernetesSecret,
+} from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
-const PROVIDERS_SUPPORTING_KEYLESS = ["aws", "azure", "gcp"];
+const PROVIDERS_SUPPORTING_KEYLESS:Array<CNDIProvider> = ["aws", "azure", "gcp"];
 
 interface OverwriteActionOptions {
   output: string;

@@ -320,4 +320,5 @@ const getWorkflowYaml = (
 
   return YAML.stringify(cndiWorkflowObj);
 };
+
 export default getWorkflowYaml;
