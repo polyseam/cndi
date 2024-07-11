@@ -2,7 +2,7 @@ blocks:
  - name: deploy_pgadmin_application_blk
    content:
     targetRevision: 1.23.3
-    destinationNamespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+    destinationNamespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
     repoURL: "https://helm.runix.net"
     chart: pgadmin4
     values:
@@ -20,9 +20,9 @@ blocks:
             Group: "Servers"
             Port: 5432
             SSLMode: "prefer"
-            Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-            Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
-            MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+            Username: "{{ $cndi.get_prompt_response(postgresql_user) }}"
+            Host: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
+            MaintenanceDB: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
 
  - name: deploy_pgadmin_ingress_blk
    content:
@@ -30,7 +30,7 @@ blocks:
     kind: Ingress
     metadata:
       name: pgadmin-ingress
-      namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+      namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
@@ -61,7 +61,7 @@ blocks:
     kind: Secret
     metadata:
       name: pgadmin-login-password-secret
-      namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+      namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
     type: Opaque
     stringData:
       password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
@@ -139,13 +139,13 @@ prompts:
       - ==
       - true
 
-  - name: deploy_postgres_ingress
+  - name: deploy_postgresql_ingress
     default: true
     message: >-
       Do you want to expose your PostgreSQL database to the web?
     type: Confirm
 
-  - name: postgres_hostname
+  - name: postgresql_hostname
     default: postgres.example.com
     message: >-
       What hostname should your PostgreSQL database be accessible at?
@@ -154,35 +154,35 @@ prompts:
       - hostname # FQDN
       - min_length: 3
     condition:
-      - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+      - "{{ $cndi.get_prompt_response(deploy_postgresql_ingress) }}"
       - ==
       - true
 
-  - name: postgres_admin_username
+  - name: postgresql_user
     default: mypostgresuser
     message: >-
       What username should be used for your PostgreSQL admin user?
     type: Input
 
-  - name: postgres_admin_password
+  - name: postgresql_user_password
     default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What will be your default password for your PostgreSQL admin user?
     type: Secret
 
-  - name: postgres_database_name
+  - name: postgresql_database_name
     default: mypostgresdb
     message: >-
       What will be the name for your PostgreSQL database?
     type: Input
 
-  - name: postgres_namespace
+  - name: postgresql_namespace
     default: postgres
     message: >-
       What namespace should PostgreSQL be deployed in?
     type: Input
 
-  - name: postgres_cluster_name
+  - name: postgresql_cluster_name
     default: postgres-cluster
     message: >-
       What will be the name for your PostgreSQL cluster?
@@ -209,12 +209,12 @@ outputs:
               enabled: true
               values:
                 tcp: 
-                  5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
+                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                       
             private: 
               enabled: true 
               values:
                 tcp: 
-                  5432: "{{ $cndi.get_prompt_response(postgres_namespace) }}/{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw:5432"                       
+                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                       
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
@@ -234,8 +234,8 @@ outputs:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
         metadata:
-          name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}"
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
           annotations:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
@@ -249,24 +249,24 @@ outputs:
           postgresql:
             pg_hba:
               - >-
-                hostssl {{ $cndi.get_prompt_response(postgres_database_name) }} {{
-                $cndi.get_prompt_response(postgres_admin_username) }} all password
+                hostssl {{ $cndi.get_prompt_response(postgresql_database_name) }} {{
+                $cndi.get_prompt_response(postgresql_user) }} all password
           bootstrap:
             initdb:
-              database: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
-              owner: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+              database: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+              owner: "{{ $cndi.get_prompt_response(postgresql_user) }}"
               secret:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
 
-      $cndi.comment(postgres-auth-secret): Postgres Credentials
+      $cndi.comment(postgres-auth-secret): PostgresqlCredentials
       cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: cnpg-cluster-superuser-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
@@ -277,7 +277,7 @@ outputs:
         kind: Secret
         metadata:
           name: cnpg-database-user-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
@@ -288,7 +288,7 @@ outputs:
         kind: Secret
         metadata:
           name: cnpg-connection-string-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: Opaque
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
@@ -319,12 +319,12 @@ outputs:
           args:
             ingress_name: postgres-cluster-ingress
             ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(postgres_hostname) }}"
-            service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            hostname: "{{ $cndi.get_prompt_response(postgresql_hostname) }}"
+            service_name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
             service_port: 5432
             namespace: postgres
           condition:
-            - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+            - "{{ $cndi.get_prompt_response(deploy_postgresql_ingress) }}"
             - ==
             - true
 
@@ -357,19 +357,21 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-    $cndi.comment(neo4j-heading): Postgres Connection Parameters
-    POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
-    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
-    POSTGRES_PROTOCOL: postgresql
-    POSTGRESQL_FQDN: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw.{{ $cndi.get_prompt_response(postgres_namespace) }}.svc.cluster.local"
-    POSTGRESQL_HOST:  "{{ $cndi.get_prompt_response(postgres_hostname) }}"
+ 
+    $cndi.comment(Postgres-heading): Postgresql Connection Parameters
+    POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgresql_user) }}"
+    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_user_password) }}"
     POSTGRESQL_PORT: "5432"
-    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
+    POSTGRESQL_HOST:  "{{ $cndi.get_prompt_response(postgresql_hostname) }}"
+    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgresql_user) }}:{{ $cndi.get_prompt_response(postgresql_user_password) }}@{{ $cndi.get_prompt_response(postgresql_hostname) }}:5432/{{ $cndi.get_prompt_response(postgresql_database_name) }}"
     POSTGRESQL_CLUSTER_SUPERUSER: postgres
     POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
-    PSQL_CONNECTION_COMMAND: "psql -h {{ $cndi.get_prompt_response(postgres_hostname) }} -p 5432 -U {{ $cndi.get_prompt_response(postgres_admin_username) }} -d {{ $cndi.get_prompt_response(postgres_database_name) }}"
-
+ 
+    $cndi.comment(fqdn-postgresql-connection-string-heading): FQDN Connection Parameters
+    FQDN_POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgresql_user) }}:{{ $cndi.get_prompt_response(postgresql_user_password) }}@{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432/{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+    POSTGRESQL_FQDN: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw.{{ $cndi.get_prompt_response(postgresql_namespace) }}.svc.cluster.local"
+  
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
     PGADMIN_LOGIN_EMAIL:  "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
