@@ -29,16 +29,24 @@ import getPublicNginxApplicationManifest from "src/outputs/core-applications/pub
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIProvider,
+  KubernetesManifest,
+  KubernetesSecret,
+} from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
+
+const PROVIDERS_SUPPORTING_KEYLESS: Array<CNDIProvider> = [];
 
 interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
   workflowSourceRef?: string;
+  updateGhWorkflow?: boolean;
 }
 
 type OverwriteWorkerMessage = {
@@ -118,10 +126,48 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       });
     }
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
-    );
+    const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
+
+    if (tryKeyless) {
+      if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+        try {
+          throw new Error(
+            [
+              owLabel,
+              ccolors.error(
+                `'keyless' infrastructure is not yet supported for provider`,
+              ),
+              ccolors.key_name(config?.provider),
+            ].join(" "),
+            { cause: 510 },
+          );
+        } catch (error) {
+          self.postMessage({
+            type: "error-overwrite",
+            code: error.cause,
+            message: error.message,
+          });
+          return;
+        }
+        // TODO: do keyless stuff
+      }
+    }
+
+    // resources outside of ./cndi should only be staged if initializing or manually requested
+    if (options.initializing || options.updateGhWorkflow) {
+      const p = path.join(".github", "workflows", "cndi-run.yaml");
+      await stageFile(
+        p,
+        getCndiRunGitHubWorkflowYamlContents(
+          config,
+          options?.workflowSourceRef,
+        ),
+      );
+      console.log(
+        ccolors.success("staged GitHub workflow:"),
+        ccolors.key_name(p),
+      );
+    }
 
     try {
       // remove all files in cndi/terraform

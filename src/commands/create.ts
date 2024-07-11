@@ -312,7 +312,9 @@ const createCommand = new Command()
 
     let project_name = repo;
 
-    if (interactive) {
+    if (overrides?.project_name) {
+      project_name = `${overrides.project_name}`;
+    } else if (interactive) {
       project_name = await PromptTypes.Input.prompt({
         message: ccolors.prompt("Please enter a name for your CNDI project:"),
         default: project_name,
