@@ -313,10 +313,14 @@ const createCommand = new Command()
     let project_name = repo;
 
     if (interactive) {
-      project_name = await PromptTypes.Input.prompt({
-        message: ccolors.prompt("Please enter a name for your CNDI project:"),
-        default: project_name,
-      });
+      if (overrides?.project_name) {
+        project_name = `${overrides.project_name}`;
+      } else {
+        project_name = await PromptTypes.Input.prompt({
+          message: ccolors.prompt("Please enter a name for your CNDI project:"),
+          default: project_name,
+        });
+      }
     }
 
     const directoryContainsCNDIFiles = await checkInitialized(
