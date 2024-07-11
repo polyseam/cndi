@@ -610,7 +610,7 @@ outputs:
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
     PGADMIN_LOGIN_EMAIL:  "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
 
-    $cndi.comment(jupyter-notebook-heading): PgAdmin Login Parameters
+    $cndi.comment(jupyter-notebook-heading): Jupyter Notebook Login Parameters
     JUPYTER_PASSWORD:  "{{ $cndi.get_prompt_response(jupyter_notebook_login_password) }}"
     JUPYTER_TOKEN:   "{{ $cndi.get_random_string(24) }}"
 

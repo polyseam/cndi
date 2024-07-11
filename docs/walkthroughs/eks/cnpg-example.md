@@ -2,7 +2,13 @@
 
 ## overview 🔭
 
-In the realm of modern applications, the need for efficient and scalable databases that can handle complex data types such as vectors is increasing. PostgreSQL, with its extensive range of modules and extensions, has become a go-to solution for such needs. One notable extension is pgvector, which enables storing and querying vectors within PostgreSQL tables. This tutorial walks you through deploying a GitOps-enabled PostgreSQL vector database cluster on Amazon's Elastic Kubernetes Service (EKS) using CNDI.
+In the realm of modern applications, the need for efficient and scalable
+databases that can handle complex data types such as vectors is increasing.
+PostgreSQL, with its extensive range of modules and extensions, has become a
+go-to solution for such needs. One notable extension is pgvector, which enables
+storing and querying vectors within PostgreSQL tables. This tutorial walks you
+through deploying a GitOps-enabled PostgreSQL vector database cluster on
+Amazon's Elastic Kubernetes Service (EKS) using CNDI.
 
 ## objectives
 
@@ -15,7 +21,9 @@ In this tutorial, you will:
    Service (EKS).
 3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
    instance on your EKS cluster for interactive data analysis.
-4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic Search Queries**: Use Jupyter Notebook to load data, create vectors, and perform semantic searches against your PostgreSQL database.
+4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
+   Search Queries**: Use Jupyter Notebook to load data, create vectors, and
+   perform semantic searches against your PostgreSQL database.
 
 ## prerequisites ✅
 
@@ -141,6 +149,21 @@ Follow the prompts to set up your project:
 - **What will be the name for your PostgreSQL cluster?
   (default:postgres-cluster)**: _Provide a name for your PostgreSQL cluster._
 
+- **Do you want to install jupyterhub, a web-based data analytics tool? (Y/n)**:
+  _Choose whether to install jupyterhub, a web-based data analytics tool_
+
+- **What will be your password for your Jupyter notebook instance?(default:
+  randomly generated value)**:_Set a default password for the Jupyter notebook
+  instance._
+
+- **Do you want to expose your Jupyter notebook instance to the web?
+  (Y/n)**:_Choose whether to make your Jupyter notebook instance accessible from
+  the public internet._
+
+- **What hostname should jupyter notebook be accessible at?
+  (default:jupyter.example.com)**:_Enter the hostname through which the Jupyter
+  notebook instance will be accessed._
+
 Once the prompts are all answered the process will generate a `cndi_config.yaml`
 file, and `cndi` directory at the root of your repository containing all the
 necessary files for the configuration. It will also store all the values in a
@@ -155,8 +178,10 @@ The structure of the generated CNDI project will be something like this:
 │   │   │   ├── cnpg.application.yaml
 |   |   |   ├── pgadmin.application.yaml
 |   │   │   ├── public_nginx.application.yaml
+|   │   │   ├── jupyter-notebook-deployment.yaml
 |   │   │   └── etc
 │   │   ├── argo-ingress.yaml
+│   │   ├── jupyter-notebook-ingress.yaml
 │   │   ├── cert-manager-cluster-issuer.yaml
 │   │   └── etc
 │   └── 📁 terraform
