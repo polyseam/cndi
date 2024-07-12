@@ -273,7 +273,7 @@ interface CNDIConfig {
             values: Record<string, unknown>;
           };
           private: {
-            enabled?: boolean; // default: true
+            enabled?: boolean; // default: false
             values: Record<string, unknown>;
           };
         };

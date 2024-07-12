@@ -39,7 +39,6 @@ const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
 const DEFAULT_NAMESPACE = "default";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
-const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
 const applicationManifestLabel = ccolors.faded(
   "\nsrc/outputs/application-manifest.ts:",
@@ -50,7 +49,6 @@ const manifestFramework = {
   kind: "Application",
   metadata: {
     namespace: DEFAULT_NAMESPACE,
-    finalizers: DEFAULT_FINALIZERS,
     labels: {},
   },
   spec: {
@@ -98,7 +96,6 @@ const getApplicationManifest = (
       labels: {
         name: releaseName,
       },
-      finalizers: DEFAULT_FINALIZERS,
     },
     spec: {
       ...manifestFramework.spec,
