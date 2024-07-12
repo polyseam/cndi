@@ -1168,6 +1168,25 @@ export async function useTemplate(
     ".env": finalEnvResult.value,
   };
 
+  // throw an error if there are unprocessed CNDI Macros
+  const cndiMacrosPattern = /\{\{\$cndi.*?\}\}/;
+  for (const key in files) {
+    const fileString = files[key] as string;
+    const positionOfFirstMacro = fileString.search(cndiMacrosPattern);
+    if (positionOfFirstMacro > -1) {
+      console.log(
+        [
+          templatesLabel,
+          ccolors.warn("Unprocessed CNDI Macros remain in"),
+          ccolors.user_input(key),
+        ].join(" "),
+      );
+      const endPos = fileString.indexOf("}}", positionOfFirstMacro) + 1;
+      const macro = fileString.slice(positionOfFirstMacro, endPos);
+      throw new Error(`Unprocessed CNDI Macro ${ccolors.warn(macro)}`);
+    }
+  }
+
   // when stringifying responses, skip undefined values
   const SKIP_UNDEFINED_ENTRIES = true;
   const responses = $cndi.getResponsesAsRecord(SKIP_UNDEFINED_ENTRIES);
