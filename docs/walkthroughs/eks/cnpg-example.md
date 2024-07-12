@@ -21,9 +21,9 @@ In this tutorial, you will:
    Service (EKS).
 3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
    instance on your EKS cluster for interactive data analysis.
-4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
-   Search Queries**: Use Jupyter Notebook to load data, create vectors, and
-   perform semantic searches against your PostgreSQL database.
+4. **Upload Vectors into a PostgreSQL Database and Run Semantic Search
+   Queries**: Use Jupyter Notebook to load data, create vectors, and perform
+   semantic searches against your PostgreSQL database.
 
 ## prerequisites ✅
 
@@ -418,34 +418,115 @@ Navigate to JupyterHub to access your Jupyter environment.
 
 ### Load the Dataset and notebook file from URL
 
-![Open Console](img/jupyterhub-notebook-console-openurl.png)
-![Open URL](img/open-url.png) Next, open the URL in the console and enter the
-GitHub Repository URL containing the dataset CSV file. This file includes the
-data that you will load into your PostgreSQL database.
+Next, open the URL in the console and copy this GitHub Repository URL containing
+the dataset CSV file. This file includes the data that you will load into your
+PostgreSQL database.
 
 ```bash
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/dataset.csv
 ```
 
-This URL points to a CSV file that contains a list of books in various genres.
-By loading this file, you will be able to use the data for your semantic search
-queries.
+![Open Console](img/jupyterhub-notebook-console-openurl.png)
 
 ![Dataset](img/dataset.png)
 
-After loading the dataset, you need to open the Jupyter Notebook file that
-contains the code for processing the dataset and performing the semantic search.
-Enter the following URL in the console:
+Again, open the URL in the console and copy this GitHub Repository URL
+containing the Jupyter Notebook file that contains the code for processing the
+dataset and performing the semantic search.
 
 ```bash
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/vector-database.ipynb
 ```
 
-This notebook file includes all the necessary steps and code to set up the
-vectors and run queries against your PostgreSQL database.
-
 ![Open Notebook](img/pre-notebook-run-one-host.png)
 ![Open Notebook](img/pre-notebook-run-two-host.png)
+
+### Understanding the code
+
+Semantic search is revolutionizing data retrieval by understanding the context
+and intent behind user queries using :
+
+- **Natural Language Processing (NLP):** Techniques to process and analyze human
+  language.
+- **Embeddings:** Representations of words, phrases, or documents as
+  high-dimensional vectors capturing semantic meaning.
+- **Similarity Search:** Finding vectors in the database closest to the query
+  vector, using distance metrics like cosine similarity or Euclidean distance.
+
+In the following code we will use the dataset containing a list of books with
+descriptions, vectorize the descriptions, and perform a search query.
+
+**Install Required Packages:**
+
+```python
+! pip install pgvector psycopg-binary psycopg fastembed
+```
+
+**Import Required Libraries:**
+
+```python
+from pgvector.psycopg import register_vector
+import psycopg
+import os
+import csv
+from fastembed import TextEmbedding
+from typing import List
+import numpy as np
+```
+
+**Connect to PostgreSQL:**
+
+```python
+conn = psycopg.connect(
+    dbname=os.environ.get("POSTGRESQL_DB"),
+    host=os.environ.get("POSTGRESQL_FQDN"), 
+    user=os.environ.get("POSTGRESQL_USER"),
+    password=os.environ.get("POSTGRESQL_USER_PASSWORD"),
+    autocommit=True)
+```
+
+**Setup Database and Table:**
+
+```python
+conn.execute('CREATE EXTENSION IF NOT EXISTS vector;')
+register_vector(conn)
+conn.execute('DROP TABLE IF EXISTS documents;')
+conn.execute('CREATE TABLE documents (id bigserial PRIMARY KEY, author text, title text, description text, embedding vector(384));')
+```
+
+**Load Data from CSV:**
+
+```python
+books = [*csv.DictReader(open('dataset.csv'))]
+```
+
+**Vectorize Book Descriptions:**
+
+```python
+descriptions = [doc["description"] for doc in books]
+embedding_model = TextEmbedding(model_name="BAAI/bge-small-en")
+embeddings: List[np.ndarray] = list(embedding_model.embed(descriptions))
+```
+
+**Insert Data into PostgreSQL:**
+
+```python
+for i, doc in enumerate(books):
+    conn.execute('INSERT INTO documents (author, title, description, embedding) VALUES (%s, %s, %s, %s)', 
+                 (doc["author"], doc["title"], doc["description"], embeddings[i]))
+```
+
+**Perform a Semantic Search Query:**
+
+```python
+query_vector = list(embedding_model.embed(["drama about people and unhappy love"]))[0]
+response = conn.execute('SELECT title, author, description FROM documents ORDER BY embedding <-> %s LIMIT 2', (query_vector,)).fetchall()
+
+for hit in response:
+    print(f"Title: {hit[0]}, Author: {hit[1]}")
+    print(hit[2])
+    print("---------")
+```
 
 ### Run the Jupyter Notebook
 
@@ -479,12 +560,10 @@ to verify the results.
 
 ### and you are done! ⚡️
 
-# By following these steps, you now have a fully-configured 3-node Kubernetes cluster with a TLS-enabled PostgreSQL Database Cluster. This setup allows you to perform advanced semantic searches and ensures your data is stored securely.
-
-## and you are done! ⚡️
-
-You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
-Postgresql Database Cluster
+By following these steps, you now have a fully-configured 3-node Kubernetes
+cluster with a TLS-enabled PostgreSQL Vector Database Cluster. This setup allows
+you to perform advanced semantic searches and ensures your data is stored
+securely.
 
 ## modifying the cluster! 🛠️
 
@@ -517,8 +596,6 @@ git add .
 git commit -m "destroy instance"
 git push
 ```
-
-<<<<<<< HEAD
 
 ## destroying ALL your resources! 💣
 
