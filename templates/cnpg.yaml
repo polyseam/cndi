@@ -449,7 +449,7 @@ outputs:
               owner: "{{ $cndi.get_prompt_response(postgresql_user) }}"
               secret:
                 name: cnpg-database-user-auth-secret
-              postInitSQL:
+              postInitApplicationSQL:
                 - CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
