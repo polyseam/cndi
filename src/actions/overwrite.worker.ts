@@ -363,7 +363,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
 
       const ingress = config?.infrastructure?.cndi?.ingress;
-      const skipPrivateIngress = ingress?.nginx?.private?.enabled === false; // explicitly disabled private ingress
+      const skipPrivateIngress = ingress?.nginx?.private?.enabled !== true; // explicitly enabled private ingress
       const skipPublicIngress = ingress?.nginx?.public?.enabled === false; // explicitly disabled public ingress
 
       if (!skipPublicIngress) {
