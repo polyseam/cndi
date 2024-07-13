@@ -16,6 +16,7 @@ export type OwActionOptions = {
   output: string;
   workflowSourceRef?: string;
   updateGhWorkflow?: boolean;
+  enablePrChecks?: boolean;
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -112,6 +113,7 @@ const overwriteCommand = new Command()
     },
   )
   .option("--update-gh-workflow", "Update the cndi-run GitHub Workflow")
+  .option("--enable-pr-checks", "Enable pull request checks", { hidden: true })
   .action((options) => {
     const output = options?.output || Deno.cwd();
     owAction({

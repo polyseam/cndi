@@ -48,6 +48,7 @@ type EchoCreateOptions = {
   deploymentTargetLabel?: string;
   responsesFile: string;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -122,6 +123,7 @@ const createCommand = new Command()
       hidden: true,
     },
   )
+  .option("--enable-pr-checks", "Enable PR checks", { hidden: true })
   .action(async (options, slug) => {
     echoCreate(options, slug);
     const skipPush = options.skipPush;
