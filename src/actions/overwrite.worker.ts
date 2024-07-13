@@ -14,7 +14,9 @@ import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
+
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -47,6 +49,7 @@ interface OverwriteActionOptions {
   initializing: boolean;
   workflowSourceRef?: string;
   updateGhWorkflow?: boolean;
+  enablePrChecks?: boolean;
 }
 
 type OverwriteWorkerMessage = {
@@ -155,18 +158,41 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     // resources outside of ./cndi should only be staged if initializing or manually requested
     if (options.initializing || options.updateGhWorkflow) {
-      const p = path.join(".github", "workflows", "cndi-run.yaml");
+      const runWorkflowPath = path.join(
+        ".github",
+        "workflows",
+        "cndi-run.yaml",
+      );
       await stageFile(
-        p,
+        runWorkflowPath,
         getCndiRunGitHubWorkflowYamlContents(
           config,
           options?.workflowSourceRef,
         ),
       );
+
       console.log(
-        ccolors.success("staged GitHub workflow:"),
-        ccolors.key_name(p),
+        ccolors.success("staged 'cndi-run' GitHub workflow:"),
+        ccolors.key_name(runWorkflowPath),
       );
+
+      if (options?.enablePrChecks) {
+        const onPullWorkflowPath = path.join(
+          ".github",
+          "workflows",
+          "cndi-onpull.yaml",
+        );
+
+        await stageFile(
+          onPullWorkflowPath,
+          getCndiOnPullGitHubWorkflowYamlContents(),
+        );
+
+        console.log(
+          ccolors.success("staged 'cndi-onpull' GitHub workflow:"),
+          ccolors.key_name(onPullWorkflowPath),
+        );
+      }
     }
 
     try {
