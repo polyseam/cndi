@@ -20,7 +20,6 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
@@ -426,11 +425,6 @@ const createCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(),
-    );
-
     const git_credentials_mode = templateResult.responses.git_credentials_mode;
 
     if (git_credentials_mode === "ssh") {
@@ -471,6 +465,7 @@ const createCommand = new Command()
       create: true,
       workflowSourceRef: options.workflowSourceRef,
       skipPush: !!skipPush,
+      enablePrChecks: !!options.enablePrChecks,
     });
   });
 
