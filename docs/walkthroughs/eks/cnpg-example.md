@@ -1,19 +1,14 @@
-# Deploying PostgreSQL vector database on EKS using CNDI
+# Deploying PostgreSQL Vector Database on EKS using CNDI
 
 ## overview 🔭
 
-This tutorial shows you how to deploy a GitOps-enabled PostgreSQL vector
-database cluster on CNDI.
-
-PostgreSQL comes with a range of modules and extensions that extend the
-database's functionality. In this tutorial, you install the pgvector extension
-on an existing PostgreSQL cluster deployed to EKS. The Pgvector extension lets
-you store vectors in the database tables by adding vector types to PostgreSQL.
-Pgvector also provides similarity searches by running common SQL queries.
-
-We simplify the PGvector extension deployment by first deploying the
-CloudnativePG operator, as the operator provides a bundled version of the
-extension.
+In the realm of modern applications, the need for efficient and scalable
+databases that can handle complex data types such as vectors is increasing.
+PostgreSQL, with its extensive range of modules and extensions, has become a
+go-to solution for such needs. One notable extension is pgvector, which enables
+storing and querying vectors within PostgreSQL tables. This tutorial walks you
+through deploying a GitOps-enabled PostgreSQL vector database cluster on
+Amazon's Elastic Kubernetes Service (EKS) using CNDI.
 
 ## objectives
 
@@ -26,9 +21,9 @@ In this tutorial, you will:
    Service (EKS).
 3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
    instance on your EKS cluster for interactive data analysis.
-4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
-   Search Queries Using SQL Syntax**: Use Jupyter Notebook to load data, create
-   vectors, and perform semantic searches against your PostgreSQL database.
+4. **Upload Vectors into a PostgreSQL Database and Run Semantic Search
+   Queries**: Use Jupyter Notebook to load data, create vectors, and perform
+   semantic searches against your PostgreSQL database.
 
 ## prerequisites ✅
 
@@ -154,6 +149,21 @@ Follow the prompts to set up your project:
 - **What will be the name for your PostgreSQL cluster?
   (default:postgres-cluster)**: _Provide a name for your PostgreSQL cluster._
 
+- **Do you want to install jupyterhub, a web-based data analytics tool? (Y/n)**:
+  _Choose whether to install jupyterhub, a web-based data analytics tool_
+
+- **What will be your password for your Jupyter notebook instance?(default:
+  randomly generated value)**:_Set a default password for the Jupyter notebook
+  instance._
+
+- **Do you want to expose your Jupyter notebook instance to the web?
+  (Y/n)**:_Choose whether to make your Jupyter notebook instance accessible from
+  the public internet._
+
+- **What hostname should jupyter notebook be accessible at?
+  (default:jupyter.example.com)**:_Enter the hostname through which the Jupyter
+  notebook instance will be accessed._
+
 Once the prompts are all answered the process will generate a `cndi_config.yaml`
 file, and `cndi` directory at the root of your repository containing all the
 necessary files for the configuration. It will also store all the values in a
@@ -168,8 +178,10 @@ The structure of the generated CNDI project will be something like this:
 │   │   │   ├── cnpg.application.yaml
 |   |   |   ├── pgadmin.application.yaml
 |   │   │   ├── public_nginx.application.yaml
+|   │   │   ├── jupyter-notebook-deployment.yaml
 |   │   │   └── etc
 │   │   ├── argo-ingress.yaml
+│   │   ├── jupyter-notebook-ingress.yaml
 │   │   ├── cert-manager-cluster-issuer.yaml
 │   │   └── etc
 │   └── 📁 terraform
@@ -380,6 +392,8 @@ postgres user admin password to connect to your database.
 
 ![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-3.png)
 
+<<<<<<< HEAD
+
 ## Upload demo dataset and run search queries with Jupyter Notebook
 
 In this section, you upload vectors into a PostgreSQL table and run semantic
@@ -404,34 +418,115 @@ Navigate to JupyterHub to access your Jupyter environment.
 
 ### Load the Dataset and notebook file from URL
 
-![Open Console](img/jupyterhub-notebook-console-openurl.png)
-![Open URL](img/open-url.png) Next, open the URL in the console and enter the
-GitHub Repository URL containing the dataset CSV file. This file includes the
-data that you will load into your PostgreSQL database.
+Next, open the URL in the console and copy this GitHub Repository URL containing
+the dataset CSV file. This file includes the data that you will load into your
+PostgreSQL database.
 
 ```bash
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/dataset.csv
 ```
 
-This URL points to a CSV file that contains a list of books in various genres.
-By loading this file, you will be able to use the data for your semantic search
-queries.
+![Open Console](img/jupyterhub-notebook-console-openurl.png)
 
 ![Dataset](img/dataset.png)
 
-After loading the dataset, you need to open the Jupyter Notebook file that
-contains the code for processing the dataset and performing the semantic search.
-Enter the following URL in the console:
+Again, open the URL in the console and copy this GitHub Repository URL
+containing the Jupyter Notebook file that contains the code for processing the
+dataset and performing the semantic search.
 
 ```bash
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/vector-database.ipynb
 ```
 
-This notebook file includes all the necessary steps and code to set up the
-vectors and run queries against your PostgreSQL database.
-
 ![Open Notebook](img/pre-notebook-run-one-host.png)
 ![Open Notebook](img/pre-notebook-run-two-host.png)
+
+### Understanding the code
+
+Semantic search is revolutionizing data retrieval by understanding the context
+and intent behind user queries using :
+
+- **Natural Language Processing (NLP):** Techniques to process and analyze human
+  language.
+- **Embeddings:** Representations of words, phrases, or documents as
+  high-dimensional vectors capturing semantic meaning.
+- **Similarity Search:** Finding vectors in the database closest to the query
+  vector, using distance metrics like cosine similarity or Euclidean distance.
+
+In the following code we will use the dataset containing a list of books with
+descriptions, vectorize the descriptions, and perform a search query.
+
+**Install Required Packages:**
+
+```python
+! pip install pgvector psycopg-binary psycopg fastembed
+```
+
+**Import Required Libraries:**
+
+```python
+from pgvector.psycopg import register_vector
+import psycopg
+import os
+import csv
+from fastembed import TextEmbedding
+from typing import List
+import numpy as np
+```
+
+**Connect to PostgreSQL:**
+
+```python
+conn = psycopg.connect(
+    dbname=os.environ.get("POSTGRESQL_DB"),
+    host=os.environ.get("POSTGRESQL_FQDN"), 
+    user=os.environ.get("POSTGRESQL_USER"),
+    password=os.environ.get("POSTGRESQL_USER_PASSWORD"),
+    autocommit=True)
+```
+
+**Setup Database and Table:**
+
+```python
+conn.execute('CREATE EXTENSION IF NOT EXISTS vector;')
+register_vector(conn)
+conn.execute('DROP TABLE IF EXISTS documents;')
+conn.execute('CREATE TABLE documents (id bigserial PRIMARY KEY, author text, title text, description text, embedding vector(384));')
+```
+
+**Load Data from CSV:**
+
+```python
+books = [*csv.DictReader(open('dataset.csv'))]
+```
+
+**Vectorize Book Descriptions:**
+
+```python
+descriptions = [doc["description"] for doc in books]
+embedding_model = TextEmbedding(model_name="BAAI/bge-small-en")
+embeddings: List[np.ndarray] = list(embedding_model.embed(descriptions))
+```
+
+**Insert Data into PostgreSQL:**
+
+```python
+for i, doc in enumerate(books):
+    conn.execute('INSERT INTO documents (author, title, description, embedding) VALUES (%s, %s, %s, %s)', 
+                 (doc["author"], doc["title"], doc["description"], embeddings[i]))
+```
+
+**Perform a Semantic Search Query:**
+
+```python
+query_vector = list(embedding_model.embed(["drama about people and unhappy love"]))[0]
+response = conn.execute('SELECT title, author, description FROM documents ORDER BY embedding <-> %s LIMIT 2', (query_vector,)).fetchall()
+
+for hit in response:
+    print(f"Title: {hit[0]}, Author: {hit[1]}")
+    print(hit[2])
+    print("---------")
+```
 
 ### Run the Jupyter Notebook
 
@@ -466,8 +561,9 @@ to verify the results.
 ### and you are done! ⚡️
 
 By following these steps, you now have a fully-configured 3-node Kubernetes
-cluster with a TLS-enabled PostgreSQL Database Cluster. This setup allows you to
-perform advanced semantic searches and ensures your data is stored securely.
+cluster with a TLS-enabled PostgreSQL Vector Database Cluster. This setup allows
+you to perform advanced semantic searches and ensures your data is stored
+securely.
 
 ## modifying the cluster! 🛠️
 
