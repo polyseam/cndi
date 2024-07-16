@@ -1,11 +1,13 @@
 import { ccolors, loadEnv, path } from "deps";
 
 import {
+  checkDirectoryForFileSuffix,
   getPrettyJSONString,
   getYAMLString,
   loadCndiConfig,
   loadJSONC,
   persistStagedFiles,
+  stageDirectory,
   stageFile,
 } from "src/utils.ts";
 
@@ -15,8 +17,12 @@ import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
 
+import { getFunctionsDockerfileContent } from "src/outputs/functions/runtime-dockerfile.ts";
+import { getFunctionsMainContent } from "src/outputs/functions/main-function.ts";
+
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
+import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/cndi-fns-workflow.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -100,6 +106,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       "terraform",
     );
 
+    const pathToFunctionsOutput = path.join(
+      options.output,
+      "cndi",
+      "functions",
+    );
+
     const envPath = path.join(options.output, ".env");
     let config: CNDIConfig;
     let pathToConfig: string;
@@ -163,6 +175,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         "workflows",
         "cndi-run.yaml",
       );
+
       await stageFile(
         runWorkflowPath,
         getCndiRunGitHubWorkflowYamlContents(
@@ -193,6 +206,59 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name(onPullWorkflowPath),
         );
       }
+    }
+
+    const pathToFunctionsInput = path.join(
+      options.output,
+      "functions",
+    );
+
+    const shouldBuildFunctions = await checkDirectoryForFileSuffix(
+      pathToFunctionsInput,
+      ".ts",
+    );
+
+    try {
+      await Deno.remove(pathToFunctionsOutput, {
+        recursive: true,
+      });
+    } catch {
+      // folder did not exist
+    }
+
+    if (shouldBuildFunctions) {
+      const fnsWorkflowPath = path.join(
+        ".github",
+        "workflows",
+        "cndi-fns.yaml",
+      );
+
+      await stageDirectory(
+        path.join("cndi", "functions", "src"),
+        path.join("functions"),
+      );
+
+      await stageFile(
+        path.join("cndi", "functions", "src", "main", "index.ts"),
+        getFunctionsMainContent(),
+      );
+
+      await stageFile(
+        path.join("cndi", "functions", "Dockerfile"),
+        getFunctionsDockerfileContent(),
+      );
+
+      await stageFile(
+        fnsWorkflowPath,
+        getCndiFnsGitHubWorkflowYamlContents(
+          config,
+        ),
+      );
+
+      console.log(
+        ccolors.success("staged 'cndi-fns' GitHub workflow:"),
+        ccolors.key_name(fnsWorkflowPath),
+      );
     }
 
     try {
