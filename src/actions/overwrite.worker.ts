@@ -96,6 +96,12 @@ self.Deno.exit = (code?: number): never => {
   self.close();
 };
 
+type ManifestWithName = {
+  metadata: {
+    name: string;
+  };
+};
+
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
@@ -308,8 +314,25 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         );
       }
 
-      config.cluster_manifests["fns-env-secret"] = getFunctionsEnvSecretManifest()
-      config.cluster_manifests["fns-pull-secret"] = getFunctionsPullSecretManifest()
+      let hasExistingFnsEnvSecret = false;
+
+      Object.entries(config?.cluster_manifests || {}).forEach(
+        (manifestEntry) => {
+          const m = manifestEntry[1] as ManifestWithName;
+          if (m?.metadata?.name === "fns-env-secret") {
+            hasExistingFnsEnvSecret = true;
+          }
+        },
+      );
+
+      // only insert empty env secret to cluster_manifests if the user doesn't supply one
+      if (!hasExistingFnsEnvSecret) {
+        config.cluster_manifests["fns-env-secret"] =
+          getFunctionsEnvSecretManifest();
+      }
+
+      config.cluster_manifests["fns-pull-secret"] =
+        getFunctionsPullSecretManifest();
 
       await stageFile(
         path.join("cndi", "cluster_manifests", "fns-deployment.yaml"),
