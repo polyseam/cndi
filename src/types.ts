@@ -264,7 +264,9 @@ interface CNDIConfig {
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
-      functions?: boolean; // default: false
+      functions?: {
+        hostname?: string;
+      };
       keyless?: boolean; // default: false
       deployment_target_configuration?: DeploymentTargetConfiguration;
       ingress: {
