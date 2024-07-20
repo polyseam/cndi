@@ -1,57 +1,50 @@
 function mainContent() {
-  console.log("main function started");
-
-  const JWT_SECRET = Deno.env.get("JWT_SECRET");
-  const VERIFY_JWT = Deno.env.get("VERIFY_JWT") === "true";
-
-  function getAuthToken(req: Request) {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      throw new Error("Missing authorization header");
-    }
-    const [bearer, token] = authHeader.split(" ");
-    if (bearer !== "Bearer") {
-      throw new Error(`Auth header is not 'Bearer {token}'`);
-    }
-    return token;
-  }
-
-  async function verifyJWT(jwt: string): Promise<boolean> {
-    const encoder = new TextEncoder();
-    const secretKey = encoder.encode(JWT_SECRET);
-    try {
-      // @ts-ignore: jose is imported downstream
-      await jose.jwtVerify(jwt, secretKey);
-    } catch (err) {
-      console.error(err);
-      return false;
-    }
-    return true;
-  }
-
   Deno.serve(async (req: Request) => {
-    if (req.method !== "OPTIONS" && VERIFY_JWT) {
-      try {
-        const token = getAuthToken(req);
-        const isValidJWT = await verifyJWT(token);
-
-        if (!isValidJWT) {
-          return new Response(
-            JSON.stringify({ msg: "Invalid JWT" }),
-            { status: 401, headers: { "Content-Type": "application/json" } },
-          );
-        }
-      } catch (e) {
-        console.error(e);
-        return new Response(
-          JSON.stringify({ msg: e.toString() }),
-          { status: 401, headers: { "Content-Type": "application/json" } },
-        );
-      }
-    }
+    const headers = new Headers({
+      "Content-Type": "application/json",
+    });
 
     const url = new URL(req.url);
     const { pathname } = url;
+
+    // handle health checks
+    if (pathname === "/_internal/health") {
+      return new Response(
+        JSON.stringify({ "message": "ok" }),
+        {
+          status: STATUS_CODE.OK,
+          headers,
+        },
+      );
+    }
+
+    if (pathname === "/_internal/metric") {
+      const metric = await EdgeRuntime.getRuntimeMetrics();
+      return Response.json(metric);
+    }
+
+    // NOTE: You can test WebSocket in the main worker by uncommenting below.
+    // if (pathname === '/_internal/ws') {
+    // 	const upgrade = req.headers.get("upgrade") || "";
+
+    // 	if (upgrade.toLowerCase() != "websocket") {
+    // 		return new Response("request isn't trying to upgrade to websocket.");
+    // 	}
+
+    // 	const { socket, response } = Deno.upgradeWebSocket(req);
+
+    // 	socket.onopen = () => console.log("socket opened");
+    // 	socket.onmessage = (e) => {
+    // 		console.log("socket message:", e.data);
+    // 		socket.send(new Date().toString());
+    // 	};
+
+    // 	socket.onerror = e => console.log("socket errored:", e.message);
+    // 	socket.onclose = () => console.log("socket closed");
+
+    // 	return response; // 101 (Switching Protocols)
+    // }
+
     const path_parts = pathname.split("/");
     const service_name = path_parts[1];
 
@@ -59,38 +52,110 @@ function mainContent() {
       const error = { msg: "missing function name in request" };
       return new Response(
         JSON.stringify(error),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        {
+          status: STATUS_CODE.BadRequest,
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
-    const servicePath = `/home/deno/functions/${service_name}`;
-    console.error(`serving the request with ${servicePath}`);
+    const servicePath = `./${service_name}`;
+    // console.error(`serving the request with ${servicePath}`);
 
-    const memoryLimitMb = 150;
-    const workerTimeoutMs = 1 * 60 * 1000;
-    const noModuleCache = false;
-    const importMapPath = null;
-    const envVarsObj = Deno.env.toObject();
-    const envVars = Object.keys(envVarsObj).map((k) => [k, envVarsObj[k]]);
+    const createWorker = async () => {
+      const memoryLimitMb = 150;
+      const workerTimeoutMs = 5 * 60 * 1000;
+      const noModuleCache = false;
 
-    try {
-      // @ts-ignore: EdgeRuntime is provided downstream
-      const worker = await EdgeRuntime.userWorkers.create({
+      // you can provide an import map inline
+      // const inlineImportMap = {
+      //   imports: {
+      //     "std/": "https://deno.land/std@0.131.0/",
+      //     "cors": "./examples/_shared/cors.ts"
+      //   }
+      // }
+
+      // const importMapPath = `data:${encodeURIComponent(JSON.stringify(importMap))}?${encodeURIComponent('/home/deno/functions/test')}`;
+      const importMapPath = null;
+      const envVarsObj = Deno.env.toObject();
+      const envVars = Object.keys(envVarsObj).map((k) => [k, envVarsObj[k]]);
+      const forceCreate = false;
+      const netAccessDisabled = false;
+
+      // load source from an eszip
+      //const maybeEszip = await Deno.readFile('./bin.eszip');
+      //const maybeEntrypoint = 'file:///src/index.ts';
+
+      // const maybeEntrypoint = 'file:///src/index.ts';
+      // or load module source from an inline module
+      // const maybeModuleCode = 'Deno.serve((req) => new Response("Hello from Module Code"));';
+      //
+      const cpuTimeSoftLimitMs = 10000;
+      const cpuTimeHardLimitMs = 20000;
+
+      return await EdgeRuntime.userWorkers.create({
         servicePath,
         memoryLimitMb,
         workerTimeoutMs,
         noModuleCache,
         importMapPath,
         envVars,
+        forceCreate,
+        netAccessDisabled,
+        cpuTimeSoftLimitMs,
+        cpuTimeHardLimitMs,
+        // maybeEszip,
+        // maybeEntrypoint,
+        // maybeModuleCode,
       });
-      return await worker.fetch(req);
-    } catch (e) {
-      const error = { msg: e.toString() };
-      return new Response(
-        JSON.stringify(error),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
+    };
+
+    const callWorker = async () => {
+      try {
+        // If a worker for the given service path already exists,
+        // it will be reused by default.
+        // Update forceCreate option in createWorker to force create a new worker for each request.
+        const worker = await createWorker();
+        const controller = new AbortController();
+
+        const signal = controller.signal;
+        // Optional: abort the request after a timeout
+        //setTimeout(() => controller.abort(), 2 * 60 * 1000);
+
+        return await worker.fetch(req, { signal });
+      } catch (e) {
+        console.error(e);
+
+        if (e instanceof Deno.errors.WorkerRequestCancelled) {
+          headers.append("Connection", "close");
+
+          // XXX(Nyannyacha): I can't think right now how to re-poll
+          // inside the worker pool without exposing the error to the
+          // surface.
+
+          // It is satisfied when the supervisor that handled the original
+          // request terminated due to reaches such as CPU time limit or
+          // Wall-clock limit.
+          //
+          // The current request to the worker has been canceled due to
+          // some internal reasons. We should repoll the worker and call
+          // `fetch` again.
+
+          // return await callWorker();
+        }
+
+        const error = { msg: e.toString() };
+        return new Response(
+          JSON.stringify(error),
+          {
+            status: STATUS_CODE.InternalServerError,
+            headers,
+          },
+        );
+      }
+    };
+
+    return callWorker();
   });
 }
 
@@ -98,7 +163,7 @@ function mainContent() {
 export function getFunctionsMainContent() {
   // divide typescript code into imports and content
   const imports = [
-    `import * as jose from "https://deno.land/x/jose@v5.6.3/index.ts";`,
+    `import { STATUS_CODE } from 'https://deno.land/std/http/status.ts';`,
   ];
 
   // get the content of the main function excluding: function signature, curly braces, and indentation
