@@ -251,7 +251,7 @@ const getSealedSecretManifestWithKSC = async (
       `--cert=${publicKeyFilePath}`,
       `--secret-file=${secretPath}`,
       `--scope=cluster-wide`,
-      `--allow-empty-data`
+      `--allow-empty-data`,
     ],
     stderr: "piped",
     stdout: "piped",

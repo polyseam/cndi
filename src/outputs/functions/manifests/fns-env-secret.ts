@@ -1,4 +1,3 @@
-
 export function getFunctionsEnvSecretManifest() {
   const manifest = {
     apiVersion: "v1",

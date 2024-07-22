@@ -3,13 +3,17 @@ import { getYAMLString } from "src/utils.ts";
 export function getFunctionsDeploymentManifest(): string {
   const OW_TIMESTAMP = new Date().toISOString();
   const REPO_URL = Deno.env.get("GIT_REPO");
+
+  // eg. /${username}/${repo}
   const repoPath = REPO_URL?.split("github.com")[1];
 
   if (!repoPath) {
-    console.error(`'GIT_REPO' must be a GitHub URL when using CNDI Functions`);
+    console.error(
+      `'GIT_REPO' must be a valid GitHub URL when using CNDI Functions`,
+    );
   }
 
-  // eg ghcr.io/username/repo:main
+  // eg. ghcr.io/${username}/${repo}-functions:main
   const image = `ghcr.io${repoPath}-functions:main`;
 
   const manifest = {

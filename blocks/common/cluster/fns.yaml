@@ -1,0 +1,1 @@
+hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
