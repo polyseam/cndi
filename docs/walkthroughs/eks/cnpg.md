@@ -1,34 +1,10 @@
-# Deploying PostgreSQL vector database on EKS using CNDI
+# Deploying PostgreSQL with CloudNativePG on EKS using CNDI
 
 ## overview 🔭
 
-This tutorial shows you how to deploy a GitOps-enabled PostgreSQL vector
-database cluster on CNDI.
-
-PostgreSQL comes with a range of modules and extensions that extend the
-database's functionality. In this tutorial, you install the pgvector extension
-on an existing PostgreSQL cluster deployed to EKS. The Pgvector extension lets
-you store vectors in the database tables by adding vector types to PostgreSQL.
-Pgvector also provides similarity searches by running common SQL queries.
-
-We simplify the PGvector extension deployment by first deploying the
-CloudnativePG operator, as the operator provides a bundled version of the
-extension.
-
-## objectives
-
-In this tutorial, you will:
-
-1. **Install CNDI**: Learn how to install the CNDI tool to manage your
-   cloud-native deployments.
-2. **Deploy a PostgreSQL Vector Database Cluster on an EKS Cluster**: Set up a
-   scalable and secure PostgreSQL vector database on Amazon's Elastic Kubernetes
-   Service (EKS).
-3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
-   instance on your EKS cluster for interactive data analysis.
-4. **Upload Vectors into a PostgreSQL Vector Database Table and Run Semantic
-   Search Queries Using SQL Syntax**: Use Jupyter Notebook to load data, create
-   vectors, and perform semantic searches against your PostgreSQL database.
+This guide will walk you through deploying a GitOps-enabled PostgreSQL cluster
+using CloudNativePG (CNPG) on Elastic Kubernetes Service (EKS) with CNDI. This
+setup includes GitOps for state management, TLS, and High Availability.
 
 ## prerequisites ✅
 
@@ -342,11 +318,9 @@ Once you are logged in verify all applications and manifests in the cluster are 
 Ensure CloudNativePG is properly accessible through your chosen domain after
 deploying and configuring external access.
 
-### Using PostgreSQL Command Line Tool
+### Connect to the Database Using PostgreSQL Command Line Tool
 
 Install an PostgreSQL client like `psql` to access your database `
-
-#### Connect to the Database
 
 Execute the command below, replacing placeholders with your postgresql host,
 user and database name. You'll be prompted for the password.
@@ -357,8 +331,8 @@ psql -h <hostname> -p 5432 -U <username> -d <database>
 
 ![Argocd UI](/docs/walkthroughs/eks/img/psql-cli.png)
 
-The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the
-.env file.
+This command `PSQL_CONNECTION_COMMAND` and the postgresql connection details can
+be found in the .env file.
 
 ### Using PgAdmin (Optional)
 
@@ -380,94 +354,10 @@ postgres user admin password to connect to your database.
 
 ![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-3.png)
 
-## Upload demo dataset and run search queries with Jupyter Notebook
+## and you are done! ⚡️
 
-In this section, you upload vectors into a PostgreSQL table and run semantic
-search queries using SQL syntax.
-
-In the following example, you use a dataset from a CSV file that contains a list
-of books in different genres. Pgvector serves as a search engine, and the query
-you run in your notebookserves as a client querying the PostgreSQL database.
-
-### Login to Jupyter Notebook
-
-Begin by logging into your Jupyter Notebook instance. This is your development
-environment where you will run the necessary commands and scripts.
-
-![Login](img/notebook-login.png)
-
-### Open JupyterHub
-
-Navigate to JupyterHub to access your Jupyter environment.
-
-![Open JupyterHub](img/notebook-open-jupyter.png)
-
-### Load the Dataset and notebook file from URL
-
-![Open Console](img/jupyterhub-notebook-console-openurl.png)
-![Open URL](img/open-url.png) Next, open the URL in the console and enter the
-GitHub Repository URL containing the dataset CSV file. This file includes the
-data that you will load into your PostgreSQL database.
-
-```bash
-https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/dataset.csv
-```
-
-This URL points to a CSV file that contains a list of books in various genres.
-By loading this file, you will be able to use the data for your semantic search
-queries.
-
-![Dataset](img/dataset.png)
-
-After loading the dataset, you need to open the Jupyter Notebook file that
-contains the code for processing the dataset and performing the semantic search.
-Enter the following URL in the console:
-
-```bash
-https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/vector-database.ipynb
-```
-
-This notebook file includes all the necessary steps and code to set up the
-vectors and run queries against your PostgreSQL database.
-
-![Open Notebook](img/pre-notebook-run-one-host.png)
-![Open Notebook](img/pre-notebook-run-two-host.png)
-
-### Run the Jupyter Notebook
-
-To run the entire notebook, click on Run in the menu, then select Run all cells.
-This action will execute all the code cells in the notebook sequentially. The
-notebook includes a query that performs a semantic search for the text "drama
-about people and unhappy love" against the documents table in PostgreSQL
-
-### Verify the Results
-
-The output of the run is similar to the following:
-
-_Title: Romeo and Juliet, Author: William Shakespeare, Paul Werstine (Editor),
-Barbara A. Mowat (Editor), Paavo Emil Cajander (Translator) In Romeo and Juliet,
-Shakespeare creates a violent world, in which two young people fall in love. In
-part because of its exquisite language, it is easy to respond as if it were
-about all young lovers._ --------_Title: A Midsummer Night's Dream, Author:
-William Shakespeare, Paul Werstine (Editor), Barbara A. Mowat (Editor),
-Catherine Belsey (Contributor) Shakespeare's intertwined love polygons begin to
-get complicated from the start.Throw in a group of labourers preparing a play
-for the Duke's wedding (one of whom is given a donkey's head and Titania for a
-lover by Puck) and the complications become fantastically funny._
-
-![Run All Cells](img/post-notebook-run.png)
-
-To ensure that the vectors were created correctly, you can use the pgAdmin tool
-to verify the results.
-
-![Query All Rows](img/pgadmin-query-all-rows.png)
-![Embeddings](img/embeddings.png)
-
-### and you are done! ⚡️
-
-By following these steps, you now have a fully-configured 3-node Kubernetes
-cluster with a TLS-enabled PostgreSQL Database Cluster. This setup allows you to
-perform advanced semantic searches and ensures your data is stored securely.
+You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
+Postgresql Database Cluster
 
 ## modifying the cluster! 🛠️
 
@@ -501,9 +391,7 @@ git commit -m "destroy instance"
 git push
 ```
 
-## destroying ALL your resources! 💣
-
-**If you want to take down the entire cluster and resources run:**
+**If you want to take down the entire cluster run:**
 
 ```bash
 cndi destroy

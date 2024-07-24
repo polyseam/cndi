@@ -1,4 +1,4 @@
-# Deploying PostgreSQL Vector Database on EKS using CNDI
+# Deploying PostgreSQL Vector Database on AKS using CNDI
 
 ## overview 🔭
 
@@ -7,8 +7,8 @@ databases that can handle complex data types such as vectors is increasing.
 PostgreSQL, with its extensive range of modules and extensions, has become a
 go-to solution for such needs. One notable extension is pgvector, which enables
 storing and querying vectors within PostgreSQL tables. This tutorial walks you
-through deploying a GitOps-enabled PostgreSQL vector database cluster on
-Amazon's Elastic Kubernetes Service (EKS) using CNDI.
+through deploying a GitOps-enabled PostgreSQL vector database cluster on Azure
+Kubernetes Service (AKS) using CNDI.
 
 ## objectives
 
@@ -16,11 +16,11 @@ In this tutorial, you will:
 
 1. **Install CNDI**: Learn how to install the CNDI tool to manage your
    cloud-native deployments.
-2. **Deploy a PostgreSQL Vector Database Cluster on an EKS Cluster**: Set up a
-   scalable and secure PostgreSQL vector database on Amazon's Elastic Kubernetes
-   Service (EKS).
-3. **Deploy a Jupyter Notebook on the EKS Cluster**: Launch a Jupyter Notebook
-   instance on your EKS cluster for interactive data analysis.
+2. **Deploy a PostgreSQL Vector Database Cluster on an AKS Cluster**: Set up a
+   scalable and secure PostgreSQL vector database on Azure Kubernetes Service
+   (AKS).
+3. **Deploy a Jupyter Notebook on the AKS Cluster**: Launch a Jupyter Notebook
+   instance on your AKS cluster for interactive data analysis.
 4. **Upload Vectors into a PostgreSQL Database and Run Semantic Search
    Queries**: Use Jupyter Notebook to load data, create vectors, and perform
    semantic searches against your PostgreSQL database.
@@ -30,32 +30,24 @@ In this tutorial, you will:
 **You will need the following things to get up and running with CNDI
 successfully:**
 
-- **AWS Cloud Account**: You'll need an active AWS account as CNDI deploys
-  infrastructure within Amazon Web Services.
+- **An Azure cloud account**: For deploying infrastructure within AKS.
 
-- **AWS Credentials**: CNDI requires your AWS Access Key ID and AWS Secret
-  Access Key to authenticate and deploy resources. Learn how to obtain your
-  credentials from the
-  [official AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey).
+- **Your cloud credentials**: ARM_CLIENT_SECRET, ARM_CLIENT_ID, ARM_TENANT_ID,
+  ARM_SUBSCRIPTION_ID.
 
-- **Domain Name**: For easy access to your cluster, attach a domain name to the
-  load balancer. Provide this domain during the `cndi create` command, and CNDI
-  will configure it automatically.
+- **A domain name**: For accessing your cluster via a load balancer.
+  [(Optional) if you dont have an domain name](docs/walkthroughs/aks/port-forwarding.md)
 
-- **GitHub Account**: Manage your infrastructure's state using a GitOps
-  workflow. Ensure you have a
+- **A GitHub account**: cndi helps you manage the state of your infrastructure
+  using a GitOps workflow, so you'll need a
   [GitHub account](https://docs.github.com/en/get-started/signing-up-for-github/signing-up-for-a-new-github-account)
-  and a
-  [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-  set up.
+  with a valid
+  [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- **GitHub CLI**: Install the GitHub Command Line Interface (CLI) to interact
-  with GitHub from your terminal. Download it from the
-  [GitHub CLI page](https://cli.github.com/).
+- **GitHub CLI**: You will need to have the GitHub CLI installed on your
+  machine. You can download it [here](https://cli.github.com/).
 
-- **AWS Setup Guide**: For a detailed guide on setting up your Amazon Web
-  Services account, including roles and permissions, refer to our
-  [AWS Setup Documentation](/docs/cloud-setup/aws/aws-setup.md).
+- [Here's a guide of how to set up your Azure account including roles and permissions](/docs/cloud-setup/azure/azure-setup.md)
 
 ## download cndi ⬇️
 
@@ -107,14 +99,18 @@ Follow the prompts to set up your project:
 - **Please select your DNS provider (azure)**:_Specify your DNS provider for
   managing DNS records._
 - **Enter an override for the default ArgoCD Admin Password? (default: randomly
-  generated value)**: _Optionally set a custom password for accessing ArgoCD's
+  generated value)**:_Optionally set a custom password for accessing ArgoCD's
   administrative interface._
-- **AWS Access Key ID**: _Enter your AWS Access Key ID for accessing AWS
-  services_.
-- **AWS Secret Access Key**: _Provide your AWS Secret Access Key for secure AWS
-  service access._
-- **Please enter your AWS Region (default: us-east-1)**: _Specify the AWS region
-  where your resources will be deployed._
+- **Please enter your Azure Subscription ID**:_Enter the ID of your Azure
+  subscription, which allows access to Azure resources_
+- **Please enter your Azure Client ID**:_Enter the Client ID (Application ID)
+  used for authentication to Azure services._
+- **Please enter your Azure Client Secret**: _Enter the Client Secret (Password)
+  associated with the Client ID for authentication._
+- **Please enter your Azure Tenant ID**: _Enter the ID of your Azure Active
+  Directory tenant._
+- **Please enter your Azure Region (default: us-east-1)**: _Specify the Azure
+  region where your infrastructure and resources will be deployed._
 - **Do you want to expose ArgoCD with an Ingress? (Y/n)**: _Decide whether to
   make PgAdmin accessible from the public internet._
 - **What hostname should ArgoCD be accessible at**: _Enter the hostname through
@@ -178,10 +174,8 @@ The structure of the generated CNDI project will be something like this:
 │   │   │   ├── cnpg.application.yaml
 |   |   |   ├── pgadmin.application.yaml
 |   │   │   ├── public_nginx.application.yaml
-|   │   │   ├── jupyter-notebook-deployment.yaml
 |   │   │   └── etc
 │   │   ├── argo-ingress.yaml
-│   │   ├── jupyter-notebook-ingress.yaml
 │   │   ├── cert-manager-cluster-issuer.yaml
 │   │   └── etc
 │   └── 📁 terraform
@@ -200,7 +194,7 @@ and scroll down to the readme for more information about your cnpg deployment
 
 You should now see the cluster configuration has been uploaded to GitHub:
 
-![GitHub repo](/docs/walkthroughs/eks/img/github-repo.png)
+![GitHub repo](/docs/walkthroughs/aks/img/github-repo.png)
 
 Now, open your web browser and navigate to your project on GitHub. Click on the
 Actions tab, then click on the job that was triggered from your latest commit.
@@ -208,7 +202,7 @@ Actions tab, then click on the job that was triggered from your latest commit.
 You will see something like the image below, which shows that GitHub has
 successfully run the workflow.
 
-![GitHub action](/docs/walkthroughs/eks/img/github-action.png)
+![GitHub action](/docs/walkthroughs/aks/img/github-action.png)
 
 It is common for `cndi run` to take a fair amount of time, as is the case with
 most Terraform and cloud infrastructure deployments.
@@ -217,7 +211,7 @@ Once `cndi run` has been completed, at the end of the run will be a link to
 `resource groups`, where you can view resources deployed by CNDI for this
 project.
 
-![current resource group](/docs/walkthroughs/eks/img/resource-groups.png)
+![current resource group](/docs/walkthroughs/aks/img/resource-groups.png)
 
 ---
 
@@ -229,7 +223,7 @@ If you enabled ExternalDNS, your domain's DNS settings will be automatically
 configured. Once the DNS changes propagate, you can access ArgoCD and PostgreSQL
 using your domain names.
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
+![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
@@ -246,16 +240,16 @@ which will have public loadbalancer.
 - Create an A record in your domain registrar pointing to this IP.
 - Open the domain names in your browser to access ArgoCD and PostgreSQL.
 
-![cndi outputs](/docs/walkthroughs/eks/img/outputs.png)
-![EKS LB](/docs/walkthroughs/eks/img/my-cndi-cluster-eks-ui.png)
-![alt text](/docs/walkthroughs/eks/img/my-cndi-cluster-ingress.png)
-![google domains](/docs/walkthroughs/eks/img/google-domains-cname.png)
-![alt text](/docs/walkthroughs/eks/img/argocd-ingress.png) If everything is
-working correctly you should now open the domain name you've assigned for ArgoCD
-in your browser to see the ArgoCD login page. The DNS changes may take a few
-minutes to propagate.
+![cndi outputs](/docs/walkthroughs/aks/img/outputs.png)
+![AKS LB](/docs/walkthroughs/aks/img/azure-nlb.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0.png)
+![google domains](/docs/walkthroughs/aks/img/google-domains-a-record.png)
+
+If everything is working correctly you should now open the domain name you've
+assigned for ArgoCD in your browser to see the ArgoCD login page. The DNS
+changes may take a few minutes to propagate.
+
+![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0.png)
 
 To log in, use the username `admin` and the password which is the value of the
 `ARGOCD_ADMIN_PASSWORD` in the `.env` located in your CNDI project folder
@@ -270,35 +264,48 @@ To log in, use the username `admin` and the password which is the value of the
 No DNS Setup - Port forwarding (Optional)
 </summary>
 <div>
-This guide will walk you through the process of connecting to your Elastic Kubernetes Service (EKS) cluster using the AWS CLI and then port forwarding the service for local access.
+This guide will walk you through the process of connecting to your Azure Kubernetes Service (AKS) cluster using the Azure CLI and then port forwarding the service for local access.
 
 ## Prerequisites
 
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
   installed on your local machine.
-- The Kubernetes command-line tool
-  [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) which
-  allows you to run commands against Kubernetes clusters.
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed
+  on your local machine.
 
 ## Steps
 
-**1.Install and Configure `AWS` CLI:**
+**1.Install Azure CLI:**
 
-If you haven't already, you'll need to install and configure the `AWS` CLI. You
-can download and set it up by following the instructions in the
-[AWS CLI install instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions).
+Install Azure CLI: If you haven't already, install the Azure CLI on your local
+machine. You can download and install it from here.
 
-**2.Configure Kubernetes CLI (kubectl):**
+**2.Login to Azure:**
 
-To interact with an Amazon Elastic Kubernetes Service (EKS) cluster, you need to
-fetch the cluster's configuration. You can do this with the AWS CLI:
+Open your terminal or command prompt and run the following command to log in to
+your Azure account:
 
 ```bash
-aws eks update-kubeconfig --name <cluster_name> --region <region>
+az login
 ```
 
-Replace <cluster_name>, <region> with the actual name and region of your EKS
-cluster.
+**2. Configure Kubernetes CLI (kubectl):**
+
+If you haven't configured kubectl to use your Kubernetes cluster, you can do so
+using the following command. Replace <subscription_id>, <resource-group-name>
+and <cluster-name> with your cluster's details:
+
+Set the cluster subscription
+
+```bash
+az account set --subscription <subscription_id>
+```
+
+Download cluster credentials
+
+```bash
+az aks get-credentials --resource-group <resource-group-name> --name <cluster-name>
+```
 
 ## Port Forwarding the Services
 
@@ -332,7 +339,7 @@ You should now see a login page for Argocd, and a place to enter a username and
 password. The username is `admin` and the password is available in the `.env`
 file we created for you under the key `ARGOCD_ADMIN_PASSWORD`.
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-0-port-foward.png)
+![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-0-port-foward.png)
 
 **2. Terminating the Port Forwarding Session:**
 
@@ -347,18 +354,16 @@ To log in, use the username `admin` and the password which is the value of the
 </details>
 Once you are logged in verify all applications and manifests in the cluster are present and their status is healthy in the ArgoCD UI
 
-![Argocd UI](/docs/walkthroughs/eks/img/argocd-ui-cnpg.png)
+![Argocd UI](/docs/walkthroughs/aks/img/argocd-ui-cnpg.png)
 
 ## Testing Your PostgreSQL Connection
 
 Ensure CloudNativePG is properly accessible through your chosen domain after
 deploying and configuring external access.
 
-### Using PostgreSQL Command Line Tool
+### Connect to the Database using PostgreSQL Command Line Tool
 
-Install an PostgreSQL client like `psql` to access your database `
-
-#### Connect to the Database
+Install an PostgreSQL client like `psql` to access your database
 
 Execute the command below, replacing placeholders with your postgresql host,
 user and database name. You'll be prompted for the password.
@@ -367,12 +372,12 @@ user and database name. You'll be prompted for the password.
 psql -h <hostname> -p 5432 -U <username> -d <database>
 ```
 
-![Argocd UI](/docs/walkthroughs/eks/img/psql-cli.png)
+This command `PSQL_CONNECTION_COMMAND` and the postgresql connection details can
+be found in the .env file.
 
-The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the
-.env file.
+![Argocd UI](/docs/walkthroughs/aks/img/psql-cli.png)
 
-### Using PgAdmin (Optional)
+### Using PgAdmin
 
 PgAdmin offers a GUI for managing your PostgreSQL databases. To connect:
 
@@ -384,15 +389,13 @@ file, your database details are made automatically available, allowing you to
 simply click on your server entry in PgAdmin's browser panel and enter your
 postgres user admin password to connect to your database.
 
-![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-0.png)
+![Argocd UI](/docs/walkthroughs/aks/img/pgadmin-ui-0.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-1.png)
+![Argocd UI](/docs/walkthroughs/aks/img/pgadmin-ui-1.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-2.png)
+![Argocd UI](/docs/walkthroughs/aks/img/pgadmin-ui-2.png)
 
-![Argocd UI](/docs/walkthroughs/eks/img/pgadmin-ui-3.png)
-
-<<<<<<< HEAD
+![Argocd UI](/docs/walkthroughs/aks/img/pgadmin-ui-3.png)
 
 ## Upload demo dataset and run search queries with Jupyter Notebook
 
@@ -405,16 +408,17 @@ you run in your notebookserves as a client querying the PostgreSQL database.
 
 ### Login to Jupyter Notebook
 
-Begin by logging into your Jupyter Notebook instance. This is your development
+Begin by logging into your Jupyter Notebook instance. Enter the login password.
+The `JUPYTER_PASSWORD` can be found in the `.env` file. This is your development
 environment where you will run the necessary commands and scripts.
 
-![Login](img/notebook-login.png)
+![Login](/docs/walkthroughs/aks/img/notebook-login.png)
 
 ### Open JupyterHub
 
 Navigate to JupyterHub to access your Jupyter environment.
 
-![Open JupyterHub](img/notebook-open-jupyter.png)
+![Open JupyterHub](/docs/walkthroughs/aks/img/notebook-open-jupyter.png)
 
 ### Load the Dataset and notebook file from URL
 
@@ -426,9 +430,9 @@ PostgreSQL database.
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/dataset.csv
 ```
 
-![Open Console](img/jupyterhub-notebook-console-openurl.png)
+![Open Console](/docs/walkthroughs/aks/img/jupyterhub-notebook-console-openurl.png)
 
-![Dataset](img/dataset.png)
+![Dataset](/docs/walkthroughs/aks/img/dataset.png)
 
 Again, open the URL in the console and copy this GitHub Repository URL
 containing the Jupyter Notebook file that contains the code for processing the
@@ -438,95 +442,8 @@ dataset and performing the semantic search.
 https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/vector-database.ipynb
 ```
 
-![Open Notebook](img/pre-notebook-run-one-host.png)
-![Open Notebook](img/pre-notebook-run-two-host.png)
-
-### Understanding the code
-
-Semantic search is revolutionizing data retrieval by understanding the context
-and intent behind user queries using :
-
-- **Natural Language Processing (NLP):** Techniques to process and analyze human
-  language.
-- **Embeddings:** Representations of words, phrases, or documents as
-  high-dimensional vectors capturing semantic meaning.
-- **Similarity Search:** Finding vectors in the database closest to the query
-  vector, using distance metrics like cosine similarity or Euclidean distance.
-
-In the following code we will use the dataset containing a list of books with
-descriptions, vectorize the descriptions, and perform a search query.
-
-**Install Required Packages:**
-
-```python
-! pip install pgvector psycopg-binary psycopg fastembed
-```
-
-**Import Required Libraries:**
-
-```python
-from pgvector.psycopg import register_vector
-import psycopg
-import os
-import csv
-from fastembed import TextEmbedding
-from typing import List
-import numpy as np
-```
-
-**Connect to PostgreSQL:**
-
-```python
-conn = psycopg.connect(
-    dbname=os.environ.get("POSTGRESQL_DB"),
-    host=os.environ.get("POSTGRESQL_FQDN"), 
-    user=os.environ.get("POSTGRESQL_USER"),
-    password=os.environ.get("POSTGRESQL_USER_PASSWORD"),
-    autocommit=True)
-```
-
-**Setup Database and Table:**
-
-```python
-conn.execute('CREATE EXTENSION IF NOT EXISTS vector;')
-register_vector(conn)
-conn.execute('DROP TABLE IF EXISTS documents;')
-conn.execute('CREATE TABLE documents (id bigserial PRIMARY KEY, author text, title text, description text, embedding vector(384));')
-```
-
-**Load Data from CSV:**
-
-```python
-books = [*csv.DictReader(open('dataset.csv'))]
-```
-
-**Vectorize Book Descriptions:**
-
-```python
-descriptions = [doc["description"] for doc in books]
-embedding_model = TextEmbedding(model_name="BAAI/bge-small-en")
-embeddings: List[np.ndarray] = list(embedding_model.embed(descriptions))
-```
-
-**Insert Data into PostgreSQL:**
-
-```python
-for i, doc in enumerate(books):
-    conn.execute('INSERT INTO documents (author, title, description, embedding) VALUES (%s, %s, %s, %s)', 
-                 (doc["author"], doc["title"], doc["description"], embeddings[i]))
-```
-
-**Perform a Semantic Search Query:**
-
-```python
-query_vector = list(embedding_model.embed(["drama about people and unhappy love"]))[0]
-response = conn.execute('SELECT title, author, description FROM documents ORDER BY embedding <-> %s LIMIT 2', (query_vector,)).fetchall()
-
-for hit in response:
-    print(f"Title: {hit[0]}, Author: {hit[1]}")
-    print(hit[2])
-    print("---------")
-```
+![Open Notebook](/docs/walkthroughs/aks/img/pre-notebook-run-one-host.png)
+![Open Notebook](/docs/walkthroughs/aks/img/pre-notebook-run-two-host.png)
 
 ### Run the Jupyter Notebook
 
@@ -550,13 +467,13 @@ get complicated from the start.Throw in a group of labourers preparing a play
 for the Duke's wedding (one of whom is given a donkey's head and Titania for a
 lover by Puck) and the complications become fantastically funny._
 
-![Run All Cells](img/post-notebook-run.png)
+![Run All Cells](/docs/walkthroughs/aks/img/post-notebook-run.png)
 
 To ensure that the vectors were created correctly, you can use the pgAdmin tool
 to verify the results.
 
-![Query All Rows](img/pgadmin-query-all-rows.png)
-![Embeddings](img/embeddings.png)
+![Query All Rows](/docs/walkthroughs/aks/img/pgadmin-query-all-rows.png)
+![Embeddings](/docs/walkthroughs/aks/img/embeddings.png)
 
 ### and you are done! ⚡️
 
@@ -569,7 +486,7 @@ securely.
 
 **To add another a node to the cluster:**
 
-![cndi config](/docs/walkthroughs/eks/img/cndi-config.png)
+![cndi config](/docs/walkthroughs/aks/img/cndi-config.png)
 
 - Go to the `cndi_config.yaml`
 - In the `infrastructure.cndi.nodes` section, add a new cnpg node and save the
