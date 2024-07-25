@@ -5,12 +5,16 @@ export function getFunctionsDeploymentManifest(): string {
   const REPO_URL = Deno.env.get("GIT_REPO");
 
   // eg. /${username}/${repo}
-  const repoPath = REPO_URL?.split("github.com")[1];
+  let repoPath = REPO_URL?.split("github.com")[1];
 
   if (!repoPath) {
     console.error(
       `'GIT_REPO' must be a valid GitHub URL when using CNDI Functions`,
     );
+  }
+
+  if (repoPath?.endsWith(".git")) {
+    repoPath = repoPath.slice(0, -4);
   }
 
   // eg. ghcr.io/${username}/${repo}-functions:main

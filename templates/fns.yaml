@@ -4,6 +4,7 @@
 blocks: # TODO: determine why I can't just have a single block called conditionally by name
   - name: fns_hostname_false
     content: {}
+    
   - name: fns_hostname_true
     content:
       hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
