@@ -14,7 +14,9 @@ import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
+
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -29,16 +31,25 @@ import getPublicNginxApplicationManifest from "src/outputs/core-applications/pub
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import { CNDIConfig, KubernetesManifest, KubernetesSecret } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIProvider,
+  KubernetesManifest,
+  KubernetesSecret,
+} from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
+
+const PROVIDERS_SUPPORTING_KEYLESS: Array<CNDIProvider> = [];
 
 interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
   workflowSourceRef?: string;
+  updateGhWorkflow?: boolean;
+  enablePrChecks?: boolean;
 }
 
 type OverwriteWorkerMessage = {
@@ -118,10 +129,71 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       });
     }
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(config, options?.workflowSourceRef),
-    );
+    const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
+
+    if (tryKeyless) {
+      if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+        try {
+          throw new Error(
+            [
+              owLabel,
+              ccolors.error(
+                `'keyless' infrastructure is not yet supported for provider`,
+              ),
+              ccolors.key_name(config?.provider),
+            ].join(" "),
+            { cause: 510 },
+          );
+        } catch (error) {
+          self.postMessage({
+            type: "error-overwrite",
+            code: error.cause,
+            message: error.message,
+          });
+          return;
+        }
+        // TODO: do keyless stuff
+      }
+    }
+
+    // resources outside of ./cndi should only be staged if initializing or manually requested
+    if (options.initializing || options.updateGhWorkflow) {
+      const runWorkflowPath = path.join(
+        ".github",
+        "workflows",
+        "cndi-run.yaml",
+      );
+      await stageFile(
+        runWorkflowPath,
+        getCndiRunGitHubWorkflowYamlContents(
+          config,
+          options?.workflowSourceRef,
+        ),
+      );
+
+      console.log(
+        ccolors.success("staged 'cndi-run' GitHub workflow:"),
+        ccolors.key_name(runWorkflowPath),
+      );
+
+      if (options?.enablePrChecks) {
+        const onPullWorkflowPath = path.join(
+          ".github",
+          "workflows",
+          "cndi-onpull.yaml",
+        );
+
+        await stageFile(
+          onPullWorkflowPath,
+          getCndiOnPullGitHubWorkflowYamlContents(),
+        );
+
+        console.log(
+          ccolors.success("staged 'cndi-onpull' GitHub workflow:"),
+          ccolors.key_name(onPullWorkflowPath),
+        );
+      }
+    }
 
     try {
       // remove all files in cndi/terraform
@@ -317,7 +389,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
 
       const ingress = config?.infrastructure?.cndi?.ingress;
-      const skipPrivateIngress = ingress?.nginx?.private?.enabled === false; // explicitly disabled private ingress
+      const skipPrivateIngress = ingress?.nginx?.private?.enabled !== true; // explicitly enabled private ingress
       const skipPublicIngress = ingress?.nginx?.public?.enabled === false; // explicitly disabled public ingress
 
       if (!skipPublicIngress) {

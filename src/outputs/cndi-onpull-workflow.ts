@@ -10,6 +10,13 @@ const comment_tag = "checkov-failures-comment";
 
 const cndiCheckovSteps = [
   {
+    name: "Checkout",
+    uses: "actions/checkout@v4",
+    with: {
+      "fetch-depth": 0,
+    },
+  },
+  {
     name: "Test with Checkov",
     id: "checkov",
     uses: "bridgecrewio/checkov-action@master",

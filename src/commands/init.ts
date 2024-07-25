@@ -25,7 +25,6 @@ import { createSshKeys } from "src/initialize/sshKeys.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
@@ -40,6 +39,7 @@ type EchoInitOptions = {
   keep?: boolean;
   create?: boolean;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoInit = (options: EchoInitOptions) => {
@@ -113,6 +113,7 @@ const initCommand = new Command()
   .option("--skip-push", "Skip pushing to the remote repository", {
     depends: ["create"],
   })
+  .option("--enable-pr-checks", "Enable pull request checks", { hidden: true })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options?.output || Deno.cwd();
@@ -390,11 +391,6 @@ const initCommand = new Command()
       getPrettyJSONString(vscodeSettings),
     );
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(),
-    );
-
     await stageFile(".gitignore", getGitignoreContents());
 
     const git_credentials_mode = templateResult?.responses.git_credentials_mode;
@@ -458,6 +454,7 @@ const initCommand = new Command()
       workflowSourceRef: options.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
+      enablePrChecks: !!options.enablePrChecks, // will become default
     });
   });
 

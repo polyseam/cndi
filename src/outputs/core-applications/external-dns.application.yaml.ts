@@ -49,6 +49,7 @@ export default function getExternalDNSApplicationManifest(
     txtOwnerId: cndi_config?.project_name || "external-dns",
     txtSuffix: "txt",
     policy: "sync",
+    interval: "30s",
     ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
     provider: externalDNSProvider,
     domainFilters: domain_filters,
@@ -70,6 +71,9 @@ export default function getExternalDNSApplicationManifest(
       name: releaseName,
       finalizers: DEFAULT_FINALIZERS,
       labels: { name: releaseName },
+      annotations: {
+        "argocd.argoproj.io/sync-wave": "-1",
+      },
     },
     spec: {
       project: DEFAULT_PROJECT,
@@ -96,7 +100,7 @@ export default function getExternalDNSApplicationManifest(
           "Validate=false",
           "CreateNamespace=true",
           "PrunePropagationPolicy=foreground",
-          "PruneLast=false",
+          "PruneLast=true",
         ],
         retry: {
           limit: 10,

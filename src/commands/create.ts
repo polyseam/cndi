@@ -20,7 +20,6 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
@@ -48,6 +47,7 @@ type EchoCreateOptions = {
   deploymentTargetLabel?: string;
   responsesFile: string;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -122,6 +122,7 @@ const createCommand = new Command()
       hidden: true,
     },
   )
+  .option("--enable-pr-checks", "Enable PR checks", { hidden: true })
   .action(async (options, slug) => {
     echoCreate(options, slug);
     const skipPush = options.skipPush;
@@ -312,7 +313,9 @@ const createCommand = new Command()
 
     let project_name = repo;
 
-    if (interactive) {
+    if (overrides?.project_name) {
+      project_name = `${overrides.project_name}`;
+    } else if (interactive) {
       project_name = await PromptTypes.Input.prompt({
         message: ccolors.prompt("Please enter a name for your CNDI project:"),
         default: project_name,
@@ -422,11 +425,6 @@ const createCommand = new Command()
 
     await stageFile(".gitignore", getGitignoreContents());
 
-    await stageFile(
-      path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(),
-    );
-
     const git_credentials_mode = templateResult.responses.git_credentials_mode;
 
     if (git_credentials_mode === "ssh") {
@@ -467,6 +465,7 @@ const createCommand = new Command()
       create: true,
       workflowSourceRef: options.workflowSourceRef,
       skipPush: !!skipPush,
+      enablePrChecks: !!options.enablePrChecks,
     });
   });
 

@@ -1,4 +1,4 @@
 - name: x-node-group
-  instance_type: t3.medium
+  instance_type: t3.large
   disk_size: 100
   count: 3

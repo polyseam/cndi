@@ -264,6 +264,7 @@ interface CNDIConfig {
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      keyless?: boolean; // default: false
       deployment_target_configuration?: DeploymentTargetConfiguration;
       ingress: {
         nginx: {
@@ -272,7 +273,7 @@ interface CNDIConfig {
             values: Record<string, unknown>;
           };
           private: {
-            enabled?: boolean; // default: true
+            enabled?: boolean; // default: false
             values: Record<string, unknown>;
           };
         };
