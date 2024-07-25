@@ -1269,7 +1269,7 @@
       "jsr:@cndi/cdktf@^0.1.2",
       "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0",
       "jsr:@polyseam/inflate-response@^1.1.2",
-      "jsr:@polyseam/silky@^1.1.2",
+      "jsr:@polyseam/silky@^1.1.1",
       "jsr:@std/assert@^0.221.0",
       "jsr:@std/async@^0.221.0",
       "jsr:@std/cli@^0.221.0",
