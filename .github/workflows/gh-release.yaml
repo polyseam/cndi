@@ -14,7 +14,7 @@ jobs:
       - name: Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.44
+          deno-version: v1.45
 
       - name: Checkout
         uses: actions/checkout@v3

@@ -1,10 +1,29 @@
-# Deploying PostgreSQL with CloudNativePG on AKS using CNDI
+# Deploying PostgreSQL Vector Database on AKS using CNDI
 
 ## overview 🔭
 
-This guide will walk you through deploying a GitOps-enabled PostgreSQL cluster
-using CloudNativePG (CNPG) on Azure Kubernetes Service (AKS) with CNDI. This
-setup includes GitOps for state management, TLS, and High Availability.
+In the realm of modern applications, the need for efficient and scalable
+databases that can handle complex data types such as vectors is increasing.
+PostgreSQL, with its extensive range of modules and extensions, has become a
+go-to solution for such needs. One notable extension is pgvector, which enables
+storing and querying vectors within PostgreSQL tables. This tutorial walks you
+through deploying a GitOps-enabled PostgreSQL vector database cluster on Azure
+Kubernetes Service (AKS) using CNDI.
+
+## objectives
+
+In this tutorial, you will:
+
+1. **Install CNDI**: Learn how to install the CNDI tool to manage your
+   cloud-native deployments.
+2. **Deploy a PostgreSQL Vector Database Cluster on an AKS Cluster**: Set up a
+   scalable and secure PostgreSQL vector database on Azure Kubernetes Service
+   (AKS).
+3. **Deploy a Jupyter Notebook on the AKS Cluster**: Launch a Jupyter Notebook
+   instance on your AKS cluster for interactive data analysis.
+4. **Upload Vectors into a PostgreSQL Database and Run Semantic Search
+   Queries**: Use Jupyter Notebook to load data, create vectors, and perform
+   semantic searches against your PostgreSQL database.
 
 ## prerequisites ✅
 
@@ -125,6 +144,21 @@ Follow the prompts to set up your project:
   be deployed._
 - **What will be the name for your PostgreSQL cluster?
   (default:postgres-cluster)**: _Provide a name for your PostgreSQL cluster._
+
+- **Do you want to install jupyterhub, a web-based data analytics tool? (Y/n)**:
+  _Choose whether to install jupyterhub, a web-based data analytics tool_
+
+- **What will be your password for your Jupyter notebook instance?(default:
+  randomly generated value)**:_Set a default password for the Jupyter notebook
+  instance._
+
+- **Do you want to expose your Jupyter notebook instance to the web?
+  (Y/n)**:_Choose whether to make your Jupyter notebook instance accessible from
+  the public internet._
+
+- **What hostname should jupyter notebook be accessible at?
+  (default:jupyter.example.com)**:_Enter the hostname through which the Jupyter
+  notebook instance will be accessed._
 
 Once the prompts are all answered the process will generate a `cndi_config.yaml`
 file, and `cndi` directory at the root of your repository containing all the
@@ -327,7 +361,7 @@ Once you are logged in verify all applications and manifests in the cluster are 
 Ensure CloudNativePG is properly accessible through your chosen domain after
 deploying and configuring external access.
 
-### Connect to the Database Using PostgreSQL Command Line Tool
+### Connect to the Database using PostgreSQL Command Line Tool
 
 Install an PostgreSQL client like `psql` to access your database
 
@@ -338,10 +372,10 @@ user and database name. You'll be prompted for the password.
 psql -h <hostname> -p 5432 -U <username> -d <database>
 ```
 
-![Argocd UI](/docs/walkthroughs/aks/img/psql-cli.png)
-
 This command `PSQL_CONNECTION_COMMAND` and the postgresql connection details can
 be found in the .env file.
+
+![Argocd UI](/docs/walkthroughs/aks/img/psql-cli.png)
 
 ### Using PgAdmin
 
@@ -363,10 +397,90 @@ postgres user admin password to connect to your database.
 
 ![Argocd UI](/docs/walkthroughs/aks/img/pgadmin-ui-3.png)
 
-## and you are done! ⚡️
+## Upload demo dataset and run search queries with Jupyter Notebook
 
-You now have a fully-configured 3-node Kubernetes cluster with TLS-enabled
-Postgresql Database Cluster
+In this section, you upload vectors into a PostgreSQL table and run semantic
+search queries using SQL syntax.
+
+In the following example, you use a dataset from a CSV file that contains a list
+of books in different genres. Pgvector serves as a search engine, and the query
+you run in your notebookserves as a client querying the PostgreSQL database.
+
+### Login to Jupyter Notebook
+
+Begin by logging into your Jupyter Notebook instance. Enter the login password.
+The `JUPYTER_PASSWORD` can be found in the `.env` file. This is your development
+environment where you will run the necessary commands and scripts.
+
+![Login](/docs/walkthroughs/aks/img/notebook-login.png)
+
+### Open JupyterHub
+
+Navigate to JupyterHub to access your Jupyter environment.
+
+![Open JupyterHub](/docs/walkthroughs/aks/img/notebook-open-jupyter.png)
+
+### Load the Dataset and notebook file from URL
+
+Next, open the URL in the console and copy this GitHub Repository URL containing
+the dataset CSV file. This file includes the data that you will load into your
+PostgreSQL database.
+
+```bash
+https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/dataset.csv
+```
+
+![Open Console](/docs/walkthroughs/aks/img/jupyterhub-notebook-console-openurl.png)
+
+![Dataset](/docs/walkthroughs/aks/img/dataset.png)
+
+Again, open the URL in the console and copy this GitHub Repository URL
+containing the Jupyter Notebook file that contains the code for processing the
+dataset and performing the semantic search.
+
+```bash
+https://raw.githubusercontent.com/Polyseam/cndi-examples-and-datasets/main/databases/postgres-pgvector/semantic-search/vector-database.ipynb
+```
+
+![Open Notebook](/docs/walkthroughs/aks/img/pre-notebook-run-one-host.png)
+![Open Notebook](/docs/walkthroughs/aks/img/pre-notebook-run-two-host.png)
+
+### Run the Jupyter Notebook
+
+To run the entire notebook, click on Run in the menu, then select Run all cells.
+This action will execute all the code cells in the notebook sequentially. The
+notebook includes a query that performs a semantic search for the text "drama
+about people and unhappy love" against the documents table in PostgreSQL
+
+### Verify the Results
+
+The output of the run is similar to the following:
+
+_Title: Romeo and Juliet, Author: William Shakespeare, Paul Werstine (Editor),
+Barbara A. Mowat (Editor), Paavo Emil Cajander (Translator) In Romeo and Juliet,
+Shakespeare creates a violent world, in which two young people fall in love. In
+part because of its exquisite language, it is easy to respond as if it were
+about all young lovers._ --------_Title: A Midsummer Night's Dream, Author:
+William Shakespeare, Paul Werstine (Editor), Barbara A. Mowat (Editor),
+Catherine Belsey (Contributor) Shakespeare's intertwined love polygons begin to
+get complicated from the start.Throw in a group of labourers preparing a play
+for the Duke's wedding (one of whom is given a donkey's head and Titania for a
+lover by Puck) and the complications become fantastically funny._
+
+![Run All Cells](/docs/walkthroughs/aks/img/post-notebook-run.png)
+
+To ensure that the vectors were created correctly, you can use the pgAdmin tool
+to verify the results.
+
+![Query All Rows](/docs/walkthroughs/aks/img/pgadmin-query-all-rows.png)
+![Embeddings](/docs/walkthroughs/aks/img/embeddings.png)
+
+### and you are done! ⚡️
+
+By following these steps, you now have a fully-configured 3-node Kubernetes
+cluster with a TLS-enabled PostgreSQL Vector Database Cluster. This setup allows
+you to perform advanced semantic searches and ensures your data is stored
+securely.
 
 ## modifying the cluster! 🛠️
 
@@ -400,7 +514,9 @@ git commit -m "destroy instance"
 git push
 ```
 
-**If you want to take down the entire cluster run:**
+## destroying ALL your resources! 💣
+
+**If you want to take down the entire cluster and resources run:**
 
 ```bash
 cndi destroy
