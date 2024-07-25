@@ -13,7 +13,7 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.44
+          deno-version: v1.45
 
       - run: deno lint
 
@@ -28,7 +28,7 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.44
+          deno-version: v1.45
 
       - run: deno task build
           
