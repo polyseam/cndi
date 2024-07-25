@@ -84,7 +84,10 @@
         ]
       },
       "@cliffy/flags@1.0.0-rc.4": {
-        "integrity": "29f370ade4ddf6e150a4d25fc44661234c19870ffcf7fb07cd100f1843fcd6e1"
+        "integrity": "29f370ade4ddf6e150a4d25fc44661234c19870ffcf7fb07cd100f1843fcd6e1",
+        "dependencies": [
+          "jsr:@std/text@0.221"
+        ]
       },
       "@cliffy/keycode@1.0.0-rc.4": {
         "integrity": "872ee86f6a438dc2c532408e542ee97ed19c91aedb8374c2eddc6e02e83c8ce4"
@@ -103,7 +106,8 @@
       "@cliffy/table@1.0.0-rc.4": {
         "integrity": "990e4e0b3910e6c9cf7a5b4318b8f5e121cf681494c94fd113febb9b4d4c0741",
         "dependencies": [
-          "jsr:@std/console@0.221"
+          "jsr:@std/console@0.221",
+          "jsr:@std/fmt@0.221"
         ]
       },
       "@cndi/cdktf@0.1.2": {
@@ -116,8 +120,11 @@
       "@polyseam/cliffy-provider-gh-releases@0.3.0": {
         "integrity": "52254879592ae6b293c1387252fecafe06afbfad803239e60a54897e16585907",
         "dependencies": [
+          "jsr:@cliffy/ansi@^1.0.0-rc.4",
           "jsr:@cliffy/command@^1.0.0-rc.4",
+          "jsr:@polyseam/inflate-response@^1.1.2",
           "jsr:@std/cli@^0.221.0",
+          "jsr:@std/fs@^0.221.0",
           "jsr:@std/semver@^0.221.0",
           "npm:@octokit/types@^13.4.1",
           "npm:octokit@^3.1.2"
@@ -175,7 +182,10 @@
         "integrity": "789a365bb79b06c4da79d2b93fe32ddfe03b93ab083e72c1de96303d12f84be5"
       },
       "@std/console@0.221.0": {
-        "integrity": "8f2afc1f3f14f5d6039c0c767f057e4aa1897d2210e167c4667cb155cafb9d11"
+        "integrity": "8f2afc1f3f14f5d6039c0c767f057e4aa1897d2210e167c4667cb155cafb9d11",
+        "dependencies": [
+          "jsr:@std/assert@^0.221.0"
+        ]
       },
       "@std/dotenv@0.221.0": {
         "integrity": "60358ec8a55ff177ca000e5028d8e995b4f1380a90d5a83f087acf0d729cc817"
@@ -202,6 +212,7 @@
       "@std/io@0.214.0": {
         "integrity": "81563289d48830f966a5c607841fb5b7048874e0368f873d6148776de0a1e890",
         "dependencies": [
+          "jsr:@std/assert@^0.214.0",
           "jsr:@std/bytes@^0.214.0"
         ]
       },
@@ -241,7 +252,10 @@
         "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e"
       },
       "@std/text@0.221.0": {
-        "integrity": "a2f89ceb0d8851cd33e6774064621a1da9fbc36578cf4f02c5b5bcd7e8c84b67"
+        "integrity": "a2f89ceb0d8851cd33e6774064621a1da9fbc36578cf4f02c5b5bcd7e8c84b67",
+        "dependencies": [
+          "jsr:@std/assert@^0.221.0"
+        ]
       },
       "@std/yaml@0.221.0": {
         "integrity": "bac8913ee4f6fc600d4b92cc020f755070e22687ad242341f31d123ff690ae98"
@@ -1255,7 +1269,7 @@
       "jsr:@cndi/cdktf@^0.1.2",
       "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0",
       "jsr:@polyseam/inflate-response@^1.1.2",
-      "jsr:@polyseam/silky@^1.1.1",
+      "jsr:@polyseam/silky@^1.1.2",
       "jsr:@std/assert@^0.221.0",
       "jsr:@std/async@^0.221.0",
       "jsr:@std/cli@^0.221.0",
