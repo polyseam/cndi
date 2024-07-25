@@ -34,6 +34,10 @@ Deno.serve((req: Request) => {
 });
 ```
 
+> [!WARNING]\
+> The function must be located in `./functions/my-func/index.ts` file, a named
+> file like `./functions/my-func.ts` is not sufficient.
+
 ## configuring ingress 🌐
 
 To expose your function to the internet, you need to add the following to your

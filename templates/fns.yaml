@@ -119,14 +119,5 @@ outputs:
     fns: |
       # CNDI Fns Deployment Guide
 
-      To author a new function, create a new file in your repo at the path [./functions/hello-world/index.ts](./functions/hello-world/index.ts).
-      
-      > [!WARNING]  
-      > The function must be located in `./functions/my-func/index.ts` file, a named file like `./functions/my-func.ts` is not sufficient.
-
-      The contents of the file should be a Supabase-style function.
-
-      For a list of example functions, checkout this list: 
-      [https://github.com/supabase/edge-runtime/tree/main/examples](https://github.com/supabase/edge-runtime/tree/main/examples)
-
-      Any functions that exist in the `./functions` directory will be deployed to your CNDI Cluster automatically when you push code to the main branch of your repo.
+      For more information on how to author and deploy functions to your CNDI Cluster, 
+      please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
