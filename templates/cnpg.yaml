@@ -429,6 +429,7 @@ outputs:
           name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}"
           namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
           annotations:
+            $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
           imageName: 'ghcr.io/cloudnative-pg/postgresql:16'
