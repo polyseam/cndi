@@ -420,7 +420,11 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
-
+      cnpg-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
       $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
