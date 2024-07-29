@@ -1260,9 +1260,7 @@
       }
     }
   },
-  "remote": {
-    "https://deno.land/std@0.224.0/http/status.ts": "ed61b4882af2514a81aefd3245e8df4c47b9a8e54929a903577643d2d1ebf514"
-  },
+  "remote": {},
   "workspace": {
     "dependencies": [
       "jsr:@cliffy/ansi@^1.0.0-rc.4",

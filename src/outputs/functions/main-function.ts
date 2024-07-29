@@ -1,4 +1,4 @@
-import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";
+// import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";
 
 function mainContent() {
   Deno.serve(async (req: Request) => {
@@ -14,6 +14,7 @@ function mainContent() {
           "message": "ok",
         }),
         {
+          // @ts-ignore - downstream import provides STATUS_CODE
           status: STATUS_CODE.OK,
           headers,
         },
@@ -49,6 +50,7 @@ function mainContent() {
         msg: "missing function name in request",
       };
       return new Response(JSON.stringify(error), {
+        // @ts-ignore - downstream import provides STATUS_CODE
         status: STATUS_CODE.BadRequest,
         headers: {
           "Content-Type": "application/json",
@@ -136,6 +138,7 @@ function mainContent() {
           msg: e.toString(),
         };
         return new Response(JSON.stringify(error), {
+          // @ts-ignore - downstream import provides STATUS_CODE
           status: STATUS_CODE.InternalServerError,
           headers,
         });
