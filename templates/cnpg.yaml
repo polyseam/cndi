@@ -347,8 +347,8 @@ prompts:
     default: true
     message: >-
       Do you want to install jupyterhub, a web-based data analytics tool?
-
     type: Confirm
+
   - name: jupyter_notebook_login_password
     default: '{{ $cndi.get_random_string(12) }}'
     message: >-
@@ -401,12 +401,7 @@ outputs:
               enabled: true
               values:
                 tcp: 
-                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                       
-            private: 
-              enabled: true 
-              values:
-                tcp: 
-                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                       
+                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                                            
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
@@ -420,7 +415,11 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
-
+      cnpg-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
       $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
