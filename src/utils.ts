@@ -672,4 +672,5 @@ export {
   stageDirectory,
   stageFile,
   useSshRepoAuth,
+  copyDir
 };

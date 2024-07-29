@@ -1,0 +1,54 @@
+cndi_version: v2
+project_name: eks-basic
+provider: aws
+distribution: eks
+infrastructure:
+  cndi:
+    cert_manager:
+      email: matt.johnston@polyseam.io
+    external_dns:
+      provider: aws
+    nodes:
+      - name: x-node-group
+        instance_type: t3.large
+        disk_size: 100
+        count: 3
+cluster_manifests:
+  argo-ingress:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: argocd-ingress
+      namespace: argocd
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        kubernetes.io/tls-acme: 'true'
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        external-dns.alpha.kubernetes.io/hostname: argocd.eks-basic.mj.cndi.link
+    spec:
+      ingressClassName: public
+      tls:
+        - hosts:
+            - argocd.eks-basic.mj.cndi.link
+          secretName: cluster-issuer-private-key
+      rules:
+        - host: argocd.eks-basic.mj.cndi.link
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: argocd-server
+                    port:
+                      number: 443
+  external-dns-secret:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: external-dns
+      namespace: external-dns
+    stringData:
+      AWS_ACCESS_KEY_ID: $cndi_on_ow.seal_secret_from_env_var(AWS_ACCESS_KEY_ID)
+      AWS_SECRET_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(AWS_SECRET_ACCESS_KEY)
