@@ -97,9 +97,9 @@ Deno.test(
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        await Deno.mkdir(`${dir}/functions/hello`, { recursive: true });
+        await Deno.mkdir(`./functions/hello`, { recursive: true });
         await Deno.writeTextFile(
-          `${dir}/functions/hello/index.ts`,
+          `./functions/hello/index.ts`,
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
