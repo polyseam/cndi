@@ -99,7 +99,7 @@ Deno.test(
         "-l",
         "aws/eks",
         "--set",
-        "git_repo='https://github.com/polyseam/example-repo'",
+        "git_repo=https://github.com/polyseam/example-repo",
       );
     });
 
@@ -111,8 +111,7 @@ Deno.test(
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        const { status } = await runCndi("ow", "--loud");
-        console.log("status", status);
+        const { status } = await runCndi("ow");
         assert(status.success);
       });
       const changedFilePathsSet = new Set(changedFilePaths);
