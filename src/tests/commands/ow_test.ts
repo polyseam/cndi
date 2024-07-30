@@ -103,7 +103,9 @@ Deno.test(
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        await runCndi("ow");
+        const {status} = await runCndi("ow", "--loud");
+        console.log("status", status);
+        assert(status.success);
       });
       const changedFilePathsSet = new Set(changedFilePaths);
       console.log("changedFilePathsSet", changedFilePathsSet);
