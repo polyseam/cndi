@@ -4,7 +4,7 @@ on:
       - main
 jobs:
   test_and_lint: # cndi
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -19,6 +19,9 @@ jobs:
         
       - name: Lint
         run: deno lint
+
+      - name: Install cndi dependency binaries
+        run: mv ./dist/linux/in ~/.cndi/bin
 
       - name: Test
         run: deno task test
