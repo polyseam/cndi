@@ -115,7 +115,6 @@ Deno.test(
         assert(status.success);
       });
       const changedFilePathsSet = new Set(changedFilePaths);
-      console.log("changedFilePathsSet", changedFilePathsSet);
 
       assert(
         setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),
