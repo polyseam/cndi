@@ -92,21 +92,29 @@ Deno.test(
     await t.step("setup", async () => {
       dir = await Deno.makeTempDir();
       Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+      await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "aws/eks",
+        "--set",
+        "git_repo=https://github.com/polyseam/example-repo",
+      );
     });
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        await Deno.mkdir(`${dir}/functions/hello`, { recursive: true });
+        await Deno.mkdir(`./functions/hello`, { recursive: true });
         await Deno.writeTextFile(
-          `${dir}/functions/hello/index.ts`,
+          `./functions/hello/index.ts`,
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        await runCndi("ow");
+        const { status } = await runCndi("ow");
+        assert(status.success);
       });
       const changedFilePathsSet = new Set(changedFilePaths);
-      console.log("changedFilePathsSet", changedFilePathsSet);
 
       assert(
         setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),

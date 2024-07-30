@@ -51,7 +51,7 @@ async function listAllFilePaths(directory: string): Promise<string[]> {
 }
 
 export async function listChangedFilePaths(
-  operationFn: () => void,
+  operationFn: () => Promise<void>,
   dir = ".",
 ): Promise<Array<string>> {
   const originalContents = await listAllFilePaths(dir);

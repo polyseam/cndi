@@ -207,8 +207,6 @@ Deno.test(
       },
     });
 
-    console.log(template.files["cndi_config.yaml"]);
-
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
 
