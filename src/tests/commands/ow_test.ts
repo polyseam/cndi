@@ -106,6 +106,7 @@ Deno.test(
         await runCndi("ow");
       });
       const changedFilePathsSet = new Set(changedFilePaths);
+      console.log("changedFilePathsSet", changedFilePathsSet);
 
       assert(
         setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),
