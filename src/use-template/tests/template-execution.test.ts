@@ -215,3 +215,24 @@ Deno.test(
     assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
   },
 );
+
+Deno.test(
+  "template execution: a template should be able to insert a block using $cndi.get_block(block_name)",
+  mySanity,
+  async () => {
+    const mockYamlFileUri = "file://" + Deno.cwd() +
+      "/src/use-template/tests/mock/templates/get_block-mock.yaml";
+    const template = await useTemplate(mockYamlFileUri, {
+      interactive: false,
+      overrides: {
+        project_name: "test",
+        enable_fns_ingress: true,
+        fns_hostname: "fns.example.com",
+        deployment_target_provider: "aws",
+        deployment_target_distribution: "eks",
+        cert_manager_email: "matt.johnston@polyseam.io",
+      },
+    });
+    console.log(template.files["cndi_config.yaml"]);
+  },
+);

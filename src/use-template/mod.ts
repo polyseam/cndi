@@ -758,13 +758,18 @@ async function processCNDIConfigOutput(
   // get_block evals
   const getBlockBeginToken = "$cndi.get_block(";
   const getBlockEndToken = ")':"; // depends on serialization wrapping key in ' quotes
+  const getBlockEndTokenNoQuote = "):\n"; // fallback if key is not wrapped in quotes
 
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
+  // first loop
+  const noQuoteIndexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+
   let ax = 0;
 
-  while (indexOpen > -1 && indexClose > -1) {
+  // while there are $cndi.get_block calls to process
+  while (indexOpen > -1 && (indexClose > -1 || noQuoteIndexClose > -1)) {
     cndiConfigObj = YAML.parse(output) as object;
 
     let key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
@@ -774,11 +779,9 @@ async function processCNDIConfigOutput(
     let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      // $cndi.get_block(blockname) with no {{ values }} can result in no singlequoted key
-      // so we search for an endToken which does not contain a single quote
-      const plainBlockEndToken = "):\n";
-
-      indexClose = output.indexOf(plainBlockEndToken, indexOpen);
+      // if call signature is not '$cndi.get_block(foo)':
+      // and is instead $cndi.get_block(foo):\n
+      indexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
       key = output.slice(indexOpen, indexClose + 1);
       pathToKey = findPathToKey(key, cndiConfigObj);
       body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
@@ -790,6 +793,7 @@ async function processCNDIConfigOutput(
     let shouldOutput = true;
 
     if (body?.condition) {
+      console.log("condition", body.condition);
       if (!resolveCNDIPromptCondition(body.condition)) {
         shouldOutput = false;
       }
