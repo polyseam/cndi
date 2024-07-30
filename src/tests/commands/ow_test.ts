@@ -92,7 +92,15 @@ Deno.test(
     await t.step("setup", async () => {
       dir = await Deno.makeTempDir();
       Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+      await runCndi(
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "aws/eks",
+        "--set",
+        "git_repo='https://github.com/polyseam/example-repo'",
+      );
     });
 
     await t.step("test", async () => {
