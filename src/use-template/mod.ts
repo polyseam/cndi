@@ -774,7 +774,6 @@ async function processCNDIConfigOutput(
     let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-
       // $cndi.get_block(blockname) with no {{ values }} can result in no singlequoted key
       // so we search for an endToken which does not contain a single quote
       const plainBlockEndToken = "):\n";
