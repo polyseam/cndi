@@ -1,3 +1,27 @@
+blocks: 
+  - name: plain_listener
+    content:
+      listeners:
+        - name: plain
+          port: 9092
+          type: internal
+          plain: true
+  
+  - name: public_listener
+    content:
+      listeners:
+        - name: public
+          port: 9094
+          type: loadbalancer
+          tls: true
+          configuration:
+            bootstrap:
+              alternativeNames:
+                - "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+                external-dns.alpha.kubernetes.io/ttl: "60"
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -10,7 +34,7 @@ prompts:
       Do you want to expose ArgoCD with an Ingress?
     type: Confirm
 
-  - name: argocd_shostname
+  - name: argocd_hostname
     default: argocd.example.com
     message: >-
       What hostname should ArgoCD be accessible at?
@@ -21,6 +45,7 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
+
   - name: kafka_cluster_name
     default: my-kafka-cluster
     message: >-
@@ -32,12 +57,22 @@ prompts:
     message: >-
       What is the size of your kafka brokers?
     type: Input
+  
+  - name: enable_kafka_ingress
+    default: true
+    message: >-
+      Do you want to expose Kafka to the web using load balancers?
+    type: Confirm
 
   - name: kafka_bootstrap_hostname
     default: my-kafka-cluster.bootstrap.com
     message: >-
       What hostname should the kafka cluster be accessible at?
     type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+      - ==
+      - true
 
 outputs:
   cndi_config:
@@ -102,29 +137,19 @@ outputs:
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
           kafka:
+            $cndi.get_block(public_listener):
+              condition:
+                - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+                - ==
+                - true
+
+            $cndi.get_block(plain_listener):
+              condition:
+                - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+                - ==
+                - false
+                
             version: 3.7.1
-            listeners:
-              - name: plain
-                port: 9092
-                type: internal
-                tls: false
-
-              - name: tls
-                port: 9093
-                type: internal
-                tls: true
-
-              - name: lbtls
-                port: 9094
-                type: loadbalancer
-                tls: true
-                configuration:
-                  bootstrap:
-                    alternativeNames:
-                      - "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
-                    annotations:
-                      external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
-                      external-dns.alpha.kubernetes.io/ttl: "60"
             config:
               offsets.topic.replication.factor: 3
               transaction.state.log.replication.factor: 3
@@ -133,6 +158,7 @@ outputs:
               min.insync.replicas: 2
               inter.broker.protocol.version: "3.7"
               ssl.endpoint.identification.algorithm: ''
+              
           entityOperator:
             topicOperator: {}
             userOperator: {}
@@ -184,6 +210,20 @@ outputs:
       
       # Strimzi Kafka Deployment Guide
 
-      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, making it easier to deploy and manage Kafka clusters. This guide provides steps to configure, test, and use Kafka with the Strimzi operator.
+      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, 
+      making it easier to deploy and manage Kafka clusters. This guide provides steps to configure, 
+      test, and use Kafka with the Strimzi operator.
 
       ## Configuration
+
+      ...
+
+      ## Connecting with a Client
+
+      To connect to the Kafka cluster, you need to use the bootstrap server address and
+      the CA certificate Strimzi creates for you. To get the certificate, lets connect to the 
+      Kubernetes API:
+
+      ```bash
+      
+      ```
