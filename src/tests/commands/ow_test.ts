@@ -21,10 +21,8 @@ const cleanup = () => {
 Deno.test(
   "'cndi ow' should do nothing if no config or inputs have changed",
   async (t) => {
-    console.log("deno working directory beginning", Deno.cwd());
     let dir = "";
     await t.step("setup", async () => {
-      console.log("initializing a cndi project");
       dir = await Deno.makeTempDir();
       Deno.chdir(dir);
       await runCndi("init", "-t", "basic", "-l", "aws/eks");
@@ -32,7 +30,6 @@ Deno.test(
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        console.log("overwriting with the same config");
         const { status } = await runCndi("ow");
         assert(status.success);
       });
@@ -48,7 +45,6 @@ Deno.test(
   async (t) => {
     let dir = "";
     await t.step("setup", async () => {
-      console.log("initializing a cndi project");
       dir = await Deno.makeTempDir();
       Deno.chdir(dir);
       await runCndi("init", "-t", "basic", "-l", "aws/eks");
@@ -94,7 +90,6 @@ Deno.test(
 
     let dir = "";
     await t.step("setup", async () => {
-      console.log("initializing a cndi project");
       dir = await Deno.makeTempDir();
       Deno.chdir(dir);
       await runCndi("init", "-t", "basic", "-l", "aws/eks");
