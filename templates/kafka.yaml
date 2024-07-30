@@ -1,0 +1,189 @@
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to expose ArgoCD with an Ingress?
+    type: Confirm
+
+  - name: argocd_shostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+  - name: kafka_cluster_name
+    default: my-kafka-cluster
+    message: >-
+      What is the name of your kafka cluster?
+    type: Input
+
+  - name: kafka_broker_size
+    default: 100Gi
+    message: >-
+      What is the size of your kafka brokers?
+    type: Input
+
+  - name: kafka_bootstrap_hostname
+    default: my-kafka-cluster.bootstrap.com
+    message: >-
+      What hostname should the kafka cluster be accessible at?
+    type: Input
+
+outputs:
+  cndi_config:
+    # source_control_platform: github ?
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a Template comment
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+            {}
+
+    cluster_manifests:
+
+      broker-node-pool:
+        apiVersion: kafka.strimzi.io/v1beta2
+        kind: KafkaNodePool
+        metadata:
+          name: broker-node-pool
+          namespace: kafka
+          labels:
+            strimzi.io/cluster: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+        spec:
+          replicas: 3
+          roles:
+            - controller
+            - broker
+          storage:
+            type: jbod
+            volumes:
+              - id: 0
+                type: persistent-claim
+                size: "{{ $cndi.get_prompt_response(kafka_broker_size) }}"
+                deleteClaim: true
+                class: rwo
+                kraftMetadata: shared
+
+      my-kafka-cluster:
+        apiVersion: kafka.strimzi.io/v1beta2
+        kind: Kafka
+        metadata:
+          name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          namespace: kafka
+          annotations:
+            strimzi.io/node-pools: enabled
+            strimzi.io/kraft: enabled
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+        spec:
+          kafka:
+            version: 3.7.1
+            listeners:
+              - name: plain
+                port: 9092
+                type: internal
+                tls: false
+
+              - name: tls
+                port: 9093
+                type: internal
+                tls: true
+
+              - name: lbtls
+                port: 9094
+                type: loadbalancer
+                tls: true
+                configuration:
+                  bootstrap:
+                    alternativeNames:
+                      - "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+                    annotations:
+                      external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+                      external-dns.alpha.kubernetes.io/ttl: "60"
+            config:
+              offsets.topic.replication.factor: 3
+              transaction.state.log.replication.factor: 3
+              transaction.state.log.min.isr: 2
+              default.replication.factor: 3
+              min.insync.replicas: 2
+              inter.broker.protocol.version: "3.7"
+              ssl.endpoint.identification.algorithm: ''
+          entityOperator:
+            topicOperator: {}
+            userOperator: {}
+
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+    applications:
+      cnpg:
+        targetRevision: 0.42.0
+        destinationNamespace: kafka
+        repoURL: "https://strimzi.io/charts/"
+        chart: strimzi-kafka-operator
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+      {}
+
+    basic: |      
+      
+      # Strimzi Kafka Deployment Guide
+
+      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, making it easier to deploy and manage Kafka clusters. This guide provides steps to configure, test, and use Kafka with the Strimzi operator.
+
+      ## Configuration
