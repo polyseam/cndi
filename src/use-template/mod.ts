@@ -767,14 +767,22 @@ async function processCNDIConfigOutput(
   while (indexOpen > -1 && indexClose > -1) {
     cndiConfigObj = YAML.parse(output) as object;
 
-    const key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
-    const pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
+    let key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
+    let pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
 
     // load value of key
-    const body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+    let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      return { error: new Error(`No value found for key: ${key}`) };
+      // $cndi.get_block(blockname) with no {{ values }} results in no singlequoted key
+      const plainBlockEndToken = "):\n";
+      indexClose = output.indexOf(plainBlockEndToken, indexOpen);
+      key = output.slice(indexOpen, indexClose + 1);
+      pathToKey = findPathToKey(key, cndiConfigObj);
+      body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+      if (!body) {
+        return { error: new Error(`No value found for key: ${key}`) };
+      }
     }
 
     let shouldOutput = true;
