@@ -1260,7 +1260,7 @@
       }
     }
   },
-  "remote": {},
+  "remote":{},
   "workspace": {
     "dependencies": [
       "jsr:@cliffy/ansi@^1.0.0-rc.4",

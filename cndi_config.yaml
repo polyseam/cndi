@@ -4,6 +4,7 @@ provider: aws # or 'gcp', 'azure'
 distribution: eks # or 'clusterless'
 infrastructure:
   cndi:
+
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:
@@ -11,5 +12,11 @@ infrastructure:
         instance_type: t3.medium # or 'n1-standard-2', 'Standard_D2_v2'
         disk_size: 100
 
-cluster_manifests: {}
+cluster_manifests:
+  some:
+    metadata:
+      name: fns-env-secret
+      namespace: fns
+    stringData: {}
+
 applications: {}

@@ -8,6 +8,12 @@ import { hasSameFilesAfter } from "src/tests/helpers/util.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
+const ogDir = Deno.cwd();
+
+const cleanup = () => {
+  Deno.chdir(ogDir);
+};
+
 Deno.test(
   "'cndi init -d' should set CNDI_TELEMETRY=debug in .env",
   async (t) => {
@@ -30,10 +36,7 @@ Deno.test(
       assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
       // assert(status.success);
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -54,10 +57,7 @@ Deno.test(
         }),
       );
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -85,10 +85,7 @@ Deno.test(
       assert(readme.startsWith(`# ${project_name}`));
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -117,10 +114,7 @@ Deno.test(
       assert(status.success);
       assert(readme.startsWith(`# ${project_name}`));
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -161,10 +155,7 @@ Deno.test(
         }),
       );
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -191,10 +182,7 @@ Deno.test(
       assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);
       // assert(status.success);
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -222,10 +210,7 @@ Deno.test(
       );
       assert(YAML.parse(cndi_responses));
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -252,10 +237,7 @@ Deno.test(
       assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);
       // assert(status.success);
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -285,10 +267,7 @@ Deno.test(
       assert(dotenv.indexOf(`GOOGLE_CREDENTIALS`) > -1);
       assert(run.status.success);
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -318,10 +297,7 @@ Deno.test(
       assert(dotenv.indexOf(`ARM_SUBSCRIPTION_ID`) > -1);
       assert(status.success);
     });
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -347,10 +323,7 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -375,10 +348,7 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -408,10 +378,7 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -440,10 +407,7 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -469,10 +433,7 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );
 
@@ -497,9 +458,6 @@ Deno.test(
       assert(status.success);
     });
 
-    await t.step("cleanup", async () => {
-      Deno.chdir("..");
-      await Deno.remove(dir, { recursive: true });
-    });
+    await t.step("cleanup", cleanup);
   },
 );

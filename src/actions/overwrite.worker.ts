@@ -1,11 +1,13 @@
 import { ccolors, loadEnv, path } from "deps";
 
 import {
+  checkDirectoryForFileSuffix,
   getPrettyJSONString,
   getYAMLString,
   loadCndiConfig,
   loadJSONC,
   persistStagedFiles,
+  stageDirectory,
   stageFile,
 } from "src/utils.ts";
 
@@ -15,8 +17,19 @@ import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
 
+import { getFunctionsDockerfileContent } from "src/outputs/functions/runtime-dockerfile.ts";
+import { getFunctionsMainContent } from "src/outputs/functions/main-function.ts";
+
+import { getFunctionsNamespaceManifest } from "src/outputs/functions/manifests/fns-namespace.ts";
+import { getFunctionsServiceManifest } from "src/outputs/functions/manifests/fns-service.ts";
+import { getFunctionsIngressManifest } from "src/outputs/functions/manifests/fns-ingress.ts";
+import { getFunctionsEnvSecretManifest } from "src/outputs/functions/manifests/fns-env-secret.ts";
+import { getFunctionsPullSecretManifest } from "src/outputs/functions/manifests/fns-pull-secret.ts";
+import { getFunctionsDeploymentManifest } from "src/outputs/functions/manifests/fns-deployment.ts";
+
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
+import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/cndi-fns-workflow.ts";
 
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
@@ -83,6 +96,12 @@ self.Deno.exit = (code?: number): never => {
   self.close();
 };
 
+type ManifestWithName = {
+  metadata: {
+    name: string;
+  };
+};
+
 self.onmessage = async (message: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
   if (message.data.type === "begin-overwrite") {
@@ -98,6 +117,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       options.output,
       "cndi",
       "terraform",
+    );
+
+    const pathToFunctionsOutput = path.join(
+      options.output,
+      "cndi",
+      "functions",
     );
 
     const envPath = path.join(options.output, ".env");
@@ -163,6 +188,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         "workflows",
         "cndi-run.yaml",
       );
+
       await stageFile(
         runWorkflowPath,
         getCndiRunGitHubWorkflowYamlContents(
@@ -193,6 +219,130 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name(onPullWorkflowPath),
         );
       }
+    }
+
+    const pathToFunctionsInput = path.join(
+      options.output,
+      "functions",
+    );
+
+    const shouldBuildFunctions = await checkDirectoryForFileSuffix(
+      pathToFunctionsInput,
+      ".ts",
+    );
+
+    try {
+      await Deno.remove(pathToFunctionsOutput, {
+        recursive: true,
+      });
+    } catch {
+      // folder did not exist
+    }
+
+    if (shouldBuildFunctions) {
+      const fnsWorkflowPath = path.join(
+        ".github",
+        "workflows",
+        "cndi-fns.yaml",
+      );
+
+      await stageDirectory(
+        path.join("cndi", "functions", "src"),
+        path.join("functions"),
+      );
+
+      await stageFile(
+        path.join("cndi", "functions", "src", "main", "index.ts"),
+        getFunctionsMainContent(),
+      );
+      console.log(
+        ccolors.success("staged functions bootstrap source"),
+        ccolors.key_name("cndi/functions/src/main/index.ts"),
+      );
+
+      await stageFile(
+        path.join("cndi", "functions", "Dockerfile"),
+        getFunctionsDockerfileContent(),
+      );
+      console.log(
+        ccolors.success("staged functions Dockerfile"),
+        ccolors.key_name("cndi/functions/Dockerfile"),
+      );
+
+      await stageFile(
+        fnsWorkflowPath,
+        getCndiFnsGitHubWorkflowYamlContents(
+          config,
+        ),
+      );
+      console.log(
+        ccolors.success("staged 'cndi-fns' GitHub workflow:"),
+        ccolors.key_name(fnsWorkflowPath),
+      );
+
+      await stageFile(
+        path.join("cndi", "cluster_manifests", "fns-namespace.yaml"),
+        getFunctionsNamespaceManifest(),
+      );
+      console.log(
+        ccolors.success("staged functions namespace manifest:"),
+        ccolors.key_name("fns-namespace.yaml"),
+      );
+
+      await stageFile(
+        path.join("cndi", "cluster_manifests", "fns-service.yaml"),
+        getFunctionsServiceManifest(),
+      );
+      console.log(
+        ccolors.success("staged functions service manifest:"),
+        ccolors.key_name("fns-service.yaml"),
+      );
+
+      const functionsIngressHostname = config?.infrastructure?.cndi?.functions
+        ?.hostname;
+
+      if (functionsIngressHostname) {
+        await stageFile(
+          path.join("cndi", "cluster_manifests", "fns-ingress.yaml"),
+          getFunctionsIngressManifest(
+            functionsIngressHostname,
+          ),
+        );
+        console.log(
+          ccolors.success("staged functions ingress manifest:"),
+          ccolors.key_name("fns-ingress.yaml"),
+        );
+      }
+
+      let hasExistingFnsEnvSecret = false;
+
+      Object.entries(config?.cluster_manifests || {}).forEach(
+        (manifestEntry) => {
+          const m = manifestEntry[1] as ManifestWithName;
+          if (m?.metadata?.name === "fns-env-secret") {
+            hasExistingFnsEnvSecret = true;
+          }
+        },
+      );
+
+      // only insert empty env secret to cluster_manifests if the user doesn't supply one
+      if (!hasExistingFnsEnvSecret) {
+        config.cluster_manifests["fns-env-secret"] =
+          getFunctionsEnvSecretManifest();
+      }
+
+      config.cluster_manifests["fns-pull-secret"] =
+        getFunctionsPullSecretManifest();
+
+      await stageFile(
+        path.join("cndi", "cluster_manifests", "fns-deployment.yaml"),
+        getFunctionsDeploymentManifest(),
+      );
+
+      console.log(
+        ccolors.success("staged functions deployment manifest:"),
+        ccolors.key_name("fns-deployment.yaml"),
+      );
     }
 
     try {
