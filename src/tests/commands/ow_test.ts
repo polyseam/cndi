@@ -103,7 +103,7 @@ Deno.test(
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        const {status} = await runCndi("ow", "--loud");
+        const { status } = await runCndi("ow", "--loud");
         console.log("status", status);
         assert(status.success);
       });
