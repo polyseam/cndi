@@ -642,6 +642,7 @@ export {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
+  copyDir,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
@@ -672,5 +673,4 @@ export {
   stageDirectory,
   stageFile,
   useSshRepoAuth,
-  copyDir
 };

@@ -82,13 +82,11 @@ If you've modified your nodes, the infrastructure should be updated with
 Terraform. If you've modified your Kubernetes manifests, the changes to the
 manifests will be applied to the cluster.
 
-
 ## aws
 
 This cluster will be deployed on [Amazon Web Services](https://aws.com). When
 your cluster is initialized the next step is to go to your domain registrar and
 create a `CNAME` record for [ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
-
 
 ## eks
 
@@ -96,15 +94,12 @@ This cluster will be deployed on
 [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks/). To see your
 cluster, check out your [AWS EKS Dashboard](console.aws.amazon.com/eks/home).
 
-
 # Basic Deployment Guide
 
-This Template provides the essential building blocks of a CNDI Cluster,
-and can be extended to meet any need. If there is no existing 
-CNDI Template for your use-case, we recommend deploying this `basic`
-Template as is. 
+This Template provides the essential building blocks of a CNDI Cluster, and can
+be extended to meet any need. If there is no existing CNDI Template for your
+use-case, we recommend deploying this `basic` Template as is.
 
-After you verify the Template is deployed successfully to your 
-infrastructure, it can be enhanced using the `cndi_config.yaml` fields 
-`applications` and `cluster_manifests` with Kubernetes manifests 
-and Helm charts respectively.
+After you verify the Template is deployed successfully to your infrastructure,
+it can be enhanced using the `cndi_config.yaml` fields `applications` and
+`cluster_manifests` with Kubernetes manifests and Helm charts respectively.
