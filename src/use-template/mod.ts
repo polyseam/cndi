@@ -758,23 +758,36 @@ async function processCNDIConfigOutput(
   // get_block evals
   const getBlockBeginToken = "$cndi.get_block(";
   const getBlockEndToken = ")':"; // depends on serialization wrapping key in ' quotes
+  const getBlockEndTokenNoQuote = "):\n"; // fallback if key is not wrapped in quotes
 
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
+  // possible that noQuote signature is in first loop: set constent for while condition
+  const noQuoteIndexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+
   let ax = 0;
 
-  while (indexOpen > -1 && indexClose > -1) {
+  // while there are $cndi.get_block calls to process
+  while (indexOpen > -1 && (indexClose > -1 || noQuoteIndexClose > -1)) {
     cndiConfigObj = YAML.parse(output) as object;
 
-    const key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
-    const pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
+    let key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
+    let pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
 
     // load value of key
-    const body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+    let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      return { error: new Error(`No value found for key: ${key}`) };
+      // if call signature is not '$cndi.get_block(foo)':
+      // and is instead $cndi.get_block(foo):\n
+      indexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+      key = output.slice(indexOpen, indexClose + 1);
+      pathToKey = findPathToKey(key, cndiConfigObj);
+      body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+      if (!body) {
+        return { error: new Error(`No value found for key: ${key}`) };
+      }
     }
 
     let shouldOutput = true;

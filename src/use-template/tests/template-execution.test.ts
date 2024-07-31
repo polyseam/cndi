@@ -1,6 +1,7 @@
 import { YAML } from "deps";
 import { useTemplate } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
+import { CNDIConfig } from "src/types.ts";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
 
@@ -213,5 +214,28 @@ Deno.test(
     assert(!parsed.infrastructure?.cndi?.external_dns);
     assert(!parsed.infrastructure?.cndi?.external_dns?.enabled);
     assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
+  },
+);
+
+Deno.test(
+  "template execution: a template should be able to insert a block using $cndi.get_block(block_name)",
+  mySanity,
+  async () => {
+    const fns_hostname = "fns.example.com";
+    const mockYamlFileUri = "file://" + Deno.cwd() +
+      "/src/use-template/tests/mock/templates/get_block-mock.yaml";
+    const template = await useTemplate(mockYamlFileUri, {
+      interactive: false,
+      overrides: {
+        project_name: "test",
+        enable_fns_ingress: true,
+        fns_hostname,
+        deployment_target_provider: "aws",
+        deployment_target_distribution: "eks",
+        cert_manager_email: "matt.johnston@polyseam.io",
+      },
+    });
+    const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
+    assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
   },
 );

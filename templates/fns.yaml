@@ -1,11 +1,8 @@
 # Note: This fns Template just simplifies Cloud Functions setup
 # but any Template can be extended to include Cloud Functions
 
-blocks: # TODO: determine why I can't just have a single block called conditionally by name
-  - name: fns_hostname_false
-    content: {}
-    
-  - name: fns_hostname_true
+blocks:
+  - name: functions
     content:
       hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
 
@@ -61,8 +58,12 @@ outputs:
     # this is a Template comment
     infrastructure:
       cndi:
-        functions: 
-          $cndi.get_block(fns_hostname_{{ $cndi.get_prompt_response(enable_fns_ingress) }}): {}
+        functions:
+          $cndi.get_block(functions):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+              - ==
+              - true
         
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"

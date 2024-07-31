@@ -1,0 +1,49 @@
+
+blocks:
+  - name: functions
+    content:
+      hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
+
+prompts:
+  - name: enable_fns_ingress
+    default: true
+    message: >-
+      Do you want to expose Cloud Functions with an Ingress?
+    type: Confirm
+ 
+  - name: fns_hostname
+    default: fns.example.com
+    message: >-
+      What hostname should Cloud Functions be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+      - ==
+      - true
+
+  - name: cert_manager_email
+    default: true
+    message: >-
+      What email?
+    type: Input
+
+outputs:
+  env:
+    FOO: bar
+  readme:
+    foo: '# header'
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        functions:
+          $cndi.get_block(functions):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+              - ==
+              - true
