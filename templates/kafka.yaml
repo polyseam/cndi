@@ -79,7 +79,7 @@ prompts:
     type: Input
 
   - name: kafka_broker_size
-    default: 100
+    default: "100"
     message: >-
       What is the size of your kafka brokers in GB?
     type: Input
