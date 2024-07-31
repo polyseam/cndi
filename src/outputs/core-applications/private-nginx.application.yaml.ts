@@ -16,9 +16,6 @@ const getDefaultControllerConfig = () => ({
     default: "false",
     controllerValue: "k8s.io/ingress-nginx-private",
   },
-  extraArgs: {
-    "enable-ssl-passthrough": "true",
-  },
 });
 const getBaseValues = (cndi_config: CNDIConfig) =>
   deepMerge({
