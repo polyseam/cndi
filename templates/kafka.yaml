@@ -99,7 +99,16 @@ prompts:
       - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
       - ==
       - true
-
+      
+  - name: kafka_broker_hostname
+    default: my-kafka-cluster.broker.com
+    message: >-
+      What hostname should the kafka broker be accessible at?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+      - ==
+      - true
 outputs:
   cndi_config:
     # source_control_platform: github ?
