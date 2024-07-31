@@ -763,7 +763,7 @@ async function processCNDIConfigOutput(
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
-  // first loop
+  // possible that noQuote signature is in first loop: set constent for while condition
   const noQuoteIndexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
 
   let ax = 0;
@@ -793,7 +793,6 @@ async function processCNDIConfigOutput(
     let shouldOutput = true;
 
     if (body?.condition) {
-      console.log("condition", body.condition);
       if (!resolveCNDIPromptCondition(body.condition)) {
         shouldOutput = false;
       }
