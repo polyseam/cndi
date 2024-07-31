@@ -1,11 +1,11 @@
 blocks: 
-  - name: plain_listener
+  - name: internal_listener
     content:
       listeners:
-        - name: plain
-          port: 9092
+        - name: internaltls
+          port: 9093
           type: internal
-          plain: true
+          tls: true
   
   - name: external_listener
     content:
