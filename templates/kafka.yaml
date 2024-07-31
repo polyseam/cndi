@@ -79,9 +79,9 @@ prompts:
     type: Input
 
   - name: kafka_broker_size
-    default: 100Gi
+    default: 100
     message: >-
-      What is the size of your kafka brokers?
+      What is the size of your kafka brokers in GB?
     type: Input
   
   - name: enable_kafka_ingress
@@ -146,7 +146,7 @@ outputs:
             volumes:
               - id: 0
                 type: persistent-claim
-                size: "{{ $cndi.get_prompt_response(kafka_broker_size) }}"
+                size: "{{ $cndi.get_prompt_response(kafka_broker_size) }}Gi"
                 deleteClaim: true
                 class: rwo
                 kraftMetadata: shared
