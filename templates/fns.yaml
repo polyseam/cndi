@@ -123,3 +123,8 @@ outputs:
 
       For more information on how to author and deploy functions to your CNDI Cluster, 
       please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
+
+  extra_files:
+    ./functions/hello-world/index.ts: |
+      Deno.serve(() => (new Response('', { status: 200 })));
+    ./functions/cow-say/index.ts: 'https://gist.githubusercontent.com/johnstonmatt/e58d763b47f5b2c61c3a4d33e3e43e62/raw/e58c396d1ce27078149a5af78c9744475de070fb/better-hello.ts'

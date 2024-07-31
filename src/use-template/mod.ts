@@ -9,7 +9,7 @@ import {
 
 import { BuiltInValidators } from "./util/validation.ts";
 import { CNDITemplateComparators } from "./util/conditions.ts";
-import { makeAbsolutePath } from "./util/fs.ts";
+import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
 import type {
   CNDITemplatePromptResponsePrimitive,
@@ -114,6 +114,7 @@ interface TemplateObject {
     cndi_config: Record<string, unknown>;
     env: Record<string, unknown>;
     readme: Record<string, unknown>;
+    extra_files: Record<string, string>;
   };
 }
 
@@ -1039,6 +1040,44 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
   return { value: envLines.join("\n") };
 }
 
+async function processCNDIExtraFilesOutput(
+  extraFilesSpec: Record<string, string>,
+) {
+  const extra_files: Record<string, string> = {};
+  for (let key in extraFilesSpec) {
+    if (!key.startsWith("./")) {
+      return {
+        error: new Error(`extra_files keys must start with './', got: ${key}`),
+      };
+    }
+
+    const sanitizedKeyResult = sanitizeFilePath(key);
+
+    if (sanitizedKeyResult?.error) {
+      return {
+        error: new Error(
+          `extra_files key must be contained within your project directory: ${key}`,
+        ),
+      };
+    }
+    const content = `${extraFilesSpec[key]}`;
+    key = sanitizedKeyResult.value;
+    if (URL.canParse(content)) {
+      const response = await fetch(content);
+      if (response.ok) {
+        extra_files[key] = await response.text();
+      } else {
+        return {
+          error: new Error(`Failed to fetch extra_files content for ${key}`),
+        };
+      }
+    } else {
+      extra_files[key] = content;
+    }
+  }
+  return { value: extra_files };
+}
+
 /**
  * Process a CNDI Template and return the results.
  * @param templateIdentifier Identifier that points to your Template, it can be a URL, a file path, or a name
@@ -1175,10 +1214,19 @@ export async function useTemplate(
     throw finalEnvResult.error;
   }
 
+  const extraFilesResult = await processCNDIExtraFilesOutput(
+    coarselyValidatedTemplateBody.value.outputs?.extra_files || {},
+  );
+
+  if (extraFilesResult.error) {
+    throw extraFilesResult.error;
+  }
+
   const files = {
     "cndi_config.yaml": finalCNDIConfigResult.value,
     "README.md": finalReadmeResult.value,
     ".env": finalEnvResult.value,
+    ...extraFilesResult.value,
   };
 
   // when stringifying responses, skip undefined values

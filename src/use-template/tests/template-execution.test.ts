@@ -1,6 +1,6 @@
 import { YAML } from "deps";
 import { useTemplate } from "../mod.ts";
-import { assert, parseDotEnv } from "test-deps";
+import { assert, assertRejects, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
@@ -237,5 +237,49 @@ Deno.test(
     });
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
+  },
+);
+
+Deno.test(
+  "template execution: a template should be able to add extra files to the output",
+  mySanity,
+  async () => {
+    const mockYamlFileUri = "file://" + Deno.cwd() +
+      "/src/use-template/tests/mock/templates/extra_files-mock.yaml";
+    const template = await useTemplate(mockYamlFileUri, {
+      interactive: false,
+      overrides: {
+        project_name: "test",
+        greet_who: "Extra!",
+      },
+    });
+    const text = "Hello World!";
+    assert(template.files["my/extra_file.txt"] === text);
+  },
+);
+
+Deno.test(
+  "template execution: a template should fail validation if it has an extra_files block which does not begin with a './'",
+  mySanity,
+  async () => {
+    const mockYamlFileUri = "file://" + Deno.cwd() +
+      "/src/use-template/tests/mock/templates/extra_files_invalid-mock.yaml";
+
+    try {
+      await assertRejects(
+        async () => {
+          await useTemplate(mockYamlFileUri, {
+            interactive: false,
+            overrides: {
+              project_name: "test",
+              greet_who: "Extra!",
+            },
+          });
+        },
+      );
+    } catch {
+      console.log("validation failed to throw error");
+      assert(false);
+    }
   },
 );

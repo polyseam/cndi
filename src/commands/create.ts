@@ -383,40 +383,42 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    const cndi_config = templateResult.files["cndi_config.yaml"];
-    const env = templateResult.files[".env"];
-    const readme = templateResult.files["README.md"];
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    await stageFile("cndi_config.yaml", cndi_config);
+    for (const [key, value] of Object.entries(templateResult.files)) {
+      // .env must be extended using generated values
+      if (key === ".env") {
+        const env = value;
+
+        // GENERATE ENV VARS
+        const sealedSecretsKeys = isClusterless
+          ? null
+          : await createSealedSecretsKeys();
+
+        const doSSH =
+          templateResult?.responses?.deployment_target_distribution ===
+            "microk8s";
+
+        const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+        const dotEnvOptions = {
+          sshPublicKey,
+          sealedSecretsKeys,
+          debugMode: !!options.debug,
+        };
+
+        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+      } else {
+        await stageFile(key, value);
+      }
+    }
 
     await stageFile(
       "cndi_responses.yaml",
       YAML.stringify(templateResult.responses),
     );
-
-    const isClusterless =
-      templateResult?.responses?.deployment_target_distribution ===
-        "clusterless";
-
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = isClusterless
-      ? null
-      : await createSealedSecretsKeys();
-
-    const doSSH =
-      templateResult?.responses?.deployment_target_distribution === "microk8s";
-
-    const sshPublicKey = doSSH ? await createSshKeys() : null;
-
-    const dotEnvOptions = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      debugMode: !!options.debug,
-    };
-
-    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
-
-    await stageFile("README.md", readme);
 
     await stageFile(
       path.join(".vscode", "settings.json"),
