@@ -10,6 +10,11 @@ blocks:
   - name: external_listener
     content:
       listeners:
+        - name: internaltls
+          port: 9093
+          type: internal
+          tls: true
+
         - name: externaltls
           port: 9094
           type: ingress
