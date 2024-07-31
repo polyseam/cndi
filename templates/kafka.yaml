@@ -28,6 +28,7 @@ blocks:
                 external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
                 external-dns.alpha.kubernetes.io/ttl: "60"
                 nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+              host: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
             brokers:
               - broker: 0
                 annotations:
@@ -40,7 +41,7 @@ blocks:
                   nginx.ingress.kubernetes.io/ssl-passthrough: "true"
                   external-dns.alpha.kubernetes.io/hostname: "1-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"   
                   external-dns.alpha.kubernetes.io/ttl: "60"
-                host: "1-{{ $cndi.get_prompt_response(kafka_broker_1_hostname) }}"                             
+                host: "1-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"                             
               - broker: 2
                 annotations:
                   nginx.ingress.kubernetes.io/ssl-passthrough: "true"
