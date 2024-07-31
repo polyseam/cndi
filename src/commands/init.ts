@@ -197,9 +197,6 @@ const initCommand = new Command()
       }
     }
 
-    let cndi_config: string;
-    let env: string;
-    let readme: string;
     let project_name = destinationDirectory.split(path.SEPARATOR).pop() ||
       "my-cndi-project"; // default to the current working directory name
 
@@ -313,76 +310,59 @@ const initCommand = new Command()
 
     let templateResult;
 
-    if (template) {
-      try {
-        templateResult = await useTemplate(
-          template!,
-          {
-            interactive: !!options.interactive,
-            overrides: {
-              project_name,
-              ...overrides,
-            },
+    try {
+      templateResult = await useTemplate(
+        template!,
+        {
+          interactive: !!options.interactive,
+          overrides: {
+            project_name,
+            ...overrides,
           },
-        );
-      } catch (e) {
-        console.error(e.message);
-        await emitExitEvent(e.cause);
-        Deno.exit(e.cause);
-      }
+        },
+      );
+    } catch (e) {
+      console.error(e.message);
+      await emitExitEvent(e.cause);
+      Deno.exit(e.cause);
+    }
 
-      cndi_config = templateResult.files["cndi_config.yaml"];
-      await stageFile("cndi_config.yaml", cndi_config);
-
-      readme = templateResult.files["README.md"];
-      env = templateResult.files[".env"];
-
-      if (options.keep) {
-        await stageFile(
-          "cndi_responses.yaml",
-          YAML.stringify(templateResult.responses),
-        );
-      }
-    } else {
-      // uhh not sure bout dis
-      readme = `# ${project_name}\n`;
-      env = "";
+    if (options.keep) {
+      await stageFile(
+        "cndi_responses.yaml",
+        YAML.stringify(templateResult.responses),
+      );
     }
 
     const isClusterless =
       templateResult?.responses?.deployment_target_distribution ===
         "clusterless";
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = isClusterless
-      ? null
-      : await createSealedSecretsKeys();
+    for (const [key, value] of Object.entries(templateResult.files)) {
+      // .env must be extended using generated values
+      if (key === ".env") {
+        const env = value;
 
-    const doSSH =
-      templateResult?.responses?.deployment_target_distribution === "microk8s";
+        // GENERATE ENV VARS
+        const sealedSecretsKeys = isClusterless
+          ? null
+          : await createSealedSecretsKeys();
 
-    const sshPublicKey = doSSH ? await createSshKeys() : null;
+        const doSSH =
+          templateResult?.responses?.deployment_target_distribution ===
+            "microk8s";
 
-    const dotEnvOptions = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      debugMode: !!options.debug,
-    };
+        const sshPublicKey = doSSH ? await createSshKeys() : null;
 
-    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+        const dotEnvOptions = {
+          sshPublicKey,
+          sealedSecretsKeys,
+          debugMode: !!options.debug,
+        };
 
-    // write a readme, extend via Template.readmeBlock if it exists
-    const readmePath = path.join(destinationDirectory, "README.md");
-    try {
-      await Deno.stat(readmePath);
-      console.log(
-        initLabel,
-        ccolors.user_input(`"${readmePath}"`),
-        ccolors.warn(`already exists, skipping generation`),
-      );
-    } catch (e) {
-      if (e instanceof Deno.errors.NotFound) {
-        await stageFile("README.md", readme);
+        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+      } else {
+        await stageFile(key, value);
       }
     }
 
