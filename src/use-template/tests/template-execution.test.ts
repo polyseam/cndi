@@ -1,6 +1,7 @@
 import { YAML } from "deps";
 import { useTemplate } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
+import { CNDIConfig } from "src/types.ts";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
 
@@ -220,6 +221,7 @@ Deno.test(
   "template execution: a template should be able to insert a block using $cndi.get_block(block_name)",
   mySanity,
   async () => {
+    const fns_hostname = "fns.example.com";
     const mockYamlFileUri = "file://" + Deno.cwd() +
       "/src/use-template/tests/mock/templates/get_block-mock.yaml";
     const template = await useTemplate(mockYamlFileUri, {
@@ -227,12 +229,13 @@ Deno.test(
       overrides: {
         project_name: "test",
         enable_fns_ingress: true,
-        fns_hostname: "fns.example.com",
+        fns_hostname,
         deployment_target_provider: "aws",
         deployment_target_distribution: "eks",
         cert_manager_email: "matt.johnston@polyseam.io",
       },
     });
-    console.log(template.files["cndi_config.yaml"]);
+    const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
+    assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
   },
 );
