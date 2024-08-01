@@ -248,8 +248,7 @@ outputs:
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
 
-    basic: |      
-      
+    kafka: |      
       # Strimzi Kafka Deployment Guide
 
       Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, 
