@@ -226,7 +226,7 @@ outputs:
             - ==
             - true
     applications:
-      cnpg:
+      kafka:
         targetRevision: 0.42.0
         destinationNamespace: kafka
         repoURL: "https://strimzi.io/charts/"
@@ -251,20 +251,96 @@ outputs:
     kafka: |      
       # Strimzi Kafka Deployment Guide
 
-      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, 
-      making it easier to deploy and manage Kafka clusters. This guide provides steps to configure, 
-      test, and use Kafka with the Strimzi operator.
-
-      ## Configuration
-
-      ...
+      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, making it easier to deploy and manage Kafka clusters. This guide provides detailed steps to configure, test, and use Kafka with the Strimzi operator.
 
       ## Connecting with a Client
 
-      To connect to the Kafka cluster, you need to use the bootstrap server address and
-      the CA certificate Strimzi creates for you. To get the certificate, lets connect to the 
-      Kubernetes API:
+      To connect securely to a Kafka cluster using SSL/TLS, you will need the cluster certificate, the truststore, and the truststore password. Once the cluster is deployed, you can connect to your cluster with the kubeconfig command found in the output of the cndi run. This template uses TLS encryption by default, so you need to extract the necessary security elements to access the cluster.
 
-      ```bash
-      
+      ### Steps to Obtain and Use Certificates, Truststores, and Truststore Passwords
+
+      #### Step 1: Retrieve the Truststore Certificate
+      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the CA certificate from the Kubernetes secret and save it to `ca.crt`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
       ```
+
+      #### Step 2: Retrieve the PKCS12 Truststore
+      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the PKCS12 truststore file from the Kubernetes secret and save it to `ca.p12`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.p12}' | base64 -d > ca.p12
+      ```
+
+      #### Step 3: Retrieve the Truststore Password
+      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the truststore password from the Kubernetes secret and save it to `ca.password.txt`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.password}' | base64 --decode > ca.password.txt
+      ```
+
+      These files (`ca.crt`, `ca.p12`, and `ca.password.txt`) will be used to configure your Kafka client for a secure connection.
+
+      ### Connect to Kafka Cluster
+
+      Once you have the TLS certificate, you can use the bootstrap host specified in the Kafka custom resource to connect to the Kafka cluster. Since Ingress uses TLS passthrough, you always have to connect on port 443. 
+
+      To connect to the Kafka cluster, you need to use the bootstrap server address.
+
+      ### Kafka Client CLI Installation and Configuration
+
+      #### 1. Install Kafka Client Tools
+
+      First, you need to install the Kafka client tools by downloading the Kafka binaries from the Apache Kafka website.
+
+      **Step-by-Step Instructions:**
+
+      **Download and Extract the Kafka Binaries:**
+
+      Go to the [Apache Kafka download page](https://kafka.apache.org/downloads) and download the latest binary release.
+
+      #### 2. Configure Kafka Client with SSL
+
+      To securely connect to your Kafka cluster using SSL, you need the truststore files obtained earlier. Ensure you have `ca.p12` and `ca.password.txt`.
+
+      #### 3. Use Kafka CLI Tools
+
+      **Configure Environment Variables:**
+
+      Set the environment variables to point to your Kafka installation and the truststore files.
+
+      **Configure Kafka CLI with SSL:**
+
+      Create a `client-ssl.properties` file with the following content:
+
+      ```properties
+      security.protocol=SSL
+      ssl.truststore.location=/path/to/ca.p12
+      ssl.truststore.password= password in the ca.password.txt
+      ssl.truststore.type=PKCS12
+      ```
+
+      **Replace `/path/to/ca.p12` and `/path/to/ca.password.txt` with the actual paths to your files.**
+
+      #### 4. Produce and Consume Messages
+
+      **Produce Messages:**
+
+      To produce messages to a Kafka topic: Replace `kafka-cluster.bootstrap.cndi.link` with the bootstrap dns address
+
+      ```sh
+      kafka-console-producer.sh --broker-list my-kafka-cluster.bootstrap.cndi.link:443 --topic my-topic --producer.config client-ssl.properties
+      ```
+
+      Type your messages and press Enter to send them. Use `Ctrl+C` to exit.
+
+      **Consume Messages:**
+
+      To consume messages from a Kafka topic: Replace `kafka-cluster.bootstrap.cndi.link` with the bootstrap dns address
+
+      ```sh
+      kafka-console-consumer.sh --bootstrap-server my-kafka-cluster.bootstrap.cndi.link:443 --topic my-topic --from-beginning --consumer.config client-ssl.properties
+      ```
+
+      This setup ensures secure communication between your Kafka clients and the Kafka cluster using SSL. If you need further assistance, feel free to ask!
