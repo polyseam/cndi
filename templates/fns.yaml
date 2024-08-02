@@ -50,12 +50,10 @@ prompts:
 
 outputs:
   cndi_config:
-    # source_control_platform: github ?
     cndi_version: v2
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a Template comment
     infrastructure:
       cndi:
         functions:
@@ -123,3 +121,9 @@ outputs:
 
       For more information on how to author and deploy functions to your CNDI Cluster, 
       please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
+
+  extra_files:
+    ./functions/hello-world/index.ts: |
+      Deno.serve(() => (new Response('hello world!', { status: 200 })));
+    ./functions/cowsay/index.ts: 'https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts'
+    
