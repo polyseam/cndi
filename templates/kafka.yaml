@@ -1,4 +1,29 @@
 blocks: 
+
+  - name: deploy_kafka_ui_application_blk
+    content:
+      kafka-ui:
+        targetRevision: 0.7.6
+        destinationNamespace: kafka
+        repoURL: 'https://provectus.github.io/kafka-ui-charts'
+        chart: kafka-ui
+        values:
+          existingConfigMap: kafka-ui-config    
+          existingSecret: kafka-ui-login-auth  
+          env: 
+          - name: KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"    
+                key: ca.password    
+          volumeMounts:
+          - name: secret-volume
+            mountPath: /ssl
+          volumes:
+          - name: secret-volume
+            secret:
+              secretName: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"  
+
   - name: internal_listener
     content:
       listeners:
@@ -139,6 +164,13 @@ prompts:
       - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
       - ==
       - true
+
+  - name: deploy_kafka_ui_application
+    default: true
+    message: >-
+      Do you want to install kafka-ui, a web-based kafka management tool?
+    type: Confirm
+
   - name: deploy_kafka_ui_ingress
     default: true
     message: >-
@@ -290,6 +322,14 @@ outputs:
         destinationNamespace: kafka
         repoURL: "https://strimzi.io/charts/"
         chart: strimzi-kafka-operator
+      kafka-ui:
+        $cndi.get_block(deploy_kafka_ui_application_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+            - ==
+            - true
+
+
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
