@@ -2,27 +2,26 @@ blocks:
 
   - name: deploy_kafka_ui_application_blk
     content:
-      kafka-ui:
-        targetRevision: 0.7.6
-        destinationNamespace: kafka
-        repoURL: 'https://provectus.github.io/kafka-ui-charts'
-        chart: kafka-ui
-        values:
-          existingConfigMap: kafka-ui-config    
-          existingSecret: kafka-ui-login-auth  
-          env: 
-          - name: KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"    
-                key: ca.password    
-          volumeMounts:
-          - name: secret-volume
-            mountPath: /ssl
-          volumes:
-          - name: secret-volume
-            secret:
-              secretName: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"  
+      targetRevision: 0.7.6
+      destinationNamespace: kafka
+      repoURL: 'https://provectus.github.io/kafka-ui-charts'
+      chart: kafka-ui
+      values:
+        existingConfigMap: kafka-ui-config    
+        existingSecret: kafka-ui-login-auth  
+        env: 
+        - name: KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"    
+              key: ca.password    
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /ssl
+        volumes:
+        - name: secret-volume
+          secret:
+            secretName: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"  
 
   - name: internal_listener
     content:
@@ -320,7 +319,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
-            
+
       kafka_ui_ingress:
         $cndi.get_block(deploy_kafka_ui_ingress_blk):
           condition:
