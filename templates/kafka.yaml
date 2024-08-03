@@ -180,7 +180,7 @@ prompts:
       - ==
       - true
 
-  - name: kafka_ui
+  - name: kafka_ui_hostname
     default: kafka-ui.example.com
     message: >-
       What hostname should kafka-ui be accessible at?
@@ -320,7 +320,7 @@ outputs:
             - ==
             - true
 
-      kafka_ui_ingress:
+      kafka-ui-ingress:
         $cndi.get_block(deploy_kafka_ui_ingress_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_kafka_ui_ingress) }}"
