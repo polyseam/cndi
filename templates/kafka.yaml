@@ -49,6 +49,35 @@ blocks:
                   external-dns.alpha.kubernetes.io/ttl: "60"
                 host: "2-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}" 
 
+  - name: deploy_kafka_ui_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kafka-ui-ingress
+        namespace: kafka
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            secretName: cluster-issuer-private-key-kafka-ui
+        rules:
+          - host: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kafka-ui
+                      port:
+                        number: 80                
+
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -108,6 +137,27 @@ prompts:
     type: Input
     condition:
       - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+      - ==
+      - true
+  - name: deploy_kafka_ui_ingress
+    default: true
+    message: >-
+      Do you want to expose kafka-ui to the web?
+    type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui
+    default: kafka-ui.example.com
+    message: >-
+      What hostname should kafka-ui be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
       - ==
       - true
 outputs:
@@ -218,6 +268,15 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
+            
+      kafka_ui_ingress:
+        $cndi.get_block(deploy_kafka_ui_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_ingress) }}"
+            - ==
+            - true
+
+      kafka-ui-configmap:
 
       external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
