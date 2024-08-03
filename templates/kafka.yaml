@@ -192,6 +192,27 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
       - ==
       - true
+
+  - name: kafka_ui_login_username
+    default: admin
+    message: >-
+      What username do you want to use for your kafka-ui login?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_login_password
+    default: '{{ $cndi.get_random_string(12) }}'
+    message: >-
+      What password do you want to use for your kafka-ui login ?
+    type: Secret
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
 outputs:
   cndi_config:
     # source_control_platform: github ?
@@ -282,7 +303,6 @@ outputs:
               min.insync.replicas: 2
               inter.broker.protocol.version: "3.7"
               ssl.endpoint.identification.algorithm: ''
-              
           entityOperator:
             topicOperator: {}
             userOperator: {}
@@ -309,6 +329,28 @@ outputs:
             - true
 
       kafka-ui-configmap:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: kafka-ui-config
+          namespace: kafka
+        data:
+          KAFKA_CLUSTERS_0_NAME: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-kafka-bootstrap.kafka.svc:9093"
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_TYPE: PKCS12
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /ssl/ca.p12
+          KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
+          AUTH_TYPE: "LOGIN_FORM"
+
+      kafka-ui-login-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: kafka-ui-login-auth
+          namespace: kafka
+        stringData:
+          SPRING_SECURITY_USER_NAME:  $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_USERNAME)
+          SPRING_SECURITY_USER_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_PASSWORD)
 
       external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
@@ -316,6 +358,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
+    
     applications:
       kafka:
         targetRevision: 0.42.0
@@ -337,6 +380,11 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+ 
+    $cndi.comment(Kafka-ui-heading): Kafka UI Login Parameters
+    KAFKA_UI_USERNAME: "{{ $cndi.get_prompt_response(kafka_ui_login_username) }}"
+    KAFKA_UI_PASSWORD: "{{ $cndi.get_prompt_response(kafka_ui_login_password) }}"
+    
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
