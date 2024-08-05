@@ -36,6 +36,12 @@ jobs:
 
       - name: Build
         run: deno task build
+      
+      - name: Install cndi dependency binaries
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux/in/* /home/runner/.cndi/bin
+      
+      - name: Test
+        run: deno task test
 
       - name: Release
         uses: softprops/action-gh-release@v1
