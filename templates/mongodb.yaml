@@ -114,7 +114,7 @@ outputs:
               - ==
               - true
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam//polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
         open_ports:
