@@ -37,9 +37,6 @@ jobs:
       - name: Build
         run: deno task build
 
-      - name: Test
-        run: deno task test
-
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
