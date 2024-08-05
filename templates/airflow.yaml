@@ -301,7 +301,8 @@ outputs:
           condition:
             - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
             - ==
-            - true          
+            - true
+            
     applications:
       cnpg:
         targetRevision: 0.18.0

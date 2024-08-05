@@ -269,6 +269,7 @@ interface CNDIConfig {
       };
       keyless?: boolean; // default: false
       deployment_target_configuration?: DeploymentTargetConfiguration;
+      keyless?: boolean; // default: false
       ingress: {
         nginx: {
           public: {

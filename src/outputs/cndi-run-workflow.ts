@@ -153,9 +153,6 @@ const getProviderSteps = (
   provider: CNDIProvider,
   keyless = false,
 ): Array<WorkflowStep> => {
-  // keyless MUST be false for now
-  keyless = false;
-
   switch (provider) {
     case "aws":
       return keyless ? AWS_STEPS_KEYLESS : AWS_STEPS;
@@ -202,8 +199,6 @@ const getEnv = (
   config: CNDIConfig,
   keyless = false,
 ): Record<string, string> => {
-  // keyless MUST be false for now
-  keyless = false;
   // if config.infrastructure.terraform.variable has values, inject them as env vars to GitHub Workflow
   const injectEnv: Record<string, string> = {};
 
@@ -264,8 +259,7 @@ const getWorkflowJob = (
   config: CNDIConfig,
   sourceRef?: string,
 ): WorkflowJob => {
-  // TODO: const isKeyless = config?.infrastructure?.cndi?.keyless === true;
-  const isKeyless = false;
+  const isKeyless = config?.infrastructure?.cndi?.keyless === true;
   const steps: Array<WorkflowStep> = [];
 
   // sourceRef is used to build the cndi binary from a provided git ref
