@@ -1,4 +1,28 @@
 blocks: 
+
+  - name: deploy_kafka_ui_application_blk
+    content:
+      targetRevision: 0.7.6
+      destinationNamespace: kafka
+      repoURL: 'https://provectus.github.io/kafka-ui-charts'
+      chart: kafka-ui
+      values:
+        existingConfigMap: kafka-ui-config    
+        existingSecret: kafka-ui-login-auth  
+        env: 
+        - name: KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"    
+              key: ca.password    
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /ssl
+        volumes:
+        - name: secret-volume
+          secret:
+            secretName: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"  
+
   - name: internal_listener
     content:
       listeners:
@@ -48,6 +72,35 @@ blocks:
                   external-dns.alpha.kubernetes.io/hostname: "2-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"   
                   external-dns.alpha.kubernetes.io/ttl: "60"
                 host: "2-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}" 
+
+  - name: deploy_kafka_ui_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kafka-ui-ingress
+        namespace: kafka
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            secretName: cluster-issuer-private-key-kafka-ui
+        rules:
+          - host: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kafka-ui
+                      port:
+                        number: 80                
 
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
@@ -110,6 +163,55 @@ prompts:
       - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
       - ==
       - true
+
+  - name: deploy_kafka_ui_application
+    default: true
+    message: >-
+      Do you want to install kafka-ui, a web-based kafka management tool?
+    type: Confirm
+
+  - name: deploy_kafka_ui_ingress
+    default: true
+    message: >-
+      Do you want to expose kafka-ui to the web?
+    type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_hostname
+    default: kafka-ui.example.com
+    message: >-
+      What hostname should kafka-ui be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_login_username
+    default: admin
+    message: >-
+      What username do you want to use for your kafka-ui login?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_login_password
+    default: '{{ $cndi.get_random_string(12) }}'
+    message: >-
+      What password do you want to use for your kafka-ui login ?
+    type: Secret
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
 outputs:
   cndi_config:
     # source_control_platform: github ?
@@ -200,7 +302,6 @@ outputs:
               min.insync.replicas: 2
               inter.broker.protocol.version: "3.7"
               ssl.endpoint.identification.algorithm: ''
-              
           entityOperator:
             topicOperator: {}
             userOperator: {}
@@ -219,18 +320,58 @@ outputs:
             - ==
             - true
 
+      kafka-ui-ingress:
+        $cndi.get_block(deploy_kafka_ui_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_ingress) }}"
+            - ==
+            - true
+
+      kafka-ui-configmap:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: kafka-ui-config
+          namespace: kafka
+        data:
+          KAFKA_CLUSTERS_0_NAME: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-kafka-bootstrap.kafka.svc:9093"
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_TYPE: PKCS12
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /ssl/ca.p12
+          KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
+          AUTH_TYPE: "LOGIN_FORM"
+
+      kafka-ui-login-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: kafka-ui-login-auth
+          namespace: kafka
+        stringData:
+          SPRING_SECURITY_USER_NAME:  $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_USERNAME)
+          SPRING_SECURITY_USER_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_PASSWORD)
+
       external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
+    
     applications:
       kafka:
         targetRevision: 0.42.0
         destinationNamespace: kafka
         repoURL: "https://strimzi.io/charts/"
         chart: strimzi-kafka-operator
+      kafka-ui:
+        $cndi.get_block(deploy_kafka_ui_application_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+            - ==
+            - true
+
+
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -238,6 +379,11 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+ 
+    $cndi.comment(Kafka-ui-heading): Kafka UI Login Parameters
+    KAFKA_UI_USERNAME: "{{ $cndi.get_prompt_response(kafka_ui_login_username) }}"
+    KAFKA_UI_PASSWORD: "{{ $cndi.get_prompt_response(kafka_ui_login_password) }}"
+    
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
