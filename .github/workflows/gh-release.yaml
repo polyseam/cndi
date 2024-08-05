@@ -34,14 +34,14 @@ jobs:
         run: |
           echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ steps.get_version_from_ref.outputs.VERSION }}" && exit 1
 
-      - name: Install cndi dependency binaries
-        run: mkdir -p /home/runner/.cndi/bin && mv ./dist/linux/in/* /home/runner/.cndi/bin
-
-      - name: Test
-        run: deno task test
-
       - name: Build
         run: deno task build
+      
+      - name: Install cndi dependency binaries
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux/in/* /home/runner/.cndi/bin
+      
+      - name: Test
+        run: deno task test
 
       - name: Release
         uses: softprops/action-gh-release@v1
