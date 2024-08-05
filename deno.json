@@ -20,8 +20,7 @@
     "build-win": "deno lint && deno fmt && deno task clean-dist && deno task compile-win",
     "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000",
     "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
-    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
-    "cp-linux-bin-deps": "mkdir -p /home/runner/.cndi/bin && mv ./dist/linux/in/* /home/runner/.cndi/bin"
+    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
   },
   "imports": {
     "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.25.0",
