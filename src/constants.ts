@@ -74,6 +74,10 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
   },
   {
+    name: "fns",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
+  },
+  {
     name: "neo4j",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/neo4j.yaml`,
   },
