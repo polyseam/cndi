@@ -34,6 +34,9 @@ jobs:
         run: |
           echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ steps.get_version_from_ref.outputs.VERSION }}" && exit 1
 
+      - name: Install cndi dependency binaries
+        run: deno task cp-linux-bin-deps
+
       - name: Test
         run: deno task test
 

@@ -18,7 +18,7 @@ jobs:
       - run: deno lint
 
       - name: Install cndi dependency binaries
-        run: mkdir -p /home/runner/.cndi/bin && mv ./dist/linux/in/* /home/runner/.cndi/bin
+        run: deno task cp-linux-bin-deps
 
       - run: deno task test
 
