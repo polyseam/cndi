@@ -30,12 +30,11 @@ blocks:
                           name: mongodb
   - name: mongo-open-tcp
     content:
-      ingress:
-        nginx:
-          public:
-            values:
-              tcp:
-                '27017': "mongodb/mongodb-replica-set-svc:27017"
+      nginx:
+        public:
+          values:
+            tcp:
+              '27017': "mongodb/mongodb-replica-set-svc:27017"
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -112,11 +111,13 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     infrastructure:
       cndi:
-        $cndi.get_block(mongo-open-tcp):
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
-            - ==
-            - true
+        ingress:
+          $cndi.get_block(mongo-open-tcp):
+            condition:
+              - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
+              - ==
+              - true
+              
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
