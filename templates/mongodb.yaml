@@ -205,7 +205,7 @@ outputs:
 
     applications:
       mongodb:
-        targetRevision: 0.8.0
+        targetRevision: 0.10.0
         destinationNamespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
         repoURL: 'https://mongodb.github.io/helm-charts'
         chart: community-operator
@@ -276,4 +276,3 @@ outputs:
       `mongosh mongodb://admin:password@mongodb.example.com`
 
       You can find the `MONGODB_CONNECTION_STRING` in the `.env` file in your project directory.
-      
