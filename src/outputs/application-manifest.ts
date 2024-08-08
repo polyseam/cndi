@@ -1,4 +1,4 @@
-import { ccolors } from "deps";
+import { ccolors, deepMerge } from "deps";
 import { getYAMLString } from "src/utils.ts";
 
 type ArgoAppInfo = Array<{ name: string; value: string }>;
@@ -71,7 +71,6 @@ const DEFAULT_SYNC_POLICY = {
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
-const DEFAULT_NAMESPACE = "default";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 
@@ -86,9 +85,11 @@ const getApplicationManifest = (
   const valuesObject = applicationSpec?.values || {};
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
+  const destinationNamespace = applicationSpec?.destinationNamespace;
+
+  const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
 
   if (!specSourcePath && !specSourceChart) {
-    const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
     console.error(
       applicationManifestLabel,
       ccolors.error(
@@ -100,6 +101,26 @@ const getApplicationManifest = (
         `or applications[${releaseNameForPrint}]${ccolors.key_name(".chart")}`,
       ),
       ccolors.error(`must be defined`),
+    );
+  }
+
+  if (!destinationNamespace) {
+    console.log(
+      applicationManifestLabel,
+      ccolors.error(
+        `applications[${releaseNameForPrint}]${
+          ccolors.key_name(
+            ".destinationNamespace",
+          )
+        }`,
+      ),
+      ccolors.error(`must be defined`),
+    );
+    console.log(
+      ccolors.warn("using"),
+      releaseNameForPrint,
+      ccolors.warn("for"),
+      ccolors.key_name("destinationNamespace"),
     );
   }
 
@@ -115,13 +136,16 @@ const getApplicationManifest = (
 
   const metadata: Meta = {
     name,
-    namespace: DEFAULT_NAMESPACE,
     labels,
     finalizers: applicationSpec?.finalizers,
     ...userMeta,
   };
 
-  const syncPolicy = { ...DEFAULT_SYNC_POLICY, ...applicationSpec?.syncPolicy };
+  const syncPolicy = deepMerge(
+    DEFAULT_SYNC_POLICY,
+    applicationSpec?.syncPolicy || {},
+  );
+
   const { repoURL, path, chart, targetRevision, info } = applicationSpec;
 
   const spec = {
@@ -138,7 +162,7 @@ const getApplicationManifest = (
     },
     destination: {
       server: DEFAULT_DESTINATION_SERVER,
-      namespace: applicationSpec.destinationNamespace,
+      namespace: destinationNamespace,
     },
     syncPolicy,
     info,
