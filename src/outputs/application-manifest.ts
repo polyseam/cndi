@@ -115,7 +115,6 @@ const getApplicationManifest = (
 
   const metadata: Meta = {
     name,
-    namespace: DEFAULT_NAMESPACE,
     labels,
     finalizers: applicationSpec?.finalizers,
     ...userMeta,
@@ -125,7 +124,7 @@ const getApplicationManifest = (
     DEFAULT_SYNC_POLICY,
     applicationSpec?.syncPolicy || {},
   );
-  
+
   const { repoURL, path, chart, targetRevision, info } = applicationSpec;
 
   const spec = {
