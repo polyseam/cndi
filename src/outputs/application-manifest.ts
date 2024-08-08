@@ -1,6 +1,32 @@
 import { ccolors } from "deps";
 import { getYAMLString } from "src/utils.ts";
 
+type ArgoAppInfo = Array<{ name: string; value: string }>;
+
+type Meta = {
+  name?: string;
+  namespace?: string;
+  labels?: Record<string, string>;
+  finalizers?: string[];
+};
+
+type SyncPolicy = {
+  automated: {
+    prune: boolean;
+    selfHeal: boolean;
+    allowEmpty: boolean;
+  };
+  syncOptions: string[];
+  retry: {
+    limit: number;
+    backoff: {
+      duration: string;
+      factor: number;
+      maxDuration: string;
+    };
+  };
+};
+
 export interface CNDIApplicationSpec {
   targetRevision: string;
   repoURL: string;
@@ -10,6 +36,15 @@ export interface CNDIApplicationSpec {
   values: {
     [key: string]: unknown;
   };
+  labels?: Record<string, string>;
+  finalizers?: string[];
+  directory?: {
+    include?: string;
+    exclude?: string;
+  };
+  info?: ArgoAppInfo;
+  syncPolicy?: SyncPolicy;
+  metadata?: Meta;
 }
 
 const DEFAULT_SYNC_POLICY = {
@@ -44,32 +79,11 @@ const applicationManifestLabel = ccolors.faded(
   "\nsrc/outputs/application-manifest.ts:",
 );
 
-const manifestFramework = {
-  apiVersion: DEFAULT_ARGOCD_API_VERSION,
-  kind: "Application",
-  metadata: {
-    namespace: DEFAULT_NAMESPACE,
-    labels: {},
-  },
-  spec: {
-    project: DEFAULT_PROJECT,
-    source: {
-      helm: {
-        version: DEFAULT_HELM_VERSION,
-      },
-    },
-    destination: {
-      server: DEFAULT_DESTINATION_SERVER,
-    },
-    syncPolicy: DEFAULT_SYNC_POLICY,
-  },
-};
-
 const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
-  const values = getYAMLString(applicationSpec?.values || {});
+  const valuesObject = applicationSpec?.values || {};
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
 
@@ -89,32 +103,52 @@ const getApplicationManifest = (
     );
   }
 
+  const labelSpec = applicationSpec.labels || {};
+  const name = releaseName;
+
+  const userMeta: Partial<Meta> = applicationSpec?.metadata || {};
+
+  const labels = {
+    ...labelSpec,
+    name,
+  };
+
+  const metadata: Meta = {
+    name,
+    namespace: DEFAULT_NAMESPACE,
+    labels,
+    finalizers: applicationSpec?.finalizers,
+    ...userMeta,
+  };
+
+  const syncPolicy = { ...DEFAULT_SYNC_POLICY, ...applicationSpec?.syncPolicy };
+  const { repoURL, path, chart, targetRevision, info } = applicationSpec;
+
+  const spec = {
+    project: DEFAULT_PROJECT,
+    source: {
+      repoURL,
+      path,
+      chart,
+      targetRevision,
+      helm: {
+        version: DEFAULT_HELM_VERSION,
+        valuesObject,
+      },
+    },
+    destination: {
+      server: DEFAULT_DESTINATION_SERVER,
+      namespace: applicationSpec.destinationNamespace,
+    },
+    syncPolicy,
+    info,
+  };
+
   const manifest = {
-    ...manifestFramework,
-    metadata: {
-      name: releaseName,
-      labels: {
-        name: releaseName,
-      },
-    },
-    spec: {
-      ...manifestFramework.spec,
-      source: {
-        ...manifestFramework.spec.source,
-        repoURL: applicationSpec.repoURL,
-        path: applicationSpec.path,
-        chart: applicationSpec.chart,
-        targetRevision: applicationSpec.targetRevision,
-        helm: {
-          ...manifestFramework.spec.source.helm,
-          values, // TODO: use valuesObject it's a bit more readable etc.
-        },
-      },
-      destination: {
-        ...manifestFramework.spec.destination,
-        namespace: applicationSpec.destinationNamespace,
-      },
-    },
+    apiVersion: DEFAULT_ARGOCD_API_VERSION,
+    kind: "Application",
+    metadata,
+    spec,
   };
 
   return [getYAMLString(manifest), `${releaseName}.application.yaml`];
