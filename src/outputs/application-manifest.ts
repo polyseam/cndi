@@ -71,7 +71,6 @@ const DEFAULT_SYNC_POLICY = {
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
-const DEFAULT_NAMESPACE = "default";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 
@@ -86,9 +85,11 @@ const getApplicationManifest = (
   const valuesObject = applicationSpec?.values || {};
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
+  const destinationNamespace = applicationSpec?.destinationNamespace;
+
+  const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
 
   if (!specSourcePath && !specSourceChart) {
-    const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
     console.error(
       applicationManifestLabel,
       ccolors.error(
@@ -100,6 +101,25 @@ const getApplicationManifest = (
         `or applications[${releaseNameForPrint}]${ccolors.key_name(".chart")}`,
       ),
       ccolors.error(`must be defined`),
+    );
+  }
+
+  if (!destinationNamespace) {
+    console.log(
+      applicationManifestLabel,
+      ccolors.error(
+        `applications[${releaseNameForPrint}]${
+          ccolors.key_name(
+            ".destinationNamespace",
+          )
+        }`,
+      ),
+      ccolors.error(`must be defined`),
+    );
+    console.log(
+      ccolors.warn("using"),
+      releaseNameForPrint,
+      ccolors.warn("for destinationNamespace"),
     );
   }
 
@@ -141,7 +161,7 @@ const getApplicationManifest = (
     },
     destination: {
       server: DEFAULT_DESTINATION_SERVER,
-      namespace: applicationSpec.destinationNamespace,
+      namespace: destinationNamespace,
     },
     syncPolicy,
     info,
