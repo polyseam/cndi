@@ -123,7 +123,7 @@ const getApplicationManifest = (
   };
 
   const syncPolicy = { ...DEFAULT_SYNC_POLICY, ...applicationSpec?.syncPolicy };
-  const { repoURL, path, chart, targetRevision } = applicationSpec;
+  const { repoURL, path, chart, targetRevision, info } = applicationSpec;
 
   const spec = {
     project: DEFAULT_PROJECT,
@@ -142,6 +142,7 @@ const getApplicationManifest = (
       namespace: applicationSpec.destinationNamespace,
     },
     syncPolicy,
+    info,
   };
 
   const manifest = {
