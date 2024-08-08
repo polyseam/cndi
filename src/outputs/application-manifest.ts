@@ -84,7 +84,6 @@ const getApplicationManifest = (
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
   const valuesObject = applicationSpec?.values || {};
-  // const values = getYAMLString(applicationSpec?.values || {});
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
 
