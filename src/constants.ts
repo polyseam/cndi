@@ -89,6 +89,10 @@ const KNOWN_TEMPLATES = [
     name: "mssqlserver",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mssqlserver.yaml`,
   },
+  {
+    name: "mongodb",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mongodb.yaml`,
+  },
 ] as const;
 
 export const NO_SCHEDULE = "NoSchedule" as const;
