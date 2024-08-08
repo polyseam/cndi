@@ -1,4 +1,4 @@
-import { ccolors } from "deps";
+import { ccolors, deepMerge } from "deps";
 import { getYAMLString } from "src/utils.ts";
 
 type ArgoAppInfo = Array<{ name: string; value: string }>;
@@ -121,7 +121,11 @@ const getApplicationManifest = (
     ...userMeta,
   };
 
-  const syncPolicy = { ...DEFAULT_SYNC_POLICY, ...applicationSpec?.syncPolicy };
+  const syncPolicy = deepMerge(
+    DEFAULT_SYNC_POLICY,
+    applicationSpec?.syncPolicy || {},
+  );
+  
   const { repoURL, path, chart, targetRevision, info } = applicationSpec;
 
   const spec = {
