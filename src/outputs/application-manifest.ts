@@ -82,7 +82,7 @@ const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
-  const valuesObject = applicationSpec?.values || {};
+  const values = getYAMLString(applicationSpec?.values || {});
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
   const destinationNamespace = applicationSpec?.destinationNamespace;
@@ -157,7 +157,7 @@ const getApplicationManifest = (
       targetRevision,
       helm: {
         version: DEFAULT_HELM_VERSION,
-        valuesObject,
+        values,
       },
     },
     destination: {
