@@ -4,10 +4,10 @@ import { getYAMLString } from "src/utils.ts";
 type ArgoAppInfo = Array<{ name: string; value: string }>;
 
 type Meta = {
-  name: string;
-  namespace: string;
-  labels: Record<string, string>;
-  finalizers: string[];
+  name?: string;
+  namespace?: string;
+  labels?: Record<string, string>;
+  finalizers?: string[];
 };
 
 type SyncPolicy = {
@@ -83,7 +83,7 @@ const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
 ): [string, string] => {
-  const values = getYAMLString(applicationSpec?.values || {});
+  const valuesObject = applicationSpec?.values || {};
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
 
@@ -117,7 +117,7 @@ const getApplicationManifest = (
     name,
     namespace: DEFAULT_NAMESPACE,
     labels,
-    finalizers: applicationSpec.finalizers || [],
+    finalizers: applicationSpec?.finalizers,
     ...userMeta,
   };
 
@@ -133,7 +133,7 @@ const getApplicationManifest = (
       targetRevision,
       helm: {
         version: DEFAULT_HELM_VERSION,
-        values,
+        valuesObject,
       },
     },
     destination: {
