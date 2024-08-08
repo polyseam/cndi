@@ -1,0 +1,28 @@
+outputs:
+  cndi_config:
+    applications:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: vitess
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+      spec:
+        destination:
+          name: ''
+          namespace: vitess
+          server: 'https://kubernetes.default.svc'
+        source:
+          path: examples/operator
+          repoURL: 'https://github.com/vitessio/vitess.git'
+          targetRevision: HEAD
+          directory:
+            include: '{operator.yaml}'
+        sources: []
+        project: default
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
