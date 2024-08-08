@@ -36,8 +36,8 @@ export interface CNDIApplicationSpec {
   values: {
     [key: string]: unknown;
   };
-  labels: Record<string, string>;
-  finalizers: string[];
+  labels?: Record<string, string>;
+  finalizers?: string[];
   directory?: {
     include?: string;
     exclude?: string;
