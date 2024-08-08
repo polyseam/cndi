@@ -119,7 +119,8 @@ const getApplicationManifest = (
     console.log(
       ccolors.warn("using"),
       releaseNameForPrint,
-      ccolors.warn("for destinationNamespace"),
+      ccolors.warn("for"),
+      ccolors.key_name("destinationNamespace"),
     );
   }
 
