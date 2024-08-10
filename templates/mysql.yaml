@@ -97,16 +97,16 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  3306: "myinnodbcluster/mycluster:3306"                       
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
-        open_ports:
-          - number: 3306
-            name: mysql
-            namespace: myinnodbcluster
-            service: mycluster
 
     cluster_manifests:
       argo-ingress:

@@ -109,14 +109,17 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  8088: "{{ $cndi.get_prompt_response(superset_namespace) }}/apache-superset:8088"         
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
-        open_ports:
-          - name: superset
-            number: 8088
+
     cluster_manifests:
       superset-namespace:
           apiVersion: v1

@@ -106,17 +106,17 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  6379: "{{ $cndi.get_prompt_response(default_namespace) }}/redis-replication:6379"                       
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
             
-        open_ports:
-          - name: redisrep
-            number: 6379
-            service: redis-replication
-            namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-
     cluster_manifests:
       redis-secret:
         apiVersion: v1

@@ -65,16 +65,16 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  7687: "neo4j/neo4j:7687"                       
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
-        open_ports:
-          - name: tcp-bolt
-            number: 7687
-            service: neo4j
-            namespace: neo4j
             
     cluster_manifests:
       $cndi.comment(neo4j-auth-secret): Neo4j Credentials

@@ -27,7 +27,7 @@ blocks:
                       service:
                         name: mongodb-replica-set-svc
                         port:
-                          name: mongodb
+                          number: 27017
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -113,15 +113,17 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  27017: "{{ $cndi.get_prompt_response(mongodb_namespace) }}/mongodb-replica-set-svc:27017"        
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam//polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-
-        open_ports:
-          - number: 27017
-            name: mongodb
-            namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
-            service: mongodb-replica-set-svc
+      
     cluster_manifests:
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
