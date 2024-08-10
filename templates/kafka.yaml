@@ -398,6 +398,12 @@ outputs:
       # Strimzi Kafka Deployment Guide
 
       Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, making it easier to deploy and manage Kafka clusters. This guide provides detailed steps to configure, test, and use Kafka with the Strimzi operator.
+      
+      ## Connect to Kafka with kafka-ui
+
+      ![Kafka UI](https://github.com/provectus/kafka-ui) for Apache Kafka is a simple tool that makes your data flows observable, helps find and troubleshoot issues faster and deliver optimal performance.
+      Its lightweight dashboard makes it easy to track key metrics of your Kafka clusters - Brokers, Topics, Partitions, Producers and Consumers.
+      If you installed kafka-ui app , it will automatically be securely connected to your Kafka cluster using SSL/TLS and you wont have to add any cluster certificates
 
       ## Connect to Kafka with a Python or Typescript Library
 
