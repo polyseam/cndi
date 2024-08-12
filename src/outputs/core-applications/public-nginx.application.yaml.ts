@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, CNDIPort } from "src/types.ts";
 import { NGINX_VERSION } from "consts";
 import { deepMerge } from "deps";
 
@@ -19,9 +19,21 @@ const getDefaultControllerConfig = () => ({
   },
 });
 
+type TCPSpec = Record<number, string>;
+
+const getTCPConfig = (open_ports: CNDIPort[]): TCPSpec => {
+  const tcp: TCPSpec = {};
+  open_ports.forEach((port: CNDIPort) => {
+    if (port.disable) return;
+    tcp[port.number] = `${port.namespace}/${port.service}:${port.number}`;
+  });
+  return tcp;
+};
+
 const getBaseValues = (cndi_config: CNDIConfig) =>
   deepMerge({
     controller: getDefaultControllerConfig(),
+    tcp: getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []),
   }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {});
 
 const eksValues = (cndi_config: CNDIConfig) =>
