@@ -397,50 +397,54 @@ outputs:
     kafka: |      
       # Strimzi Kafka Deployment Guide
 
-      Strimzi simplifies the process of running Apache Kafka in a Kubernetes environment, making it easier to deploy and manage Kafka clusters. This guide provides detailed steps to configure, test, and use Kafka with the Strimzi operator.
+      Strimzi simplifies the process of running [Apache Kafka](https://kafka.apache.org/) in a Kubernetes environment, making it easier to deploy and manage Kafka Clusters. This guide provides detailed steps to configure, test, and use Kafka with the [Strimzi Kafka Operator](https://github.com/strimzi/strimzi-kafka-operator).
       
       ## Connect to Kafka with kafka-ui
 
-      ![Kafka UI](https://github.com/provectus/kafka-ui) for Apache Kafka is a simple tool that makes your data flows observable, helps find and troubleshoot issues faster and deliver optimal performance.
+      ![Kafka UI](https://github.com/provectus/kafka-ui) for Apache Kafka is a simple tool to visualize events and activity, and it can be helpful when troubleshooting issues or learning the ropes.
       Its lightweight dashboard makes it easy to track key metrics of your Kafka clusters - Brokers, Topics, Partitions, Producers and Consumers.
       If you installed kafka-ui app , it will automatically be securely connected to your Kafka cluster using SSL/TLS and you wont have to add any cluster certificates
 
-      ## Connect to Kafka with a Python or Typescript Library
+      ## Connect to Kafka with [kafka-python](https://kafka-python.readthedocs.io/en/master/) or [KafkaJS](https://kafka.js.org/docs/getting-started)
 
-      This template uses TLS encryption by default, so you need to extract the necessary security elements to access the kafka cluster.
-      To connect securely to a Kafka cluster a Python or Typescript Library, you will need the cluster certificate.
+      This Template configures TLS encryption out-of-the-box, so you need to extract a generated Certificate from a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/) to access the Kafka Cluster.
+      
+      To connect securely to a Kafka Cluster using a client library like [kafka-python](https://kafka-python.readthedocs.io/en/master/) or [KafkaJS](https://kafka.js.org/docs/getting-started) you will need a Cluster Certificate.
 
       ### Steps to Obtain and Use Certificates
 
-      Once the cluster is deployed, connect to your cluster with the kubeconfig command found in the output of the cndi run. 
+      Once your cluster is deployed, connect to your cluster with your provider's [kubeconfig setup](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) command found in the output of the `cndi run` or `cndi show-outputs`. 
 
       #### Step 1: Retrieve the Certificate
-      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the CA certificate from the Kubernetes secret and save it to `ca.crt`:
+
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the CA certificate from the Kubernetes secret and save it to `ca.crt`:
 
       ```sh
       kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.crt}' | base64 --decode
       ```
-      You can set the value of the cert as an Environment variable to use in your Typescript or python code 
 
-      ## Connect to Kafka Cluster with kafka command line tools
+      You can set the value of the certificate as an Environment variable (eg. `MY_KCLUSTER_CERTIFICATE_CONTENTS`), then pass it in to your library of choice.
 
-      This template uses TLS encryption by default, so you need to extract the necessary security elements to access the cluster.
-      To connect securely to a Kafka cluster using SSL/TLS, you will need the cluster the truststore, and the truststore password.
-      Once the cluster is deployed, you can connect to your cluster with the kubeconfig command found in
-      the output of the cndi run. 
+      ## Connect to Kafka Cluster with [Kafka Command Line Tools](https://github.com/apache/kafka/tree/trunk/bin)
 
+      This Template configures TLS encryption out-of-the-box, so you need to extract a couple generated Certs to connect using the java-based Kafka Command Line Tools:
+
+      To get started, you'll need the cluster the truststore and the truststore password:
+
+      Once your cluster is deployed, connect to your cluster with your provider's [kubeconfig setup](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) command found in the output of the `cndi run` or `cndi show-outputs`, 
+      then carry on to the next step!
 
       ### Steps to Obtain and Use PKCS12 Truststore and Truststore Password
 
       #### Step 1: Retrieve the PKCS12 Truststore
-      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the PKCS12 truststore file from the Kubernetes secret and save it to `ca.p12`:
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the PKCS12 truststore file from the Kubernetes Secret and save it to a local file: `ca.p12`:
 
       ```sh
       kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.p12}' | base64 -d > ca.p12
       ```
 
       #### Step 2: Retrieve the Truststore Password
-      Replace `my-kafka-cluster` with the name of your cluster. Run the following command to get the truststore password from the Kubernetes secret and save it to `ca.password.txt`:
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the truststore password from the Kubernetes secret and save it to `ca.password.txt`:
 
       ```sh
       kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.password}' | base64 --decode > ca.password.txt
@@ -461,15 +465,14 @@ outputs:
 
       Go to the [Apache Kafka download page](https://kafka.apache.org/downloads) and download the latest binary release.
 
-      #### 2. Use Kafka CLI Tools
+      #### 2. Use [Kafka CLI Tools](https://github.com/apache/kafka/)
 
       Set the environment variables to point to your Kafka installation and the truststore files.
       The open source Apache Kafka code includes a series of tools under the bin directory that can be useful to manage and interact with an kafka cluster
-      kafka-console-producer.sh and kafka-console-consumer.sh are part of the Apache Kafka toolbox included with the open source Apache Kafka cli. 
-      They may be found in the bin directory of the unpacked archive.
+      [bin/kafka-console-producer.sh](https://github.com/apache/kafka/blob/trunk/bin/kafka-console-producer.sh) and [bin/kafka-console-consumer.sh](https://github.com/apache/kafka/blob/trunk/bin/kafka-console-consumer.sh) are part of the [Apache Kafka toolbox](https://github.com/apache/kafka/tree/trunk/bin) included with the open source Apache Kafka CLI. 
 
       #### 3. Configure Kafka CLI with SSL authentication
-      To securely connect to your Kafka cluster using SSL, you need the truststore files obtained earlier. Ensure you have `ca.p12` and `ca.password.txt`.
+      To securely connect to your Kafka cluster using TLS (SSL), you need the truststore files obtained earlier. Ensure you have `ca.p12` and `ca.password.txt`.
 
       Create a configuration.properties file pointing to the keystore and truststore with the following entries:
 
@@ -480,7 +483,7 @@ outputs:
       ssl.truststore.type=PKCS12 # truststore type
       ```
       **Replace `/path/to/ca.p12` and `ca.password.txt` with the actual paths and
-      password value to your files.**
+      password value to your files**
 
       #### 4. Produce and Consume Messages
 
@@ -502,4 +505,4 @@ outputs:
       kafka-console-consumer.sh --bootstrap-server my-kafka-cluster.bootstrap.cndi.link:443 --topic my-topic --from-beginning --consumer.config client-ssl.properties
       ```
 
-      This setup ensures secure communication between your Kafka clients and the Kafka cluster using SSL. If you need further assistance, feel free to ask!
+      This setup ensures secure communication between your Kafka clients and the Kafka cluster using TLS (SSL). If you need further assistance, feel free to ask!
