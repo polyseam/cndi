@@ -45,6 +45,7 @@
       "additionalProperties": false,
       "properties": {
         "cndi_config": {
+          "$comment": "Should not reference cndi_config.schema.json because a value in the Template may not be valid until evaluated",
           "type": "object",
           "description": "The cndi_config body template",
           "additionalProperties": false,
@@ -62,6 +63,7 @@
           "type": "object",
           "description": "The dotenv body template",
           "patternProperties": {
+            "additionalProperties": false,
             "^.*$": {
             }
           }
