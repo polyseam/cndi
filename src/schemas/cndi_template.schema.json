@@ -42,6 +42,7 @@
         "env",
         "readme"
       ],
+      "additionalProperties": false,
       "properties": {
         "cndi_config": {
           "type": "object",
@@ -72,6 +73,12 @@
           "patternProperties": {
             "^.*$": {
             }
+          }
+        },
+        "extra_files": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
           }
         }
       }
