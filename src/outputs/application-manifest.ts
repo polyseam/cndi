@@ -45,6 +45,7 @@ export interface CNDIApplicationSpec {
   info?: ArgoAppInfo;
   syncPolicy?: SyncPolicy;
   metadata?: Meta;
+  valuesSchema?: string;
 }
 
 const DEFAULT_SYNC_POLICY = {
