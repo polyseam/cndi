@@ -112,6 +112,7 @@
           "type": "object",
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
           "required": ["nodes"],
+          "additionalProperties": false,
           "properties": {
             "functions": {
               "type": "object",
@@ -122,7 +123,7 @@
                 }
               }
             },
-            "external-dns": {
+            "external_dns": {
               "type": "object",
               "description": "An optional object to configure the Bitnami external-dns Kubernetes controller.",
               "properties": {
@@ -310,14 +311,16 @@
                       "description": "An object which defines the properties of the public nginx ingress controller.",
                       "type": "object",
                       "additionalProperties": false,
-                      "enabled": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "Whether or not to deploy the public ingress-nginx controller."
-                      },
-                      "values": {
-                        "type": "object",
-                        "description": "An object which defines the values to be passed to the public ingress-nginx Helm Chart."
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Whether or not to deploy the public ingress-nginx controller."
+                        },
+                        "values": {
+                          "type": "object",
+                          "description": "An object which defines the values to be passed to the public ingress-nginx Helm Chart."
+                        }
                       }
                     },
                     "private": {
