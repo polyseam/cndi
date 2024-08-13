@@ -4,6 +4,8 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
+import type { CNDIApplicationSpec } from "src/outputs/application-manifest.ts";
+
 export const NODE_KIND = {
   aws: "aws",
   eks: "eks",
@@ -354,16 +356,6 @@ type EnvLines = Array<EnvCommentEntry | EnvValueEntry>;
 interface KubernetesSecretWithStringData extends KubernetesSecret {
   stringData: {
     [key: string]: string;
-  };
-}
-
-interface CNDIApplicationSpec {
-  targetRevision: string;
-  repoURL: string;
-  destinationNamespace: string;
-  chart?: string;
-  values: {
-    [key: string]: unknown;
   };
 }
 
