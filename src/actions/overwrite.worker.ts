@@ -716,7 +716,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             return;
           }
         }
-        
+
         const [manifestContent, filename] = getApplicationManifest(
           releaseName,
           applicationSpec,

@@ -39,7 +39,7 @@
     "@cndi/cdktf/modules/aws-eks.ts": "jsr:@cndi/cdktf@^0.1.2/modules/aws-eks.ts",
     "@cndi/cdktf/modules/aws-iam-assumable-role-with-oidc.ts": "jsr:@cndi/cdktf@^0.1.2/modules/aws-iam-assumable-role-with-oidc.ts",
     "@cndi/cdktf/modules/aws-vpc.ts": "jsr:@cndi/cdktf@^0.1.2/modules/aws-vpc.ts",
-    "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.1",
+    "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.2",
     "@polyseam/inflate-response": "jsr:@polyseam/inflate-response@^1.1.2",
     "@polyseam/silky": "jsr:@polyseam/silky@^1.1.2",
     "@std/assert": "jsr:@std/assert@^0.221.0",
