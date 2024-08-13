@@ -117,7 +117,6 @@ outputs:
             cert-manager.io/cluster-issuer: cluster-issuer
             kubernetes.io/tls-acme: "true"
             $cndi.comment(nginx_annotation_link): "to learn more about available nginx annotations checkout https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations"
-            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
             nginx.ingress.kubernetes.io/limit-rpm: "{{ $cndi.get_prompt_response(rate_limit_rpm) }}" # rate limit in requests per minute
             nginx.ingress.kubernetes.io/limit-burst-multiplier: "{{ $cndi.get_prompt_response(rate_limit_burst) }}" # burst multiplier

@@ -33,7 +33,6 @@ blocks:
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
-        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
         external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
     spec:
       ingressClassName: public
@@ -189,7 +188,6 @@ blocks:
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
-        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
         external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
         # if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname
         # external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com
