@@ -13,9 +13,12 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.43
+          deno-version: v1.45
 
       - run: deno lint
+
+      - name: Install cndi dependency binaries
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux/in/* /home/runner/.cndi/bin
 
       - run: deno task test
 
@@ -28,7 +31,7 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.43
+          deno-version: v1.45
 
       - run: deno task build
           

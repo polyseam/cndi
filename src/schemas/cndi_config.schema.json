@@ -17,7 +17,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "eks"]
+            "enum": ["microk8s", "eks", "clusterless"]
           }
         }
       }
@@ -32,7 +32,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "gke"]
+            "enum": ["microk8s", "gke", "clusterless"]
           }
         }
       }
@@ -47,7 +47,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "aks"]
+            "enum": ["microk8s", "aks", "clusterless"]
           }
         }
       }
@@ -88,7 +88,7 @@
     "distribution": {
       "type": "string",
       "description": "The distribution of Kubernetes to use for the infrastructure.",
-      "enum": ["microk8s", "eks", "gke", "aks"]
+      "enum": ["microk8s", "eks", "gke", "aks", "clusterless"]
     },
     "infrastructure": {
       "type": "object",
@@ -112,7 +112,43 @@
           "type": "object",
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
           "required": ["nodes"],
+          "additionalProperties": false,
           "properties": {
+            "functions": {
+              "type": "object",
+              "properties": {
+                "hostname": {
+                  "type": "string",
+                  "description": "The hostname on which to make your CNDI Functions available."
+                }
+              }
+            },
+            "external_dns": {
+              "type": "object",
+              "description": "An optional object to configure the Bitnami external-dns Kubernetes controller.",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether or not to deploy the external-dns controller."
+                },
+                "provider": {
+                  "type": "string",
+                  "description": "The DNS provider the external-dns controller should send updates to."
+                },
+                "domain_filters": {
+                  "description": "An array of domain name filters which the external-dns controller should apply updates to.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "values": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false
+            },
             "reloader": {
               "type": "object",
               "description": "An optional object which permits disabling the reloader Kubernetes controller.",
@@ -175,11 +211,11 @@
               "description": "An array of ports to open on the cluster.",
               "items": {
                 "type": "object",
-                "description": "A port to open or close on the cluster.",
+                "description": "A port to open or close for TCP traffic into the cluster.",
                 "properties": {
                   "number": {
                     "type": "number",
-                    "description": "The port number to open or close.",
+                    "description": "The number of the port to open TCP traffic for.",
                     "minimum": 1,
                     "maximum": 65535
                   },
@@ -189,6 +225,14 @@
                   "disable": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "description": "The Kubernetes Namespace of the Service to open the port for."
+                  },
+                  "service": {
+                    "type": "string",
+                    "description": "The Kubernetes Service to open the port for."
                   }
                 }
               }
@@ -254,6 +298,50 @@
                   }
                 }
               }
+            },
+            "ingress": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "nginx": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "public": {
+                      "description": "An object which defines the properties of the public nginx ingress controller.",
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": true,
+                          "description": "Whether or not to deploy the public ingress-nginx controller."
+                        },
+                        "values": {
+                          "type": "object",
+                          "description": "An object which defines the values to be passed to the public ingress-nginx Helm Chart."
+                        }
+                      }
+                    },
+                    "private": {
+                      "type": "object",
+                      "description": "An object which defines the properties of the private nginx ingress controller.",
+                      "properties": {
+                        "additionalProperties": false,
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Whether or not to deploy the private ingress-nginx controller."
+                        },
+                        "values": {
+                          "type": "object",
+                          "description": "An object which defines the values to be passed to the private ingress-nginx Helm Chart."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -285,6 +373,20 @@
                 "name": {
                   "type": "string",
                   "description": "The name of the Kubernetes resource to deploy."
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "The namespace of the Kubernetes resource to deploy."
+                },
+                "labels": {
+                  "type": "object",
+                  "description": "The labels of the Kubernetes resource to deploy.",
+                  "additionalProperties": true
+                },
+                "annotations": {
+                  "type": "object",
+                  "description": "The annotations of the Kubernetes resource to deploy.",
+                  "additionalProperties": true
                 }
               }
             },
@@ -305,6 +407,14 @@
         "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
           "type": "object",
           "required": ["targetRevision", "destinationNamespace", "repoURL"],
+          "oneOf": [
+            {
+              "required": ["chart"]
+            },
+            {
+              "required": ["path"]
+            }
+          ],
           "properties": {
             "targetRevision": {
               "type": "string",
@@ -327,6 +437,8 @@
               "description": "The path to the Helm Chart from the root of the git-hosted repository."
             },
             "values": {
+            },
+            "syncOptions": {
             }
           }
         }

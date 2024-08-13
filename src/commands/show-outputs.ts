@@ -34,17 +34,17 @@ const showOutputsCommand = new Command()
   .env(
     "SEALED_SECRETS_PRIVATE_KEY=<value:string>",
     "Private key used to encrypt your sealed secrets.",
-    { required: true },
+    { required: false },
   )
   .env(
     "SEALED_SECRETS_PUBLIC_KEY=<value:string>",
     "Public key used to encrypt your sealed secrets.",
-    { required: true },
+    { required: false },
   )
   .env(
     "ARGOCD_ADMIN_PASSWORD=<value:string>",
     "Password used to authenticate to the ArgoCD UI.",
-    { required: true },
+    { required: false },
   )
   .env(
     "GIT_USERNAME=<value:string>",
@@ -75,7 +75,7 @@ const showOutputsCommand = new Command()
     const pathToTerraformBinary = getPathToTerraformBinary();
 
     try {
-      setTF_VARs(); // set TF_VARs using CNDI's .env variables
+      await setTF_VARs(options.path); // set TF_VARs using CNDI's .env variables
     } catch (setTF_VARsError) {
       console.log(setTF_VARsError.message);
       await emitExitEvent(setTF_VARsError.cause);
@@ -121,8 +121,8 @@ const showOutputsCommand = new Command()
         ccolors.error("failed to spawn 'terraform init'"),
       );
       console.log(ccolors.caught(err));
-      await emitExitEvent(1402);
-      Deno.exit(1402);
+      await emitExitEvent(1700);
+      Deno.exit(1700);
     }
 
     try {
@@ -170,8 +170,8 @@ const showOutputsCommand = new Command()
         ccolors.error("failed to spawn 'terraform output'"),
       );
       console.log(ccolors.caught(err));
-      await emitExitEvent(1403);
-      Deno.exit(1403);
+      await emitExitEvent(1701);
+      Deno.exit(1701);
     }
     await emitExitEvent(0);
   });

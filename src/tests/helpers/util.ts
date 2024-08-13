@@ -1,4 +1,4 @@
-import { assert } from "test-deps";
+import { assert, walk } from "test-deps";
 import { path } from "deps";
 
 function areSetsEqual(setA: Set<string>, setB: Set<string>) {
@@ -16,10 +16,11 @@ const assertSetEquality = (setA: Set<string>, setB: Set<string>) =>
 
 const hasSameFilesAfter = async (
   operationFn: () => void,
+  dir = ".",
 ) => {
   const originalContents = new Set<string>();
   // read the current directory entries (files, symlinks, and directories)
-  for await (const dirEntry of Deno.readDir(".")) {
+  for await (const dirEntry of Deno.readDir(dir)) {
     originalContents.add(dirEntry.name);
   }
   console.log("originalContents", originalContents);
@@ -28,13 +29,41 @@ const hasSameFilesAfter = async (
 
   const afterContents = new Set<string>();
   // read the current directory entries after "cndi init" has ran
-  for await (const afterDirEntry of Deno.readDir(".")) {
+  for await (const afterDirEntry of Deno.readDir(dir)) {
     afterContents.add(afterDirEntry.name);
   }
   console.log("afterContents", afterContents);
 
   return areSetsEqual(originalContents, afterContents);
 };
+
+// Function to list all file paths in the current directory including subfolders
+async function listAllFilePaths(directory: string): Promise<string[]> {
+  const filePaths: string[] = [];
+
+  for await (const entry of walk(directory)) {
+    if (entry.isFile) {
+      filePaths.push(entry.path);
+    }
+  }
+
+  return filePaths;
+}
+
+export async function listChangedFilePaths(
+  operationFn: () => Promise<void>,
+  dir = ".",
+): Promise<Array<string>> {
+  const originalContents = await listAllFilePaths(dir);
+  await operationFn();
+  const afterContents = await listAllFilePaths(dir);
+  return afterContents.filter((path) => !originalContents.includes(path));
+}
+
+export const setsAreEquivalent = <T>(
+  a: Set<T>,
+  b: Set<T>,
+): boolean => (a.isSubsetOf(b) && b.isSubsetOf(a));
 
 async function ensureResourceNamesMatchFileNames() {
   //assert(status.success);

@@ -12,7 +12,14 @@ import {
 
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
-import { CNDIConfig, CNDIPort, NodeRole, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  CNDIDistribution,
+  CNDIPort,
+  CNDITaintEffect,
+  NodeRole,
+  TFBlocks,
+} from "src/types.ts";
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
 import emitTelemetryEvent from "src/telemetry/telemetry.ts";
@@ -89,6 +96,22 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
         cause: 500,
       },
     );
+  }
+};
+
+const getTaintEffectForDistribution = (
+  effect: CNDITaintEffect,
+  distribution: CNDIDistribution,
+) => {
+  if (distribution === "aks") {
+    return effect;
+  } else {
+    const effectMap = {
+      "NoSchedule": "NO_SCHEDULE",
+      "PreferNoSchedule": "PREFER_NO_SCHEDULE",
+      "NoExecute": "NO_EXECUTE",
+    };
+    return effectMap[effect];
   }
 };
 
@@ -327,6 +350,54 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
+async function copyDir(
+  src: string,
+  dest: string,
+): Promise<void | Error> {
+  try {
+    // create the destination directory
+    // fail and return if error if the destination directory already exists
+    await Deno.mkdir(dest, { recursive: true });
+    for await (const entry of Deno.readDir(src)) {
+      const srcPath = `${src}/${entry.name}`;
+      const destPath = `${dest}/${entry.name}`;
+      if (entry.isFile) {
+        await Deno.copyFile(srcPath, destPath);
+      } else if (entry.isDirectory) {
+        await copyDir(srcPath, destPath);
+      }
+    }
+  } catch (error) {
+    return error;
+  }
+}
+
+async function stageDirectory(
+  relativePathOut: string,
+  relativePathIn: string,
+): Promise<{ success: true } | Error> {
+  try {
+    const outputPath = path.join(await getStagingDir(), relativePathOut);
+    const inputPath = path.join(Deno.cwd(), relativePathIn);
+    await copyDir(inputPath, outputPath);
+  } catch (error) {
+    return error;
+  }
+  return { success: true };
+}
+
+async function checkDirectoryForFileSuffix(directory: string, suffix: string) {
+  try {
+    for await (const entry of walk(directory)) {
+      if (entry.isFile && entry.name.endsWith(suffix)) {
+        return true;
+      }
+    }
+  } catch {
+    // directory doesn't exist
+  }
+  return false;
+}
 type CDKTFAppConfig = {
   outdir: string;
 };
@@ -456,12 +527,6 @@ const getCndiInstallPath = (): string => {
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 };
 
-function base10intToHex(decimal: number): string {
-  // if the int8 in hex is less than 2 characters, prepend 0
-  const hex = decimal.toString(16).padStart(2, "0");
-  return hex;
-}
-
 function getUserDataTemplateFileString(
   role?: NodeRole,
   doBase64Encode?: boolean,
@@ -516,16 +581,6 @@ function replaceRange(
   return s.substring(0, start) + substitute + s.substring(end);
 }
 
-function getSecretOfLength(len = 32): string {
-  if (len % 2) {
-    throw new Error("password length must be even");
-  }
-
-  const values = new Uint8Array(len / 2);
-  crypto.getRandomValues(values);
-  return Array.from(values, base10intToHex).join("");
-}
-
 function useSshRepoAuth(): boolean {
   return (
     !!Deno.env.get("GIT_SSH_PRIVATE_KEY")?.length && !Deno.env.get("GIT_TOKEN")
@@ -561,9 +616,10 @@ function absolutifyPath(p: string): string {
   return path.resolve(p);
 }
 
-const getProjectDirectoryFromFlag = (value: string | boolean) => {
+// used to take a user provided filesystem path and return the absolute path
+const getProjectDirectoryFromFlag = (value: string): string => {
   // only executed if the flag is provided
-  return typeof value === "boolean" ? Deno.cwd() : absolutifyPath(value);
+  return !value ? Deno.cwd() : absolutifyPath(value);
 };
 
 function getPathToCndiBinary() {
@@ -576,10 +632,17 @@ function getPathToCndiBinary() {
   return path.join(CNDI_HOME, "bin", `cndi${suffix}`);
 }
 
+function isSlug(input: string): boolean {
+  const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  return slugPattern.test(input);
+}
+
 export {
+  checkDirectoryForFileSuffix,
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
+  copyDir,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
@@ -590,13 +653,14 @@ export {
   getPathToTerraformBinary,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
-  getSecretOfLength,
   getStagingDir,
+  getTaintEffectForDistribution,
   getTFData,
   getTFModule,
   getTFResource,
   getUserDataTemplateFileString,
   getYAMLString,
+  isSlug,
   loadCndiConfig,
   loadJSONC,
   loadYAML,
@@ -606,6 +670,7 @@ export {
   replaceRange,
   resolveCNDIPorts,
   sha256Digest,
+  stageDirectory,
   stageFile,
   useSshRepoAuth,
 };

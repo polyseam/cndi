@@ -16,13 +16,11 @@ import { KNOWN_TEMPLATES } from "consts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
-import { createTerraformStatePassphrase } from "src/initialize/terraformStatePassphrase.ts";
-import { createArgoUIAdminPassword } from "src/initialize/argoUIAdminPassword.ts";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
+
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 // Error Domain: 15XX
@@ -49,6 +47,7 @@ type EchoCreateOptions = {
   deploymentTargetLabel?: string;
   responsesFile: string;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -108,7 +107,7 @@ const createCommand = new Command()
   )
   .option(
     "-o, --output <output:string>",
-    "Output directory",
+    "Destination for new cndi project files.",
     getProjectDirectoryFromFlag,
   )
   .option("--debug, -d", "Enable debug mode", { hidden: true })
@@ -118,9 +117,12 @@ const createCommand = new Command()
   )
   .option(
     "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "A git ref pointing to the version of the cndi codebase to use in the 'cndi run' workflow",
-    { hidden: true },
+    "Specify a ref to build a cndi workflow with",
+    {
+      hidden: true,
+    },
   )
+  .option("--enable-pr-checks", "Enable PR checks", { hidden: true })
   .action(async (options, slug) => {
     echoCreate(options, slug);
     const skipPush = options.skipPush;
@@ -157,7 +159,7 @@ const createCommand = new Command()
     // default to repo component of slug
     const [owner, repo] = slug.split("/"); // by this point, slug is valid
 
-    let destinationDirectory = options.output ?? path.join(Deno.cwd(), repo);
+    let destinationDirectory = options?.output || path.join(Deno.cwd(), repo);
 
     if (interactive && !options.output) {
       destinationDirectory = await PromptTypes.Input.prompt({
@@ -311,7 +313,9 @@ const createCommand = new Command()
 
     let project_name = repo;
 
-    if (interactive) {
+    if (overrides?.project_name) {
+      project_name = `${overrides.project_name}`;
+    } else if (interactive) {
       project_name = await PromptTypes.Input.prompt({
         message: ccolors.prompt("Please enter a name for your CNDI project:"),
         default: project_name,
@@ -360,12 +364,6 @@ const createCommand = new Command()
       throw new Error("template is undefined");
     }
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = await createSealedSecretsKeys();
-
-    const terraformStatePassphrase = createTerraformStatePassphrase();
-    const argoUIAdminPassword = createArgoUIAdminPassword();
-
     let templateResult;
 
     try {
@@ -385,37 +383,42 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    const deployment_target_provider =
-      templateResult.responses.deployment_target_provider;
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    const cndi_config = templateResult.files["cndi_config.yaml"];
-    const env = templateResult.files[".env"];
-    const readme = templateResult.files["README.md"];
+    for (const [key, value] of Object.entries(templateResult.files)) {
+      // .env must be extended using generated values
+      if (key === ".env") {
+        const env = value;
 
-    await stageFile("cndi_config.yaml", cndi_config);
+        // GENERATE ENV VARS
+        const sealedSecretsKeys = isClusterless
+          ? null
+          : await createSealedSecretsKeys();
+
+        const doSSH =
+          templateResult?.responses?.deployment_target_distribution ===
+            "microk8s";
+
+        const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+        const dotEnvOptions = {
+          sshPublicKey,
+          sealedSecretsKeys,
+          debugMode: !!options.debug,
+        };
+
+        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+      } else {
+        await stageFile(key, value);
+      }
+    }
 
     await stageFile(
       "cndi_responses.yaml",
       YAML.stringify(templateResult.responses),
     );
-
-    const shouldSkipSSH =
-      templateResult?.responses?.deployment_target_distribution !== "microk8s";
-    const sshPublicKey = await createSshKeys(
-      shouldSkipSSH,
-    );
-
-    const cndiGeneratedValues = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      terraformStatePassphrase,
-      argoUIAdminPassword,
-      debugMode: !!options.debug,
-    };
-
-    await stageFile(".env", getFinalEnvString(env, cndiGeneratedValues));
-
-    await stageFile("README.md", readme);
 
     await stageFile(
       path.join(".vscode", "settings.json"),
@@ -423,14 +426,6 @@ const createCommand = new Command()
     );
 
     await stageFile(".gitignore", getGitignoreContents());
-
-    await stageFile(
-      path.join(".github", "workflows", "cndi-run.yaml"),
-      getCndiRunGitHubWorkflowYamlContents(
-        options.workflowSourceRef,
-        deployment_target_provider === "dev",
-      ),
-    );
 
     const git_credentials_mode = templateResult.responses.git_credentials_mode;
 
@@ -461,8 +456,8 @@ const createCommand = new Command()
         ),
         ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
       );
-      await emitExitEvent(1507);
-      Deno.exit(1507);
+      await emitExitEvent(1506);
+      Deno.exit(1506);
     }
 
     await persistStagedFiles(destinationDirectory);
@@ -470,7 +465,9 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      skipPush,
+      workflowSourceRef: options.workflowSourceRef,
+      skipPush: !!skipPush,
+      enablePrChecks: !!options.enablePrChecks,
     });
   });
 

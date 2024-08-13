@@ -17,7 +17,6 @@ import runCommand from "src/commands/run.ts";
 import createCommand from "src/commands/create.ts";
 import initCommand from "src/commands/init.ts";
 import { overwriteCommand } from "src/commands/overwrite.ts";
-import terraformCommand from "src/commands/terraform.ts";
 import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";
@@ -63,9 +62,9 @@ export default async function cndi() {
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
     );
-    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 1));
-    await emitExitEvent(1);
-    Deno.exit(1);
+    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 10));
+    await emitExitEvent(10);
+    Deno.exit(10);
   }
 
   return await new Command()
@@ -78,7 +77,6 @@ export default async function cndi() {
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)
-    .command("terraform", terraformCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
     .command("install", installCommand)

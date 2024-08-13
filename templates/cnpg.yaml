@@ -2,7 +2,7 @@ blocks:
  - name: deploy_pgadmin_application_blk
    content:
     targetRevision: 1.23.3
-    destinationNamespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+    destinationNamespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
     repoURL: "https://helm.runix.net"
     chart: pgadmin4
     values:
@@ -20,9 +20,164 @@ blocks:
             Group: "Servers"
             Port: 5432
             SSLMode: "prefer"
-            Username: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-            Host: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
-            MaintenanceDB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
+            Username: "{{ $cndi.get_prompt_response(postgresql_user) }}"
+            Host: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
+            MaintenanceDB: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+ - name: deploy_jupyter_notebook_ingress_blk
+   content:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: jupyter-notebook-ingress
+      namespace: "jupyter-notebook"
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        kubernetes.io/tls-acme: 'true'
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+        external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
+    spec:
+      ingressClassName: public
+      tls:
+        - hosts:
+            - "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
+          secretName: cluster-issuer-private-key-jupyter
+      rules:
+        - host: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: notebook
+                    port:
+                      number: 8888
+ - name: deploy_jupyter_notebook_namespace_blk
+   content:
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: jupyter-notebook             
+ - name: deploy_jupyter_notebook_deployment_blk
+   content:
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: notebook
+      namespace: jupyter-notebook
+      labels:
+        app: jupyter-notebook
+    spec:
+      selector:
+        matchLabels:
+          app: jupyter-notebook
+      template:
+        metadata:
+          labels:
+            app: jupyter-notebook
+        spec:  
+          containers:
+          - name: jupyter
+            image: tensorflow/tensorflow:2.15.0-jupyter
+            resources:
+              requests:
+                memory: "4500Mi"
+                cpu: "1"
+              limits:
+                memory: "4500Mi"
+                cpu: "1"            
+            ports:
+            - containerPort: 8888
+            env:
+            - name: POSTGRESQL_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-db-credentials
+                  key: dbname
+            - name: POSTGRESQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-db-credentials
+                  key: host
+            - name: POSTGRESQL_FQDN
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-db-credentials
+                  key: fqdn
+            - name: POSTGRESQL_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-db-credentials
+                  key: password
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-db-credentials
+                  key: username
+            - name: JUPYTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jupyter-notebook-login-secret
+                  key: jupyter-password
+            - name: JUPYTER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jupyter-notebook-login-secret
+                  key: jupyter-token
+            volumeMounts:
+            - mountPath: /etc/jupyter
+              name: jupyter-config
+            - mountPath: /home/jovyan/work
+              name: jupyter-storage
+            command: ["sh", "-c", "echo \"c.NotebookApp.token = '${JUPYTER_PASSWORD}'\" > /etc/jupyter/jupyter_notebook_config.py && echo \"c.NotebookApp.password = '${JUPYTER_PASSWORD}'\" >> /etc/jupyter/jupyter_notebook_config.py && echo \"c.NotebookApp.allow_password_change = False\" >> /etc/jupyter/jupyter_notebook_config.py && jupyter notebook --config=/etc/jupyter/jupyter_notebook_config.py --ip=0.0.0.0 --port=8888 --no-browser --allow-root"]
+          volumes:
+          - name: jupyter-config
+            emptyDir: {}
+          - name: jupyter-storage
+            emptyDir: {}  
+ - name: deploy_jupyter_notebook_service_blk
+   content:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      namespace: jupyter-notebook
+      labels: 
+        app: jupyter-notebook
+      name: notebook
+    spec:
+      ports:
+      - port: 8888
+        targetPort: 8888
+      selector: 
+        app: jupyter-notebook
+      type: ClusterIP
+
+ - name: deploy_jupyter_notebook_postgresql_db_credentials_blk
+   content:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: postgresql-db-credentials
+      namespace: jupyter-notebook
+    type: kubernetes.io/basic-auth
+    stringData:
+      username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
+      password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
+      dbname: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DB)
+      host: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_HOST)
+      fqdn: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_FQDN)
+
+ - name: deploy_jupyter_notebook_login_secret_blk
+   content:    
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: jupyter-notebook-login-secret
+      namespace: jupyter-notebook
+    type: Opaque
+    stringData:
+      jupyter-password: $cndi_on_ow.seal_secret_from_env_var(JUPYTER_PASSWORD)
+      jupyter-token: $cndi_on_ow.seal_secret_from_env_var(JUPYTER_TOKEN)
 
  - name: deploy_pgadmin_ingress_blk
    content:
@@ -30,7 +185,7 @@ blocks:
     kind: Ingress
     metadata:
       name: pgadmin-ingress
-      namespace: postgres
+      namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
@@ -43,7 +198,7 @@ blocks:
       tls:
         - hosts:
             - "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
-          secretName: cluster-issuer-private-key
+          secretName: cluster-issuer-private-key-pgadmin
       rules:
         - host: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
           http:
@@ -61,16 +216,16 @@ blocks:
     kind: Secret
     metadata:
       name: pgadmin-login-password-secret
-      namespace: "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
+      namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
     type: Opaque
     stringData:
       password: $cndi_on_ow.seal_secret_from_env_var(PGADMIN_LOGIN_PASSWORD)
 
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
       
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
    
   - name: deploy_argocd_ingress
@@ -130,7 +285,7 @@ prompts:
       - true
 
   - name: pgadmin_login_password
-    default: postgres
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What password do you want to use for your PgAdmin login ?
     type: Secret
@@ -139,55 +294,92 @@ prompts:
       - ==
       - true
 
-  - name: deploy_postgres_ingress
+  - name: deploy_postgresql_ingress
     default: true
     message: >-
-      Do you want to expose PostgreSQL to the web?
+      Do you want to expose your PostgreSQL database to the web?
     type: Confirm
 
-  - name: postgres_hostname
+  - name: postgresql_hostname
     default: postgres.example.com
     message: >-
-      What hostname should PostgreSQL be accessible at?
+      What hostname should your PostgreSQL database be accessible at?
     type: Input
     validators:
       - hostname # FQDN
       - min_length: 3
     condition:
-      - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+      - "{{ $cndi.get_prompt_response(deploy_postgresql_ingress) }}"
       - ==
       - true
 
-  - name: postgres_admin_username
-    default: postgres
+  - name: postgresql_user
+    default: mypostgresuser
     message: >-
       What username should be used for your PostgreSQL admin user?
     type: Input
 
-  - name: postgres_admin_password
-    default: postgres
+  - name: postgresql_user_password
+    default: '{{ $cndi.get_random_string(12) }}'
     message: >-
       What will be your default password for your PostgreSQL admin user?
     type: Secret
 
-  - name: postgres_database_name
-    default: postgres
+  - name: postgresql_database_name
+    default: mypostgresdb
     message: >-
       What will be the name for your PostgreSQL database?
     type: Input
 
-  - name: postgres_namespace
+  - name: postgresql_namespace
     default: postgres
     message: >-
       What namespace should PostgreSQL be deployed in?
     type: Input
 
-  - name: postgres_cluster_name
+  - name: postgresql_cluster_name
     default: postgres-cluster
     message: >-
       What will be the name for your PostgreSQL cluster?
     type: Input
+  
+  - name: deploy_jupyter_notebook_manifests
+    default: true
+    message: >-
+      Do you want to install jupyterhub, a web-based data analytics tool?
+    type: Confirm
 
+  - name: jupyter_notebook_login_password
+    default: '{{ $cndi.get_random_string(12) }}'
+    message: >-
+      What will be your password for your Jupyter notebook instance?
+    type: Secret
+    condition:
+    - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+    - ==
+    - true
+
+  - name: deploy_jupyter_notebook_ingress
+    default: true
+    message: >-
+      Do you want to expose your Jupyter notebook instance database to the web?
+    type: Confirm
+    condition:
+    - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+    - ==
+    - true
+
+  - name: jupyter_notebook_hostname
+    default: jupyter.example.com
+    message: >-
+      What hostname should your jupyter notebook be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_ingress) }}"
+      - ==
+      - true
 outputs:
   cndi_config:
     cndi_version: v2
@@ -197,47 +389,47 @@ outputs:
     # this is a Template comment
     infrastructure:
       cndi:
-        external_dns:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-            args:
-              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                tcp: 
+                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                                            
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-        open_ports:
-          - number: 5432
-            name: postgres
-            namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
-            service: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
     cluster_manifests:
       external-dns-secret: 
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
-
       cnpg-namespace:
         apiVersion: v1
         kind: Namespace
         metadata:
-          name: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          name: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
       $cndi.comment(postgres-cluster): Configure your CNPG Cluster here
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
         metadata:
-          name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}"
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
           annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
           imageName: 'ghcr.io/cloudnative-pg/postgresql:16'
           instances: 3
@@ -249,46 +441,48 @@ outputs:
           postgresql:
             pg_hba:
               - >-
-                hostssl {{ $cndi.get_prompt_response(postgres_database_name) }} {{
-                $cndi.get_prompt_response(postgres_admin_username) }} all password
+                hostssl {{ $cndi.get_prompt_response(postgresql_database_name) }} {{
+                $cndi.get_prompt_response(postgresql_user) }} all password
           bootstrap:
             initdb:
-              database: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
-              owner: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
+              database: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+              owner: "{{ $cndi.get_prompt_response(postgresql_user) }}"
               secret:
                 name: cnpg-database-user-auth-secret
+              postInitApplicationSQL:
+                - CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
           superuserSecret:
             name: cnpg-cluster-superuser-auth-secret
 
-      $cndi.comment(postgres-auth-secret): Postgres Credentials
+      $cndi.comment(postgres-auth-secret): PostgresqlCredentials
       cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: cnpg-cluster-superuser-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
 
       cnpg-cluster-user-auth-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: cnpg-database-user-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
 
       cnpg-connection-string-secret:
         apiVersion: v1
         kind: Secret
         metadata:
           name: cnpg-connection-string-secret
-          namespace: "{{ $cndi.get_prompt_response(postgres_namespace) }}"
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
         type: Opaque
         stringData:
           connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
@@ -301,7 +495,7 @@ outputs:
             - true
 
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -315,16 +509,16 @@ outputs:
             - true
 
       postgres-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: postgres-cluster-ingress
             ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(postgres_hostname) }}"
-            service_name: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+            hostname: "{{ $cndi.get_prompt_response(postgresql_hostname) }}"
+            service_name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
             service_port: 5432
             namespace: postgres
           condition:
-            - "{{ $cndi.get_prompt_response(deploy_postgres_ingress) }}"
+            - "{{ $cndi.get_prompt_response(deploy_postgresql_ingress) }}"
             - ==
             - true
 
@@ -334,6 +528,45 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_ingress) }}"
             - ==
             - true
+          
+      $cndi.comment(jupyter-notebook): Here are your jupyter-notebook resources
+      jupyter-notebook-ingress:
+        $cndi.get_block(deploy_jupyter_notebook_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_ingress) }}"
+            - ==
+            - true      
+      
+      jupyter-notebook-jupyter-notebook-namespace:
+        $cndi.get_block(deploy_jupyter_notebook_namespace_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+            - ==
+            - true    
+      jupyter-notebook-jupyter-notebook-login-secret:
+        $cndi.get_block(deploy_jupyter_notebook_login_secret_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+            - ==
+            - true      
+      jupyter-notebook-postgresql-db-credentials-secret:
+        $cndi.get_block(deploy_jupyter_notebook_postgresql_db_credentials_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+            - ==
+            - true      
+      jupyter-notebook-service:
+        $cndi.get_block(deploy_jupyter_notebook_service_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+            - ==
+            - true      
+      jupyter-notebook-deployment:
+        $cndi.get_block(deploy_jupyter_notebook_deployment_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_jupyter_notebook_manifests) }}"
+            - ==
+            - true      
 
     applications:
       cnpg:
@@ -351,30 +584,44 @@ outputs:
             - true
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
-      {}
-
-    $cndi.comment(neo4j-heading): Postgres Connection Parameters
-    POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgres_database_name) }}"
-    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgres_admin_password) }}"
-    POSTGRES_PROTOCOL: postgresql
-    POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgres_cluster_name) }}-rw"
+ 
+    $cndi.comment(Postgres-heading): Postgresql Connection Parameters
+    POSTGRESQL_DB: "{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(postgresql_user) }}"
+    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_user_password) }}"
     POSTGRESQL_PORT: "5432"
-    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgres_admin_username) }}:{{ $cndi.get_prompt_response(postgres_admin_password) }}@{{ $cndi.get_prompt_response(postgres_hostname) }}:5432/{{ $cndi.get_prompt_response(postgres_database_name) }}"
-    POSTGRESQL_CLUSTER_SUPERUSER: "{{ $cndi.get_prompt_response(postgres_admin_username) }}"
-
+    POSTGRESQL_HOST:  "{{ $cndi.get_prompt_response(postgresql_hostname) }}"
+    POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgresql_user) }}:{{ $cndi.get_prompt_response(postgresql_user_password) }}@{{ $cndi.get_prompt_response(postgresql_hostname) }}:5432/{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+    POSTGRESQL_CLUSTER_SUPERUSER: postgres
+    POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
+    PSQL_CONNECTION_COMMAND: "psql -h {{ $cndi.get_prompt_response(postgresql_hostname) }} -p 5432 -U {{ $cndi.get_prompt_response(postgresql_user) }} -d {{ $cndi.get_prompt_response(postgresql_database_name) }}"
+ 
+    $cndi.comment(fqdn-postgresql-connection-string-heading): FQDN Connection Parameters
+    FQDN_POSTGRESQL_CONNECTION_STRING: "postgresql://{{ $cndi.get_prompt_response(postgresql_user) }}:{{ $cndi.get_prompt_response(postgresql_user_password) }}@{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432/{{ $cndi.get_prompt_response(postgresql_database_name) }}"
+    POSTGRESQL_FQDN: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw.{{ $cndi.get_prompt_response(postgresql_namespace) }}.svc.cluster.local"
+  
     $cndi.comment(cnpg-heading): PgAdmin Login Parameters
     PGADMIN_LOGIN_PASSWORD:  "{{ $cndi.get_prompt_response(pgadmin_login_password) }}"
     PGADMIN_LOGIN_EMAIL:  "{{ $cndi.get_prompt_response(pgadmin_login_email) }}"
+
+    $cndi.comment(jupyter-notebook-heading): Jupyter Notebook Login Parameters
+    JUPYTER_PASSWORD:  "{{ $cndi.get_prompt_response(jupyter_notebook_login_password) }}"
+    JUPYTER_TOKEN:   "{{ $cndi.get_random_string(24) }}"
+
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
     cnpg: |
       # CloudNativePG Deployment Guide
@@ -406,13 +653,13 @@ outputs:
 
       #### Connect to the Database
 
-      Execute the command below, replacing placeholders with your connection details. You'll be prompted for the password.
+      Execute the command below, replacing placeholders with your postgresql host, user and database name. You'll be prompted for the password.
 
       ```bash
-      psql -h <hostname> -p <port> -U <username> -d <database>
+      psql -h <hostname> -p 5432 -U <username> -d <database>
       ```
 
-      The POSTGRESQL_CONNECTION_STRING can be found in the .env file.
+      The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the .env file.
 
       ### Using PgAdmin
 

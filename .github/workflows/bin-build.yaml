@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - 'main'
+env: # this is a Read-Only token for Public Repositories see: https://github.com/polyseam/cndi/pull/863
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 jobs:
   bin-build-test-ubuntu:
     runs-on: ubuntu-latest
@@ -13,7 +15,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.43
+          deno-version: v1.45
       - name: deno build-linux
         run: deno task build-linux
       - name: linux cndi --help
@@ -26,7 +28,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.43
+          deno-version: v1.45
       - name: deno build-mac
         run: deno task build-mac
       - name: mac cndi --help
@@ -39,7 +41,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.43
+          deno-version: v1.45
       - name: deno build-win
         run: deno task build-win
       - name: win cndi --help

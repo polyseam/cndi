@@ -9,7 +9,7 @@ import {
 
 import { BuiltInValidators } from "./util/validation.ts";
 import { CNDITemplateComparators } from "./util/conditions.ts";
-import { makeAbsolutePath } from "./util/fs.ts";
+import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
 import type {
   CNDITemplatePromptResponsePrimitive,
@@ -33,6 +33,17 @@ type BuiltInValidator = keyof typeof BuiltInValidators;
 const templatesLabel = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
+
+const ALPHANUMERIC_CHARSET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+function getRandomString(length = 32, charset = ALPHANUMERIC_CHARSET) {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => charset[byte % charset.length]).join("");
+}
+
+// TODO: 1200 codes
 
 /**
  * Options for `useTemplate`.
@@ -103,15 +114,17 @@ interface TemplateObject {
     cndi_config: Record<string, unknown>;
     env: Record<string, unknown>;
     readme: Record<string, unknown>;
+    extra_files: Record<string, string>;
   };
 }
 
-type CNDIProvider = "aws" | "azure" | "gcp";
+type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
 
 const distributionMap = {
   aws: "eks",
   azure: "aks",
   gcp: "gke",
+  dev: "microk8s",
 };
 
 function fixUndefinedDistributionIfRequired(config: string): string {
@@ -434,6 +447,19 @@ function resolveCNDIPromptCondition(
   }
 }
 
+function literalizeGetRandomStringCalls(input: string): string {
+  let output = removeWhitespaceBetweenBraces(input);
+  const get_random_string_regexp =
+    /\{\{\s*\$cndi\.get_random_string\((\d*)\)\s*\}\}/g;
+
+  output = output.replace(get_random_string_regexp, (_match, len) => {
+    const length = parseInt(len) || 32;
+    return getRandomString(length);
+  });
+
+  return output;
+}
+
 async function presentCliffyPrompt(
   promptDefinition: CNDITemplateStaticPromptEntry,
 ) {
@@ -448,6 +474,17 @@ async function presentCliffyPrompt(
 
   if (!shouldShowPrompt) {
     return;
+  }
+
+  if (promptDefinition.default) {
+    if (typeof promptDefinition.default === "string") {
+      promptDefinition.default = literalizeGetPromptResponseCalls(
+        promptDefinition.default,
+      );
+      promptDefinition.default = literalizeGetRandomStringCalls(
+        promptDefinition.default,
+      );
+    }
   }
 
   await cprompt([
@@ -554,7 +591,7 @@ async function presentCliffyPrompt(
                     ccolors.error("not found"),
                   ].join(" "),
                   {
-                    cause: 4500,
+                    cause: 1203,
                   },
                 );
               } else {
@@ -567,12 +604,13 @@ async function presentCliffyPrompt(
                 if (validationError) {
                   console.log(ccolors.error(validationError));
                   await next(promptDefinition.name); // validation failed, run same prompt again
+                  return;
                 } else {
                   validity.push(true);
                   if (validity.length === promptDefinition.validators.length) {
                     // all validations for prompt passed, proceed to next prompt
-                    await next();
                     $cndi.responses.set(promptDefinition.name, value);
+                    await next();
                     return;
                   }
                   continue;
@@ -651,10 +689,24 @@ function literalizeGetPromptResponseCalls(input: string): string {
   let output = removeWhitespaceBetweenBraces(input);
   for (const responseKey in responses) {
     const val = responses[responseKey];
-    output = output.replaceAll(
-      `{{$cndi.get_prompt_response(${responseKey})}}`,
-      `${val}`,
-    );
+
+    if (typeof val == "string") {
+      output = output.replaceAll(
+        `{{$cndi.get_prompt_response(${responseKey})}}`,
+        `${val}`,
+      );
+    } else {
+      // replace the macro and remove surrrounding single quotes when it represents the entire value
+      output = output.replaceAll(
+        `'{{$cndi.get_prompt_response(${responseKey})}}'`,
+        `${val}`,
+      );
+      // replace the macro when it is embedded in a string
+      output = output.replaceAll(
+        `{{$cndi.get_prompt_response(${responseKey})}}`,
+        `${val}`,
+      );
+    }
   }
   return output;
 }
@@ -701,26 +753,42 @@ async function processCNDIConfigOutput(
   // get_prompt_response evals
   output = literalizeGetPromptResponseCalls(output);
 
+  // get_random_string evals
+  output = literalizeGetRandomStringCalls(output);
+
   // get_block evals
   const getBlockBeginToken = "$cndi.get_block(";
-  const getBlockEndToken = ")";
+  const getBlockEndToken = ")':"; // depends on serialization wrapping key in ' quotes
+  const getBlockEndTokenNoQuote = "):\n"; // fallback if key is not wrapped in quotes
 
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
+  // possible that noQuote signature is in first loop: set constent for while condition
+  const noQuoteIndexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+
   let ax = 0;
 
-  while (indexOpen > -1 && indexClose > -1) {
+  // while there are $cndi.get_block calls to process
+  while (indexOpen > -1 && (indexClose > -1 || noQuoteIndexClose > -1)) {
     cndiConfigObj = YAML.parse(output) as object;
 
-    const key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
-    const pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
+    let key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
+    let pathToKey = findPathToKey(key, cndiConfigObj); // path to first instance of key
 
     // load value of key
-    const body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+    let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      return { error: new Error(`No value found for key: ${key}`) };
+      // if call signature is not '$cndi.get_block(foo)':
+      // and is instead $cndi.get_block(foo):\n
+      indexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+      key = output.slice(indexOpen, indexClose + 1);
+      pathToKey = findPathToKey(key, cndiConfigObj);
+      body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+      if (!body) {
+        return { error: new Error(`No value found for key: ${key}`) };
+      }
     }
 
     let shouldOutput = true;
@@ -946,20 +1014,20 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
           error: new Error([
             templatesLabel,
             "template error:\n",
-            `template error: '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+            `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
             ccolors.caught(error),
           ].join(" ")),
-          cause: 4501,
+          cause: 1204,
         };
       }
     }
   }
 
   for (const key in envSpec) {
-    const val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
-
+    let val = literalizeGetPromptResponseCalls(`${envSpec[key]}`);
+    val = literalizeGetRandomStringCalls(val);
     if (key.startsWith("$cndi.comment")) {
-      envLines.push(`\n# ${val}`);
+      envLines.push(`\n# ${unwrapQuotes(val)}`);
     } else if (key.startsWith("$cndi.get_block")) {
       // do nothing, already handled
     } else if (val === "" || val === "''") {
@@ -970,6 +1038,44 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
     }
   }
   return { value: envLines.join("\n") };
+}
+
+async function processCNDIExtraFilesOutput(
+  extraFilesSpec: Record<string, string>,
+) {
+  const extra_files: Record<string, string> = {};
+  for (let key in extraFilesSpec) {
+    if (!key.startsWith("./")) {
+      return {
+        error: new Error(`extra_files keys must start with './', got: ${key}`),
+      };
+    }
+
+    const sanitizedKeyResult = sanitizeFilePath(key);
+
+    if (sanitizedKeyResult?.error) {
+      return {
+        error: new Error(
+          `extra_files key must be contained within your project directory: ${key}`,
+        ),
+      };
+    }
+    const content = `${extraFilesSpec[key]}`;
+    key = sanitizedKeyResult.value;
+    if (URL.canParse(content)) {
+      const response = await fetch(content);
+      if (response.ok) {
+        extra_files[key] = await response.text();
+      } else {
+        return {
+          error: new Error(`Failed to fetch extra_files content for ${key}`),
+        };
+      }
+    } else {
+      extra_files[key] = content;
+    }
+  }
+  return { value: extra_files };
 }
 
 /**
@@ -1108,10 +1214,19 @@ export async function useTemplate(
     throw finalEnvResult.error;
   }
 
+  const extraFilesResult = await processCNDIExtraFilesOutput(
+    coarselyValidatedTemplateBody.value.outputs?.extra_files || {},
+  );
+
+  if (extraFilesResult.error) {
+    throw extraFilesResult.error;
+  }
+
   const files = {
     "cndi_config.yaml": finalCNDIConfigResult.value,
     "README.md": finalReadmeResult.value,
     ".env": finalEnvResult.value,
+    ...extraFilesResult.value,
   };
 
   // when stringifying responses, skip undefined values
@@ -1122,6 +1237,8 @@ export async function useTemplate(
     responses,
     files,
   };
+
+  console.log(); // let it breathe
 
   return useTemplateResult;
 }

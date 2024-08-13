@@ -1,0 +1,21 @@
+cndi_version: v2
+project_name: mj-eks-example
+provider: aws
+distribution: eks
+infrastructure:
+  cndi:
+    cert_manager:
+      email: matt.johnston@polyseam.io
+    nodes:
+      - name: airflow-alpha
+        instance_type: t3.medium
+        disk_size: 100
+      - name: airflow-beta
+        instance_type: t3.medium
+        disk_size: 100
+    external_dns:
+      provider: aws
+    
+      
+cluster_manifests: {}
+applications: {}

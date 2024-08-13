@@ -46,26 +46,39 @@ blocks:
       operators:
         default_owner: Polyseam
 
-  - name: airflow_web_ingress
+  - name: deploy_airflow_ingress_blk
     content:
-      web:
-        enabled: true
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: airflow-ingress
+        namespace: airflow
         annotations:
           cert-manager.io/cluster-issuer: cluster-issuer
-          $cndi.comment(unmanaged_target_description): "if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname"
-          $cndi.comment(unmanaged_target): "external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com"
+          kubernetes.io/tls-acme: 'true'
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+      spec:
         ingressClassName: public
-        hosts:
-          - name: "{{ $cndi.get_arg(hostname) }}"
-            tls:
-              secretName: cluster-issuer-private-key
-              enabled: true
-
-
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            secretName: cluster-issuer-private-key-airflow
+        rules:
+          - host: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: airflow-webserver
+                      port:
+                        number: 8080
 prompts:
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
-  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/setup-prompts.yaml):
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
   - name: deploy_argocd_ingress
@@ -138,11 +151,12 @@ prompts:
       - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
       - ==
       - false
-
-  - name: postgresql_password
+  - name: postgresql_user_password
     message: "Please enter a password for the PostgreSQL database used as Airflow's storage backend:"
     type: Secret
-    default: letmeinplease!
+    validators:
+      - min_length: 3    
+    default: '{{ $cndi.get_random_string(12) }}'
 
 outputs:
   cndi_config:
@@ -153,24 +167,22 @@ outputs:
     infrastructure:
       cndi:
         external_dns: 
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/config.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-            args:
-              dns_provider: "{{ $cndi.get_prompt_response(dns_provider) }}"
-
+              
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
     cluster_manifests:
       external-dns-secret: 
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
@@ -197,8 +209,28 @@ outputs:
           namespace: airflow
         type: Opaque
         stringData:
-          connection: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CONNECTION_STRING)
+          connection: $cndi_on_ow.seal_secret_from_env_var(FQDN_POSTGRESQL_CONNECTION_STRING)
 
+      airflow-fernet-key-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-fernet-key
+          namespace: airflow
+        type: Opaque
+        stringData:
+          fernet-key: $cndi_on_ow.seal_secret_from_env_var(AIRFLOW_FERNET_KEY)
+      
+      airflow-webserver-key-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: airflow-webserver-key
+          namespace: airflow
+        type: Opaque
+        stringData:
+          webserver-key: $cndi_on_ow.seal_secret_from_env_var(AIRFLOW_WEBSERVER_KEY)
+              
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
@@ -206,7 +238,8 @@ outputs:
           name: cnpg-airflow-cluster
           namespace: airflow
           annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
           imageName: "ghcr.io/cloudnative-pg/postgresql:16"
           instances: 3
@@ -237,7 +270,7 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
       cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -247,10 +280,10 @@ outputs:
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PASSWORD)
+          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
 
       argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/default-ingress.yaml):
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress
             ingress_class_name: public
@@ -263,6 +296,12 @@ outputs:
             - ==
             - true
 
+      airflow-ingress:
+        $cndi.get_block(deploy_airflow_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
+            - ==
+            - true          
     applications:
       cnpg:
         targetRevision: 0.20.1
@@ -292,6 +331,11 @@ outputs:
               wait: 40
               $cndi.comment(subPath): Folder path in DAG repo to sync
               subPath: dags
+          enableBuiltInSecretEnvVars:
+            AIRFLOW__CORE__FERNET_KEY: false
+            AIRFLOW__WEBSERVER__SECRET_KEY: false
+          fernetKeySecretName: airflow-fernet-key
+          webserverSecretKeySecretName: airflow-webserver-key
           config:
             $cndi.get_block(airflow_public_config):
               args:
@@ -305,52 +349,46 @@ outputs:
                 - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
                 - ==
                 - false
-
-          ingress:
-            $cndi.get_block(airflow_web_ingress):
-              condition:
-                - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
-                - ==
-                - true
-              args:
-                hostname: "{{ $cndi.get_prompt_response(airflow_hostname) }}"
           logs:
             persistence:
               enabled: true
               size: 15Gi
-              storageClassName: nfs
+              storageClassName: rwm
           createUserJob:
             useHelmHooks: false
           migrateDatabaseJob:
             useHelmHooks: false
 
   env:
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
-
-    $cndi.get_block(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
       {}
-
-    $cndi.comment(neo4j-heading): PostgreSQL Connection Parameters
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+     
+    $cndi.comment(airflow-heading): Airflow Key Parameters 
+    AIRFLOW_FERNET_KEY: '{{ $cndi.get_random_string(32) }}' 
+    AIRFLOW_WEBSERVER_KEY: '{{ $cndi.get_random_string(16) }}'    
+    $cndi.comment(postgres-heading): PostgreSQL Connection Parameters
     POSTGRESQL_DB: airflow-db
     POSTGRESQL_USER: airflow
-    POSTGRESQL_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_password) }}"
-    POSTGRESQL_PROTOCOL: postgresql
-    POSTGRESQL_HOST: cnpg-airflow-cluster-rw
-    POSTGRESQL_PORT: 5432
-    POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
+    POSTGRESQL_USER_PASSWORD:  "{{ $cndi.get_prompt_response(postgresql_user_password) }}"
+    FQDN_POSTGRESQL_CONNECTION_STRING: "postgresql://airflow:{{ $cndi.get_prompt_response(postgresql_user_password) }}@cnpg-airflow-cluster-rw:5432/airflow-db"
     POSTGRESQL_CLUSTER_SUPERUSER: postgres
+    POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
     $cndi.get_block(git_sync_dedicated_env_block):
       condition:
         - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
         - ==
         - false
-
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/common/core-readme.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
       {}
-    $cndi.get_string(https://raw.githubusercontent.com/polyseam/common-blocks/main/{{ $cndi.get_prompt_response(deployment_target_provider) }}/readme-section.md):
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
       {}
     airflow-section: |
       # Apache Airflow Deployment Guide
@@ -363,11 +401,8 @@ outputs:
       For detailed guidance on deploying Airflow across different environments, we offer step-by-step walkthroughs for each supported deployment target.
       These walkthroughs illustrate how to deploy a production-grade Airflow cluster using CNDI's `airflow` Template on various platforms:
 
-      - **AWS EC2:** [ec2/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/ec2/airflow.md)
       - **AWS EKS:** [eks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/eks/airflow.md)
-      - **GCP Compute Engine:** [gce/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gce/airflow.md)
       - **GCP GKE:** [gke/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/gke/airflow.md)
-      - **Azure Virtual Machines:** [avm/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/avm/airflow.md)
       - **Azure AKS:** [aks/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/aks/airflow.md)
       - **Local Development:** [dev/airflow](https://github.com/polyseam/cndi/blob/main/docs/walkthroughs/dev/airflow.md)
 
@@ -398,9 +433,3 @@ outputs:
 
       **Verify that Airflow is connected to the private DAG repository**:
         - If correct, the private DAGs should be visible on the Airflow UI. If not,you should go back and make sure that the private DAG repository is properly connected to Airflow with the correct credentials that located in the `.env` file
-      
-      
-
-
-
-
