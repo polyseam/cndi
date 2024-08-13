@@ -25,9 +25,11 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
+export { Command } from "@cliffy/command";
+export { CompletionsCommand } from "@cliffy/command/completions";
+export { HelpCommand } from "@cliffy/command/help";
 
-import { colors } from "@cliffy/ansi";
+import { colors } from "@cliffy/ansi/colors";
 
 import {
   Checkbox,
