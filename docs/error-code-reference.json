@@ -250,6 +250,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/856"
   },
   {
+    "code": 812,
+    "message": "failed to construct URL when fetching 'valuesSchema' during 'cndi overwrite'",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/709"
+  },
+  {
     "code": 900,
     "message": "cndi_config invalid: does not have 'project_name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/566"

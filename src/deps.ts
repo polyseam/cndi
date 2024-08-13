@@ -13,6 +13,8 @@ export { Spinner, type SpinnerOptions } from "@std/cli";
 export { homedir, platform } from "node:os";
 export { unzip } from "node:zlib";
 export { promisify } from "node:util";
+export { default as Ajv } from "npm:ajv";
+export type { DefinedError } from "npm:ajv";
 
 export const YAML = {
   ...yaml,
@@ -23,9 +25,11 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
+export { Command } from "@cliffy/command";
+export { CompletionsCommand } from "@cliffy/command/completions";
+export { HelpCommand } from "@cliffy/command/help";
 
-import { colors } from "@cliffy/ansi";
+import { colors } from "@cliffy/ansi/colors";
 
 import {
   Checkbox,

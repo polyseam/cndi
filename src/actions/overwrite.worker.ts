@@ -51,6 +51,7 @@ import {
   KubernetesSecret,
 } from "src/types.ts";
 import validateConfig from "src/validate/cndiConfig.ts";
+import validateValuesWithSchema from "src/validate/valuesSchema.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
@@ -698,6 +699,24 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
       for (const releaseName in applications) {
         const applicationSpec = applications[releaseName];
+
+        if (applicationSpec.valuesSchema) {
+          try {
+            await validateValuesWithSchema(
+              releaseName,
+              applicationSpec.valuesSchema,
+              applicationSpec.values,
+            );
+          } catch (error) {
+            self.postMessage({
+              type: "error-overwrite",
+              code: error.cause,
+              message: error.message,
+            });
+            return;
+          }
+        }
+
         const [manifestContent, filename] = getApplicationManifest(
           releaseName,
           applicationSpec,
