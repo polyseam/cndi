@@ -105,6 +105,20 @@ and secrets that are needed to run your project.
 It contains all the information needed to run your project, except for the
 environment variables which can't be in source code.
 
+_bonus_ `extra_files` : The `extra_files` section is a key/value map of relative
+filepaths and the content to write in that location. This is useful for writing
+additional files that are not part of the core CNDI project structure.
+
+```yaml
+# eg.
+outputs:
+  extra_files:
+    ./my-file.txt: |
+      This is the 
+      multiline content of my file
+    ./some-other/file.json: https://example.com/some-other-file.json
+```
+
 To learn more about [readme](./project-structure.md),
 [env](./project-structure.md), and [cndi_config](./project-structure.md), you
 can check out the [CNDI Project Structure](./project-structure.md) section of

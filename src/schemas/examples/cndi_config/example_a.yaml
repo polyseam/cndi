@@ -1,7 +1,7 @@
 cndi_version: v2
-project_name: mj-ec2-airflow
+project_name: mj-eks-example
 provider: aws
-distribution: microk8s
+distribution: eks
 infrastructure:
   cndi:
     cert_manager:
@@ -13,5 +13,9 @@ infrastructure:
       - name: airflow-beta
         instance_type: t3.medium
         disk_size: 100
+    external_dns:
+      provider: aws
+    
+      
 cluster_manifests: {}
 applications: {}

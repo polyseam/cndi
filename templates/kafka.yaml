@@ -1,0 +1,508 @@
+blocks: 
+
+  - name: deploy_kafka_ui_application_blk
+    content:
+      targetRevision: 0.7.6
+      destinationNamespace: kafka
+      repoURL: 'https://provectus.github.io/kafka-ui-charts'
+      chart: kafka-ui
+      values:
+        existingConfigMap: kafka-ui-config    
+        existingSecret: kafka-ui-login-auth  
+        env: 
+        - name: KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"    
+              key: ca.password    
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /ssl
+        volumes:
+        - name: secret-volume
+          secret:
+            secretName: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-cluster-ca-cert"  
+
+  - name: internal_listener
+    content:
+      listeners:
+        - name: internaltls
+          port: 9093
+          type: internal
+          tls: true
+  
+  - name: external_listener
+    content:
+      listeners:
+        - name: internaltls
+          port: 9093
+          type: internal
+          tls: true
+
+        - name: externaltls
+          port: 9094
+          type: ingress
+          tls: true
+          configuration:
+            class: public
+            bootstrap:
+              alternativeNames:
+                - "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+                external-dns.alpha.kubernetes.io/ttl: "60"
+                nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+              host: "{{ $cndi.get_prompt_response(kafka_bootstrap_hostname) }}"
+            brokers:
+              - broker: 0
+                annotations:
+                  nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+                  external-dns.alpha.kubernetes.io/hostname: "0-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"
+                  external-dns.alpha.kubernetes.io/ttl: "60"
+                host: "0-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"
+              - broker: 1
+                annotations:
+                  nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+                  external-dns.alpha.kubernetes.io/hostname: "1-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"   
+                  external-dns.alpha.kubernetes.io/ttl: "60"
+                host: "1-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"                             
+              - broker: 2
+                annotations:
+                  nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+                  external-dns.alpha.kubernetes.io/hostname: "2-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}"   
+                  external-dns.alpha.kubernetes.io/ttl: "60"
+                host: "2-{{ $cndi.get_prompt_response(kafka_broker_hostname) }}" 
+
+  - name: deploy_kafka_ui_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kafka-ui-ingress
+        namespace: kafka
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            secretName: cluster-issuer-private-key-kafka-ui
+        rules:
+          - host: "{{ $cndi.get_prompt_response(kafka_ui_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kafka-ui
+                      port:
+                        number: 80                
+
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to expose ArgoCD with an Ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: kafka_cluster_name
+    default: my-kafka-cluster
+    message: >-
+      What is the name of your kafka cluster?
+    type: Input
+
+  - name: kafka_broker_size
+    default: "100"
+    message: >-
+      What is the size of your kafka brokers in GB?
+    type: Input
+  
+  - name: enable_kafka_ingress
+    default: true
+    message: >-
+      Do you want to expose Kafka to the web?
+    type: Confirm
+
+  - name: kafka_bootstrap_hostname
+    default: my-kafka-cluster.bootstrap.com
+    message: >-
+      What hostname should the kafka cluster be accessible at?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+      - ==
+      - true
+      
+  - name: kafka_broker_hostname
+    default: my-kafka-cluster.broker.com
+    message: >-
+      What hostname should the kafka broker be accessible at?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+      - ==
+      - true
+
+  - name: deploy_kafka_ui_application
+    default: true
+    message: >-
+      Do you want to install kafka-ui, a web-based kafka management tool?
+    type: Confirm
+
+  - name: deploy_kafka_ui_ingress
+    default: true
+    message: >-
+      Do you want to expose kafka-ui to the web?
+    type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_hostname
+    default: kafka-ui.example.com
+    message: >-
+      What hostname should kafka-ui be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_login_username
+    default: admin
+    message: >-
+      What username do you want to use for your kafka-ui login?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+  - name: kafka_ui_login_password
+    default: '{{ $cndi.get_random_string(12) }}'
+    message: >-
+      What password do you want to use for your kafka-ui login ?
+    type: Secret
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+      - ==
+      - true
+
+outputs:
+  cndi_config:
+    # source_control_platform: github ?
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a Template comment
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+        ingress:
+          nginx:
+            public: 
+              enabled: true
+              values:
+                controller:
+                  extraArgs:
+                    enable-ssl-passthrough: "true"
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+            {}
+
+    cluster_manifests:
+      broker-node-pool:
+        apiVersion: kafka.strimzi.io/v1beta2
+        kind: KafkaNodePool
+        metadata:
+          name: broker-node-pool
+          namespace: kafka
+          labels:
+            strimzi.io/cluster: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+        spec:
+          replicas: 3
+          roles:
+            - controller
+            - broker
+          storage:
+            type: jbod
+            volumes:
+              - id: 0
+                type: persistent-claim
+                size: "{{ $cndi.get_prompt_response(kafka_broker_size) }}Gi"
+                deleteClaim: true
+                class: rwo
+                kraftMetadata: shared
+
+      my-kafka-cluster:
+        apiVersion: kafka.strimzi.io/v1beta2
+        kind: Kafka
+        metadata:
+          name: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          namespace: kafka
+          annotations:
+            strimzi.io/node-pools: enabled
+            strimzi.io/kraft: enabled
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+        spec:
+          kafka:
+            $cndi.get_block(internal_listener):
+              condition:
+                - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+                - ==
+                - false
+
+            $cndi.get_block(external_listener):
+              condition:
+                - "{{ $cndi.get_prompt_response(enable_kafka_ingress) }}"
+                - ==
+                - true
+
+            version: 3.7.1
+            config:
+              offsets.topic.replication.factor: 3
+              transaction.state.log.replication.factor: 3
+              transaction.state.log.min.isr: 2
+              default.replication.factor: 3
+              min.insync.replicas: 2
+              inter.broker.protocol.version: "3.7"
+              ssl.endpoint.identification.algorithm: ''
+          entityOperator:
+            topicOperator: {}
+            userOperator: {}
+
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      kafka-ui-ingress:
+        $cndi.get_block(deploy_kafka_ui_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_ingress) }}"
+            - ==
+            - true
+
+      kafka-ui-configmap:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: kafka-ui-config
+          namespace: kafka
+        data:
+          KAFKA_CLUSTERS_0_NAME: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}"
+          KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ $cndi.get_prompt_response(kafka_cluster_name) }}-kafka-bootstrap.kafka.svc:9093"
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_TYPE: PKCS12
+          KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /ssl/ca.p12
+          KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
+          AUTH_TYPE: "LOGIN_FORM"
+
+      kafka-ui-login-auth-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: kafka-ui-login-auth
+          namespace: kafka
+        stringData:
+          SPRING_SECURITY_USER_NAME:  $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_USERNAME)
+          SPRING_SECURITY_USER_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(KAFKA_UI_PASSWORD)
+
+      external-dns-secret:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+    
+    applications:
+      kafka:
+        targetRevision: 0.42.0
+        destinationNamespace: kafka
+        repoURL: "https://strimzi.io/charts/"
+        chart: strimzi-kafka-operator
+      kafka-ui:
+        $cndi.get_block(deploy_kafka_ui_application_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_kafka_ui_application) }}"
+            - ==
+            - true
+
+
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+ 
+    $cndi.comment(Kafka-ui-heading): Kafka UI Login Parameters
+    KAFKA_UI_USERNAME: "{{ $cndi.get_prompt_response(kafka_ui_login_username) }}"
+    KAFKA_UI_PASSWORD: "{{ $cndi.get_prompt_response(kafka_ui_login_password) }}"
+    
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+      {}
+
+    kafka: |      
+      # Strimzi Kafka Deployment Guide
+
+      Strimzi simplifies the process of running [Apache Kafka](https://kafka.apache.org/) in a Kubernetes environment, making it easier to deploy and manage Kafka Clusters. This guide provides detailed steps to configure, test, and use Kafka with the [Strimzi Kafka Operator](https://github.com/strimzi/strimzi-kafka-operator).
+      
+      ## Connect to Kafka with kafka-ui
+
+      ![Kafka UI](https://github.com/provectus/kafka-ui) for Apache Kafka is a simple tool to visualize events and activity, and it can be helpful when troubleshooting issues or learning the ropes.
+      Its lightweight dashboard makes it easy to track key metrics of your Kafka clusters - Brokers, Topics, Partitions, Producers and Consumers.
+      If you installed kafka-ui app , it will automatically be securely connected to your Kafka cluster using SSL/TLS and you wont have to add any cluster certificates
+
+      ## Connect to Kafka with [kafka-python](https://kafka-python.readthedocs.io/en/master/) or [KafkaJS](https://kafka.js.org/docs/getting-started)
+
+      This Template configures TLS encryption out-of-the-box, so you need to extract a generated Certificate from a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/) to access the Kafka Cluster.
+      
+      To connect securely to a Kafka Cluster using a client library like [kafka-python](https://kafka-python.readthedocs.io/en/master/) or [KafkaJS](https://kafka.js.org/docs/getting-started) you will need a Cluster Certificate.
+
+      ### Steps to Obtain and Use Certificates
+
+      Once your cluster is deployed, connect to your cluster with your provider's [kubeconfig setup](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) command found in the output of the `cndi run` or `cndi show-outputs`. 
+
+      #### Step 1: Retrieve the Certificate
+
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the CA certificate from the Kubernetes secret and save it to `ca.crt`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.crt}' | base64 --decode
+      ```
+
+      You can set the value of the certificate as an Environment variable (eg. `MY_KCLUSTER_CERTIFICATE_CONTENTS`), then pass it in to your library of choice.
+
+      ## Connect to Kafka Cluster with [Kafka Command Line Tools](https://github.com/apache/kafka/tree/trunk/bin)
+
+      This Template configures TLS encryption out-of-the-box, so you need to extract a couple generated Certs to connect using the java-based Kafka Command Line Tools:
+
+      To get started, you'll need the cluster the truststore and the truststore password:
+
+      Once your cluster is deployed, connect to your cluster with your provider's [kubeconfig setup](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) command found in the output of the `cndi run` or `cndi show-outputs`, 
+      then carry on to the next step!
+
+      ### Steps to Obtain and Use PKCS12 Truststore and Truststore Password
+
+      #### Step 1: Retrieve the PKCS12 Truststore
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the PKCS12 truststore file from the Kubernetes Secret and save it to a local file: `ca.p12`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.p12}' | base64 -d > ca.p12
+      ```
+
+      #### Step 2: Retrieve the Truststore Password
+      Replace `my-kafka-cluster` with the name of your cluster in the following command to get the truststore password from the Kubernetes secret and save it to `ca.password.txt`:
+
+      ```sh
+      kubectl get secret my-kafka-cluster-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.password}' | base64 --decode > ca.password.txt
+      ```
+
+      These files (`ca.p12`, and `ca.password.txt`) will be used to configure your Kafka client for a secure connection.
+
+
+      ### Kafka Client CLI Installation and Configuration
+
+      #### 1. Install Kafka Client Tools
+
+      First, you need to install the Kafka client tools by downloading the Kafka binaries from the Apache Kafka website.
+
+      **Step-by-Step Instructions:**
+
+      **Download and Extract the Kafka Binaries:**
+
+      Go to the [Apache Kafka download page](https://kafka.apache.org/downloads) and download the latest binary release.
+
+      #### 2. Use [Kafka CLI Tools](https://github.com/apache/kafka/)
+
+      Set the environment variables to point to your Kafka installation and the truststore files.
+      The open source Apache Kafka code includes a series of tools under the bin directory that can be useful to manage and interact with an kafka cluster
+      [bin/kafka-console-producer.sh](https://github.com/apache/kafka/blob/trunk/bin/kafka-console-producer.sh) and [bin/kafka-console-consumer.sh](https://github.com/apache/kafka/blob/trunk/bin/kafka-console-consumer.sh) are part of the [Apache Kafka toolbox](https://github.com/apache/kafka/tree/trunk/bin) included with the open source Apache Kafka CLI. 
+
+      #### 3. Configure Kafka CLI with SSL authentication
+      To securely connect to your Kafka cluster using TLS (SSL), you need the truststore files obtained earlier. Ensure you have `ca.p12` and `ca.password.txt`.
+
+      Create a configuration.properties file pointing to the keystore and truststore with the following entries:
+
+      ```properties
+      security.protocol=SSL # security protocol, SSL for the default TLS security settings
+      ssl.truststore.location=/path/to/ca.p12 # truststore location on the file system
+      ssl.truststore.password= # truststore password value
+      ssl.truststore.type=PKCS12 # truststore type
+      ```
+      **Replace `/path/to/ca.p12` and `ca.password.txt` with the actual paths and
+      password value to your files**
+
+      #### 4. Produce and Consume Messages
+
+      **Produce Messages:**
+
+      To produce messages to a Kafka topic: Replace `kafka-cluster.bootstrap.cndi.link` with youe bootstrap dns address
+
+      ```sh
+      kafka-console-producer.sh --broker-list my-kafka-cluster.bootstrap.cndi.link:443 --topic my-topic --producer.config configuration.properties
+      ```
+
+      Type your messages and press Enter to send them. Use `Ctrl+C` to exit.
+
+      **Consume Messages:**
+
+      To consume messages from a Kafka topic: Replace `kafka-cluster.bootstrap.cndi.link` with the bootstrap dns address
+
+      ```sh
+      kafka-console-consumer.sh --bootstrap-server my-kafka-cluster.bootstrap.cndi.link:443 --topic my-topic --from-beginning --consumer.config client-ssl.properties
+      ```
+
+      This setup ensures secure communication between your Kafka clients and the Kafka cluster using TLS (SSL). If you need further assistance, feel free to ask!

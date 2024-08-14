@@ -1,0 +1,126 @@
+blocks:
+  - name: functions
+    content:
+      hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
+
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+      {}
+
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to expose ArgoCD with an Ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+    
+  - name: enable_fns_ingress
+    default: true
+    message: >-
+      Do you want to expose Cloud Functions with an Ingress?
+    type: Confirm
+  
+  - name: fns_hostname
+    default: fns.example.com
+    message: >-
+      What hostname should Cloud Functions be accessible at?
+    type: Input
+    validators:
+      - hostname
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+      - ==
+      - true
+
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        functions:
+          $cndi.get_block(functions):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+              - ==
+              - true
+        
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+            {}
+
+    cluster_manifests:
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+      external-dns-secret:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+      {}
+
+    fns: |
+      # CNDI Fns Deployment Guide
+
+      For more information on how to author and deploy functions to your CNDI Cluster, 
+      please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
+
+  extra_files:
+    ./functions/hello-world/index.ts: |
+      Deno.serve(() => (new Response('hello world!', { status: 200 })));
+    ./functions/cowsay/index.ts: 'https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts'
+    

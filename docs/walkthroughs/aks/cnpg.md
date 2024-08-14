@@ -327,11 +327,9 @@ Once you are logged in verify all applications and manifests in the cluster are 
 Ensure CloudNativePG is properly accessible through your chosen domain after
 deploying and configuring external access.
 
-### Using PostgreSQL Command Line Tool
+### Connect to the Database Using PostgreSQL Command Line Tool
 
-Install an PostgreSQL client like `psql` to access your database `
-
-#### Connect to the Database
+Install an PostgreSQL client like `psql` to access your database
 
 Execute the command below, replacing placeholders with your postgresql host,
 user and database name. You'll be prompted for the password.
@@ -342,8 +340,8 @@ psql -h <hostname> -p 5432 -U <username> -d <database>
 
 ![Argocd UI](/docs/walkthroughs/aks/img/psql-cli.png)
 
-The POSTGRESQL_CONNECTION_STRING and PSQL_CONNECTION_COMMAND can be found in the
-.env file.
+This command `PSQL_CONNECTION_COMMAND` and the postgresql connection details can
+be found in the .env file.
 
 ### Using PgAdmin
 

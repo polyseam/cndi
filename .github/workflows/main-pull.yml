@@ -12,13 +12,16 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.44
+          deno-version: v1.45
       
       - name: Check formatting
         run: deno fmt --check
         
       - name: Lint
         run: deno lint
+
+      - name: Install cndi dependency binaries
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux/in/* /home/runner/.cndi/bin
 
       - name: Test
         run: deno task test

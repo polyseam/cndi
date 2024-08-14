@@ -4,6 +4,8 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
+import type { CNDIApplicationSpec } from "src/outputs/application-manifest.ts";
+
 export const NODE_KIND = {
   aws: "aws",
   eks: "eks",
@@ -264,6 +266,9 @@ interface CNDIConfig {
   provider: CNDIProvider;
   infrastructure: {
     cndi: {
+      functions?: {
+        hostname?: string;
+      };
       keyless?: boolean; // default: false
       deployment_target_configuration?: DeploymentTargetConfiguration;
       keyless?: boolean; // default: false
@@ -274,7 +279,7 @@ interface CNDIConfig {
             values: Record<string, unknown>;
           };
           private: {
-            enabled?: boolean; // default: true
+            enabled?: boolean; // default: false
             values: Record<string, unknown>;
           };
         };
@@ -352,16 +357,6 @@ type EnvLines = Array<EnvCommentEntry | EnvValueEntry>;
 interface KubernetesSecretWithStringData extends KubernetesSecret {
   stringData: {
     [key: string]: string;
-  };
-}
-
-interface CNDIApplicationSpec {
-  targetRevision: string;
-  repoURL: string;
-  destinationNamespace: string;
-  chart?: string;
-  values: {
-    [key: string]: unknown;
   };
 }
 

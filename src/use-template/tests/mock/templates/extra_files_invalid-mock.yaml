@@ -1,0 +1,31 @@
+prompts:
+  - name: greet_who
+    default: World
+    message: >-
+      Who do you want to greet?
+    type: Input
+
+outputs:
+  cndi_config:
+    # source_control_platform: github ?
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    # this is a Template comment
+    infrastructure:
+      cndi:
+        nodes:
+          - name: my-node
+
+    cluster_manifests: {}
+
+  env:
+    HELLO: "{{ $cndi.get_prompt_response(greet_who) }}"
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+
+  extra_files:
+    ../my/extra_file.txt: Hello World!
+    

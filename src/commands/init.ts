@@ -25,7 +25,6 @@ import { createSshKeys } from "src/initialize/sshKeys.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
 const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
@@ -40,6 +39,7 @@ type EchoInitOptions = {
   keep?: boolean;
   create?: boolean;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoInit = (options: EchoInitOptions) => {
@@ -113,6 +113,7 @@ const initCommand = new Command()
   .option("--skip-push", "Skip pushing to the remote repository", {
     depends: ["create"],
   })
+  .option("--enable-pr-checks", "Enable pull request checks", { hidden: true })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options?.output || Deno.cwd();
@@ -196,9 +197,6 @@ const initCommand = new Command()
       }
     }
 
-    let cndi_config: string;
-    let env: string;
-    let readme: string;
     let project_name = destinationDirectory.split(path.SEPARATOR).pop() ||
       "my-cndi-project"; // default to the current working directory name
 
@@ -312,87 +310,65 @@ const initCommand = new Command()
 
     let templateResult;
 
-    if (template) {
-      try {
-        templateResult = await useTemplate(
-          template!,
-          {
-            interactive: !!options.interactive,
-            overrides: {
-              project_name,
-              ...overrides,
-            },
+    try {
+      templateResult = await useTemplate(
+        template!,
+        {
+          interactive: !!options.interactive,
+          overrides: {
+            project_name,
+            ...overrides,
           },
-        );
-      } catch (e) {
-        console.error(e.message);
-        await emitExitEvent(e.cause);
-        Deno.exit(e.cause);
-      }
+        },
+      );
+    } catch (e) {
+      console.error(e.message);
+      await emitExitEvent(e.cause);
+      Deno.exit(e.cause);
+    }
 
-      cndi_config = templateResult.files["cndi_config.yaml"];
-      await stageFile("cndi_config.yaml", cndi_config);
-
-      readme = templateResult.files["README.md"];
-      env = templateResult.files[".env"];
-
-      if (options.keep) {
-        await stageFile(
-          "cndi_responses.yaml",
-          YAML.stringify(templateResult.responses),
-        );
-      }
-    } else {
-      // uhh not sure bout dis
-      readme = `# ${project_name}\n`;
-      env = "";
+    if (options.keep) {
+      await stageFile(
+        "cndi_responses.yaml",
+        YAML.stringify(templateResult.responses),
+      );
     }
 
     const isClusterless =
       templateResult?.responses?.deployment_target_distribution ===
         "clusterless";
 
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = isClusterless
-      ? null
-      : await createSealedSecretsKeys();
+    for (const [key, value] of Object.entries(templateResult.files)) {
+      // .env must be extended using generated values
+      if (key === ".env") {
+        const env = value;
 
-    const doSSH =
-      templateResult?.responses?.deployment_target_distribution === "microk8s";
+        // GENERATE ENV VARS
+        const sealedSecretsKeys = isClusterless
+          ? null
+          : await createSealedSecretsKeys();
 
-    const sshPublicKey = doSSH ? await createSshKeys() : null;
+        const doSSH =
+          templateResult?.responses?.deployment_target_distribution ===
+            "microk8s";
 
-    const dotEnvOptions = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      debugMode: !!options.debug,
-    };
+        const sshPublicKey = doSSH ? await createSshKeys() : null;
 
-    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+        const dotEnvOptions = {
+          sshPublicKey,
+          sealedSecretsKeys,
+          debugMode: !!options.debug,
+        };
 
-    // write a readme, extend via Template.readmeBlock if it exists
-    const readmePath = path.join(destinationDirectory, "README.md");
-    try {
-      await Deno.stat(readmePath);
-      console.log(
-        initLabel,
-        ccolors.user_input(`"${readmePath}"`),
-        ccolors.warn(`already exists, skipping generation`),
-      );
-    } catch (e) {
-      if (e instanceof Deno.errors.NotFound) {
-        await stageFile("README.md", readme);
+        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+      } else {
+        await stageFile(key, value);
       }
     }
 
     await stageFile(
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
-    );
-
-    await stageFile(
-      path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(),
     );
 
     await stageFile(".gitignore", getGitignoreContents());
@@ -458,6 +434,7 @@ const initCommand = new Command()
       workflowSourceRef: options.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
+      enablePrChecks: !!options.enablePrChecks, // will become default
     });
   });
 

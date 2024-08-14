@@ -1,6 +1,6 @@
 {
-  "version": "2.12.4",
-  "deno_version": "1.45.0",
+  "version": "2.15.1",
+  "deno_version": "1.45.5",
   "tasks": {
     "tar-win": "tar -czvf dist/release-archives/cndi-win.tar.gz -C dist/win/in .",
     "tar-linux": "tar -czvf dist/release-archives/cndi-linux.tar.gz -C dist/linux/in .",
@@ -41,7 +41,7 @@
     "@cndi/cdktf/modules/aws-vpc.ts": "jsr:@cndi/cdktf@^0.1.2/modules/aws-vpc.ts",
     "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@^0.3.0",
     "@polyseam/inflate-response": "jsr:@polyseam/inflate-response@^1.1.2",
-    "@polyseam/silky": "jsr:@polyseam/silky@^1.1.1",
+    "@polyseam/silky": "jsr:@polyseam/silky@^1.1.2",
     "@std/assert": "jsr:@std/assert@^0.221.0",
     "@std/async": "jsr:@std/async@^0.221.0",
     "@std/cli": "jsr:@std/cli@^0.221.0",

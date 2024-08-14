@@ -1,5 +1,31 @@
-import { ccolors } from "deps";
+import { ccolors, deepMerge } from "deps";
 import { getYAMLString } from "src/utils.ts";
+
+type ArgoAppInfo = Array<{ name: string; value: string }>;
+
+type Meta = {
+  name?: string;
+  namespace?: string;
+  labels?: Record<string, string>;
+  finalizers?: string[];
+};
+
+type SyncPolicy = {
+  automated: {
+    prune: boolean;
+    selfHeal: boolean;
+    allowEmpty: boolean;
+  };
+  syncOptions: string[];
+  retry: {
+    limit: number;
+    backoff: {
+      duration: string;
+      factor: number;
+      maxDuration: string;
+    };
+  };
+};
 
 export interface CNDIApplicationSpec {
   targetRevision: string;
@@ -10,6 +36,15 @@ export interface CNDIApplicationSpec {
   values: {
     [key: string]: unknown;
   };
+  labels?: Record<string, string>;
+  finalizers?: string[];
+  directory?: {
+    include?: string;
+    exclude?: string;
+  };
+  info?: ArgoAppInfo;
+  syncPolicy?: SyncPolicy;
+  metadata?: Meta;
 }
 
 const DEFAULT_SYNC_POLICY = {
@@ -36,36 +71,12 @@ const DEFAULT_SYNC_POLICY = {
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
-const DEFAULT_NAMESPACE = "default";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
-const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
 const applicationManifestLabel = ccolors.faded(
   "\nsrc/outputs/application-manifest.ts:",
 );
-
-const manifestFramework = {
-  apiVersion: DEFAULT_ARGOCD_API_VERSION,
-  kind: "Application",
-  metadata: {
-    namespace: DEFAULT_NAMESPACE,
-    finalizers: DEFAULT_FINALIZERS,
-    labels: {},
-  },
-  spec: {
-    project: DEFAULT_PROJECT,
-    source: {
-      helm: {
-        version: DEFAULT_HELM_VERSION,
-      },
-    },
-    destination: {
-      server: DEFAULT_DESTINATION_SERVER,
-    },
-    syncPolicy: DEFAULT_SYNC_POLICY,
-  },
-};
 
 const getApplicationManifest = (
   releaseName: string,
@@ -74,9 +85,11 @@ const getApplicationManifest = (
   const values = getYAMLString(applicationSpec?.values || {});
   const specSourcePath = applicationSpec.path;
   const specSourceChart = applicationSpec.chart;
+  const destinationNamespace = applicationSpec?.destinationNamespace;
+
+  const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
 
   if (!specSourcePath && !specSourceChart) {
-    const releaseNameForPrint = ccolors.user_input(`"${releaseName}"`);
     console.error(
       applicationManifestLabel,
       ccolors.error(
@@ -91,33 +104,75 @@ const getApplicationManifest = (
     );
   }
 
+  if (!destinationNamespace) {
+    console.log(
+      applicationManifestLabel,
+      ccolors.error(
+        `applications[${releaseNameForPrint}]${
+          ccolors.key_name(
+            ".destinationNamespace",
+          )
+        }`,
+      ),
+      ccolors.error(`must be defined`),
+    );
+    console.log(
+      ccolors.warn("using"),
+      releaseNameForPrint,
+      ccolors.warn("for"),
+      ccolors.key_name("destinationNamespace"),
+    );
+  }
+
+  const labelSpec = applicationSpec.labels || {};
+  const name = releaseName;
+
+  const userMeta: Partial<Meta> = applicationSpec?.metadata || {};
+
+  const labels = {
+    ...labelSpec,
+    name,
+  };
+
+  const metadata: Meta = {
+    name,
+    labels,
+    finalizers: applicationSpec?.finalizers,
+    ...userMeta,
+  };
+
+  const syncPolicy = deepMerge(
+    DEFAULT_SYNC_POLICY,
+    applicationSpec?.syncPolicy || {},
+  );
+
+  const { repoURL, path, chart, targetRevision, info } = applicationSpec;
+
+  const spec = {
+    project: DEFAULT_PROJECT,
+    source: {
+      repoURL,
+      path,
+      chart,
+      targetRevision,
+      helm: {
+        version: DEFAULT_HELM_VERSION,
+        values,
+      },
+    },
+    destination: {
+      server: DEFAULT_DESTINATION_SERVER,
+      namespace: destinationNamespace,
+    },
+    syncPolicy,
+    info,
+  };
+
   const manifest = {
-    ...manifestFramework,
-    metadata: {
-      name: releaseName,
-      labels: {
-        name: releaseName,
-      },
-      finalizers: DEFAULT_FINALIZERS,
-    },
-    spec: {
-      ...manifestFramework.spec,
-      source: {
-        ...manifestFramework.spec.source,
-        repoURL: applicationSpec.repoURL,
-        path: applicationSpec.path,
-        chart: applicationSpec.chart,
-        targetRevision: applicationSpec.targetRevision,
-        helm: {
-          ...manifestFramework.spec.source.helm,
-          values, // TODO: use valuesObject it's a bit more readable etc.
-        },
-      },
-      destination: {
-        ...manifestFramework.spec.destination,
-        namespace: applicationSpec.destinationNamespace,
-      },
-    },
+    apiVersion: DEFAULT_ARGOCD_API_VERSION,
+    kind: "Application",
+    metadata,
+    spec,
   };
 
   return [getYAMLString(manifest), `${releaseName}.application.yaml`];

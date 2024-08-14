@@ -20,7 +20,6 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
@@ -48,6 +47,7 @@ type EchoCreateOptions = {
   deploymentTargetLabel?: string;
   responsesFile: string;
   skipPush?: boolean;
+  enablePrChecks?: boolean; // will become default
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -122,6 +122,7 @@ const createCommand = new Command()
       hidden: true,
     },
   )
+  .option("--enable-pr-checks", "Enable PR checks", { hidden: true })
   .action(async (options, slug) => {
     echoCreate(options, slug);
     const skipPush = options.skipPush;
@@ -382,40 +383,42 @@ const createCommand = new Command()
       Deno.exit(error.cause);
     }
 
-    const cndi_config = templateResult.files["cndi_config.yaml"];
-    const env = templateResult.files[".env"];
-    const readme = templateResult.files["README.md"];
+    const isClusterless =
+      templateResult?.responses?.deployment_target_distribution ===
+        "clusterless";
 
-    await stageFile("cndi_config.yaml", cndi_config);
+    for (const [key, value] of Object.entries(templateResult.files)) {
+      // .env must be extended using generated values
+      if (key === ".env") {
+        const env = value;
+
+        // GENERATE ENV VARS
+        const sealedSecretsKeys = isClusterless
+          ? null
+          : await createSealedSecretsKeys();
+
+        const doSSH =
+          templateResult?.responses?.deployment_target_distribution ===
+            "microk8s";
+
+        const sshPublicKey = doSSH ? await createSshKeys() : null;
+
+        const dotEnvOptions = {
+          sshPublicKey,
+          sealedSecretsKeys,
+          debugMode: !!options.debug,
+        };
+
+        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+      } else {
+        await stageFile(key, value);
+      }
+    }
 
     await stageFile(
       "cndi_responses.yaml",
       YAML.stringify(templateResult.responses),
     );
-
-    const isClusterless =
-      templateResult?.responses?.deployment_target_distribution ===
-        "clusterless";
-
-    // GENERATE ENV VARS
-    const sealedSecretsKeys = isClusterless
-      ? null
-      : await createSealedSecretsKeys();
-
-    const doSSH =
-      templateResult?.responses?.deployment_target_distribution === "microk8s";
-
-    const sshPublicKey = doSSH ? await createSshKeys() : null;
-
-    const dotEnvOptions = {
-      sshPublicKey,
-      sealedSecretsKeys,
-      debugMode: !!options.debug,
-    };
-
-    await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
-
-    await stageFile("README.md", readme);
 
     await stageFile(
       path.join(".vscode", "settings.json"),
@@ -423,11 +426,6 @@ const createCommand = new Command()
     );
 
     await stageFile(".gitignore", getGitignoreContents());
-
-    await stageFile(
-      path.join(".github", "workflows", "cndi-onpull.yaml"),
-      getCndiOnPullGitHubWorkflowYamlContents(),
-    );
 
     const git_credentials_mode = templateResult.responses.git_credentials_mode;
 
@@ -469,6 +467,7 @@ const createCommand = new Command()
       create: true,
       workflowSourceRef: options.workflowSourceRef,
       skipPush: !!skipPush,
+      enablePrChecks: !!options.enablePrChecks,
     });
   });
 

@@ -262,6 +262,11 @@ There are a few other files beyond `cndi_config.yaml` which all play a part in
 your CNDI project. To learn more about each file `cndi create` generated, check
 out [CNDI Project Structure Guide](./docs/project-structure.md).
 
+## functions 🪄
+
+CNDI has support for deploying serverless functions to Kubernetes, to learn more
+checkout the [CNDI Functions Guide](./docs/functions.md).
+
 ## connecting remotely 🔗
 
 Sometimes you need to connect to your cluster in order to debug applications,
