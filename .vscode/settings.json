@@ -13,10 +13,12 @@
   },
   "yaml.schemas": {
     "src/schemas/cndi_config.schema.json": [
-      "cndi_config.yaml"
+      "cndi_config.yaml",
+      "src/schemas/examples/cndi_config/*.yaml"
     ],
     "src/schemas/cndi_template.schema.json": [
-      "templates/*.yaml"
+      "templates/*.yaml",
+      "src/schemas/examples/templates/*.yaml"
     ]
   },
   "deno.testing.args": ["-A"],

@@ -33,7 +33,6 @@ blocks:
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
-        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
         external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(jupyter_notebook_hostname) }}"
     spec:
       ingressClassName: public
@@ -189,7 +188,6 @@ blocks:
       annotations:
         cert-manager.io/cluster-issuer: cluster-issuer
         kubernetes.io/tls-acme: 'true'
-        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
         external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(pgadmin_hostname) }}"
         # if you are using an unmanaged Kubernetes distribution, you can uncomment the following line and replace the value with your load balancer hostname
         # external-dns.alpha.kubernetes.io/target: my-loadbalancer.us-east-1.elb.amazonaws.com
@@ -395,19 +393,16 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-        ingress:
-          nginx:
-            public: 
-              enabled: true
-              values:
-                tcp: 
-                  5432: "{{ $cndi.get_prompt_response(postgresql_namespace) }}/{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw:5432"                                            
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-
+        open_ports:
+          number: 5432
+          protocol: TCP
+          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
+          service: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
     cluster_manifests:
       external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
