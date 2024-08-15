@@ -93,6 +93,10 @@ const KNOWN_TEMPLATES = [
     name: "mongodb",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mongodb.yaml`,
   },
+  {
+    name: "redis",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/redis.yaml`,
+  },
 ] as const;
 
 export const NO_SCHEDULE = "NoSchedule" as const;
