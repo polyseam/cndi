@@ -108,7 +108,7 @@ outputs:
         open_ports:
           - name: redis-client
             number: 6379
-            service: "redis-cluster-leader"
+            service: redis-cluster-leader
             namespace: redis
 
     cluster_manifests:
@@ -152,7 +152,7 @@ outputs:
             volumeClaimTemplate:
               spec:
                 storageClassName: rwo
-                accessModes: ["ReadWriteOnce"]
+                accessModes: [ReadWriteOnce]
                 resources:
                   requests:
                     storage: "{{ $cndi.get_prompt_response(node_disk_size_gib) }}Gi"
@@ -160,7 +160,7 @@ outputs:
             nodeConfVolumeClaimTemplate:
               spec:
                 storageClassName: rwo
-                accessModes: ["ReadWriteOnce"]
+                accessModes: [ReadWriteOnce]
                 resources:
                   requests:
                     storage: "{{ $cndi.get_prompt_response(node_disk_size_gib) }}Gi"
@@ -185,7 +185,7 @@ outputs:
             ingress_name: redis-ingress
             hostname: "{{ $cndi.get_prompt_response(redis_hostname) }}"
             namespace: redis
-            service: "redis-cluster-leader"
+            service: redis-cluster-leader
           condition:
             - "{{ $cndi.get_prompt_response(deploy_redis_ingress) }}"
             - ==
