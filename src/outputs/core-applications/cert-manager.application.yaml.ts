@@ -33,6 +33,17 @@ export default function getCertManagerApplicationManifest(): string {
         server: DEFAULT_DESTINATION_SERVER,
         namespace: "cert-manager",
       },
+      ignoreDifferences: [
+        {
+          group: "admissionregistration.k8s.io",
+          kind: "ValidatingWebhookConfiguration",
+          name: "cert-manager-webhook",
+          jqPathExpressions: [
+            '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane")',
+            '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "kubernetes.azure.com/managedby")',
+          ],
+        },
+      ],
       syncPolicy: {
         automated: {
           prune: true,
