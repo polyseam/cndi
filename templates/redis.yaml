@@ -5,7 +5,7 @@ blocks:
         kind: Ingress
         metadata:
           name: redis-server-ingress
-          namespace: "{{ $cndi.get_arg(namespace) }}"
+          namespace: redis
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
             kubernetes.io/tls-acme: 'true'
@@ -24,7 +24,7 @@ blocks:
                     pathType: Prefix
                     backend:
                       service:
-                        name: redis-replication
+                        name: redis-cluster-leader
                         port:
                           number: 6379
 prompts:
@@ -68,25 +68,20 @@ prompts:
       - ==
       - true
 
-  - name: default_user_password
-    message: 'Please enter Redis default user password '
+  - name: default_redis_password
+    message: 'Please enter Redis default user password'
     default: password
     type: Secret
 
-  - name: default_namespace
-    message: 'Please enter the namespace for the cluster'
-    default: redis-opr
-    type: Input
-
   - name: cluster_size
-    message: 'Please enter the cluster size for Redis Replication'
+    message: 'Please enter the cluster size for RedisCluster'
     default: 3
     type: Number
 
-  - name: common_name
-    message: "Please enter the common name for TLS certificate"
-    default: polyseam.io
-    type: Input
+  - name: node_disk_size_gib
+    message: 'Please enter the disk size for your RedisCluster nodes (GiB)'
+    default: 80
+    type: Number
 
 outputs:
   cndi_config:
@@ -111,10 +106,10 @@ outputs:
             {}
             
         open_ports:
-          - name: redisrep
+          - name: redis-client
             number: 6379
-            service: redis-replication
-            namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+            service: redis-cluster-leader
+            namespace: redis
 
     cluster_manifests:
       redis-secret:
@@ -122,147 +117,53 @@ outputs:
         kind: Secret
         metadata:
           name: redis-secret
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+          namespace: redis
         stringData:
           password: $cndi_on_ow.seal_secret_from_env_var(REDISPASSWORD)
         type: Opaque
 
-      redis-issuer:
-        apiVersion: cert-manager.io/v1
-        kind: Issuer
+      redis-cluster:
+        apiVersion: redis.redis.opstreelabs.in/v1beta2
+        kind: RedisCluster
         metadata:
-          name: selfsigned-issuer
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-        spec:
-          selfSigned: {}
-
-      redis-root-certificate:
-        apiVersion: cert-manager.io/v1
-        kind: Certificate
-        metadata:
-          name: redis-root-cert
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-        spec:
-          isCA: true
-          commonName: "{{ $cndi.get_prompt_response(common_name) }}"
-          privateKey:
-            algorithm: RSA
-            encoding: PKCS1
-            size: 2048
-          dnsNames:
-            - "{{ $cndi.get_prompt_response(redis_hostname) }}"
-          secretName: myredis-secret
-          issuerRef:
-            kind: Issuer
-            name: selfsigned-issuer
-
-      redis-ca-issuer:
-        apiVersion: cert-manager.io/v1
-        kind: Issuer
-        metadata:
-          name: redis-ca-issuer
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-        spec:
-          ca:
-            secretName: myredis-secret
-
-      redis-signed-cert:
-        apiVersion: cert-manager.io/v1
-        kind: Certificate
-        metadata:
-          name: redis-signed-cert
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
+          name: redis-cluster
+          namespace: redis
           annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-        spec:
-          secretName: redis-server-tls
-          isCA: false
-          commonName: "CName-{{ $cndi.get_prompt_response(common_name) }}"
-          usages:
-            - server auth
-            - client auth
-          dnsNames:
-            - "{{ $cndi.get_prompt_response(redis_hostname) }}"
-          issuerRef:
-            name: redis-ca-issuer
-            kind: Issuer
-
-      redis-rep:
-        apiVersion: redis.redis.opstreelabs.in/v1beta1
-        kind: RedisReplication
-        metadata:
-          name: redis-replication
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-          annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,ServerSideApply=true
         spec:
           clusterSize: "{{ $cndi.get_prompt_response(cluster_size) }}"
-          TLS:
-            ca: ca.crt
-            cert: tls.crt
-            key: tls.key
-            secret:
-              secretName: redis-server-tls
+          clusterVersion: v7
+          persistenceEnabled: true
           podSecurityContext:
             runAsUser: 1000
             fsGroup: 1000
           kubernetesConfig:
-            image: quay.io/opstree/redis:v7.0.5
+            image: quay.io/opstree/redis:v7.0.12
             imagePullPolicy: IfNotPresent
-            redisSecret:
-              name: redis-secret
-              key: password
             resources:
+              $cndi.comment(sizing): consumption stable for default node type 
               requests:
                 cpu: 101m
-                memory: 128Mi
+                memory: 256Mi
               limits:
-                cpu: 101m
-                memory: 128Mi
+                cpu: 501m
+                memory: 512Mi
           storage:
             volumeClaimTemplate:
               spec:
-                accessModes: ["ReadWriteOnce"]
+                storageClassName: rwo
+                accessModes: [ReadWriteOnce]
                 resources:
                   requests:
-                    storage: 1Gi
-
-      redis-sentinel:
-        apiVersion: redis.redis.opstreelabs.in/v1beta1
-        kind: RedisSentinel
-        metadata:
-          name: redis-sentinel
-          namespace: "{{ $cndi.get_prompt_response(default_namespace) }}"
-          annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-        spec:
-          clusterSize: "{{ $cndi.get_prompt_response(cluster_size) }}"
-          podSecurityContext:
-            runAsUser: 1000
-            fsGroup: 1000
-          redisSentinelConfig: 
-            redisReplicationName : redis-replication
-            redisPort: "6379"
-          kubernetesConfig:
-            image: quay.io/opstree/redis-sentinel:v7.0.7 
-            imagePullPolicy: IfNotPresent
-            redisSecret:
-              name: redis-secret
-              key: password
-            resources:
-              requests:
-                cpu: 101m
-                memory: 128Mi
-              limits:
-                cpu: 101m
-                memory: 128Mi
-          storage:
-            volumeClaimTemplate:
+                    storage: "{{ $cndi.get_prompt_response(node_disk_size_gib) }}Gi"
+            nodeConfVolume: true
+            nodeConfVolumeClaimTemplate:
               spec:
-                accessModes: ["ReadWriteOnce"]
+                storageClassName: rwo
+                accessModes: [ReadWriteOnce]
                 resources:
                   requests:
-                    storage: 1Gi
+                    storage: "5Gi"
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
@@ -283,7 +184,8 @@ outputs:
           args:
             ingress_name: redis-ingress
             hostname: "{{ $cndi.get_prompt_response(redis_hostname) }}"
-            namespace: "{{ $cndi.get_prompt_response(default_namespace) }}" 
+            namespace: redis
+            service: redis-cluster-leader
           condition:
             - "{{ $cndi.get_prompt_response(deploy_redis_ingress) }}"
             - ==
@@ -297,11 +199,14 @@ outputs:
             - true
 
     applications: 
-      redis-opr:
-        repoURL: https://ot-container-kit.github.io/helm-charts
+      redis-operator:
+        repoURL: 'https://ot-container-kit.github.io/helm-charts'
         chart: redis-operator
-        targetRevision: 0.15.0
-        destinationNamespace: "{{ $cndi.get_prompt_response(default_namespace) }}" 
+        targetRevision: 0.18.0
+        destinationNamespace: redis
+        syncPolicy:
+          syncOptions:
+            - Replace=true
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -312,7 +217,7 @@ outputs:
 
         
     $cndi.comment(redis-heading): Redis Connection Parameters
-    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_user_password) }}" 
+    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_redis_password) }}" 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):

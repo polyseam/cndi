@@ -70,6 +70,14 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
   },
   {
+    name: "kafka",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
+  },
+  {
+    name: "fns",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
+  },
+  {
     name: "neo4j",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/neo4j.yaml`,
   },
@@ -80,6 +88,14 @@ const KNOWN_TEMPLATES = [
   {
     name: "mssqlserver",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mssqlserver.yaml`,
+  },
+  {
+    name: "mongodb",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/mongodb.yaml`,
+  },
+  {
+    name: "redis",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/redis.yaml`,
   },
 ] as const;
 

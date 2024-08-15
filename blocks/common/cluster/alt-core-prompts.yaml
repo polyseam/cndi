@@ -84,7 +84,7 @@
 
 - name: cert_manager_email
   message: >-
-    What email address should be used for Let"s Encrypt certificate
+    What email address should be used for Let's Encrypt certificate
     registration?
   type: Input
   default: jane.doe@example.com

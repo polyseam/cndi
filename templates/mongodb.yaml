@@ -27,6 +27,13 @@ blocks:
                         name: mongodb-replica-set-svc
                         port:
                           name: mongodb
+  - name: mongo-open-tcp
+    content:
+      nginx:
+        public:
+          values:
+            tcp:
+              '27017': "mongodb/mongodb-replica-set-svc:27017"
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -103,6 +110,13 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     infrastructure:
       cndi:
+        ingress:
+          $cndi.get_block(mongo-open-tcp):
+            condition:
+              - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
+              - ==
+              - true
+              
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
           
@@ -113,14 +127,9 @@ outputs:
               - ==
               - true
         nodes:
-          $cndi.get_block(https://raw.githubusercontent.com/polyseam//polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
 
-        open_ports:
-          - number: 27017
-            name: mongodb
-            namespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
-            service: mongodb-replica-set-svc
     cluster_manifests:
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
@@ -190,11 +199,13 @@ outputs:
                   db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
                 - name: userAdminAnyDatabase
                   db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
+                - name: dbOwner
+                  db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
               scramCredentialsSecretName: my-scram
 
     applications:
       mongodb:
-        targetRevision: 0.8.0
+        targetRevision: 0.10.0
         destinationNamespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
         repoURL: 'https://mongodb.github.io/helm-charts'
         chart: community-operator
@@ -211,7 +222,7 @@ outputs:
     MONGODB_DATABASE: "{{ $cndi.get_prompt_response(mongodb_name) }}"
     MONGODB_USER: "{{ $cndi.get_prompt_response(mongodb_user) }}"
     MONGODB_PASSWORD: "{{ $cndi.get_prompt_response(mongodb_password) }}"
-    MONGODB_CONNECTION_STRING: "mongodb://{{ $cndi.get_prompt_response(mongodb_user) }}:{{ $cndi.get_prompt_response(mongodb_password) }}@{{$cndi.get_prompt_response(mongodb_hostname) }}/{{ $cndi.get_prompt_response(mongodb_name) }}"
+    MONGODB_CONNECTION_STRING: "mongodb://{{ $cndi.get_prompt_response(mongodb_user) }}:{{ $cndi.get_prompt_response(mongodb_password) }}@{{$cndi.get_prompt_response(mongodb_hostname) }}/{{ $cndi.get_prompt_response(mongodb_name) }}?directConnection=true"
     MONGODB_REPLICA_SETS: "{{ $cndi.get_prompt_response(mongodb_replica_sets) }}"
     MONGODB_NAMESPACE: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
 
@@ -264,4 +275,4 @@ outputs:
       5. **Connect to MongoDB:** Enter the command `mongo <connection-string>` in your terminal, replacing `<connection-string>` with your actual connection string. For example:
       `mongosh mongodb://admin:password@mongodb.example.com`
 
-      You can find the `MONGODB_CONNECTION_STRING` in the `.env` file in your project directory
+      You can find the `MONGODB_CONNECTION_STRING` in the `.env` file in your project directory.
