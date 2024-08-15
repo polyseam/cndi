@@ -78,7 +78,7 @@ prompts:
     default: 3
     type: Number
 
-  - name: node_disk_size_gb
+  - name: node_disk_size_gib
     message: 'Please enter the disk size for your RedisCluster nodes (GiB)'
     default: 100
     type: Number
