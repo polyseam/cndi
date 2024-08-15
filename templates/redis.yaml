@@ -141,13 +141,13 @@ outputs:
             image: quay.io/opstree/redis:v7.0.12
             imagePullPolicy: IfNotPresent
             resources:
-              $cndi.comment(sizing): default based on the node size above  
+              $cndi.comment(sizing): consumption stable for default node type 
               requests:
-                cpu: 1000m
-                memory: 6000Mi
+                cpu: 101m
+                memory: 256Mi
               limits:
-                cpu: 2000m
-                memory: 7000Mi
+                cpu: 501m
+                memory: 512Mi
           storage:
             volumeClaimTemplate:
               spec:
@@ -163,7 +163,7 @@ outputs:
                 accessModes: [ReadWriteOnce]
                 resources:
                   requests:
-                    storage: "{{ $cndi.get_prompt_response(node_disk_size_gib) }}Gi"
+                    storage: "5Gi"
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
