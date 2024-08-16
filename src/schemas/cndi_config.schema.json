@@ -62,7 +62,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s"]
+            "enum": ["microk8s", "k3d"]
           }
         }
       }
@@ -88,7 +88,7 @@
     "distribution": {
       "type": "string",
       "description": "The distribution of Kubernetes to use for the infrastructure.",
-      "enum": ["microk8s", "eks", "gke", "aks", "clusterless"]
+      "enum": ["microk8s", "eks", "gke", "aks", "clusterless", "k3d"]
     },
     "infrastructure": {
       "type": "object",
