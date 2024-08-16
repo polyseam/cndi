@@ -78,6 +78,21 @@ const applicationManifestLabel = ccolors.faded(
   "\nsrc/outputs/application-manifest.ts:",
 );
 
+type AppSpecSource = {
+  repoURL: string;
+  path?: string;
+  chart?: string;
+  targetRevision: string;
+  directory?: {
+    include?: string;
+    exclude?: string;
+  };
+  helm?: {
+    version: string;
+    values: string;
+  };
+};
+
 const getApplicationManifest = (
   releaseName: string,
   applicationSpec: CNDIApplicationSpec,
@@ -146,20 +161,29 @@ const getApplicationManifest = (
     applicationSpec?.syncPolicy || {},
   );
 
-  const { repoURL, path, chart, targetRevision, info } = applicationSpec;
+  const { repoURL, path, chart, targetRevision, info, directory } =
+    applicationSpec;
+
+  const source: AppSpecSource = {
+    repoURL,
+    path,
+    chart,
+    targetRevision,
+  };
+
+  // directory and helm are mutually exclusive in the ArgoCD Application CRD
+  if (directory) {
+    source.directory = directory;
+  } else {
+    source.helm = {
+      version: DEFAULT_HELM_VERSION,
+      values,
+    };
+  }
 
   const spec = {
     project: DEFAULT_PROJECT,
-    source: {
-      repoURL,
-      path,
-      chart,
-      targetRevision,
-      helm: {
-        version: DEFAULT_HELM_VERSION,
-        values,
-      },
-    },
+    source,
     destination: {
       server: DEFAULT_DESTINATION_SERVER,
       namespace: destinationNamespace,
