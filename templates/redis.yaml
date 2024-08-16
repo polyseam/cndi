@@ -140,6 +140,9 @@ outputs:
           kubernetesConfig:
             image: quay.io/opstree/redis:v7.0.12
             imagePullPolicy: IfNotPresent
+            redisSecret:
+              name: redis-secret
+              key: password
             resources:
               $cndi.comment(sizing): consumption stable for default node type 
               requests:
