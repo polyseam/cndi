@@ -12,6 +12,8 @@ type WorkflowStep = {
   id?: string;
 };
 
+const AWS_REGION = Deno.env.get("AWS_REGION")! || "us-east-1";
+
 const LATEST_RELEASE_STEPS: Array<WorkflowStep> = [{
   name: "welcome",
   run: 'echo "welcome to cndi!"',
@@ -106,8 +108,8 @@ const CLUSTER_ENV = {
 
 const AWS_STEPS: Array<WorkflowStep> = [
   {
-    name: "install awscli 1",
-    run: "pip install -U awscli",
+    name: "configure aws region",
+    run: `aws configure set region ${AWS_REGION}`,
   },
 ];
 
@@ -116,11 +118,8 @@ const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   uses: "aws-actions/configure-aws-credentials@v3",
   with: {
     "role-to-assume": "${{ secrets.AWS_OIDC_ROLE_TO_ASSUME_ARN }}",
-    "aws-region": Deno.env.get("AWS_REGION")! || "us-east-1",
+    "aws-region": AWS_REGION,
   },
-}, {
-  name: "install awscli 1",
-  run: "pip install -U awscli",
 }];
 
 const AZURE_STEPS_KEYLESS: Array<WorkflowStep> = [{
