@@ -8,6 +8,7 @@ const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
 const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
+const EXCLUDED_FROM_EXTERNAL_DNS = ["devmode.cndi.link"];
 
 const getDefaultExternalDNSProviderForCNDIProvider = (
   cndiProvider: CNDIProvider,
@@ -53,6 +54,7 @@ export default function getExternalDNSApplicationManifest(
     ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
     provider: externalDNSProvider,
     domainFilters: domain_filters,
+    excludeDomains: EXCLUDED_FROM_EXTERNAL_DNS,
   };
 
   if (externalDNSCannotUseEnvVars.includes(externalDNSProvider)) {
