@@ -202,9 +202,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     let firstNodeGroup: AwsEksManagedNodeGroupModule;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
-      const count = nodeGroup?.count || 1;
       const maxCount = nodeGroup?.max_count;
-      const minCount = nodeGroup?.min_count;
+      const minCount = nodeGroup?.min_count || nodeGroup?.count || 1;
       const nodeGroupName = nodeGroup.name;
 
       const instanceType = nodeGroup?.instance_type ||
@@ -216,9 +215,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         DEFAULT_NODE_DISK_SIZE_MANAGED;
 
       const scalingConfig = {
-        desiredSize: count,
-        maxSize: count,
-        minSize: count,
+        desiredSize: minCount,
+        maxSize: maxCount,
+        minSize: minCount,
       };
 
       if (maxCount) {
