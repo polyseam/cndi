@@ -220,12 +220,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         minSize: minCount,
       };
 
-      if (maxCount) {
-        scalingConfig.maxSize = maxCount;
-      }
-      if (minCount) {
-        scalingConfig.minSize = minCount;
-      }
       const taints = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
