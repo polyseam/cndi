@@ -3,12 +3,14 @@ import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
-
+//Should this be
 Deno.test(
   "template validation: basic template should pass validation",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
+    //Should this be `file://${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
+
     const template = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
