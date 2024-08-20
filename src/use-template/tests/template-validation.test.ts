@@ -3,7 +3,6 @@ import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
-//Should this be
 Deno.test(
   "template validation: basic template should pass validation",
   mySanity,
@@ -23,7 +22,7 @@ Deno.test(
     assert(!!template);
   },
 );
-
+//This throws error from fetch() cause it is looking for file:// and is grtting "C" as protocol
 Deno.test(
   "template validation: more provided values should pass validation",
   mySanity,
