@@ -1,4 +1,4 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import { CNDIConfig, K3dNodeItemSpec } from "src/types.ts";
 
 import {
   App,
@@ -9,10 +9,12 @@ import {
   Construct,
   Fn,
   stageCDKTFStack,
-  TerraformOutput,
 } from "cdktf-deps";
 
-import { SEALED_SECRETS_VERSION } from "consts";
+const devK3dStackLabel = ccolors.faded(
+  "src/outputs/terraform/dev/DevK3dStack.ts:",
+);
+import { NFS_SERVER_PROVISIONER, SEALED_SECRETS_VERSION } from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -20,19 +22,100 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
-import { deepMerge } from "deps";
+import { ccolors, deepMerge } from "deps";
 
 import { CNDITerraformStack } from "src/outputs/terraform/CNDICoreTerraformStack.ts";
 
+const isValidK3dCapacityString = (str: string): boolean => {
+  const suffix = str.slice(-1);
+  const number = str.slice(0, -1);
+
+  if (suffix === "G" || suffix === "M" || suffix === "K") {
+    return !Number.isNaN(parseInt(number));
+  }
+  return false;
+};
+
+export default function getK3dResource(
+  cndi_config: CNDIConfig,
+) {
+  if (cndi_config.infrastructure.cndi.nodes.length !== 1) {
+    throw new Error(
+      [
+        devK3dStackLabel,
+        ccolors.error("dev clusters must have exactly one node"),
+      ].join(" "),
+      {
+        cause: 4777,
+      },
+    );
+  }
+  const node = cndi_config.infrastructure.cndi
+    .nodes[0] as K3dNodeItemSpec;
+  const { name } = node;
+  const DEFAULT_DISK_SIZE = 128;
+  const DEFAULT_CPUS = 4;
+  const DEFAULT_MEMORY = 8;
+  const suffix = "G";
+  const cpus = node?.cpus || DEFAULT_CPUS;
+
+  const userSpecifiedMemory = !!node?.memory;
+  const userMemoryIsInt = !isNaN(Number(node?.memory!));
+
+  let memory = `${DEFAULT_MEMORY}${suffix}`; // 4G
+
+  if (userSpecifiedMemory) {
+    if (userMemoryIsInt) {
+      memory = `${node.memory}${suffix}`; // assume G
+    } else {
+      if (isValidK3dCapacityString(`${node.memory!}`)) {
+        memory = `${node.memory!}`; // eg. 500G | 5000M | 100000K
+      } else {
+        // TODO: fail validation here?
+        console.error(
+          ccolors.warn(`Invalid multipass node memory value:`),
+          ccolors.user_input(`"${node.memory!}"`),
+        );
+      }
+    }
+  }
+
+  let disk = `${DEFAULT_DISK_SIZE}${suffix}`; // 128G
+
+  const userSpecifiedDisk = !!node?.disk;
+  const userDiskIsInt = !isNaN(Number(node?.disk!));
+
+  if (userSpecifiedDisk) {
+    if (userDiskIsInt) {
+      disk = `${node.disk}${suffix}`;
+    } else {
+      if (isValidK3dCapacityString(`${node.disk!}`)) {
+        disk = `${node.disk!}`;
+      } else {
+        // TODO: fail validation here?
+        console.warn(
+          ccolors.warn(`Invalid multipass node disk value:`),
+          ccolors.user_input(`"${node.disk!}"`),
+        );
+      }
+    }
+  }
+
+  return {
+    name,
+    cpus,
+    disk,
+    memory,
+  };
+}
 // TODO: ensure that splicing project_name into tags.Name is safe
-export default class DevK3dStack extends CNDITerraformStack {
+export class DevK3dStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
 
-    const project_name = this.locals.cndi_project_name.asString;
-
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
+
     new CDKTFProviderKubernetes.storageClass.StorageClass(
       this,
       "cndi_kubernetes_storage_class_local_disk",
@@ -203,6 +286,31 @@ export default class DevK3dStack extends CNDITerraformStack {
       },
     );
 
+    const _helmReleaseNFSServerProvisioner = new CDKTFProviderHelm.release
+      .Release(
+      this,
+      "cndi_helm_release_nfs_server_provisioner",
+      {
+        chart: "nfs-server-provisioner",
+        name: "nfs-server-provisioner",
+        namespace: "nfs",
+        repository: "https://kvaps.github.io/charts",
+        version: NFS_SERVER_PROVISIONER,
+        timeout: 300,
+        atomic: true,
+        set: [
+          {
+            name: "storageClass.name",
+            value: "rwm",
+          },
+          {
+            name: "storageClass.mountOptions[0]",
+            value: "vers=4",
+          },
+        ],
+      },
+    );
+
     const argoAppsValues = {
       applications: [
         {
@@ -252,23 +360,24 @@ export default class DevK3dStack extends CNDITerraformStack {
   }
 }
 
-export async function stageTerraformSynthDevK3d(cndi_config: CNDIConfig) {
+export async function stageTerraformSynthDevK3d(
+  cndi_config: CNDIConfig,
+) {
   const cdktfAppConfig = await getCDKTFAppConfig();
   const app = new App(cdktfAppConfig);
   new DevK3dStack(app, `_cndi_stack_`, cndi_config);
-
-  // write terraform stack to staging directory
   await stageCDKTFStack(app);
 
+  const cndi_k3d_instance = getK3dResource(cndi_config);
   const input = deepMerge({
     resource: {
       k3d_cluster: {
         cndi_k3d_cluster: {
-          name: `${cndi_config.project_name || "unnamed"}-k3d-cluster`,
+          name: `${cndi_k3d_instance.name || "unnamed"}-k3d-cluster`,
           servers: 1,
           agents: 2,
-          image: "rancher/k3s:v1.28.8-k3s1",
           network: "my-cndi-network",
+          image: "rancher/k3s:v1.28.8-k3s1",
           k3s: [
             {
               extra_args: [
@@ -294,6 +403,18 @@ export async function stageTerraformSynthDevK3d(cndi_config: CNDIConfig) {
               "update_default_kubeconfig": true,
             },
           ],
+          // runtime: [{
+          //   servers_memory: cndi_k3d_instance.memory,
+          //   gpu_request: "all",
+          // }],
+          // volume: [{
+          //   source: "/tmp/export",
+          //   destination: "/export",
+          // },
+          // {
+          //   source: "/tmp/rancher",
+          //   destination: "/var/lib/rancher/k3s/storage@all",
+          // }],
         },
       },
     },
