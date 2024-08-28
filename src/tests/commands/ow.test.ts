@@ -8,7 +8,7 @@ import {
 } from "src/tests/helpers/util.ts";
 
 import { loadCndiConfig } from "src/utils.ts";
-import { YAML } from "src/deps.ts";
+import { path, YAML } from "src/deps.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
@@ -76,16 +76,16 @@ Deno.test(
   "'cndi ow' should bootstrap functions if source typescript is provided",
   async (t) => {
     const filePathsCreatedForFunctions = new Set([
-      "cndi/functions/Dockerfile",
-      "cndi/functions/src/hello/index.ts",
-      "cndi/functions/src/main/index.ts",
-      "cndi/cluster_manifests/fns-pull-secret.yaml",
-      "cndi/cluster_manifests/fns-deployment.yaml",
-      "cndi/cluster_manifests/fns-env-secret.yaml",
-      "cndi/cluster_manifests/fns-namespace.yaml",
-      "cndi/cluster_manifests/fns-service.yaml",
-      ".github/workflows/cndi-fns.yaml",
-      "functions/hello/index.ts",
+      path.join("cndi", "functions", "Dockerfile"),
+      path.join("cndi", "functions", "src", "hello", "index.ts"),
+      path.join("cndi", "functions", "src", "main", "index.ts"),
+      path.join("cndi", "cluster_manifests", "fns-pull-secret.yaml"),
+      path.join("cndi", "cluster_manifests", "fns-deployment.yaml"),
+      path.join("cndi", "cluster_manifests", "fns-env-secret.yaml"),
+      path.join("cndi", "cluster_manifests", "fns-namespace.yaml"),
+      path.join("cndi", "cluster_manifests", "fns-service.yaml"),
+      path.join(".github", "workflows", "cndi-fns.yaml"),
+      path.join("functions", "hello", "index.ts"),
     ]);
 
     let dir = "";
@@ -107,7 +107,7 @@ Deno.test(
       const changedFilePaths = await listChangedFilePaths(async () => {
         await Deno.mkdir(`./functions/hello`, { recursive: true });
         await Deno.writeTextFile(
-          `./functions/hello/index.ts`,
+          path.join("functions", "hello", "index.ts"),
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
