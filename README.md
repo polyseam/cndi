@@ -25,7 +25,7 @@
 </p>
 
 Start with a [Template](https://www.cndi.dev/templates) for a popular service
-like [Airflow](https://airflow.apache.org), [Kafka](https://kafka.apache.org) or
+like [Airflow](https://airflow.apache.org), [Kafka](https://kafka.apache.org), or
 [PostgreSQL](https://cloudnative-pg.io) and CNDI will help you deploy it on your
 own infrastructure - just as easily as you can sign up for a cloud-based
 Platform as a Service.
