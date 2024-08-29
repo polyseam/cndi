@@ -111,7 +111,7 @@
   },
   {
     "code": 500,
-    "message": "cndi_config.yaml not found during 'cndi overwrite'",
+    "message": "cndi_config.yaml not found",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/508"
   },
   {
@@ -492,6 +492,11 @@
     "code": 1506,
     "message": "failed to run `cndi create` because the user has not provided the necessary 'git_username' and 'git_repo' responses",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/902"
+  },
+  {
+    "code": 1507,
+    "message": "failed to run `cndi create` because it was called with an invalid repo slug argument",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/896"
   },
   {
     "code": 1600,

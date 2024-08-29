@@ -5,6 +5,7 @@ import {
   emitExitEvent,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
+  isSlug,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -27,14 +28,25 @@ import getFinalEnvString from "src/outputs/dotenv.ts";
 const createLabel = ccolors.faded("\nsrc/commands/create.ts:");
 
 function validateGitHubSlug(value: string) {
-  if (!value) {
-    return "Owner/Repo slug is required";
-  }
   if (!value.includes("/")) {
-    return "Owner/Repo slug must be in the format owner/repo";
+    return "Owner/Repo slug argument must be in the format owner/repo";
   }
 
-  // TODO: check if repo exists ??
+  const githubOwnerRepoTuple = value.split("/");
+
+  const [owner, repo] = githubOwnerRepoTuple;
+
+  if (githubOwnerRepoTuple.length !== 2) {
+    return "owner/repo slug argument must be in the format owner/repo";
+  }
+
+  if (!isSlug(owner)) {
+    return "owner component of slug must only contain alphanumeric characters and hyphens";
+  }
+
+  if (!isSlug(repo)) {
+    return "repo component of slug must only contain alphanumeric characters and hyphens";
+  }
 
   return true;
 }
@@ -151,6 +163,13 @@ const createCommand = new Command()
           ccolors.user_input("--non-interactive"),
           ccolors.error("flag"),
         );
+        await emitExitEvent(1500);
+        Deno.exit(1500);
+      }
+    } else {
+      const slugValidation = validateGitHubSlug(slug);
+      if (slugValidation !== true) {
+        console.error(createLabel, ccolors.error(slugValidation));
         await emitExitEvent(1500);
         Deno.exit(1500);
       }
