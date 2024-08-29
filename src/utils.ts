@@ -125,6 +125,19 @@ const loadCndiConfig = async (
     pathToConfig = path.join(projectDirectory, "cndi_config.yml");
   }
 
+  if (!await exists(pathToConfig)) {
+    throw new Error(
+      [
+        utilsLabel,
+        ccolors.error("failed to find a"),
+        ccolors.key_name(`cndi_config.yaml`),
+        ccolors.error("file at"),
+        ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
+      ].join(" "),
+      { cause: 500 },
+    );
+  }
+
   try {
     const config = await loadYAML(pathToConfig) as CNDIConfig;
     return { config, pathToConfig };
