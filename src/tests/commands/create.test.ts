@@ -37,37 +37,3 @@ Deno.test(
     await t.step("cleanup", cleanup);
   },
 );
-
-// Deno.test(
-//   "'cndi create' should create a repo if the repo-slug is valid",
-//   async (t) => {
-//     let dir = "";
-
-//     await t.step("setup", async () => {
-//       dir = await Deno.makeTempDir();
-//       Deno.chdir(dir);
-//     });
-
-//     await t.step("test", async () => {
-//       const owner = 'polyseam';
-//       const repo = 'test-repo-do-not-touch';
-
-//       const result = await runCndi(
-//         "create",
-//         `${owner}/${repo}`,
-//         "-l",
-//         "aws/eks",
-//         "-t",
-//         "basic",
-//       );
-
-//       assert(result.status.success === false);
-//       assert(result.stderrOutput.includes("slug"));
-//     });
-
-//     await t.step("cleanup", () => {
-
-//       cleanup()
-//     });
-//   },
-// );
