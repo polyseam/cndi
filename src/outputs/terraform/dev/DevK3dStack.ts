@@ -293,12 +293,29 @@ export class DevK3dStack extends CNDITerraformStack {
       {
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
-        namespace: "nfs",
+        createNamespace: true,
+        namespace: "kube-system",
         repository: "https://kvaps.github.io/charts",
         version: NFS_SERVER_PROVISIONER,
         timeout: 300,
         atomic: true,
         set: [
+          {
+            name: "persistence.enabled",
+            value: "true",
+          },
+          {
+            name: "persistence.accessMode",
+            value: "ReadWriteOnce",
+          },
+          {
+            name: "persistence.storageClass",
+            value: "rwo",
+          },
+          {
+            name: "persistence.storageClass",
+            value: "1Gi",
+          },
           {
             name: "storageClass.name",
             value: "rwm",
@@ -368,12 +385,11 @@ export async function stageTerraformSynthDevK3d(
   new DevK3dStack(app, `_cndi_stack_`, cndi_config);
   await stageCDKTFStack(app);
 
-  const cndi_k3d_instance = getK3dResource(cndi_config);
   const input = deepMerge({
     resource: {
       k3d_cluster: {
         cndi_k3d_cluster: {
-          name: `${cndi_k3d_instance.name || "unnamed"}-k3d-cluster`,
+          name: `${cndi_config.project_name || "unnamed"}-k3d-cluster`,
           servers: 1,
           agents: 2,
           network: "my-cndi-network",
@@ -403,18 +419,12 @@ export async function stageTerraformSynthDevK3d(
               "update_default_kubeconfig": true,
             },
           ],
-          // runtime: [{
-          //   servers_memory: cndi_k3d_instance.memory,
-          //   gpu_request: "all",
-          // }],
-          // volume: [{
-          //   source: "/tmp/export",
-          //   destination: "/export",
-          // },
-          // {
-          //   source: "/tmp/rancher",
-          //   destination: "/var/lib/rancher/k3s/storage@all",
-          // }],
+          volume: [{
+            source: `${
+              cndi_config.project_name || "unnamed"
+            }-k3d-cluster-volumes`,
+            destination: "/var/lib/rancher/k3s/storage",
+          }],
         },
       },
     },
