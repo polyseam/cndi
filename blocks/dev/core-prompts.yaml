@@ -2,6 +2,6 @@
 - name: deployment_target_distribution
   message: Which Kubernetes distribution would you like to use locally?
   type: Select
-  default: microk8s
+  default: k3d
   options:
-    - microk8s
+    - k3d
