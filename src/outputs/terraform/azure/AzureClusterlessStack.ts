@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderAzure,
+  CDKTFProviderAzurerm,
   Construct,
   stageCDKTFStack,
   TerraformLocal,
@@ -18,7 +18,7 @@ import {
 const DEFAULT_ARM_REGION = "eastus";
 
 class AzureClusterlessTerraformStack extends TerraformStack {
-  rg: CDKTFProviderAzure.resourceGroup.ResourceGroup;
+  rg: CDKTFProviderAzurerm.resourceGroup.ResourceGroup;
   variables: Record<string, TerraformVariable> = {};
   locals: Record<string, TerraformLocal> = {};
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -37,7 +37,7 @@ class AzureClusterlessTerraformStack extends TerraformStack {
       ARM_REGION,
     );
 
-    new CDKTFProviderAzure.provider.AzurermProvider(
+    new CDKTFProviderAzurerm.provider.AzurermProvider(
       this,
       "cndi_azurerm_provider",
       {
@@ -45,7 +45,7 @@ class AzureClusterlessTerraformStack extends TerraformStack {
       },
     );
 
-    this.rg = new CDKTFProviderAzure.resourceGroup.ResourceGroup(
+    this.rg = new CDKTFProviderAzurerm.resourceGroup.ResourceGroup(
       this,
       "cndi_azurerm_resource_group",
       {

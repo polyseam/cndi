@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderGCP,
+  CDKTFProviderGoogle,
   CDKTFProviderTime,
   Construct,
   Fn,
@@ -32,7 +32,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
     const _project_name = this.locals.cndi_project_name.asString;
     const open_ports = resolveCNDIPorts(cndi_config);
 
-    const serviceProjectListService = new CDKTFProviderGCP
+    const serviceProjectListService = new CDKTFProviderGoogle
       .projectService.ProjectService(
       this,
       "cndi_google_project_service_serviceusage",
@@ -42,7 +42,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServiceCloudResourceManager = new CDKTFProviderGCP
+    const projectServiceCloudResourceManager = new CDKTFProviderGoogle
       .projectService.ProjectService(
       this,
       "cndi_google_project_service_cloudresourcemanager",
@@ -53,7 +53,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServiceCompute = new CDKTFProviderGCP.projectService
+    const projectServiceCompute = new CDKTFProviderGoogle.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_compute",
@@ -64,7 +64,8 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+    const computeNetwork = new CDKTFProviderGoogle.computeNetwork
+      .ComputeNetwork(
       this,
       "cndi_google_compute_network",
       {
@@ -74,7 +75,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeSubnetwork = new CDKTFProviderGCP.computeSubnetwork
+    const computeSubnetwork = new CDKTFProviderGoogle.computeSubnetwork
       .ComputeSubnetwork(
       this,
       "cndi_google_compute_subnetwork",
@@ -85,7 +86,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    new CDKTFProviderGCP.computeFirewall.ComputeFirewall(
+    new CDKTFProviderGoogle.computeFirewall.ComputeFirewall(
       this,
       "cndi_google_compute_firewall",
       {
@@ -110,7 +111,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeRouter = new CDKTFProviderGCP.computeRouter.ComputeRouter(
+    const computeRouter = new CDKTFProviderGoogle.computeRouter.ComputeRouter(
       this,
       "cndi_google_compute_router",
       {
@@ -119,7 +120,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    new CDKTFProviderGCP.computeRouterNat.ComputeRouterNat(
+    new CDKTFProviderGoogle.computeRouterNat.ComputeRouterNat(
       this,
       "cndi_google_compute_router_nat",
       {
@@ -130,7 +131,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    new CDKTFProviderGCP.computeFirewall.ComputeFirewall(
+    new CDKTFProviderGoogle.computeFirewall.ComputeFirewall(
       this,
       "cndi_google_compute_firewall_allow-external",
       {
@@ -146,7 +147,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    let leaderInstance: CDKTFProviderGCP.computeInstance.ComputeInstance;
+    let leaderInstance: CDKTFProviderGoogle.computeInstance.ComputeInstance;
 
     const instanceSelfLinks: string[] = [];
 
@@ -177,7 +178,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       };
 
       for (let i = 0; i < count; i++) {
-        const source = new CDKTFProviderGCP.computeDisk.ComputeDisk(
+        const source = new CDKTFProviderGoogle.computeDisk.ComputeDisk(
           this,
           `cndi_google_compute_disk_${nodeSpec.name}_${i}`,
           {
@@ -246,7 +247,8 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
           );
         }
 
-        const instance = new CDKTFProviderGCP.computeInstance.ComputeInstance(
+        const instance = new CDKTFProviderGoogle.computeInstance
+          .ComputeInstance(
           this,
           `cndi_google_compute_instance_${nodeSpec.name}_${i}`,
           {
@@ -271,7 +273,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       }
     }
 
-    const computeInstanceGroup = new CDKTFProviderGCP.computeInstanceGroup
+    const computeInstanceGroup = new CDKTFProviderGoogle.computeInstanceGroup
       .ComputeInstanceGroup(
       this,
       "cndi_google_compute_instance_group",
@@ -287,7 +289,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeHealthCheck = new CDKTFProviderGCP.computeRegionHealthCheck
+    const computeHealthCheck = new CDKTFProviderGoogle.computeRegionHealthCheck
       .ComputeRegionHealthCheck(
       this,
       "cndi_google_compute_region_health_check",
@@ -302,7 +304,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeRegionBackendService = new CDKTFProviderGCP
+    const computeRegionBackendService = new CDKTFProviderGoogle
       .computeRegionBackendService.ComputeRegionBackendService(
       this,
       "cndi_google_compute_region_backend_service",
@@ -320,7 +322,7 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
       },
     );
 
-    const computeForwardingRule = new CDKTFProviderGCP.computeForwardingRule
+    const computeForwardingRule = new CDKTFProviderGoogle.computeForwardingRule
       .ComputeForwardingRule(
       this,
       "cndi_google_compute_forwarding_rule",

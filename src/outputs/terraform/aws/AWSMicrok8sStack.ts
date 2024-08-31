@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderAWS,
+  CDKTFProviderAws,
   Construct,
   Fn,
   stageCDKTFStack,
@@ -30,7 +30,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     const open_ports = resolveCNDIPorts(cndi_config);
     const nodeList: Array<{ name: string; id: string }> = [];
 
-    const vpc = new CDKTFProviderAWS.vpc.Vpc(this, `cndi_aws_vpc`, {
+    const vpc = new CDKTFProviderAws.vpc.Vpc(this, `cndi_aws_vpc`, {
       cidrBlock: "10.0.0.0/16",
       enableDnsHostnames: true,
       enableDnsSupport: true,
@@ -39,7 +39,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     });
 
-    const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+    const igw = new CDKTFProviderAws.internetGateway.InternetGateway(
       this,
       `cndi_aws_internet_gateway`,
       {
@@ -51,7 +51,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     );
 
     // TODO: should this be further filtered according to instance_type avaiability?
-    const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
+    const availabilityZones = new CDKTFProviderAws.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
       this,
       "available-zones",
@@ -60,7 +60,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const cndiPrimarySubnet = new CDKTFProviderAWS.subnet.Subnet(
+    const cndiPrimarySubnet = new CDKTFProviderAws.subnet.Subnet(
       this,
       `cndi_aws_subnet`,
       {
@@ -74,7 +74,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const routeTable = new CDKTFProviderAWS.routeTable.RouteTable(
+    const routeTable = new CDKTFProviderAws.routeTable.RouteTable(
       this,
       `cndi_aws_route_table`,
       {
@@ -85,7 +85,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const _routeTableAssociation = new CDKTFProviderAWS.routeTableAssociation
+    const _routeTableAssociation = new CDKTFProviderAws.routeTableAssociation
       .RouteTableAssociation(
       this,
       "cndi_aws_route_table_association",
@@ -96,7 +96,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const _route = new CDKTFProviderAWS.route.Route(this, `cndi_aws_route`, {
+    const _route = new CDKTFProviderAws.route.Route(this, `cndi_aws_route`, {
       dependsOn: [routeTable],
       routeTableId: routeTable.id,
       destinationCidrBlock: "0.0.0.0/0",
@@ -132,7 +132,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       });
     });
 
-    const securityGroup = new CDKTFProviderAWS.securityGroup.SecurityGroup(
+    const securityGroup = new CDKTFProviderAws.securityGroup.SecurityGroup(
       this,
       `cndi_aws_security_group`,
       {
@@ -157,7 +157,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    const sshKeyPair = new CDKTFProviderAWS.keyPair.KeyPair(
+    const sshKeyPair = new CDKTFProviderAws.keyPair.KeyPair(
       this,
       "cndi_aws_key_pair",
       {
@@ -169,7 +169,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       },
     );
 
-    let leaderInstance: CDKTFProviderAWS.instance.Instance;
+    let leaderInstance: CDKTFProviderAws.instance.Instance;
 
     for (const node of cndi_config.infrastructure.cndi.nodes) {
       let role: NodeRole = nodeList.length === 0 ? "leader" : "controller";
@@ -239,7 +239,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 
       for (let i = 0; i < count; i++) {
         const nodeName = `${node.name}-${i}`;
-        const cndiInstance = new CDKTFProviderAWS.instance.Instance(
+        const cndiInstance = new CDKTFProviderAws.instance.Instance(
           this,
           `cndi_aws_instance_${node.name}_${i}`,
           {
@@ -266,7 +266,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       }
     }
 
-    const cndiNLB = new CDKTFProviderAWS.lb.Lb(this, `cndi_aws_lb`, {
+    const cndiNLB = new CDKTFProviderAws.lb.Lb(this, `cndi_aws_lb`, {
       internal: false,
       loadBalancerType: "network",
       subnets: [cndiPrimarySubnet.id],
@@ -276,7 +276,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
     });
 
     for (const port of open_ports) {
-      const cndiTargetGroup = new CDKTFProviderAWS.lbTargetGroup.LbTargetGroup(
+      const cndiTargetGroup = new CDKTFProviderAws.lbTargetGroup.LbTargetGroup(
         this,
         `cndi_aws_lb_target_group_for_port_${port.name}`,
         {
@@ -289,7 +289,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         },
       );
 
-      const _cndiListener = new CDKTFProviderAWS.lbListener.LbListener(
+      const _cndiListener = new CDKTFProviderAws.lbListener.LbListener(
         this,
         `cndi_aws_lb_listener_for_port_${port.name}`,
         {
@@ -308,7 +308,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         },
       );
       for (const target of nodeList) {
-        new CDKTFProviderAWS.lbTargetGroupAttachment.LbTargetGroupAttachment(
+        new CDKTFProviderAws.lbTargetGroupAttachment.LbTargetGroupAttachment(
           this,
           `cndi_aws_lb_target_group_attachment_for_port_${port.name}_${target.name}`,
           {

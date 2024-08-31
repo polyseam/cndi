@@ -1,4 +1,4 @@
-import { CDKTFProviderAWS, Construct, TerraformLocal } from "cdktf-deps";
+import { CDKTFProviderAws, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
@@ -15,7 +15,7 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
 
     this.locals.aws_region = new TerraformLocal(this, "aws_region", aws_region);
 
-    new CDKTFProviderAWS.provider.AwsProvider(this, "cndi_aws_provider", {
+    new CDKTFProviderAws.provider.AwsProvider(this, "cndi_aws_provider", {
       region: this.locals.aws_region.asString,
       defaultTags: [
         {
@@ -34,7 +34,7 @@ export default class AWSCoreTerraformStack extends CNDITerraformStack {
       ],
     });
 
-    new CDKTFProviderAWS.resourcegroupsGroup.ResourcegroupsGroup(
+    new CDKTFProviderAws.resourcegroupsGroup.ResourcegroupsGroup(
       this,
       `cndi_aws_resource_group`,
       {

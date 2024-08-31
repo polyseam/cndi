@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderAzure,
+  CDKTFProviderAzurerm,
   Construct,
   Fn,
   stageCDKTFStack,
@@ -33,7 +33,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       CNDIProject: project_name,
     };
 
-    const publicIp = new CDKTFProviderAzure.publicIp.PublicIp(
+    const publicIp = new CDKTFProviderAzurerm.publicIp.PublicIp(
       this,
       "cndi_azure_public_ip",
       {
@@ -48,7 +48,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+    const vnet = new CDKTFProviderAzurerm.virtualNetwork.VirtualNetwork(
       this,
       "cndi_azure_vnet",
       {
@@ -60,7 +60,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const subnet = new CDKTFProviderAzure.subnet.Subnet(
+    const subnet = new CDKTFProviderAzurerm.subnet.Subnet(
       this,
       "cndi_azure_subnet",
       {
@@ -71,22 +71,26 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    const lb = new CDKTFProviderAzure.lb.Lb(this, "cndi_azure_load_balancer", {
-      frontendIpConfiguration: [
-        {
-          name: `cndi-azure-lb-frontend-ip-configuration`,
-          publicIpAddressId: publicIp.id,
-        },
-      ],
-      sku: "Standard",
-      skuTier: "Regional",
-      location: this.rg.location!,
-      name: `cndi-azure-load-balancer`,
-      resourceGroupName: this.rg.name,
-      tags,
-    });
+    const lb = new CDKTFProviderAzurerm.lb.Lb(
+      this,
+      "cndi_azure_load_balancer",
+      {
+        frontendIpConfiguration: [
+          {
+            name: `cndi-azure-lb-frontend-ip-configuration`,
+            publicIpAddressId: publicIp.id,
+          },
+        ],
+        sku: "Standard",
+        skuTier: "Regional",
+        location: this.rg.location!,
+        name: `cndi-azure-load-balancer`,
+        resourceGroupName: this.rg.name,
+        tags,
+      },
+    );
 
-    const backendAddressPool = new CDKTFProviderAzure.lbBackendAddressPool
+    const backendAddressPool = new CDKTFProviderAzurerm.lbBackendAddressPool
       .LbBackendAddressPool(
       this,
       "cndi_azure_lb_backend_address_pool",
@@ -97,7 +101,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     );
 
     const securityRule: Array<
-      CDKTFProviderAzure.networkSecurityGroup.NetworkSecurityGroupSecurityRule
+      CDKTFProviderAzurerm.networkSecurityGroup.NetworkSecurityGroupSecurityRule
     > = [];
     open_ports.map((port, index) => {
       securityRule.push({
@@ -119,7 +123,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         sourcePortRanges: [],
       });
 
-      const lbProbe = new CDKTFProviderAzure.lbProbe.LbProbe(
+      const lbProbe = new CDKTFProviderAzurerm.lbProbe.LbProbe(
         this,
         `cndi_azure_lb_probe_${port.number}`,
         {
@@ -129,7 +133,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         },
       );
 
-      new CDKTFProviderAzure.lbRule.LbRule(
+      new CDKTFProviderAzurerm.lbRule.LbRule(
         this,
         `cndi_azure_lb_rule_${port.number}`,
         {
@@ -145,7 +149,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       );
     });
 
-    const cndiNsg = new CDKTFProviderAzure.networkSecurityGroup
+    const cndiNsg = new CDKTFProviderAzurerm.networkSecurityGroup
       .NetworkSecurityGroup(
       this,
       "cndi_azure_subnet_nsg",
@@ -158,7 +162,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
       },
     );
 
-    new CDKTFProviderAzure.subnetNetworkSecurityGroupAssociation
+    new CDKTFProviderAzurerm.subnetNetworkSecurityGroupAssociation
       .SubnetNetworkSecurityGroupAssociation(
       this,
       "cndi_azure_subnet_nsg_association",
@@ -171,7 +175,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
     const nodeList = [];
 
     let leaderInstance:
-      CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine;
+      CDKTFProviderAzurerm.linuxVirtualMachine.LinuxVirtualMachine;
 
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeSpec?.count || 1; // count will never be zero, defaults to 1
@@ -222,7 +226,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           diskSizeGb,
         };
 
-        const nodePublicIp = new CDKTFProviderAzure.publicIp.PublicIp(
+        const nodePublicIp = new CDKTFProviderAzurerm.publicIp.PublicIp(
           this,
           `cndi_${nodeName}_public_ip`,
           {
@@ -236,7 +240,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           },
         );
 
-        const networkInterface = new CDKTFProviderAzure.networkInterface
+        const networkInterface = new CDKTFProviderAzurerm.networkInterface
           .NetworkInterface(
           this,
           `cndi_azure_network_interface_${nodeName}`,
@@ -257,7 +261,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           },
         );
 
-        new CDKTFProviderAzure.networkInterfaceBackendAddressPoolAssociation
+        new CDKTFProviderAzurerm.networkInterfaceBackendAddressPoolAssociation
           .NetworkInterfaceBackendAddressPoolAssociation(
           this,
           `cndi_azure_lb_backend_address_pool_association_${nodeName}`,
@@ -329,8 +333,8 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         const dependsOn = role === "leader" ? [] : [leaderInstance!];
 
         const cndiInstance:
-          CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine =
-            new CDKTFProviderAzure.linuxVirtualMachine.LinuxVirtualMachine(
+          CDKTFProviderAzurerm.linuxVirtualMachine.LinuxVirtualMachine =
+            new CDKTFProviderAzurerm.linuxVirtualMachine.LinuxVirtualMachine(
               this,
               `cndi_azure_virtual_machine_${nodeName}`,
               {

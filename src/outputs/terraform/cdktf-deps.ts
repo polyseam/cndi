@@ -21,15 +21,16 @@ export {
 };
 
 // Terraform CDKTF Providers
-export * as CDKTFProviderRandom from "@cdktf/provider-random";
-export * as CDKTFProviderAWS from "@cdktf/provider-aws";
-export * as CDKTFProviderAzure from "@cdktf/provider-azurerm";
-export * as CDKTFProviderGCP from "@cdktf/provider-google";
-export * as CDKTFProviderHelm from "@cdktf/provider-helm";
-export * as CDKTFProviderKubernetes from "@cdktf/provider-kubernetes";
-export * as CDKTFProviderTime from "@cdktf/provider-time";
-export * as CDKTFProviderTls from "@cdktf/provider-tls";
-export * as CDKTFProviderLocal from "@cdktf/provider-local";
+
+export { CDKTFProviderRandom } from "src/outputs/terraform/terraform-providers/CDKTFProviderRandom.ts";
+export { CDKTFProviderAws } from "src/outputs/terraform/terraform-providers/CDKTFProviderAws.ts";
+export { CDKTFProviderGoogle } from "src/outputs/terraform/terraform-providers/CDKTFProviderGoogle.ts";
+export { CDKTFProviderAzurerm } from "src/outputs/terraform/terraform-providers/CDKTFProviderAzurerm.ts";
+export { CDKTFProviderKubernetes } from "src/outputs/terraform/terraform-providers/CDKTFProviderKubernetes.ts";
+export { CDKTFProviderTime } from "src/outputs/terraform/terraform-providers/CDKTFProviderTime.ts";
+export { CDKTFProviderTls } from "src/outputs/terraform/terraform-providers/CDKTFProviderTls.ts";
+export { CDKTFProviderHelm } from "src/outputs/terraform/terraform-providers/CDKTFProviderHelm.ts";
+export { CDKTFProviderLocal } from "src/outputs/terraform/terraform-providers/CDKTFProviderLocal.ts";
 
 export { AwsEks as AwsEksModule } from "@cndi/cdktf/modules/aws-eks.ts";
 export { AwsVpc as AwsVpcModule } from "@cndi/cdktf/modules/aws-vpc.ts";

@@ -4,7 +4,7 @@ import { ccolors } from "deps";
 
 import {
   App,
-  CDKTFProviderAzure,
+  CDKTFProviderAzurerm,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderRandom,
@@ -43,7 +43,7 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   return false;
 }
 type AnonymousClusterNodePoolConfig = Omit<
-  CDKTFProviderAzure.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
+  CDKTFProviderAzurerm.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"
 >;
 
@@ -102,7 +102,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     // Create a virtual network (VNet) in Azure with a dynamic address space.
     // The address space is partially determined by the random integer generated above.
-    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+    const vnet = new CDKTFProviderAzurerm.virtualNetwork.VirtualNetwork(
       this,
       "cndi_azure_vnet",
       {
@@ -116,7 +116,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     // Create a subnet within the above VNet.
     // The subnet address prefix is dynamically calculated using the address space multiplier.
-    const subnet = new CDKTFProviderAzure.subnet.Subnet(
+    const subnet = new CDKTFProviderAzurerm.subnet.Subnet(
       this,
       "cndi_azure_subnet",
       {
@@ -192,7 +192,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
-    const cluster = new CDKTFProviderAzure.kubernetesCluster.KubernetesCluster(
+    const cluster = new CDKTFProviderAzurerm.kubernetesCluster
+      .KubernetesCluster(
       this,
       `cndi_azurerm_kubernetes_cluster`,
       {
@@ -253,7 +254,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     let nodePoolIndex = 1; // 0 is the default nodePoolSpec
     for (const nodeSpec of nodePools) {
       // all non-default nodePoolSpecs
-      new CDKTFProviderAzure.kubernetesClusterNodePool
+      new CDKTFProviderAzurerm.kubernetesClusterNodePool
         .KubernetesClusterNodePool(
         this,
         `cndi_azurerm_kubernetes_cluster_node_pool_${nodePoolIndex}`,

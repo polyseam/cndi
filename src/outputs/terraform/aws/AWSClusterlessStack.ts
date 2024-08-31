@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderAWS,
+  CDKTFProviderAws,
   Construct,
   stageCDKTFStack,
   TerraformLocal,
@@ -38,7 +38,7 @@ class AWSClusterlessTerraformStack extends TerraformStack {
 
     this.locals.aws_region = new TerraformLocal(this, "aws_region", aws_region);
 
-    new CDKTFProviderAWS.provider.AwsProvider(this, "cndi_aws_provider", {
+    new CDKTFProviderAws.provider.AwsProvider(this, "cndi_aws_provider", {
       region: this.locals.aws_region.asString,
       defaultTags: [
         {
@@ -57,7 +57,7 @@ class AWSClusterlessTerraformStack extends TerraformStack {
       ],
     });
 
-    new CDKTFProviderAWS.resourcegroupsGroup.ResourcegroupsGroup(
+    new CDKTFProviderAws.resourcegroupsGroup.ResourcegroupsGroup(
       this,
       `cndi_aws_resource_group`,
       {

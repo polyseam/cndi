@@ -2,7 +2,7 @@ import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   App,
-  CDKTFProviderGCP,
+  CDKTFProviderGoogle,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
@@ -46,14 +46,14 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
-    const clientConfig = new CDKTFProviderGCP.dataGoogleClientConfig
+    const clientConfig = new CDKTFProviderGoogle.dataGoogleClientConfig
       .DataGoogleClientConfig(
       this,
       "cndi_google_client_config",
       {},
     );
 
-    const projectServiceCloudResourseManager = new CDKTFProviderGCP
+    const projectServiceCloudResourseManager = new CDKTFProviderGoogle
       .projectService.ProjectService(
       this,
       "cndi_google_project_service_cloudresourcemanager",
@@ -63,7 +63,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServiceCompute = new CDKTFProviderGCP.projectService
+    const projectServiceCompute = new CDKTFProviderGoogle.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_compute",
@@ -74,7 +74,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServiceFile = new CDKTFProviderGCP.projectService
+    const projectServiceFile = new CDKTFProviderGoogle.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_file",
@@ -85,7 +85,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const projectServiceContainer = new CDKTFProviderGCP.projectService
+    const projectServiceContainer = new CDKTFProviderGoogle.projectService
       .ProjectService(
       this,
       "cndi_google_project_service_container",
@@ -110,7 +110,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+    const network = new CDKTFProviderGoogle.computeNetwork.ComputeNetwork(
       this,
       "cndi_google_compute_network",
       {
@@ -120,7 +120,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
+    const subnet = new CDKTFProviderGoogle.computeSubnetwork.ComputeSubnetwork(
       this,
       "cndi_google_compute_subnetwork",
       {
@@ -132,7 +132,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const _computeFirewallInternal = new CDKTFProviderGCP.computeFirewall
+    const _computeFirewallInternal = new CDKTFProviderGoogle.computeFirewall
       .ComputeFirewall(
       this,
       "cndi_google_compute_firewall",
@@ -163,7 +163,8 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const gkeCluster = new CDKTFProviderGCP.containerCluster.ContainerCluster(
+    const gkeCluster = new CDKTFProviderGoogle.containerCluster
+      .ContainerCluster(
       this,
       "cndi_google_container_cluster",
       {
@@ -247,7 +248,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         Object.hasOwn(nodePoolSpec, "min_count") ||
         Object.hasOwn(nodePoolSpec, "max_count")
       ) {
-        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+        new CDKTFProviderGoogle.containerNodePool.ContainerNodePool(
           this,
           `cndi_gcp_container_node_pool_${nodePoolSpec.name}`,
           {
@@ -263,7 +264,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           },
         );
       } else {
-        new CDKTFProviderGCP.containerNodePool.ContainerNodePool(
+        new CDKTFProviderGoogle.containerNodePool.ContainerNodePool(
           this,
           `cndi_google_container_node_pool_${nodePoolIndex}`,
           {

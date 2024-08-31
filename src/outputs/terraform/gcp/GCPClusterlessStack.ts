@@ -1,6 +1,6 @@
 import {
   App,
-  CDKTFProviderGCP,
+  CDKTFProviderGoogle,
   Construct,
   stageCDKTFStack,
   TerraformLocal,
@@ -95,11 +95,15 @@ class GCPClusterlessTerraformStack extends TerraformStack {
       parsedKey.client_email,
     );
 
-    new CDKTFProviderGCP.provider.GoogleProvider(this, "cndi_google_provider", {
-      project,
-      region,
-      zone,
-    });
+    new CDKTFProviderGoogle.provider.GoogleProvider(
+      this,
+      "cndi_google_provider",
+      {
+        project,
+        region,
+        zone,
+      },
+    );
   }
 }
 

@@ -1,4 +1,4 @@
-import { CDKTFProviderGCP, Construct, TerraformLocal } from "cdktf-deps";
+import { CDKTFProviderGoogle, Construct, TerraformLocal } from "cdktf-deps";
 import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 import { ccolors } from "deps";
@@ -77,10 +77,14 @@ export default class GCPCoreTerraformStack extends CNDITerraformStack {
       parsedKey.client_email,
     );
 
-    new CDKTFProviderGCP.provider.GoogleProvider(this, "cndi_google_provider", {
-      project,
-      region,
-      zone,
-    });
+    new CDKTFProviderGoogle.provider.GoogleProvider(
+      this,
+      "cndi_google_provider",
+      {
+        project,
+        region,
+        zone,
+      },
+    );
   }
 }

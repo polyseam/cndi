@@ -13,7 +13,7 @@ import {
   AwsEksModule,
   AwsIamAssumableRoleWithOidcModule,
   AwsVpcModule,
-  CDKTFProviderAWS,
+  CDKTFProviderAws,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
   CDKTFProviderTime,
@@ -50,7 +50,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
+    const efsFs = new CDKTFProviderAws.efsFileSystem.EfsFileSystem(
       this,
       "cndi_aws_efs_file_system",
       {
@@ -65,7 +65,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`;
 
-    const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
+    const availableByDefault = new CDKTFProviderAws.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
       this,
       "available-zones",
@@ -97,7 +97,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     });
 
-    const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+    const ebsCsiPolicy = new CDKTFProviderAws.dataAwsIamPolicy.DataAwsIamPolicy(
       this,
       "ebs_csi_policy",
       {
@@ -105,7 +105,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const efsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
+    const efsCsiPolicy = new CDKTFProviderAws.dataAwsIamPolicy.DataAwsIamPolicy(
       this,
       "efs_csi_policy",
       {
@@ -141,7 +141,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const _efsAccessPoint = new CDKTFProviderAWS.efsAccessPoint.EfsAccessPoint(
+    const _efsAccessPoint = new CDKTFProviderAws.efsAccessPoint.EfsAccessPoint(
       this,
       "cndi_aws_efs_access_point",
       {
@@ -182,7 +182,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     let subnetIdx = 0;
     for (const _subnet of privateSubnets) {
-      const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
+      const _efsMountTarget = new CDKTFProviderAws.efsMountTarget
         .EfsMountTarget(
         this,
         `cndi_aws_efs_mount_target_${subnetIdx}`,
