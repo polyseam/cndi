@@ -1,24 +1,19 @@
-import * as esbuild from "https://deno.land/x/esbuild@v0.20.0/mod.js";
-import { denoPlugins } from "https://deno.land/x/esbuild_deno_loader@0.8.5/mod.ts";
+import * as esbuild from "npm:esbuild@0.20.2";
+import { denoPlugins } from "jsr:@luca/esbuild-deno-loader@^0.10.3";
 
 const result = await esbuild.build({
   plugins: [
-    {
-      name: "json",
-
-      // deno-lint-ignore no-explicit-any
-      setup: (build: any) =>
-        build.onLoad({ filter: /\.json$/ }, () => ({ loader: "json" })),
-    },
     ...denoPlugins({
       configPath: await Deno.realPath("deno.json"),
     }),
   ],
-  entryPoints: ["main.ts"],
-  outfile: "./dist/cndi.js",
+  entryPoints: ["main.ts", "src/actions/overwrite.worker.ts"],
+  outdir: "./dist/js/",
   bundle: true,
-  format: "esm",
   minify: true,
+  format: "esm",
+  sourcemap: false,
+  treeShaking: true,
 });
 
 console.log(result.outputFiles);
