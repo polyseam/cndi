@@ -22,6 +22,7 @@
       "jsr:@std/cli@^0.221.0": "jsr:@std/cli@0.221.0",
       "jsr:@std/collections@^0.221.0": "jsr:@std/collections@0.221.0",
       "jsr:@std/console@0.221": "jsr:@std/console@0.221.0",
+      "jsr:@std/data-structures@^0.221.0": "jsr:@std/data-structures@0.221.0",
       "jsr:@std/dotenv@^0.221.0": "jsr:@std/dotenv@0.221.0",
       "jsr:@std/encoding@0.221": "jsr:@std/encoding@0.221.0",
       "jsr:@std/fmt@0.221": "jsr:@std/fmt@0.221.0",
@@ -39,6 +40,7 @@
       "jsr:@std/path@^0.214.0": "jsr:@std/path@0.214.0",
       "jsr:@std/path@^0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/semver@^0.221.0": "jsr:@std/semver@0.221.0",
+      "jsr:@std/streams@^0.221.0": "jsr:@std/streams@0.221.0",
       "jsr:@std/testing@^0.221.0": "jsr:@std/testing@0.221.0",
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
       "jsr:@std/yaml@^0.221.0": "jsr:@std/yaml@0.221.0",
@@ -187,6 +189,9 @@
           "jsr:@std/assert@^0.221.0"
         ]
       },
+      "@std/data-structures@0.221.0": {
+        "integrity": "46b16fd296a75cabc0c85c9063795145f8fdf669ec882a52dc1367201172a044"
+      },
       "@std/dotenv@0.221.0": {
         "integrity": "60358ec8a55ff177ca000e5028d8e995b4f1380a90d5a83f087acf0d729cc817"
       },
@@ -248,8 +253,23 @@
       "@std/semver@0.221.0": {
         "integrity": "836a446cd1d054d08c7498c243199ddf0b604740d72dec56df96e2833413f039"
       },
+      "@std/streams@0.221.0": {
+        "integrity": "47f2f74634b47449277c0ee79fe878da4424b66bd8975c032e3afdca88986e61",
+        "dependencies": [
+          "jsr:@std/assert@^0.221.0",
+          "jsr:@std/bytes@^0.221.0",
+          "jsr:@std/io@^0.221.0"
+        ]
+      },
       "@std/testing@0.221.0": {
-        "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e"
+        "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e",
+        "dependencies": [
+          "jsr:@std/assert@^0.221.0",
+          "jsr:@std/data-structures@^0.221.0",
+          "jsr:@std/fmt@^0.221.0",
+          "jsr:@std/fs@^0.221.0",
+          "jsr:@std/path@^0.221.0"
+        ]
       },
       "@std/text@0.221.0": {
         "integrity": "a2f89ceb0d8851cd33e6774064621a1da9fbc36578cf4f02c5b5bcd7e8c84b67",

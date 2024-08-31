@@ -42,6 +42,7 @@ function isValidAzureAKSNodePoolName(inputString: string): boolean {
   }
   return false;
 }
+
 type AnonymousClusterNodePoolConfig = Omit<
   CDKTFProviderAzurerm.kubernetesClusterNodePool.KubernetesClusterNodePoolConfig,
   "kubernetesClusterId"
@@ -154,7 +155,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
         const nodeLabels = nodeSpec.labels || {};
 
-        const nodePoolSpec: AnonymousClusterNodePoolConfig = {
+        const nodePoolSpec = {
           name: nodeSpec.name,
           ...scale,
           nodeTaints,
@@ -225,6 +226,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
+        // @ts-ignore - this is a bug in the CDKTF provider
         dependsOn: [this.rg],
       },
     );
@@ -332,6 +334,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
+        // @ts-ignore - this is a bug in the CDKTF provider
         dependsOn: [cluster],
         timeout: 600,
         atomic: true,
@@ -434,6 +437,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
+        // @ts-ignore - this is a bug in the CDKTF provider
         dependsOn: [cluster, sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",

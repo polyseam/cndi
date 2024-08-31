@@ -6,6 +6,7 @@ import {
   efsMountTarget,
   provider,
   resourcegroupsGroup,
+  vpc,
 } from "@cdktf/provider-aws";
 
 export const CDKTFProviderAws = {
@@ -16,4 +17,5 @@ export const CDKTFProviderAws = {
   dataAwsIamPolicy,
   efsAccessPoint,
   efsMountTarget,
+  vpc,
 };

@@ -1,4 +1,4 @@
-import {
+export {
   kubernetesCluster,
   kubernetesClusterNodePool,
   provider,
@@ -7,11 +7,15 @@ import {
   virtualNetwork,
 } from "@cdktf/provider-azurerm";
 
-export const CDKTFProviderAzurerm = {
-  provider,
-  resourceGroup,
-  kubernetesClusterNodePool,
-  virtualNetwork,
-  subnet,
-  kubernetesCluster,
-};
+// // export type {KubernetesClusterNodePoolConfig} from "@cdktf/provider-azurerm/kubernetes-cluster-node-pool";
+
+// // import type {KubernetesClusterNodePoolConfig} from "@cdktf/provider-azurerm";
+
+// export const CDKTFProviderAzurerm = {
+//   provider,
+//   resourceGroup,
+//   virtualNetwork,
+//   subnet,
+//   kubernetesCluster,
+//   kubernetesClusterNodePool
+// };
