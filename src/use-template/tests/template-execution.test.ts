@@ -1,4 +1,4 @@
-import { YAML } from "deps";
+import { path, YAML } from "deps";
 import { useTemplate } from "../mod.ts";
 import { assert, assertRejects, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
@@ -254,7 +254,7 @@ Deno.test(
       },
     });
     const text = "Hello World!";
-    assert(template.files["my/extra_file.txt"] === text);
+    assert(template.files[path.join("my", "extra_file.txt")] === text);
   },
 );
 

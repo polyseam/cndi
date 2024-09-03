@@ -9,14 +9,7 @@ export default async function setTF_VARs(projectDir: string) {
     const { config } = await loadCndiConfig(projectDir);
     isClusterless = config.distribution === "clusterless";
   } catch (e) {
-    console.error(e);
-    throw new Error(
-      [
-        setTF_VARsLabel,
-        ccolors.error("Failed to load cndi config"),
-      ].join(" "),
-      { cause: 90000 },
-    );
+    throw e;
   }
 
   const envPath = path.join(projectDir, ".env");

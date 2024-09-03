@@ -3,12 +3,13 @@ import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
-
 Deno.test(
   "template validation: basic template should pass validation",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
+    //Should this be `file://${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
+
     const template = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
@@ -21,7 +22,7 @@ Deno.test(
     assert(!!template);
   },
 );
-
+//This throws error from fetch() cause it is looking for file:// and is grtting "C" as protocol
 Deno.test(
   "template validation: more provided values should pass validation",
   mySanity,
