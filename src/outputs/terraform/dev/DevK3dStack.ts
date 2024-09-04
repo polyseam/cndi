@@ -404,6 +404,7 @@ export async function stageTerraformSynthDevK3d(
         cndi_k3d_cluster: {
           name: `${cndi_config.project_name || "unnamed"}-k3d-cluster`,
           servers: 1,
+          agents: 2,
           network: "my-cndi-network",
           image: "rancher/k3s:v1.28.8-k3s1",
           kube_api: [{
