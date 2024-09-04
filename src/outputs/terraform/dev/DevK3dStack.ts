@@ -9,6 +9,7 @@ import {
   Construct,
   Fn,
   stageCDKTFStack,
+  TerraformOutput,
 } from "cdktf-deps";
 
 const devK3dStackLabel = ccolors.faded(
@@ -148,6 +149,18 @@ export class DevK3dStack extends CNDITerraformStack {
       "cndi_kubernetes_provider",
       kubernetes,
     );
+
+    new TerraformOutput(this, "cndi_dev_tutorial", {
+      value: `
+          Accessing ArgoCD UI
+
+          1. Port forward the argocd-server service
+          run: kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+          2. Login in the browser
+          open: https:127.0.0.1:8080 in your browser to access the argocd UI
+      `,
+    });
 
     new CDKTFProviderHelm.provider.HelmProvider(this, "cndi_helm_provider", {
       kubernetes,
