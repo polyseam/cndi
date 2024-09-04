@@ -394,9 +394,8 @@ export async function stageTerraformSynthDevK3d(
           network: "my-cndi-network",
           image: "rancher/k3s:v1.28.8-k3s1",
           kube_api: [{
-            "host": "localhost",
             "host_ip": "127.0.0.1",
-            "host_port": 6445,
+            "host_port": 6443,
           }],
 
           k3s: [
