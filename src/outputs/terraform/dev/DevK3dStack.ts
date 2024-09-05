@@ -27,88 +27,6 @@ import { ccolors, deepMerge } from "deps";
 
 import { CNDITerraformStack } from "src/outputs/terraform/CNDICoreTerraformStack.ts";
 
-const isValidK3dCapacityString = (str: string): boolean => {
-  const suffix = str.slice(-1);
-  const number = str.slice(0, -1);
-
-  if (suffix === "G" || suffix === "M" || suffix === "K") {
-    return !Number.isNaN(parseInt(number));
-  }
-  return false;
-};
-
-export default function getK3dResource(
-  cndi_config: CNDIConfig,
-) {
-  if (cndi_config.infrastructure.cndi.nodes.length !== 1) {
-    throw new Error(
-      [
-        devK3dStackLabel,
-        ccolors.error("dev clusters must have exactly one node"),
-      ].join(" "),
-      {
-        cause: 4777,
-      },
-    );
-  }
-  const node = cndi_config.infrastructure.cndi
-    .nodes[0] as K3dNodeItemSpec;
-  const { name } = node;
-  const DEFAULT_DISK_SIZE = 128;
-  const DEFAULT_CPUS = 4;
-  const DEFAULT_MEMORY = 8;
-  const suffix = "G";
-  const cpus = node?.cpus || DEFAULT_CPUS;
-
-  const userSpecifiedMemory = !!node?.memory;
-  const userMemoryIsInt = !isNaN(Number(node?.memory!));
-
-  let memory = `${DEFAULT_MEMORY}${suffix}`; // 4G
-
-  if (userSpecifiedMemory) {
-    if (userMemoryIsInt) {
-      memory = `${node.memory}${suffix}`; // assume G
-    } else {
-      if (isValidK3dCapacityString(`${node.memory!}`)) {
-        memory = `${node.memory!}`; // eg. 500G | 5000M | 100000K
-      } else {
-        // TODO: fail validation here?
-        console.error(
-          ccolors.warn(`Invalid multipass node memory value:`),
-          ccolors.user_input(`"${node.memory!}"`),
-        );
-      }
-    }
-  }
-
-  let disk = `${DEFAULT_DISK_SIZE}${suffix}`; // 128G
-
-  const userSpecifiedDisk = !!node?.disk;
-  const userDiskIsInt = !isNaN(Number(node?.disk!));
-
-  if (userSpecifiedDisk) {
-    if (userDiskIsInt) {
-      disk = `${node.disk}${suffix}`;
-    } else {
-      if (isValidK3dCapacityString(`${node.disk!}`)) {
-        disk = `${node.disk!}`;
-      } else {
-        // TODO: fail validation here?
-        console.warn(
-          ccolors.warn(`Invalid multipass node disk value:`),
-          ccolors.user_input(`"${node.disk!}"`),
-        );
-      }
-    }
-  }
-
-  return {
-    name,
-    cpus,
-    disk,
-    memory,
-  };
-}
 // TODO: ensure that splicing project_name into tags.Name is safe
 export class DevK3dStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -408,7 +326,30 @@ export class DevK3dStack extends CNDITerraformStack {
     );
   }
 }
+export default function getK3dResource(
+  cndi_config: CNDIConfig,
+) {
+  if (cndi_config.infrastructure.cndi.nodes.length !== 1) {
+    throw new Error(
+      [
+        devK3dStackLabel,
+        ccolors.error("dev clusters must have exactly one node group"),
+      ].join(" "),
+      {
+        cause: 4777,
+      },
+    );
+  }
+  const node = cndi_config.infrastructure.cndi.nodes[0] as K3dNodeItemSpec;
+  const { name } = node;
+  const DEFAULT_NODE_COUNT = 1;
+  const count = node?.count || DEFAULT_NODE_COUNT;
 
+  return {
+    name,
+    count,
+  };
+}
 export async function stageTerraformSynthDevK3d(
   cndi_config: CNDIConfig,
 ) {
@@ -416,14 +357,13 @@ export async function stageTerraformSynthDevK3d(
   const app = new App(cdktfAppConfig);
   new DevK3dStack(app, `_cndi_stack_`, cndi_config);
   await stageCDKTFStack(app);
-  const count = cndi_config?.infrastructure.cndi.nodes;
-
+  const cndi_k3d_cluster = getK3dResource(cndi_config);
   const input = deepMerge({
     resource: {
       k3d_cluster: {
         cndi_k3d_cluster: {
           name: `${cndi_config.project_name}-k3d-cluster`,
-          servers: count,
+          servers: cndi_k3d_cluster.count,
           agents: 0,
           network: `${cndi_config.project_name}-k3d-cluster-network`,
           image: "rancher/k3s:v1.28.8-k3s1",
