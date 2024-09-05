@@ -135,12 +135,7 @@ export class DevK3dStack extends CNDITerraformStack {
     );
     // this is required because there is no @cdktf/provider-k3d
     const kubernetes = {
-      host: "${k3d_cluster.cndi_k3d_cluster.credentials[0].host}",
-      clientCertificate:
-        "${k3d_cluster.cndi_k3d_cluster.credentials[0].client_certificate}",
-      clientKey: "${k3d_cluster.cndi_k3d_cluster.credentials[0].client_key}",
-      clusterCaCertificate:
-        "${k3d_cluster.cndi_k3d_cluster.credentials[0].cluster_ca_certificate}",
+      configPath: "~/.kube/config",
     };
 
     const _kubeProvider = new CDKTFProviderKubernetes.provider
