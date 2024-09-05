@@ -403,8 +403,8 @@ export async function stageTerraformSynthDevK3d(
       k3d_cluster: {
         cndi_k3d_cluster: {
           name: `${cndi_config.project_name || "unnamed"}-k3d-cluster`,
-          servers: 1,
-          agents: 2,
+          servers: 3,
+          agents: 0,
           network: "my-cndi-network",
           image: "rancher/k3s:v1.28.8-k3s1",
           kube_api: [{
@@ -419,6 +419,8 @@ export async function stageTerraformSynthDevK3d(
                   "arg": "--disable=traefik",
                   "node_filters": [
                     "server:0",
+                    "server:1",
+                    "server:2",
                   ],
                 },
               ],
@@ -426,14 +428,23 @@ export async function stageTerraformSynthDevK3d(
           ],
           port: [
             {
+              host: "",
+              node_filters: null,
+              protocol: "TCP",
               host_port: 80,
               container_port: 80,
             },
             {
+              host: "",
+              node_filters: null,
+              protocol: "TCP",
               host_port: 8080,
               container_port: 8080,
             },
             {
+              host: "",
+              node_filters: null,
+              protocol: "TCP",
               host_port: 443,
               container_port: 443,
             },
@@ -449,6 +460,7 @@ export async function stageTerraformSynthDevK3d(
               cndi_config.project_name || "unnamed"
             }-k3d-cluster-volumes`,
             destination: "/var/lib/rancher/k3s/storage",
+            node_filters: null,
           }],
         },
       },
