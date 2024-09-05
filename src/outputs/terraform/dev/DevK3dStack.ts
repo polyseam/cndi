@@ -127,6 +127,9 @@ export class DevK3dStack extends CNDITerraformStack {
             "storageclass.kubernetes.io/is-default-class": "true",
           },
         },
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         storageProvisioner: "rancher.io/local-path",
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
@@ -182,6 +185,9 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_argocd",
       {
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
@@ -221,7 +227,10 @@ export class DevK3dStack extends CNDITerraformStack {
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
-          dependsOn: [helmReleaseArgoCD],
+          dependsOn: [
+            helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
+            "${k3d_cluster.cndi_k3d_cluster}",
+          ],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
@@ -241,7 +250,10 @@ export class DevK3dStack extends CNDITerraformStack {
         this,
         "cndi_kubernetes_secret_argocd_private_repo",
         {
-          dependsOn: [helmReleaseArgoCD],
+          dependsOn: [
+            helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
+            "${k3d_cluster.cndi_k3d_cluster}",
+          ],
           metadata: {
             name: "private-repo",
             namespace: "argocd",
@@ -263,6 +275,9 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_kubernetes_secret_sealed_secrets_key",
       {
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         type: "kubernetes.io/tls",
         metadata: {
           name: "sealed-secrets-key",
@@ -284,7 +299,10 @@ export class DevK3dStack extends CNDITerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [sealedSecretsSecret],
+        dependsOn: [
+          sealedSecretsSecret, // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
@@ -299,6 +317,9 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_nfs_server_provisioner",
       {
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
         createNamespace: true,
@@ -372,7 +393,10 @@ export class DevK3dStack extends CNDITerraformStack {
       {
         chart: "argocd-apps",
         createNamespace: true,
-        dependsOn: [helmReleaseArgoCD],
+        dependsOn: [
+          helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         name: "root-argo-app",
         namespace: "argocd",
         repository: "https://argoproj.github.io/argo-helm",
@@ -392,15 +416,16 @@ export async function stageTerraformSynthDevK3d(
   const app = new App(cdktfAppConfig);
   new DevK3dStack(app, `_cndi_stack_`, cndi_config);
   await stageCDKTFStack(app);
+  const count = cndi_config?.infrastructure.cndi.nodes;
 
   const input = deepMerge({
     resource: {
       k3d_cluster: {
         cndi_k3d_cluster: {
-          name: `${cndi_config.project_name || "unnamed"}-k3d-cluster`,
-          servers: 3,
+          name: `${cndi_config.project_name}-k3d-cluster`,
+          servers: count,
           agents: 0,
-          network: "my-cndi-network",
+          network: `${cndi_config.project_name}-k3d-cluster-network`,
           image: "rancher/k3s:v1.28.8-k3s1",
           kube_api: [{
             "host_ip": "127.0.0.1",
@@ -413,9 +438,7 @@ export async function stageTerraformSynthDevK3d(
                 {
                   "arg": "--disable=traefik",
                   "node_filters": [
-                    "server:0",
-                    "server:1",
-                    "server:2",
+                    "server:*",
                   ],
                 },
               ],
@@ -451,9 +474,7 @@ export async function stageTerraformSynthDevK3d(
             },
           ],
           volume: [{
-            source: `${
-              cndi_config.project_name || "unnamed"
-            }-k3d-cluster-volumes`,
+            source: `${cndi_config.project_name}-k3d-cluster-volumes`,
             destination: "/var/lib/rancher/k3s/storage",
             node_filters: null,
           }],
