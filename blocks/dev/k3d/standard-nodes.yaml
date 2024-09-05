@@ -1,0 +1,2 @@
+- name: "{{ $cndi.get_prompt_response(project_name) }}-node"
+  count: 3
