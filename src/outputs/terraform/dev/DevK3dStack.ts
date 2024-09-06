@@ -46,7 +46,7 @@ export class DevK3dStack extends CNDITerraformStack {
           },
         },
         dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         storageProvisioner: "rancher.io/local-path",
         reclaimPolicy: "Delete",
@@ -104,7 +104,7 @@ export class DevK3dStack extends CNDITerraformStack {
       "cndi_helm_release_argocd",
       {
         dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -147,7 +147,7 @@ export class DevK3dStack extends CNDITerraformStack {
         {
           dependsOn: [
             helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-            "${k3d_cluster.cndi_k3d_cluster}",
+            "k3d_cluster.cndi_k3d_cluster",
           ],
           metadata: {
             name: "private-repo",
@@ -170,7 +170,7 @@ export class DevK3dStack extends CNDITerraformStack {
         {
           dependsOn: [
             helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-            "${k3d_cluster.cndi_k3d_cluster}",
+            "k3d_cluster.cndi_k3d_cluster",
           ],
           metadata: {
             name: "private-repo",
@@ -194,7 +194,7 @@ export class DevK3dStack extends CNDITerraformStack {
       "cndi_kubernetes_secret_sealed_secrets_key",
       {
         dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         type: "kubernetes.io/tls",
         metadata: {
@@ -219,7 +219,7 @@ export class DevK3dStack extends CNDITerraformStack {
         chart: "sealed-secrets",
         dependsOn: [
           sealedSecretsSecret, // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         name: "sealed-secrets",
         namespace: "kube-system",
@@ -236,7 +236,7 @@ export class DevK3dStack extends CNDITerraformStack {
       "cndi_helm_release_nfs_server_provisioner",
       {
         dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
@@ -313,7 +313,7 @@ export class DevK3dStack extends CNDITerraformStack {
         createNamespace: true,
         dependsOn: [
           helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          "k3d_cluster.cndi_k3d_cluster",
         ],
         name: "root-argo-app",
         namespace: "argocd",
