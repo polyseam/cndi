@@ -23,7 +23,7 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
-import { ccolors, deepMerge } from "deps";
+import { ccolors } from "deps";
 
 import { CNDITerraformStack } from "src/outputs/terraform/CNDICoreTerraformStack.ts";
 
@@ -31,6 +31,74 @@ import { CNDITerraformStack } from "src/outputs/terraform/CNDICoreTerraformStack
 export class DevK3dStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
+    const cndi_k3d_cluster = getK3dResource(cndi_config);
+
+    this.addOverride("terraform.required_providers.k3d", {
+      source: "pvotal-tech/k3d", // Source of the provider
+      version: "0.0.7", // Provider version
+    });
+
+    this.addOverride("provider.k3d", {});
+
+    // Define a resource using addOverride
+    this.addOverride("resource.k3d_cluster.cndi_k3d_cluster", {
+      name: `${cndi_config.project_name}-k3d-cluster`,
+      servers: cndi_k3d_cluster.count,
+      agents: 0,
+      network: `${cndi_config.project_name}-k3d-cluster-network`,
+      image: "rancher/k3s:v1.28.8-k3s1",
+      kube_api: [{
+        "host_ip": "127.0.0.1",
+        "host_port": 6443,
+      }],
+
+      k3s: [
+        {
+          extra_args: [
+            {
+              "arg": "--disable=traefik",
+              "node_filters": [
+                "server:*",
+              ],
+            },
+          ],
+        },
+      ],
+      port: [
+        {
+          host: "",
+          node_filters: null,
+          protocol: "TCP",
+          host_port: 80,
+          container_port: 80,
+        },
+        {
+          host: "",
+          node_filters: null,
+          protocol: "TCP",
+          host_port: 8080,
+          container_port: 8080,
+        },
+        {
+          host: "",
+          node_filters: null,
+          protocol: "TCP",
+          host_port: 443,
+          container_port: 443,
+        },
+      ],
+      kubeconfig: [
+        {
+          "switch_current_context": true,
+          "update_default_kubeconfig": true,
+        },
+      ],
+      volume: [{
+        source: `${cndi_config.project_name}-k3d-cluster-volumes`,
+        destination: "/var/lib/rancher/k3s/storage",
+        node_filters: null,
+      }],
+    });
 
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
@@ -45,9 +113,6 @@ export class DevK3dStack extends CNDITerraformStack {
             "storageclass.kubernetes.io/is-default-class": "true",
           },
         },
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
-        ],
         storageProvisioner: "rancher.io/local-path",
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
@@ -103,8 +168,7 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_argocd",
       {
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+        dependsOn: [
         ],
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -146,8 +210,7 @@ export class DevK3dStack extends CNDITerraformStack {
         "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [
-            helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-            "${k3d_cluster.cndi_k3d_cluster}",
+            helmReleaseArgoCD,
           ],
           metadata: {
             name: "private-repo",
@@ -169,8 +232,7 @@ export class DevK3dStack extends CNDITerraformStack {
         "cndi_kubernetes_secret_argocd_private_repo",
         {
           dependsOn: [
-            helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-            "${k3d_cluster.cndi_k3d_cluster}",
+            helmReleaseArgoCD,
           ],
           metadata: {
             name: "private-repo",
@@ -189,13 +251,17 @@ export class DevK3dStack extends CNDITerraformStack {
       );
     }
 
+    this.addOverride(
+      "resource.kubernetes_secret.cndi_kubernetes_secret_argocd_private_repo.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
+
     const sealedSecretsSecret = new CDKTFProviderKubernetes.secret.Secret(
       this,
       "cndi_kubernetes_secret_sealed_secrets_key",
       {
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
-        ],
         type: "kubernetes.io/tls",
         metadata: {
           name: "sealed-secrets-key",
@@ -218,8 +284,7 @@ export class DevK3dStack extends CNDITerraformStack {
       {
         chart: "sealed-secrets",
         dependsOn: [
-          sealedSecretsSecret, // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          sealedSecretsSecret,
         ],
         name: "sealed-secrets",
         namespace: "kube-system",
@@ -235,9 +300,6 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_nfs_server_provisioner",
       {
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
-        ],
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
         createNamespace: true,
@@ -312,8 +374,7 @@ export class DevK3dStack extends CNDITerraformStack {
         chart: "argocd-apps",
         createNamespace: true,
         dependsOn: [
-          helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          helmReleaseArgoCD,
         ],
         name: "root-argo-app",
         namespace: "argocd",
@@ -357,85 +418,9 @@ export async function stageTerraformSynthDevK3d(
   const app = new App(cdktfAppConfig);
   new DevK3dStack(app, `_cndi_stack_`, cndi_config);
   await stageCDKTFStack(app);
-  const cndi_k3d_cluster = getK3dResource(cndi_config);
-  const input = deepMerge({
-    resource: {
-      k3d_cluster: {
-        cndi_k3d_cluster: {
-          name: `${cndi_config.project_name}-k3d-cluster`,
-          servers: cndi_k3d_cluster.count,
-          agents: 0,
-          network: `${cndi_config.project_name}-k3d-cluster-network`,
-          image: "rancher/k3s:v1.28.8-k3s1",
-          kube_api: [{
-            "host_ip": "127.0.0.1",
-            "host_port": 6443,
-          }],
-
-          k3s: [
-            {
-              extra_args: [
-                {
-                  "arg": "--disable=traefik",
-                  "node_filters": [
-                    "server:*",
-                  ],
-                },
-              ],
-            },
-          ],
-          port: [
-            {
-              host: "",
-              node_filters: null,
-              protocol: "TCP",
-              host_port: 80,
-              container_port: 80,
-            },
-            {
-              host: "",
-              node_filters: null,
-              protocol: "TCP",
-              host_port: 8080,
-              container_port: 8080,
-            },
-            {
-              host: "",
-              node_filters: null,
-              protocol: "TCP",
-              host_port: 443,
-              container_port: 443,
-            },
-          ],
-          kubeconfig: [
-            {
-              "switch_current_context": true,
-              "update_default_kubeconfig": true,
-            },
-          ],
-          volume: [{
-            source: `${cndi_config.project_name}-k3d-cluster-volumes`,
-            destination: "/var/lib/rancher/k3s/storage",
-            node_filters: null,
-          }],
-        },
-      },
-    },
-    provider: {
-      k3d: {},
-    },
-    terraform: {
-      required_providers: {
-        k3d: {
-          source: "pvotal-tech/k3d",
-          version: "0.0.7",
-        },
-      },
-    },
-  }, {
-    ...cndi_config?.infrastructure?.terraform,
-  });
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  await patchAndStageTerraformFilesWithInput({
+    ...cndi_config?.infrastructure?.terraform,
+  });
 }
