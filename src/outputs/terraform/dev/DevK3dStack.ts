@@ -103,7 +103,8 @@ export class DevK3dStack extends CNDITerraformStack {
     new CDKTFProviderTime.provider.TimeProvider(this, "cndi_time_provider", {});
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
-    new CDKTFProviderKubernetes.storageClass.StorageClass(
+    const rwoStorageClass = new CDKTFProviderKubernetes.storageClass
+      .StorageClass(
       this,
       "cndi_kubernetes_storage_class_local_disk",
       {
@@ -119,7 +120,12 @@ export class DevK3dStack extends CNDITerraformStack {
         volumeBindingMode: "WaitForFirstConsumer",
       },
     );
-    // this is required because there is no @cdktf/provider-k3d
+    this.addOverride(
+      "resource.kubernetes_storage_class.cndi_kubernetes_storage_class_local_disk.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
     const kubernetes = {
       configPath: "~/.kube/config",
     };
@@ -168,9 +174,6 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_argocd",
       {
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
-        ],
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
@@ -204,7 +207,12 @@ export class DevK3dStack extends CNDITerraformStack {
         ],
       },
     );
-
+    this.addOverride(
+      "resource.helm_release.cndi_helm_release_argocd.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
@@ -278,7 +286,12 @@ export class DevK3dStack extends CNDITerraformStack {
         },
       },
     );
-
+    this.addOverride(
+      "resource.kubernetes_secret.cndi_kubernetes_secret_sealed_secrets_key.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
     const _helmReleaseSealedSecrets = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_helm_release_sealed_secrets",
@@ -295,14 +308,19 @@ export class DevK3dStack extends CNDITerraformStack {
         atomic: true,
       },
     );
-
+    this.addOverride(
+      "resource.helm_release.cndi_helm_release_sealed_secrets.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
     const _helmReleaseNFSServerProvisioner = new CDKTFProviderHelm.release
       .Release(
       this,
       "cndi_helm_release_nfs_server_provisioner",
       {
-        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+        dependsOn: [
+          rwoStorageClass,
         ],
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
@@ -340,7 +358,12 @@ export class DevK3dStack extends CNDITerraformStack {
         ],
       },
     );
-
+    this.addOverride(
+      "resource.helm_release.cndi_helm_release_nfs_server_provisioner.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
     const argoAppsValues = {
       applications: [
         {
@@ -378,8 +401,7 @@ export class DevK3dStack extends CNDITerraformStack {
         chart: "argocd-apps",
         createNamespace: true,
         dependsOn: [
-          helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
-          "${k3d_cluster.cndi_k3d_cluster}",
+          helmReleaseArgoCD,
         ],
         name: "root-argo-app",
         namespace: "argocd",
@@ -390,8 +412,15 @@ export class DevK3dStack extends CNDITerraformStack {
         values: [Fn.yamlencode(argoAppsValues)],
       },
     );
+    this.addOverride(
+      "resource.helm_release.cndi_helm_release_argocd_apps.depends_on",
+      [
+        "k3d_cluster.cndi_k3d_cluster",
+      ],
+    );
   }
 }
+
 export default function getK3dResource(
   cndi_config: CNDIConfig,
 ) {
