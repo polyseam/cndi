@@ -168,7 +168,8 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_argocd",
       {
-        dependsOn: [
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
         ],
         chart: "argo-cd",
         cleanupOnFail: true,
@@ -300,6 +301,9 @@ export class DevK3dStack extends CNDITerraformStack {
       this,
       "cndi_helm_release_nfs_server_provisioner",
       {
+        dependsOn: [ // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
+        ],
         chart: "nfs-server-provisioner",
         name: "nfs-server-provisioner",
         createNamespace: true,
@@ -374,7 +378,8 @@ export class DevK3dStack extends CNDITerraformStack {
         chart: "argocd-apps",
         createNamespace: true,
         dependsOn: [
-          helmReleaseArgoCD,
+          helmReleaseArgoCD, // @ts-ignore - string is required because k3d provider has no @cdktf package
+          "${k3d_cluster.cndi_k3d_cluster}",
         ],
         name: "root-argo-app",
         namespace: "argocd",
