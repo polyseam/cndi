@@ -437,7 +437,7 @@ export default function getK3dResource(
   }
   const node = cndi_config.infrastructure.cndi.nodes[0] as K3dNodeItemSpec;
   const { name } = node;
-  const DEFAULT_NODE_COUNT = 1;
+  const DEFAULT_NODE_COUNT = 3;
   const count = node?.count || DEFAULT_NODE_COUNT;
 
   return {
