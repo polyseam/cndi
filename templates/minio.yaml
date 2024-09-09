@@ -137,7 +137,7 @@ outputs:
             name: myminio-tenant-config
           pools:
             - servers: '{{ $cndi.get_prompt_response(tenant_servers) }}'
-              volumesPerServer: '{{ $cndi.get_prompt_response(volumes_per_server) }}'
+              volumesPerServer: '{{ $cndi.get_prompt_response(volumes_per_tenant_server) }}'
               volumeClaimTemplate:
                 metadata:
                   name: data
