@@ -187,7 +187,7 @@ outputs:
       {}
 
         
-    $cndi.comment(mysql-heading): Mysql Connection Parameters
+    $cndi.comment(minio-heading): Minio Connection Parameters
     MINIO_TENANT_CREDENTIALS: "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' 
                                export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
     MINIO_ROOT_USER: "{{ $cndi.get_prompt_response(tenant_access_key) }}"
@@ -206,11 +206,18 @@ outputs:
 
     minio: |
       ## Minio
+      MinIO is a high-performance, distributed object storage system designed to support cloud-native applications with S3-compatible storage for unstructured, semi-structured and structured data. 
+      Some benefits of combining MinIO include:
+
+      High Performance: MinIO writes as fast as they come in. MinIO is used to build high performance infrastructure for machine learning, analytics and application data workloads.
+      Scalability: MinIO handles large amounts of data and scales horizontally across multiple nodes, This allows organizations to store and process massive amounts of data in real-time, making it suitable for big data and high-velocity data streaming use cases.
+      Durability: MinIO provides durable storage, allowing organizations to retain data for long periods of time, such as for historical analysis, compliance requirements, or data recovery purposes.
+      Fault Tolerance: MinIO erasure codes data across multiple nodes, providing fault tolerance and ensuring data durability.
+      Easy Integration: MinIO is easily integrated with like aws s3, a built-in framework for connecting with external systems. This makes it straightforward to stream data to MinIO for storage, and vice versa for data retrieval.
 
 
       This template deploys a Standalone production ready
       [minio operator and tenant](https://github.com/minio/operator/tree/master)
-
 
       To test the connection you can install the [MinIO CLient](https://min.io/docs/minio/linux/reference/minio-mc.html).
 
