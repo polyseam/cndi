@@ -9,7 +9,6 @@ import {
 
 import {
   App,
-  AwsEksManagedNodeGroupModule,
   AwsEksModule,
   AwsIamAssumableRoleWithOidcModule,
   AwsVpcModule,
@@ -152,11 +151,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const iamRoleAdditionalPolicies = {
-      efsRoleName: efsCsiPolicy.arn,
-      ebsRoleName: ebsCsiPolicy.arn,
-    };
-
     // deno-lint-ignore no-explicit-any
     const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
 
@@ -195,11 +189,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       subnetIdx++;
     }
 
-    const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
-      {};
+    const eksManagedNodeGroups: Record<
+      string,
+      CDKTFProviderAWS.eksNodeGroup.EksNodeGroup
+    > = {};
 
+    let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup;
     let nodeGroupIndex = 0;
-    let firstNodeGroup: AwsEksManagedNodeGroupModule;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeGroup?.count || 1;
@@ -227,39 +223,61 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
-      const taints = nodeGroup.taints?.map((taint) => ({
+      const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
         effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
       })) || [];
-
       const tags = {
         Name: `cndi-eks-node-group-${nodeGroupName}`,
         CNDIProject: project_name,
       };
+      const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
+        .LaunchTemplate(
+        this,
+        `cndi_aws_launch_template_${nodeGroupIndex}`,
+        {
+          namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
+          blockDeviceMappings: [
+            {
+              deviceName: "/dev/sdf",
+              ebs: {
+                volumeSize,
+              },
+            },
+          ],
+          tagSpecifications: [
+            {
+              resourceType: "instance",
+              tags,
+            },
+          ],
+          dependsOn: [],
+        },
+      );
 
       const labels = nodeGroup.labels || {};
-      eksManagedNodeGroups[nodeGroupName] = new AwsEksManagedNodeGroupModule(
+
+      eksManagedNodeGroups[nodeGroupName] = new CDKTFProviderAWS.eksNodeGroup
+        .EksNodeGroup(
         this,
         `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
-          name: nodeGroupName,
           clusterName: eksm.clusterNameOutput,
-          clusterVersion: eksm.clusterVersionOutput,
           subnetIds: subnetIds,
-          clusterServiceCidr: eksm.clusterServiceCidrOutput,
-          clusterPrimarySecurityGroupId:
-            eksm.clusterPrimarySecurityGroupIdOutput,
-          vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
           amiType: "AL2_x86_64",
-          ...scalingConfig,
           instanceTypes: [instanceType],
+          nodeGroupName,
+          nodeRoleArn: eksm.clusterIamRoleArnOutput,
+          scalingConfig,
+          launchTemplate: {
+            id: nodegroupLaunchTemplate.id,
+            version: `${nodegroupLaunchTemplate.latestVersion}`,
+          },
           capacityType: "ON_DEMAND",
           labels,
-          taints,
+          taint,
           tags,
-          iamRoleAdditionalPolicies,
-          enableEfaSupport: false,
           diskSize: volumeSize,
         },
       );
