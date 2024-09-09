@@ -39,22 +39,22 @@ prompts:
     type: Number
 
   - name: tenant_access_key
-    default: accesskey
-    message: 'Enter the access key for the MinIO tenant:'
+    default: '{{ $cndi.get_random_string(12) }}'
+    message: 'Enter the access key(root user) for the MinIO tenant:'
     type: Secret
 
-  - name: tenant_secret_Key
-    default: secretkey
-    message: 'Enter the secret key for the MinIO tenant:'
+  - name: tenant_secret_key
+    default: '{{ $cndi.get_random_string(24) }}'
+    message: 'Enter the secret key(root password)  for the MinIO tenant:'
     type: Secret
 
   - name: tenant_name
-    default: tenant-default
+    default: myminiotenant 
     message: 'Enter the name of the MinIO tenant:'
     type: Input
 
   - name: bucket_name
-    default: my-bucket
+    default: myminiobucket
     message: 'Enter the name of the bucket to create in the MinIO tenant:'
     type: Input
 
@@ -121,8 +121,7 @@ outputs:
             app.kubernetes.io/instance: tenant
         type: Opaque
         stringData:
-          config.env: |
-            $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_CREDENTIALS)
+          config.env: $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_CREDENTIALS)
       tenant-crd:
         apiVersion: minio.min.io/v2
         kind: Tenant
@@ -143,8 +142,7 @@ outputs:
                 metadata:
                   name: data
                 spec:
-                  accessModes:
-                    - ReadWriteOnce
+                  storageClassName: rwo
                   resources:
                     requests:
                       storage: 10Gi
@@ -187,13 +185,14 @@ outputs:
       {}
 
         
-    $cndi.comment(minio-heading): Minio Connection Parameters
-    MINIO_TENANT_CREDENTIALS: "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' 
-                               export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
+    $cndi.comment(minio-heading): sMinio Connection Parameters
+    MINIO_TENANT_CREDENTIALS: | 
+      "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' 
+      export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
     MINIO_ROOT_USER: "{{ $cndi.get_prompt_response(tenant_access_key) }}"
     MINIO_ROOT_PASSWORD: "{{ $cndi.get_prompt_response(tenant_secret_key) }}"
-    TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_secret_key) }}"
-
+    TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
+    MINIO_TENANT_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
