@@ -121,7 +121,8 @@ outputs:
             app.kubernetes.io/instance: tenant
         type: Opaque
         stringData:
-          config.env: $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_CREDENTIALS)
+          config.env: |-
+            $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_CREDENTIALS)
       tenant-crd:
         apiVersion: minio.min.io/v2
         kind: Tenant
@@ -138,14 +139,8 @@ outputs:
           pools:
             - servers: '{{ $cndi.get_prompt_response(tenant_servers) }}'
               volumesPerServer: '{{ $cndi.get_prompt_response(volumes_per_tenant_server) }}'
-              volumeClaimTemplate:
-                metadata:
-                  name: data
-                spec:
-                  storageClassName: rwo
-                  resources:
-                    requests:
-                      storage: 10Gi
+              storageClassName: rwo
+              size: 10Gi
           buckets:
             - name: '{{ $cndi.get_prompt_response(bucket_name) }}'
       argo-ingress:
@@ -186,9 +181,7 @@ outputs:
 
         
     $cndi.comment(minio-heading): sMinio Connection Parameters
-    MINIO_TENANT_CREDENTIALS: | 
-      "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' 
-      export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
+    MINIO_TENANT_CREDENTIALS: "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
     MINIO_ROOT_USER: "{{ $cndi.get_prompt_response(tenant_access_key) }}"
     MINIO_ROOT_PASSWORD: "{{ $cndi.get_prompt_response(tenant_secret_key) }}"
     TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
