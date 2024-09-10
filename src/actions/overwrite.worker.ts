@@ -189,18 +189,23 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         "cndi-run.yaml",
       );
 
-      await stageFile(
-        runWorkflowPath,
-        getCndiRunGitHubWorkflowYamlContents(
-          config,
-          options?.workflowSourceRef,
-        ),
-      );
-
-      console.log(
-        ccolors.success("staged 'cndi-run' GitHub workflow:"),
-        ccolors.key_name(runWorkflowPath),
-      );
+      if (config?.provider !== "dev") {
+        await stageFile(
+          runWorkflowPath,
+          getCndiRunGitHubWorkflowYamlContents(
+            config,
+            options?.workflowSourceRef,
+          ),
+        );
+        console.log(
+          ccolors.success("staged 'cndi-run' GitHub workflow:"),
+          ccolors.key_name(runWorkflowPath),
+        );
+      } else {
+        console.log(
+          "Skipping 'cndi-run' workflow for 'dev' provider.",
+        );
+      }
 
       if (options?.enablePrChecks) {
         const onPullWorkflowPath = path.join(
