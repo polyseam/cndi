@@ -207,12 +207,7 @@ export class DevK3dStack extends CNDITerraformStack {
         ],
       },
     );
-    this.addOverride(
-      "resource.helm_release.cndi_helm_release_argocd.depends_on",
-      [
-        "k3d_cluster.cndi_k3d_cluster",
-      ],
-    );
+
     if (useSshRepoAuth()) {
       new CDKTFProviderKubernetes.secret.Secret(
         this,
@@ -415,6 +410,7 @@ export class DevK3dStack extends CNDITerraformStack {
     this.addOverride(
       "resource.helm_release.cndi_helm_release_argocd_apps.depends_on",
       [
+        "kubernetes_secret.cndi_kubernetes_secret_argocd_private_repo",
         "k3d_cluster.cndi_k3d_cluster",
       ],
     );
