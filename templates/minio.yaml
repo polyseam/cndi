@@ -28,6 +28,11 @@ prompts:
     message: 'Enter the domain name for the MinIO tenant:'
     type: Input
 
+  - name: tenant_name
+    default: myminio 
+    message: 'Enter the name of the MinIO tenant account:'
+    type: Input
+
   - name: tenant_servers
     default: 4
     message: 'Specify the number of tenant servers to deploy:'
@@ -37,25 +42,20 @@ prompts:
     default: 2
     message: 'Specify the number of volumes per server:'
     type: Number
-
-  - name: tenant_access_key
+    
+  - name: console_access_key
     default: '{{ $cndi.get_random_string(12) }}'
-    message: 'Enter the access key(root user) for the MinIO tenant:'
+    message: 'Enter the "Username" for the MinIO user:'
     type: Secret
 
-  - name: tenant_secret_key
-    default: '{{ $cndi.get_random_string(24) }}'
-    message: 'Enter the secret key(root password)  for the MinIO tenant:'
+  - name: console_secret_key
+    default: '{{ $cndi.get_random_string(18) }}'
+    message: 'Enter the "Password" for the MinIO user:'
     type: Secret
-
-  - name: tenant_name
-    default: myminiotenant 
-    message: 'Enter the name of the MinIO tenant:'
-    type: Input
 
   - name: bucket_name
-    default: myminiobucket
-    message: 'Enter the name of the bucket to create in the MinIO tenant:'
+    default: mydefaultbucket
+    message: 'Enter the name of the bucket to create in your MinIO tenant account:'
     type: Input
 
 
@@ -82,11 +82,37 @@ outputs:
             {}
 
     cluster_manifests:
-      tenant-server-ingress:
+      myminio-ui-ingress:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
-          name: tenant-server-ingress
+          name: '{{ $cndi.get_prompt_response(tenant_name) }}-ui-ingress'
+          namespace: minio
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        spec:
+          tls:
+            - hosts:
+                - '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+              secretName: cluster-issuer-private-key-default-minio-ui
+          rules:
+            - host: '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: '{{ $cndi.get_prompt_response(tenant_name) }}-console'
+                        port:
+                          name: https-console
+      myminio-server-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: myminio-server-ingress
           namespace: minio
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
@@ -108,11 +134,11 @@ outputs:
                     name: minio
                     port:
                       name: https-minio
-      myminio-tenant-config:
+      minio-tenant-root-creds-secret:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: myminio-tenant-config
+          name: minio-tenant-root-creds-secret
           namespace: minio
           annotations:
             sealedsecrets.bitnami.com/cluster-wide: "true"
@@ -121,9 +147,8 @@ outputs:
             app.kubernetes.io/instance: tenant
         type: Opaque
         stringData:
-          config.env: |-
-            $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_CREDENTIALS)
-      tenant-crd:
+          config.env: $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_ROOT_CREDENTIALS)
+      default-tenant-account-crd:
         apiVersion: minio.min.io/v2
         kind: Tenant
         metadata:
@@ -134,15 +159,39 @@ outputs:
           labels:
             app: minio
         spec:
+          features:  
+            bucketDNS: false
+          users:
+            - name: default-admin-user
+          buckets:
+            - name: '{{ $cndi.get_prompt_response(bucket_name) }}'
+          mountPath: /data              
           configuration:
-            name: myminio-tenant-config
+            name: minio-tenant-root-creds-secret
           pools:
             - servers: '{{ $cndi.get_prompt_response(tenant_servers) }}'
               volumesPerServer: '{{ $cndi.get_prompt_response(volumes_per_tenant_server) }}'
-              storageClassName: rwo
-              size: 10Gi
-          buckets:
-            - name: '{{ $cndi.get_prompt_response(bucket_name) }}'
+              volumeClaimTemplate:
+                apiVersion: v1
+                kind: persistentvolumeclaims
+                metadata: { }
+                spec:
+                  resources:
+                    requests:
+                      storage: 5Gi
+                  storageClassName: rwo      
+      
+      default-admin-user-secret:        
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: default-admin-user
+          namespace: minio
+        type: Opaque       
+        stringData:
+          CONSOLE_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_USER_NAME)
+          CONSOLE_SECRET_KEY: $cndi_on_ow.seal_secret_from_env_var(MINIO_TENANT_USER_PASSWORD)   
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
@@ -180,13 +229,14 @@ outputs:
       {}
 
         
-    $cndi.comment(minio-heading): sMinio Connection Parameters
-    MINIO_TENANT_CREDENTIALS: "export MINIO_ROOT_USER='{{ $cndi.get_prompt_response(tenant_access_key) }}' export MINIO_ROOT_PASSWORD='{{ $cndi.get_prompt_response(tenant_secret_key) }}'"
-    MINIO_ROOT_USER: "{{ $cndi.get_prompt_response(tenant_access_key) }}"
-    MINIO_ROOT_PASSWORD: "{{ $cndi.get_prompt_response(tenant_secret_key) }}"
-    TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
+    $cndi.comment(minio-heading): Minio Connection Parameters
+    MINIO_TENANT_ROOT_CREDENTIALS: 'export MINIO_ROOT_USER="{{ $cndi.get_random_string(18) }}" 
+      export MINIO_ROOT_PASSWORD="{{ $cndi.get_random_string(24) }}"'
+    MINIO_USER_NAME: "{{ $cndi.get_prompt_response(console_access_key) }}"
+    MINIO_USER_PASSWORD: "{{ $cndi.get_prompt_response(console_secret_key) }}"
+    MINIO_TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
     MINIO_TENANT_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
-
+    MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
