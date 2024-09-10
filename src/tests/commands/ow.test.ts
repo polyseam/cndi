@@ -3,6 +3,7 @@ import { assert } from "test-deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import {
+  listAllFilePaths,
   listChangedFilePaths,
   setsAreEquivalent,
 } from "src/tests/helpers/util.ts";
@@ -34,6 +35,30 @@ Deno.test(
         assert(status.success);
       });
       assert(changedFilePaths.length === 0);
+    });
+
+    await t.step("cleanup", cleanup);
+  },
+);
+
+Deno.test(
+  "'cndi ow' should not create cndi-run GitHub workflow for 'dev' provider",
+  async (t) => {
+    let dir = "";
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+      await runCndi("init", "-t", "basic", "-l", "dev/microk8s");
+    });
+
+    await t.step("test", async () => {
+      const filepaths = await listAllFilePaths(dir);
+      const pathToCndiRunWorkflow = path.join(
+        ".github",
+        "workflows",
+        "cndi-run.yaml",
+      );
+      assert(!filepaths.includes(pathToCndiRunWorkflow));
     });
 
     await t.step("cleanup", cleanup);
