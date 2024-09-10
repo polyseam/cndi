@@ -10,6 +10,8 @@ import {
   TerraformVariable,
 } from "cdktf";
 
+export type { ITerraformDependable } from "cdktf";
+
 export {
   App,
   Fn,

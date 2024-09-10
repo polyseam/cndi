@@ -74,6 +74,8 @@ const aksValues = (cndi_config: CNDIConfig) =>
     },
   });
 
+const k3dValues = (cndi_config: CNDIConfig) => getBaseValues(cndi_config);
+
 const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
   const cndiDistribution = cndi_config.distribution;
   const providerConfigs = {
@@ -81,6 +83,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
     gke: gkeValues(cndi_config),
     aks: aksValues(cndi_config),
     microk8s: gkeValues(cndi_config), // Not ready
+    k3d: k3dValues(cndi_config),
     clusterless: null,
   };
 

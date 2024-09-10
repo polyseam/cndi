@@ -93,7 +93,25 @@ interface MultipassNodeItemSpec extends BaseNodeItemSpec {
   volume_size?: number;
   disk_size?: number;
 }
-
+// cndi_config.jsonc["nodes"][kind==="dev"]
+interface K3dNodeItemSpec extends BaseNodeItemSpec {
+  name: string;
+  cpus?: number;
+  memory?: number | string; // if integer, assume G
+  disk?: number | string; // if integer, assume G
+  disk_size_gb?: number;
+  volume_size?: number;
+  disk_size?: number;
+}
+interface KindNodeItemSpec extends BaseNodeItemSpec {
+  name: string;
+  cpus?: number;
+  memory?: number | string; // if integer, assume G
+  disk?: number | string; // if integer, assume G
+  disk_size_gb?: number;
+  volume_size?: number;
+  disk_size?: number;
+}
 // cndi_config.jsonc["nodes"][kind==="azure"]
 interface AzureNodeItemSpec extends BaseNodeItemSpec {
   machine_type?: string;
@@ -388,6 +406,8 @@ export type {
   GCPDeploymentTargetConfiguration,
   GCPNodeItemSpec,
   GKENodeItemSpec,
+  K3dNodeItemSpec,
+  KindNodeItemSpec,
   KubernetesManifest,
   KubernetesSecret,
   KubernetesSecretWithStringData,
