@@ -1,4 +1,32 @@
+blocks: 
 
+  - name: deploy_default_minio_ui_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: '{{ $cndi.get_prompt_response(tenant_name) }}-ui-ingress'
+        namespace: minio
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      spec:
+        tls:
+          - hosts:
+              - '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+            secretName: cluster-issuer-private-key-default-minio-ui
+        rules:
+          - host: '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: '{{ $cndi.get_prompt_response(tenant_name) }}-console'
+                      port:
+                        name: https-console     
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -22,6 +50,11 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
+  - name: deploy_default_minio_ingress
+    default: true
+    message: >-
+      Do you want to expose your minio console ui to the web?
+    type: Confirm
 
   - name: tenant_domain_name
     default: tenant.example.com
@@ -29,7 +62,7 @@ prompts:
     type: Input
 
   - name: tenant_name
-    default: myminio 
+    default: default-minio 
     message: 'Enter the name of the MinIO tenant account:'
     type: Input
 
@@ -82,37 +115,12 @@ outputs:
             {}
 
     cluster_manifests:
-      myminio-ui-ingress:
+
+      default-minio-server-ingress:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
-          name: '{{ $cndi.get_prompt_response(tenant_name) }}-ui-ingress'
-          namespace: minio
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          tls:
-            - hosts:
-                - '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
-              secretName: cluster-issuer-private-key-default-minio-ui
-          rules:
-            - host: '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: '{{ $cndi.get_prompt_response(tenant_name) }}-console'
-                        port:
-                          name: https-console
-      myminio-server-ingress:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: myminio-server-ingress
+          name: default-minio-server-ingress
           namespace: minio
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
@@ -206,6 +214,12 @@ outputs:
             - ==
             - true
 
+      default_minio-ingress:
+        $cndi.get_block(deploy_default_ui_ingress_blk):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_default_ingress) }}"
+            - ==
+            - true      
 
       external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
@@ -272,7 +286,7 @@ outputs:
 
       [Command](https://min.io/docs/minio/linux/reference/minio-mc/mc-cp.html) to copy object to or from Minio bucket.
       ```
-      mc cp --recursive ~/mydata/ myminio/mydata/
+      mc cp --recursive ~/mydata/ default-minio/mydata/
       ```
 
       You can find the MINIO_TENANT_CREDENTIALS and TENANT_DOMAIN_NAME in the .env file.
