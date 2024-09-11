@@ -4,7 +4,8 @@ import { CNDIConfig, Microk8sAddon } from "src/types.ts";
 import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
 import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_https_manifest.yaml.tftpl.ts";
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
-
+import getRwmStorageClassTemplate from "src/outputs/terraform/manifest-templates/rwm_storage_class.yaml.tftpl.ts";
+import getRwoStorageClassTemplate from "src/outputs/terraform/manifest-templates/rwo_storage_class.yaml.tftpl.ts";
 import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 
 import {
@@ -127,7 +128,10 @@ const getLeaderCloudInitYaml = (
     `${PATH_TO_MANIFESTS}/root-application.yaml`;
   const PATH_TO_CLUSTER_REPO_SECRET_MANIFEST =
     `${PATH_TO_MANIFESTS}/cluster-repo-secret.yaml`;
-
+  const PATH_TO_RWM_STORAGE_CLASS_MANIFEST =
+    `${PATH_TO_MANIFESTS}/rwm_storage_class.yaml`;
+  const PATH_TO_RWO_STORAGE_CLASS_MANIFEST =
+    `${PATH_TO_MANIFESTS}/rwo_storage_class.yaml`;
   const PATH_TO_SEALED_SECRETS_PRIVATE_KEY =
     `${WORKING_DIR}/sealed_secrets_private_key.key`;
   const PATH_TO_SEALED_SECRETS_PUBLIC_KEY =
@@ -135,9 +139,9 @@ const getLeaderCloudInitYaml = (
 
   const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
-  let packages = ["apache2-utils", "nfs-common"];
+  const packages = ["apache2-utils", "nfs-common"];
 
-  let nfsInstallCommands = [
+  const nfsInstallCommands = [
     `echo "Installing nfs on host: $(hostname)"`,
     // because this next line uses interpolation at runtime
     // we install the nfs addon manually rather than declaritively
@@ -158,12 +162,20 @@ const getLeaderCloudInitYaml = (
   ];
 
   if (isDevCluster(config)) {
-    packages = ["apache2-utils"]; // no nfs-common on dev clusters
     storageClassSetupCommands = [
-      `echo "Setting hostpath-storage as default storage class"`,
-      `echo "hostpath-storage is now the default storage class"`,
+      `echo "Setting rwo as default storage class"`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl apply -f ${PATH_TO_RWO_STORAGE_CLASS_MANIFEST}`,
+        `microk8s failed to apply rwo storageclass`,
+      ),
+      `echo "rwo is now the default storage class"`,
+      `echo "Setting rwm as default storage class"`,
+      loopUntilSuccess(
+        `sudo microk8s kubectl apply -f ${PATH_TO_RWM_STORAGE_CLASS_MANIFEST}`,
+        `microk8s failed to apply rwm storageclass`,
+      ),
+      `echo "rwm is now the default storage class"`,
     ];
-    nfsInstallCommands = []; // no nfs on dev clusters, hostpath-storage is installed declaratively
   }
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
@@ -184,6 +196,14 @@ const getLeaderCloudInitYaml = (
       {
         path: PATH_TO_CLUSTER_REPO_SECRET_MANIFEST,
         content: getClusterRepoSecretYaml(useSshRepoAuth),
+      },
+      {
+        path: PATH_TO_RWM_STORAGE_CLASS_MANIFEST,
+        content: getRwmStorageClassTemplate(),
+      },
+      {
+        path: PATH_TO_RWO_STORAGE_CLASS_MANIFEST,
+        content: getRwoStorageClassTemplate(),
       },
       {
         path: PATH_TO_SEALED_SECRETS_PUBLIC_KEY,
