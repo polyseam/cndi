@@ -12,7 +12,7 @@ blocks:
   - name: azure-nodes
     content:
       nodes:
-        - name: gpu-enabled
+        - name: gpuenabled
           $cndi.comment(azure_vantage): https://instances.vantage.sh/azure/vm/nc4ast4-v3
           instance_type: nc4ast4-v3
           labels:
