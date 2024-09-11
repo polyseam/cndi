@@ -507,7 +507,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name("cert-manager.application.yaml"),
         );
 
-        if (cert_manager?.self_signed) {
+        if (cert_manager?.self_signed || config?.provider == "dev") {
           await stageFile(
             path.join(
               "cndi",
@@ -582,9 +582,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       const open_ports = config?.infrastructure?.cndi?.open_ports || [];
 
       const isMicrok8sCluster = config?.distribution === "microk8s";
+      const isNotDevCluster = config?.provider !== "dev";
 
       if (
-        isMicrok8sCluster
+        isMicrok8sCluster && isNotDevCluster
       ) {
         await Promise.all([
           stageFile(
