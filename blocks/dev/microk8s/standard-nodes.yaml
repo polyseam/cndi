@@ -1,4 +1,4 @@
-- name: "{{ $cndi.get_prompt_response(project_name) }}-node"
-  cpus: 4
-  memory: 16G
-  disk: 100G
+- name: "{{ $cndi.get_prompt_response(project_name) }}"
+  cpus: 2
+  memory: 8G
+  disk: 50G

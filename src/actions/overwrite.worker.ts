@@ -31,9 +31,6 @@ import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/cndi-fns-workflow.ts";
 
-import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
-import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
-
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
@@ -507,7 +504,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name("cert-manager.application.yaml"),
         );
 
-        if (cert_manager?.self_signed) {
+        if (cert_manager?.self_signed || config?.provider == "dev") {
           await stageFile(
             path.join(
               "cndi",
@@ -578,30 +575,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name("private_nginx.application.yaml"),
         );
       }
-
-      const open_ports = config?.infrastructure?.cndi?.open_ports || [];
-
-      const isMicrok8sCluster = config?.distribution === "microk8s";
-
-      if (
-        isMicrok8sCluster
-      ) {
-        await Promise.all([
-          stageFile(
-            path.join(
-              "cndi",
-              "cluster_manifests",
-              "ingress-tcp-services-configmap.yaml",
-            ),
-            getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
-          ),
-          stageFile(
-            path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
-            getMicrok8sIngressDaemonsetManifest(open_ports),
-          ),
-        ]);
-      }
-      console.log(ccolors.success("staged open ports manifests"));
 
       await stageFile(
         path.join("cndi", "cluster_manifests", "Chart.yaml"),
