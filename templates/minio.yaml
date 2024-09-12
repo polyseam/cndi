@@ -50,16 +50,14 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
-  - name: deploy_default_minio_ingress
-    default: true
-    message: >-
-      Do you want to expose your minio console ui to the web?
-    type: Confirm
+
 
   - name: tenant_domain_name
     default: tenant.example.com
     message: 'Enter the domain name for the MinIO tenant:'
     type: Input
+    validators:
+      - hostname # FQDN
 
   - name: tenant_name
     default: default-minio 
@@ -75,16 +73,40 @@ prompts:
     default: 2
     message: 'Specify the number of volumes per server:'
     type: Number
-    
+
+  - name: deploy_default_minio_ingress
+    default: true
+    message: >-
+      Do you want to expose your minio console ui to the web?
+    type: Confirm 
+
+  - name: default_minio_ingress_domain
+    default: myminioconsole.example.com
+    message: 'Enter the domain name for the MinIO tenant console ui:'
+    type: Input
+    validators:
+      - hostname # FQDN
+      - min_length: 3 
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_default_minio_ingress) }}"
+      - ==
+      - true 
+
   - name: console_access_key
     default: '{{ $cndi.get_random_string(12) }}'
     message: 'Enter the "Username" for the MinIO user:'
     type: Secret
+    validators:
+      - hostname # FQDN
+      - min_length: 8     
 
   - name: console_secret_key
     default: '{{ $cndi.get_random_string(18) }}'
     message: 'Enter the "Password" for the MinIO user:'
     type: Secret
+    validators:
+      - hostname # FQDN
+      - min_length: 8
 
   - name: bucket_name
     default: mydefaultbucket
@@ -246,8 +268,8 @@ outputs:
     $cndi.comment(minio-heading): Minio Connection Parameters
     MINIO_TENANT_ROOT_CREDENTIALS: 'export MINIO_ROOT_USER="{{ $cndi.get_random_string(18) }}" 
       export MINIO_ROOT_PASSWORD="{{ $cndi.get_random_string(24) }}"'
-    MINIO_USER_NAME: "{{ $cndi.get_prompt_response(console_access_key) }}"
-    MINIO_USER_PASSWORD: "{{ $cndi.get_prompt_response(console_secret_key) }}"
+    MINIO_TENANT_USER_NAME: "{{ $cndi.get_prompt_response(console_access_key) }}"
+    MINIO_TENANT_USER_PASSWORD: "{{ $cndi.get_prompt_response(console_secret_key) }}"
     MINIO_TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
     MINIO_TENANT_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
     MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
