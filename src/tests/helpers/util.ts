@@ -38,7 +38,7 @@ const hasSameFilesAfter = async (
 };
 
 // Function to list all file paths in the current directory including subfolders
-async function listAllFilePaths(directory: string): Promise<string[]> {
+export async function listAllFilePaths(directory: string): Promise<string[]> {
   const filePaths: string[] = [];
 
   for await (const entry of walk(directory)) {
