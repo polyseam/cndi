@@ -105,8 +105,7 @@ const getLeaderCloudInitYaml = (
       },
       {
         name: "community",
-        url: "/snap/microk8s/current/addons/community",
-        reference: microk8sVersion,
+        url: "https://github.com/canonical/microk8s-community-addons",
       },
     ],
   };
@@ -140,10 +139,11 @@ const getLeaderCloudInitYaml = (
 
   const nfsInstallCommands = [
     `echo "Installing nfs on host: $(hostname)"`,
+    "sudo microk8s status",
     // because this next line uses interpolation at runtime
     // we install the nfs addon manually rather than declaritively
     loopUntilSuccess(
-      "sudo microk8s enable nfs",
+      'sudo microk8s enable nfs -n "$(hostname)"',
       "microk8s failed to enable 'nfs' addon",
     ),
     `echo "nfs installed"`,
@@ -152,8 +152,8 @@ const getLeaderCloudInitYaml = (
   let storageClassSetupCommands = [
     `echo "Setting NFS as default storage class"`,
     loopUntilSuccess(
-      `sudo microk8s kubectl patch storageclass nfs -p '{ "metadata": { "annotations": { "storageclass.kubernetes.io/is-default-class": "true" } } }'`,
-      `microk8s failed to install nfs`,
+      `sudo microk8s kubectl apply -f ${PATH_TO_RWM_STORAGE_CLASS_MANIFEST}`,
+      `microk8s failed to apply rwm storageclass`,
     ),
     `echo "NFS is now the default storage class"`,
   ];
@@ -235,7 +235,7 @@ const getLeaderCloudInitYaml = (
       `echo "Setting microk8s config"`,
 
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
-      `sleep 10`,
+      `sleep 20`,
       ...nfsInstallCommands,
 
       // group "microk8s" is created by microk8s snap
