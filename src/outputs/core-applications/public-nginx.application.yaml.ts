@@ -49,17 +49,6 @@ const eksValues = (cndi_config: CNDIConfig) =>
     },
   });
 
-const devValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
-    controller: {
-      service: {
-        external: {
-          enabled: false,
-        },
-      },
-    },
-  });
-
 const gkeValues = (cndi_config: CNDIConfig) => getBaseValues(cndi_config);
 
 const aksValues = (cndi_config: CNDIConfig) =>
@@ -91,7 +80,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
     eks: eksValues(cndi_config),
     gke: gkeValues(cndi_config),
     aks: aksValues(cndi_config),
-    microk8s: devValues(cndi_config), // Not ready
+    microk8s: gkeValues(cndi_config), // Not ready
     clusterless: null,
   };
 
