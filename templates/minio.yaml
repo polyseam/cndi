@@ -97,7 +97,6 @@ prompts:
     message: 'Enter the "Username" for the MinIO tenant user:'
     type: Secret
     validators:
-      - hostname # FQDN
       - min_length: 8     
 
   - name: console_secret_key
@@ -105,7 +104,6 @@ prompts:
     message: 'Enter the "Password" for your MinIO tenant user:'
     type: Secret
     validators:
-      - hostname # FQDN
       - min_length: 8
 
   - name: bucket_name
