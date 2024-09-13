@@ -7,11 +7,8 @@ export default function getStorageClassManifestYamlTftpl() {
     kind: "StorageClass",
     metadata: {
       name: "rwm",
-      annotations: {
-        "storageclass.kubernetes.io/is-default-class": "false",
-      },
     },
-    provisioner: "cluster.local/nfs-server-provisioner",
+    provisioner: "microk8s.io/hostpath",
     reclaimPolicy: "Delete",
     volumeBindingMode: "Immediate",
   };

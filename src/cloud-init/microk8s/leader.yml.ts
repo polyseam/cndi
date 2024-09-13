@@ -136,19 +136,7 @@ const getLeaderCloudInitYaml = (
 
   const MICROK8S_ADD_NODE_TOKEN_TTL = 4294967295; //seconds 2^32 - 1 (136 Years)
 
-  const packages = ["apache2-utils", "nfs-common"];
-
-  const nfsInstallCommands = [
-    `echo "Installing nfs on host: $(hostname)"`,
-    "sudo microk8s status",
-    // because this next line uses interpolation at runtime
-    // we install the nfs addon manually rather than declaritively
-    loopUntilSuccess(
-      'sudo microk8s enable nfs -n "$(hostname)"',
-      "microk8s failed to enable 'nfs' addon",
-    ),
-    `echo "nfs installed"`,
-  ];
+  const packages = ["apache2-utils"];
 
   const storageClassSetupCommands = [
     `echo "Setting rwo as default storage class"`,
@@ -226,7 +214,6 @@ const getLeaderCloudInitYaml = (
 
       `sudo snap set microk8s config="$(cat ${PATH_TO_LAUNCH_CONFIG})"`,
       `sleep 20`,
-      ...nfsInstallCommands,
 
       // group "microk8s" is created by microk8s snap
       `echo "Adding ubuntu user to microk8s group"`,
