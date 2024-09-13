@@ -105,7 +105,8 @@ const getLeaderCloudInitYaml = (
       },
       {
         name: "community",
-        url: "https://github.com/canonical/microk8s-community-addons",
+        url: "/snap/microk8s/current/addons/community",
+        reference: microk8sVersion,
       },
     ],
   };
@@ -149,31 +150,20 @@ const getLeaderCloudInitYaml = (
     `echo "nfs installed"`,
   ];
 
-  let storageClassSetupCommands = [
-    `echo "Setting NFS as default storage class"`,
+  const storageClassSetupCommands = [
+    `echo "Setting rwo as default storage class"`,
+    loopUntilSuccess(
+      `sudo microk8s kubectl apply -f ${PATH_TO_RWO_STORAGE_CLASS_MANIFEST}`,
+      `microk8s failed to apply rwo storageclass`,
+    ),
+    `echo "rwo is now the default storage class"`,
+    `echo "Setting rwm as default storage class"`,
     loopUntilSuccess(
       `sudo microk8s kubectl apply -f ${PATH_TO_RWM_STORAGE_CLASS_MANIFEST}`,
       `microk8s failed to apply rwm storageclass`,
     ),
-    `echo "NFS is now the default storage class"`,
+    `echo "rwm is now the default storage class"`,
   ];
-
-  if (isDevCluster(config)) {
-    storageClassSetupCommands = [
-      `echo "Setting rwo as default storage class"`,
-      loopUntilSuccess(
-        `sudo microk8s kubectl apply -f ${PATH_TO_RWO_STORAGE_CLASS_MANIFEST}`,
-        `microk8s failed to apply rwo storageclass`,
-      ),
-      `echo "rwo is now the default storage class"`,
-      `echo "Setting rwm as default storage class"`,
-      loopUntilSuccess(
-        `sudo microk8s kubectl apply -f ${PATH_TO_RWM_STORAGE_CLASS_MANIFEST}`,
-        `microk8s failed to apply rwm storageclass`,
-      ),
-      `echo "rwm is now the default storage class"`,
-    ];
-  }
 
   // https://cloudinit.readthedocs.io/en/latest/reference/examples.html
   const content = {
@@ -271,7 +261,7 @@ const getLeaderCloudInitYaml = (
         `sudo microk8s kubectl --namespace "kube-system" create secret tls "${SEALED_SECRETS_SECRET_NAME}" --cert="${PATH_TO_SEALED_SECRETS_PUBLIC_KEY}" --key="${PATH_TO_SEALED_SECRETS_PRIVATE_KEY}"`,
         "failed to create sealed-secrets-key secret",
       ),
-      `sleep 10`,
+      `sleep 20`,
       loopUntilSuccess(
         `sudo microk8s kubectl --namespace "kube-system" label secret "${SEALED_SECRETS_SECRET_NAME}" sealedsecrets.bitnami.com/sealed-secrets-key=active`,
         "failed to label sealed-secrets-key secret",
