@@ -54,7 +54,7 @@ prompts:
 
   - name: tenant_domain_name
     default: tenant.example.com
-    message: 'Enter the domain name for the MinIO tenant:'
+    message: 'Enter the domain name for the MinIO tenant api:'
     type: Input
     validators:
       - hostname # FQDN
@@ -94,7 +94,7 @@ prompts:
 
   - name: console_access_key
     default: '{{ $cndi.get_random_string(12) }}'
-    message: 'Enter the "Username" for the MinIO user:'
+    message: 'Enter the "Username" for the MinIO tenant user:'
     type: Secret
     validators:
       - hostname # FQDN
@@ -102,7 +102,7 @@ prompts:
 
   - name: console_secret_key
     default: '{{ $cndi.get_random_string(18) }}'
-    message: 'Enter the "Password" for the MinIO user:'
+    message: 'Enter the "Password" for your MinIO tenant user:'
     type: Secret
     validators:
       - hostname # FQDN
@@ -237,9 +237,9 @@ outputs:
             - true
 
       default_minio-ingress:
-        $cndi.get_block(deploy_default_ui_ingress_blk):
+        $cndi.get_block(deploy_default_minio_ui_ingress_blk):
           condition:
-            - "{{ $cndi.get_prompt_response(deploy_default_ingress) }}"
+            - "{{ $cndi.get_prompt_response(deploy_default_minio_ingress) }}"
             - ==
             - true      
 
