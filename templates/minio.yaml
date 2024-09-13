@@ -51,16 +51,15 @@ prompts:
       - ==
       - true
 
-
   - name: tenant_domain_name
-    default: tenant.example.com
-    message: 'Enter the domain name for the MinIO tenant api:'
+    default: myminiotenant.example.com
+    message: 'What hostname should the MinIO tenant be accessible at'
     type: Input
     validators:
       - hostname # FQDN
 
   - name: tenant_name
-    default: default-minio 
+    default: myminiotenant 
     message: 'Enter the name of the MinIO tenant account:'
     type: Input
 
@@ -82,7 +81,7 @@ prompts:
 
   - name: default_minio_ingress_domain
     default: myminioconsole.example.com
-    message: 'Enter the domain name for the MinIO tenant console ui:'
+    message: 'What hostname should the MinIO console ui be accessible at'
     type: Input
     validators:
       - hostname # FQDN
@@ -107,7 +106,7 @@ prompts:
       - min_length: 8
 
   - name: bucket_name
-    default: mydefaultbucket
+    default: myminiobucket
     message: 'Enter the name of the bucket to create in your MinIO tenant account:'
     type: Input
 
@@ -234,7 +233,7 @@ outputs:
             - ==
             - true
 
-      default_minio-ingress:
+      default-minio-ingress:
         $cndi.get_block(deploy_default_minio_ui_ingress_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_default_minio_ingress) }}"
@@ -270,7 +269,7 @@ outputs:
     MINIO_TENANT_USER_PASSWORD: "{{ $cndi.get_prompt_response(console_secret_key) }}"
     MINIO_TENANT_DOMAIN_NAME: "{{ $cndi.get_prompt_response(tenant_domain_name) }}"
     MINIO_TENANT_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
-    MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(tenant_name) }}"
+    MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(bucket_name) }}"
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
