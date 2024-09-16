@@ -90,7 +90,6 @@ export const ccolors = {
 
 // Polyseam Modules
 export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate-response";
 
 export {
   GHRError,
