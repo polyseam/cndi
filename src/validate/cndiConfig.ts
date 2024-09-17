@@ -309,24 +309,63 @@ export default function validateConfig(
     }
 
     if (
-      config?.provider === "dev" &&
-      config?.infrastructure?.cndi?.nodes?.length > 1
+      config?.provider === "dev"
     ) {
-      throw new Error(
-        [
-          cndiConfigLabel,
-          ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
-          ccolors.error("but it has multiple"),
-          ccolors.key_name('"infrastructure.cndi.nodes"'),
-          ccolors.error("entries with the"),
-          ccolors.key_name('"kind"'),
-          ccolors.error(
-            'value of "dev". Only one node can be deployed when doing dev deployments.',
-          ),
-        ].join(" "),
-        { cause: 911 },
-      );
+      const devNode = firstNode;
+
+      if (devNode?.count && devNode.count !== 1) {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error("but it has a dev node with a"),
+            ccolors.key_name("count"),
+            ccolors.error("defined and not equal to"),
+            ccolors.key_name("1"),
+            ccolors.error(
+              "Only one node can be deployed when doing dev deployments.",
+            ),
+          ].join(" "),
+          { cause: 911 },
+        );
+      }
+
+      if (devNode?.min_count && devNode.min_count !== 1) {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error("but it has a dev node with a"),
+            ccolors.key_name("min_count"),
+            ccolors.error("defined and not equal to"),
+            ccolors.key_name("1"),
+            ccolors.error(
+              "Only one node can be deployed when doing dev deployments.",
+            ),
+          ].join(" "),
+          { cause: 911 },
+        );
+      }
+
+      if (devNode?.max_count && devNode.max_count !== 1) {
+        throw new Error(
+          [
+            cndiConfigLabel,
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.error("but it has a dev node with a"),
+            ccolors.key_name("max_count"),
+            ccolors.error("defined and not equal to"),
+            ccolors.key_name("1"),
+            ccolors.error(
+              "Only one node can be deployed when doing dev deployments.",
+            ),
+          ].join(" "),
+          { cause: 911 },
+        );
+      }
     }
 
     if (!config?.cndi_version) {
