@@ -1,0 +1,4 @@
+$cndi.comment(gcp_credentials): GCP Credentials
+GCP_REGION: "{{ $cndi.get_prompt_response(gcp_region) }}"
+GCP_SERVICE_ACCOUNT: '{{ $cndi.get_prompt_response(gcp_service_account) }}'
+GCP_WORKLOAD_IDENTITY_PROVIDER: "{{ $cndi.get_prompt_response(gcp_workload_identity_provider) }}"

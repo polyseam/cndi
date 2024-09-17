@@ -19,7 +19,8 @@ const stageTerraformResourcesForConfigLabel = ccolors.faded(
   "src/outputs/terraform/stageTerraformResourcesForConfig.ts:",
 );
 
-const ensureValidGoogleCredentials = () => {
+const ensureValidGoogleCredentials = (keyless = false) => {
+  if (keyless) return;
   const key = Deno.env.get("GOOGLE_CREDENTIALS");
 
   if (!key) {
@@ -85,7 +86,7 @@ export default async function stageTerraformResourcesForConfig(
       await stageTerraformSynthAWSClusterless(config);
       break;
     case "gcp/gke":
-      ensureValidGoogleCredentials();
+      ensureValidGoogleCredentials(config?.infrastructure?.cndi?.keyless);
       await stageTerraformSynthGCPGKE(config);
       break;
     case "gcp/clusterless":
