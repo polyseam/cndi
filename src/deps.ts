@@ -4,7 +4,7 @@ export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
 export { deepMerge } from "@std/collections";
 export { delay } from "@std/async";
-export { ensureDirSync, exists, existsSync, walk, walkSync } from "@std/fs";
+export { ensureDirSync, exists, existsSync, walk, walkSync, copy } from "@std/fs";
 export { load as loadEnv, loadSync as loadEnvSync } from "@std/dotenv";
 export { writeAll } from "@std/io";
 export { Spinner, type SpinnerOptions } from "@std/cli";

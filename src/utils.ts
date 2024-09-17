@@ -8,6 +8,7 @@ import {
   platform,
   walk,
   YAML,
+  copy
 } from "deps";
 
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
@@ -363,38 +364,17 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.writeTextFile(stagingPath, fileContents);
 }
 
-async function copyDir(
-  src: string,
-  dest: string,
-): Promise<void | Error> {
-  try {
-    // create the destination directory
-    // fail and return if error if the destination directory already exists
-    await Deno.mkdir(dest, { recursive: true });
-    for await (const entry of Deno.readDir(src)) {
-      const srcPath = `${src}/${entry.name}`;
-      const destPath = `${dest}/${entry.name}`;
-      if (entry.isFile) {
-        await Deno.copyFile(srcPath, destPath);
-      } else if (entry.isDirectory) {
-        await copyDir(srcPath, destPath);
-      }
-    }
-  } catch (error) {
-    return error;
-  }
-}
 
 async function stageDirectory(
   relativePathOut: string,
   relativePathIn: string,
 ): Promise<{ success: true } | Error> {
   try {
-    const outputPath = path.join(await getStagingDir(), relativePathOut);
     const inputPath = path.join(Deno.cwd(), relativePathIn);
-    await copyDir(inputPath, outputPath);
+    const outputPath = path.join(await getStagingDir(), relativePathOut);
+    await copy(inputPath, outputPath); // fail if the output directory already exists
   } catch (error) {
-    return error;
+    return error as Error;
   }
   return { success: true };
 }
@@ -655,7 +635,6 @@ export {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
-  copyDir,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
