@@ -1,7 +1,6 @@
 import { path } from "deps";
 import getProjectRootDir from "get-project-root"; // this is the root of the project, runs on import (side-effect bad?)
 
-
 const deno = "deno";
 
 const cmd = [

@@ -1,5 +1,6 @@
 import {
   ccolors,
+  copy,
   deepMerge,
   exists,
   homedir,
@@ -8,7 +9,6 @@ import {
   platform,
   walk,
   YAML,
-  copy
 } from "deps";
 
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
@@ -363,7 +363,6 @@ async function stageFile(relativePath: string, fileContents: string) {
   await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
   await Deno.writeTextFile(stagingPath, fileContents);
 }
-
 
 async function stageDirectory(
   relativePathOut: string,
