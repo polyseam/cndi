@@ -100,6 +100,37 @@ const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
   }
 };
 
+type PxSuccessResult<T> = [undefined, T];
+type PxErrorResult = [Error, undefined];
+
+type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
+
+function px<T>(operation: () => T): PxResult<T> {
+  try {
+    const value = operation();
+    return [undefined, value];
+  } catch (error) {
+    if (error instanceof Error) {
+      return [error, undefined];
+    }
+    return [error as Error, undefined];
+  }
+}
+
+async function pxAsync<T>(
+  operation: () => Promise<T>,
+): Promise<PxResult<T>> {
+  try {
+    const value = await operation();
+    return [undefined, value];
+  } catch (error) {
+    if (error instanceof Error) {
+      return [error, undefined];
+    }
+    return [error as Error, undefined];
+  }
+}
+
 const getTaintEffectForDistribution = (
   effect: CNDITaintEffect,
   distribution: CNDIDistribution,
@@ -657,6 +688,8 @@ export {
   loadYAML,
   patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
+  px,
+  pxAsync,
   removeOldBinaryIfRequired,
   replaceRange,
   resolveCNDIPorts,

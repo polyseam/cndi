@@ -65,10 +65,14 @@ interface OverwriteActionOptions {
   enablePrChecks?: boolean;
 }
 
+type WorkerMessageType =
+  | "begin-overwrite"
+  | "complete-overwrite"
+  | "error-overwrite";
 type OverwriteWorkerMessage = {
   data: {
+    type: WorkerMessageType;
     options?: OverwriteActionOptions;
-    type: "begin-overwrite" | "complete-overwrite" | "error-overwrite";
     code?: number;
   };
 };
@@ -77,7 +81,7 @@ declare const self: {
   onmessage: (message: OverwriteWorkerMessage) => void;
   postMessage: (
     message: {
-      type: "complete-overwrite" | "error-overwrite";
+      type: WorkerMessageType;
       code?: number;
       message?: string;
     },
@@ -134,10 +138,15 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       config = result.config;
       pathToConfig = result.pathToConfig;
     } catch (errorLoadingCndiConfig) {
+      const error = errorLoadingCndiConfig as Error;
+      const code = (typeof (error.cause) === "number") ? error.cause : -1;
+      const message = error.message
+        ? error.message
+        : "unknown error loading cndi config";
       self.postMessage({
         type: "error-overwrite",
-        code: errorLoadingCndiConfig.cause,
-        message: errorLoadingCndiConfig.message,
+        code,
+        message,
       });
       return;
     }
@@ -147,10 +156,15 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     try {
       await validateConfig(config, pathToConfig);
     } catch (errorValidatingConfig) {
+      const error = errorValidatingConfig as Error;
+      const code = (typeof (error.cause) === "number") ? error.cause : -1;
+      const message = error.message
+        ? error.message
+        : "unknown error validating cndi config";
       self.postMessage({
         type: "error-overwrite",
-        code: errorValidatingConfig.cause,
-        message: errorValidatingConfig.message,
+        code,
+        message,
       });
     }
 
@@ -158,26 +172,28 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     if (tryKeyless) {
       if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+        // TODO: this throw/catch nonsense needs work
+        const cause = 510;
+        const errorMessage = [
+          owLabel,
+          ccolors.error(
+            `'keyless' infrastructure is not yet supported for provider`,
+          ),
+          ccolors.key_name(config?.provider),
+        ].join(" ");
         try {
           throw new Error(
-            [
-              owLabel,
-              ccolors.error(
-                `'keyless' infrastructure is not yet supported for provider`,
-              ),
-              ccolors.key_name(config?.provider),
-            ].join(" "),
-            { cause: 510 },
+            errorMessage,
+            { cause },
           );
-        } catch (error) {
+        } catch {
           self.postMessage({
             type: "error-overwrite",
-            code: error.cause,
-            message: error.message,
+            code: cause,
+            message: errorMessage,
           });
           return;
         }
-        // TODO: do keyless stuff
       }
     }
 
@@ -627,11 +643,17 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
                 secretFileName,
               },
             );
-          } catch (error) {
+          } catch (sealedSecretsError) {
+            const error = sealedSecretsError as Error;
+            const code = (typeof (error.cause) === "number") ? error.cause : -1;
+            const message = error.message
+              ? error.message
+              : "unknown sealed secret error";
+
             self.postMessage({
               type: "error-overwrite",
-              code: error.cause,
-              message: error.message,
+              code,
+              message,
             });
             return;
           }
@@ -720,11 +742,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     try {
       await stageTerraformResourcesForConfig(config); //, options);
-    } catch (error) {
+    } catch (errorStagingTerraformResources) {
+      const error = errorStagingTerraformResources as Error;
       self.postMessage({
         type: "error-overwrite",
-        code: error.cause,
-        message: error.message,
+        code: (typeof (error?.cause) === "number") ? error.cause : -1,
+        message: error?.message ?? "unknown error staging terraform resources",
       });
       return;
     }
@@ -736,21 +759,24 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     try {
       await persistStagedFiles(options.output);
       console.log("  ");
-    } catch (_errorPersistingStagedFiles) {
+    } catch {
+      // TODO: this throw/catch nonsense needs work
+      const errorMessage = [
+        owLabel,
+        ccolors.error(`failed to persist staged cndi files to`),
+        ccolors.user_input(`${options.output}`),
+      ].join(" ");
+      const cause = 509;
       try {
         throw new Error(
-          [
-            owLabel,
-            ccolors.error(`failed to persist staged cndi files to`),
-            ccolors.user_input(`${options.output}`),
-          ].join(" "),
-          { cause: 509 },
+          errorMessage,
+          { cause },
         );
-      } catch (error) {
+      } catch {
         self.postMessage({
           type: "error-overwrite",
-          code: error.cause,
-          message: error.message,
+          code: cause,
+          message: errorMessage,
         });
         return;
       }
