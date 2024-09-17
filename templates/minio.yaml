@@ -14,10 +14,10 @@ blocks:
       spec:
         tls:
           - hosts:
-              - '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+              - '{{ $cndi.get_prompt_response(default_minio_ingress_domain) }}'
             secretName: cluster-issuer-private-key-default-minio-ui
         rules:
-          - host: '{{ $cndi.get_prompt_response(tenant_ui_domain_name) }}'
+          - host: '{{ $cndi.get_prompt_response(default_minio_ingress_domain) }}'
             http:
               paths:
                 - path: /
@@ -203,6 +203,8 @@ outputs:
                 kind: persistentvolumeclaims
                 metadata: { }
                 spec:
+                  accessModes:
+                    - ReadWriteOnce
                   resources:
                     requests:
                       storage: 5Gi
@@ -299,7 +301,7 @@ outputs:
       Create Alias
       ```
       bash +o history
-      mc alias set ALIAS TENANT_DOMAIN_NAME MINIO_ROOT_USER MINIO_ROOT_PASSWORD
+      mc alias set ALIAS MINIO_TENANT_DOMAIN_NAME MINIO_ROOT_USER MINIO_ROOT_PASSWORD
       bash -o history
       ```
 
@@ -308,4 +310,4 @@ outputs:
       mc cp --recursive ~/mydata/ default-minio/mydata/
       ```
 
-      You can find the MINIO_TENANT_CREDENTIALS and TENANT_DOMAIN_NAME in the .env file.
+      You can find the MINIO_TENANT_CREDENTIALS and MINIO_TENANT_DOMAIN_NAME in the .env file.
