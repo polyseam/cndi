@@ -1,4 +1,4 @@
-# microk8s
+## microk8s
 
 Your `dev` cluster will be deployed locally using
 [multipass](https://multipass.run/) for virtualization, so you will need to
@@ -18,7 +18,7 @@ workload to it. This approach is powered by the `--cloud-init` option in
 [multipass](https://multipass.run/docs/launch-command), which enables running
 some setup configuration and scripts on the VM at launch time.
 
-## up and running
+### up and running
 
 Now that the node has been created and your workload has begun to deploy you can
 start to interact with your cluster.
