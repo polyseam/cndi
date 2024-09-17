@@ -11,13 +11,14 @@ blocks:
           cert-manager.io/cluster-issuer: cluster-issuer
           kubernetes.io/tls-acme: 'true'
           nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(minio_webui_domain) }}"
       spec:
         tls:
           - hosts:
-              - '{{ $cndi.get_prompt_response(default_minio_ingress_domain) }}'
-            secretName: cluster-issuer-private-key-default-minio-ui
+              - '{{ $cndi.get_prompt_response(minio_webui_domain) }}'
+            secretName: cluster-issuer-private-key-minio-ui
         rules:
-          - host: '{{ $cndi.get_prompt_response(default_minio_ingress_domain) }}'
+          - host: '{{ $cndi.get_prompt_response(minio_webui_domain) }}'
             http:
               paths:
                 - path: /
@@ -64,7 +65,7 @@ prompts:
     type: Number
 
   - name: volumes_per_server
-    default: 2
+    default: 1
     message: 'Specify the number of volumes per server:'
     type: Number
 
@@ -91,7 +92,7 @@ prompts:
     message: 'Enter the "Username/Accesskey" for the MinIO tenant user:'
     type: Secret
     validators:
-      - min_length: 8     
+      - min_length: 3     
 
   - name: secret_key
     default: '{{ $cndi.get_random_string(18) }}'
@@ -134,12 +135,13 @@ outputs:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
-          name: default-minio-server-ingress
+          name: minio-server-ingress
           namespace: minio
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
             kubernetes.io/tls-acme: 'true'
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+            external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(server_domain_name) }}"
         spec:
           tls:
           - hosts:
@@ -193,6 +195,7 @@ outputs:
             name: minio-tenant-root-creds-secret
           pools:
             - servers: '{{ $cndi.get_prompt_response(servers) }}'
+              name: pool-0            
               volumesPerServer: '{{ $cndi.get_prompt_response(volumes_per_server) }}'
               volumeClaimTemplate:
                 apiVersion: v1
@@ -261,7 +264,8 @@ outputs:
 
         
     $cndi.comment(minio-heading): Minio Connection Parameters
-    MINIO_TENANT_ROOT_CREDENTIALS: 'export MINIO_ROOT_USER="{{ $cndi.get_random_string(18) }}" 
+    MINIO_TENANT_ROOT_CREDENTIALS: | 
+      'export MINIO_ROOT_USER="{{ $cndi.get_random_string(18) }}" 
       export MINIO_ROOT_PASSWORD="{{ $cndi.get_random_string(24) }}"'
     MINIO_TENANT_ACCESS_KEY: "{{ $cndi.get_prompt_response(access_key) }}"
     MINIO_TENANT_SECRET_KEY: "{{ $cndi.get_prompt_response(secret_key) }}"
