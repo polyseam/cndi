@@ -203,7 +203,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         );
       } else {
         console.log(
-          "Skipping 'cndi-run' workflow for 'dev' provider.",
+          ccolors.success("skipping 'cndi-run' workflow for"),
+          ccolors.key_name("dev"),
+          ccolors.success("provider"),
         );
       }
 
