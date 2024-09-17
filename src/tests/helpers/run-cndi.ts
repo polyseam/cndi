@@ -1,11 +1,6 @@
 import { path } from "deps";
 import getProjectRootDir from "get-project-root"; // this is the root of the project, runs on import (side-effect bad?)
 
-export interface RunCndiResult {
-  status: Deno.ProcessStatus;
-  output: Uint8Array;
-  stderror: Uint8Array;
-}
 
 const deno = "deno";
 

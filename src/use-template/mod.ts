@@ -552,8 +552,11 @@ async function presentCliffyPrompt(
                   await next(promptDefinition.name);
                   return;
                 }
-              } catch (errReadingFile) {
-                console.log(ccolors.warn(errReadingFile.message));
+              } catch (caught) {
+                const errReadingFile = caught as Error;
+                const msg = errReadingFile?.message ||
+                  "Failed to read file at path";
+                console.log(ccolors.warn(msg));
                 await next(promptDefinition.name);
                 return;
               }
@@ -1009,13 +1012,12 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
             literalizeGetPromptResponseCalls(`${block[blockKey]}`)
           }'`;
         }
-      } catch (error) {
+      } catch (_parseError) {
         return {
           error: new Error([
             templatesLabel,
             "template error:\n",
             `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
-            ccolors.caught(error),
           ].join(" ")),
           cause: 1204,
         };
