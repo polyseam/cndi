@@ -272,6 +272,7 @@ outputs:
     MINIO_TENANT_SERVER_DOMAIN_NAME: "{{ $cndi.get_prompt_response(server_domain_name) }}"
     MINIO_TENANT_NAME: "myminio"
     MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(bucket_name) }}"
+    MINIO_CLIENT_COMMAND: mc alias set myminio https://{{ $cndi.get_prompt_response(server_domain_name) }} {{ $cndi.get_prompt_response(access_key) }} {{ $cndi.get_prompt_response(secret_key) }}
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
@@ -282,7 +283,11 @@ outputs:
       {}
 
     minio: |
-      ## Minio
+      ## Minio Deployment Guide
+      
+      This template deploys a Standalone production ready
+      [minio operator and tenant](https://github.com/minio/operator/tree/master)
+      
       MinIO is a high-performance, distributed object storage system designed to support cloud-native applications with S3-compatible storage for unstructured, semi-structured and structured data. 
       Some benefits of combining MinIO include:
 
@@ -291,27 +296,36 @@ outputs:
       Durability: MinIO provides durable storage, allowing organizations to retain data for long periods of time, such as for historical analysis, compliance requirements, or data recovery purposes.
       Fault Tolerance: MinIO erasure codes data across multiple nodes, providing fault tolerance and ensuring data durability.
       Easy Integration: MinIO is easily integrated with like aws s3, a built-in framework for connecting with external systems. This makes it straightforward to stream data to MinIO for storage, and vice versa for data retrieval.
+      
+      ## Testing Your Minio Connection
 
+      ### Using MinIO Console
 
-      This template deploys a Standalone production ready
-      [minio operator and tenant](https://github.com/minio/operator/tree/master)
+      When you first open the MinIO console web interface, you'll be prompted to enter your access and secret keys. The credentials are in the ENV file:
+      Username: <MINIO_TENANT_ACCESS_KEY>
+      Password: <MINIO_TENANT_SECRET_KEY>
+
+      Once logged in, you will see the MinIO dashboard, which provides an easy-to-use interface for managing buckets and objects.
+      You can create new buckets, upload files, and manage your stored data directly through this interface.
+
+      ### Using MinIO `mc` Command Line Tool
 
       To test the connection you can install the [MinIO CLient](https://min.io/docs/minio/linux/reference/minio-mc.html).
 
       # Set up MinIO alias
-      mc alias set myminio $MINIO_TENANT_SERVER_DOMAIN_NAME $MINIO_TENANT_ACCESS_KEY $MINIO_TENANT_SECRET_KEY;
+      mc alias set myminio  https://<MINIO_TENANT_SERVER_DOMAIN_NAME> <MINIO_TENANT_ACCESS_KEY> <MINIO_TENANT_SECRET_KEY>
       
       # Create a new bucket if it doesn't exist
-      mc mb myminio/mydefaultbucket || echo "Bucket already exists";
+      mc mb myminio/myminiobucket || echo "Bucket already exists";
       
       # Create a file to upload
       echo "Hello, MinIO!" > /tmp/hello.txt;
       
       # Copy the file to the MinIO bucket
-      mc cp /tmp/hello.txt myminio/mydefaultbucket;
+      mc cp /tmp/hello.txt myminio/myminiobucket;
       
       # List objects in the bucket to verify the upload
-      mc ls myminio/mydefaultbucket;
+      mc ls myminio/myminiobucket;
 
 
       You can find the MINIO_TENANT_ACCESS_KEY MINIO_TENANT_SECRET_KEY and MINIO_TENANT_SERVER_DOMAIN_NAME in the .env file.
