@@ -1,4 +1,4 @@
-import { ccolors, Command, path, PromptTypes, YAML } from "deps";
+import { ccolors, Command, path, PromptTypes, px, YAML } from "deps";
 import {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
@@ -23,6 +23,8 @@ import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
+
+import { ErrOut } from "errout";
 
 // Error Domain: 15XX
 const createLabel = ccolors.faded("\nsrc/commands/create.ts:");
@@ -204,12 +206,13 @@ const createCommand = new Command()
 
     // load responses from file
     let responsesFileText = "";
-    try {
-      responsesFileText = await Deno.readTextFile(
-        options.responsesFile,
-      );
-    } catch (errorLoadingResponses) {
-      if (errorLoadingResponses instanceof Deno.errors.NotFound) {
+
+    const [errorLoadingResponsesFile, responsesFileTextResult] = await px.async(
+      () => Deno.readTextFile(options.responsesFile),
+    );
+
+    if (errorLoadingResponsesFile) {
+      if (errorLoadingResponsesFile instanceof Deno.errors.NotFound) {
         // no responses file found, continue with defaults
       } else {
         console.error(
@@ -218,28 +221,25 @@ const createCommand = new Command()
           ccolors.key_name("cndi_responses.yaml"),
           ccolors.error("file"),
         );
-        ccolors.caught(errorLoadingResponses, 1502);
+        ccolors.caught(errorLoadingResponsesFile, 1502);
         console.log(
           ccolors.warn(
             "⚠️ continuing with defaults in spite of unexpected error",
           ),
         );
       }
+    } else {
+      responsesFileText = responsesFileTextResult;
     }
 
-    let responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
-    try {
-      responses = YAML.parse(responsesFileText) as Record<
+    const [errorParsingResponses, responses = {}] = px.sync(() =>
+      YAML.parse(responsesFileText) as Record<
         string,
         CNDITemplatePromptResponsePrimitive
-      >;
-      if (responses) {
-        overrides = responses as Record<
-          string,
-          CNDITemplatePromptResponsePrimitive
-        >;
-      }
-    } catch (errorParsingResponses) {
+      >
+    );
+
+    if (errorParsingResponses) {
       console.error(
         createLabel,
         ccolors.error("Error parsing"),
@@ -249,6 +249,13 @@ const createCommand = new Command()
       ccolors.caught(errorParsingResponses, 1503);
       await emitExitEvent(1503);
       Deno.exit(1503);
+    }
+
+    if (responses) {
+      overrides = responses as Record<
+        string,
+        CNDITemplatePromptResponsePrimitive
+      >;
     }
 
     if (options.set) {
@@ -396,10 +403,15 @@ const createCommand = new Command()
           git_credentials_mode: "token",
         },
       });
-    } catch (error) {
-      console.error(error.message);
-      await emitExitEvent(error.cause);
-      Deno.exit(error.cause);
+    } catch (e) {
+      if (e instanceof ErrOut) {
+        e.out();
+      } else {
+        const error = e as Error & { cause: number };
+        console.error(error.message);
+        await emitExitEvent(error.cause);
+        Deno.exit(error.cause);
+      }
     }
 
     const isClusterless =

@@ -7,6 +7,7 @@ import {
   JSONC,
   path,
   platform,
+  px,
   walk,
   YAML,
 } from "deps";
@@ -23,9 +24,11 @@ import {
 } from "src/types.ts";
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+import { ErrOut } from "src/ErrOut.ts";
 
-const utilsLabel = ccolors.faded("src/utils.ts:");
+import { emitTelemetryEvent } from "src/telemetry/telemetry.ts";
+
+const label = ccolors.faded("src/utils.ts:");
 
 // YAML.stringify but easier to work with
 function getYAMLString(object: unknown, skipInvalid = true): string {
@@ -34,6 +37,14 @@ function getYAMLString(object: unknown, skipInvalid = true): string {
   return YAML.stringify(object as Record<string, unknown>, {
     skipInvalid,
   });
+}
+
+async function emitExitEvent(exit_code: number) {
+  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
+  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
+  if (isDebug) console.log("\nevent_uuid", event_uuid);
+  console.log();
 }
 
 async function sha256Digest(message: string): Promise<string> {
@@ -62,75 +73,6 @@ const removeOldBinaryIfRequired = async (
   return true;
 };
 
-const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
-  if (providedPath) {
-    const normalized = path.normalize(providedPath);
-    if (await exists(normalized)) {
-      return normalized;
-    } else {
-      throw new Error(
-        [
-          utilsLabel,
-          ccolors.error("could not find cndi_config file at"),
-          ccolors.user_input(`"${providedPath}"`),
-        ].join(" "),
-        {
-          cause: 500,
-        },
-      );
-    }
-  }
-
-  if (await exists(path.join(Deno.cwd(), "cndi_config.yaml"))) {
-    return path.join(Deno.cwd(), "cndi_config.yaml");
-  } else if (await exists(path.join(Deno.cwd(), "cndi_config.yml"))) {
-    return path.join(Deno.cwd(), "cndi_config.yml");
-  } else {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("there is no"),
-        ccolors.key_name('"cndi_config.yaml"'),
-        ccolors.error("file in your current directory"),
-      ].join(" "),
-      {
-        cause: 500,
-      },
-    );
-  }
-};
-
-type PxSuccessResult<T> = [undefined, T];
-type PxErrorResult = [Error, undefined];
-
-type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
-
-function px<T>(operation: () => T): PxResult<T> {
-  try {
-    const value = operation();
-    return [undefined, value];
-  } catch (error) {
-    if (error instanceof Error) {
-      return [error, undefined];
-    }
-    return [error as Error, undefined];
-  }
-}
-
-async function pxAsync<T>(
-  operation: () => Promise<T>,
-): Promise<PxResult<T>> {
-  try {
-    const value = await operation();
-    return [undefined, value];
-  } catch (error) {
-    if (error instanceof Error) {
-      return [error, undefined];
-    }
-    return [error as Error, undefined];
-  }
-}
-
 const getTaintEffectForDistribution = (
   effect: CNDITaintEffect,
   distribution: CNDIDistribution,
@@ -147,10 +89,19 @@ const getTaintEffectForDistribution = (
   }
 };
 
+type LoadConfigSuccessResult = {
+  config: CNDIConfig;
+  pathToConfig: string;
+};
+
+export type PxSuccessResult<T> = [undefined, T];
+export type PxErrorResult = [ErrOut, undefined];
+export type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
+
 // attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
   projectDirectory: string,
-): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
+): Promise<PxResult<LoadConfigSuccessResult>> => {
   let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
 
   if (!await exists(pathToConfig)) {
@@ -158,34 +109,77 @@ const loadCndiConfig = async (
   }
 
   if (!await exists(pathToConfig)) {
-    throw new Error(
-      [
-        utilsLabel,
+    return [
+      new ErrOut([
         ccolors.error("failed to find a"),
         ccolors.key_name(`cndi_config.yaml`),
         ccolors.error("file at"),
         ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
-      ].join(" "),
-      { cause: 500 },
-    );
+      ], {
+        id: "loadCndiConfig/not-found",
+        code: 500, // Deno.exit(500)
+        metadata: {
+          pathToConfig,
+        },
+        label,
+      }),
+      undefined,
+    ];
   }
 
-  try {
-    const config = await loadYAML(pathToConfig) as CNDIConfig;
-    return { config, pathToConfig };
-  } catch {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("your cndi_config file at"),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("could not be read"),
-      ].join(" "),
-      {
-        cause: 504,
-      },
-    );
+  const [errorReadingFile, configText] = await px.async(() =>
+    Deno.readTextFile(pathToConfig)
+  );
+
+  if (errorReadingFile) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("could not read"),
+          ccolors.key_name(`cndi_config.yaml`),
+          ccolors.error("file at"),
+          ccolors.user_input(`"${pathToConfig}"`),
+        ],
+        {
+          code: 504,
+          id: "loadCndiConfig/read-text-error",
+          metadata: {
+            pathToConfig,
+          },
+          label,
+        },
+      ),
+      undefined,
+    ];
   }
+
+  const [errorParsingFile, config] = px.sync(() =>
+    YAML.parse(configText) as CNDIConfig
+  );
+
+  if (errorParsingFile) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("could not parse"),
+          ccolors.key_name(`cndi_config.yaml`),
+          ccolors.error("file at"),
+          ccolors.user_input(`"${pathToConfig}"`),
+        ],
+        {
+          code: 1300,
+          id: "loadCndiConfig/parse-yaml-error",
+          metadata: {
+            pathToConfig,
+          },
+          label,
+        },
+      ),
+      undefined,
+    ];
+  }
+
+  return [undefined, { config, pathToConfig }];
 };
 
 // TODO: the following 2 functions can fail in 2 ways
@@ -193,45 +187,6 @@ const loadCndiConfig = async (
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
-};
-
-// helper function to load a YAML file
-const loadYAML = async (path: string) => {
-  let txt: string;
-  let y: unknown;
-  try {
-    txt = await Deno.readTextFile(path);
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
-      throw new Error(
-        [
-          utilsLabel,
-          ccolors.error("could not find file at"),
-          ccolors.user_input(`"${path}"`),
-        ].join(" "),
-        {
-          cause: 1301,
-        },
-      );
-    }
-    throw error;
-  }
-
-  try {
-    y = await YAML.parse(txt);
-  } catch {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("could not parse file as YAML at"),
-        ccolors.user_input(`"${path}"`),
-      ].join(" "),
-      {
-        cause: 1300,
-      },
-    );
-  }
-  return y;
 };
 
 function getPrettyJSONString(object: unknown) {
@@ -439,7 +394,6 @@ function getStagingDir(): string {
   if (!stagingDirectory) {
     throw new Error(
       [
-        utilsLabel,
         `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
         ccolors.error(`is not set!`),
       ].join(" "),
@@ -619,14 +573,6 @@ const getErrorDiscussionLinkMessageForCode = (code: number): string => {
     : "";
 };
 
-async function emitExitEvent(exit_code: number) {
-  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
-  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
-  if (isDebug) console.log("\nevent_uuid", event_uuid);
-  console.log();
-}
-
 function absolutifyPath(p: string): string {
   if (path.isAbsolute(p)) {
     return p;
@@ -670,7 +616,6 @@ export {
   getCndiInstallPath,
   getFileSuffixForPlatform,
   getPathToCndiBinary,
-  getPathToCndiConfig,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
@@ -685,11 +630,8 @@ export {
   isSlug,
   loadCndiConfig,
   loadJSONC,
-  loadYAML,
   patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
-  px,
-  pxAsync,
   removeOldBinaryIfRequired,
   replaceRange,
   resolveCNDIPorts,

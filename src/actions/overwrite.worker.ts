@@ -45,11 +45,11 @@ import getReloaderApplicationManifest from "src/outputs/core-applications/reload
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import {
-  CNDIConfig,
   CNDIProvider,
   KubernetesManifest,
   KubernetesSecret,
 } from "src/types.ts";
+
 import validateConfig from "src/validate/cndiConfig.ts";
 
 const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
@@ -69,7 +69,7 @@ type WorkerMessageType =
   | "begin-overwrite"
   | "complete-overwrite"
   | "error-overwrite";
-type OverwriteWorkerMessage = {
+export type OverwriteWorkerMessage = {
   data: {
     type: WorkerMessageType;
     options?: OverwriteActionOptions;
@@ -77,14 +77,16 @@ type OverwriteWorkerMessage = {
   };
 };
 
+export type OverwriteWorkerMessageOutgoing = {
+  type: WorkerMessageType;
+  code?: number;
+  message?: string;
+};
+
 declare const self: {
   onmessage: (message: OverwriteWorkerMessage) => void;
   postMessage: (
-    message: {
-      type: WorkerMessageType;
-      code?: number;
-      message?: string;
-    },
+    message: OverwriteWorkerMessageOutgoing,
   ) => void;
   close: () => never;
   Deno: typeof Deno;
@@ -130,42 +132,24 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     );
 
     const envPath = path.join(options.output, ".env");
-    let config: CNDIConfig;
-    let pathToConfig: string;
 
-    try {
-      const result = await loadCndiConfig(options.output);
-      config = result.config;
-      pathToConfig = result.pathToConfig;
-    } catch (errorLoadingCndiConfig) {
-      const error = errorLoadingCndiConfig as Error;
-      const code = (typeof (error.cause) === "number") ? error.cause : -1;
-      const message = error.message
-        ? error.message
-        : "unknown error loading cndi config";
-      self.postMessage({
-        type: "error-overwrite",
-        code,
-        message,
-      });
+    const [errorLoadingConfig, result] = await loadCndiConfig(options.output);
+
+    if (errorLoadingConfig) {
+      await self.postMessage(errorLoadingConfig.owWorkerErrorMessage);
       return;
     }
 
+    const config = result.config;
+    const pathToConfig = result.pathToConfig;
+
     await loadEnv({ export: true, envPath });
 
-    try {
-      await validateConfig(config, pathToConfig);
-    } catch (errorValidatingConfig) {
-      const error = errorValidatingConfig as Error;
-      const code = (typeof (error.cause) === "number") ? error.cause : -1;
-      const message = error.message
-        ? error.message
-        : "unknown error validating cndi config";
-      self.postMessage({
-        type: "error-overwrite",
-        code,
-        message,
-      });
+    const validationError = validateConfig(config, pathToConfig);
+
+    if (validationError) {
+      await self.postMessage(validationError.owWorkerErrorMessage);
+      return;
     }
 
     const tryKeyless = config?.infrastructure?.cndi?.keyless === true;

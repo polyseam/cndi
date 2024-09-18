@@ -71,7 +71,9 @@
     "simple-git": "npm:simple-git@3.18.0",
     "src/": "./src/",
     "test-deps": "./src/tests/deps.ts",
-    "validator": "npm:validator@13.11.0"
+    "px": "./src/px/mod.ts",
+    "validator": "npm:validator@13.11.0",
+    "errout": "./src/ErrOut.ts"
   },
   "lint": {
     "exclude": ["dist/*"]

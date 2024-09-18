@@ -1106,7 +1106,7 @@ export async function useTemplate(
   );
 
   if (templateBodyStringResult.error) {
-    throw templateBodyStringResult.error;
+    throw templateBodyStringResult.error as Error;
   }
 
   const coarselyValidatedTemplateBody = getCoarselyValidatedTemplateBody(
@@ -1114,7 +1114,7 @@ export async function useTemplate(
   );
 
   if (coarselyValidatedTemplateBody.error) {
-    throw coarselyValidatedTemplateBody.error;
+    throw coarselyValidatedTemplateBody.error as Error;
   }
 
   const staticBlocks = coarselyValidatedTemplateBody.value.blocks;
@@ -1153,7 +1153,7 @@ export async function useTemplate(
         );
 
         if (pSpecResult.error) {
-          throw pSpecResult.error;
+          throw pSpecResult.error as Error;
         }
 
         const importedPromptSpecs = pSpecResult?.value || [];
@@ -1197,7 +1197,7 @@ export async function useTemplate(
   );
 
   if (finalCNDIConfigResult.error) {
-    throw finalCNDIConfigResult.error;
+    throw finalCNDIConfigResult.error as Error;
   }
 
   const finalReadmeResult = await processCNDIReadmeOutput(
@@ -1205,7 +1205,7 @@ export async function useTemplate(
   );
 
   if (finalReadmeResult.error) {
-    throw finalReadmeResult.error;
+    throw finalReadmeResult.error as Error;
   }
 
   const finalEnvResult = await processCNDIEnvOutput(
@@ -1213,7 +1213,7 @@ export async function useTemplate(
   );
 
   if (finalEnvResult.error) {
-    throw finalEnvResult.error;
+    throw finalEnvResult.error as Error;
   }
 
   const extraFilesResult = await processCNDIExtraFilesOutput(
@@ -1221,7 +1221,7 @@ export async function useTemplate(
   );
 
   if (extraFilesResult.error) {
-    throw extraFilesResult.error;
+    throw extraFilesResult.error as Error;
   }
 
   const files = {

@@ -1,14 +1,16 @@
 import { ccolors, loadEnv, path, simpleGit, writeAll } from "deps";
-import { emitExitEvent } from "src/utils.ts";
+import { ErrOut } from "errout";
 
-const createRepoLabel = ccolors.faded("\nsrc/actions/createRepo.ts:");
+const label = ccolors.faded("\nsrc/actions/createRepo.ts:");
 
 type CreateRepoOptions = {
   output: string;
   skipPush?: boolean;
 };
 
-export default async function createRepo(options: CreateRepoOptions) {
+export default async function createRepo(
+  options: CreateRepoOptions,
+): Promise<ErrOut | void> {
   let repoUrl: URL;
 
   try {
@@ -18,17 +20,20 @@ export default async function createRepo(options: CreateRepoOptions) {
     await ghAvailableCmd.output();
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      throw new Error(
+      return new ErrOut(
         [
-          createRepoLabel,
           ccolors.error(
             "'gh' CLI must be installed and added to PATH when using",
           ),
           ccolors.key_name("cndi init --create"),
           ccolors.error("or"),
           ccolors.key_name("cndi create"),
-        ].join(" "),
-        { cause: 1600 },
+          "\n",
+          ccolors.error(
+            "please create your repo and set your secrets manually!",
+          ),
+        ],
+        { code: 1600, label, id: "createRepo/!gh-installed", metadata: {} },
       );
     }
   }
@@ -46,16 +51,17 @@ export default async function createRepo(options: CreateRepoOptions) {
 
   try {
     repoUrl = new URL(repoUrlString);
-  } catch (error) {
-    console.error(
-      createRepoLabel,
+  } catch {
+    return new ErrOut([
       ccolors.error(
         `Could not parse the provided 'GIT_REPO' url as a valid URL`,
       ),
-      ccolors.caught(error, 1601),
-    );
-    await emitExitEvent(1601);
-    Deno.exit(1601);
+    ], {
+      code: 1601,
+      label,
+      id: "!isURL(env.GIT_REPO)",
+      metadata: { repoUrlString },
+    });
   }
 
   const git = simpleGit(options.output);
@@ -67,36 +73,37 @@ export default async function createRepo(options: CreateRepoOptions) {
 
   try {
     await git.init();
-  } catch (e) {
+  } catch (initError) {
+    const e = initError as Error;
+    console.error(ccolors.warn("git init"));
+    console.error("failed");
     console.error(e);
-    console.error("git init failed");
   }
 
   try {
     await git.addRemote("origin", repoUrlStringWithCredentials);
-  } catch (e) {
+  } catch (addRemoteError) {
+    const e = addRemoteError as Error;
+    console.error(ccolors.warn("git remote add origin"));
+    console.error("failed");
     console.error(e);
-    console.error(
-      ccolors.warn("git remote add origin"),
-      ccolors.error("failed"),
-    );
   }
 
   try {
     await git.add(".");
-  } catch (e) {
+  } catch (gitAddError) {
+    const e = gitAddError as Error;
+    console.error(ccolors.warn("git add"));
+    console.error(ccolors.error("failed"));
     console.error(e);
-    console.error(ccolors.warn("git add"), ccolors.error("failed"));
   }
 
   try {
     await git.commit("initial commit");
   } catch (e) {
+    console.error(ccolors.warn('git commit -m "initial commit"'));
+    console.error(ccolors.error("failed"));
     console.error(e);
-    console.error(
-      ccolors.warn("git commit -m 'initial commit'"),
-      ccolors.error("failed"),
-    );
   }
 
   const createRepoCmd = new Deno.Command("gh", {
@@ -116,7 +123,7 @@ export default async function createRepo(options: CreateRepoOptions) {
     const createRepoOutput = await createRepoCmd.output();
     if (createRepoOutput.code !== 0) {
       await writeAll(Deno.stderr, createRepoOutput.stderr);
-      console.error(createRepoLabel, ccolors.error("failed to create repo"));
+      console.error(label, ccolors.error("failed to create repo"));
     }
   } catch (e) {
     console.error("failed to create repo");
@@ -155,11 +162,12 @@ export default async function createRepo(options: CreateRepoOptions) {
   if (!options?.skipPush) {
     try {
       await git.push("origin", "main", ["--set-upstream"]);
-    } catch (e) {
-      console.error(e);
+    } catch (gitPushError) {
+      const e = gitPushError as Error;
+      console.error(ccolors.warn("git push origin main"));
+      console.error("failed");
       console.error(
-        ccolors.warn("git push origin main"),
-        ccolors.error("failed"),
+        e,
       );
     }
     console.log(

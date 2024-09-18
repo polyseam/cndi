@@ -21,7 +21,7 @@ import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";
 
-import { emitExitEvent, px, removeOldBinaryIfRequired } from "src/utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
 
@@ -54,11 +54,9 @@ export default async function cndi() {
   Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);
 
-  const [errorEnsuringDirectory] = px<void>(() =>
-    ensureDirSync(stagingDirectory)
-  );
-
-  if (errorEnsuringDirectory) {
+  try {
+    ensureDirSync(stagingDirectory);
+  } catch (errorEnsuringDirectory) {
     console.error(
       cndiLabel,
       ccolors.error(`Could not create staging directory`),
@@ -66,6 +64,7 @@ export default async function cndi() {
     );
     console.error(ccolors.caught(errorEnsuringDirectory, 10));
     await emitExitEvent(10);
+    Deno.exit(10);
   }
 
   return await new Command()

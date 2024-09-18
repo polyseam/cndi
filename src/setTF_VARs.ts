@@ -1,16 +1,25 @@
 import { ccolors, loadEnvSync, path } from "deps";
 import { loadCndiConfig } from "src/utils.ts";
-const setTF_VARsLabel = ccolors.faded("\nsrc/setTF_VARs.ts:");
+import { ErrOut } from "errout";
 
-export default async function setTF_VARs(projectDir: string) {
+const label = ccolors.faded("\nsrc/setTF_VARs.ts:");
+
+export default async function setTF_VARs(
+  projectDir: string,
+): Promise<ErrOut | void> {
   let isClusterless = false;
 
-  try {
-    const { config } = await loadCndiConfig(projectDir);
-    isClusterless = config.distribution === "clusterless";
-  } catch (e) {
-    throw e;
+  const [errorLoadingConfig, loadConfigResult] = await loadCndiConfig(
+    projectDir,
+  );
+
+  if (errorLoadingConfig) {
+    return errorLoadingConfig;
   }
+
+  const { config } = loadConfigResult!;
+
+  isClusterless = config.distribution === "clusterless";
 
   const envPath = path.join(projectDir, ".env");
 
@@ -27,45 +36,50 @@ export default async function setTF_VARs(projectDir: string) {
   const git_username = Deno.env.get("GIT_USERNAME");
 
   if (!git_username && !git_ssh_private_key) {
-    throw new Error(
+    return new ErrOut(
       [
-        setTF_VARsLabel,
         ccolors.error("Either"),
         ccolors.key_name(`"GIT_USERNAME"`),
         ccolors.error("or"),
         ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
         ccolors.error("must be set"),
-      ].join(" "),
-      { cause: 100 },
+      ],
+      {
+        code: 100,
+        label,
+        id: "setTF_VARs: !env.GIT_USERNAME && !env.GIT_SSH_PRIVATE_KEY",
+      },
     );
   }
 
   if (!git_token && !git_ssh_private_key) {
-    throw new Error(
+    return new ErrOut(
       [
-        setTF_VARsLabel,
         ccolors.error("Either"),
         ccolors.key_name(`"GIT_TOKEN"`),
         ccolors.error("or"),
         ccolors.key_name(`"GIT_SSH_PRIVATE_KEY"`),
         ccolors.error("must be set"),
-      ].join(" "),
+      ],
       {
-        cause: 101,
+        code: 101,
+        label,
+        id: "setTF_VARs: !env.GIT_TOKEN && !env.GIT_SSH_PRIVATE_KEY",
       },
     );
   }
 
   const git_repo = Deno.env.get("GIT_REPO");
   if (!git_repo) {
-    throw new Error(
+    return new ErrOut(
       [
-        setTF_VARsLabel,
         ccolors.key_name(`"GIT_REPO"`),
         ccolors.error("env var is not set"),
-      ].join(" "),
+      ],
       {
-        cause: 102,
+        code: 102,
+        label,
+        id: "setTF_VARs: !env.GIT_REPO",
       },
     );
   }
@@ -73,14 +87,16 @@ export default async function setTF_VARs(projectDir: string) {
   if (!isClusterless) {
     const argocd_admin_password = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
     if (!argocd_admin_password) {
-      throw new Error(
+      return new ErrOut(
         [
-          setTF_VARsLabel,
           ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
           ccolors.error("env var is not set"),
-        ].join(" "),
+        ],
         {
-          cause: 103,
+          code: 103,
+          label,
+          id:
+            "setTF_VARs: !env.ARGOCD_ADMIN_PASSWORD && cndi_config.distribution !== 'clusterless'",
         },
       );
     }
@@ -90,14 +106,16 @@ export default async function setTF_VARs(projectDir: string) {
       ?.trim();
 
     if (!sealed_secrets_private_key) {
-      throw new Error(
+      return new ErrOut(
         [
-          setTF_VARsLabel,
           ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
           ccolors.error("env var is not set"),
-        ].join(" "),
+        ],
         {
-          cause: 104,
+          code: 104,
+          label,
+          id:
+            "setTF_VARs: !env.SEALED_SECRETS_PRIVATE_KEY && cndi_config.distribution !== 'clusterless'",
         },
       );
     }
@@ -107,14 +125,16 @@ export default async function setTF_VARs(projectDir: string) {
       ?.trim();
 
     if (!sealed_secrets_public_key) {
-      throw new Error(
+      return new ErrOut(
         [
-          setTF_VARsLabel,
           ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
           ccolors.error("env var is not set"),
-        ].join(" "),
+        ],
         {
-          cause: 105,
+          code: 105,
+          label,
+          id:
+            "setTF_VARs: !env.SEALED_SECRETS_PUBLIC_KEY && cndi_config.distribution !== 'clusterless'",
         },
       );
     }
