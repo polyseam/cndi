@@ -278,7 +278,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           labels,
           taint,
           tags,
-          diskSize: volumeSize,
         },
       );
 
