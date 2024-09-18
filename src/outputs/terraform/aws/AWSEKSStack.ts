@@ -252,7 +252,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               tags,
             },
           ],
-          dependsOn: [],
+          dependsOn: [eksm],
         },
       );
 
@@ -278,6 +278,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           labels,
           taint,
           tags,
+          dependsOn: [nodegroupLaunchTemplate],
         },
       );
 
