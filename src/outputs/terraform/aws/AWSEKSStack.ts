@@ -90,9 +90,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       enableDnsHostnames: true,
       publicSubnetTags: {
         "kubernetes.io/role/elb": "1",
+        [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
       privateSubnetTags: {
         "kubernetes.io/role/internal-elb": "1",
+        [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
     });
 
