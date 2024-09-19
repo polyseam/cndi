@@ -188,7 +188,55 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       );
       subnetIdx++;
     }
+    const eksNodeGroupRole = new CDKTFProviderAWS.iamRole.IamRole(
+      this,
+      "cndi_iam_role_compute",
+      {
+        namePrefix: "COMPUTE",
+        assumeRolePolicy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: "sts:AssumeRole",
+              Principal: {
+                Service: "ec2.amazonaws.com",
+              },
+            },
+          ],
+        }),
+      },
+    );
 
+    const workerNodePolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+        role: eksNodeGroupRole.name,
+      },
+    );
+
+    const cniPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_cni_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+        role: eksNodeGroupRole.name,
+      },
+    );
+
+    const containerRegistryAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+        role: eksNodeGroupRole.name,
+      },
+    );
     const eksManagedNodeGroups: Record<
       string,
       CDKTFProviderAWS.eksNodeGroup.EksNodeGroup
@@ -228,10 +276,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         value: taint.value,
         effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
       })) || [];
+
       const tags = {
         Name: `cndi-eks-node-group-${nodeGroupName}`,
         CNDIProject: project_name,
       };
+
       const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
         .LaunchTemplate(
         this,
@@ -252,7 +302,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               tags,
             },
           ],
-          dependsOn: [eksm],
+          dependsOn: [
+            workerNodePolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+          ],
         },
       );
 
@@ -268,7 +322,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           amiType: "AL2_x86_64",
           instanceTypes: [instanceType],
           nodeGroupName,
-          nodeRoleArn: eksm.clusterIamRoleArnOutput,
+          nodeRoleArn: eksNodeGroupRole.arn,
           scalingConfig,
           launchTemplate: {
             id: nodegroupLaunchTemplate.id,
@@ -278,7 +332,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           labels,
           taint,
           tags,
-          dependsOn: [nodegroupLaunchTemplate],
+          dependsOn: [
+            workerNodePolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+            nodegroupLaunchTemplate,
+          ],
         },
       );
 
