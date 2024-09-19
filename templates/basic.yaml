@@ -3,6 +3,11 @@ prompts:
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
+  - $cndi.get_block(file:///Users/m/dev/polyseam/cndi/blocks/common/cluster/external-dns-foreign-prompts.yaml):
+      condition:
+        - "{{ $cndi.get_prompt_response(dns_provider) }}"
+        - '!='
+        - "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
 
   - name: deploy_argocd_ingress
     default: true

@@ -416,35 +416,26 @@ async function getTemplateBodyStringForIdentifier(
 function resolveCNDIPromptCondition(
   condition: CNDITemplateConditionTuple,
 ): boolean {
-  const [input, comparator, standard] = condition;
-  const standardType = typeof standard;
+  
+  const [left, comparator, right] = condition;
 
-  let val = input;
+  const [leftVal, leftType] = literalizeConditionElement(left);
+  const [rightVal, rightType] = literalizeConditionElement(right);
 
-  if (typeof input === "string") {
-    val = literalizeGetPromptResponseCalls(input);
-
-    if (val === undefined) {
-      console.log(`value for '${ccolors.user_input(input)}' is undefined`);
-      return false;
-    }
-
-    if (standardType === "number") {
-      val = parseInt(input);
-    } else if (standardType === "boolean") {
-      val = val === "true" ? true : false;
-    }
-
-    const verdict = CNDITemplateComparators[comparator](val, standard);
-
-    return verdict || false;
-  } else {
-    const verdict = CNDITemplateComparators[comparator](
-      val,
-      standard as CNDITemplatePromptResponsePrimitive,
+  if (leftType !== rightType) {
+    console.log(
+      ccolors.warn(
+        `The types of the left and right sides of the condition are not the same`,
+      ),
     );
-    return verdict || false;
   }
+
+  const verdict = CNDITemplateComparators[comparator](
+    leftVal as CNDITemplatePromptResponsePrimitive,
+    rightVal as CNDITemplatePromptResponsePrimitive,
+  );
+
+  return verdict || false;
 }
 
 function literalizeGetRandomStringCalls(input: string): string {
@@ -682,6 +673,31 @@ function processCNDICommentCalls(input: string): string {
   const replaced = input.replace(pattern, "# $2");
 
   return replaced;
+}
+
+type ConditionElement = [CNDITemplatePromptResponsePrimitive, string];
+
+function literalizeConditionElement(
+  element: CNDITemplatePromptResponsePrimitive,
+): ConditionElement {
+  console.log("literalizing condition element", element);
+  const responses = $cndi.getResponsesAsRecord();
+  let responseKey;
+  if (typeof element === "string") {
+    if(!element.includes('{{') && !element.includes('}}')) {
+      return [element, typeof element];
+    }
+    const cleanEl = removeWhitespaceBetweenBraces(element);
+    responseKey = cleanEl.match(/\{\{\$cndi\.get_prompt_response\((.*?)\)\}\}/)?.[1];
+    console.log("responseKey", responseKey);
+  }
+  let val = element;
+
+  if (responseKey) {
+    val = responses[responseKey];
+  }
+  console.log("val", val, typeof val);
+  return [val, typeof val];
 }
 
 function literalizeGetPromptResponseCalls(input: string): string {

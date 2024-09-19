@@ -1,0 +1,39 @@
+- name: external_dns_azure_credentials
+  type: Input
+  message: 'Please paste in your Azure credentials JSON:'
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - azure
+
+- name: external_dns_aws_access_key_id
+  type: Input
+  message: 'Please supply your AWS_ACCESS_KEY_ID:'
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - aws
+
+- name: external_dns_aws_access_key_secret
+  type: Input
+  message: 'Please supply your AWS_SECRET_ACCESS_KEY:'
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - aws
+
+- name: external_dns_gcp_credentials
+  type: Input
+  message: 'Please paste in your GCP credentials JSON:'
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - gcp
+
+- name: external_dns_cloudflare_api_token
+  type: Input
+  message: 'Please paste in your Cloudflare API Token:'
+  condition:
+    - "{{ $cndi.get_prompt_response(dns_provider) }}"
+    - ==
+    - cloudflare
