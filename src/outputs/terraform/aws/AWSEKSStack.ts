@@ -262,7 +262,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         DEFAULT_NODE_DISK_SIZE_MANAGED;
 
       const scalingConfig = {
-        desiredSize: count,
+        desiredSize: minCount,
         maxSize: count,
         minSize: count,
       };
