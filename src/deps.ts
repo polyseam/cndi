@@ -23,9 +23,11 @@ export const YAML = {
 
 // Third party
 //  - cliffy
-export { Command, CompletionsCommand, HelpCommand } from "@cliffy/command";
+export { Command } from "@cliffy/command";
+export { CompletionsCommand } from "@cliffy/command/completions";
+export { HelpCommand } from "@cliffy/command/help";
 
-import { colors } from "@cliffy/ansi";
+import { colors } from "@cliffy/ansi/colors";
 
 import {
   Checkbox,
@@ -88,7 +90,6 @@ export const ccolors = {
 
 // Polyseam Modules
 export * as silky from "@polyseam/silky";
-export { inflateResponse } from "@polyseam/inflate-response";
 
 export {
   GHRError,
