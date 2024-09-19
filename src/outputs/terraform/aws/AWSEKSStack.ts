@@ -252,7 +252,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       const maxCount = nodeGroup?.max_count;
       const minCount = nodeGroup?.min_count;
       const nodeGroupName = nodeGroup.name;
-
       const instanceType = nodeGroup?.instance_type ||
         DEFAULT_INSTANCE_TYPES.aws;
 
@@ -266,7 +265,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         maxSize: count,
         minSize: count,
       };
-
+      if (count) {
+        scalingConfig.desiredSize = count;
+      }
       if (maxCount) {
         scalingConfig.maxSize = maxCount;
       }
