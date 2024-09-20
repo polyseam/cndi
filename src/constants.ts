@@ -30,7 +30,7 @@ const NODE_DISK_SIZE_KEY = {
 
 const MANAGED_NODE_KINDS = ["eks", "gke", "aks"] as const;
 
-const CLOUDINIT_RETRY_INTERVAL = 180; // seconds
+const CLOUDINIT_RETRY_INTERVAL = 90; // seconds
 
 const DEFAULT_OPEN_PORTS = [
   {
