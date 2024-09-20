@@ -190,6 +190,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       );
       subnetIdx++;
     }
+
     const eksNodeGroupRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
       "cndi_iam_role_compute",
@@ -236,6 +237,62 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
       {
         policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+        role: eksNodeGroupRole.name,
+      },
+    );
+    const ebsEfsPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
+      this,
+      "cndi_aws_iam_policy_ebs_efs",
+      {
+        policy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: [
+                // EBS Permissions
+                "ec2:CreateVolume",
+                "ec2:AttachVolume",
+                "ec2:DetachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DeleteVolume",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeVolumeStatus",
+                "ec2:DescribeTags",
+                "ec2:CreateTags",
+                "ec2:DeleteTags",
+                "ec2:CreateSnapshot",
+                "ec2:DeleteSnapshot",
+                "ec2:DescribeSnapshots",
+                "ec2:ModifySnapshotAttribute",
+                "ec2:CopySnapshot",
+                "ec2:CreateTags",
+                "ec2:DescribeTags",
+
+                // EFS Permissions
+                "elasticfilesystem:CreateFileSystem",
+                "elasticfilesystem:DeleteFileSystem",
+                "elasticfilesystem:DescribeFileSystems",
+                "elasticfilesystem:CreateMountTarget",
+                "elasticfilesystem:DeleteMountTarget",
+                "elasticfilesystem:DescribeMountTargets",
+                "elasticfilesystem:ModifyMountTargetSecurityGroups",
+                "elasticfilesystem:DescribeMountTargetSecurityGroups",
+                "elasticfilesystem:TagResource",
+              ],
+              Resource: "*",
+            },
+          ],
+        }),
+      },
+    );
+
+    const ebsEfsPolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ebs_efs",
+      {
+        policyArn: ebsEfsPolicy.arn,
         role: eksNodeGroupRole.name,
       },
     );
@@ -310,6 +367,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           ],
           dependsOn: [
             workerNodePolicyAttachment,
+            ebsEfsPolicyAttachment,
             cniPolicyAttachment,
             containerRegistryAttachment,
           ],
@@ -339,6 +397,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           taint,
           tags,
           dependsOn: [
+            ebsEfsPolicyAttachment,
             workerNodePolicyAttachment,
             cniPolicyAttachment,
             containerRegistryAttachment,
