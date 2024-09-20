@@ -261,7 +261,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         DEFAULT_NODE_DISK_SIZE_MANAGED;
 
       const scalingConfig = {
-        desiredSize: minCount,
+        desiredSize: minCount || count,
         maxSize: count,
         minSize: count,
       };
@@ -273,6 +273,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       }
       if (minCount) {
         scalingConfig.minSize = minCount;
+      }
+      if (scalingConfig.desiredSize < scalingConfig.minSize) {
+        scalingConfig.desiredSize = scalingConfig.minSize;
       }
       const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
