@@ -8,6 +8,7 @@ type Msg = Array<string> | string;
 type ErrOutOptions = {
   code: number;
   metadata?: Record<string, unknown>;
+  cause?: Error;
   id: string;
   label: string;
 };
@@ -22,7 +23,7 @@ export class ErrOut extends Error {
     const message = `${options.label}  ${
       Array.isArray(msg) ? msg.join(" ") : msg
     }`;
-    super(message, {});
+    super(message, { cause: options.cause });
     this.message = message;
     this.id = options.id;
     this.code = options.code;
@@ -30,8 +31,10 @@ export class ErrOut extends Error {
   }
 
   get discussionURL(): string {
-    return error_code_reference.find((entry) => (entry.code === this.code))
-      ?.discussion_link || "";
+    return (
+      error_code_reference.find((entry) => entry.code === this.code)
+        ?.discussion_link || ""
+    );
   }
 
   print(): void {
@@ -63,7 +66,11 @@ export class ErrOut extends Error {
 
   async out(): Promise<never> {
     this.print();
-    await this.persist();
+    try {
+      await this.persist();
+    } catch {
+      // error persisting exit event to telemetry server
+    }
     return this.exit();
   }
 
@@ -75,7 +82,5 @@ export class ErrOut extends Error {
     } as OverwriteWorkerMessageOutgoing;
   }
 
-  exit = (): never => {
-    Deno.exit(this.code);
-  };
+  exit = () => Deno.exit(this.code);
 }

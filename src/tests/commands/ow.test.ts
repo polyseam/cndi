@@ -77,11 +77,12 @@ Deno.test(
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        const [errorLoadingConfig, result] = await loadCndiConfig(projectDir);
+        const [errorLoadingConfig, result] = await loadCndiConfig(dir);
 
         if (errorLoadingConfig) {
-          return errorLoadingConfig;
+          assert(false, errorLoadingConfig.message);
         }
+
         const { config } = result;
         config.cluster_manifests["new-ns"] = {
           kind: "Namespace",

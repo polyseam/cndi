@@ -13,11 +13,9 @@ export default async function setTF_VARs(
     projectDir,
   );
 
-  if (errorLoadingConfig) {
-    return errorLoadingConfig;
-  }
+  if (errorLoadingConfig) return errorLoadingConfig;
 
-  const { config } = loadConfigResult!;
+  const { config } = loadConfigResult;
 
   isClusterless = config.distribution === "clusterless";
 

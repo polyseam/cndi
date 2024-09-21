@@ -1,13 +1,17 @@
 import { ccolors, path, writeAll } from "deps";
-import { getStagingDir } from "src/utils.ts";
+import { getStagingDirectory, PxResult } from "src/utils.ts";
 
 const sshKeysLabel = ccolors.faded("\nsrc/initialize/sshKeys.ts:");
 
-const createSshKeys = async (): Promise<string | null> => {
-  const stagingDir = getStagingDir();
+type PublicKey = string;
 
-  const ssh_private_key_path = path.join(stagingDir, "cndi_rsa");
-  const ssh_public_key_path = path.join(stagingDir, "cndi_rsa.pub");
+const createSshKeys = async (): Promise<PxResult<PublicKey>> => {
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) return [err];
+
+  const ssh_private_key_path = path.join(stagingDirectory, "cndi_rsa");
+  const ssh_public_key_path = path.join(stagingDirectory, "cndi_rsa.pub");
 
   let ssh_public_key;
 
@@ -51,7 +55,7 @@ const createSshKeys = async (): Promise<string | null> => {
 
   Deno.env.set("SSH_PUBLIC_KEY", ssh_public_key);
 
-  return ssh_public_key;
+  return [undefined, ssh_public_key];
 };
 
 export { createSshKeys };

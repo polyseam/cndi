@@ -46,7 +46,10 @@ import {
   Secret,
   Select,
   Toggle,
+  ValidateResult,
 } from "@cliffy/prompt";
+
+export type { ValidateResult };
 
 export { prompt as cprompt };
 

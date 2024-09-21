@@ -36,13 +36,17 @@ export { AwsVpc as AwsVpcModule } from "@cndi/cdktf/modules/aws-vpc.ts";
 export { AwsIamAssumableRoleWithOidc as AwsIamAssumableRoleWithOidcModule } from "@cndi/cdktf/modules/aws-iam-assumable-role-with-oidc.ts";
 export { AwsEksManagedNodeGroup as AwsEksManagedNodeGroupModule } from "@cndi/cdktf/modules/aws-eks-managed-node-group.ts";
 
-import { getPrettyJSONString, getStagingDir } from "src/utils.ts";
+import { getPrettyJSONString, getStagingDirectory } from "src/utils.ts";
 import { path, walkSync } from "deps";
 
-export async function stageCDKTFStack(app: App) {
+import { ErrOut } from "errout";
+
+export async function stageCDKTFStack(app: App): Promise<ErrOut | void> {
   app.synth();
 
-  const stagingDirectory = getStagingDir();
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) return err;
 
   const tfHome = path.join(stagingDirectory, "cndi", "terraform");
   const synthDir = path.join(tfHome, "stacks", "_cndi_stack_");
