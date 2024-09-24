@@ -12,6 +12,9 @@ blocks:
           kubernetes.io/tls-acme: 'true'
           nginx.ingress.kubernetes.io/backend-protocol: HTTPS
           external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(minio_webui_domain) }}"
+          $cndi.comment(nginx-ingress-annotation): Increase the maximum body size to 50TiB 
+          $cndi.comment(nginx-ingress-annotation-cont): to align with Minio max file size
+          nginx.ingress.kubernetes.io/proxy-body-size: 50000g
       spec:
         tls:
           - hosts:
@@ -142,6 +145,9 @@ outputs:
             kubernetes.io/tls-acme: 'true'
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
             external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(server_domain_name) }}"
+            $cndi.comment(nginx-ingress-annotation-2): Increase the maximum body size to 50TiB 
+            $cndi.comment(nginx-ingress-annotation-2-cont): to align with Minio max file size
+            nginx.ingress.kubernetes.io/proxy-body-size: 50000g
         spec:
           tls:
           - hosts:
@@ -264,11 +270,11 @@ outputs:
 
         
     $cndi.comment(minio-heading): Minio Connection Parameters
+    MINIO_TENANT_ACCESS_KEY: "{{ $cndi.get_prompt_response(access_key) }}"
+    MINIO_TENANT_SECRET_KEY: "{{ $cndi.get_prompt_response(secret_key) }}"
     MINIO_TENANT_ROOT_CREDENTIALS: | 
       'export MINIO_ROOT_USER="{{ $cndi.get_random_string(18) }}" 
       export MINIO_ROOT_PASSWORD="{{ $cndi.get_random_string(24) }}"'
-    MINIO_TENANT_ACCESS_KEY: "{{ $cndi.get_prompt_response(access_key) }}"
-    MINIO_TENANT_SECRET_KEY: "{{ $cndi.get_prompt_response(secret_key) }}"
     MINIO_TENANT_SERVER_DOMAIN_NAME: "{{ $cndi.get_prompt_response(server_domain_name) }}"
     MINIO_TENANT_NAME: "myminio"
     MINIO_TENANT_BUCKET_NAME: "{{ $cndi.get_prompt_response(bucket_name) }}"
