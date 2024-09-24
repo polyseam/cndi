@@ -14,7 +14,7 @@ type ErrOutOptions = {
 };
 
 export class ErrOut extends Error {
-  readonly cause?: never;
+  override readonly cause?: Error;
   readonly code: number;
   metadata: Record<string, unknown>;
 
@@ -47,7 +47,7 @@ export class ErrOut extends Error {
     console.error(discussionMessage);
   }
 
-  toString(): string {
+  override toString(): string {
     const { id, message, code } = this;
     return [`Error: ${id}`, `code: ${code}`, message].join("\n");
   }
