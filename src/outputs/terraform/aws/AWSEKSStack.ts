@@ -34,6 +34,8 @@ import {
 
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
+import { ErrOut } from "errout";
+
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
@@ -70,10 +72,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "available-zones",
       {
-        filter: [{
-          name: "opt-in-status",
-          values: ["opt-in-not-required"],
-        }],
+        filter: [
+          {
+            name: "opt-in-status",
+            values: ["opt-in-not-required"],
+          },
+        ],
       },
     );
 
@@ -365,10 +369,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [
-          eksm,
-          firstNodeGroup!,
-        ],
+        dependsOn: [eksm, firstNodeGroup!],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -449,10 +450,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       this,
       "cndi_kubernetes_secret_sealed_secrets_key",
       {
-        dependsOn: [
-          eksm,
-          firstNodeGroup!,
-        ],
+        dependsOn: [eksm, firstNodeGroup!],
         type: "kubernetes.io/tls",
         metadata: {
           name: "sealed-secrets-key",
@@ -474,11 +472,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [
-          eksm,
-          sealedSecretsSecret,
-          firstNodeGroup!,
-        ],
+        dependsOn: [eksm, sealedSecretsSecret, firstNodeGroup!],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
@@ -524,11 +518,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       {
         chart: "argocd-apps",
         createNamespace: true,
-        dependsOn: [
-          helmReleaseArgoCD,
-          firstNodeGroup!,
-          argocdRepoSecret,
-        ],
+        dependsOn: [helmReleaseArgoCD, firstNodeGroup!, argocdRepoSecret],
         name: "root-argo-app",
         namespace: "argocd",
         repository: "https://argoproj.github.io/argo-helm",
@@ -555,18 +545,28 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   }
 }
 
-export async function stageTerraformSynthAWSEKS(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+export async function stageTerraformSynthAWSEKS(
+  cndi_config: CNDIConfig,
+): Promise<null | ErrOut> {
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new AWSEKSTerraformStack(app, `_cndi_stack_`, cndi_config);
+  new AWSEKSTerraformStack(app as Construct, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory
-  await stageCDKTFStack(app);
+  const errStagingApp = await stageCDKTFStack(app);
+  if (errStagingApp) return errStagingApp;
 
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }

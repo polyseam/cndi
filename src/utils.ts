@@ -305,7 +305,14 @@ async function patchAndStageTerraformFilesWithInput(
     }
   }
 
-  await stageFile(pathToTerraformObject, getPrettyJSONString(output));
+  const errorStagingTFObj = await stageFile(
+    pathToTerraformObject,
+    getPrettyJSONString(output),
+  );
+
+  if (errorStagingTFObj) {
+    return errorStagingTFObj;
+  }
 }
 
 function getPathToTerraformBinary() {
@@ -371,15 +378,15 @@ async function stageFile(
     await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
     await Deno.writeTextFile(stagingPath, fileContents);
   } catch (errorStaging) {
-    return new ErrOut([
-      ccolors.error("failed to stage file at"),
-      ccolors.key_name(stagingPath),
-    ], {
-      cause: errorStaging as Error,
-      code: 508,
-      label,
-      id: "!stageFile",
-    });
+    return new ErrOut(
+      [ccolors.error("failed to stage file at"), ccolors.key_name(stagingPath)],
+      {
+        cause: errorStaging as Error,
+        code: 508,
+        label,
+        id: "!stageFile",
+      },
+    );
   }
 }
 
@@ -421,13 +428,30 @@ type CDKTFAppConfig = {
   outdir: string;
 };
 
-async function getCDKTFAppConfig(): Promise<PxResult<string>> {
+async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
   const [err, stagingDirectory] = getStagingDirectory();
   if (err) return [err];
 
   const outdir = path.join(stagingDirectory, "cndi", "terraform");
-  await Deno.mkdir(path.dirname(outdir), { recursive: true });
-  return [undefined, outdir];
+  try {
+    await Deno.mkdir(outdir, { recursive: true });
+  } catch (errorCreatingDirectory) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("failed to create staging directory for terraform at"),
+          ccolors.key_name(outdir),
+        ],
+        {
+          cause: errorCreatingDirectory as Error,
+          code: 510,
+          label,
+          id: "!getCDKTFAppConfig",
+        },
+      ),
+    ];
+  }
+  return [undefined, { outdir }];
 }
 
 async function persistStagedFiles(

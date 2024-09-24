@@ -34,6 +34,8 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import { ErrOut } from "errout";
+
 import AzureCoreTerraformStack from "./AzureCoreStack.ts";
 
 function isValidAzureAKSNodePoolName(inputString: string): boolean {
@@ -531,13 +533,18 @@ function validateCNDIConfigAzureAKS(cndi_config: CNDIConfig) {
   }
 }
 
-export async function stageTerraformSynthAzureAKS(cndi_config: CNDIConfig) {
+export async function stageTerraformSynthAzureAKS(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
   validateCNDIConfigAzureAKS(cndi_config);
 
-  const cdktfAppConfig = await getCDKTFAppConfig();
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
 
-  new AzureAKSTerraformStack(app, `_cndi_stack_`, cndi_config);
+  new AzureAKSTerraformStack(app as Construct, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory
   await stageCDKTFStack(app);
@@ -547,5 +554,10 @@ export async function stageTerraformSynthAzureAKS(cndi_config: CNDIConfig) {
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }

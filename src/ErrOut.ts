@@ -17,6 +17,8 @@ export class ErrOut extends Error {
   readonly cause?: never;
   readonly code: number;
   metadata: Record<string, unknown>;
+
+  // a slash-delimitted path from '@org/module', 'fileName', 'functionName', 'condition'
   id: string;
 
   constructor(msg: Msg, options: ErrOutOptions) {

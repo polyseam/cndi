@@ -14,7 +14,6 @@ import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 import type {
   CNDITemplatePromptResponsePrimitive,
   PromptType,
-  Result,
 } from "./types.ts";
 
 import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "consts";
@@ -163,11 +162,20 @@ function getCoarselyValidatedTemplateBody(
   templateBodyString: string,
 ): PxResult<TemplateObject> {
   if (templateBodyString.indexOf("\n---\n") > -1) {
-    return {
-      error: new Error(
-        "Template body contains multiple YAML documents in a single file.\nUnsupported!",
-      ),
-    };
+    // TODOO: this seems to general
+    // what if the --- is in a string?
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error(
+          "Template body contains multiple YAML documents in a single file.",
+        ),
+      ], {
+        label,
+        id: "isYAMLMultiDoc(getCoarselyValidatedTemplateBody())",
+        code: 1207,
+      }),
+    ];
   }
 
   const templateBody = YAML.parse(templateBodyString) as {
@@ -177,26 +185,73 @@ function getCoarselyValidatedTemplateBody(
   };
 
   if (typeof templateBody !== "object") {
-    return { error: new Error("Template body is not an object") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error("Template body is not an object"),
+      ], {
+        label,
+        id: 'typeof(templateBody) !== "object"',
+        code: 1208,
+      }),
+    ];
   }
 
   if (templateBody == null) {
-    return { error: new Error("Template body is null") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error("Template body is null"),
+      ], {
+        label,
+        id: "templateBody==null",
+        code: 1209,
+      }),
+    ];
   }
 
   if (templateBody?.prompts && !Array.isArray(templateBody.prompts)) {
-    return { error: new Error("Template body's prompts is not an array") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.key_name("outputs.prompts"),
+        ccolors.error("is defined and is not an array"),
+      ], {
+        label,
+        id: "templateBody?.prompts && !Array.isArray(templateBody.prompts)",
+        code: 1210,
+      }),
+    ];
   }
 
   if (templateBody?.blocks && !Array.isArray(templateBody.blocks)) {
-    return { error: new Error("Template body's blocks is not an array") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.key_name("outputs.blocks"),
+        ccolors.error("is defined and is not an array"),
+      ], {
+        label,
+        id: "templateBody?.blocks && !Array.isArray(templateBody.blocks)",
+        code: 1210,
+      }),
+    ];
   }
 
   if (!templateBody?.outputs) {
-    return { error: new Error(`Template body's "outputs" is not truthy`) };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error('Template body is missing "outputs"'),
+      ], {
+        label,
+        id: "templateBody?.outputs",
+        code: 1211,
+      }),
+    ];
   }
 
-  return { value: templateBody as TemplateObject };
+  return [undefined, templateBody as TemplateObject];
 }
 
 async function getBlockForIdentifier(
@@ -648,7 +703,7 @@ async function presentCliffyPrompt(
 async function fetchPromptBlockForImportStatement(
   importStatement: string,
   body: GetBlockBody,
-): Promise<PxResult<Array<unknown>>> {
+): Promise<PxResult<Array<CNDITemplateStaticPromptEntry>>> {
   const literalizedImportStatement = literalizeGetPromptResponseCalls(
     removeWhitespaceBetweenBraces(importStatement),
   );
@@ -1252,7 +1307,9 @@ export async function useTemplate(
                 prompt as CNDITemplateStaticPromptEntry,
               );
             } else {
-              $cndi.responses.set(prompt.name, prompt.default);
+              // TODO: unset response when default is missing?
+              // deno-lint-ignore no-explicit-any
+              $cndi.responses.set(prompt.name, prompt.default as any);
             }
           }
         }

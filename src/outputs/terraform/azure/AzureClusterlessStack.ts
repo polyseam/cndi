@@ -15,6 +15,8 @@ import {
   patchAndStageTerraformFilesWithInput,
 } from "src/utils.ts";
 
+import { ErrOut } from "errout";
+
 const DEFAULT_ARM_REGION = "eastus";
 
 class AzureClusterlessTerraformStack extends TerraformStack {
@@ -57,10 +59,20 @@ class AzureClusterlessTerraformStack extends TerraformStack {
   }
 }
 
-async function stageTerraformSynthAzureClusterless(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+async function stageTerraformSynthAzureClusterless(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new AzureClusterlessTerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  new AzureClusterlessTerraformStack(
+    app as Construct,
+    `_cndi_stack_`,
+    cndi_config,
+  );
 
   // write terraform stack to staging directory
   await stageCDKTFStack(app);
@@ -68,9 +80,13 @@ async function stageTerraformSynthAzureClusterless(cndi_config: CNDIConfig) {
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
-
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }
 
 export { stageTerraformSynthAzureClusterless };

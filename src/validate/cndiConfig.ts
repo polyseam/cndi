@@ -1,5 +1,5 @@
 import { ccolors } from "deps";
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, CNDIProvider } from "src/types.ts";
 import { isSlug } from "src/utils.ts";
 import {
   EFFECT_VALUES,
@@ -12,12 +12,16 @@ import { ErrOut } from "errout";
 
 const label = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
 
+const PROVIDERS_SUPPORTING_KEYLESS: Array<CNDIProvider> = [];
+
 export default function validateConfig(
   config: CNDIConfig,
   pathToConfig: string,
 ): ErrOut | void {
   if (config?.cndi_version && config?.cndi_version !== "v2") {
     console.log();
+
+    // config?.infrastructure?.cndi?.keyless
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
@@ -95,6 +99,31 @@ export default function validateConfig(
         label,
       },
     );
+  }
+
+  if (config?.infrastructure?.cndi?.keyless === true) {
+    if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+      return new ErrOut(
+        [
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"infrastructure.cndi.keyless"'),
+          ccolors.error("set to"),
+          ccolors.user_input('"true"'),
+          ccolors.error("while"),
+          ccolors.key_name("keyless"),
+          ccolors.error("deployments are not supported in"),
+          ccolors.user_input(config?.provider),
+        ],
+        {
+          code: 921,
+          id: "validate/cndi_config/keyless/!keylessSupported(provider)",
+          metadata: { config },
+          label,
+        },
+      );
+    }
   }
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
