@@ -9,7 +9,6 @@ import {
 
 import {
   App,
-  AwsEksManagedNodeGroupModule,
   AwsEksModule,
   AwsIamAssumableRoleWithOidcModule,
   AwsVpcModule,
@@ -91,9 +90,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       enableDnsHostnames: true,
       publicSubnetTags: {
         "kubernetes.io/role/elb": "1",
+        [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
       privateSubnetTags: {
         "kubernetes.io/role/internal-elb": "1",
+        [`kubernetes.io/cluster/${project_name}`]: "owned",
       },
     });
 
@@ -152,11 +153,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    const iamRoleAdditionalPolicies = {
-      efsRoleName: efsCsiPolicy.arn,
-      ebsRoleName: ebsCsiPolicy.arn,
-    };
-
     // deno-lint-ignore no-explicit-any
     const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
 
@@ -195,18 +191,136 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       subnetIdx++;
     }
 
-    const eksManagedNodeGroups: Record<string, AwsEksManagedNodeGroupModule> =
-      {};
+    const eksNodeGroupRole = new CDKTFProviderAWS.iamRole.IamRole(
+      this,
+      "cndi_iam_role_compute",
+      {
+        namePrefix: "COMPUTE",
+        assumeRolePolicy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: "sts:AssumeRole",
+              Principal: {
+                Service: "ec2.amazonaws.com",
+              },
+            },
+          ],
+        }),
+      },
+    );
 
+    const workerNodePolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_worker_node_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+        role: eksNodeGroupRole.name,
+      },
+    );
+
+    const cniPolicyAttachment = new CDKTFProviderAWS.iamRolePolicyAttachment
+      .IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_eks_cni_policy",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+        role: eksNodeGroupRole.name,
+      },
+    );
+
+    const containerRegistryAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ec2_container_registry_readonly",
+      {
+        policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+        role: eksNodeGroupRole.name,
+      },
+    );
+    const ebsEfsPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
+      this,
+      "cndi_aws_iam_policy_ebs_efs",
+      {
+        policy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: [
+                // EBS Permissions
+                "ec2:CreateVolume",
+                "ec2:AttachVolume",
+                "ec2:DetachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DeleteVolume",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeVolumeStatus",
+                "ec2:DescribeTags",
+                "ec2:CreateTags",
+                "ec2:DeleteTags",
+                "ec2:CreateSnapshot",
+                "ec2:DeleteSnapshot",
+                "ec2:DescribeSnapshots",
+                "ec2:ModifySnapshotAttribute",
+                "ec2:CopySnapshot",
+                "ec2:CreateTags",
+                "ec2:DescribeTags",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:CreateSnapshot",
+                "ec2:AttachVolume",
+                "ec2:DetachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DescribeInstances",
+                "ec2:DescribeVolumesModifications",
+
+                // EFS Permissions
+                "elasticfilesystem:CreateAccessPoint",
+                "elasticfilesystem:DeleteAccessPoint",
+                "elasticfilesystem:DescribeAccessPoints",
+                "elasticfilesystem:CreateFileSystem",
+                "elasticfilesystem:DeleteFileSystem",
+                "elasticfilesystem:DescribeFileSystems",
+                "elasticfilesystem:CreateMountTarget",
+                "elasticfilesystem:DeleteMountTarget",
+                "elasticfilesystem:DescribeMountTargets",
+                "elasticfilesystem:ModifyMountTargetSecurityGroups",
+                "elasticfilesystem:DescribeMountTargetSecurityGroups",
+                "elasticfilesystem:TagResource",
+                "elasticfilesystem:ClientWrite",
+                "elasticfilesystem:DescribeTags",
+              ],
+              Resource: "*",
+            },
+          ],
+        }),
+      },
+    );
+
+    const ebsEfsPolicyAttachment = new CDKTFProviderAWS
+      .iamRolePolicyAttachment.IamRolePolicyAttachment(
+      this,
+      "cndi_aws_iam_role_policy_attachment_ebs_efs",
+      {
+        policyArn: ebsEfsPolicy.arn,
+        role: eksNodeGroupRole.name,
+      },
+    );
+    const eksManagedNodeGroups: Record<
+      string,
+      CDKTFProviderAWS.eksNodeGroup.EksNodeGroup
+    > = {};
+
+    let firstNodeGroup: CDKTFProviderAWS.eksNodeGroup.EksNodeGroup;
     let nodeGroupIndex = 0;
-    let firstNodeGroup: AwsEksManagedNodeGroupModule;
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeGroup?.count || 1;
       const maxCount = nodeGroup?.max_count;
       const minCount = nodeGroup?.min_count;
       const nodeGroupName = nodeGroup.name;
-
       const instanceType = nodeGroup?.instance_type ||
         DEFAULT_INSTANCE_TYPES.aws;
 
@@ -216,18 +330,23 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         DEFAULT_NODE_DISK_SIZE_MANAGED;
 
       const scalingConfig = {
-        desiredSize: count,
+        desiredSize: minCount || count,
         maxSize: count,
         minSize: count,
       };
-
+      if (count) {
+        scalingConfig.desiredSize = count;
+      }
       if (maxCount) {
         scalingConfig.maxSize = maxCount;
       }
       if (minCount) {
         scalingConfig.minSize = minCount;
       }
-      const taints = nodeGroup.taints?.map((taint) => ({
+      if (scalingConfig.desiredSize < scalingConfig.minSize) {
+        scalingConfig.desiredSize = scalingConfig.minSize;
+      }
+      const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
         effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
@@ -238,29 +357,64 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         CNDIProject: project_name,
       };
 
+      const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
+        .LaunchTemplate(
+        this,
+        `cndi_aws_launch_template_${nodeGroupIndex}`,
+        {
+          namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
+          blockDeviceMappings: [
+            {
+              deviceName: "/dev/sdf",
+              ebs: {
+                volumeSize,
+              },
+            },
+          ],
+          tagSpecifications: [
+            {
+              resourceType: "instance",
+              tags,
+            },
+          ],
+          dependsOn: [
+            workerNodePolicyAttachment,
+            ebsEfsPolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+          ],
+        },
+      );
+
       const labels = nodeGroup.labels || {};
-      eksManagedNodeGroups[nodeGroupName] = new AwsEksManagedNodeGroupModule(
+
+      eksManagedNodeGroups[nodeGroupName] = new CDKTFProviderAWS.eksNodeGroup
+        .EksNodeGroup(
         this,
         `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
-          name: nodeGroupName,
           clusterName: eksm.clusterNameOutput,
-          clusterVersion: eksm.clusterVersionOutput,
           subnetIds: subnetIds,
-          clusterServiceCidr: eksm.clusterServiceCidrOutput,
-          clusterPrimarySecurityGroupId:
-            eksm.clusterPrimarySecurityGroupIdOutput,
-          vpcSecurityGroupIds: [eksm.nodeSecurityGroupId!],
           amiType: "AL2_x86_64",
-          ...scalingConfig,
           instanceTypes: [instanceType],
+          nodeGroupName,
+          nodeRoleArn: eksNodeGroupRole.arn,
+          scalingConfig,
+          launchTemplate: {
+            id: nodegroupLaunchTemplate.id,
+            version: `${nodegroupLaunchTemplate.latestVersion}`,
+          },
           capacityType: "ON_DEMAND",
           labels,
-          taints,
+          taint,
           tags,
-          iamRoleAdditionalPolicies,
-          enableEfaSupport: false,
-          diskSize: volumeSize,
+          dependsOn: [
+            ebsEfsPolicyAttachment,
+            workerNodePolicyAttachment,
+            cniPolicyAttachment,
+            containerRegistryAttachment,
+            nodegroupLaunchTemplate,
+          ],
         },
       );
 
