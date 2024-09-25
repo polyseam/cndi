@@ -356,13 +356,18 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         Name: `cndi-eks-node-group-${nodeGroupName}`,
         CNDIProject: project_name,
       };
-
+      const userdata = `#!/bin/bash
+                        set -o xtrace
+                        /etc/eks/bootstrap.sh ${project_name}
+                      `;
       const nodegroupLaunchTemplate = new CDKTFProviderAWS.launchTemplate
         .LaunchTemplate(
         this,
         `cndi_aws_launch_template_${nodeGroupIndex}`,
         {
           namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
+          userData: Fn.base64encode(userdata),
+          imageId: "ami-0f364014f4d0fb0be",
           blockDeviceMappings: [
             {
               deviceName: "/dev/sdf",
