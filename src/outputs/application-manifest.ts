@@ -3,6 +3,16 @@ import { getYAMLString } from "src/utils.ts";
 
 type ArgoAppInfo = Array<{ name: string; value: string }>;
 
+type IgnoreDifferencesEntry = {
+  group: string;
+  kind: string;
+  managedFieldsManagers: string[];
+  name: string;
+  namespace: string;
+  jqPathExpressions: string[];
+  jsonPointers: string[];
+};
+
 type Meta = {
   name?: string;
   namespace?: string;
@@ -45,6 +55,8 @@ export interface CNDIApplicationSpec {
   info?: ArgoAppInfo;
   syncPolicy?: SyncPolicy;
   metadata?: Meta;
+  ignoreDifferences?: Array<IgnoreDifferencesEntry>;
+  revisionHistoryLimit?: number;
 }
 
 const DEFAULT_SYNC_POLICY = {
@@ -161,8 +173,16 @@ const getApplicationManifest = (
     applicationSpec?.syncPolicy || {},
   );
 
-  const { repoURL, path, chart, targetRevision, info, directory } =
-    applicationSpec;
+  const {
+    repoURL,
+    path,
+    chart,
+    targetRevision,
+    info,
+    directory,
+    ignoreDifferences,
+    revisionHistoryLimit,
+  } = applicationSpec;
 
   const source: AppSpecSource = {
     repoURL,
@@ -190,6 +210,8 @@ const getApplicationManifest = (
     },
     syncPolicy,
     info,
+    ignoreDifferences,
+    revisionHistoryLimit,
   };
 
   const manifest = {
