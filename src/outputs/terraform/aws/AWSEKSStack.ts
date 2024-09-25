@@ -356,6 +356,27 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         Name: `cndi-eks-node-group-${nodeGroupName}`,
         CNDIProject: project_name,
       };
+
+      const ubuntuAmi = new CDKTFProviderAWS.dataAwsAmi.DataAwsAmi(
+        this,
+        `cndi_aws_ubuntu_ami_lookup_${nodeGroupIndex}`,
+        {
+          mostRecent: true,
+          filter: [
+            {
+              name: "name",
+              values: [
+                `ubuntu-eks/k8s_${DEFAULT_K8S_VERSION}/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*`,
+              ],
+            },
+            {
+              name: "virtualization-type",
+              values: ["hvm"],
+            },
+          ],
+          owners: ["099720109477"], // Canonical's AWS account ID
+        },
+      );
       const userdata = `#!/bin/bash
                         set -o xtrace
                         /etc/eks/bootstrap.sh ${project_name}
@@ -367,7 +388,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
           userData: Fn.base64encode(userdata),
-          imageId: "ami-0f364014f4d0fb0be",
+          imageId: ubuntuAmi.id,
           blockDeviceMappings: [
             {
               deviceName: "/dev/sdf",
@@ -400,7 +421,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           clusterName: eksm.clusterNameOutput,
           subnetIds: subnetIds,
-          amiType: "AL2_x86_64",
+          amiType: "CUSTOM",
           instanceTypes: [instanceType],
           nodeGroupName,
           nodeRoleArn: eksNodeGroupRole.arn,
