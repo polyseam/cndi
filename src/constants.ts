@@ -74,6 +74,10 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
   },
   {
+    name: "wordpress",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/wordpress.yaml`,
+  },
+  {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
   },
