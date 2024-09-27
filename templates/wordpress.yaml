@@ -22,14 +22,26 @@ prompts:
       - ==
       - true
 
+  - name: wordpress_hostname
+    default: wordpress.example.com
+    message: >-
+      What hostname should Wordpress be accessible at?
+    type: Input
+    validators:
+      - hostname
+  
+  - name: wordpress_password
+    message: >-
+      What password should Wordpress user 'admin' use?
+    type: Secret
+    default: '{{ $cndi.get_random_string(16) }}'
+    
 outputs:
   cndi_config:
-    # source_control_platform: github ?
     cndi_version: v2
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
-    # this is a Template comment
     infrastructure:
       cndi:
         cert_manager:
@@ -67,10 +79,55 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
+      
+      wp-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: wordpress-pw
+          namespace: wordpress
+        stringData:
+          wordpress-password: $cndi_on_ow.seal_secret_from_env_var(WORDPRESS_PASSWORD)
 
+      wp-ingress:
+        kind: Ingress
+        apiVersion: networking.k8s.io/v1
+        metadata:
+          name: wordpress-ingress
+          namespace: wordpress
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: 'true'
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+            external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(wordpress_hostname) }}"
+        spec:
+          ingressClassName: public
+          tls:
+            - hosts:
+                - "{{ $cndi.get_prompt_response(wordpress_hostname) }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $cndi.get_prompt_response(wordpress_hostname) }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: ImplementationSpecific
+                    backend:
+                      service:
+                        name: wordpress
+                        port:
+                          number: 443
+                          
     applications:
       wordpress:
-        
+        repoURL: https://charts.bitnami.com/bitnami
+        chart: wordpress
+        targetRevision: 23.1.17
+        destinationNamespace: wordpress
+        values:
+          existingSecret: wordpress-pw
+          wordpressUsername: admin
+
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -78,6 +135,8 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+    $cndi.comment(wordpress): Wordpress Variables
+    WORDPRESS_PASSWORD: "{{ $cndi.get_prompt_response(wordpress_password) }}"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
@@ -91,12 +150,8 @@ outputs:
     wordpress: |
       # Wordpress Deployment Guide
 
-      This Template provides the essential building blocks of a CNDI Cluster,
-      and can be extended to meet any need. If there is no existing 
-      CNDI Template for your use-case, we recommend deploying this `basic`
-      Template as is. 
+      ## Accessing Wordpress
 
-      After you verify the Template is deployed successfully to your 
-      infrastructure, it can be enhanced using the `cndi_config.yaml` fields 
-      `applications` and `cluster_manifests` with Kubernetes manifests 
-      and Helm charts respectively.
+      Wordpress will be deployed at the hostname you entered in your prompts
+      and you can login to the admin panel at 
+      [https://{{ $cndi.get_prompt_response(wordpress_hostname) }}/wp-admin](https://{{ $cndi.get_prompt_response(wordpress_hostname) }}/wp-admin).
