@@ -101,6 +101,10 @@ const KNOWN_TEMPLATES = [
     name: "redis",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/redis.yaml`,
   },
+  {
+    name: "minio",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/minio.yaml`,
+  },
 ] as const;
 
 export const NO_SCHEDULE = "NoSchedule" as const;
