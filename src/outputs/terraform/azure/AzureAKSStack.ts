@@ -131,21 +131,37 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
-        const count = nodeSpec.count || 1;
-
+        let count = nodeSpec.count || 1;
+        const maxCount = nodeSpec?.max_count;
+        const minCount = nodeSpec?.min_count;
         const scale = {
-          nodeCount: count,
           maxCount: count,
-          minCount: count,
+          minCount: minCount || count,
         };
-
-        if (nodeSpec.max_count) {
-          scale.maxCount = nodeSpec.max_count;
+        if (count && minCount) {
+          throw new Error(
+            [
+              AKSStackLabel,
+              ccolors.key_name('"infrastructure.cndi.nodes"'),
+              ccolors.error(
+                "must either have count or min_count not both",
+              ),
+            ].join(" "),
+            {
+              cause: 4888,
+            },
+          );
+        }
+        if (maxCount) {
+          scale.maxCount = maxCount;
+        }
+        if (minCount) {
+          scale.minCount = minCount;
+        }
+        if (count < scale.minCount) {
+          count = scale.minCount;
         }
 
-        if (nodeSpec.min_count) {
-          scale.minCount = nodeSpec.min_count;
-        }
         const nodeTaints = nodeSpec.taints?.map((taint) =>
           `${taint.key}=${taint.value}:${
             getTaintEffectForDistribution(taint.effect, "aks") // taint.effect must be valid by now
