@@ -15,7 +15,6 @@ infrastructure:
         disk_size: 100
     external_dns:
       provider: aws
-    
-      
+
 cluster_manifests: {}
 applications: {}

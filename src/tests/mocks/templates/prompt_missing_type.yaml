@@ -7,9 +7,9 @@ prompts:
     message: "is one + zero one?"
     default: true
 outputs:
-    cndi_config:
-        cndi_version: v2
-    env:
-        HELLO: WORLD
-    readme:
-        - '# readme heading'
+  cndi_config:
+    cndi_version: v2
+  env:
+    HELLO: WORLD
+  readme:
+    - "# readme heading"

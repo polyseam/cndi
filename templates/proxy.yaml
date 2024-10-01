@@ -64,17 +64,17 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
+
     cluster_manifests:
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
@@ -144,7 +144,7 @@ outputs:
                         port:
                           number: 443
 
-      external-dns-secret: 
+      external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -158,7 +158,7 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-      
+
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):

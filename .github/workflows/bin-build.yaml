@@ -1,10 +1,10 @@
 on:
   pull_request:
-    branches:    
+    branches:
       - main
   push:
     branches:
-      - 'main'
+      - "main"
 env: # this is a Read-Only token for Public Repositories see: https://github.com/polyseam/cndi/pull/863
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 jobs:

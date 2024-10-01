@@ -1,6 +1,6 @@
 on:
   pull_request:
-    branches:    
+    branches:
       - main
 jobs:
   test_and_lint: # cndi
@@ -8,15 +8,15 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-        
+
       - name: use deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v2.0.0-rc.2
-      
+
       - name: Check formatting
         run: deno fmt --check
-        
+
       - name: Lint
         run: deno lint
 
