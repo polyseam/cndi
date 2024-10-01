@@ -74,6 +74,10 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
   },
   {
+    name: "wordpress",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/wordpress.yaml`,
+  },
+  {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
   },
@@ -96,6 +100,10 @@ const KNOWN_TEMPLATES = [
   {
     name: "redis",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/redis.yaml`,
+  },
+  {
+    name: "minio",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/minio.yaml`,
   },
 ] as const;
 

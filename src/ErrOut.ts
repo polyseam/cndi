@@ -13,6 +13,14 @@ type ErrOutOptions = {
   label: string;
 };
 
+/**
+ * Error class for handling errors in the CLI
+ * This class provides a method to exit, print the error message, and persist the error to the telemetry server
+ * @class
+ * @extends Error
+ * @param {Msg} msg - The error message
+ * @param {ErrOutOptions} options - The options for the error
+ */
 export class ErrOut extends Error {
   override readonly cause?: Error;
   readonly code: number;

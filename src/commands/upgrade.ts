@@ -9,6 +9,8 @@ import { emitExitEvent, getPathToCndiBinary } from "src/utils.ts";
 const destinationDir = "~/.cndi/bin";
 
 const upgradeCommand = new GithubReleasesUpgradeCommand({
+  // @ts-ignore - hotfix!
+  spinner: false,
   provider: new GithubReleasesProvider({
     repository: "polyseam/cndi",
     destinationDir,
