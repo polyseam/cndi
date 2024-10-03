@@ -21,6 +21,8 @@ import {
 } from "src/utils.ts";
 
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
+import { ErrOut } from "errout";
+import { ensureValidGoogleCredentials } from "src/outputs/terraform/gcp/utils.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 export class GCPMicrok8sStack extends GCPCoreTerraformStack {
@@ -350,10 +352,21 @@ export class GCPMicrok8sStack extends GCPCoreTerraformStack {
   }
 }
 
-export async function stageTerraformSynthGCPMicrok8s(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+export async function stageTerraformSynthGCPMicrok8s(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const errEnsuringValidGoogleCredentials = ensureValidGoogleCredentials();
+  if (errEnsuringValidGoogleCredentials) {
+    return errEnsuringValidGoogleCredentials;
+  }
+
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new GCPMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+
+  new GCPMicrok8sStack(app as Construct, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory
   await stageCDKTFStack(app);
@@ -363,5 +376,10 @@ export async function stageTerraformSynthGCPMicrok8s(cndi_config: CNDIConfig) {
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }

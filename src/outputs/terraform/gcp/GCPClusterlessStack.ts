@@ -15,6 +15,10 @@ import {
 
 import { ccolors } from "deps";
 
+import { ErrOut } from "errout";
+
+import { ensureValidGoogleCredentials } from "src/outputs/terraform/gcp/utils.ts";
+
 type GCPKeyJSON = {
   type: string;
   project_id: string;
@@ -103,10 +107,25 @@ class GCPClusterlessTerraformStack extends TerraformStack {
   }
 }
 
-async function stageTerraformSynthGCPClusterless(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+async function stageTerraformSynthGCPClusterless(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const errEnsuringValidGoogleCredentials = ensureValidGoogleCredentials();
+  if (errEnsuringValidGoogleCredentials) {
+    return errEnsuringValidGoogleCredentials;
+  }
+
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new GCPClusterlessTerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  new GCPClusterlessTerraformStack(
+    app as Construct,
+    `_cndi_stack_`,
+    cndi_config,
+  );
 
   // write terraform stack to staging directory
   await stageCDKTFStack(app);
@@ -116,7 +135,12 @@ async function stageTerraformSynthGCPClusterless(cndi_config: CNDIConfig) {
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }
 
 export { stageTerraformSynthGCPClusterless };

@@ -22,13 +22,13 @@ Deno.test(
     assert(!!template);
   },
 );
-//This throws error from fetch() cause it is looking for file:// and is grtting "C" as protocol
+// This throws error from fetch() cause it is looking for file:// and is grtting "C" as protocol
 Deno.test(
   "template validation: more provided values should pass validation",
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const _template = await useTemplate(
+    const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
         interactive: false,
@@ -40,5 +40,6 @@ Deno.test(
         },
       },
     );
+    assert(!!template);
   },
 );

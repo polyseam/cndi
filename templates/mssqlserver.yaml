@@ -1,6 +1,6 @@
 blocks:
-   - name : windows_auth
-     content:
+  - name: windows_auth
+    content:
       dns_url: "{{ $cndi.get_arg(dns_url) }}"
       dns_ip: "{{ $cndi.get_arg(dns_ip) }}"
       privilegedadaccount: "{{ $cndi.get_arg(privilegedadaccount) }}"
@@ -67,7 +67,7 @@ prompts:
     validators:
       - hostname # FQDN
       - min_length: 3
-    condition: 
+    condition:
       - "{{ $cndi.get_prompt_response(add_windows_login) }}"
       - ==
       - true
@@ -78,7 +78,7 @@ prompts:
     type: Input
     validators:
       - min_length: 3
-    condition: 
+    condition:
       - "{{ $cndi.get_prompt_response(add_windows_login) }}"
       - ==
       - true
@@ -89,7 +89,7 @@ prompts:
     type: Input
     validators:
       - min_length: 3
-    condition: 
+    condition:
       - "{{ $cndi.get_prompt_response(add_windows_login) }}"
       - ==
       - true
@@ -105,7 +105,7 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -121,7 +121,7 @@ outputs:
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
+
     cluster_manifests:
       $cndi.comment(mssql-sa-secret): Mssql sa password
       mssql-sa-secret:
@@ -133,7 +133,7 @@ outputs:
         type: Opaque
         stringData:
           MSSQL_SA_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(MSSQL_SA_PASSWORD)
-          
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
@@ -162,14 +162,14 @@ outputs:
             - ==
             - true
 
-      external-dns-secret: 
+      external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
-    applications: 
+    applications:
       mssql:
         targetRevision: 0.1.8
         destinationNamespace: mssql
@@ -198,7 +198,7 @@ outputs:
             name: mssql-certs
             namespace: mssql
             secretName: mssql-certs-secret
-            commonName: "{{ $cndi.get_prompt_response(mssql_hostname) }}" 
+            commonName: "{{ $cndi.get_prompt_response(mssql_hostname) }}"
             dnsNames:
               - "{{ $cndi.get_prompt_response(mssql_hostname) }}"
               - "mssql-0.mssql.svc.cluster.local"
@@ -215,7 +215,7 @@ outputs:
               tlskey: "/var/opt/mssql/sslcert/tls.key"
               tlsprotocols: "1.2"
               forceencryption: "0"
-          windows_auth: 
+          windows_auth:
             $cndi.get_block(windows_auth):
               condition:
                 - "{{ $cndi.get_prompt_response(add_windows_login) }}"
@@ -232,7 +232,6 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
 
     $cndi.comment(mssql-sa-password-comment): "Should contain uppercase, lowercase, number, special character and muste be greater than 8 letters"
     MSSQL_SA_PASSWORD: "{{ $cndi.get_prompt_response(mssql_sa_password) }}"

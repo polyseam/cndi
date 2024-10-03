@@ -1,6 +1,6 @@
 import { path, YAML } from "deps";
-import { useTemplate } from "../mod.ts";
-import { assert, assertRejects, parseDotEnv } from "test-deps";
+import { useTemplate, UseTemplateResult } from "../mod.ts";
+import { assert, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
@@ -10,12 +10,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("airflow", {
+    const templateResult = await useTemplate("airflow", {
       interactive: false,
       overrides: {
         deployment_target_provider: "aws",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("airflow"));
   },
@@ -26,12 +27,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "aws",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(!template.files["README.md"].includes("airflow"));
   },
@@ -42,12 +44,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "aws",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     const env = parseDotEnv(template.files[".env"]);
     assert(typeof env.AWS_ACCESS_KEY_ID === "string");
@@ -60,12 +63,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "gcp",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     const env = parseDotEnv(template.files[".env"]);
     assert(env.GOOGLE_CREDENTIALS);
@@ -77,12 +81,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "azure",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     const env = parseDotEnv(template.files[".env"]);
     assert(env.ARM_CLIENT_ID);
@@ -97,12 +102,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "azure",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("azure"));
   },
@@ -113,12 +119,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "gcp",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("gcp"));
   },
@@ -129,12 +136,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "aws",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("aws"));
   },
@@ -145,12 +153,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "aws",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
@@ -163,12 +172,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "gcp",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
@@ -181,12 +191,13 @@ Deno.test(
   mySanity,
   async () => {
     // Deno.cwd() is the root of the project
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "azure",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
@@ -200,14 +211,14 @@ Deno.test(
   async () => {
     // Deno.cwd() is the root of the project
 
-    const template = await useTemplate("basic", {
+    const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
         deployment_target_provider: "azure",
         enable_external_dns: false,
       },
     });
-
+    const template = templateResult[1] as UseTemplateResult;
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
 
@@ -222,9 +233,10 @@ Deno.test(
   mySanity,
   async () => {
     const fns_hostname = "fns.example.com";
-    const mockYamlFileUri = "file://" + Deno.cwd() +
+    const mockYamlFileUri = "file://" +
+      Deno.cwd() +
       "/src/use-template/tests/mock/templates/get_block-mock.yaml";
-    const template = await useTemplate(mockYamlFileUri, {
+    const templateResult = await useTemplate(mockYamlFileUri, {
       interactive: false,
       overrides: {
         project_name: "test",
@@ -235,6 +247,7 @@ Deno.test(
         cert_manager_email: "matt.johnston@polyseam.io",
       },
     });
+    const template = templateResult[1] as UseTemplateResult;
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
   },
@@ -244,9 +257,10 @@ Deno.test(
   "template execution: a template should be able to add extra files to the output",
   mySanity,
   async () => {
-    const mockYamlFileUri = "file://" + Deno.cwd() +
+    const mockYamlFileUri = "file://" +
+      Deno.cwd() +
       "/src/use-template/tests/mock/templates/extra_files-mock.yaml";
-    const template = await useTemplate(mockYamlFileUri, {
+    const templateResult = await useTemplate(mockYamlFileUri, {
       interactive: false,
       overrides: {
         project_name: "test",
@@ -254,6 +268,7 @@ Deno.test(
       },
     });
     const text = "Hello World!";
+    const template = templateResult[1] as UseTemplateResult;
     assert(template.files[path.join("my", "extra_file.txt")] === text);
   },
 );
@@ -262,24 +277,18 @@ Deno.test(
   "template execution: a template should fail validation if it has an extra_files block which does not begin with a './'",
   mySanity,
   async () => {
-    const mockYamlFileUri = "file://" + Deno.cwd() +
+    const mockYamlFileUri = "file://" +
+      Deno.cwd() +
       "/src/use-template/tests/mock/templates/extra_files_invalid-mock.yaml";
 
-    try {
-      await assertRejects(
-        async () => {
-          await useTemplate(mockYamlFileUri, {
-            interactive: false,
-            overrides: {
-              project_name: "test",
-              greet_who: "Extra!",
-            },
-          });
-        },
-      );
-    } catch {
-      console.log("validation failed to throw error");
-      assert(false);
-    }
+    const templateResult = await useTemplate(mockYamlFileUri, {
+      interactive: false,
+      overrides: {
+        project_name: "test",
+        greet_who: "Extra!",
+      },
+    });
+    const err = templateResult[0];
+    assert(err);
   },
 );

@@ -31,10 +31,13 @@ const getTCPConfig = (open_ports: CNDIPort[]): TCPSpec => {
 };
 
 const getBaseValues = (cndi_config: CNDIConfig) =>
-  deepMerge({
-    controller: getDefaultControllerConfig(),
-    tcp: getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []),
-  }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {});
+  deepMerge(
+    {
+      controller: getDefaultControllerConfig(),
+      tcp: getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []),
+    },
+    cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {},
+  );
 
 const eksValues = (cndi_config: CNDIConfig) =>
   deepMerge(getBaseValues(cndi_config), {
@@ -98,9 +101,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
   return providerConfigs[cndiDistribution];
 };
 
-export default function getNginxApplicationManifest(
-  cndi_config: CNDIConfig,
-) {
+export default function getNginxApplicationManifest(cndi_config: CNDIConfig) {
   if (cndi_config.distribution === "clusterless") return "";
   const releaseName = "ingress-nginx-public";
   const values = getDefaultNginxValuesForCNDIProvider(cndi_config);

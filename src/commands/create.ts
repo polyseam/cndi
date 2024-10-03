@@ -1,8 +1,14 @@
-import { ccolors, Command, path, PromptTypes, YAML } from "deps";
+import {
+  ccolors,
+  Command,
+  path,
+  PromptTypes,
+  ValidateResult,
+  YAML,
+} from "deps";
 import {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
-  emitExitEvent,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
   isSlug,
@@ -24,10 +30,12 @@ import vscodeSettings from "src/outputs/vscode-settings.ts";
 
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
-// Error Domain: 15XX
-const createLabel = ccolors.faded("\nsrc/commands/create.ts:");
+import { ErrOut } from "errout";
 
-function validateGitHubSlug(value: string) {
+// Error Domain: 15XX
+const label = ccolors.faded("\nsrc/commands/create.ts:");
+
+function validateGitHubSlug(value: string): ValidateResult {
   if (!value.includes("/")) {
     return "Owner/Repo slug argument must be in the format owner/repo";
   }
@@ -47,7 +55,6 @@ function validateGitHubSlug(value: string) {
   if (!isSlug(repo)) {
     return "repo component of slug must only contain alphanumeric characters and hyphens";
   }
-
   return true;
 }
 
@@ -113,10 +120,7 @@ const createCommand = new Command()
       equalsSign: true,
     },
   )
-  .option(
-    "--non-interactive",
-    "Skip all Template prompts and use defaults",
-  )
+  .option("--non-interactive", "Skip all Template prompts and use defaults")
   .option(
     "-o, --output <output:string>",
     "Destination for new cndi project files.",
@@ -147,31 +151,44 @@ const createCommand = new Command()
         slug = await PromptTypes.Input.prompt({
           message: [
             ccolors.prompt("Please enter the GitHub"),
-            `${ccolors.user_input("owner")}${ccolors.faded("/")}${
-              ccolors.user_input("repo")
-            }`,
+            `${ccolors.user_input("owner")}${
+              ccolors.faded(
+                "/",
+              )
+            }${ccolors.user_input("repo")}`,
             ccolors.prompt("slug where your project should be created:"),
           ].join(" "),
           validate: validateGitHubSlug,
         });
       } else {
         // if not in interactive mode, slug is required
-        console.error(
-          createLabel,
-          ccolors.key_name("owner/repo"),
-          ccolors.error("slug is required when using"),
-          ccolors.user_input("--non-interactive"),
-          ccolors.error("flag"),
+        const err = new ErrOut(
+          [
+            ccolors.key_name("owner/repo"),
+            ccolors.error("slug is required when using"),
+            ccolors.user_input("--non-interactive"),
+            ccolors.error("flag"),
+          ],
+          {
+            label,
+            code: 1500,
+            id: "create/!interactive&&!slug",
+          },
         );
-        await emitExitEvent(1500);
-        Deno.exit(1500);
+        await err.out();
+        return;
       }
     } else {
-      const slugValidation = validateGitHubSlug(slug);
-      if (slugValidation !== true) {
-        console.error(createLabel, ccolors.error(slugValidation));
-        await emitExitEvent(1500);
-        Deno.exit(1500);
+      const slugValidationErrorMessage = validateGitHubSlug(slug);
+
+      if (typeof slugValidationErrorMessage === "string") {
+        const err = new ErrOut([ccolors.error(slugValidationErrorMessage)], {
+          label,
+          code: 1500,
+          id: "create/!slugValidation",
+        });
+        await err.out();
+        return;
       }
     }
 
@@ -190,35 +207,38 @@ const createCommand = new Command()
     }
 
     if (!template && !interactive) {
-      console.error(
+      const err = new ErrOut(
         [
-          createLabel,
           ccolors.key_name("--template (-t)"),
           ccolors.error("is required when using"),
           ccolors.user_input("--non-interactive"),
-        ].join(" "),
+        ],
+        {
+          label,
+          code: 1501,
+          id: "create/!template&&!interactive",
+        },
       );
-      await emitExitEvent(1501);
-      Deno.exit(1501);
+      await err.out();
+      return;
     }
 
     // load responses from file
     let responsesFileText = "";
+
     try {
-      responsesFileText = await Deno.readTextFile(
-        options.responsesFile,
-      );
-    } catch (errorLoadingResponses) {
-      if (errorLoadingResponses instanceof Deno.errors.NotFound) {
+      responsesFileText = await Deno.readTextFile(options.responsesFile);
+    } catch (errLoadingResponsesFile) {
+      if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
         // no responses file found, continue with defaults
       } else {
         console.error(
-          createLabel,
+          label,
           ccolors.error("Error loading"),
           ccolors.key_name("cndi_responses.yaml"),
           ccolors.error("file"),
         );
-        ccolors.caught(errorLoadingResponses, 1502);
+        ccolors.caught(errLoadingResponsesFile as Error, 1502);
         console.log(
           ccolors.warn(
             "⚠️ continuing with defaults in spite of unexpected error",
@@ -228,27 +248,35 @@ const createCommand = new Command()
     }
 
     let responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
     try {
       responses = YAML.parse(responsesFileText) as Record<
         string,
         CNDITemplatePromptResponsePrimitive
       >;
-      if (responses) {
-        overrides = responses as Record<
-          string,
-          CNDITemplatePromptResponsePrimitive
-        >;
-      }
     } catch (errorParsingResponses) {
-      console.error(
-        createLabel,
-        ccolors.error("Error parsing"),
-        ccolors.key_name("cndi_responses.yaml"),
-        ccolors.error("file"),
+      const err = new ErrOut(
+        [
+          ccolors.error("Error parsing"),
+          ccolors.key_name("cndi_responses.yaml"),
+          ccolors.error("file"),
+        ],
+        {
+          label,
+          code: 1503,
+          id: "create/!isValidYAML(responsesFile)",
+          cause: errorParsingResponses as Error,
+        },
       );
-      ccolors.caught(errorParsingResponses, 1503);
-      await emitExitEvent(1503);
-      Deno.exit(1503);
+      await err.out();
+      return;
+    }
+
+    if (responses) {
+      overrides = responses as Record<
+        string,
+        CNDITemplatePromptResponsePrimitive
+      >;
     }
 
     if (options.set) {
@@ -262,38 +290,39 @@ const createCommand = new Command()
       const slug = options.deploymentTargetLabel.split("/");
 
       if (slug.length !== 2) {
-        console.error(
-          createLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
-          ),
+        const err = new ErrOut(
+          [
+            ccolors.error(
+              `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
+            ),
+          ],
+          {
+            label,
+            code: 1504,
+            id: "create/!isValidSlug(deploymentTargetLabel)",
+          },
         );
-        await emitExitEvent(1504);
-        Deno.exit(1504);
+        await err.out();
+        return;
       }
 
       const [deployment_target_provider, deployment_target_distribution] = slug;
 
       if (!deployment_target_distribution) {
-        console.error(
-          createLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
-          ),
+        const err = new ErrOut(
+          [
+            ccolors.error(
+              `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
+            ),
+          ],
+          {
+            label,
+            code: 1504,
+            id: "create/!deployment_target_distribution",
+          },
         );
-        await emitExitEvent(1504);
-        Deno.exit(1504);
-      }
-
-      if (!deployment_target_provider) {
-        console.error(
-          createLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
-          ),
-        );
-        await emitExitEvent(1504);
-        Deno.exit(1504);
+        await err.out();
+        return;
       }
 
       overrides.deployment_target_provider = deployment_target_provider;
@@ -301,33 +330,33 @@ const createCommand = new Command()
     }
 
     if (!interactive && !overrides?.deployment_target_provider) {
-      console.error(
+      const err = new ErrOut(
         [
-          createLabel, // this stems from the decision that CNDI will not choose a provider for you
           ccolors.error("CNDI will not choose a deployment"),
           ccolors.key_name("provider"),
           ccolors.error(
             `for you in ${ccolors.user_input("--non-interactive")} mode.\n\n`,
           ),
-          createLabel,
+          label,
           ccolors.error("Please supply a provider using"),
-          ccolors.key_name(
-            "--deployment-target-label",
-          ),
-          `${ccolors.user_input("<provider>")}${ccolors.faded("/")}${
-            ccolors.user_input("<distribution>")
-          }`,
+          ccolors.key_name("--deployment-target-label"),
+          `${ccolors.user_input("<provider>")}${
+            ccolors.faded(
+              "/",
+            )
+          }${ccolors.user_input("<distribution>")}`,
           ccolors.error("flag"),
-          createLabel,
+          label,
           ccolors.error("or otherwise"),
           ccolors.key_name("override"),
           ccolors.error("the"),
           ccolors.key_name("deployment_target_provider"),
           ccolors.error("response"),
-        ].join(" "),
+        ],
+        { label, code: 1504, id: "create/!deployment_target_provider" },
       );
-      await emitExitEvent(1504);
-      Deno.exit(1504);
+      await err.out();
+      return;
     }
 
     let project_name = repo;
@@ -365,7 +394,7 @@ const createCommand = new Command()
 
     if (!shouldContinue) {
       console.log();
-      Deno.exit(0); // this event isn't handled by telemetry, it's just not very interesting
+      return;
     }
 
     const templateNamesList: Array<string> = KNOWN_TEMPLATES.map((t) => t.name);
@@ -380,26 +409,36 @@ const createCommand = new Command()
 
     if (!template) {
       // this is impossible
-      throw new Error("template is undefined");
+      const err = new ErrOut(
+        [
+          ccolors.error("internal error!"),
+          ccolors.warn("template"),
+          ccolors.error("argument is undefined"),
+        ],
+        {
+          code: 1505,
+          label,
+          id: "create/!template",
+        },
+      );
+      await err.out();
+      return;
     }
 
-    let templateResult;
+    const [useTemplateErr, templateResult] = await useTemplate(template, {
+      interactive,
+      overrides: {
+        project_name,
+        ...overrides,
+        // by placing this last, users will be unable to override these values to their own detriment
+        git_repo: `https://github.com/${owner}/${repo}`,
+        git_credentials_mode: "token",
+      },
+    });
 
-    try {
-      templateResult = await useTemplate(template, {
-        interactive,
-        overrides: {
-          project_name,
-          ...overrides,
-          // by placing this last, users will be unable to override these values to their own detriment
-          git_repo: `https://github.com/${owner}/${repo}`,
-          git_credentials_mode: "token",
-        },
-      });
-    } catch (error) {
-      console.error(error.message);
-      await emitExitEvent(error.cause);
-      Deno.exit(error.cause);
+    if (useTemplateErr) {
+      await useTemplateErr.out();
+      return;
     }
 
     const isClusterless =
@@ -420,7 +459,14 @@ const createCommand = new Command()
           templateResult?.responses?.deployment_target_distribution ===
             "microk8s";
 
-        const sshPublicKey = doSSH ? await createSshKeys() : null;
+        const [err, sshPublicKey] = doSSH
+          ? await createSshKeys()
+          : [null, null];
+
+        if (err) {
+          await err.out();
+          return;
+        }
 
         const dotEnvOptions = {
           sshPublicKey,
@@ -428,37 +474,72 @@ const createCommand = new Command()
           debugMode: !!options.debug,
         };
 
-        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+        const errStagingEnv = await stageFile(
+          ".env",
+          getFinalEnvString(env, dotEnvOptions),
+        );
+        if (errStagingEnv) {
+          await errStagingEnv.out();
+          return;
+        }
       } else {
-        await stageFile(key, value);
+        const errStagingFile = await stageFile(key, value);
+        if (errStagingFile) {
+          await errStagingFile.out();
+          return;
+        }
       }
     }
 
-    await stageFile(
+    const templateResultResponsesErr = await stageFile(
       "cndi_responses.yaml",
       YAML.stringify(templateResult.responses),
     );
 
-    await stageFile(
+    if (templateResultResponsesErr) {
+      await templateResultResponsesErr.out();
+      return;
+    }
+
+    const errStagingVscodeSettings = await stageFile(
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
     );
 
-    await stageFile(".gitignore", getGitignoreContents());
+    if (errStagingVscodeSettings) {
+      await errStagingVscodeSettings.out();
+      return;
+    }
+
+    const errStagingGitignore = await stageFile(
+      ".gitignore",
+      getGitignoreContents(),
+    );
+
+    if (errStagingGitignore) {
+      await errStagingGitignore.out();
+      return;
+    }
 
     const git_credentials_mode = templateResult.responses.git_credentials_mode;
 
     if (git_credentials_mode === "ssh") {
-      console.error(
-        createLabel,
-        ccolors.key_name("git_credentials_mode"),
-        ccolors.error("must be set to"),
-        ccolors.user_input("token"),
-        ccolors.error("when running"),
-        ccolors.user_input("cndi create"),
+      const err = new ErrOut(
+        [
+          ccolors.key_name("git_credentials_mode"),
+          ccolors.error("must be set to"),
+          ccolors.user_input("token"),
+          ccolors.error("when running"),
+          ccolors.user_input("cndi create"),
+        ],
+        {
+          label,
+          code: 1505,
+          id: "create/git_credentials_mode==ssh",
+        },
       );
-      await emitExitEvent(1505);
-      Deno.exit(1505);
+      await err.out();
+      return;
     }
 
     // TODO: consider this more carefully
@@ -468,15 +549,17 @@ const createCommand = new Command()
       });
 
     if (missingRequiredValuesForCreateRepo.length > 0) {
-      console.error(
-        createLabel,
-        ccolors.error(
-          `The following required values are missing for creating a new cndi cluster repo:`,
-        ),
-        ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
+      const err = new ErrOut(
+        [
+          ccolors.error(
+            `The following required values are missing for creating a new cndi cluster repo:`,
+          ),
+          ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
+        ],
+        { label, code: 1506, id: "create/!requiredValuesForCreateRepo" },
       );
-      await emitExitEvent(1506);
-      Deno.exit(1506);
+      await err.out();
+      return;
     }
 
     await persistStagedFiles(destinationDirectory);

@@ -5,12 +5,13 @@ const { Input, Select } = PromptTypes;
 import {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
-  emitExitEvent,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
+
+import { ErrOut } from "errout";
 
 import { useTemplate } from "src/use-template/mod.ts";
 
@@ -27,7 +28,7 @@ import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
-const initLabel = ccolors.faded("\nsrc/commands/init.ts:");
+const label = ccolors.faded("\nsrc/commands/init.ts:");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 
@@ -106,10 +107,7 @@ const initCommand = new Command()
     "Label in the form of <provider/distribution> slug to specifying a deployment target",
   )
   .option("-k, --keep", "Keep responses in cndi_responses.yaml")
-  .option(
-    "-c, --create",
-    "Create a new cndi cluster repo",
-  )
+  .option("-c, --create", "Create a new cndi cluster repo")
   .option("--skip-push", "Skip pushing to the remote repository", {
     depends: ["create"],
   })
@@ -124,14 +122,16 @@ const initCommand = new Command()
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
     if (!template && !options.interactive) {
-      console.error(
-        initLabel,
-        ccolors.error(
-          `--interactive (-i) flag is required if no template is specified`,
-        ),
+      const err = new ErrOut(
+        [`--interactive (-i) flag is required if no template is specified`],
+        {
+          code: 400,
+          label,
+          id: "!interactive&&!template",
+        },
       );
-      await emitExitEvent(400);
-      Deno.exit(400);
+      await err.out();
+      return;
     }
 
     if (options.responsesFile === defaultResponsesFilePath) {
@@ -155,16 +155,21 @@ const initCommand = new Command()
       try {
         responseFileText = Deno.readTextFileSync(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
-        console.error(ccolors.caught(errorReadingSuppliedResponseFile, 401));
-
-        console.error(
-          initLabel,
-          ccolors.error(`Could not load responses file from provided path`),
-          ccolors.key_name(`"${options.responsesFile}"`),
+        const err = new ErrOut(
+          [ccolors.error("Could not load responses file from provided path")],
+          {
+            code: 401,
+            label,
+            id:
+              "!readTextFile(options.responsesFile)&&!isDefault(options.responsesFile)",
+            cause: errorReadingSuppliedResponseFile as Error,
+            metadata: {
+              responsesFile: options.responsesFile,
+            },
+          },
         );
-
-        await emitExitEvent(401);
-        Deno.exit(401);
+        await err.out();
+        return;
       }
 
       try {
@@ -175,18 +180,27 @@ const initCommand = new Command()
             CNDITemplatePromptResponsePrimitive
           >;
         }
-      } catch (errorParsingResponsesFile) {
-        console.error(ccolors.caught(errorParsingResponsesFile, 402));
-
-        console.error(
-          initLabel,
-          ccolors.error(
-            `Could not parse file as responses YAML from provide path`,
-          ),
-          ccolors.key_name(`"${options.responsesFile}"`),
+      } catch (cause) {
+        const err = new ErrOut(
+          [
+            ccolors.error(
+              "Could not parse file as responses YAML from provided path",
+            ),
+            ccolors.key_name(`"${options.responsesFile}"`),
+          ],
+          {
+            code: 402,
+            label,
+            id: "!YAML.parse(responseFileText)",
+            cause: cause as Error,
+            metadata: {
+              responsesFile: options.responsesFile,
+            },
+          },
         );
-        await emitExitEvent(402);
-        Deno.exit(402);
+
+        await err.out();
+        return;
       }
     }
 
@@ -201,44 +215,39 @@ const initCommand = new Command()
       "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
-      console.error(
-        initLabel,
-        ccolors.error(`--template (-t) flag requires a value`),
-      );
-      await emitExitEvent(400);
-      Deno.exit(400);
+      const err = new ErrOut([`--template (-t) flag requires a value`], {
+        label,
+        code: 400,
+        id: 'options.template==="true"',
+      });
+      await err.out();
+      return;
     }
 
     const noProvider = !options.interactive &&
-      !options.deploymentTargetLabel && !overrides.deployment_target_provider;
+      !options.deploymentTargetLabel &&
+      !overrides.deployment_target_provider;
 
     if (noProvider) {
-      console.error(
-        initLabel,
-        ccolors.key_name("deployment_target_provider"),
-        ccolors.error(
-          `is required when not running in`,
-        ),
-        ccolors.key_name("--interactive"),
-        ccolors.error(`mode`),
+      const err = new ErrOut(
+        [
+          ccolors.key_name("deployment_target_provider"),
+          ccolors.error(`is required when not running in`),
+          ccolors.key_name("--interactive"),
+          ccolors.error(`mode`),
+          ccolors.error("you can set this value using"),
+          ccolors.key_name(
+            "--deployment-target-label (-l) <provider>/<distribution>",
+          ),
+          ccolors.error("or"),
+          ccolors.error("using"),
+          ccolors.key_name("--set"),
+          ccolors.key_name("deployment_target_provider=<provider>"),
+        ],
+        { label, code: 403, id: "!provider&&!interactive" },
       );
-      console.error(
-        initLabel,
-        ccolors.error("you can set this value using"),
-        ccolors.key_name(
-          "--deployment-target-label (-l) <provider>/<distribution>",
-        ),
-        ccolors.error("or"),
-      );
-      console.error(
-        initLabel,
-        ccolors.error("using"),
-        ccolors.key_name("--set"),
-        ccolors.key_name("deployment_target_provider=<provider>"),
-      );
-
-      await emitExitEvent(403);
-      Deno.exit(403);
+      await err.out();
+      return;
     }
 
     if (options.deploymentTargetLabel) {
@@ -246,25 +255,37 @@ const initCommand = new Command()
         options.deploymentTargetLabel.split("/");
 
       if (!deployment_target_distribution) {
-        console.error(
-          initLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
-          ),
+        const err = new ErrOut(
+          [
+            ccolors.error(
+              `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
+            ),
+          ],
+          {
+            label,
+            code: 404,
+            id: "!deployment_target_distribution",
+          },
         );
-        await emitExitEvent(404);
-        Deno.exit(404);
+        await err.out();
+        return;
       }
 
       if (!deployment_target_provider) {
-        console.error(
-          initLabel,
-          ccolors.error(
-            `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
-          ),
+        const err = new ErrOut(
+          [
+            ccolors.error(
+              `--deployment-target-label (-l) flag requires a slug in the form of <provider>/<distribution>`,
+            ),
+          ],
+          {
+            label,
+            code: 404,
+            id: "!deployment_target_provider",
+          },
         );
-        await emitExitEvent(404);
-        Deno.exit(404);
+        await err.out();
+        return;
       }
       overrides.deployment_target_provider = deployment_target_provider;
       overrides.deployment_target_distribution = deployment_target_distribution;
@@ -308,30 +329,28 @@ const initCommand = new Command()
       });
     }
 
-    let templateResult;
+    const [errUsingTemplate, templateResult] = await useTemplate(template!, {
+      interactive: !!options.interactive,
+      overrides: {
+        project_name,
+        ...overrides,
+      },
+    });
 
-    try {
-      templateResult = await useTemplate(
-        template!,
-        {
-          interactive: !!options.interactive,
-          overrides: {
-            project_name,
-            ...overrides,
-          },
-        },
-      );
-    } catch (e) {
-      console.error(e.message);
-      await emitExitEvent(e.cause);
-      Deno.exit(e.cause);
+    if (errUsingTemplate) {
+      await errUsingTemplate.out();
+      return;
     }
 
     if (options.keep) {
-      await stageFile(
+      const errStagingResponses = await stageFile(
         "cndi_responses.yaml",
         YAML.stringify(templateResult.responses),
       );
+      if (errStagingResponses) {
+        await errStagingResponses.out();
+        return;
+      }
     }
 
     const isClusterless =
@@ -352,7 +371,14 @@ const initCommand = new Command()
           templateResult?.responses?.deployment_target_distribution ===
             "microk8s";
 
-        const sshPublicKey = doSSH ? await createSshKeys() : null;
+        const [errCreatingSshKeys, sshPublicKey] = doSSH
+          ? await createSshKeys()
+          : [null, null];
+
+        if (errCreatingSshKeys) {
+          await errCreatingSshKeys.out();
+          return;
+        }
 
         const dotEnvOptions = {
           sshPublicKey,
@@ -360,35 +386,63 @@ const initCommand = new Command()
           debugMode: !!options.debug,
         };
 
-        await stageFile(".env", getFinalEnvString(env, dotEnvOptions));
+        const errStagingDotenv = await stageFile(
+          ".env",
+          getFinalEnvString(env, dotEnvOptions),
+        );
+        if (errStagingDotenv) {
+          await errStagingDotenv.out();
+          return;
+        }
       } else {
-        await stageFile(key, value);
+        const errStagingFiles = await stageFile(key, value);
+        if (errStagingFiles) {
+          await errStagingFiles.out();
+          return;
+        }
       }
     }
 
-    await stageFile(
+    const errStagingVSCodeSettings = await stageFile(
       path.join(".vscode", "settings.json"),
       getPrettyJSONString(vscodeSettings),
     );
 
-    await stageFile(".gitignore", getGitignoreContents());
+    if (errStagingVSCodeSettings) {
+      await errStagingVSCodeSettings.out();
+      return;
+    }
+
+    const errStagingGitignore = await stageFile(
+      ".gitignore",
+      getGitignoreContents(),
+    );
+    if (errStagingGitignore) {
+      await errStagingGitignore.out();
+      return;
+    }
 
     const git_credentials_mode = templateResult?.responses.git_credentials_mode;
     const git_repo = templateResult?.responses.git_repo as string;
 
     if (git_credentials_mode === "ssh") {
       if (git_repo && git_repo.startsWith("https://")) {
-        console.error(
-          initLabel,
-          "git_repo",
-          ccolors.error(
-            `must be specified as an ssh URL when ${
-              ccolors.key_name("git_credentials_mode")
-            } is set to ${ccolors.user_input("ssh")}`,
-          ),
+        const err = new ErrOut(
+          [
+            ccolors.key_name("git_repo"),
+            ccolors.error("must be specified as an ssh URL when"),
+            ccolors.key_name("git_credentials_mode"),
+            ccolors.error("is set to"),
+            ccolors.user_input("ssh"),
+          ],
+          {
+            label,
+            code: 405,
+            id: "git_credentials_mode===ssh&git_repo.startsWith(https)",
+          },
         );
-        await emitExitEvent(405);
-        Deno.exit(405);
+        await err.out();
+        return;
       }
     }
 
@@ -396,17 +450,19 @@ const initCommand = new Command()
     if (options.create) {
       if (git_credentials_mode === "ssh") {
         // not implemented!
-        console.error(
-          initLabel,
-          "git_credentials_mode",
-          ccolors.error(
-            `must be ${ccolors.key_name("token")} when using ${
-              ccolors.key_name("--create")
-            }`,
-          ),
-        );
-        await emitExitEvent(406);
-        Deno.exit(406);
+        const err = new ErrOut([
+          ccolors.key_name("git_credentials_mode"),
+          ccolors.error(`must be`),
+          ccolors.key_name("token"),
+          ccolors.error(`when using`),
+          ccolors.key_name("--create"),
+        ], {
+          label,
+          code: 406,
+          id: "git_credentials_mode===ssh&options.create",
+        });
+        await err.out();
+        return;
       }
 
       const missingRequiredValuesForCreateRepo =
@@ -415,15 +471,18 @@ const initCommand = new Command()
         });
 
       if (missingRequiredValuesForCreateRepo.length > 0) {
-        console.error(
-          initLabel,
+        const err = new ErrOut([
           ccolors.error(
             `The following required values are missing for creating a new cndi cluster repo:`,
           ),
           ccolors.key_name(missingRequiredValuesForCreateRepo.join(", ")),
-        );
-        await emitExitEvent(407);
-        Deno.exit(407);
+        ], {
+          label,
+          code: 407,
+          id: "init/missingRequiredValuesForCreateRepo",
+        });
+        await err.out();
+        return;
       }
     }
 

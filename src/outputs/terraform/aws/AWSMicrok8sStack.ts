@@ -21,6 +21,8 @@ import {
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
 import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
+import { ErrOut } from "errout";
+
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
 
 export class AWSMicrok8sStack extends AWSCoreTerraformStack {
@@ -181,27 +183,24 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
 
       if (role === "leader") {
         if (useSshRepoAuth()) {
-          userData = Fn.templatefile(
-            "microk8s-cloud-init-leader.yml.tftpl",
-            {
-              bootstrap_token: this.locals.bootstrap_token.asString!,
-              git_repo_encoded: Fn.base64encode(
-                this.variables.git_repo.stringValue,
-              ),
-              git_repo: this.variables.git_repo.stringValue,
-              git_ssh_private_key: Fn.base64encode(
-                this.variables.git_ssh_private_key.stringValue,
-              ),
-              sealed_secrets_private_key: Fn.base64encode(
-                this.variables.sealed_secrets_private_key.stringValue,
-              ),
-              sealed_secrets_public_key: Fn.base64encode(
-                this.variables.sealed_secrets_public_key.stringValue,
-              ),
-              argocd_admin_password:
-                this.variables.argocd_admin_password.stringValue,
-            },
-          );
+          userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
+            bootstrap_token: this.locals.bootstrap_token.asString!,
+            git_repo_encoded: Fn.base64encode(
+              this.variables.git_repo.stringValue,
+            ),
+            git_repo: this.variables.git_repo.stringValue,
+            git_ssh_private_key: Fn.base64encode(
+              this.variables.git_ssh_private_key.stringValue,
+            ),
+            sealed_secrets_private_key: Fn.base64encode(
+              this.variables.sealed_secrets_private_key.stringValue,
+            ),
+            sealed_secrets_public_key: Fn.base64encode(
+              this.variables.sealed_secrets_public_key.stringValue,
+            ),
+            argocd_admin_password:
+              this.variables.argocd_admin_password.stringValue,
+          });
         } else {
           userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
             bootstrap_token: this.locals.bootstrap_token.asString!,
@@ -338,18 +337,32 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
   }
 }
 
-export async function stageTerraformSynthAWSMicrok8s(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+export async function stageTerraformSynthAWSMicrok8s(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new AWSMicrok8sStack(app, `_cndi_stack_`, cndi_config);
+
+  new AWSMicrok8sStack(app as Construct, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory
-  await stageCDKTFStack(app);
+  const errStagingApp = await stageCDKTFStack(app);
+
+  if (errStagingApp) return errStagingApp;
 
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+
+  return null;
 }

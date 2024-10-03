@@ -1,5 +1,5 @@
 import { ccolors } from "deps";
-import { CNDIConfig } from "src/types.ts";
+import { CNDIConfig, CNDIProvider } from "src/types.ts";
 import { isSlug } from "src/utils.ts";
 import {
   EFFECT_VALUES,
@@ -8,27 +8,22 @@ import {
   PREFER_NO_SCHEDULE,
 } from "consts";
 
-const cndiConfigLabel = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
+import { ErrOut } from "errout";
+
+const label = ccolors.faded("\nsrc/validate/cndiConfig.ts:");
+
+const PROVIDERS_SUPPORTING_KEYLESS: Array<CNDIProvider> = [];
 
 export default function validateConfig(
   config: CNDIConfig,
   pathToConfig: string,
-) {
-  if (!config) {
-    throw new Error(
-      [
-        cndiConfigLabel,
-        ccolors.error("cndi_config file not found at "),
-        ccolors.user_input(`"${pathToConfig}"`),
-      ].join(" "),
-      { cause: 500 },
-    );
-  }
-
+): ErrOut | void {
   if (config?.cndi_version && config?.cndi_version !== "v2") {
-    throw new Error(
+    console.log();
+
+    // config?.infrastructure?.cndi?.keyless
+    return new ErrOut(
       [
-        cndiConfigLabel,
         ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it has an unsupported"),
@@ -36,29 +31,38 @@ export default function validateConfig(
         ccolors.error("value. Only"),
         ccolors.key_name("v2"),
         ccolors.error("is supported."),
-      ].join(" "),
-      { cause: 914 },
+      ],
+      {
+        code: 914,
+        id: "validate/cndi_config/cndi_version!=v2",
+        metadata: { config },
+        label,
+      },
     );
   }
 
   if (!config?.project_name) {
     console.log();
-    throw new Error(
+    return new ErrOut(
       [
-        cndiConfigLabel,
         ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"project_name"'),
         ccolors.error("key"),
-      ].join(" "),
-      { cause: 900 },
+      ],
+      {
+        code: 900,
+        id: "validate/cndi_config/!project_name",
+        metadata: { config },
+        label,
+      },
     );
   } else if (config?.project_name) {
     if (!isSlug(config?.project_name)) {
-      throw new Error(
+      console.log();
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but the"),
@@ -67,25 +71,59 @@ export default function validateConfig(
           ccolors.error(
             "it must only contain lowercase letters, numbers, and hyphens",
           ),
-        ].join(" "),
-        { cause: 903 },
+        ],
+        {
+          code: 903,
+          id: "validate/cndi_config/!isSlug(project_name)",
+          metadata: { config },
+          label,
+        },
       );
     }
   }
 
   if (!config?.infrastructure) {
     console.log();
-    throw new Error(
+    return new ErrOut(
       [
-        cndiConfigLabel,
         ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"infrastructure"'),
         ccolors.error("key"),
-      ].join(" "),
-      { cause: 901 },
+      ],
+      {
+        code: 901,
+        id: "validate/cndi_config/!infrastructure",
+        metadata: { config },
+        label,
+      },
     );
+  }
+
+  if (config?.infrastructure?.cndi?.keyless === true) {
+    if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
+      return new ErrOut(
+        [
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"infrastructure.cndi.keyless"'),
+          ccolors.error("set to"),
+          ccolors.user_input('"true"'),
+          ccolors.error("while"),
+          ccolors.key_name("keyless"),
+          ccolors.error("deployments are not supported in"),
+          ccolors.user_input(config?.provider),
+        ],
+        {
+          code: 921,
+          id: "validate/cndi_config/keyless/!keylessSupported(provider)",
+          metadata: { config },
+          label,
+        },
+      );
+    }
   }
 
   const open_ports = config?.infrastructure?.cndi?.open_ports;
@@ -95,9 +133,8 @@ export default function validateConfig(
       let index = 0;
       for (const port of open_ports) {
         if (!port.number) {
-          throw new Error(
+          return new ErrOut(
             [
-              cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
               ccolors.error(
@@ -105,14 +142,18 @@ export default function validateConfig(
               ),
               ccolors.key_name('"number"'),
               ccolors.error("key"),
-            ].join(" "),
-            { cause: 912 },
+            ],
+            {
+              code: 912,
+              id: "validate/cndi_config/!open_ports[n][number]",
+              metadata: { config },
+              label,
+            },
           );
         }
         if (!port.name) {
-          throw new Error(
+          return new ErrOut(
             [
-              cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
               ccolors.error(
@@ -120,14 +161,18 @@ export default function validateConfig(
               ),
               ccolors.key_name('"name"'),
               ccolors.error("key"),
-            ].join(" "),
-            { cause: 913 },
+            ],
+            {
+              code: 913,
+              id: "validate/cndi_config/!open_ports[n][name]",
+              metadata: { config },
+              label,
+            },
           );
         }
         if (!port.service && !!port?.namespace) {
-          throw new Error(
+          return new ErrOut(
             [
-              cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
               ccolors.error(
@@ -135,13 +180,17 @@ export default function validateConfig(
               ),
               ccolors.key_name('"service"'),
               ccolors.error("key"),
-            ].join(" "),
-            { cause: 910 },
+            ],
+            {
+              code: 910,
+              id: "validate/cndi_config/!open_ports[n][service]",
+              metadata: { config },
+              label,
+            },
           );
         } else if (!port.namespace && !!port?.service) {
-          throw new Error(
+          return new ErrOut(
             [
-              cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
               ccolors.error(
@@ -150,22 +199,31 @@ export default function validateConfig(
               ccolors.key_name('"namespace"'),
               ccolors.error("key"),
             ].join(" "),
-            { cause: 909 },
+            {
+              code: 909,
+              id: "validate/cndi_config/!open_ports[n][namespace]",
+              metadata: { config },
+              label,
+            },
           );
         }
         index++;
       }
     } else {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but"),
           ccolors.key_name('"infrastructure.cndi.open_ports"'),
-          ccolors.error("must be an array of objects"),
-        ].join(" "),
-        { cause: 908 },
+          ccolors.error("must be an array of objects if set"),
+        ],
+        {
+          code: 908,
+          id: "validate/cndi_config/!isArray(open_ports)",
+          metadata: { config },
+          label,
+        },
       );
     }
   }
@@ -177,9 +235,8 @@ export default function validateConfig(
       !config?.infrastructure?.cndi?.cert_manager?.self_signed &&
       !config?.infrastructure?.cndi?.cert_manager?.email
     ) {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at"),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("\nwith"),
@@ -188,23 +245,32 @@ export default function validateConfig(
           ccolors.key_name("\ninfrastructure.cndi.cert_manager.self_signed"),
           ccolors.error("or"),
           ccolors.key_name("infrastructure.cndi.cert_manager.email"),
-        ].join(" "),
-        { cause: 915 },
+        ],
+        {
+          code: 915,
+          id: "validate/cndi_config/cert_manager![email|self_signed]",
+          metadata: { config },
+          label,
+        },
       );
     }
   }
 
   if (!config?.provider) {
-    throw new Error(
+    return new ErrOut(
       [
-        cndiConfigLabel,
         ccolors.error("cndi_config file found was at "),
         ccolors.user_input(`"${pathToConfig}"`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"provider"'),
         ccolors.error("key"),
-      ].join(" "),
-      { cause: 916 },
+      ],
+      {
+        code: 916,
+        id: "validate/cndi_config/!provider",
+        metadata: { config },
+        label,
+      },
     );
   }
 
@@ -212,9 +278,8 @@ export default function validateConfig(
 
   if (isClusterless) {
     if (config?.provider === "dev") {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but it has"),
@@ -226,59 +291,76 @@ export default function validateConfig(
           ccolors.error("is set to"),
           ccolors.user_input('"dev"'),
           ccolors.error("which is not supported"),
-        ].join(" "),
-        { cause: 918 },
+        ],
+        {
+          code: 918,
+          id: "validate/cndi_config/clusterless/provider==dev",
+          metadata: { config },
+          label,
+        },
       );
     }
     if (config?.infrastructure?.cndi) {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but it has"),
           ccolors.key_name('"infrastructure.cndi"'),
           ccolors.error("entries in clusterless mode"),
-        ].join(" "),
-        { cause: 919 },
+        ],
+        {
+          code: 919,
+          id:
+            "validate/cndi_config/clusterless/infrastructure.cndi.nodes.length",
+          metadata: { config },
+          label,
+        },
       );
     }
     // TODO: throw if cluster things are present in clusterless mode
   } else {
     if (!config?.distribution) {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but it does not have the required"),
           ccolors.key_name('"distribution"'),
           ccolors.error("key"),
-        ].join(" "),
-        { cause: 917 },
+        ],
+        {
+          code: 917,
+          id: "validate/cndi_config/!distribution",
+          metadata: { config },
+          label,
+        },
       );
     }
 
     const firstNode = config?.infrastructure?.cndi?.nodes?.[0];
 
     if (!firstNode) {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but it does not have any"),
           ccolors.key_name('"infrastructure.cndi.nodes"'),
           ccolors.error("entries"),
         ].join(" "),
-        { cause: 902 },
+        {
+          code: 902,
+          id: "validate/cndi_config/dev/!infrastructure.cndi.nodes.length>1",
+          metadata: { config },
+          label,
+        },
       );
     } else if (firstNode.taints?.length) {
       // throw on AKS
       if (config?.distribution === "aks") {
-        throw new Error(
+        return new ErrOut(
           [
-            cndiConfigLabel,
             ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error(
@@ -286,13 +368,19 @@ export default function validateConfig(
             ),
             ccolors.key_name('"infrastructure.cndi.nodes"'),
             ccolors.error("entry"),
-          ].join(" "),
-          { cause: 918 },
+          ],
+          {
+            code: 918,
+            id:
+              "validate/cndi_config/aks/infrastructure.cndi.nodes[0].taints.length",
+            metadata: { config },
+            label,
+          },
         );
       }
       // warn on other distributions
       console.log(
-        cndiConfigLabel,
+        label,
         ccolors.warn(
           "Warning:",
         ),
@@ -314,9 +402,8 @@ export default function validateConfig(
       const devNode = firstNode;
 
       if (devNode?.count && devNode.count !== 1) {
-        throw new Error(
+        return new ErrOut(
           [
-            cndiConfigLabel,
             ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error("but it has a dev node with a"),
@@ -326,15 +413,19 @@ export default function validateConfig(
             ccolors.error(
               "Only one node can be deployed when doing dev deployments.",
             ),
-          ].join(" "),
-          { cause: 911 },
+          ],
+          {
+            code: 911,
+            id: "validate/cndi_config/dev/count!=1",
+            metadata: { config },
+            label,
+          },
         );
       }
 
       if (devNode?.min_count && devNode.min_count !== 1) {
-        throw new Error(
+        return new ErrOut(
           [
-            cndiConfigLabel,
             ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error("but it has a dev node with a"),
@@ -344,15 +435,19 @@ export default function validateConfig(
             ccolors.error(
               "Only one node can be deployed when doing dev deployments.",
             ),
-          ].join(" "),
-          { cause: 911 },
+          ],
+          {
+            code: 911,
+            id: "validate/cndi_config/dev/min_count!=1",
+            metadata: { config },
+            label,
+          },
         );
       }
 
       if (devNode?.max_count && devNode.max_count !== 1) {
-        throw new Error(
+        return new ErrOut(
           [
-            cndiConfigLabel,
             ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error("but it has a dev node with a"),
@@ -362,15 +457,20 @@ export default function validateConfig(
             ccolors.error(
               "Only one node can be deployed when doing dev deployments.",
             ),
-          ].join(" "),
-          { cause: 911 },
+          ],
+          {
+            code: 911,
+            id: "validate/cndi_config/dev/max_count!=1",
+            metadata: { config },
+            label,
+          },
         );
       }
     }
 
     if (!config?.cndi_version) {
       console.log(
-        cndiConfigLabel,
+        label,
         ccolors.warn(`You haven't specified a`),
         ccolors.key_name(`"cndi_version"`),
         ccolors.warn(`in your config file, defaulting to "v2"`),
@@ -381,9 +481,8 @@ export default function validateConfig(
 
     for (const node of config?.infrastructure?.cndi?.nodes) {
       if (!node.name) {
-        throw new Error(
+        return new ErrOut(
           [
-            cndiConfigLabel,
             ccolors.error("cndi_config file found was at "),
             ccolors.user_input(`"${pathToConfig}"`),
             ccolors.error("but it has at least one"),
@@ -391,17 +490,21 @@ export default function validateConfig(
             ccolors.error("entry that is missing a"),
             ccolors.key_name('"name"'),
             ccolors.error("value. Node names must be specified."),
-          ].join(" "),
-          { cause: 905 },
+          ],
+          {
+            code: 905,
+            id: "validate/cndi_config/infrastructure.cndi.nodes[*]!name",
+            metadata: { config },
+            label,
+          },
         );
       }
       nodeNameSet.add(node.name);
 
       for (const taint of node.taints || []) {
         if (!taint?.effect) {
-          throw new Error(
+          return new ErrOut(
             [
-              cndiConfigLabel,
               ccolors.error("cndi_config file found was at "),
               ccolors.user_input(`"${pathToConfig}"`),
               ccolors.error("\nbut the"),
@@ -417,14 +520,19 @@ export default function validateConfig(
                   ccolors.key_name(PREFER_NO_SCHEDULE)
                 }, or ${ccolors.key_name(NO_EXECUTE)}`,
               ),
-            ].join(" "),
-            { cause: 920 },
+            ],
+            {
+              code: 920,
+              id:
+                "validate/cndi_config/infrastructure.cndi.nodes[*].taints[*]!effect",
+              metadata: { config },
+              label,
+            },
           );
         } else {
           if (!EFFECT_VALUES.includes(taint.effect)) {
-            throw new Error(
+            return new ErrOut(
               [
-                cndiConfigLabel,
                 ccolors.error("cndi_config file found was at "),
                 ccolors.user_input(`"${pathToConfig}"`),
                 ccolors.error("\nbut the"),
@@ -442,8 +550,13 @@ export default function validateConfig(
                 ),
                 ccolors.error("\nYou supplied:"),
                 ccolors.user_input(`"${taint.effect}"`),
-              ].join(" "),
-              { cause: 920 },
+              ],
+              {
+                code: 920,
+                id: "validate/cndi_config/!EFFECT_VALUES",
+                metadata: { config },
+                label,
+              },
             );
           }
         }
@@ -454,9 +567,8 @@ export default function validateConfig(
       nodeNameSet.size === config?.infrastructure?.cndi?.nodes?.length;
 
     if (!nodeNamesAreUnique) {
-      throw new Error(
+      return new ErrOut(
         [
-          cndiConfigLabel,
           ccolors.error("cndi_config file found was at "),
           ccolors.user_input(`"${pathToConfig}"`),
           ccolors.error("but it has multiple "),
@@ -464,8 +576,14 @@ export default function validateConfig(
           ccolors.error("entries with the same"),
           ccolors.key_name('"name"'),
           ccolors.error("values. Node names must be unique."),
-        ].join(" "),
-        { cause: 906 },
+        ],
+        {
+          code: 906,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes.every(unique(name))",
+          metadata: { config },
+          label,
+        },
       );
     }
   }

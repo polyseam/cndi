@@ -1,39 +1,39 @@
 blocks:
   - name: mongodb-server-ingress
     content:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: mongodb-server-ingress
-          namespace: "{{ $cndi.get_arg(namespace) }}"
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          ingressClassName: public
-          tls:
-            - hosts:
-                - "{{ $cndi.get_arg(hostname) }}"
-              secretName: cluster-issuer-private-key
-          rules:
-            - host: "{{ $cndi.get_arg(hostname) }}"
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: mongodb-replica-set-svc
-                        port:
-                          name: mongodb
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: mongodb-server-ingress
+        namespace: "{{ $cndi.get_arg(namespace) }}"
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_arg(hostname) }}"
+            secretName: cluster-issuer-private-key
+        rules:
+          - host: "{{ $cndi.get_arg(hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: mongodb-replica-set-svc
+                      port:
+                        name: mongodb
   - name: mongo-open-tcp
     content:
       nginx:
         public:
           values:
             tcp:
-              '27017': "mongodb/mongodb-replica-set-svc:27017"
+              "27017": "mongodb/mongodb-replica-set-svc:27017"
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -82,7 +82,7 @@ prompts:
     type: Number
   - name: mongodb_user
     message: Please enter the username for your mongodb admin
-    default: admin  
+    default: admin
     type: Input
 
   - name: mongodb_password
@@ -93,12 +93,12 @@ prompts:
     type: Secret
 
   - name: mongodb_name
-    message: 'Please enter the name for the mongodb database you want to use:'
+    message: "Please enter the name for the mongodb database you want to use:"
     default: my-mongodb-database
     type: Input
 
   - name: mongodb_namespace
-    message: 'Please enter your destination namespace for your mongoDb database:'
+    message: "Please enter your destination namespace for your mongoDb database:"
     default: mongodb
     type: Input
 
@@ -116,11 +116,11 @@ outputs:
               - "{{ $cndi.get_prompt_response(deploy_mongodb_ingress) }}"
               - ==
               - true
-              
+
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-          
-        external_dns: 
+
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -156,7 +156,7 @@ outputs:
             - ==
             - true
 
-      external-dns-secret: 
+      external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -207,7 +207,7 @@ outputs:
       mongodb:
         targetRevision: 0.10.0
         destinationNamespace: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
-        repoURL: 'https://mongodb.github.io/helm-charts'
+        repoURL: "https://mongodb.github.io/helm-charts"
         chart: community-operator
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
@@ -216,7 +216,6 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
 
     $cndi.comment(mongodb-heading): Mongodb Connection Parameters
     MONGODB_DATABASE: "{{ $cndi.get_prompt_response(mongodb_name) }}"
@@ -237,8 +236,8 @@ outputs:
     mongodb: |
       # MongoDB Deployment Guide
 
-      This Template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm. 
-      MongoDB is a powerful, open-source, NoSQL database designed with scalability and developer agility in mind. 
+      This Template deploys a Standalone production ready [MongoDB database](https://github.com/mongodb/mongodb-kubernetes-operator) on Kubernetes cluster using Helm.
+      MongoDB is a powerful, open-source, NoSQL database designed with scalability and developer agility in mind.
       It supports a wide variety of data types and is ideal for applications requiring rapid iteration and flexible schema designs.
 
       ## Customizing Your Deployment

@@ -27,6 +27,9 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 
+import { ErrOut } from "errout";
+
+import { ensureValidGoogleCredentials } from "src/outputs/terraform/gcp/utils.ts";
 import GCPCoreTerraformStack from "./GCPCoreStack.ts";
 
 function truncateString(str: string, num = 63) {
@@ -157,9 +160,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             ports: ["0-65535"],
           },
         ],
-        sourceRanges: [
-          subnet.ipCidrRange,
-        ],
+        sourceRanges: [subnet.ipCidrRange],
       },
     );
 
@@ -517,10 +518,21 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
   }
 }
 
-export async function stageTerraformSynthGCPGKE(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+export async function stageTerraformSynthGCPGKE(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const errEnsuringValidGoogleCredentials = ensureValidGoogleCredentials();
+  if (errEnsuringValidGoogleCredentials) {
+    return errEnsuringValidGoogleCredentials;
+  }
+
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new GCPGKETerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  new GCPGKETerraformStack(app as Construct, `_cndi_stack_`, cndi_config);
 
   // write terraform stack to staging directory
   await stageCDKTFStack(app);
@@ -528,7 +540,11 @@ export async function stageTerraformSynthGCPGKE(cndi_config: CNDIConfig) {
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
-
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }

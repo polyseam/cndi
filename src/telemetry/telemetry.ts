@@ -12,7 +12,7 @@ interface TelemetryEvent {
 
 const CNDI_TELEMETRY_URL = "https://cndi.run/events/telemetry";
 
-export default async function emitTelemetryEvent(
+export async function emitTelemetryEvent(
   eventName: string,
   eventData: Record<string, unknown>,
 ) {
