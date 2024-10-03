@@ -1,12 +1,4 @@
 blocks:
-  - name: load_superset_examples_blk
-    content:
-      envFromSecret: superset-secrets-env
-      postgresql:
-        enabled: false
-      init:
-        loadExamples: "{{ $cndi.get_prompt_response(load_superset_examples) }}"
-
   - name: deploy_superset_ingress_blk
     content:
       apiVersion: networking.k8s.io/v1
@@ -223,11 +215,8 @@ outputs:
           envFromSecret: superset-secrets-env
           postgresql:
             enabled: false
-          $cndi.get_block(load_superset_examples_blk):
-            condition:
-              - "{{ $cndi.get_prompt_response(load_superset_examples) }}"
-              - ==
-              - true             
+          init:
+            loadExamples: "{{ $cndi.get_prompt_response(load_superset_examples) }}"
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -235,8 +224,7 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
-        
+  
     $cndi.comment(superset-heading): Superset Connection Parameters
     REDIS_HOST: superset-redis-headless
     REDIS_PORT: "6379"
