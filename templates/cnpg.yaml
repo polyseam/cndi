@@ -399,10 +399,10 @@ outputs:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
         open_ports:
-          number: 5432
-          protocol: TCP
-          namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
-          service: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
+          - name: postgres
+            number: 5432
+            namespace: "{{ $cndi.get_prompt_response(postgresql_namespace) }}"
+            service: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-rw"
     cluster_manifests:
       external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
