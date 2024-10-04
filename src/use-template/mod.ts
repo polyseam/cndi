@@ -829,12 +829,16 @@ async function processCNDIConfigOutput(
       // the value of the block is parsed
       const parsedVal = YAML.parse(obj.value) as Record<string, unknown>;
 
-      // then the block is merged with the host object, overwriting any matching keys
-      // preserving the host object's distinct keys
-      const final = {
-        ...host,
-        ...parsedVal,
-      };
+      let final: Record<string, unknown> | Array<unknown>;
+
+      if (Array.isArray(parsedVal)) {
+        final = parsedVal; // if the returned block is an array just return it
+      } else {
+        // the returned block is an object
+        // merge it with the host object, overwriting any matching keys
+        // and preserving the host object's distinct keys
+        final = { ...host, ...parsedVal };
+      }
 
       // then the parsed value is set in the host object
       setValueForKeyPath(
