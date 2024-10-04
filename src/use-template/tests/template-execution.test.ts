@@ -298,7 +298,7 @@ Deno.test(
         enable_alpha: true,
       },
     });
-    console.log("template", JSON.stringify(template));
+
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
 
     const values = config?.applications?.myapp?.values as {
@@ -307,7 +307,6 @@ Deno.test(
       "details": { "example_a": string };
     };
 
-    console.log("values", JSON.stringify(values));
     assert(values.some_beta_content?.should_exist);
     assert(values?.some_charlie_content?.should_exist);
     assert(values?.details.example_a === "value_a");
