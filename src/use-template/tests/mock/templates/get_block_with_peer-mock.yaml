@@ -1,0 +1,36 @@
+
+blocks:
+  - name: alpha
+    content:
+      details:
+        example_a: "value_a"
+
+prompts:
+  - name: enable_alpha
+    default: true
+    message: >-
+      Do you want to expose Cloud Functions with an Ingress?
+    type: Confirm
+
+outputs:
+  env:
+    FOO: bar
+  readme:
+    foo: '# header'
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    applications:
+      myapp:
+        values:
+          some_beta_content:
+            should_exist: true
+          some_charlie_content:
+            should_exist: true
+          $cndi.get_block(alpha):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_alpha) }}"
+              - ==
+              - true
