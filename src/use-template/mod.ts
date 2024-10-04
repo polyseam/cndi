@@ -829,22 +829,23 @@ async function processCNDIConfigOutput(
       // the value of the block is parsed
       const parsedVal = YAML.parse(obj.value) as Record<string, unknown>;
 
-      let final: Record<string, unknown> | Array<unknown>;
+      // the ultimate block including the host object, the block object, and the original call removed
+      let resolvedBlock: Record<string, unknown> | Array<unknown>;
 
       if (Array.isArray(parsedVal)) {
-        final = parsedVal; // if the returned block is an array just return it
+        resolvedBlock = parsedVal; // if the returned block is an array just return it
       } else {
         // the returned block is an object
         // merge it with the host object, overwriting any matching keys
         // and preserving the host object's distinct keys
-        final = { ...host, ...parsedVal };
+        resolvedBlock = { ...host, ...parsedVal };
       }
 
-      // then the parsed value is set in the host object
+      // then the resolved block is saved to cndiConfigObj
       setValueForKeyPath(
         cndiConfigObj,
         targetPath, // path to host object
-        final,
+        resolvedBlock,
       );
     } else {
       const numChilden =
