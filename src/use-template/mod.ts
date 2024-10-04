@@ -815,10 +815,37 @@ async function processCNDIConfigOutput(
       // get_arg evals
       obj.value = processBlockBodyArgs(obj.value, body?.args);
 
+      const targetPath = pathToKey.slice(0, -1);
+
+      // eg. '$cndi.get_block(foo)'
+      const call = pathToKey[pathToKey.length - 1];
+
+      // get the host object (parent of the $cndi.get_block call)
+      const host = getValueFromKeyPath(cndiConfigObj, targetPath);
+
+      // the literal `$cndi.get_block(foo)` is deleted
+      delete host[call];
+
+      // the value of the block is parsed
+      const parsedVal = YAML.parse(obj.value) as Record<string, unknown>;
+
+      // the ultimate block including the host object, the block object, and the original call removed
+      let resolvedBlock: Record<string, unknown> | Array<unknown>;
+
+      if (Array.isArray(parsedVal)) {
+        resolvedBlock = parsedVal; // if the returned block is an array just return it
+      } else {
+        // the returned block is an object
+        // merge it with the host object, overwriting any matching keys
+        // and preserving the host object's distinct keys
+        resolvedBlock = { ...host, ...parsedVal };
+      }
+
+      // then the resolved block is saved to cndiConfigObj
       setValueForKeyPath(
         cndiConfigObj,
-        pathToKey.slice(0, -1),
-        YAML.parse(obj.value),
+        targetPath, // path to host object
+        resolvedBlock,
       );
     } else {
       const numChilden =
