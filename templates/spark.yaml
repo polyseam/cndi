@@ -188,40 +188,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
             - ==
             - true
-      # spark-sc:
-      #   kind: StorageClass
-      #   apiVersion: storage.k8s.io/v1
-      #   metadata:
-      #     name:  my-new-sc
-      #     namespace: default
-      #     annotations: 
-      #       argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-      #   provisioner: file.csi.azure.com
-      #   reclaimPolicy: Delete
-      #   volumeBindingMode: WaitForFirstConsumer
-      #   mountOptions:
-      #     - dir_mode=0777
-      #     - file_mode=0777
-      #     - uid=185
-      #     - gid=185
-      #   parameters:
-      #     skuName: Standard_LRS
-      # spark-pvc:
-      #   apiVersion: v1
-      #   kind: PersistentVolumeClaim
-      #   metadata:
-      #     name: spark-pvc
-      #     namespace: default
-      #     annotations: 
-      #       argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-      #   spec:
-      #     storageClassName: my-new-sc
-      #     accessModes:
-      #       - ReadWriteMany
-      #     volumeMode: Filesystem
-      #     resources:
-      #       requests:
-      #         storage: 5Gi
+     
       spark-application:
         apiVersion: sparkoperator.k8s.io/v1beta2
         kind: ScheduledSparkApplication
@@ -231,8 +198,6 @@ outputs:
           annotations: 
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         spec:
-          #schedule: "@every 5m"
-          #schedule: "15 * * * *"
           schedule: "{{ $cndi.get_prompt_response(spark_app_schedule) }}"
           concurrencyPolicy: Allow
           template:
@@ -247,9 +212,6 @@ outputs:
               spark.eventLog.enabled: "true"
               spark.eventLog.dir: "/mnt/spark-logs"
             volumes:
-              # - name: spark-data
-              #   persistentVolumeClaim:
-              #     claimName: spark-pvc
               - name: spark-local-dir
                 emptyDir: {}
             driver:
@@ -261,8 +223,6 @@ outputs:
               serviceAccount: spark-spark-operator-spark
             
               volumeMounts:
-                # - name: spark-data
-                #   mountPath: /mnt/spark-logs
                 - name: spark-local-dir
                   mountPath: /mnt/spark-logs
                 - name: spark-local-dir
@@ -272,7 +232,6 @@ outputs:
               - name: git-sync-sidecar
                 image: registry.k8s.io/git-sync/git-sync:v4.2.3
                 args:
-                  #- --repo=https://github.com/vipmarwah/pythonprogs
                   - --repo={{ $cndi.get_prompt_response(git_repo_path) }}
                   - --root=/git/repo
                 env:
