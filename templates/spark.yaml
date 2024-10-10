@@ -1,0 +1,763 @@
+blocks:
+  - name: git_sync_dedicated_env_block
+    content:
+      $cndi.comment(dag-repo-credentials-embedded): Spark Application Credentials Embedded
+      GIT_SYNC_USERNAME: "{{ $cndi.get_prompt_response(sparkapplication_git_sync_username) }}"
+      GIT_SYNC_PASSWORD: "{{ $cndi.get_prompt_response(sparkapplication_git_sync_password) }}"
+  - name: sparkui-ingress
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: spark-ui-ingress
+        namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_arg(hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_arg(hostname) }}"
+            secretName: cluster-issuer-spark-key
+        rules:
+          - host: "{{ $cndi.get_arg(hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: spark-pi-python-ui-svc
+                      port:
+                        number: 4040
+  - name: git_sync_dedicated
+    content:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: sparkapp-git-credentials
+        namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+      stringData:
+        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
+        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
+
+  - name: git_sync_shared
+    content:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: sparkapp-git-credentials
+        namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+      stringData:
+        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
+        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
+  
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+      {}
+      
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+      {}
+  - name: deploy_argocd_ingress
+    default: true
+    message: >-
+      Do you want to install ArgoCD and expose it via an ingress?
+    type: Confirm
+
+  - name: argocd_hostname
+    default: argocd.example.com
+    message: >-
+      What hostname should ArgoCD be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+      - ==
+      - true
+
+  - name: deploy_sparkui_ingress
+    default: true
+    message: >-
+      Do you want to expose spark-ui via an ingress?
+    type: Confirm
+
+  - name: sparkui_hostname
+    message: 'Please enter the domain name you want sparkui to be accessible on:'
+    default: sparkui.example.com
+    type: Input
+    validators:
+      - hostname # FQDN
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_sparkui_ingress) }}"
+      - ==
+      - true
+  
+  - name: cluster_size
+    message: 'Please enter the cluster size for Spark executor'
+    default: 3
+    type: Number
+  
+  - name: git_repo_path
+    message: 'Please enter the path of git repository for spark programs'
+    type: Input
+
+  - name: sparkapplication_share_credentials
+    default: true
+    message: >-
+      Do you want to use your cluster credentials for SparkApplication's Git Sync?
+    type: Confirm
+    condition:
+      - "{{ $cndi.get_prompt_response(git_credentials_mode) }}"
+      - ==
+      - token
+
+  - name: sparkapplication_git_sync_username
+    message: >-
+      What is the username for your SparkApplication Git repository?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
+      - ==
+      - false
+
+  - name: sparkapplication_git_sync_password
+    message: >-
+      What is the password for your SparkApplication Git repository?
+    type: Input
+    condition:
+      - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
+      - ==
+      - false
+  - name: sparkapp_namespace
+    default: sparkapplication
+    message: >-
+      What namespace should SparkApplication be deployed in?
+    type: Input
+
+  - name: spark_app_schedule
+    default: "*/10 * * * *"
+    message: 'Please enter the schedule for Spark Application (Format: *(Minute) *(hour) *(Day of Month) *(Month) *(Day of week))'
+    type: Input
+
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns: 
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+              
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+            {}
+        open_ports:
+          - name: sparkui
+            number: 4040
+            service: spark-pi-python-ui-svc
+            namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+
+    cluster_manifests:
+      sparkapplication-namespace:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+
+      $cndi.comment(airflow-git-sync-secret): SparkApplication Git-Sync Credentials
+      git-sync-credentials-secret:
+        $cndi.get_block(git_sync_dedicated):
+          condition:
+            - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
+            - ==
+            - false
+        $cndi.get_block(git_sync_shared):
+          condition:
+            - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
+            - ==
+            - true
+      # spark-sc:
+      #   kind: StorageClass
+      #   apiVersion: storage.k8s.io/v1
+      #   metadata:
+      #     name:  my-new-sc
+      #     namespace: default
+      #     annotations: 
+      #       argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+      #   provisioner: file.csi.azure.com
+      #   reclaimPolicy: Delete
+      #   volumeBindingMode: WaitForFirstConsumer
+      #   mountOptions:
+      #     - dir_mode=0777
+      #     - file_mode=0777
+      #     - uid=185
+      #     - gid=185
+      #   parameters:
+      #     skuName: Standard_LRS
+      # spark-pvc:
+      #   apiVersion: v1
+      #   kind: PersistentVolumeClaim
+      #   metadata:
+      #     name: spark-pvc
+      #     namespace: default
+      #     annotations: 
+      #       argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+      #   spec:
+      #     storageClassName: my-new-sc
+      #     accessModes:
+      #       - ReadWriteMany
+      #     volumeMode: Filesystem
+      #     resources:
+      #       requests:
+      #         storage: 5Gi
+      spark-application:
+        apiVersion: sparkoperator.k8s.io/v1beta2
+        kind: ScheduledSparkApplication
+        metadata:
+          name: spark-pi-python
+          namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+          annotations: 
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          #schedule: "@every 5m"
+          #schedule: "15 * * * *"
+          schedule: "{{ $cndi.get_prompt_response(spark_app_schedule) }}"
+          concurrencyPolicy: Allow
+          template:
+            type: Python
+            pythonVersion: "3"
+            mode: cluster
+            image: spark:3.5.0
+            imagePullPolicy: Always
+            mainApplicationFile: local:///git/repo/pythonprogs/prog.py
+            sparkVersion: 3.5.0
+            sparkConf:
+              spark.eventLog.enabled: "true"
+              spark.eventLog.dir: "/mnt/spark-logs"
+            volumes:
+              # - name: spark-data
+              #   persistentVolumeClaim:
+              #     claimName: spark-pvc
+              - name: spark-local-dir
+                emptyDir: {}
+            driver:
+              labels:
+                version: 3.5.0
+              cores: 1
+              coreLimit: 1200m
+              memory: 512m
+              serviceAccount: spark-spark-operator-spark
+            
+              volumeMounts:
+                # - name: spark-data
+                #   mountPath: /mnt/spark-logs
+                - name: spark-local-dir
+                  mountPath: /mnt/spark-logs
+                - name: spark-local-dir
+                  mountPath: /git/repo
+              
+              initContainers:
+              - name: git-sync-sidecar
+                image: registry.k8s.io/git-sync/git-sync:v4.2.3
+                args:
+                  #- --repo=https://github.com/vipmarwah/pythonprogs
+                  - --repo={{ $cndi.get_prompt_response(git_repo_path) }}
+                  - --root=/git/repo
+                env:
+                  - name: GITSYNC_USERNAME
+                    valueFrom:
+                      secretKeyRef:
+                        name: sparkapp-git-credentials
+                        key: GITSYNC_USERNAME
+                  - name: GITSYNC_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: sparkapp-git-credentials
+                        key: GITSYNC_PASSWORD   
+                  - name: GITSYNC_BRANCH
+                    value: "main"
+                  - name: GITSYNC_REV
+                    value: "v1.0.0"
+                  - name: GITSYNC_ONE_TIME
+                    value: "true"
+                volumeMounts:
+                  - name: spark-local-dir
+                    mountPath: /git/repo
+              deleteOnTermination: true
+            executor:
+              labels:
+                version: 3.5.0
+              instances: "{{ $cndi.get_prompt_response(cluster_size) }}"
+              cores: 1
+              coreLimit: 1200m
+              memory: 512m
+      argo-ingress:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
+          args:
+            ingress_name: argocd-ingress
+            ingress_class_name: public
+            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
+            service_name: argocd-server
+            service_port: 443
+            namespace: argocd
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+      sparkui-ingress:
+        $cndi.get_block(sparkui-ingress):
+          args:
+            ingress_name: sparkui-ingress
+            hostname: "{{ $cndi.get_prompt_response(sparkui_hostname) }}"
+            namespace: "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+            service: spark-pi-python-ui-svc
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_sparkui_ingress) }}"
+            - ==
+            - true
+      external-dns-secret: 
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+    applications:
+      spark:
+        targetRevision: 2.0.0-rc.0
+        destinationNamespace: spark-opr
+        repoURL: 'https://kubeflow.github.io/spark-operator'
+        chart: spark-operator
+        values:
+          spark:
+            jobNamespaces:
+            - "{{ $cndi.get_prompt_response(sparkapp_namespace) }}"
+        syncPolicy:
+          syncOptions:
+          - Replace=true
+        ignoreDifferences:
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          name: spark-spark-operator-webhook
+          jqPathExpressions:
+            - .webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane")
+            - .webhooks[].namespaceSelector.matchExpressions[] | select(.key == "kubernetes.azure.com/managedby")
+        - group: admissionregistration.k8s.io
+          kind: MutatingWebhookConfiguration
+          name: spark-spark-operator-webhook
+          jqPathExpressions:
+            - .webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane")
+            - .webhooks[].namespaceSelector.matchExpressions[] | select(.key == "kubernetes.azure.com/managedby")
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+    $cndi.get_block(git_sync_dedicated_env_block):
+      condition:
+        - "{{ $cndi.get_prompt_response(sparkapplication_share_credentials) }}"
+        - ==
+        - false
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+      {}
+    Spark: |
+      # Spark Operator Guide
+      This template is a standalone production-ready spark operator along with Spark Application (CRD) with a user defined cluster size using the [ spark-operator helm chart](with a user defined cluster size using the)
+      Spark operator is designed to simplify the deployment and management of Spark Applications on kubernetes cluster. It automates the submission, execution, monitoring, and lifecycle management of Spark jobs, making it easier to run Spark workloads in a Kubernetes-native way.
+      In this template, actual programs or data pipelines can be stored in GitHub and synchronized into the Spark application CRD using git-sync (https://github.com/kubernetes/git-sync).
+
+      ## Customizing Your Deployment
+      Customize your Redis deployment to meet your specific requirements by adjusting the `values.yaml` file in the Helm chart
+      For a detailed overview of all configurable parameters and their purposes, consult the Helm chart's documentation or the `values.yaml` file. 
+
+      ## Following are the details regarding the deployment of this template.
+
+      1. Deploy your Python/Scala programs on GitHub using the same GitHub account associated with this Spark operator deployment or any other account.
+      2. Deploy the spark operator template with Spark Application CRDs.
+      3. During the deployment process, you will be prompted to provide the path of the Spark application programs to be executed.  
+
+      ## Use cases of Spark Operator template.
+      1. Automating large-scale data processing pipelines.
+      2. Distributed machine learning workloads.
+
+      ## Steps to use this template
+      1. follow the steps described in the link https://github.com/polyseam/cndi
+         in our case the template name is spark.
+      2. Respond to the questions prompted during deployment. Below is the example of questionaire 
+       
+          ? Please enter a name for your CNDI project: (vm-spark-template) » vm-spark-template <br>
+          ? Where do you want to deploy your cluster? » azure <br>
+          ? What distribution do you want to use? » aks <br>
+          ? What is your git username? () » githubuser <br>  
+          ? Please enter your Git Personal Access Token: () » ****************************************  <br>
+          ? What email address should be used for Let's Encrypt certificate registration? (jane.doe@example.com) » useremail@gmail.com <br>
+          ? Would you like to enable external-dns for automatic DNS management? (Y/n) » Yes <br>
+          ? Please select your DNS provider (aws) » aws <br>
+          ? Enter an override for the default ArgoCD Admin Password? (iFMkJFpUE7d2HBOhf7qE9LM1O4ZnL7WX) » argocdpassword <br>
+          ? Please enter your arm_region: (eastus) » eastus <br>
+          ? Please enter your arm_client_id: () » ************************************ <br>
+          ? Please enter your arm_client_secret: () » **************************************** <br>
+          ? Please enter your arm_tenant_id: () » ************************************ <br>
+          ? Please enter your arm_subscription_id: () » ************************************ <br>
+          ? Do you want to install ArgoCD and expose it via an ingress? (Y/n) » Yes <br>
+          ? What hostname should ArgoCD be accessible at? (argocd.example.com) » argocd.example.com <br>
+          ? Do you want to expose spark-ui via an ingress? (Y/n) » Yes <br>
+          ? Please enter the domain name you want sparkui to be accessible on: (sparkui.example.com) » sparkui.example.com <br>
+          ? Please enter the cluster size for Spark executor (3) » 2 <br>
+          ? Please enter the path of git repository for spark programs » https://github.com/<githubuser>/pythonprogs <br>
+          ? Do you want to use your cluster credentials for SparkApplication's Git Sync? (Y/n) » No <br>
+          ? What is the username for your SparkApplication Git repository? » githubuser <br>
+          ? What is the password for your SparkApplication Git repository? » github-password-token <br>
+          ? What namespace should SparkApplication be deployed in? (sparkapplication) » sparkapp <br>
+          ? Please enter the schedule for Spark Application (Format: *(Minute) *(hour) *(Day of Month) *(Month) *(Day of week)) (*/10 * * * *) » */10 * * * * <br>
+
+        Your final deployment (cndi_config.yaml) will resemble the code below, and you can modify it according to your needs
+        ```
+        cndi_version: v2
+        project_name: vm-spark-template
+        provider: azure
+        distribution: aks
+        infrastructure:
+          cndi:
+            cert_manager:
+              email: useremail@gmail.com
+            external_dns:
+              provider: aws
+            nodes:
+              - name: xnodegroup
+                instance_type: Standard_D2s_v3
+                disk_size: 100
+                count: 3
+            open_ports:
+              - name: sparkui
+                number: 4040
+                service: spark-pi-python-ui-svc
+                namespace: sparkapp
+        cluster_manifests:
+          sparkapplication-namespace:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: sparkapp
+          git-sync-credentials-secret:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: sparkapp-git-credentials
+              namespace: sparkapp
+            stringData:
+              GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
+              GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
+          spark-application:
+            apiVersion: sparkoperator.k8s.io/v1beta2
+            kind: ScheduledSparkApplication
+            metadata:
+              name: spark-pi-python
+              namespace: sparkapp
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              schedule: '*/10 * * * *'
+              concurrencyPolicy: Allow
+              template:
+                type: Python
+                pythonVersion: '3'
+                mode: cluster
+                image: 'spark:3.5.0'
+                imagePullPolicy: Always
+                mainApplicationFile: 'local:///git/repo/pythonprogs/prog.py'
+                sparkVersion: 3.5.0
+                # To enable eventlog.
+                sparkConf:
+                  spark.eventLog.enabled: 'true'
+                  spark.eventLog.dir: /mnt/spark-logs
+                volumes:
+                  - name: spark-local-dir
+                    emptyDir: {}
+                driver:
+                  labels:
+                    version: 3.5.0
+                  cores: 1
+                  coreLimit: 1200m
+                  memory: 512m
+                  serviceAccount: spark-spark-operator-spark
+                  volumeMounts:
+                    # This directory will be utilized to store the SparkApplication logs.
+                    - name: spark-local-dir
+                      mountPath: /mnt/spark-logs
+                    # This directory will be used to download the Spark data pipelines/programs stored on GitHub account.
+                    - name: spark-local-dir
+                      mountPath: /git/repo
+                  initContainers:
+                      # Utilized git-sync to download the GitHub repository containing data pipelines/programs into a local folder.
+                    - name: git-sync-sidecar
+                      image: 'registry.k8s.io/git-sync/git-sync:v4.2.3'
+                      args:
+                        - '--repo=https://github.com/vipmarwah/pythonprogs'
+                        - '--root=/git/repo'
+                      env:
+                        - name: GITSYNC_USERNAME
+                          valueFrom:
+                            secretKeyRef:
+                              name: sparkapp-git-credentials
+                              key: GITSYNC_USERNAME
+                        - name: GITSYNC_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: sparkapp-git-credentials
+                              key: GITSYNC_PASSWORD
+                        - name: GITSYNC_BRANCH
+                          value: main
+                        - name: GITSYNC_REV
+                          value: v1.0.0
+                        - name: GITSYNC_ONE_TIME
+                          value: 'true'
+                      volumeMounts:
+                        - name: spark-local-dir
+                          mountPath: /git/repo
+                  deleteOnTermination: true
+                executor:
+                  labels:
+                    version: 3.5.0
+                  instances: 2
+                  cores: 1
+                  coreLimit: 1200m
+                  memory: 512m
+          argo-ingress:
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: argocd-ingress
+              namespace: argocd
+              annotations:
+                cert-manager.io/cluster-issuer: cluster-issuer
+                kubernetes.io/tls-acme: 'true'
+                nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+                external-dns.alpha.kubernetes.io/hostname: argocd.example.com
+            spec:
+              ingressClassName: public
+              tls:
+                - hosts:
+                    - argocd.example.com
+                  secretName: cluster-issuer-private-key
+              rules:
+                - host: argocd.example.com
+                  http:
+                    paths:
+                      - path: /
+                        pathType: Prefix
+                        backend:
+                          service:
+                            name: argocd-server
+                            port:
+                              number: 443
+          sparkui-ingress:
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: spark-ui-ingress
+              namespace: sparkapp
+              annotations:
+                cert-manager.io/cluster-issuer: cluster-issuer
+                kubernetes.io/tls-acme: 'true'
+                external-dns.alpha.kubernetes.io/hostname: sparkui.example.com
+            spec:
+              ingressClassName: public
+              tls:
+                - hosts:
+                    - sparkui.example.com
+                  secretName: cluster-issuer-spark-key
+              rules:
+                - host: sparkui.example.com
+                  http:
+                    paths:
+                      - path: /
+                        pathType: Prefix
+                        backend:
+                          service:
+                            name: spark-pi-python-ui-svc
+                            port:
+                              number: 4040
+          external-dns-secret:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: external-dns
+              namespace: external-dns
+            stringData:
+              AWS_ACCESS_KEY_ID: $cndi_on_ow.seal_secret_from_env_var(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(AWS_SECRET_ACCESS_KEY)
+        applications:
+          spark:
+            targetRevision: 2.0.0-rc.0
+            destinationNamespace: spark-opr
+            repoURL: 'https://kubeflow.github.io/spark-operator'
+            chart: spark-operator
+            values:
+              spark:
+                jobNamespaces:
+                  - sparkapp
+            syncPolicy:
+              syncOptions:
+                - Replace=true
+            ignoreDifferences:
+              - group: admissionregistration.k8s.io
+                kind: ValidatingWebhookConfiguration
+                name: spark-spark-operator-webhook
+                jqPathExpressions:
+                  - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane")'
+                  - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "kubernetes.azure.com/managedby")'
+              - group: admissionregistration.k8s.io
+                kind: MutatingWebhookConfiguration
+                name: spark-spark-operator-webhook
+                jqPathExpressions:
+                  - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane")'
+                  - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "kubernetes.azure.com/managedby")'
+
+      ```
+      3. Now you can access your deployent through argocd.example.com 
+
+      ## Here are a few technical considerations to keep in mind after deployment.
+
+      a. In this deployment, the Spark Application will store its logs in the cluster's internal storage i.e /mnt/spark-logs. To configure a persistent volume for log storage, here are the additions to the existing code. <br>
+          If the deployment is on Azure, the following modifications should be made within the cluster_manifest block of the cndi_config.yaml file. <br>
+
+      ```
+          # Add the storage class first with user permissions.
+          spark-sc:
+            kind: StorageClass
+            apiVersion: storage.k8s.io/v1
+            metadata:
+              name:  my-new-sc
+              namespace: default
+              annotations: 
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            provisioner: file.csi.azure.com
+            reclaimPolicy: Delete
+            volumeBindingMode: WaitForFirstConsumer
+            mountOptions:
+              - dir_mode=0777
+              - file_mode=0777
+              # userid of spark user is 185.
+              - uid=185
+              - gid=185
+            parameters:
+              skuName: Standard_LRS
+          # Create a persistant volume claim using the above declared storage class.
+          spark-pvc:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: spark-pvc
+              namespace: default
+              annotations: 
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              storageClassName: my-new-sc
+              accessModes:
+                - ReadWriteMany
+              volumeMode: Filesystem
+              resources:
+                requests:
+                  storage: 5Gi
+      ```
+      Now the Spark Application block in cndi_config.yaml file will look like:
+
+      ```
+      spark-application:
+        apiVersion: sparkoperator.k8s.io/v1beta2
+        kind: ScheduledSparkApplication
+        metadata:
+          name: spark-pi-python
+          namespace: sparkapp
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        spec:
+          schedule: '*/10 * * * *'
+          concurrencyPolicy: Allow
+          template:
+            type: Python
+            pythonVersion: '3'
+            mode: cluster
+            image: 'spark:3.5.0'
+            imagePullPolicy: Always
+            mainApplicationFile: 'local:///git/repo/pythonprogs/prog.py'
+            sparkVersion: 3.5.0
+            # To enable eventlog.
+            sparkConf:
+              spark.eventLog.enabled: 'true'
+              spark.eventLog.dir: /mnt/spark-logs
+            volumes:
+              # Create a colume using PVC
+              - name: spark-data
+                persistentVolumeClaim:
+                  claimName: spark-pvc 
+              - name: spark-local-dir
+                emptyDir: {}
+            driver:
+              labels:
+                version: 3.5.0
+              cores: 1
+              coreLimit: 1200m
+              memory: 512m
+              serviceAccount: spark-spark-operator-spark
+              volumeMounts:
+                - name: spark-data
+                  mountPath: /mnt/spark-logs
+                - name: spark-local-dir
+                  mountPath: /git/repo
+              initContainers:
+                - name: git-sync-sidecar
+                  image: 'registry.k8s.io/git-sync/git-sync:v4.2.3'
+                  args:
+                    - '--repo=https://github.com/vipmarwah/pythonprogs'
+                    - '--root=/git/repo'
+                  env:
+                    - name: GITSYNC_USERNAME
+                      valueFrom:
+                        secretKeyRef:
+                          name: sparkapp-git-credentials
+                          key: GITSYNC_USERNAME
+                    - name: GITSYNC_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: sparkapp-git-credentials
+                          key: GITSYNC_PASSWORD
+                    - name: GITSYNC_BRANCH
+                      value: main
+                    - name: GITSYNC_REV
+                      value: v1.0.0
+                    - name: GITSYNC_ONE_TIME
+                      value: 'true'
+                  volumeMounts:
+                    - name: spark-local-dir
+                      mountPath: /git/repo
+              deleteOnTermination: true
+            executor:
+              labels:
+                version: 3.5.0
+              instances: 2
+              cores: 1
+              coreLimit: 1200m
+              memory: 512m
+      ```
+      b. This spark template utilized git-sync to download the latest copy of GitHub repository containing data pipelines/programs into a local folder before every execution.
