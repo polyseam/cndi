@@ -241,6 +241,16 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         taint,
         serviceAccount,
         machineType,
+        imageType: "UBUNTU_CONTAINERD",
+        guestAccelerator: [{
+          type: "nvidia-tesla-a100",
+          count: 1,
+          gpuPartitionSize: "",
+          gpuSharingConfig: [],
+          gpuDriverInstallationConfig: [{
+            gpuDriverVersion: "INSTALLATION_DISABLED",
+          }],
+        }],
       };
 
       if (
