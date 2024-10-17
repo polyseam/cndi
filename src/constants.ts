@@ -105,6 +105,10 @@ const KNOWN_TEMPLATES = [
     name: "minio",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/minio.yaml`,
   },
+  {
+    name: "superset",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/superset.yaml`,
+  },
 ] as const;
 
 export const NO_SCHEDULE = "NoSchedule" as const;

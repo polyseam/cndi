@@ -292,3 +292,32 @@ Deno.test(
     assert(err);
   },
 );
+
+Deno.test(
+  "template execution: $cndi.get_block(identifier) macro should not clobber siblings",
+  mySanity,
+  async () => {
+    const mockYamlFileUri = "file://" + Deno.cwd() +
+      "/src/use-template/tests/mock/templates/get_block_with_peer-mock.yaml";
+    const template = await useTemplate(mockYamlFileUri, {
+      interactive: false,
+      overrides: {
+        project_name: "test",
+        greet_who: "Extra!",
+        enable_alpha: true,
+      },
+    });
+
+    const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
+
+    const values = config?.applications?.myapp?.values as {
+      "some_beta_content": { "should_exist": boolean };
+      "some_charlie_content": { "should_exist": boolean };
+      "details": { "example_a": string };
+    };
+
+    assert(values.some_beta_content?.should_exist);
+    assert(values?.some_charlie_content?.should_exist);
+    assert(values?.details.example_a === "value_a");
+  },
+);

@@ -1,3 +1,32 @@
+blocks:
+  - name: deploy_superset_ingress_blk
+    content:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: superset-ingress
+        namespace: superset
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: 'true'
+          external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(superset_hostname) }}"
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_prompt_response(superset_hostname) }}"
+            secretName: cluster-issuer-private-key-superset
+        rules:
+          - host: "{{ $cndi.get_prompt_response(superset_hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: superset
+                      port:
+                        number: 8088
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -7,12 +36,12 @@ prompts:
   - name: deploy_argocd_ingress
     default: true
     message: >-
-      Do you want to install ArgoCD and expose it via an ingress?
+      Do you want to expose ArgoCD to the web?
     type: Confirm
 
   - name: argocd_hostname
     default: argocd.example.com
-    message: "Please enter the domain name you want argocd to be accessible on:"
+    message: 'What hostname should ArgoCD be accessible at?'
     type: Input
     validators:
       - hostname # FQDN
@@ -20,15 +49,16 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
+
   - name: deploy_superset_ingress
     default: true
     message: >-
-      Do you want to expose Superset to the web?
+      Do you want to expose the Superset UI to the web?
     type: Confirm
 
   - name: superset_hostname
     default: superset.example.com
-    message: Please enter the domain name you want superset to be accessible on
+    message: What hostname should Superset UI be accessible at?
     type: Input
     validators:
       - hostname # FQDN
@@ -38,60 +68,12 @@ prompts:
       - ==
       - true
 
-  - name: superset_namespace
-    default: mysuperset
-    message: Please enter your destination namespace for your superset cluster
-    type: Input
+  - name: load_superset_examples
+    default: false
+    message: >-
+      Do you want to load example datasets and dashboards into superset?
+    type: Confirm
 
-  - name: postgresql_superuser_password
-    default: superset
-    message: Please enter the password for postgresql default admin user
-    type: Secret
-
-  - name: database_user
-    default: superset
-    message: Please enter the name for the postgresql database user
-    type: Input
-
-  - name: database_user_password
-    default: superset
-    message: Please enter the password for postgresql database user
-    type: Secret
-
-  - name: postgresql_db
-    default: superset
-    message: Please enter the name for the postgresql database you want to use
-    type: Input
-
-  - name: postgresql_cluster_name
-    default: cnpg-cluster
-    message: Please enter the name for your postgresql cluster
-    type: Input
-
-  - name: redis_service_name
-    default: redis-replication
-    message: Please enter service name for redis replication (default recommended)
-    type: Input
-
-  - name: default_user_password
-    default: superset
-    message: Please enter the password for redis default user
-    type: Secret
-
-  - name: sentinel_service_name
-    default: redis-sentinel
-    message: Please enter service name for redis sentinel (default recommended)
-    type: Input
-
-  - name: superset_admin_email
-    default: admin@example.com
-    message: Please enter email address you want to use for superset admin user
-    type: Input
-
-  - name: lets_encrypt_email
-    default: admin@example.com
-    message: Please enter the email address you want to use for lets encrypt
-    type: Input
 outputs:
   cndi_config:
     cndi_version: v2
@@ -102,8 +84,8 @@ outputs:
       cndi:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
-
-        external_dns:
+          
+        external_dns: 
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -113,16 +95,18 @@ outputs:
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-
+            
         open_ports:
           - name: superset
+            namespace: superset
+            service: superset
             number: 8088
     cluster_manifests:
       superset-namespace:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: superset
 
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
@@ -139,29 +123,23 @@ outputs:
             - true
 
       superset-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: superset-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(superset_hostname) }}"
-            service_name: apache-superset
-            service_port: 8088
-            namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+        $cndi.get_block(deploy_superset_ingress_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_superset_ingress) }}"
             - ==
-            - true
+            - true          
 
       cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
         metadata:
-          name: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}"
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+          name: cnpg-cluster
+          namespace: superset
           annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
-          imageName: "ghcr.io/cloudnative-pg/postgresql:16"
+          imageName: 'ghcr.io/cloudnative-pg/postgresql:16'
           instances: 3
           storage:
             size: 1Gi
@@ -170,8 +148,8 @@ outputs:
               enabled: true
           bootstrap:
             initdb:
-              database: "{{ $cndi.get_prompt_response(postgresql_db) }}"
-              owner: "{{ $cndi.get_prompt_response(database_user) }}"
+              database: superset-db
+              owner: superset
               secret:
                 name: cnpg-database-user-auth-secret
           superuserSecret:
@@ -182,7 +160,7 @@ outputs:
         kind: Secret
         metadata:
           name: cnpg-cluster-superuser-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+          namespace: superset
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER)
@@ -193,98 +171,21 @@ outputs:
         kind: Secret
         metadata:
           name: cnpg-database-user-auth-secret
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+          namespace: superset
         type: kubernetes.io/basic-auth
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
-
-      redis-secret:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: redis-secret
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
-        type: Opaque
-        stringData:
-          password: $cndi_on_ow.seal_secret_from_env_var(REDISPASSWORD)
-
-      redis-replication:
-        apiVersion: redis.redis.opstreelabs.in/v1beta1
-        kind: RedisReplication
-        metadata:
-          name: "{{ $cndi.get_prompt_response(redis_service_name) }}"
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
-          annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-        spec:
-          clusterSize: 3
-          podSecurityContext:
-            runAsUser: 1000
-            fsGroup: 1000
-          kubernetesConfig:
-            image: quay.io/opstree/redis:v7.0.12
-            imagePullPolicy: IfNotPresent
-            redisSecret:
-              name: redis-secret
-              key: password
-            resources:
-              requests:
-                cpu: 201m
-                memory: 228Mi
-              limits:
-                cpu: 201m
-                memory: 228Mi
-          storage:
-            volumeClaimTemplate:
-              spec:
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: 1Gi
-
-      redis-sentinel:
-        apiVersion: redis.redis.opstreelabs.in/v1beta1
-        kind: RedisSentinel
-        metadata:
-          name: "{{ $cndi.get_prompt_response(sentinel_service_name) }}"
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
-          annotations:
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-        spec:
-          clusterSize: 3
-          podSecurityContext:
-            runAsUser: 1000
-            fsGroup: 1000
-          redisSentinelConfig:
-            redisReplicationName: "{{ $cndi.get_prompt_response(redis_service_name) }}"
-            redisPort: "6379"
-          kubernetesConfig:
-            image: quay.io/opstree/redis-sentinel:v7.0.7
-            imagePullPolicy: IfNotPresent
-            redisSecret:
-              name: redis-secret
-              key: password
-            resources:
-              requests:
-                cpu: 101m
-                memory: 228Mi
-              limits:
-                cpu: 101m
-                memory: 228Mi
 
       superset-secrets:
         apiVersion: v1
         kind: Secret
         metadata:
           name: superset-secrets-env
-          namespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
-          labels:
-            app: apache-superset
+          namespace: superset
         type: Opaque
         stringData:
           REDIS_HOST: $cndi_on_ow.seal_secret_from_env_var(REDIS_HOST)
-          REDIS_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(REDISPASSWORD)
           REDIS_PORT: $cndi_on_ow.seal_secret_from_env_var(REDIS_PORT)
           DB_HOST: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_HOST)
           DB_PORT: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PORT)
@@ -292,45 +193,30 @@ outputs:
           DB_PASS: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER_PASSWORD)
           DB_NAME: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DATABASE)
 
-      external-dns-secret:
+      external-dns-secret: 
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
-    applications:
+    applications: 
       cnpg:
         targetRevision: 0.18.0
         destinationNamespace: cnpg-system
-        repoURL: "https://cloudnative-pg.github.io/charts"
+        repoURL: 'https://cloudnative-pg.github.io/charts'
         chart: cloudnative-pg
-      redis-opr:
-        repoURL: https://ot-container-kit.github.io/helm-charts
-        chart: redis-operator
-        targetRevision: 0.15.3
-        destinationNamespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
-      apache-superset:
+      superset: 
         repoURL: https://apache.github.io/superset
-        targetRevision: 0.10.6
+        targetRevision: 0.12.11
         chart: superset
-        destinationNamespace: "{{ $cndi.get_prompt_response(superset_namespace) }}"
+        destinationNamespace: superset
         values:
           envFromSecret: superset-secrets-env
-          supersetNode:
-            replicaCount: 1
-            connections:
-              redis_password: dummy
-          supersetWorker:
-            replicaCount: 1
-          init:
-            adminUser:
-              email: "{{ $cndi.get_prompt_response(superset_admin_email) }}"
           postgresql:
             enabled: false
-          redis:
-            enabled: false
-
+          init:
+            loadExamples: "{{ $cndi.get_prompt_response(load_superset_examples) }}"
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -338,18 +224,18 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
-
+  
     $cndi.comment(superset-heading): Superset Connection Parameters
-    REDIS_HOST: "{{ $cndi.get_prompt_response(redis_service_name) }}-0.{{ $cndi.get_prompt_response(redis_service_name) }}-headless.{{ $cndi.get_prompt_response(superset_namespace) }}.svc.cluster.local"
-    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_user_password) }}"
+    REDIS_HOST: superset-redis-headless
     REDIS_PORT: "6379"
-    POSTGRESQL_HOST: "{{ $cndi.get_prompt_response(postgresql_cluster_name) }}-ew"
+    $cndi.comment(postgres-heading): PostgreSQL Connection Parameters
+    POSTGRESQL_HOST: "cnpg-cluster-rw"
     POSTGRESQL_PORT: "5432"
     POSTGRESQL_SUPERUSER: postgres
-    POSTGRESQL_SUPERUSER_PASSWORD: "{{ $cndi.get_prompt_response(postgresql_superuser_password) }}"
-    POSTGRESQL_DATABASE: "{{ $cndi.get_prompt_response(postgresql_db) }}"
-    POSTGRESQL_USER: "{{ $cndi.get_prompt_response(database_user) }}"
-    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_prompt_response(database_user_password) }}"
+    POSTGRESQL_SUPERUSER_PASSWORD: '{{ $cndi.get_random_string(24) }}'
+    POSTGRESQL_DATABASE: superset-db
+    POSTGRESQL_USER: superset
+    POSTGRESQL_USER_PASSWORD: '{{ $cndi.get_random_string(16) }}' 
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
@@ -364,7 +250,7 @@ outputs:
       # Apache Superset Deployment Guide
 
       This Template deploys a standalone production-ready [Apache Superset](https://superset.apache.org) application on a Kubernetes cluster using Helm.
-      Apache Superset is an open-source data exploration and visualization platform designed to be intuitive and easy to use.
+      Apache Superset is an open-source data exploration and visualization platform designed to be intuitive and easy to use. 
       It supports connection to a wide variety of databases and data warehouses, allowing you to visualize your data through rich, interactive dashboards.
 
       ## Customizing Your Deployment
@@ -377,7 +263,7 @@ outputs:
       - **Ingress:** Customize Ingress settings for external access.
 
       For a full list of configurable values, consult the Helm chart's documentation or the [values.yaml](https://github.com/apache/superset/tree/master/helm/superset/values.yaml) file in the chart source.
-
+      
       ## Verifying Superset Accessibility
 
       After deploying your Superset instance and configuring external access (either via port forwarding, Ingress, or ExternalDNS), it's crucial to ensure that Superset is properly accessible through your chosen domain.
