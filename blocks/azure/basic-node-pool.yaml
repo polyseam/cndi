@@ -2,4 +2,3 @@
   instance_type: Standard_D2s_v3
   disk_size: 100
   count: 3
-

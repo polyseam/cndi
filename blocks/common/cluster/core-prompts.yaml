@@ -134,4 +134,4 @@
   message: >-
     Enter an override for the default ArgoCD Admin Password?
   type: Input
-  default: '{{ $cndi.get_random_string(32) }}'
+  default: "{{ $cndi.get_random_string(32) }}"

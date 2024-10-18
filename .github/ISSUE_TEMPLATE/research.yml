@@ -15,7 +15,7 @@ body:
   - type: textarea
     id: summary
     attributes:
-      label: 'Please provide a summary of the area of research you suggest:'
+      label: "Please provide a summary of the area of research you suggest:"
       description: What topic should be researched?
       placeholder: "I think we should research using foo..."
     validations:

@@ -6,7 +6,6 @@ changelog:
     authors:
       - octocat
   categories:
-
     - title: Breaking Changes 🛠
       labels:
         - Semver-Major

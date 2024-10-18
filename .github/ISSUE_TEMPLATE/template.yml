@@ -30,7 +30,7 @@ body:
     id: template
     attributes:
       label: Which new Template should be added to CNDI?
-      description: 'Please tell us more about the Template you aim to deploy to and why:'
+      description: "Please tell us more about the Template you aim to deploy to and why:"
       placeholder: I would like to be able to deploy Trackmania servers...
     validations:
       required: true

@@ -1,32 +1,32 @@
 blocks:
   - name: redis-ingress
     content:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: redis-server-ingress
-          namespace: redis
-          annotations:
-            cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
-            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        spec:
-          ingressClassName: public
-          tls:
-            - hosts:
-                - "{{ $cndi.get_arg(hostname) }}"
-              secretName: cluster-issuer-redis-key
-          rules:
-            - host: "{{ $cndi.get_arg(hostname) }}"
-              http:
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: redis-cluster-leader
-                        port:
-                          number: 6379
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: redis-server-ingress
+        namespace: redis
+        annotations:
+          cert-manager.io/cluster-issuer: cluster-issuer
+          kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      spec:
+        ingressClassName: public
+        tls:
+          - hosts:
+              - "{{ $cndi.get_arg(hostname) }}"
+            secretName: cluster-issuer-redis-key
+        rules:
+          - host: "{{ $cndi.get_arg(hostname) }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: redis-cluster-leader
+                      port:
+                        number: 6379
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
       {}
@@ -58,7 +58,7 @@ prompts:
     type: Confirm
 
   - name: redis_hostname
-    message: 'Please enter the domain name you want Redis to be accessible on:'
+    message: "Please enter the domain name you want Redis to be accessible on:"
     default: redis.example.com
     type: Input
     validators:
@@ -69,17 +69,17 @@ prompts:
       - true
 
   - name: default_redis_password
-    message: 'Please enter Redis default user password'
+    message: "Please enter Redis default user password"
     default: password
     type: Secret
 
   - name: cluster_size
-    message: 'Please enter the cluster size for RedisCluster'
+    message: "Please enter the cluster size for RedisCluster"
     default: 3
     type: Number
 
   - name: node_disk_size_gib
-    message: 'Please enter the disk size for your RedisCluster nodes (GiB)'
+    message: "Please enter the disk size for your RedisCluster nodes (GiB)"
     default: 80
     type: Number
 
@@ -94,17 +94,17 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
               - ==
               - true
-              
+
         nodes:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
             {}
-            
+
         open_ports:
           - name: redis-client
             number: 6379
@@ -144,7 +144,7 @@ outputs:
               name: redis-secret
               key: password
             resources:
-              $cndi.comment(sizing): consumption stable for default node type 
+              $cndi.comment(sizing): consumption stable for default node type
               requests:
                 cpu: 101m
                 memory: 256Mi
@@ -194,16 +194,16 @@ outputs:
             - ==
             - true
 
-      external-dns-secret: 
+      external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
 
-    applications: 
+    applications:
       redis-operator:
-        repoURL: 'https://ot-container-kit.github.io/helm-charts'
+        repoURL: "https://ot-container-kit.github.io/helm-charts"
         chart: redis-operator
         targetRevision: 0.18.0
         destinationNamespace: redis
@@ -218,9 +218,8 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-        
     $cndi.comment(redis-heading): Redis Connection Parameters
-    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_redis_password) }}" 
+    REDISPASSWORD: "{{ $cndi.get_prompt_response(default_redis_password) }}"
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
@@ -232,9 +231,9 @@ outputs:
     redis: |
       # Redis Deployment Guide
 
-      This Template deploys a standalone production-ready Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator). 
+      This Template deploys a standalone production-ready Redis Operater along with Redis-Replication server with a user defined cluster size using the [ot-container-kit Redis Helm chart](https://github.com/OT-CONTAINER-KIT/redis-operator).
       It also deploys Redis-Sentinel as a monitoring solution for Redis instances on a Kubernetes cluster using Helm.
-      Redis is an open-source, in-memory data structure store, used as a database, cache, and message broker. 
+      Redis is an open-source, in-memory data structure store, used as a database, cache, and message broker.
       It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes, and streams.
       Redis is known for its high performance, simplicity, and flexibility, making it ideal for a wide range of applications.
 
@@ -273,4 +272,3 @@ outputs:
       6. **Verify the Connection:** Execute a simple Redis command, such as `PING`, to ensure the connection is working. You should receive a response of `PONG` if everything is set up correctly.
 
       Remember to adjust your connection details and steps according to the specific configuration and security settings of your Redis deployment.
-            
