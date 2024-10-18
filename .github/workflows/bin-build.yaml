@@ -15,7 +15,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.0.1
+          deno-version: "2.0.1"
       - name: deno build-linux
         run: deno task build-linux
       - name: linux cndi --help
@@ -28,7 +28,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.0.1
+          deno-version: "2.0.1"
       - name: deno build-mac
         run: deno task build-mac
       - name: mac cndi --help
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.0.1
+          deno-version: "2.0.1"
       - name: deno build-win
         run: deno task build-win
       - name: win cndi --help
