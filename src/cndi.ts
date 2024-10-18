@@ -10,6 +10,7 @@ import {
   path,
 } from "deps";
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
+import { ErrOut } from "errout";
 
 // commands
 import upgradeCommand from "src/commands/upgrade.ts";
@@ -21,9 +22,9 @@ import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";
 
-import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
+import { removeOldBinaryIfRequired } from "src/utils.ts";
 
-const cndiLabel = ccolors.faded("\nsrc/cndi.ts:");
+const label = ccolors.faded("\nsrc/cndi.ts:");
 
 export default async function cndi() {
   if (!deno_json?.version) {
@@ -56,15 +57,18 @@ export default async function cndi() {
 
   try {
     ensureDirSync(stagingDirectory);
-  } catch (failedToCreateStagingDirectoryError) {
-    console.error(
-      cndiLabel,
+  } catch (errorEnsuringDirectory) {
+    const err = new ErrOut([
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
-    );
-    console.error(ccolors.caught(failedToCreateStagingDirectoryError, 10));
-    await emitExitEvent(10);
-    Deno.exit(10);
+    ], {
+      label,
+      code: 10,
+      id: "error-ensuring-stagingDirectory",
+      cause: errorEnsuringDirectory as Error,
+    });
+    await err.out();
+    return;
   }
 
   return await new Command()

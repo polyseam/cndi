@@ -1,28 +1,29 @@
 import { ccolors, path, simpleGit } from "deps";
 
 import encrypt from "src/tfstate/encrypt.ts";
+import { ErrOut } from "errout";
 
 const git = simpleGit();
 
-const gitWriteStateLabel = ccolors.faded("\nsrc/tfstate/git/write-state.ts:");
-
-export default async function pushStateFromRun({
-  pathToTerraformResources,
-  cmd,
-}: {
+const label = ccolors.faded("\nsrc/tfstate/git/write-state.ts:");
+type PushStateForRunOptions = {
   pathToTerraformResources: string;
   cmd: string;
-}) {
+};
+
+export async function pushStateFromTerraform({
+  pathToTerraformResources,
+  cmd,
+}: PushStateForRunOptions): Promise<ErrOut | void> {
   const isGitRepo = await git.checkIsRepo();
 
   if (!isGitRepo) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitWriteStateLabel,
         ccolors.user_input(`"${cmd}"`),
         ccolors.error("must be executed inside a git repository"),
-      ].join(" "),
-      { cause: 1005 },
+      ],
+      { code: 1005, label, id: "write-state/!isGitRepo", metadata: { cmd } },
     );
   }
 
@@ -30,13 +31,17 @@ export default async function pushStateFromRun({
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitWriteStateLabel,
         ccolors.error("you must have clean git state when running"),
         ccolors.user_input(`"${cmd}"`),
-      ].join(" "),
-      { cause: 1006 },
+      ],
+      {
+        code: 1006,
+        label,
+        id: "write-state/!cleanGitState",
+        metadata: { cmd },
+      },
     );
   }
 
@@ -52,13 +57,17 @@ export default async function pushStateFromRun({
     state = Deno.readTextFileSync(pathToState);
   } catch (errorReadingState) {
     if (errorReadingState instanceof Deno.errors.NotFound) {
-      throw new Error(
+      return new ErrOut(
         [
-          gitWriteStateLabel,
           ccolors.error("failed to find tfstate at"),
           ccolors.key_name(`"${pathToState}"`),
-        ].join(" "),
-        { cause: 1009 },
+        ],
+        {
+          code: 1009,
+          id: "write-state/!stateFile",
+          label,
+          metadata: { cmd, pathToState },
+        },
       );
     }
   }
@@ -67,27 +76,35 @@ export default async function pushStateFromRun({
     // this should throw an error if state is corrupted
     JSON.parse(state!);
   } catch {
-    throw new Error(
+    return new ErrOut(
       [
-        gitWriteStateLabel,
         ccolors.error("corrupted state JSON please run"),
         ccolors.user_input(`"${cmd}"`),
         ccolors.error("again"),
-      ].join(" "),
-      { cause: 1007 },
+      ],
+      {
+        code: 1007,
+        id: "write-state/!parseAsJSON(stateFile)",
+        label,
+        metadata: { cmd, pathToState, state: state! },
+      },
     );
   }
 
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
   if (!secret) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitWriteStateLabel,
         ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
         "is not set in your environment",
-      ].join(" "),
-      { cause: 1008 },
+      ],
+      {
+        code: 1008,
+        id: "write-state/!env.TERRAFORM_STATE_PASSPHRASE",
+        label,
+        metadata: { cmd, secret },
+      },
     );
   }
 
@@ -109,11 +126,12 @@ export default async function pushStateFromRun({
     Deno.writeTextFileSync(pathToNewState, encryptedState);
   } catch (errorWritingState) {
     console.error(
-      gitWriteStateLabel,
+      label,
       ccolors.error("failed to write encrypted tfstate to disk"),
     );
-    console.error(ccolors.caught(errorWritingState));
+    console.error(ccolors.caught(errorWritingState as Error));
   }
+
   try {
     await git.raw("add", pathToNewState, "--force"); // add the file regardless of if it is in .gitignore
     await git.commit(
@@ -122,19 +140,19 @@ export default async function pushStateFromRun({
     );
   } catch (errorCommitingState) {
     console.error(
-      gitWriteStateLabel,
+      label,
       ccolors.error(`failed to commit encrypted tfstate`),
       ccolors.key_name(`"_state"`),
       ccolors.error(`branch`),
     );
-    console.error(ccolors.caught(errorCommitingState));
+    console.error(ccolors.caught(errorCommitingState as Error));
   }
 
   try {
     await git.push("origin", "_state", { "--force": null });
   } catch (pushError) {
     console.error(
-      gitWriteStateLabel,
+      label,
       ccolors.error(`failed to push encrypted`),
       ccolors.key_name(`terraform.tfstate`),
       ccolors.error(`to remote`),
@@ -142,7 +160,7 @@ export default async function pushStateFromRun({
       ccolors.error(`branch`),
     );
     console.error('did you forget to add an "origin" remote?');
-    console.error(ccolors.caught(pushError));
+    console.error(ccolors.caught(pushError as Error));
   }
 
   await git.checkout(originalBranch || "main");

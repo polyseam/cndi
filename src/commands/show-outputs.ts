@@ -1,6 +1,6 @@
 import { ccolors, Command, path } from "deps";
 
-import pullStateForShowOutputs from "src/tfstate/git/read-state.ts";
+import { pullStateForTerraform } from "src/tfstate/git/read-state.ts";
 
 import setTF_VARs from "src/setTF_VARs.ts";
 
@@ -74,20 +74,20 @@ const showOutputsCommand = new Command()
 
     const pathToTerraformBinary = getPathToTerraformBinary();
 
-    try {
-      await setTF_VARs(options.path); // set TF_VARs using CNDI's .env variables
-    } catch (setTF_VARsError) {
-      console.log(setTF_VARsError.message);
-      await emitExitEvent(setTF_VARsError.cause);
-      Deno.exit(setTF_VARsError.cause);
+    const setTF_VARsError = await setTF_VARs(options.path);
+
+    if (setTF_VARsError) {
+      await setTF_VARsError.out();
     }
 
-    try {
-      await pullStateForShowOutputs({ pathToTerraformResources, cmd });
-    } catch (pullStateForShowOutputsError) {
-      console.log(pullStateForShowOutputsError.message);
-      await emitExitEvent(pullStateForShowOutputsError.cause);
-      Deno.exit(pullStateForShowOutputsError.cause);
+    const pullStateError = await pullStateForTerraform({
+      pathToTerraformResources,
+      cmd,
+    });
+
+    if (pullStateError) {
+      await pullStateError.out();
+      return;
     }
 
     try {
@@ -120,7 +120,7 @@ const showOutputsCommand = new Command()
         showoutputsLabel,
         ccolors.error("failed to spawn 'terraform init'"),
       );
-      console.log(ccolors.caught(err));
+      console.log(ccolors.caught(err as Error));
       await emitExitEvent(1700);
       Deno.exit(1700);
     }
@@ -169,7 +169,7 @@ const showOutputsCommand = new Command()
         showoutputsLabel,
         ccolors.error("failed to spawn 'terraform output'"),
       );
-      console.log(ccolors.caught(err));
+      console.log(ccolors.caught(err as Error));
       await emitExitEvent(1701);
       Deno.exit(1701);
     }

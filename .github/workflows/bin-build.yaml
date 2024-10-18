@@ -13,9 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.46
+          deno-version: "v2.0.0"
       - name: deno build-linux
         run: deno task build-linux
       - name: linux cndi --help
@@ -26,9 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.46
+          deno-version: "v2.0.0"
       - name: deno build-mac
         run: deno task build-mac
       - name: mac cndi --help
@@ -39,9 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.46
+          deno-version: "v2.0.0"
       - name: deno build-win
         run: deno task build-win
       - name: win cndi --help

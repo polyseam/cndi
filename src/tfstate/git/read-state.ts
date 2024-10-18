@@ -4,26 +4,36 @@ import decrypt from "src/tfstate/decrypt.ts";
 
 const git = simpleGit();
 
-const gitReadStateLabel = ccolors.faded("src/tfstate/git/read-state.ts:");
+import { ErrOut } from "errout";
 
-export default async function pullStateForRun({
-  pathToTerraformResources,
-  cmd,
-}: {
+const label = ccolors.faded("src/tfstate/git/read-state.ts:");
+
+type PullStateForRunOptions = {
   pathToTerraformResources: string;
   cmd: string;
-}) {
+};
+
+export async function pullStateForTerraform({
+  pathToTerraformResources,
+  cmd,
+}: PullStateForRunOptions): Promise<ErrOut | void> {
   // fails in GitHub Actions
   const isGitRepo = git.checkIsRepo();
 
   if (!isGitRepo) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitReadStateLabel,
         ccolors.user_input(`"${cmd}"`),
         ccolors.error("must be executed inside a git repository"),
-      ].join(" "),
-      { cause: 1001 },
+      ],
+      {
+        code: 1001,
+        label,
+        id: "read-state/!isGitRepo",
+        metadata: {
+          cmd,
+        },
+      },
     );
   }
 
@@ -35,13 +45,17 @@ export default async function pullStateForRun({
   const originalBranch = (await git.branch()).current;
 
   if (!originalBranch) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitReadStateLabel,
         ccolors.error("you must make a commit on your branch before running"),
         ccolors.user_input(`"${cmd}"`),
-      ].join(" "),
-      { cause: 1002 },
+      ],
+      {
+        code: 1002,
+        label,
+        id: "read-state/current-branch/!commits.length",
+        metadata: { cmd },
+      },
     );
   }
 
@@ -49,13 +63,17 @@ export default async function pullStateForRun({
   const cleanGitState = (await git.status()).isClean();
 
   if (!cleanGitState) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitReadStateLabel,
         ccolors.error("your branch must be clean before running"),
         ccolors.user_input(`"${cmd}"`),
-      ].join(" "),
-      { cause: 1003 },
+      ],
+      {
+        code: 1003,
+        label,
+        id: "read-state/cleanGitState/!isClean",
+        metadata: { cmd, originalBranch },
+      },
     );
   }
 
@@ -75,7 +93,7 @@ export default async function pullStateForRun({
     );
   } catch {
     console.log(
-      gitReadStateLabel,
+      label,
       `"terraform.tfstate.encrypted" not found, using fresh state`,
     );
   }
@@ -83,14 +101,15 @@ export default async function pullStateForRun({
   const secret = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
   if (!secret) {
-    throw new Error(
+    return new ErrOut(
       [
-        gitReadStateLabel,
         ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
         "is not set in your environment",
-      ].join(" "),
+      ],
       {
-        cause: 1004,
+        code: 1004,
+        label,
+        id: "read-state/!env.TERRAFORM_STATE_PASSPHRASE",
       },
     );
   }

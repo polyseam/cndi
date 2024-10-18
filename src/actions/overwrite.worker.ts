@@ -11,6 +11,8 @@ import {
   stageFile,
 } from "src/utils.ts";
 
+import { ErrOut } from "errout";
+
 import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 
 import getApplicationManifest from "src/outputs/application-manifest.ts";
@@ -44,17 +46,11 @@ import getPublicNginxApplicationManifest from "src/outputs/core-applications/pub
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
-import {
-  CNDIConfig,
-  CNDIProvider,
-  KubernetesManifest,
-  KubernetesSecret,
-} from "src/types.ts";
+import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
+
 import validateConfig from "src/validate/cndiConfig.ts";
 
-const owLabel = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
-
-const PROVIDERS_SUPPORTING_KEYLESS: Array<CNDIProvider> = [];
+const label = ccolors.faded("\nsrc/commands/overwrite.worker.ts:");
 
 interface OverwriteActionOptions {
   output: string;
@@ -65,23 +61,27 @@ interface OverwriteActionOptions {
   enablePrChecks?: boolean;
 }
 
-type OverwriteWorkerMessage = {
+type WorkerMessageType =
+  | "begin-overwrite"
+  | "complete-overwrite"
+  | "error-overwrite";
+export type OverwriteWorkerMessage = {
   data: {
+    type: WorkerMessageType;
     options?: OverwriteActionOptions;
-    type: "begin-overwrite" | "complete-overwrite" | "error-overwrite";
     code?: number;
   };
 };
 
+export type OverwriteWorkerMessageOutgoing = {
+  type: WorkerMessageType;
+  code?: number;
+  message?: string;
+};
+
 declare const self: {
   onmessage: (message: OverwriteWorkerMessage) => void;
-  postMessage: (
-    message: {
-      type: "complete-overwrite" | "error-overwrite";
-      code?: number;
-      message?: string;
-    },
-  ) => void;
+  postMessage: (message: OverwriteWorkerMessageOutgoing) => void;
   close: () => never;
   Deno: typeof Deno;
 };
@@ -126,59 +126,30 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     );
 
     const envPath = path.join(options.output, ".env");
-    let config: CNDIConfig;
-    let pathToConfig: string;
 
-    try {
-      const result = await loadCndiConfig(options.output);
-      config = result.config;
-      pathToConfig = result.pathToConfig;
-    } catch (errorLoadingCndiConfig) {
-      self.postMessage({
-        type: "error-overwrite",
-        code: errorLoadingCndiConfig.cause,
-        message: errorLoadingCndiConfig.message,
-      });
+    const [errorLoadingConfig, result] = await loadCndiConfig(options.output);
+
+    if (errorLoadingConfig) {
+      await self.postMessage(errorLoadingConfig.owWorkerErrorMessage);
       return;
     }
 
+    const config = result.config;
+    const pathToConfig = result.pathToConfig;
+
     await loadEnv({ export: true, envPath });
 
-    try {
-      await validateConfig(config, pathToConfig);
-    } catch (errorValidatingConfig) {
-      self.postMessage({
-        type: "error-overwrite",
-        code: errorValidatingConfig.cause,
-        message: errorValidatingConfig.message,
-      });
+    const validationError = validateConfig(config, pathToConfig);
+
+    if (validationError) {
+      await self.postMessage(validationError.owWorkerErrorMessage);
+      return;
     }
 
     const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
 
     if (tryKeyless) {
-      if (!PROVIDERS_SUPPORTING_KEYLESS.includes(config?.provider)) {
-        try {
-          throw new Error(
-            [
-              owLabel,
-              ccolors.error(
-                `'keyless' infrastructure is not yet supported for provider`,
-              ),
-              ccolors.key_name(config?.provider),
-            ].join(" "),
-            { cause: 510 },
-          );
-        } catch (error) {
-          self.postMessage({
-            type: "error-overwrite",
-            code: error.cause,
-            message: error.message,
-          });
-          return;
-        }
-        // TODO: do keyless stuff
-      }
+      // TODO: implement keyless
     }
 
     // resources outside of ./cndi should only be staged if initializing or manually requested
@@ -190,13 +161,19 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       );
 
       if (config?.provider !== "dev") {
-        await stageFile(
+        const errStagingOnRunWorkflow = await stageFile(
           runWorkflowPath,
           getCndiRunGitHubWorkflowYamlContents(
             config,
             options?.workflowSourceRef,
           ),
         );
+
+        if (errStagingOnRunWorkflow) {
+          await self.postMessage(errStagingOnRunWorkflow.owWorkerErrorMessage);
+          return;
+        }
+
         console.log(
           ccolors.success("staged 'cndi-run' GitHub workflow:"),
           ccolors.key_name(runWorkflowPath),
@@ -216,10 +193,15 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           "cndi-onpull.yaml",
         );
 
-        await stageFile(
+        const errStagingOnPullWorkflow = await stageFile(
           onPullWorkflowPath,
           getCndiOnPullGitHubWorkflowYamlContents(),
         );
+
+        if (errStagingOnPullWorkflow) {
+          await self.postMessage(errStagingOnPullWorkflow.owWorkerErrorMessage);
+          return;
+        }
 
         console.log(
           ccolors.success("staged 'cndi-onpull' GitHub workflow:"),
@@ -228,10 +210,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
     }
 
-    const pathToFunctionsInput = path.join(
-      options.output,
-      "functions",
-    );
+    const pathToFunctionsInput = path.join(options.output, "functions");
 
     const shouldBuildFunctions = await checkDirectoryForFileSuffix(
       pathToFunctionsInput,
@@ -252,54 +231,75 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         "workflows",
         "cndi-fns.yaml",
       );
-
-      await stageDirectory(
+      const errStagingFnsDir = await stageDirectory(
         path.join("cndi", "functions", "src"),
         path.join("functions"),
       );
+      if (errStagingFnsDir) {
+        await self.postMessage(errStagingFnsDir.owWorkerErrorMessage);
+        return;
+      }
 
-      await stageFile(
+      const errStagingFnsEntrySrc = await stageFile(
         path.join("cndi", "functions", "src", "main", "index.ts"),
         getFunctionsMainContent(),
       );
+      if (errStagingFnsEntrySrc) {
+        await self.postMessage(errStagingFnsEntrySrc.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged functions bootstrap source"),
         ccolors.key_name("cndi/functions/src/main/index.ts"),
       );
 
-      await stageFile(
+      const errStagingFnsDockerfile = await stageFile(
         path.join("cndi", "functions", "Dockerfile"),
         getFunctionsDockerfileContent(),
       );
+      if (errStagingFnsDockerfile) {
+        await self.postMessage(errStagingFnsDockerfile.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged functions Dockerfile"),
         ccolors.key_name("cndi/functions/Dockerfile"),
       );
 
-      await stageFile(
+      const fnsBuildWorkflowErr = await stageFile(
         fnsWorkflowPath,
-        getCndiFnsGitHubWorkflowYamlContents(
-          config,
-        ),
+        getCndiFnsGitHubWorkflowYamlContents(config),
       );
+      if (fnsBuildWorkflowErr) {
+        await self.postMessage(fnsBuildWorkflowErr.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged 'cndi-fns' GitHub workflow:"),
         ccolors.key_name(fnsWorkflowPath),
       );
 
-      await stageFile(
+      const errStagingFnsNamespace = await stageFile(
         path.join("cndi", "cluster_manifests", "fns-namespace.yaml"),
         getFunctionsNamespaceManifest(),
       );
+      if (errStagingFnsNamespace) {
+        await self.postMessage(errStagingFnsNamespace.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged functions namespace manifest:"),
         ccolors.key_name("fns-namespace.yaml"),
       );
 
-      await stageFile(
+      const errStagingFnsSvc = await stageFile(
         path.join("cndi", "cluster_manifests", "fns-service.yaml"),
         getFunctionsServiceManifest(),
       );
+      if (errStagingFnsSvc) {
+        await self.postMessage(errStagingFnsSvc.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged functions service manifest:"),
         ccolors.key_name("fns-service.yaml"),
@@ -309,12 +309,14 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         ?.hostname;
 
       if (functionsIngressHostname) {
-        await stageFile(
+        const errStagingFnsIngress = await stageFile(
           path.join("cndi", "cluster_manifests", "fns-ingress.yaml"),
-          getFunctionsIngressManifest(
-            functionsIngressHostname,
-          ),
+          getFunctionsIngressManifest(functionsIngressHostname),
         );
+        if (errStagingFnsIngress) {
+          await self.postMessage(errStagingFnsIngress.owWorkerErrorMessage);
+          return;
+        }
         console.log(
           ccolors.success("staged functions ingress manifest:"),
           ccolors.key_name("fns-ingress.yaml"),
@@ -341,11 +343,15 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       config.cluster_manifests["fns-pull-secret"] =
         getFunctionsPullSecretManifest();
 
-      await stageFile(
+      const errStagingFnsDeployment = await stageFile(
         path.join("cndi", "cluster_manifests", "fns-deployment.yaml"),
         getFunctionsDeploymentManifest(),
       );
 
+      if (errStagingFnsDeployment) {
+        await self.postMessage(errStagingFnsDeployment.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged functions deployment manifest:"),
         ccolors.key_name("fns-deployment.yaml"),
@@ -364,15 +370,18 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     const terraformStatePassphrase = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
     if (!terraformStatePassphrase) {
-      self.postMessage({
-        type: "error-overwrite",
-        code: 503,
-        message: [
-          owLabel,
+      const err = new ErrOut(
+        [
           ccolors.key_name(`"TERRAFORM_STATE_PASSPHRASE"`),
           ccolors.error(`is not set in environment`),
-        ].join(" "),
-      });
+        ],
+        {
+          label,
+          code: 503,
+          id: "!env.TERRAFORM_STATE_PASSPHRASE",
+        },
+      );
+      await self.postMessage(err.owWorkerErrorMessage);
       return;
     }
 
@@ -395,38 +404,41 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       const argoUIAdminPassword = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
 
       if (!sealedSecretsKeys) {
-        self.postMessage({
-          type: "error-overwrite",
+        const err = new ErrOut([
+          ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+          ccolors.error(`and/or`),
+          ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+          ccolors.error(`are not present in environment`),
+        ], {
+          label,
           code: 501,
-          message: [
-            owLabel,
-            ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
-            ccolors.error(`and/or`),
-            ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-            ccolors.error(`are not present in environment`),
-          ].join(" "),
+          id: "!env.SEALED_SECRETS_PUBLIC_KEY||!env.SEALED_SECRETS_PRIVATE_KEY",
         });
+        await self.postMessage(err.owWorkerErrorMessage);
         return;
       }
 
       if (!argoUIAdminPassword) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: 502,
-          message: [
-            owLabel,
+        const err = new ErrOut(
+          [
             ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
             ccolors.error(`is not set in environment`),
-          ].join(" "),
-        });
+          ],
+          {
+            label,
+            code: 502,
+            id: "!env.ARGOCD_ADMIN_PASSWORD",
+          },
+        );
+        await self.postMessage(err.owWorkerErrorMessage);
         return;
       }
 
       // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
       try {
-        ksc = await loadJSONC(
+        ksc = (await loadJSONC(
           path.join(options.output, "cndi", "ks_checks.json"),
-        ) as Record<string, string>;
+        )) as Record<string, string>;
       } catch {
         // ks_checks.json did not exist or was invalid JSON
       }
@@ -450,7 +462,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           console.error(
             ccolors.warn(
               `failed to read SealedSecret: "${
-                ccolors.key_name(key + ".yaml")
+                ccolors.key_name(
+                  key + ".yaml",
+                )
               }" referenced in 'ks_checks.json'`,
             ),
           );
@@ -494,7 +508,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         config?.infrastructure?.cndi?.cert_manager?.enabled === false;
 
       if (cert_manager && !skipCertManager) {
-        await stageFile(
+        const errStagingCertManApplication = await stageFile(
           path.join(
             "cndi",
             "cluster_manifests",
@@ -503,14 +517,19 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ),
           getCertManagerApplicationManifest(),
         );
-
+        if (errStagingCertManApplication) {
+          await self.postMessage(
+            errStagingCertManApplication.owWorkerErrorMessage,
+          );
+          return;
+        }
         console.log(
           ccolors.success("staged application manifest:"),
           ccolors.key_name("cert-manager.application.yaml"),
         );
 
         if (cert_manager?.self_signed || config?.provider == "dev") {
-          await stageFile(
+          const errStagingSelfSignedCertManIssuer = await stageFile(
             path.join(
               "cndi",
               "cluster_manifests",
@@ -518,8 +537,14 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             ),
             getDevClusterIssuerManifest(),
           );
+          if (errStagingSelfSignedCertManIssuer) {
+            await self.postMessage(
+              errStagingSelfSignedCertManIssuer.owWorkerErrorMessage,
+            );
+            return;
+          }
         } else {
-          await stageFile(
+          const errStagingProdCertManIssuer = await stageFile(
             path.join(
               "cndi",
               "cluster_manifests",
@@ -527,6 +552,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             ),
             getProductionClusterIssuerManifest(cert_manager?.email),
           );
+          if (errStagingProdCertManIssuer) {
+            await self.postMessage(
+              errStagingProdCertManIssuer.owWorkerErrorMessage,
+            );
+            return;
+          }
         }
       }
 
@@ -534,7 +565,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         config?.infrastructure?.cndi?.reloader?.enabled === false;
 
       if (!skipReloader) {
-        await stageFile(
+        const errStagingReloaderApp = await stageFile(
           path.join(
             "cndi",
             "cluster_manifests",
@@ -543,6 +574,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ),
           getReloaderApplicationManifest(),
         );
+        if (errStagingReloaderApp) {
+          await self.postMessage(errStagingReloaderApp.owWorkerErrorMessage);
+          return;
+        }
       }
 
       const ingress = config?.infrastructure?.cndi?.ingress;
@@ -550,7 +585,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       const skipPublicIngress = ingress?.nginx?.public?.enabled === false; // explicitly disabled public ingress
 
       if (!skipPublicIngress) {
-        await stageFile(
+        const errStagingPublicIngApp = await stageFile(
           path.join(
             "cndi",
             "cluster_manifests",
@@ -559,6 +594,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ),
           getPublicNginxApplicationManifest(config),
         );
+        if (errStagingPublicIngApp) {
+          await self.postMessage(errStagingPublicIngApp.owWorkerErrorMessage);
+          return;
+        }
         console.log(
           ccolors.success("staged application manifest:"),
           ccolors.key_name("public_nginx.application.yaml"),
@@ -566,7 +605,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
 
       if (!skipPrivateIngress) {
-        await stageFile(
+        const errStagingPrivateIngApp = await stageFile(
           path.join(
             "cndi",
             "cluster_manifests",
@@ -575,6 +614,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ),
           getPrivateNginxApplicationManifest(config),
         );
+        if (errStagingPrivateIngApp) {
+          await self.postMessage(errStagingPrivateIngApp.owWorkerErrorMessage);
+          return;
+        }
         console.log(
           ccolors.success("staged application manifest:"),
           ccolors.key_name("private_nginx.application.yaml"),
@@ -586,30 +629,52 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       const isMicrok8sCluster = config?.distribution === "microk8s";
       const isNotDevCluster = config?.provider !== "dev";
 
-      if (
-        isMicrok8sCluster && isNotDevCluster
-      ) {
-        await Promise.all([
-          stageFile(
-            path.join(
-              "cndi",
-              "cluster_manifests",
-              "ingress-tcp-services-configmap.yaml",
-            ),
-            getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+      if (isMicrok8sCluster && isNotDevCluster) {
+        const errStagingMicrok8sIngConfigMap = await stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "ingress-tcp-services-configmap.yaml",
           ),
-          stageFile(
-            path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
-            getMicrok8sIngressDaemonsetManifest(open_ports),
-          ),
-        ]);
+          getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
+        );
+        if (errStagingMicrok8sIngConfigMap) {
+          await self.postMessage(
+            errStagingMicrok8sIngConfigMap.owWorkerErrorMessage,
+          );
+          return;
+        }
+        console.log(
+          ccolors.success("staged open ports configmap manifest:"),
+          ccolors.key_name("ingress-tcp-services-configmap.yaml"),
+        );
+
+        const errStagingmicrok8sIngDaemonset = await stageFile(
+          path.join("cndi", "cluster_manifests", "ingress-daemonset.yaml"),
+          getMicrok8sIngressDaemonsetManifest(open_ports),
+        );
+        if (errStagingmicrok8sIngDaemonset) {
+          await self.postMessage(
+            errStagingmicrok8sIngDaemonset.owWorkerErrorMessage,
+          );
+          return;
+        }
+        console.log(
+          ccolors.success("staged open ports daemonset manifest:"),
+          ccolors.key_name("ingress-daemonset.yaml"),
+        );
       }
       console.log(ccolors.success("staged open ports manifests"));
 
-      await stageFile(
+      const errStagingChartYaml = await stageFile(
         path.join("cndi", "cluster_manifests", "Chart.yaml"),
         RootChartYaml,
       );
+
+      if (errStagingChartYaml) {
+        await self.postMessage(errStagingChartYaml.owWorkerErrorMessage);
+        return;
+      }
 
       // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
       for (const key in cluster_manifests) {
@@ -618,10 +683,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         if (manifestObj?.kind && manifestObj.kind === "Secret") {
           const secret = cluster_manifests[key] as KubernetesSecret;
           const secretFileName = `${key}.yaml`;
-          let sealedSecretManifestWithKSC;
 
-          try {
-            sealedSecretManifestWithKSC = await getSealedSecretManifestWithKSC(
+          const [err, sealedSecretManifestWithKSC] =
+            await getSealedSecretManifestWithKSC(
               secret,
               {
                 publicKeyFilePath: tempPublicKeyFilePath,
@@ -630,12 +694,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
                 secretFileName,
               },
             );
-          } catch (error) {
-            self.postMessage({
-              type: "error-overwrite",
-              code: error.cause,
-              message: error.message,
-            });
+
+          if (err) {
+            await self.postMessage(err.owWorkerErrorMessage);
             return;
           }
 
@@ -648,10 +709,17 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
               ...sealedSecretManifestWithKSC?.ksc,
             };
 
-            await stageFile(
+            const errStagingASecretClusterManifest = await stageFile(
               path.join("cndi", "cluster_manifests", secretFileName),
               sealedSecretManifest,
             );
+
+            if (errStagingASecretClusterManifest) {
+              await self.postMessage(
+                errStagingASecretClusterManifest.owWorkerErrorMessage,
+              );
+              return;
+            }
 
             console.log(
               ccolors.success(`staged encrypted secret:`),
@@ -662,21 +730,31 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         }
 
         const manifestFilename = `${key}.yaml`;
-        await stageFile(
+
+        const errStagingAClusterManifest = await stageFile(
           path.join("cndi", "cluster_manifests", manifestFilename),
           getYAMLString(manifestObj),
         );
+        if (errStagingAClusterManifest) {
+          await self.postMessage(
+            errStagingAClusterManifest.owWorkerErrorMessage,
+          );
+          return;
+        }
         console.log(
           ccolors.success("staged manifest:"),
           ccolors.key_name(manifestFilename),
         );
       }
 
-      await stageFile(
+      const errStagingKSCJSON = await stageFile(
         path.join("cndi", "ks_checks.json"),
         getPrettyJSONString(ks_checks),
       );
-
+      if (errStagingKSCJSON) {
+        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
+        return;
+      }
       console.log(
         ccolors.success("staged metadata:"),
         ccolors.key_name("ks_checks.json"),
@@ -686,7 +764,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         config?.infrastructure?.cndi?.external_dns?.enabled === false;
 
       if (!skipExternalDNS) {
-        await stageFile(
+        const errStagingExtDnsApp = await stageFile(
           path.join(
             "cndi",
             "cluster_manifests",
@@ -695,6 +773,10 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ),
           getExternalDNSManifest(config),
         );
+        if (errStagingExtDnsApp) {
+          await self.postMessage(errStagingExtDnsApp.owWorkerErrorMessage);
+          return;
+        }
         console.log(
           ccolors.success("staged application manifest:"),
           ccolors.key_name("external-dns.application.yaml"),
@@ -710,10 +792,14 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           releaseName,
           applicationSpec,
         );
-        await stageFile(
+        const errStagingApplication = await stageFile(
           path.join("cndi", "cluster_manifests", "applications", filename),
           manifestContent,
         );
+        if (errStagingApplication) {
+          await self.postMessage(errStagingApplication.owWorkerErrorMessage);
+          return;
+        }
         console.log(
           ccolors.success("staged application manifest:"),
           ccolors.key_name(filename),
@@ -723,11 +809,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     try {
       await stageTerraformResourcesForConfig(config); //, options);
-    } catch (error) {
+    } catch (errorStagingTerraformResources) {
+      const error = errorStagingTerraformResources as Error;
       self.postMessage({
         type: "error-overwrite",
-        code: error.cause,
-        message: error.message,
+        code: typeof error?.cause === "number" ? error.cause : -1,
+        message: error?.message ?? "unknown error staging terraform resources",
       });
       return;
     }
@@ -736,33 +823,20 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     console.log(ccolors.success("staged terraform stack"));
 
-    try {
-      await persistStagedFiles(options.output);
-      console.log("  ");
-    } catch (_errorPersistingStagedFiles) {
-      try {
-        throw new Error(
-          [
-            owLabel,
-            ccolors.error(`failed to persist staged cndi files to`),
-            ccolors.user_input(`${options.output}`),
-          ].join(" "),
-          { cause: 509 },
-        );
-      } catch (error) {
-        self.postMessage({
-          type: "error-overwrite",
-          code: error.cause,
-          message: error.message,
-        });
-        return;
-      }
+    const errPersistingStagedFiles = await persistStagedFiles(options.output);
+
+    if (errPersistingStagedFiles) {
+      await self.postMessage(errPersistingStagedFiles.owWorkerErrorMessage);
+      return;
     }
+    console.log("  ");
 
     const completionMessage = options?.initializing
       ? `initialized your cndi project at ${ccolors.key_name(options.output)}!`
       : `overwrote your cndi project files in ${
-        ccolors.key_name(path.join(options.output, "cndi"))
+        ccolors.key_name(
+          path.join(options.output, "cndi"),
+        )
       }!`;
 
     console.log("\n" + completionMessage);

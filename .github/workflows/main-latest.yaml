@@ -11,9 +11,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: use deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.46
+          deno-version: v2.0.0
 
       - run: deno lint
 
@@ -29,9 +29,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: use deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.46
+          deno-version: v2.0.0
 
       - run: deno task build
 

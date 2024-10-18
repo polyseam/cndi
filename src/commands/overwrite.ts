@@ -62,7 +62,11 @@ const owAction = (options: OwActionOptions) => {
       w.terminate();
       spinner.stop();
       if (options.create) {
-        await createRepo(options);
+        const error = await createRepo(options);
+        if (error) {
+          await error.out();
+          return;
+        }
       }
       await emitExitEvent(0);
       Deno.exit(0);

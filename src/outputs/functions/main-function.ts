@@ -117,7 +117,8 @@ function mainContent() {
         return await worker.fetch(req, {
           signal,
         });
-      } catch (e) {
+      } catch (err) {
+        const e = err as Error;
         console.error(e);
         // @ts-ignore - EdgeRuntime seems to patch Deno.errors
         if (e instanceof Deno.errors.WorkerRequestCancelled) {

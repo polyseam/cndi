@@ -1,5 +1,6 @@
 import {
   ccolors,
+  copy,
   deepMerge,
   exists,
   homedir,
@@ -20,11 +21,14 @@ import {
   NodeRole,
   TFBlocks,
 } from "src/types.ts";
+
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import emitTelemetryEvent from "src/telemetry/telemetry.ts";
+import { ErrOut } from "errout";
 
-const utilsLabel = ccolors.faded("src/utils.ts:");
+import { emitTelemetryEvent } from "src/telemetry/telemetry.ts";
+
+const label = ccolors.faded("src/utils.ts:");
 
 // YAML.stringify but easier to work with
 function getYAMLString(object: unknown, skipInvalid = true): string {
@@ -33,6 +37,14 @@ function getYAMLString(object: unknown, skipInvalid = true): string {
   return YAML.stringify(object as Record<string, unknown>, {
     skipInvalid,
   });
+}
+
+async function emitExitEvent(exit_code: number) {
+  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
+  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
+  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
+  if (isDebug) console.log("\nevent_uuid", event_uuid);
+  console.log();
 }
 
 async function sha256Digest(message: string): Promise<string> {
@@ -61,44 +73,6 @@ const removeOldBinaryIfRequired = async (
   return true;
 };
 
-const getPathToCndiConfig = async (providedPath?: string): Promise<string> => {
-  if (providedPath) {
-    const normalized = path.normalize(providedPath);
-    if (await exists(normalized)) {
-      return normalized;
-    } else {
-      throw new Error(
-        [
-          utilsLabel,
-          ccolors.error("could not find cndi_config file at"),
-          ccolors.user_input(`"${providedPath}"`),
-        ].join(" "),
-        {
-          cause: 500,
-        },
-      );
-    }
-  }
-
-  if (await exists(path.join(Deno.cwd(), "cndi_config.yaml"))) {
-    return path.join(Deno.cwd(), "cndi_config.yaml");
-  } else if (await exists(path.join(Deno.cwd(), "cndi_config.yml"))) {
-    return path.join(Deno.cwd(), "cndi_config.yml");
-  } else {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("there is no"),
-        ccolors.key_name('"cndi_config.yaml"'),
-        ccolors.error("file in your current directory"),
-      ].join(" "),
-      {
-        cause: 500,
-      },
-    );
-  }
-};
-
 const getTaintEffectForDistribution = (
   effect: CNDITaintEffect,
   distribution: CNDIDistribution,
@@ -107,53 +81,107 @@ const getTaintEffectForDistribution = (
     return effect;
   } else {
     const effectMap = {
-      "NoSchedule": "NO_SCHEDULE",
-      "PreferNoSchedule": "PREFER_NO_SCHEDULE",
-      "NoExecute": "NO_EXECUTE",
+      NoSchedule: "NO_SCHEDULE",
+      PreferNoSchedule: "PREFER_NO_SCHEDULE",
+      NoExecute: "NO_EXECUTE",
     };
     return effectMap[effect];
   }
 };
 
+type LoadConfigSuccessResult = {
+  config: CNDIConfig;
+  pathToConfig: string;
+};
+
+export type PxSuccessResult<T> = [undefined, T];
+export type PxErrorResult = [ErrOut];
+export type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
+
 // attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
 const loadCndiConfig = async (
   projectDirectory: string,
-): Promise<{ config: CNDIConfig; pathToConfig: string }> => {
+): Promise<PxResult<LoadConfigSuccessResult>> => {
   let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
 
-  if (!await exists(pathToConfig)) {
+  if (!(await exists(pathToConfig))) {
     pathToConfig = path.join(projectDirectory, "cndi_config.yml");
   }
 
-  if (!await exists(pathToConfig)) {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("failed to find a"),
-        ccolors.key_name(`cndi_config.yaml`),
-        ccolors.error("file at"),
-        ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
-      ].join(" "),
-      { cause: 500 },
-    );
+  if (!(await exists(pathToConfig))) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("failed to find a"),
+          ccolors.key_name(`cndi_config.yaml`),
+          ccolors.error("file at"),
+          ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
+        ],
+        {
+          id: "loadCndiConfig/not-found",
+          code: 500,
+          metadata: {
+            pathToConfig,
+          },
+          label,
+        },
+      ),
+    ];
   }
 
+  let configText: string;
+
   try {
-    const config = await loadYAML(pathToConfig) as CNDIConfig;
-    return { config, pathToConfig };
-  } catch {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("your cndi_config file at"),
-        ccolors.user_input(`"${pathToConfig}"`),
-        ccolors.error("could not be read"),
-      ].join(" "),
-      {
-        cause: 504,
-      },
-    );
+    configText = await Deno.readTextFile(pathToConfig);
+  } catch (errorReadingFile) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("could not read"),
+          ccolors.key_name(`cndi_config.yaml`),
+          ccolors.error("file at"),
+          ccolors.user_input(`"${pathToConfig}"`),
+        ],
+        {
+          code: 504,
+          id: "loadCndiConfig/read-text-error",
+          metadata: {
+            pathToConfig,
+          },
+          label,
+          cause: errorReadingFile as Error,
+        },
+      ),
+    ];
   }
+
+  let config: CNDIConfig;
+
+  try {
+    config = YAML.parse(configText) as CNDIConfig;
+  } catch (errorParsingFile) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("could not parse"),
+          ccolors.key_name(`cndi_config.yaml`),
+          ccolors.error("file at"),
+          ccolors.user_input(`"${pathToConfig}"`),
+        ],
+        {
+          code: 1300,
+          id: "loadCndiConfig/parse-yaml-error",
+          metadata: {
+            pathToConfig,
+          },
+          label,
+          cause: errorParsingFile as Error,
+        },
+      ),
+    ];
+  }
+
+  return [undefined, { config, pathToConfig }];
 };
 
 // TODO: the following 2 functions can fail in 2 ways
@@ -161,45 +189,6 @@ const loadCndiConfig = async (
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
   return JSONC.parse(await Deno.readTextFile(path));
-};
-
-// helper function to load a YAML file
-const loadYAML = async (path: string) => {
-  let txt: string;
-  let y: unknown;
-  try {
-    txt = await Deno.readTextFile(path);
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
-      throw new Error(
-        [
-          utilsLabel,
-          ccolors.error("could not find file at"),
-          ccolors.user_input(`"${path}"`),
-        ].join(" "),
-        {
-          cause: 1301,
-        },
-      );
-    }
-    throw error;
-  }
-
-  try {
-    y = await YAML.parse(txt);
-  } catch {
-    throw new Error(
-      [
-        utilsLabel,
-        ccolors.error("could not parse file as YAML at"),
-        ccolors.user_input(`"${path}"`),
-      ].join(" "),
-      {
-        cause: 1300,
-      },
-    );
-  }
-  return y;
 };
 
 function getPrettyJSONString(object: unknown) {
@@ -222,6 +211,7 @@ function getTFResource(
     },
   };
 }
+
 function getTFModule(
   module_type: string,
   content: Record<never, never>,
@@ -258,37 +248,53 @@ interface TFResourceFileObject {
   };
 }
 
+function getStagingDirectory(): PxResult<string> {
+  const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
+  if (!stagingDirectory) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("internal error!"),
+          ccolors.error("Environment Variable"),
+          ccolors.key_name("CNDI_STAGING_DIRECTORY"),
+          ccolors.error("is not defined"),
+        ],
+        {
+          label: "src/utils.ts",
+          code: 202,
+          id: "getStagingDirectory/!env.CNDI_STAGING_DIRECTORY",
+        },
+      ),
+    ];
+  }
+  return [undefined, stagingDirectory];
+}
+
 // MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithInput(input: TFBlocks) {
+async function patchAndStageTerraformFilesWithInput(
+  input: TFBlocks,
+): Promise<ErrOut | void> {
   const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
 
-  const cdktfObj = await loadJSONC(
-    path.join(await getStagingDir(), pathToTerraformObject),
-  ) as TFBlocks;
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) return err;
+
+  const cdktfObj = (await loadJSONC(
+    path.join(stagingDirectory, pathToTerraformObject),
+  )) as TFBlocks;
 
   // this is highly inefficient
   const cdktfWithEmpties = {
     ...cdktfObj,
-    resource: deepMerge(
-      cdktfObj?.resource || {},
-      input?.resource || {},
-    ),
-    terraform: deepMerge(
-      cdktfObj?.terraform || {},
-      input?.terraform || {},
-    ),
-    variable: deepMerge(
-      cdktfObj?.variable || {},
-      input?.variable || {},
-    ),
+    resource: deepMerge(cdktfObj?.resource || {}, input?.resource || {}),
+    terraform: deepMerge(cdktfObj?.terraform || {}, input?.terraform || {}),
+    variable: deepMerge(cdktfObj?.variable || {}, input?.variable || {}),
     locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
     output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
     module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
     data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
-    provider: deepMerge(
-      cdktfObj?.provider || {},
-      input?.provider || {},
-    ),
+    provider: deepMerge(cdktfObj?.provider || {}, input?.provider || {}),
   };
 
   const output: Record<string, unknown> = {};
@@ -299,10 +305,14 @@ async function patchAndStageTerraformFilesWithInput(input: TFBlocks) {
     }
   }
 
-  await stageFile(
+  const errorStagingTFObj = await stageFile(
     pathToTerraformObject,
     getPrettyJSONString(output),
   );
+
+  if (errorStagingTFObj) {
+    return errorStagingTFObj;
+  }
 }
 
 function getPathToTerraformBinary() {
@@ -357,46 +367,49 @@ function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
   return ports;
 }
 
-async function stageFile(relativePath: string, fileContents: string) {
-  const stagingPath = path.join(await getStagingDir(), relativePath);
-  await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
-  await Deno.writeTextFile(stagingPath, fileContents);
-}
-
-async function copyDir(
-  src: string,
-  dest: string,
-): Promise<void | Error> {
+async function stageFile(
+  relativePath: string,
+  fileContents: string,
+): Promise<ErrOut | void> {
+  const [err, stagingDirectory] = getStagingDirectory();
+  if (err) return err;
+  const stagingPath = path.join(stagingDirectory, relativePath);
   try {
-    // create the destination directory
-    // fail and return if error if the destination directory already exists
-    await Deno.mkdir(dest, { recursive: true });
-    for await (const entry of Deno.readDir(src)) {
-      const srcPath = `${src}/${entry.name}`;
-      const destPath = `${dest}/${entry.name}`;
-      if (entry.isFile) {
-        await Deno.copyFile(srcPath, destPath);
-      } else if (entry.isDirectory) {
-        await copyDir(srcPath, destPath);
-      }
-    }
-  } catch (error) {
-    return error;
+    await Deno.mkdir(path.dirname(stagingPath), { recursive: true });
+    await Deno.writeTextFile(stagingPath, fileContents);
+  } catch (errorStaging) {
+    return new ErrOut(
+      [ccolors.error("failed to stage file at"), ccolors.key_name(stagingPath)],
+      {
+        cause: errorStaging as Error,
+        code: 508,
+        label,
+        id: "!stageFile",
+      },
+    );
   }
 }
 
 async function stageDirectory(
   relativePathOut: string,
   relativePathIn: string,
-): Promise<{ success: true } | Error> {
+): Promise<ErrOut | void> {
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) return err;
+
   try {
-    const outputPath = path.join(await getStagingDir(), relativePathOut);
     const inputPath = path.join(Deno.cwd(), relativePathIn);
-    await copyDir(inputPath, outputPath);
-  } catch (error) {
-    return error;
+    const outputPath = path.join(stagingDirectory, relativePathOut);
+    await copy(inputPath, outputPath); // fail if the output directory already exists
+  } catch (errorStaging) {
+    return new ErrOut([ccolors.error("failed to stage directory")], {
+      cause: errorStaging as Error,
+      code: 509,
+      label,
+      id: "!stageDirectory",
+    });
   }
-  return { success: true };
 }
 
 async function checkDirectoryForFileSuffix(directory: string, suffix: string) {
@@ -415,32 +428,38 @@ type CDKTFAppConfig = {
   outdir: string;
 };
 
-async function getCDKTFAppConfig(): Promise<CDKTFAppConfig> {
-  const stagingDirectory = getStagingDir();
+async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
+  const [err, stagingDirectory] = getStagingDirectory();
+  if (err) return [err];
+
   const outdir = path.join(stagingDirectory, "cndi", "terraform");
-  await Deno.mkdir(path.dirname(outdir), { recursive: true });
-  return {
-    outdir,
-  };
-}
-
-function getStagingDir(): string {
-  const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
-  if (!stagingDirectory) {
-    throw new Error(
-      [
-        utilsLabel,
-        `${ccolors.key_name(`"CNDI_STAGING_DIRECTORY"`)}`,
-        ccolors.error(`is not set!`),
-      ].join(" "),
-      { cause: 202 },
-    );
+  try {
+    await Deno.mkdir(outdir, { recursive: true });
+  } catch (errorCreatingDirectory) {
+    return [
+      new ErrOut(
+        [
+          ccolors.error("failed to create staging directory for terraform at"),
+          ccolors.key_name(outdir),
+        ],
+        {
+          cause: errorCreatingDirectory as Error,
+          code: 510,
+          label,
+          id: "!getCDKTFAppConfig",
+        },
+      ),
+    ];
   }
-  return stagingDirectory;
+  return [undefined, { outdir }];
 }
 
-async function persistStagedFiles(targetDirectory: string) {
-  const stagingDirectory = getStagingDir();
+async function persistStagedFiles(
+  targetDirectory: string,
+): Promise<ErrOut | void> {
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) return err;
 
   for await (const entry of walk(stagingDirectory)) {
     if (entry.isFile) {
@@ -481,10 +500,7 @@ function checkForRequiredMissingCreateRepoValues(
 ): string[] {
   const git_credentials_mode = responses?.git_credentials_mode || "token";
 
-  const requiredKeys = [
-    "git_username",
-    "git_repo",
-  ];
+  const requiredKeys = ["git_username", "git_repo"];
 
   if (git_credentials_mode === "token") {
     requiredKeys.push("git_token");
@@ -496,7 +512,7 @@ function checkForRequiredMissingCreateRepoValues(
 
   for (const key of requiredKeys) {
     const envVarName = key.toUpperCase();
-    const missingValue = !responses[key] && !Deno.env.get(envVarName) ||
+    const missingValue = (!responses[key] && !Deno.env.get(envVarName)) ||
       Deno.env.get(envVarName) === `__${envVarName}_PLACEHOLDER__`;
 
     if (missingValue) {
@@ -609,14 +625,6 @@ const getErrorDiscussionLinkMessageForCode = (code: number): string => {
     : "";
 };
 
-async function emitExitEvent(exit_code: number) {
-  const event_uuid = await emitTelemetryEvent("command_exit", { exit_code });
-  const isDebug = Deno.env.get("CNDI_TELEMETRY") === "debug";
-  if (exit_code) console.error(getErrorDiscussionLinkMessageForCode(exit_code));
-  if (isDebug) console.log("\nevent_uuid", event_uuid);
-  console.log();
-}
-
 function absolutifyPath(p: string): string {
   if (path.isAbsolute(p)) {
     return p;
@@ -655,18 +663,16 @@ export {
   checkForRequiredMissingCreateRepoValues,
   checkInitialized,
   checkInstalled,
-  copyDir,
   emitExitEvent,
   getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
   getPathToCndiBinary,
-  getPathToCndiConfig,
   getPathToKubesealBinary,
   getPathToTerraformBinary,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
-  getStagingDir,
+  getStagingDirectory,
   getTaintEffectForDistribution,
   getTFData,
   getTFModule,
@@ -676,7 +682,6 @@ export {
   isSlug,
   loadCndiConfig,
   loadJSONC,
-  loadYAML,
   patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,

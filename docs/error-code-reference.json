@@ -190,6 +190,21 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/549"
   },
   {
+    "code": 703,
+    "message": "Failed to Seal Secret using the kubeseal CLI",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1010"
+  },
+  {
+    "code": 704,
+    "message": "Failed to make temporary file for unsealed secret",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
+  },
+  {
+    "code": 705,
+    "message": "Failed to write to temporary file for unsealed secret",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
+  },
+  {
     "code": 800,
     "message": "failed to stage all aws terraform objects during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/551"
