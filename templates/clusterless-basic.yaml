@@ -34,9 +34,9 @@ outputs:
 
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/clusterless/env.yaml):
       {}
-    $cndi.comment(configure_greeter): 'Change who you are greeting:'
+    $cndi.comment(configure_greeter): "Change who you are greeting:"
     TF_VAR_visitor: "{{ $cndi.get_prompt_response(visitor) }}"
-    
+
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
     $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/clusterless/core-readme.md):

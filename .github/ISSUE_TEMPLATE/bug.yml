@@ -11,7 +11,7 @@ body:
       value: |
         Thanks for helping to improve our CNDI!
         If you are looking to report a bug in CNDI, you're in the right spot!
-        
+
   - type: textarea
     id: what-happened
     attributes:

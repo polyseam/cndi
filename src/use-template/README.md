@@ -54,11 +54,11 @@ prompts:
     default: "airflow.example.com"
     type: "Input"
     validators:
-        - hostname
+      - hostname
     condition:
-        - '{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}'
-        - ==
-        - true
+      - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
+      - ==
+      - true
 ```
 
 ## macros
@@ -124,8 +124,8 @@ be the comment you want to insert.
 outputs:
   env:
     # this comment is for template maintainers
-    $cndi.comment(title): 'This line will show up in the .env file for template consumers'
-    NOTEWORTHY: '{{ $cndi.get_prompt_response(title) }}'
+    $cndi.comment(title): "This line will show up in the .env file for template consumers"
+    NOTEWORTHY: "{{ $cndi.get_prompt_response(title) }}"
 ```
 
 ### `{{ $cndi.get_random_string(<length>) }}`
@@ -137,6 +137,6 @@ for generating default passwords or other secrets.
 prompts:
   - name: db_password
     message: "What password should be used for the database?"
-    default: '{{ $cndi.get_random_string(16) }}'
+    default: "{{ $cndi.get_random_string(16) }}"
     type: "Password"
 ```

@@ -1,7 +1,7 @@
 import { ccolors, Command, path } from "deps";
 
-import pullStateForRun from "src/tfstate/git/read-state.ts";
-import pushStateFromRun from "src/tfstate/git/write-state.ts";
+import { pullStateForTerraform } from "src/tfstate/git/read-state.ts";
+import { pushStateFromTerraform } from "src/tfstate/git/write-state.ts";
 
 import setTF_VARs from "src/setTF_VARs.ts";
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
@@ -71,20 +71,20 @@ const runCommand = new Command()
 
     const pathToTerraformBinary = getPathToTerraformBinary();
 
-    try {
-      await setTF_VARs(options.path); // set TF_VARs using CNDI's .env variables
-    } catch (setTF_VARsError) {
-      console.error(setTF_VARsError.message);
-      await emitExitEvent(setTF_VARsError.cause);
-      Deno.exit(setTF_VARsError.cause);
+    const setTF_VARsError = await setTF_VARs(options.path);
+
+    if (setTF_VARsError) {
+      await setTF_VARsError.out();
     }
 
-    try {
-      await pullStateForRun({ pathToTerraformResources, cmd });
-    } catch (pullStateForRunError) {
-      console.error(pullStateForRunError.message);
-      await emitExitEvent(pullStateForRunError.cause);
-      Deno.exit(pullStateForRunError.cause);
+    const pullStateError = await pullStateForTerraform({
+      pathToTerraformResources,
+      cmd,
+    });
+
+    if (pullStateError) {
+      await pullStateError.out();
+      return;
     }
 
     try {
@@ -114,7 +114,7 @@ const runCommand = new Command()
         runLabel,
         ccolors.error("failed to spawn 'terraform init'"),
       );
-      console.error(ccolors.caught(err));
+      console.error(ccolors.caught(err as Error));
       await emitExitEvent(1402);
       Deno.exit(1402);
     }
@@ -144,12 +144,14 @@ const runCommand = new Command()
 
       const status = await terraformApplyChildProcess.status;
 
-      try {
-        await pushStateFromRun({ pathToTerraformResources, cmd });
-      } catch (pushStateFromRunError) {
-        console.error(pushStateFromRunError.message);
-        await emitExitEvent(pushStateFromRunError.cause);
-        Deno.exit(pushStateFromRunError.cause);
+      const pushStateError = await pushStateFromTerraform({
+        pathToTerraformResources,
+        cmd,
+      });
+
+      if (pushStateError) {
+        await pushStateError.out();
+        return;
       }
 
       // if `terraform apply` fails, exit with the code
@@ -165,7 +167,7 @@ const runCommand = new Command()
         runLabel,
         ccolors.error("failed to spawn 'terraform apply'"),
       );
-      console.error(ccolors.caught(err));
+      console.error(ccolors.caught(err as Error));
       await emitExitEvent(1403);
       Deno.exit(1403);
     }

@@ -64,7 +64,7 @@ project_name: my-postgres-project
 cndi_version: v2
 provider: aws
 distribution: eks
-infrastructure: {...}
+infrastructure: { ... }
 applications:
   cnpg:
     targetRevision: 0.18.0
@@ -100,9 +100,9 @@ project_name: my-postgres-project
 cndi_version: v2
 provider: aws
 distribution: eks
-infrastructure: {...}
-applications: {...}
-cluster_manifests: 
+infrastructure: { ... }
+applications: { ... }
+cluster_manifests:
   # keys are arbitrary and used as file names
   # eg. ./cndi/cluster_manifests/pg-namespace.yaml
   pg-namespace: # a simple Kubernetes manifest which enables the grouping of resources
@@ -111,7 +111,7 @@ cluster_manifests:
     metadata:
       name: cnpg
 
-  pg-cluster: 
+  pg-cluster:
     apiVersion: postgresql.cnpg.io/v1
     kind: "Cluster" # the kind of custom resource that the cloudnative-pg operator will watch for
     metadata:
@@ -120,8 +120,8 @@ cluster_manifests:
     spec:
       replicas: 1
       storageSize: 10Gi
-  
-  cnpg-cluster-superuser-auth-secret: 
+
+  cnpg-cluster-superuser-auth-secret:
     # a Kubernetes Secret resource, which will hold PostgreSQL superuser credentials
     apiVersion: v1
     kind: Secret

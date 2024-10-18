@@ -14,7 +14,6 @@ import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 import type {
   CNDITemplatePromptResponsePrimitive,
   PromptType,
-  Result,
 } from "./types.ts";
 
 import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "consts";
@@ -26,11 +25,15 @@ import {
   unwrapQuotes,
 } from "./util/strings.ts";
 
+import { PxResult } from "src/utils.ts";
+
 import { unsetValueForKeyPath } from "deps";
+
+import { ErrOut } from "errout";
 
 type BuiltInValidator = keyof typeof BuiltInValidators;
 
-const templatesLabel = ccolors.faded("\n@cndi/use-template:");
+const label = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
 
@@ -157,13 +160,22 @@ const $cndi = {
 
 function getCoarselyValidatedTemplateBody(
   templateBodyString: string,
-): Result<TemplateObject> {
+): PxResult<TemplateObject> {
   if (templateBodyString.indexOf("\n---\n") > -1) {
-    return {
-      error: new Error(
-        "Template body contains multiple YAML documents in a single file.\nUnsupported!",
-      ),
-    };
+    // TODOO: this seems to general
+    // what if the --- is in a string?
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error(
+          "Template body contains multiple YAML documents in a single file.",
+        ),
+      ], {
+        label,
+        id: "isYAMLMultiDoc(getCoarselyValidatedTemplateBody())",
+        code: 1207,
+      }),
+    ];
   }
 
   const templateBody = YAML.parse(templateBodyString) as {
@@ -173,31 +185,78 @@ function getCoarselyValidatedTemplateBody(
   };
 
   if (typeof templateBody !== "object") {
-    return { error: new Error("Template body is not an object") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error("Template body is not an object"),
+      ], {
+        label,
+        id: 'typeof(templateBody) !== "object"',
+        code: 1208,
+      }),
+    ];
   }
 
   if (templateBody == null) {
-    return { error: new Error("Template body is null") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error("Template body is null"),
+      ], {
+        label,
+        id: "templateBody==null",
+        code: 1209,
+      }),
+    ];
   }
 
   if (templateBody?.prompts && !Array.isArray(templateBody.prompts)) {
-    return { error: new Error("Template body's prompts is not an array") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.key_name("outputs.prompts"),
+        ccolors.error("is defined and is not an array"),
+      ], {
+        label,
+        id: "templateBody?.prompts && !Array.isArray(templateBody.prompts)",
+        code: 1210,
+      }),
+    ];
   }
 
   if (templateBody?.blocks && !Array.isArray(templateBody.blocks)) {
-    return { error: new Error("Template body's blocks is not an array") };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.key_name("outputs.blocks"),
+        ccolors.error("is defined and is not an array"),
+      ], {
+        label,
+        id: "templateBody?.blocks && !Array.isArray(templateBody.blocks)",
+        code: 1210,
+      }),
+    ];
   }
 
   if (!templateBody?.outputs) {
-    return { error: new Error(`Template body's "outputs" is not truthy`) };
+    return [
+      new ErrOut([
+        ccolors.error("template error:"),
+        ccolors.error('Template body is missing "outputs"'),
+      ], {
+        label,
+        id: "templateBody?.outputs",
+        code: 1211,
+      }),
+    ];
   }
 
-  return { value: templateBody as TemplateObject };
+  return [undefined, templateBody as TemplateObject];
 }
 
 async function getBlockForIdentifier(
   blockIdentifier: string,
-): Promise<Result<string>> {
+): Promise<PxResult<string>> {
   let blockBodyString = ""; // the cndi_template.yaml file contents \as a string
   // Supported Identifier String Types:
   // - URL
@@ -211,45 +270,48 @@ async function getBlockForIdentifier(
   } catch {
     if (blockIdentifier.includes("/")) {
       try {
-        const absPath = makeAbsolutePath(blockIdentifier);
-        if (absPath.error) return { error: absPath.error };
-        blockIdentifierURL = new URL("file://" + absPath.value);
+        const [err, absPath] = makeAbsolutePath(blockIdentifier);
+        if (err) return [err];
+
+        blockIdentifierURL = new URL("file://" + absPath);
       } catch {
-        return {
-          error: new Error(
+        return [
+          new ErrOut(
             [
-              templatesLabel,
-              "template error:\n",
               ccolors.error("Failed to convert the block filepath to a URL"),
               ccolors.user_input(`"${blockIdentifier}"\n`),
-            ].join(" "),
+            ],
             {
-              cause: 1200,
+              code: 1200,
+              label,
+              id: "getBlockForIdentifier/!newURL(identifier)",
             },
           ),
-        };
+        ];
       }
     } else {
       // Bare Name
       const blockContent = $cndi.blocks.get(blockIdentifier);
       if (!blockContent) {
         if (blockContent === null) {
-          return { value: YAML.stringify(null) };
+          return [undefined, YAML.stringify(null)];
         }
-        return {
-          error: new Error(
+
+        return [
+          new ErrOut(
             [
-              templatesLabel,
               ccolors.error("Failed to find CNDI Template Block with name:"),
               ccolors.user_input(`"${blockIdentifier}"\n`),
-            ].join(" "),
+            ],
             {
-              cause: 1208,
+              code: 1208,
+              label,
+              id: "getBlockForIdentifier/!getBlockByName",
             },
           ),
-        };
+        ];
       } else {
-        return { value: YAML.stringify(blockContent) as string };
+        return [undefined, YAML.stringify(blockContent)];
       }
     }
   }
@@ -258,38 +320,40 @@ async function getBlockForIdentifier(
   try {
     blockBodyResponse = await fetch(blockIdentifierURL);
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
           ccolors.error(
             "Failed to fetch CNDI Template Block using URL identifier:",
           ),
           ccolors.user_input(`"${blockIdentifier}"\n`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getBlockForIdentifier/!fetch(blockIdentifierURL)",
         },
       ),
-    };
+    ];
   }
 
   if (!blockBodyResponse.ok) {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
           ccolors.error(
             "Failed to fetch CNDI Template Block using URL identifier:",
           ),
           ccolors.user_input(`"${blockIdentifier}"\n`),
           ccolors.error(`HTTP Status: ${blockBodyResponse.status}`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getBlockForIdentifier/!blockBodyResponse.ok",
         },
       ),
-    };
+    ];
   }
 
   blockBodyString = await blockBodyResponse.text();
@@ -297,26 +361,26 @@ async function getBlockForIdentifier(
   try {
     YAML.parse(blockBodyString);
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
           ccolors.error("Failed to parse the CNDI Template Block body as YAML"),
           ccolors.user_input(`"${blockIdentifier}"\n`),
-        ].join(" "),
+        ],
         {
-          cause: 1202,
+          code: 1202,
+          label,
+          id: "getBlockForIdentifier/!YAML.parse(blockBodyString)",
         },
       ),
-    };
+    ];
   }
-
-  return { value: blockBodyString };
+  return [undefined, blockBodyString];
 }
 
 async function getTemplateBodyStringForIdentifier(
   templateIdentifier: string,
-): Promise<Result<string>> {
+): Promise<PxResult<string>> {
   let templateBodyString = ""; // the cndi_template.yaml file contents \as a string
 
   // Supported Identifier String Types:
@@ -332,22 +396,24 @@ async function getTemplateBodyStringForIdentifier(
   } catch {
     if (templateIdentifier.includes("/")) {
       try {
-        const absPath = makeAbsolutePath(templateIdentifier);
-        if (absPath.error) return { error: absPath.error };
-        templateIdentifierURL = new URL("file://" + absPath.value);
+        const [err, absPath] = makeAbsolutePath(templateIdentifier);
+        if (err) return [err];
+        templateIdentifierURL = new URL("file://" + absPath);
       } catch {
-        return {
-          error: new Error(
+        return [
+          new ErrOut(
             [
-              templatesLabel,
               ccolors.error("Failed to convert the template filepath to a URL"),
               ccolors.user_input(`"${templateIdentifier}"\n`),
-            ].join(" "),
+            ],
             {
-              cause: 1200,
+              code: 1200,
+              label,
+              id:
+                "getTemplateBodyStringForIdentifier/!newURL(templateIdentifier)",
             },
           ),
-        };
+        ];
       }
     } else {
       // Bare Name
@@ -361,34 +427,37 @@ async function getTemplateBodyStringForIdentifier(
   try {
     templateBodyResponse = await fetch(templateIdentifierURL);
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
           ccolors.error("Failed to fetch CNDI Template using URL identifier:"),
           ccolors.user_input(`"${templateIdentifier}"\n`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id:
+            "getTemplateBodyStringForIdentifier/!fetch(templateIdentifierURL)",
         },
       ),
-    };
+    ];
   }
 
   if (!templateBodyResponse.ok) {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
           ccolors.error("Failed to fetch CNDI Template using URL identifier:"),
           ccolors.user_input(`"${templateIdentifier}"\n`),
           ccolors.error(`HTTP Status: ${templateBodyResponse.status}`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getTemplateBodyStringForIdentifier/!templateBodyResponse.ok",
         },
       ),
-    };
+    ];
   }
 
   templateBodyString = await templateBodyResponse.text();
@@ -396,21 +465,22 @@ async function getTemplateBodyStringForIdentifier(
   try {
     YAML.parse(templateBodyString);
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
-          ccolors.error("Failed to parse the template body as YAML"),
+          ccolors.error("Failed to parse the CNDI Template body as YAML"),
           ccolors.user_input(`"${templateIdentifier}"\n`),
-        ].join(" "),
+        ],
         {
-          cause: 1202,
+          code: 1202,
+          label,
+          id:
+            "getTemplateBodyStringForIdentifier/!YAML.parse(templateBodyString)",
         },
       ),
-    };
+    ];
   }
-
-  return { value: templateBodyString };
+  return [undefined, templateBodyString];
 }
 
 function resolveCNDIPromptCondition(
@@ -537,14 +607,14 @@ async function presentCliffyPrompt(
           }
 
           if (providedPath && typeof providedPath === "string") {
-            const absPath = makeAbsolutePath(providedPath);
-            if (absPath.error) {
-              console.log(ccolors.error(absPath.error.message));
+            const [err, absPath] = makeAbsolutePath(providedPath);
+            if (err) {
+              console.log(ccolors.error(err.message));
               await next(promptDefinition.name);
               return;
             } else {
               try {
-                const data = Deno.readTextFileSync(absPath.value!);
+                const data = Deno.readTextFileSync(absPath);
                 if (data.length) {
                   value = data;
                 } else {
@@ -552,8 +622,11 @@ async function presentCliffyPrompt(
                   await next(promptDefinition.name);
                   return;
                 }
-              } catch (errReadingFile) {
-                console.log(ccolors.warn(errReadingFile.message));
+              } catch (caught) {
+                const errReadingFile = caught as Error;
+                const msg = errReadingFile?.message ||
+                  "Failed to read file at path";
+                console.log(ccolors.warn(msg));
                 await next(promptDefinition.name);
                 return;
               }
@@ -582,9 +655,10 @@ async function presentCliffyPrompt(
                 BuiltInValidators[validatorName as BuiltInValidator];
 
               if (typeof validate != "function") {
+                // TODO: find alternative to throwing error
                 throw new Error(
                   [
-                    templatesLabel,
+                    label,
                     ccolors.error("template error:\n"),
                     ccolors.error("validator"),
                     ccolors.user_input(validatorName),
@@ -629,7 +703,7 @@ async function presentCliffyPrompt(
 async function fetchPromptBlockForImportStatement(
   importStatement: string,
   body: GetBlockBody,
-) {
+): Promise<PxResult<Array<CNDITemplateStaticPromptEntry>>> {
   const literalizedImportStatement = literalizeGetPromptResponseCalls(
     removeWhitespaceBetweenBraces(importStatement),
   );
@@ -643,19 +717,17 @@ async function fetchPromptBlockForImportStatement(
 
   if (body?.condition) {
     if (!resolveCNDIPromptCondition(body.condition)) {
-      return { value: null, condition: body.condition };
+      return [undefined, []];
     }
   }
 
-  const promptBlockResponse = await getBlockForIdentifier(identifier);
-
-  if (promptBlockResponse.error) {
-    return { error: promptBlockResponse.error };
-  }
-
-  let importedPromptsText = removeWhitespaceBetweenBraces(
-    promptBlockResponse.value,
+  const [errGettingBlock, promptBlockResponse] = await getBlockForIdentifier(
+    identifier,
   );
+
+  if (errGettingBlock) return [errGettingBlock];
+
+  let importedPromptsText = removeWhitespaceBetweenBraces(promptBlockResponse);
 
   importedPromptsText = processBlockBodyArgs(importedPromptsText, body?.args);
 
@@ -664,9 +736,19 @@ async function fetchPromptBlockForImportStatement(
   const importedPromptsArray = YAML.parse(importedPromptsText);
 
   if (Array.isArray(importedPromptsArray)) {
-    return { value: importedPromptsArray };
+    return [undefined, importedPromptsArray];
   } else {
-    return { error: new Error("prompt block imports must return YAML Arrays") };
+    return [
+      new ErrOut(
+        [ccolors.error("Prompt block imports must return YAML Arrays")],
+        {
+          label,
+          code: 1299,
+          id:
+            "fetchPromptBlockForImportStatement/!Array.isArray(importedPromptsArray)",
+        },
+      ),
+    ];
   }
 }
 
@@ -745,7 +827,7 @@ function findPathToKey(
 
 async function processCNDIConfigOutput(
   cndi_config: object,
-): Promise<Result<string>> {
+): Promise<PxResult<string>> {
   let cndiConfigObj = cndi_config; // object is mutated
 
   let output = removeWhitespaceBetweenBraces(YAML.stringify(cndiConfigObj));
@@ -787,7 +869,19 @@ async function processCNDIConfigOutput(
       pathToKey = findPathToKey(key, cndiConfigObj);
       body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
       if (!body) {
-        return { error: new Error(`No value found for key: ${key}`) };
+        return [
+          new ErrOut(
+            [
+              ccolors.error("Failed to find block with key:"),
+              ccolors.user_input(key),
+            ],
+            {
+              label,
+              code: 1204,
+              id: "processCNDIConfigOutput/!body",
+            },
+          ),
+        ];
       }
     }
 
@@ -799,21 +893,22 @@ async function processCNDIConfigOutput(
       }
     }
 
-    if (shouldOutput) { // only try to load in a block if the condition is met
+    if (shouldOutput) {
+      // only try to load in a block if the condition is met
       const statement = output.slice(indexOpen, indexClose + 1);
       const identifier = statement.slice(statement.indexOf("(") + 1, -1);
-      const obj = await getBlockForIdentifier(identifier);
+      let [errGettingBlock, blockString] = await getBlockForIdentifier(
+        identifier,
+      );
 
-      if (obj.error) {
-        return { error: obj.error };
-      }
+      if (errGettingBlock) return [errGettingBlock];
 
-      obj.value = literalizeGetPromptResponseCalls(
-        removeWhitespaceBetweenBraces(unwrapQuotes(obj.value)),
+      blockString = literalizeGetPromptResponseCalls(
+        removeWhitespaceBetweenBraces(unwrapQuotes(blockString!)),
       );
 
       // get_arg evals
-      obj.value = processBlockBodyArgs(obj.value, body?.args);
+      blockString = processBlockBodyArgs(blockString, body?.args);
 
       const targetPath = pathToKey.slice(0, -1);
 
@@ -827,7 +922,7 @@ async function processCNDIConfigOutput(
       delete host[call];
 
       // the value of the block is parsed
-      const parsedVal = YAML.parse(obj.value) as Record<string, unknown>;
+      const parsedVal = YAML.parse(blockString) as Record<string, unknown>;
 
       // the ultimate block including the host object, the block object, and the original call removed
       let resolvedBlock: Record<string, unknown> | Array<unknown>;
@@ -848,9 +943,9 @@ async function processCNDIConfigOutput(
         resolvedBlock,
       );
     } else {
-      const numChilden =
-        Object.keys(getValueFromKeyPath(cndiConfigObj, pathToKey.slice(0, -1)))
-          .length;
+      const numChilden = Object.keys(
+        getValueFromKeyPath(cndiConfigObj, pathToKey.slice(0, -1)),
+      ).length;
       if (numChilden === 1) {
         unsetValueForKeyPath(cndiConfigObj, pathToKey.slice(0, -1));
       } else {
@@ -869,12 +964,12 @@ async function processCNDIConfigOutput(
   output = processCNDICommentCalls(output);
   output = fixUndefinedDistributionIfRequired(output);
 
-  return { value: output };
+  return [undefined, output];
 }
 
 async function getStringForIdentifier(
   identifier: string,
-): Promise<Result<string>> {
+): Promise<PxResult<string>> {
   // Supported Identifier String Types:
   // - URL
   // - File Path
@@ -886,25 +981,24 @@ async function getStringForIdentifier(
   } catch {
     if (identifier.includes("/")) {
       try {
-        const absPath = makeAbsolutePath(identifier);
-        if (absPath.error) return { error: absPath.error };
-        identifierURL = new URL("file://" + absPath.value);
+        const [err, absPath] = makeAbsolutePath(identifier);
+        if (err) return [err];
+
+        identifierURL = new URL("file://" + absPath);
       } catch {
-        return {
-          error: new Error(
+        return [
+          new ErrOut(
             [
-              templatesLabel,
-              "template error:\n",
-              ccolors.error("Failed to process $cndi.get_string(") +
-              ccolors.user_input(identifier) +
-              ccolors.error(")\n"),
-              ccolors.error("Unable to convert the string filepath to a URL"),
-            ].join(" "),
+              ccolors.error("Failed to convert the string filepath to a URL"),
+              ccolors.user_input(`"${identifier}"\n`),
+            ],
             {
-              cause: 1200,
+              code: 1200,
+              label,
+              id: "getStringForIdentifier/!newURL(identifier)",
             },
           ),
-        };
+        ];
       }
     }
   }
@@ -913,64 +1007,67 @@ async function getStringForIdentifier(
   try {
     stringResponse = await fetch(identifierURL!);
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
-          ccolors.error("Failed to process $cndi.get_string(") +
-          ccolors.user_input(identifier) +
-          ccolors.error(")\n"),
-          ccolors.error("Failed to fetch string using URL identifier"),
-        ].join(" "),
+          ccolors.error("Failed to fetch string using URL identifier:"),
+          ccolors.user_input(`"${identifier}"\n`),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getStringForIdentifier/!fetch(identifierURL)",
         },
       ),
-    };
+    ];
   }
 
   if (!stringResponse.ok) {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
-          ccolors.error("Failed to process $cndi.get_string(") +
-          ccolors.user_input(identifier) +
-          ccolors.error(")\n"),
-          ccolors.error("Failed to fetch string using URL identifier"),
+          ccolors.error("Failed to fetch string using URL identifier:"),
+          ccolors.user_input(`"${identifier}"\n`),
           ccolors.error(`HTTP Status: ${stringResponse.status}`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getStringForIdentifier/!stringResponse.ok",
         },
       ),
-    };
+    ];
   }
 
   try {
     const str = await stringResponse.text();
-    return { value: str };
+    return [undefined, str];
   } catch {
-    return {
-      error: new Error(
+    return [
+      new ErrOut(
         [
-          templatesLabel,
-          ccolors.error("Failed to fetch string for $cndi.get_string(") +
-          ccolors.user_input(identifier) +
-          ccolors.error(")\n"),
+          ccolors.error(
+            `Failed to fetch string for $cndi.get_string(${
+              ccolors.user_input(
+                identifier,
+              )
+            })\n`,
+          ),
           ccolors.error(`HTTP Status: ${stringResponse.status}`),
-        ].join(" "),
+        ],
         {
-          cause: 1201,
+          code: 1201,
+          label,
+          id: "getStringForIdentifier/!stringResponse.text",
         },
       ),
-    };
+    ];
   }
 }
 
 async function processCNDIReadmeOutput(
   readmeSpecRaw: Record<string, unknown> = {},
-): Promise<Result<string>> {
+): Promise<PxResult<string>> {
   const readmeSpecStr = literalizeGetPromptResponseCalls(
     removeWhitespaceBetweenBraces(YAML.stringify(readmeSpecRaw)),
   );
@@ -982,16 +1079,29 @@ async function processCNDIReadmeOutput(
     if (key.startsWith("$cndi.get_block")) {
       console.log("template error:");
       console.log("outputs.readme cannot contain block imports");
-      return {
-        error: new Error("readme cannot contain block imports"),
-      };
+      return [
+        new ErrOut(
+          [
+            ccolors.error("template error:"),
+            ccolors.key_name("outputs.readme"),
+            ccolors.error("cannot contain block imports"),
+          ],
+          {
+            code: 1204,
+            label,
+            id: "processCNDIReadmeOutput/!key.startsWith($cndi.get_block)",
+          },
+        ),
+      ];
     } else if (key.startsWith("$cndi.get_string")) {
       const identifier = key.split("$cndi.get_string(")[1].split(")")[0];
-      const strResult = await getStringForIdentifier(identifier);
-      if (strResult.error) {
-        readmeLines.push(`<!-- ${strResult.error.message} -->`);
+      const [errGettingStr, strResult] = await getStringForIdentifier(
+        identifier,
+      );
+      if (errGettingStr) {
+        readmeLines.push(`<!-- ${errGettingStr.message} -->`);
       } else {
-        readmeLines.push(`${strResult.value}`);
+        readmeLines.push(`${strResult}`);
       }
     } else if (key.startsWith("$cndi.comment")) {
       readmeLines.push(`<!-- ${readmeSpec[key]} -->`);
@@ -999,10 +1109,12 @@ async function processCNDIReadmeOutput(
       readmeLines.push(`${readmeSpec[key]}`);
     }
   }
-  return { value: readmeLines.join("\n\n") };
+  return [undefined, readmeLines.join("\n\n")];
 }
 
-async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
+async function processCNDIEnvOutput(
+  envSpecRaw: Record<string, unknown>,
+): Promise<PxResult<string>> {
   const envStr = YAML.stringify(envSpecRaw);
   const envSpec = YAML.parse(
     literalizeGetPromptResponseCalls(envStr),
@@ -1020,32 +1132,41 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       }
 
       const identifier = key.split("$cndi.get_block(")[1].split(")")[0];
-      const obj = await getBlockForIdentifier(identifier);
-      if (obj.error) {
-        return { error: obj.error };
-      }
+      const [errorGettingBlock, blockStr] = await getBlockForIdentifier(
+        identifier,
+      );
+
+      if (errorGettingBlock) return [errorGettingBlock];
 
       // calling literalize on the block as a string results in weird multiline strings in .env
       // so we call the literalize function on each value in the block instead
       // and wrap the result in quotes
 
       try {
-        const block = YAML.parse(obj.value) as Record<string, unknown>;
+        const block = YAML.parse(blockStr) as Record<string, unknown>;
         for (const blockKey in block) {
           envSpec[blockKey] = `'${
-            literalizeGetPromptResponseCalls(`${block[blockKey]}`)
+            literalizeGetPromptResponseCalls(
+              `${block[blockKey]}`,
+            )
           }'`;
         }
-      } catch (error) {
-        return {
-          error: new Error([
-            templatesLabel,
-            "template error:\n",
-            `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
-            ccolors.caught(error),
-          ].join(" ")),
-          cause: 1204,
-        };
+      } catch (_parseError) {
+        return [
+          new ErrOut(
+            [
+              ccolors.error("template error:\n"),
+              ccolors.error(
+                `template error: every '$cndi.get_block(${identifier})' call in outputs.env must return a flat YAML string`,
+              ),
+            ],
+            {
+              code: 1204,
+              label,
+              id: "processCNDIEnvOutput/!isFlatYAML(blockStr)",
+            },
+          ),
+        ];
       }
     }
   }
@@ -1064,45 +1185,64 @@ async function processCNDIEnvOutput(envSpecRaw: Record<string, unknown>) {
       envLines.push(`${key}=${val}`);
     }
   }
-  return { value: envLines.join("\n") };
+  return [undefined, envLines.join("\n")];
 }
+
+type ExtraFiles = Record<string, string>;
 
 async function processCNDIExtraFilesOutput(
   extraFilesSpec: Record<string, string>,
-) {
+): Promise<PxResult<ExtraFiles>> {
   const extra_files: Record<string, string> = {};
   for (let key in extraFilesSpec) {
     if (!key.startsWith("./")) {
-      return {
-        error: new Error(`extra_files keys must start with './', got: ${key}`),
-      };
-    }
-
-    const sanitizedKeyResult = sanitizeFilePath(key);
-
-    if (sanitizedKeyResult?.error) {
-      return {
-        error: new Error(
-          `extra_files key must be contained within your project directory: ${key}`,
+      return [
+        new ErrOut(
+          [
+            ccolors.error(
+              `extra_files keys must start with './', got: ${key}`,
+            ),
+          ],
+          {
+            label,
+            code: 1205,
+            id: "processCNDIExtraFilesOutput/!key.startsWith(./)",
+          },
         ),
-      };
+      ];
     }
+
+    const [errorSantizing, sanitizedKey] = sanitizeFilePath(key);
+
+    if (errorSantizing) return [errorSantizing];
+
     const content = `${extraFilesSpec[key]}`;
-    key = sanitizedKeyResult.value;
+    key = sanitizedKey;
     if (URL.canParse(content)) {
       const response = await fetch(content);
       if (response.ok) {
         extra_files[key] = await response.text();
       } else {
-        return {
-          error: new Error(`Failed to fetch extra_files content for ${key}`),
-        };
+        return [
+          new ErrOut(
+            [
+              ccolors.error(
+                `Failed to fetch extra_files content for ${key}`,
+              ),
+            ],
+            {
+              label,
+              code: 1206,
+              id: "processCNDIExtraFilesOutput/!response.ok",
+            },
+          ),
+        ];
       }
     } else {
       extra_files[key] = content;
     }
   }
-  return { value: extra_files };
+  return [undefined, extra_files];
 }
 
 /**
@@ -1115,34 +1255,38 @@ async function processCNDIExtraFilesOutput(
 export async function useTemplate(
   templateIdentifier: string,
   options: UseTemplateOptions,
-): Promise<UseTemplateResult> {
+): Promise<PxResult<UseTemplateResult>> {
   const { overrides } = options;
 
   if (options.mode === "webui") {
-    throw new Error("webui mode not yet supported");
+    return [
+      new ErrOut([ccolors.error("webui mode not yet supported")], {
+        label,
+        code: 1299,
+        id: "useTemplate/options.mode===webui",
+      }),
+    ];
   }
 
   for (const property in overrides) {
     $cndi.responses.set(property, overrides[property]);
   }
 
-  const templateBodyStringResult = await getTemplateBodyStringForIdentifier(
-    templateIdentifier,
-  );
+  const [errorGettingTemplateBodyString, templateBodyString] =
+    await getTemplateBodyStringForIdentifier(
+      templateIdentifier,
+    );
 
-  if (templateBodyStringResult.error) {
-    throw templateBodyStringResult.error;
-  }
+  if (errorGettingTemplateBodyString) return [errorGettingTemplateBodyString];
 
-  const coarselyValidatedTemplateBody = getCoarselyValidatedTemplateBody(
-    templateBodyStringResult.value,
-  );
+  const [templateBodyCoarseValidationErr, coarselyValidatedTemplateBody] =
+    getCoarselyValidatedTemplateBody(
+      templateBodyString,
+    );
 
-  if (coarselyValidatedTemplateBody.error) {
-    throw coarselyValidatedTemplateBody.error;
-  }
+  if (templateBodyCoarseValidationErr) return [templateBodyCoarseValidationErr];
 
-  const staticBlocks = coarselyValidatedTemplateBody.value.blocks;
+  const staticBlocks = coarselyValidatedTemplateBody.blocks;
 
   if (staticBlocks && staticBlocks.length > 0 && Array.isArray(staticBlocks)) {
     for (const block of staticBlocks) {
@@ -1151,7 +1295,7 @@ export async function useTemplate(
   }
 
   // begin asking prompts, including remote imports
-  const prompts = (coarselyValidatedTemplateBody.value?.prompts as Array<
+  const prompts = (coarselyValidatedTemplateBody.prompts as Array<
     CNDITemplatePromptEntry | CNDITemplatePromptBlockImportEntry
   >) || [];
 
@@ -1172,16 +1316,15 @@ export async function useTemplate(
           promptBlockImportStatement,
         );
 
-        const pSpecResult = await fetchPromptBlockForImportStatement(
-          evaluatedImportStatement,
-          importBlockPSpec[promptBlockImportStatement],
-        );
+        const [errorFetchingPrompts, pSpecImported] =
+          await fetchPromptBlockForImportStatement(
+            evaluatedImportStatement,
+            importBlockPSpec[promptBlockImportStatement],
+          );
 
-        if (pSpecResult.error) {
-          throw pSpecResult.error;
-        }
+        if (errorFetchingPrompts) return [errorFetchingPrompts];
 
-        const importedPromptSpecs = pSpecResult?.value || [];
+        const importedPromptSpecs = pSpecImported;
 
         for (const prompt of importedPromptSpecs) {
           // imported prompt may be defined, if so skip
@@ -1191,7 +1334,9 @@ export async function useTemplate(
                 prompt as CNDITemplateStaticPromptEntry,
               );
             } else {
-              $cndi.responses.set(prompt.name, prompt.default);
+              // TODO: unset response when default is missing?
+              // deno-lint-ignore no-explicit-any
+              $cndi.responses.set(prompt.name, prompt.default as any);
             }
           }
         }
@@ -1214,46 +1359,41 @@ export async function useTemplate(
   // begin processing outputs, starting with cndi_config
 
   const cndiConfigYAML = YAML.stringify(
-    coarselyValidatedTemplateBody.value.outputs?.cndi_config || {},
+    coarselyValidatedTemplateBody.outputs?.cndi_config || {},
   );
 
-  const finalCNDIConfigResult = await processCNDIConfigOutput(
-    YAML.parse(cndiConfigYAML) as object,
+  const [errorProcessingCNDIConfigOutput, finalCNDIConfig] =
+    await processCNDIConfigOutput(
+      YAML.parse(cndiConfigYAML) as object,
+    );
+
+  if (errorProcessingCNDIConfigOutput) return [errorProcessingCNDIConfigOutput];
+
+  const [errorProcessingCNDIReadmeOutput, finalReadme] =
+    await processCNDIReadmeOutput(
+      coarselyValidatedTemplateBody.outputs?.readme || {},
+    );
+
+  if (errorProcessingCNDIReadmeOutput) return [errorProcessingCNDIReadmeOutput];
+
+  const [errorProcessingCNDIEnvOutput, finalEnv] = await processCNDIEnvOutput(
+    coarselyValidatedTemplateBody.outputs?.env || {},
   );
 
-  if (finalCNDIConfigResult.error) {
-    throw finalCNDIConfigResult.error;
-  }
+  if (errorProcessingCNDIEnvOutput) return [errorProcessingCNDIEnvOutput];
 
-  const finalReadmeResult = await processCNDIReadmeOutput(
-    coarselyValidatedTemplateBody.value.outputs?.readme || {},
-  );
+  const [errorProcessingExtraFilesOutput, extraFiles] =
+    await processCNDIExtraFilesOutput(
+      coarselyValidatedTemplateBody.outputs?.extra_files || {},
+    );
 
-  if (finalReadmeResult.error) {
-    throw finalReadmeResult.error;
-  }
-
-  const finalEnvResult = await processCNDIEnvOutput(
-    coarselyValidatedTemplateBody.value.outputs?.env || {},
-  );
-
-  if (finalEnvResult.error) {
-    throw finalEnvResult.error;
-  }
-
-  const extraFilesResult = await processCNDIExtraFilesOutput(
-    coarselyValidatedTemplateBody.value.outputs?.extra_files || {},
-  );
-
-  if (extraFilesResult.error) {
-    throw extraFilesResult.error;
-  }
+  if (errorProcessingExtraFilesOutput) return [errorProcessingExtraFilesOutput];
 
   const files = {
-    "cndi_config.yaml": finalCNDIConfigResult.value,
-    "README.md": finalReadmeResult.value,
-    ".env": finalEnvResult.value,
-    ...extraFilesResult.value,
+    "cndi_config.yaml": finalCNDIConfig,
+    "README.md": finalReadme,
+    ".env": finalEnv,
+    ...extraFiles,
   };
 
   // when stringifying responses, skip undefined values
@@ -1267,5 +1407,5 @@ export async function useTemplate(
 
   console.log(); // let it breathe
 
-  return useTemplateResult;
+  return [undefined, useTemplateResult];
 }

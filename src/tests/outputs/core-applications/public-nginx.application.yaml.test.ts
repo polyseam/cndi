@@ -5,8 +5,13 @@ import { YAML } from "deps";
 import getProjectRootDir from "get-project-root";
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
-const { config } = await loadCndiConfig(getProjectRootDir());
+const [err, loadConfigResult] = await loadCndiConfig(getProjectRootDir());
 
+if (err) {
+  throw err;
+}
+
+const { config } = loadConfigResult;
 type ParsedManifest = {
   kind: string;
   spec: { source: { helm: { values: string } } };

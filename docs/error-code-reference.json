@@ -190,6 +190,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/549"
   },
   {
+    "code": 703,
+    "message": "Failed to Seal Secrets using the kubeseal CLI",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1010"
+  },
+  {
     "code": 800,
     "message": "failed to stage all aws terraform objects during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/551"

@@ -48,21 +48,21 @@ ask for their email address.
 
 ```yaml
 prompts:
-- name: enable_cert_manager
-  message: Do you want to enable cert-manager?
-  type: Confirm
-  default: true
+  - name: enable_cert_manager
+    message: Do you want to enable cert-manager?
+    type: Confirm
+    default: true
 
-- name: email
-  message: Please enter your email address
-  type: Input
-  default: jane@example.com
-  validators:
-    - email
-  condition:
-    - "{{ $cndi.get_prompt_response(enable_cert_manager) }}"
-    - ==
-    - true
+  - name: email
+    message: Please enter your email address
+    type: Input
+    default: jane@example.com
+    validators:
+      - email
+    condition:
+      - "{{ $cndi.get_prompt_response(enable_cert_manager) }}"
+      - ==
+      - true
 ```
 
 The result of this `prompts` array would be a prompt asking the user if they
@@ -114,7 +114,7 @@ additional files that are not part of the core CNDI project structure.
 outputs:
   extra_files:
     ./my-file.txt: |
-      This is the 
+      This is the
       multiline content of my file
     ./some-other/file.json: https://example.com/some-other-file.json
 ```
@@ -136,10 +136,10 @@ For an example of `blocks` let's look at how the `airflow` Template uses
 
 ```yaml
 prompts:
-- name: airflow_share_credentials
-  message: Do you want to use your cluster credentials to fetch DAGs?
-  type: Confirm
-  default: false
+  - name: airflow_share_credentials
+    message: Do you want to use your cluster credentials to fetch DAGs?
+    type: Confirm
+    default: false
 
 blocks:
   - name: git_sync_dedicated
@@ -165,19 +165,19 @@ blocks:
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
 outputs:
   cndi_config:
-      cluster_manifests:
-          $cndi.comment(airflow-git-sync-secret): Airflow Credentials
-          git-sync-credentials-secret:
-          $cndi.get_block(git_sync_dedicated):
-              condition:
-              - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-              - ==
-              - false
-          $cndi.get_block(git_sync_shared):
-              condition:
-              - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
-              - ==
-              - true
+    cluster_manifests:
+      $cndi.comment(airflow-git-sync-secret): Airflow Credentials
+      git-sync-credentials-secret:
+      $cndi.get_block(git_sync_dedicated):
+        condition:
+          - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
+          - ==
+          - false
+      $cndi.get_block(git_sync_shared):
+        condition:
+          - "{{ $cndi.get_prompt_response(airflow_share_credentials) }}"
+          - ==
+          - true
 ```
 
 In this example, we have two blocks, `git_sync_dedicated` and `git_sync_shared`,

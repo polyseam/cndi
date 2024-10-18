@@ -1,22 +1,32 @@
-import type { Result } from "../types.ts";
-import { path } from "deps";
+import { PxResult } from "src/utils.ts";
+import { ccolors, path } from "deps";
+import { ErrOut } from "errout";
+
+const label = "@cndi/use-template/util/fs.ts";
+
 // Function to make a user-defined path absolute
-export function makeAbsolutePath(userPath: string): Result<string> {
+export function makeAbsolutePath(userPath: string): PxResult<string> {
   // Check if the path starts with `~/` (home directory)
   if (userPath.startsWith("~/")) {
     const homeDir = Deno.env.get("HOME");
     if (!homeDir) {
-      return { error: new Error("Failed to get the user's home directory") };
+      return [
+        new ErrOut([ccolors.error("Failed to get the user's home directory")], {
+          code: 100,
+          label,
+          id: "makeAbsolutePath/!env.HOME",
+        }),
+      ];
     }
     // Replace `~` with the user's home directory and return
-    return { value: path.join(homeDir, userPath.slice(2)) };
+    return [undefined, path.join(homeDir, userPath.slice(2))];
   } else {
     // Resolve the path against the current working directory
-    return { value: path.resolve(Deno.cwd(), userPath) };
+    return [undefined, path.resolve(Deno.cwd(), userPath)];
   }
 }
 
-export function sanitizeFilePath(inputPath: string): Result<string> {
+export function sanitizeFilePath(inputPath: string): PxResult<string> {
   // Normalize the input path to resolve any '..' or '.' segments
   const normalizedPath = path.normalize(inputPath);
 
@@ -29,16 +39,33 @@ export function sanitizeFilePath(inputPath: string): Result<string> {
 
   // Ensure the normalized path does not contain '..' segments
   const parts = normalizedPath.split(path.SEPARATOR);
+
   if (parts.includes("..")) {
-    return {
-      error: new Error('Invalid path: Path cannot contain ".." segments'),
-    };
+    return [
+      new ErrOut(
+        [ccolors.error("Invalid path: Path cannot contain '..' segments")],
+        {
+          label,
+          code: 100,
+          id: "sanitizeFilePath/parts.includes('..')",
+        },
+      ),
+    ];
   }
 
   // Ensure the path does not start with a separator (indicating an absolute path)
   if (path.isAbsolute(normalizedPath)) {
-    return { error: new Error("Invalid path: Absolute paths are not allowed") };
+    return [
+      new ErrOut(
+        [ccolors.error("Invalid path: Absolute paths are not allowed")],
+        {
+          label,
+          code: 100,
+          id: "sanitizeFilePath/path.isAbsolute",
+        },
+      ),
+    ];
   }
 
-  return { value: normalizedPath };
+  return [undefined, normalizedPath];
 }

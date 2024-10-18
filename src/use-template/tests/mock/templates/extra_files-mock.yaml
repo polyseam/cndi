@@ -28,4 +28,3 @@ outputs:
 
   extra_files:
     ./my/extra_file.txt: Hello World!
-    

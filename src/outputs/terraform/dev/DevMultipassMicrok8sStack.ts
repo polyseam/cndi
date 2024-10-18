@@ -13,7 +13,7 @@ import {
   resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
-import { CNDIConfig, MultipassNodeItemSpec, TFBlocks } from "src/types.ts";
+import { CNDIConfig, MultipassNodeItemSpec } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 import { LARSTOBI_MULTIPASS_PROVIDER_VERSION } from "consts";
 import { ccolors, deepMerge } from "deps";
@@ -24,6 +24,8 @@ const LOCAL_CLOUDINIT_FILE_NAME =
 const devMultipassMicrok8sStackLabel = ccolors.faded(
   "src/outputs/terraform/dev/DevMultipassMicrok8sStack.ts:",
 );
+
+import { ErrOut } from "errout";
 
 export class DevMultipassMicrok8sStack extends CNDITerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -200,11 +202,16 @@ export default function getMultipassResource(
 
 export async function stageTerraformSynthDevMultipassMicrok8s(
   cndi_config: CNDIConfig,
-) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+): Promise<ErrOut | null> {
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new DevMultipassMicrok8sStack(app, `_cndi_stack_`, cndi_config);
-  await stageCDKTFStack(app);
+  new DevMultipassMicrok8sStack(app as Construct, `_cndi_stack_`, cndi_config);
+  const errStagingStack = await stageCDKTFStack(app);
+
+  if (errStagingStack) return errStagingStack;
 
   const cndi_multipass_instance = getMultipassResource(cndi_config);
   const input = deepMerge({
@@ -228,5 +235,10 @@ export async function stageTerraformSynthDevMultipassMicrok8s(
     ...cndi_config?.infrastructure?.terraform,
   });
 
-  await patchAndStageTerraformFilesWithInput(input as TFBlocks);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }

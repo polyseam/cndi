@@ -25,7 +25,7 @@ body:
   - type: textarea
     id: feature
     attributes:
-      label: 'Please provide a summary of the enhancement you are proposing:'
+      label: "Please provide a summary of the enhancement you are proposing:"
       description: What would change about CNDI if this were implemented?
       placeholder: I think the user experience would be greatly improved if..."
     validations:
@@ -34,7 +34,7 @@ body:
   - type: textarea
     id: use-case
     attributes:
-      label: 'Please provide the motivation or use case for this enhancement:'
+      label: "Please provide the motivation or use case for this enhancement:"
       description: Why do you think this is a good idea?
       placeholder: "I think this is a good idea because..."
     validations:
@@ -52,12 +52,11 @@ body:
   - type: textarea
     id: implementation
     attributes:
-      label: 'How would you approach solving this problem within CNDI?'
+      label: "How would you approach solving this problem within CNDI?"
       description: How do you imagine this feature would be implemented?
       placeholder: "By creating a dedicated check for foo..."
     validations:
       required: false
-
 
   - type: checkboxes
     id: terms

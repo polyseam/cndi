@@ -15,6 +15,8 @@ import {
   patchAndStageTerraformFilesWithInput,
 } from "src/utils.ts";
 
+import { ErrOut } from "errout";
+
 const DEFAULT_AWS_REGION = "us-east-1";
 const CNDI_MAJOR_VERSION = "v2";
 
@@ -73,20 +75,36 @@ class AWSClusterlessTerraformStack extends TerraformStack {
   }
 }
 
-async function stageTerraformSynthAWSClusterless(cndi_config: CNDIConfig) {
-  const cdktfAppConfig = await getCDKTFAppConfig();
+async function stageTerraformSynthAWSClusterless(
+  cndi_config: CNDIConfig,
+): Promise<ErrOut | null> {
+  const [errGettingAppConfig, cdktfAppConfig] = await getCDKTFAppConfig();
+
+  if (errGettingAppConfig) return errGettingAppConfig;
+
   const app = new App(cdktfAppConfig);
-  new AWSClusterlessTerraformStack(app, `_cndi_stack_`, cndi_config);
+
+  new AWSClusterlessTerraformStack(
+    app as Construct,
+    `_cndi_stack_`,
+    cndi_config,
+  );
 
   // write terraform stack to staging directory
-  await stageCDKTFStack(app);
+  const errStagingApp = await stageCDKTFStack(app);
+
+  if (errStagingApp) return errStagingApp;
 
   const input: TFBlocks = {
     ...cndi_config?.infrastructure?.terraform,
   };
 
   // patch cdk.tf.json with user's terraform pass-through
-  await patchAndStageTerraformFilesWithInput(input);
+  const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
+    input,
+  );
+  if (errorPatchingAndStaging) return errorPatchingAndStaging;
+  return null;
 }
 
 export { stageTerraformSynthAWSClusterless };

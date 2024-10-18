@@ -47,7 +47,7 @@ To expose your function to the internet, you need to add the following to your
 infrastructure:
   cndi:
     functions:
-        hostname: "myfunctions.example.com"
+      hostname: "myfunctions.example.com"
 ```
 
 This will create an Ingress resource that routes traffic from

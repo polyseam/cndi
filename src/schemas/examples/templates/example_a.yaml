@@ -26,13 +26,13 @@ prompts:
       - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
       - ==
       - true
-    
+
   - name: enable_fns_ingress
     default: true
     message: >-
       Do you want to expose Cloud Functions with an Ingress?
     type: Confirm
-  
+
   - name: fns_hostname
     default: fns.example.com
     message: >-
@@ -59,11 +59,11 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
               - ==
               - true
-        
+
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -116,11 +116,10 @@ outputs:
     fns: |
       # CNDI Fns Deployment Guide
 
-      For more information on how to author and deploy functions to your CNDI Cluster, 
+      For more information on how to author and deploy functions to your CNDI Cluster,
       please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
 
   extra_files:
     ./functions/hello-world/index.ts: |
       Deno.serve(() => (new Response('hello world!', { status: 200 })));
-    ./functions/cowsay/index.ts: 'https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts'
-    
+    ./functions/cowsay/index.ts: "https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts"

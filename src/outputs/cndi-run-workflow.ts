@@ -75,7 +75,7 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   },
 }, {
   name: "setup deno",
-  uses: "denoland/setup-deno@v1",
+  uses: "denoland/setup-deno@v2",
 }, {
   name: "build cndi",
   run: "deno task build-linux",

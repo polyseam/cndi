@@ -29,13 +29,13 @@ prompts:
     type: Input
     validators:
       - hostname
-  
+
   - name: wordpress_password
     message: >-
       What password should Wordpress user 'admin' use?
     type: Secret
-    default: '{{ $cndi.get_random_string(16) }}'
-    
+    default: "{{ $cndi.get_random_string(16) }}"
+
 outputs:
   cndi_config:
     cndi_version: v2
@@ -47,7 +47,7 @@ outputs:
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
-        external_dns: 
+        external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
               - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
@@ -79,7 +79,7 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
-      
+
       wp-secret:
         apiVersion: v1
         kind: Secret
@@ -97,7 +97,7 @@ outputs:
           namespace: wordpress
           annotations:
             cert-manager.io/cluster-issuer: cluster-issuer
-            kubernetes.io/tls-acme: 'true'
+            kubernetes.io/tls-acme: "true"
             nginx.ingress.kubernetes.io/backend-protocol: HTTPS
             external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(wordpress_hostname) }}"
         spec:
@@ -117,7 +117,7 @@ outputs:
                         name: wordpress
                         port:
                           number: 443
-                          
+
     applications:
       wordpress:
         repoURL: https://charts.bitnami.com/bitnami
@@ -153,5 +153,5 @@ outputs:
       ## Accessing Wordpress
 
       Wordpress will be deployed at the hostname you entered in your prompts
-      and you can login to the admin panel at 
+      and you can login to the admin panel at
       [https://{{ $cndi.get_prompt_response(wordpress_hostname) }}/wp-admin](https://{{ $cndi.get_prompt_response(wordpress_hostname) }}/wp-admin).
