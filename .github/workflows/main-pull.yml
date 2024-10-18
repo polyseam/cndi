@@ -12,7 +12,7 @@ jobs:
       - name: use deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.0.0-rc.2
+          deno-version: v2.x
 
       - name: Check formatting
         run: deno fmt --check
