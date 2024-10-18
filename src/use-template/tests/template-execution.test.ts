@@ -19,7 +19,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("airflow"));
-  },
+  }
 );
 
 Deno.test(
@@ -36,7 +36,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(!template.files["README.md"].includes("airflow"));
-  },
+  }
 );
 
 Deno.test(
@@ -55,7 +55,7 @@ Deno.test(
     const env = parseDotEnv(template.files[".env"]);
     assert(typeof env.AWS_ACCESS_KEY_ID === "string");
     assert(typeof env.AWS_SECRET_ACCESS_KEY === "string");
-  },
+  }
 );
 
 Deno.test(
@@ -73,7 +73,7 @@ Deno.test(
     assert(!!template);
     const env = parseDotEnv(template.files[".env"]);
     assert(env.GOOGLE_CREDENTIALS);
-  },
+  }
 );
 
 Deno.test(
@@ -94,7 +94,7 @@ Deno.test(
     assert(env.ARM_CLIENT_SECRET);
     assert(env.ARM_SUBSCRIPTION_ID);
     assert(env.ARM_TENANT_ID);
-  },
+  }
 );
 
 Deno.test(
@@ -111,7 +111,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("azure"));
-  },
+  }
 );
 
 Deno.test(
@@ -128,7 +128,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("gcp"));
-  },
+  }
 );
 
 Deno.test(
@@ -145,7 +145,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("aws"));
-  },
+  }
 );
 
 Deno.test(
@@ -164,7 +164,7 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "aws");
-  },
+  }
 );
 
 Deno.test(
@@ -183,7 +183,7 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "gcp");
-  },
+  }
 );
 
 Deno.test(
@@ -202,7 +202,7 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "azure");
-  },
+  }
 );
 
 Deno.test(
@@ -225,7 +225,7 @@ Deno.test(
     assert(!parsed.infrastructure?.cndi?.external_dns);
     assert(!parsed.infrastructure?.cndi?.external_dns?.enabled);
     assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
-  },
+  }
 );
 
 Deno.test(
@@ -233,7 +233,8 @@ Deno.test(
   mySanity,
   async () => {
     const fns_hostname = "fns.example.com";
-    const mockYamlFileUri = "file://" +
+    const mockYamlFileUri =
+      "file://" +
       Deno.cwd() +
       "/src/use-template/tests/mock/templates/get_block-mock.yaml";
     const templateResult = await useTemplate(mockYamlFileUri, {
@@ -250,14 +251,15 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
-  },
+  }
 );
 
 Deno.test(
   "template execution: a template should be able to add extra files to the output",
   mySanity,
   async () => {
-    const mockYamlFileUri = "file://" +
+    const mockYamlFileUri =
+      "file://" +
       Deno.cwd() +
       "/src/use-template/tests/mock/templates/extra_files-mock.yaml";
     const templateResult = await useTemplate(mockYamlFileUri, {
@@ -270,14 +272,15 @@ Deno.test(
     const text = "Hello World!";
     const template = templateResult[1] as UseTemplateResult;
     assert(template.files[path.join("my", "extra_file.txt")] === text);
-  },
+  }
 );
 
 Deno.test(
   "template execution: a template should fail validation if it has an extra_files block which does not begin with a './'",
   mySanity,
   async () => {
-    const mockYamlFileUri = "file://" +
+    const mockYamlFileUri =
+      "file://" +
       Deno.cwd() +
       "/src/use-template/tests/mock/templates/extra_files_invalid-mock.yaml";
 
@@ -290,16 +293,18 @@ Deno.test(
     });
     const err = templateResult[0];
     assert(err);
-  },
+  }
 );
 
 Deno.test(
   "template execution: $cndi.get_block(identifier) macro should not clobber siblings",
   mySanity,
   async () => {
-    const mockYamlFileUri = "file://" + Deno.cwd() +
+    const mockYamlFileUri =
+      "file://" +
+      Deno.cwd() +
       "/src/use-template/tests/mock/templates/get_block_with_peer-mock.yaml";
-    const template = await useTemplate(mockYamlFileUri, {
+    const [errUsingTemplate, template] = await useTemplate(mockYamlFileUri, {
       interactive: false,
       overrides: {
         project_name: "test",
@@ -308,16 +313,20 @@ Deno.test(
       },
     });
 
+    if (errUsingTemplate) {
+      throw errUsingTemplate;
+    }
+
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
 
     const values = config?.applications?.myapp?.values as {
-      "some_beta_content": { "should_exist": boolean };
-      "some_charlie_content": { "should_exist": boolean };
-      "details": { "example_a": string };
+      some_beta_content: { should_exist: boolean };
+      some_charlie_content: { should_exist: boolean };
+      details: { example_a: string };
     };
 
     assert(values.some_beta_content?.should_exist);
     assert(values?.some_charlie_content?.should_exist);
     assert(values?.details.example_a === "value_a");
-  },
+  }
 );

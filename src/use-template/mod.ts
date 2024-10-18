@@ -922,7 +922,7 @@ async function processCNDIConfigOutput(
       delete host[call];
 
       // the value of the block is parsed
-      const parsedVal = YAML.parse(obj.value) as Record<string, unknown>;
+      const parsedVal = YAML.parse(blockString) as Record<string, unknown>;
 
       // the ultimate block including the host object, the block object, and the original call removed
       let resolvedBlock: Record<string, unknown> | Array<unknown>;
@@ -939,13 +939,8 @@ async function processCNDIConfigOutput(
       // then the resolved block is saved to cndiConfigObj
       setValueForKeyPath(
         cndiConfigObj,
-<<<<<<< HEAD
-        pathToKey.slice(0, -1),
-        YAML.parse(blockString),
-=======
         targetPath, // path to host object
         resolvedBlock,
->>>>>>> f693ba11a6ebac1a19d91d87399449ed4a10423d
       );
     } else {
       const numChilden = Object.keys(
