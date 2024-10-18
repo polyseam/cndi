@@ -683,10 +683,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         if (manifestObj?.kind && manifestObj.kind === "Secret") {
           const secret = cluster_manifests[key] as KubernetesSecret;
           const secretFileName = `${key}.yaml`;
-          let sealedSecretManifestWithKSC;
 
-          try {
-            sealedSecretManifestWithKSC = await getSealedSecretManifestWithKSC(
+          const [err, sealedSecretManifestWithKSC] =
+            await getSealedSecretManifestWithKSC(
               secret,
               {
                 publicKeyFilePath: tempPublicKeyFilePath,
@@ -695,18 +694,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
                 secretFileName,
               },
             );
-          } catch (sealedSecretsError) {
-            const error = sealedSecretsError as Error;
-            const code = typeof error.cause === "number" ? error.cause : -1;
-            const message = error.message
-              ? error.message
-              : "unknown sealed secret error";
 
-            self.postMessage({
-              type: "error-overwrite",
-              code,
-              message,
-            });
+          if (err) {
+            await self.postMessage(err.owWorkerErrorMessage);
             return;
           }
 

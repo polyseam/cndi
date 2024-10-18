@@ -191,8 +191,18 @@
   },
   {
     "code": 703,
-    "message": "Failed to Seal Secrets using the kubeseal CLI",
+    "message": "Failed to Seal Secret using the kubeseal CLI",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1010"
+  },
+  {
+    "code": 704,
+    "message": "Failed to make temporary file for unsealed secret",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
+  },
+  {
+    "code": 705,
+    "message": "Failed to write to temporary file for unsealed secret",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
   },
   {
     "code": 800,
