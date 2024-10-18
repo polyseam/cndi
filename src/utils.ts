@@ -403,7 +403,7 @@ async function stageDirectory(
     const outputPath = path.join(stagingDirectory, relativePathOut);
     await copy(inputPath, outputPath); // fail if the output directory already exists
   } catch (errorStaging) {
-    return new ErrOut([], {
+    return new ErrOut([ccolors.error("failed to stage directory")], {
       cause: errorStaging as Error,
       code: 509,
       label,

@@ -167,7 +167,7 @@ const parseCndiSecret = (
   } else {
     return [
       new ErrOut([
-        `Secret`,
+        ccolors.error(`Secret`),
         ccolors.key_name(`"${inputSecret.metadata.name}"`),
         ccolors.error("has no data or stringData"),
       ], {
@@ -280,7 +280,7 @@ const getSealedSecretManifestWithKSC = async (
   } catch (err) {
     return [
       new ErrOut([
-        "Failed to write Secret manifest to seal with",
+        ccolors.error("failed to write Secret manifest to seal with"),
         ccolors.key_name("kubeseal"),
       ], {
         label,
@@ -308,7 +308,10 @@ const getSealedSecretManifestWithKSC = async (
   if (kubesealCommandOutput.code !== 0) {
     Deno.stdout.write(kubesealCommandOutput.stderr);
     return [
-      new ErrOut(["kubeseal failed to seal secret"], {
+      new ErrOut([
+        ccolors.key_name("kubeseal"),
+        ccolors.error("failed to seal secret"),
+      ], {
         label,
         code: 703,
         id: "src/outputs/sealed-secret-manifest/kubeseal/exit_code/!0",

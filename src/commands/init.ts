@@ -215,7 +215,9 @@ const initCommand = new Command()
       "my-cndi-project"; // default to the current working directory name
 
     if (options.template === "true") {
-      const err = new ErrOut([`--template (-t) flag requires a value`], {
+      const err = new ErrOut([
+        ccolors.error(`--template (-t) flag requires a value`),
+      ], {
         label,
         code: 400,
         id: 'options.template==="true"',
