@@ -27,7 +27,7 @@ body:
     id: deployment-target
     attributes:
       label: Which new environment should be added to CNDI?
-      description: 'Please tell us more about the environment you aim to deploy to and why:'
+      description: "Please tell us more about the environment you aim to deploy to and why:"
       placeholder: I would like to be able to deploy CNDI to my smart fridge because...
     validations:
       required: true

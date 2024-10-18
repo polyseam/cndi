@@ -16,13 +16,13 @@
     Please enter your arm_client_secret:
   type: Secret
   default: ""
-  
+
 - name: arm_tenant_id
   message: >-
     Please enter your arm_tenant_id:
   type: Secret
   default: ""
-  
+
 - name: arm_subscription_id
   message: >-
     Please enter your arm_subscription_id:

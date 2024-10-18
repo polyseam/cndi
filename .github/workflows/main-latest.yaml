@@ -2,7 +2,7 @@ name: main # used by the cndi team, not end users
 on:
   push:
     branches:
-      - 'main'
+      - "main"
 jobs:
   main-test-and-lint:
     runs-on: ubuntu-20.04
@@ -34,7 +34,7 @@ jobs:
           deno-version: v1.46
 
       - run: deno task build
-          
+
       - id: upload-source-code
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -43,6 +43,6 @@ jobs:
           AWS_S3_BUCKET: "cndi-binaries"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: 'us-east-1'
-          SOURCE_DIR: './dist/release-archives'
-          DEST_DIR: 'cndi/main'
+          AWS_REGION: "us-east-1"
+          SOURCE_DIR: "./dist/release-archives"
+          DEST_DIR: "cndi/main"
