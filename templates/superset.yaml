@@ -129,11 +129,11 @@ outputs:
             - ==
             - true
 
-      cnpg-cluster:
+      superset-cnpg-cluster:
         apiVersion: postgresql.cnpg.io/v1
         kind: Cluster
         metadata:
-          name: cnpg-cluster
+          name: superset-cnpg-cluster
           namespace: superset
           annotations:
             $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
@@ -146,52 +146,60 @@ outputs:
           replicationSlots:
             highAvailability:
               enabled: true
+          postgresql:
+            pg_hba:
+              - host superset-db superset all password
           bootstrap:
             initdb:
               database: superset-db
               owner: superset
               secret:
-                name: cnpg-database-user-auth-secret
+                name: superset-cnpg-database-user-auth-secret
           superuserSecret:
-            name: cnpg-cluster-superuser-auth-secret
+            name: superset-cnpg-cluster-superuser-auth-secret
 
-      cnpg-cluster-superuser-auth-secret:
+      superset-cnpg-cluster-superuser-auth-secret:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: cnpg-cluster-superuser-auth-secret
+          name: superset-cnpg-cluster-superuser-auth-secret
           namespace: superset
         type: kubernetes.io/basic-auth
         stringData:
-          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER_PASSWORD)
+          username: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER)
+          password: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
 
-      cnpg-database-user-auth-secret:
+      superset-cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: cnpg-database-user-auth-secret
+          name: superset-cnpg-database-user-auth-secret
           namespace: superset
         type: kubernetes.io/basic-auth
         stringData:
-          username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
-          password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
+          username: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_USER)
+          password: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_USER_PASSWORD)
 
-      superset-secrets:
+      superset-env-secret:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: superset-secrets-env
+          name: superset-env
           namespace: superset
         type: Opaque
         stringData:
-          REDIS_HOST: $cndi_on_ow.seal_secret_from_env_var(REDIS_HOST)
-          REDIS_PORT: $cndi_on_ow.seal_secret_from_env_var(REDIS_PORT)
-          DB_HOST: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_HOST)
-          DB_PORT: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_PORT)
-          DB_USER: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER)
-          DB_PASS: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_SUPERUSER_PASSWORD)
-          DB_NAME: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_DATABASE)
+          SUPERSET_SECRET_KEY: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_SECRET_KEY)
+          REDIS_USER: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_USER)
+          REDIS_HOST: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_HOST)
+          REDIS_DB: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_DB)
+          REDIS_PORT: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_PORT)
+          REDIS_CELERY_DB: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_CELERY_DB)
+          REDIS_PROTO: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_PROTO)
+          DB_HOST: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_HOST)
+          DB_PORT: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_PORT)
+          DB_USER: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER)
+          DB_PASS: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
+          DB_NAME: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_DB)
 
       external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
@@ -212,7 +220,10 @@ outputs:
         chart: superset
         destinationNamespace: superset
         values:
-          envFromSecret: superset-secrets-env
+          redis:
+            master:
+              persistence:
+                enabled: true
           postgresql:
             enabled: false
           init:
@@ -225,17 +236,23 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
 
-    $cndi.comment(superset-heading): Superset Connection Parameters
-    REDIS_HOST: superset-redis-headless
-    REDIS_PORT: "6379"
-    $cndi.comment(postgres-heading): PostgreSQL Connection Parameters
-    POSTGRESQL_HOST: "cnpg-cluster-rw"
-    POSTGRESQL_PORT: "5432"
-    POSTGRESQL_SUPERUSER: postgres
-    POSTGRESQL_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
-    POSTGRESQL_DATABASE: superset-db
-    POSTGRESQL_USER: superset
-    POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_random_string(16) }}"
+    $cndi.comment(superset-heading): Superset Redis Connection Parameters
+    SUPERSET_SECRET_KEY: "{{ $cndi.get_random_string(24) }}"
+    SUPERSET_REDIS_USER: redis
+    SUPERSET_REDIS_DB: redis-db
+    SUPERSET_REDIS_HOST: superset-redis-headless
+    SUPERSET_REDIS_PORT: 6379
+    SUPERSET_REDIS_CELERY_DB: 0
+    SUPERSET_REDIS_PROTO: redis
+
+    $cndi.comment(postgres-heading): Superset PostgreSQL Connection Parameters
+    SUPERSET_POSTGRESQL_HOST: "superset-cnpg-cluster-rw"
+    SUPERSET_POSTGRESQL_PORT: "5432"
+    SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER: postgres
+    SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD: "{{ $cndi.get_random_string(24) }}"
+    SUPERSET_POSTGRESQL_DB: superset-db
+    SUPERSET_POSTGRESQL_USER: superset
+    SUPERSET_POSTGRESQL_USER_PASSWORD: "{{ $cndi.get_random_string(16) }}"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
