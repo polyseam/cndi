@@ -15,6 +15,8 @@ blocks:
       stringData:
         GIT_SYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
+        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
+        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
 
   - name: git_sync_shared
     content:
@@ -26,6 +28,8 @@ blocks:
       stringData:
         GIT_SYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
+        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
+        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
 
   - name: airflow_public_config
     content:
@@ -309,7 +313,7 @@ outputs:
         chart: cloudnative-pg
 
       airflow:
-        targetRevision: 1.11.0
+        targetRevision: 1.15.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
@@ -354,8 +358,12 @@ outputs:
               storageClassName: rwm
           createUserJob:
             useHelmHooks: false
+            applyCustomEnv: false
           migrateDatabaseJob:
+            applyCustomEnv: false
             useHelmHooks: false
+            jobAnnotations:
+              "argocd.argoproj.io/hook": Sync
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
