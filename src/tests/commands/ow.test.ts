@@ -94,6 +94,17 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
           password: "$cndi_on_ow.seal_secret_from_env_var(FOOSECRET)",
         },
       };
+      config.cluster_manifests["new-secret-yet-to-be-defined"] = {
+        kind: "Secret",
+        metadata: {
+          name: "my-secret-2",
+        },
+        stringData: {
+          // BAR_SECRET will not be defined and should be included in .env with a placeholder
+          magic: "$cndi_on_ow.seal_secret_from_env_var(BAR_SECRET)",
+        },
+      };
+
       await Deno.writeTextFile(
         `${dir}/cndi_config.yaml`,
         YAML.stringify(config),
@@ -104,17 +115,17 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
     const beforeSet = new Set(before);
     const afterSet = new Set(after);
 
-    console.log("beforeSet", beforeSet);
-    console.log("afterSet", afterSet);
-
     const added = afterSet.difference(beforeSet);
-    console.log("added", added);
-    const removed = beforeSet.difference(afterSet);
-    console.log("removed", removed);
+    const _removed = beforeSet.difference(afterSet);
 
-    const expectedToAdd = new Set(["cndi/cluster_manifests/new-secret.yaml"]);
+    const expectedToAdd = new Set([
+      path.join("cndi", "cluster_manifests", "new-secret.yaml"),
+      // new-secret-yet-to-be-defined will update .env with a placeholder, but not yield a secret
+    ]);
 
     assert(setsAreEquivalent(added, expectedToAdd));
+    const dotenv = await Deno.readTextFile(path.join(dir, ".env"));
+    assert(dotenv.includes("BAR_SECRET"));
   });
 
   await t.step("cleanup", cleanup);

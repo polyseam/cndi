@@ -199,14 +199,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       ".ts",
     );
 
-    // try {
-    //   await Deno.remove(pathToFunctionsOutput, {
-    //     recursive: true,
-    //   });
-    // } catch {
-    //   // folder did not exist
-    // }
-
     if (shouldBuildFunctions) {
       const fnsWorkflowPath = path.join(
         ".github",

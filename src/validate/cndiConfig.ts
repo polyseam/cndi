@@ -671,7 +671,10 @@ function validateClusterManifestsSpec(
     const manifest = entry[1] as Manifest;
 
     if (manifest.kind === "Secret") {
-      const d = manifest.stringData || manifest.data;
+      const d = (manifest?.stringData || manifest?.data) as Record<
+        string,
+        unknown
+      >;
       if (!d) {
         console.log(
           "Secret manifest should have either",
@@ -681,7 +684,8 @@ function validateClusterManifestsSpec(
         );
       } else {
         for (const key in d) {
-          const sealedData = parseCNDISecretDataForSealing(d[key]);
+          const val = `${d[key]}`;
+          const sealedData = parseCNDISecretDataForSealing(val);
           if (!sealedData) {
             return new ErrOut(
               [
