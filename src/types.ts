@@ -55,7 +55,7 @@ export type DeploymentTarget = ObjectValues<typeof DEPLOYMENT_TARGET>;
 export type Command = ObjectValues<typeof COMMAND>;
 
 // cndi_config.jsonc["infrastructure"]["cndi"]["nodes"]["*"]
-interface BaseNodeItemSpec {
+export interface CNDINodeSpec {
   name: string;
   role?: NodeRole; // default: controller
   volume_size?: number;
@@ -84,7 +84,7 @@ interface Taint {
 }
 
 // cndi_config.jsonc["nodes"][kind==="dev"]
-interface MultipassNodeItemSpec extends BaseNodeItemSpec {
+interface MultipassNodeItemSpec extends CNDINodeSpec {
   name: string;
   cpus?: number;
   memory?: number | string; // if integer, assume G
@@ -95,7 +95,7 @@ interface MultipassNodeItemSpec extends BaseNodeItemSpec {
 }
 
 // cndi_config.jsonc["nodes"][kind==="azure"]
-interface AzureNodeItemSpec extends BaseNodeItemSpec {
+interface AzureNodeItemSpec extends CNDINodeSpec {
   machine_type?: string;
   image?: string;
   size?: number | string;
@@ -104,7 +104,7 @@ interface AzureNodeItemSpec extends BaseNodeItemSpec {
   instance_type?: string;
 }
 
-interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
+interface AzureAKSNodeItemSpec extends CNDINodeSpec {
   agents_min_count?: number;
   agents_max_count?: number;
   agents_size?: string;
@@ -117,7 +117,7 @@ interface AzureAKSNodeItemSpec extends BaseNodeItemSpec {
   instance_type?: string;
 }
 // cndi_config.jsonc["nodes"]["entries"][kind==="aws"]
-interface AWSEC2NodeItemSpec extends BaseNodeItemSpec {
+interface AWSEC2NodeItemSpec extends CNDINodeSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -134,7 +134,7 @@ type AWSEKSNodeItemSpec = Omit<AWSEC2NodeItemSpec, "ami"> & {
 };
 
 // cndi_config.jsonc["nodes"]["entries"][kind==="gcp"]
-interface GCPNodeItemSpec extends BaseNodeItemSpec {
+interface GCPNodeItemSpec extends CNDINodeSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -143,7 +143,7 @@ interface GCPNodeItemSpec extends BaseNodeItemSpec {
 }
 
 // cndi_config.jsonc["nodes"]["entries"][kind==="gke"]
-interface GKENodeItemSpec extends BaseNodeItemSpec {
+interface GKENodeItemSpec extends CNDINodeSpec {
   min_count?: number;
   max_count?: number;
   machine_type?: string;
@@ -155,7 +155,7 @@ interface GKENodeItemSpec extends BaseNodeItemSpec {
 }
 
 // cndi_config.jsonc["nodes"]["deployment_target_configuration"]["aws"]
-interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
+interface AWSDeploymentTargetConfiguration extends CNDINodeSpec {
   ami?: string;
   instance_type?: string;
   availability_zone?: string;
@@ -163,7 +163,7 @@ interface AWSDeploymentTargetConfiguration extends BaseNodeItemSpec {
 }
 
 // cndi_config.jsonc["nodes"]["deployment_target_configuration"]["azure"]
-interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
+interface AzureDeploymentTargetConfiguration extends CNDINodeSpec {
   image?: string;
   machine_type?: string;
   disk_size_gb?: number;
@@ -171,7 +171,7 @@ interface AzureDeploymentTargetConfiguration extends BaseNodeItemSpec {
 }
 
 // cndi_config.jsonc["nodes"]["deployment_target_configuration"]["gcp"]
-interface GCPDeploymentTargetConfiguration extends BaseNodeItemSpec {
+interface GCPDeploymentTargetConfiguration extends CNDINodeSpec {
   machine_type?: string;
   image?: string;
   size?: number;
@@ -258,63 +258,65 @@ export type CNDIDistribution =
   | "aks"
   | "clusterless";
 
+export type CNDIInfrastructure = {
+  cndi: {
+    functions?: {
+      hostname?: string;
+    };
+    keyless?: boolean; // default: false
+    deployment_target_configuration?: DeploymentTargetConfiguration;
+    ingress: {
+      nginx: {
+        public: {
+          enabled?: boolean; // default: true
+          values: Record<string, unknown>;
+        };
+        private: {
+          enabled?: boolean; // default: false
+          values: Record<string, unknown>;
+        };
+      };
+    };
+    external_dns: {
+      enabled?: boolean; // default: true
+      provider: ExternalDNSProvider;
+      domain_filters: Array<string>;
+      values: Record<string, unknown>;
+    };
+    reloader: {
+      enabled?: boolean; // default: true
+    };
+    cert_manager?: {
+      enabled?: boolean; // default: true
+      email: string;
+      self_signed?: boolean;
+    };
+    nodes: Array<CNDINodeSpec>;
+    microk8s: {
+      addons: Array<Microk8sAddon>;
+      version?: string; // 1.27
+      channel?: string; // stable
+      "cloud-init": {
+        leader_before: Array<string>; //
+        leader_after: Array<string>;
+      };
+    };
+    argocd: {
+      root_application: unknown; //
+      install_url?: string; //
+    };
+    open_ports?: Array<CNDIPort>;
+  };
+  terraform?: TFBlocks;
+};
+
 // incomplete type, config will have more options
 interface CNDIConfig {
   project_name?: string;
   cndi_version?: string;
   distribution: CNDIDistribution;
   provider: CNDIProvider;
-  infrastructure: {
-    cndi: {
-      functions?: {
-        hostname?: string;
-      };
-      keyless?: boolean; // default: false
-      deployment_target_configuration?: DeploymentTargetConfiguration;
-      ingress: {
-        nginx: {
-          public: {
-            enabled?: boolean; // default: true
-            values: Record<string, unknown>;
-          };
-          private: {
-            enabled?: boolean; // default: false
-            values: Record<string, unknown>;
-          };
-        };
-      };
-      external_dns: {
-        enabled?: boolean; // default: true
-        provider: ExternalDNSProvider;
-        domain_filters: Array<string>;
-        values: Record<string, unknown>;
-      };
-      reloader: {
-        enabled?: boolean; // default: true
-      };
-      cert_manager?: {
-        enabled?: boolean; // default: true
-        email: string;
-        self_signed?: boolean;
-      };
-      nodes: Array<BaseNodeItemSpec>;
-      microk8s: {
-        addons: Array<Microk8sAddon>;
-        version?: string; // 1.27
-        channel?: string; // stable
-        "cloud-init": {
-          leader_before: Array<string>; //
-          leader_after: Array<string>;
-        };
-      };
-      argocd: {
-        root_application: unknown; //
-        install_url?: string; //
-      };
-      open_ports?: Array<CNDIPort>;
-    };
-    terraform?: TFBlocks;
-  };
+  infrastructure: CNDIInfrastructure;
   applications: {
     [key: string]: CNDIApplicationSpec;
   };
@@ -376,7 +378,6 @@ export type {
   AzureAKSNodeItemSpec,
   AzureDeploymentTargetConfiguration,
   AzureNodeItemSpec,
-  BaseNodeItemSpec,
   CNDIApplicationSpec,
   CNDIConfig,
   CNDIPort,
