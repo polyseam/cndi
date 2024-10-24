@@ -107,24 +107,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
   if (message.data.type === "begin-overwrite") {
     const options = message.data.options as OverwriteActionOptions;
 
-    const pathToKubernetesManifests = path.join(
-      options.output,
-      "cndi",
-      "cluster_manifests",
-    );
-
-    const pathToTerraformResources = path.join(
-      options.output,
-      "cndi",
-      "terraform",
-    );
-
-    const pathToFunctionsOutput = path.join(
-      options.output,
-      "cndi",
-      "functions",
-    );
-
     const envPath = path.join(options.output, ".env");
 
     const [errorLoadingConfig, result] = await loadCndiConfig(options.output);
@@ -217,13 +199,13 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       ".ts",
     );
 
-    try {
-      await Deno.remove(pathToFunctionsOutput, {
-        recursive: true,
-      });
-    } catch {
-      // folder did not exist
-    }
+    // try {
+    //   await Deno.remove(pathToFunctionsOutput, {
+    //     recursive: true,
+    //   });
+    // } catch {
+    //   // folder did not exist
+    // }
 
     if (shouldBuildFunctions) {
       const fnsWorkflowPath = path.join(
@@ -358,15 +340,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       );
     }
 
-    try {
-      // remove all files in cndi/terraform
-      await Deno.remove(pathToTerraformResources, {
-        recursive: true,
-      });
-    } catch {
-      // folder did not exist
-    }
-
     const terraformStatePassphrase = Deno.env.get("TERRAFORM_STATE_PASSPHRASE");
 
     if (!terraformStatePassphrase) {
@@ -486,15 +459,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         } catch {
           // failed to stage sealedManifest from ks_checks.json
         }
-      }
-
-      try {
-        // remove all files in cndi/cluster
-        await Deno.remove(pathToKubernetesManifests, {
-          recursive: true,
-        });
-      } catch {
-        // folder did not exist
       }
 
       await Deno.writeTextFile(
@@ -823,7 +787,9 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
     console.log(ccolors.success("staged terraform stack"));
 
-    const errPersistingStagedFiles = await persistStagedFiles(options.output);
+    const errPersistingStagedFiles = await persistStagedFiles(options.output, {
+      purge: ["cndi"], // effectively says "always empty contents of cndi/ before staging"
+    });
 
     if (errPersistingStagedFiles) {
       await self.postMessage(errPersistingStagedFiles.owWorkerErrorMessage);

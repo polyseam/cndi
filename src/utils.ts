@@ -454,10 +454,27 @@ async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
   return [undefined, { outdir }];
 }
 
+type PersistStagedFilesOptions = {
+  purge: string[]; // a list of subpaths to purge from the target directory
+};
+
 async function persistStagedFiles(
   targetDirectory: string,
+  opt?: PersistStagedFilesOptions,
 ): Promise<ErrOut | void> {
+  const purge = opt?.purge || [];
+
   const [err, stagingDirectory] = getStagingDirectory();
+
+  for (const relPath of purge) {
+    try {
+      await Deno.remove(path.join(targetDirectory, relPath), {
+        recursive: true,
+      });
+    } catch {
+      // directory doesn't exist
+    }
+  }
 
   if (err) return err;
 
