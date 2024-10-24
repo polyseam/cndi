@@ -173,6 +173,18 @@ const getApplicationManifest = (
     applicationSpec?.syncPolicy || {},
   );
 
+  const finalSyncOptions: Record<string, string> = {};
+
+  for (const syncOption of syncPolicy.syncOptions) {
+    const [name, status] = syncOption.split("=");
+    finalSyncOptions[name] = status;
+  }
+
+  // syncOptions are deduped and the user-supplied values are preferred
+  syncPolicy.syncOptions = Object.entries(finalSyncOptions).map(([k, v]) =>
+    `${k}=${v}`
+  );
+
   const {
     repoURL,
     path,
