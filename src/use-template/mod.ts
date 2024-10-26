@@ -762,9 +762,7 @@ function processCNDICommentCalls(input: string): string {
 
   // Replace the matched lines with '# ' followed by the captured text after the colon
   const replaced = input.replace(pattern, "# $2");
-
-  console.log("input", input);
-  console.log("replaced", replaced);
+  
   return replaced;
 }
 
