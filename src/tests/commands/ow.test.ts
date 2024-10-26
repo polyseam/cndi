@@ -109,7 +109,7 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
         `${dir}/cndi_config.yaml`,
         YAML.stringify(config),
       );
-      await runCndi("ow", "--loud");
+      await runCndi("ow");
     });
 
     const beforeSet = new Set(before);
