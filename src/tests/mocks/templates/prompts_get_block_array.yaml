@@ -4,8 +4,8 @@ prompts:
 
 outputs:
   cndi_config:
-    # source_control_platform: github ?
     cndi_version: v2
-  readme: "# hello world"
+  readme:
+    heading: "# hello world"
   env:
     FOO: bar

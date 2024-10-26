@@ -5,6 +5,7 @@ import { runCndi } from "src/tests/helpers/run-cndi.ts";
 import {
   listAllFilePaths,
   listChangedFilePaths,
+  listFilepathsBeforeAndAfter,
   setsAreEquivalent,
 } from "src/tests/helpers/util.ts";
 
@@ -30,11 +31,11 @@ Deno.test(
     });
 
     await t.step("test", async () => {
-      const changedFilePaths = await listChangedFilePaths(async () => {
+      const { before, after } = await listFilepathsBeforeAndAfter(async () => {
         const { status } = await runCndi("ow");
         assert(status.success);
       });
-      assert(changedFilePaths.length === 0);
+      assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
 
     await t.step("cleanup", cleanup);
@@ -59,6 +60,112 @@ Deno.test(
         "cndi-run.yaml",
       );
       assert(!filepaths.includes(pathToCndiRunWorkflow));
+    });
+
+    await t.step("cleanup", cleanup);
+  },
+);
+
+Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, async (t) => {
+  let dir = "";
+  await t.step("setup", async () => {
+    dir = await Deno.makeTempDir();
+    Deno.chdir(dir);
+    await runCndi("init", "-t", "basic", "-l", "aws/eks");
+  });
+
+  await t.step("test", async () => {
+    const { before, after } = await listFilepathsBeforeAndAfter(async () => {
+      const [errorLoadingConfig, result] = await loadCndiConfig(dir);
+
+      if (errorLoadingConfig) {
+        assert(false, errorLoadingConfig.message);
+      }
+
+      Deno.env.set("FOOSECRET", "realstring");
+
+      const { config } = result;
+      config.cluster_manifests["new-secret"] = {
+        kind: "Secret",
+        metadata: {
+          name: "my-secret",
+        },
+        stringData: {
+          password: "$cndi_on_ow.seal_secret_from_env_var(FOOSECRET)",
+        },
+      };
+      config.cluster_manifests["new-secret-yet-to-be-defined"] = {
+        kind: "Secret",
+        metadata: {
+          name: "my-secret-2",
+        },
+        stringData: {
+          // BAR_SECRET will not be defined and should be included in .env with a placeholder
+          magic: "$cndi_on_ow.seal_secret_from_env_var(BAR_SECRET)",
+        },
+      };
+
+      await Deno.writeTextFile(
+        `${dir}/cndi_config.yaml`,
+        YAML.stringify(config),
+      );
+      await runCndi("ow");
+    });
+
+    const beforeSet = new Set(before);
+    const afterSet = new Set(after);
+
+    const added = afterSet.difference(beforeSet);
+    const _removed = beforeSet.difference(afterSet);
+
+    const expectedToAdd = new Set([
+      path.join("cndi", "cluster_manifests", "new-secret.yaml"),
+      // new-secret-yet-to-be-defined will update .env with a placeholder, but not yield a secret
+    ]);
+
+    assert(setsAreEquivalent(added, expectedToAdd));
+    const dotenv = await Deno.readTextFile(path.join(dir, ".env"));
+    assert(dotenv.includes("BAR_SECRET"));
+  });
+
+  await t.step("cleanup", cleanup);
+});
+
+Deno.test(
+  `'cndi ow' should fail if secrets use plaintext in their definition`,
+  async (t) => {
+    let dir = "";
+    await t.step("setup", async () => {
+      dir = await Deno.makeTempDir();
+      Deno.chdir(dir);
+      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+    });
+
+    await t.step("test", async () => {
+      const { before, after } = await listFilepathsBeforeAndAfter(async () => {
+        const [errorLoadingConfig, result] = await loadCndiConfig(dir);
+
+        if (errorLoadingConfig) {
+          assert(false, errorLoadingConfig.message);
+        }
+
+        const { config } = result;
+        config.cluster_manifests["new-secret"] = {
+          kind: "Secret",
+          metadata: {
+            name: "my-secret",
+          },
+          stringData: {
+            password: "plaintext",
+          },
+        };
+        await Deno.writeTextFile(
+          `${dir}/cndi_config.yaml`,
+          YAML.stringify(config),
+        );
+        await runCndi("ow");
+      });
+      assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
 
     await t.step("cleanup", cleanup);
