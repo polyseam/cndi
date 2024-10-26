@@ -54,4 +54,4 @@ outputs:
               - ==
               - true
     cluster_manifests:
-      $cndi.get_block(unconditional_block): true
+      $cndi.get_block(unconditional_block): {}
