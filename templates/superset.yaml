@@ -214,6 +214,8 @@ outputs:
         chart: superset
         destinationNamespace: superset
         values:
+          secretEnv:
+            create: false
           redis:
             master:
               persistence:
