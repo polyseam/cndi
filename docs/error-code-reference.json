@@ -526,7 +526,12 @@
   {
     "code": 16401,
     "message": "failed to create repo, github credential issue",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1042"
+  },
+  {
+    "code": 1602,
+    "message": "failed to create repo, github credential issue",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1042"
   },
   {
     "code": 1700,
