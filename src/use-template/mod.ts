@@ -844,17 +844,28 @@ async function processCNDIConfigOutput(
   const getBlockBeginToken = "$cndi.get_block(";
   const getBlockEndToken = ")':"; // depends on serialization wrapping key in ' quotes
   const getBlockEndTokenNoQuote = "):\n"; // fallback if key is not wrapped in quotes
+  const getBlockEndTokenNoNewLine = "): "; // fallback if body is not on next line
 
   let indexOpen = output.indexOf(getBlockBeginToken);
   let indexClose = output.indexOf(getBlockEndToken, indexOpen);
 
-  // possible that noQuote signature is in first loop: set constent for while condition
+  // possible that noQuote signature is in first loop: set constant for while condition
   const noQuoteIndexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
+
+  // possible that get_block is on same line as body in first loop: set constant for while condition
+  const getBlockEndTokenNoNewLineClose = output.indexOf(
+    getBlockEndTokenNoNewLine,
+    indexOpen,
+  );
 
   let ax = 0;
 
   // while there are $cndi.get_block calls to process
-  while (indexOpen > -1 && (indexClose > -1 || noQuoteIndexClose > -1)) {
+  while (
+    indexOpen > -1 &&
+    (indexClose > -1 || noQuoteIndexClose > -1 ||
+      getBlockEndTokenNoNewLineClose > -1)
+  ) {
     cndiConfigObj = YAML.parse(output) as object;
 
     let key = output.slice(indexOpen, indexClose + 1); // get_block key which contains body
@@ -864,12 +875,21 @@ async function processCNDIConfigOutput(
     let body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
 
     if (!body) {
-      // if call signature is not '$cndi.get_block(foo)':
-      // and is instead $cndi.get_block(foo):\n
+      // maybe call signature is `$cndi.get_block(foo):\n` instead of `'$cndi.get_block(foo)':`
       indexClose = output.indexOf(getBlockEndTokenNoQuote, indexOpen);
       key = output.slice(indexOpen, indexClose + 1);
       pathToKey = findPathToKey(key, cndiConfigObj);
       body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+
+      if (!body) {
+        // maybe call signature is `$cndi.get_block(foo): `
+        indexClose = output.indexOf(getBlockEndTokenNoNewLine, indexOpen);
+        key = output.slice(indexOpen, indexClose + 1);
+        pathToKey = findPathToKey(key, cndiConfigObj);
+        body = getValueFromKeyPath(cndiConfigObj, pathToKey) as GetBlockBody;
+      }
+
+      // if body is still undefined we have a problem
       if (!body) {
         return [
           new ErrOut(

@@ -3,6 +3,13 @@ blocks:
     content:
       hostname: "{{ $cndi.get_prompt_response(fns_hostname) }}"
 
+  - name: unconditional_block
+    content:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: my-thing
+
 prompts:
   - name: enable_fns_ingress
     default: true
@@ -46,3 +53,5 @@ outputs:
               - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
               - ==
               - true
+    cluster_manifests:
+      $cndi.get_block(unconditional_block): true

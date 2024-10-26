@@ -1,3 +1,15 @@
+blocks:
+  - name: block_with_comment
+    content:
+      apiVersion: example.com/v1
+      kind: SomeResource
+      metadata:
+        name: my-thing
+        namespace: my-namespace
+        annotations:
+          argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+          $cndi.comment(why_propagation_policy): This is a comment
+
 prompts:
   - name: greet_who
     default: World
@@ -17,15 +29,7 @@ outputs:
           - name: my-node
 
     cluster_manifests:
-      arbitrary-resource:
-        apiVersion: example.com/v1
-        kind: SomeResource
-        metadata:
-          name: my-thing
-          namespace: my-namespace
-          annotations:
-            $cndi.comment(why_propagation_policy): This is a comment
-            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
+      $cndi.get_block(block_with_comment): {}
 
   env:
     HELLO: "{{ $cndi.get_prompt_response(greet_who) }}"

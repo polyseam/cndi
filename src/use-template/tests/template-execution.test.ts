@@ -250,7 +250,7 @@ Deno.test(
 );
 
 Deno.test(
-  "template execution: a template should be able to insert a block using $cndi.get_block(block_name)",
+  "template execution: a template should be able to insert a blocks using $cndi.get_block(block_name)",
   mySanity,
   async () => {
     const fns_hostname = "fns.example.com";
@@ -271,6 +271,7 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
+    assert(config?.cluster_manifests?.kind === "Namespace");
   },
 );
 
