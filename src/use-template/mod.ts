@@ -763,6 +763,8 @@ function processCNDICommentCalls(input: string): string {
   // Replace the matched lines with '# ' followed by the captured text after the colon
   const replaced = input.replace(pattern, "# $2");
 
+  console.log("input", input);
+  console.log("replaced", replaced);
   return replaced;
 }
 
@@ -961,8 +963,11 @@ async function processCNDIConfigOutput(
 
   // get_prompt_response evals (again)
   output = literalizeGetPromptResponseCalls(output);
-  output = processCNDICommentCalls(output);
+
   output = fixUndefinedDistributionIfRequired(output);
+
+  // comment evals last so they don't get removed in YAML.parse by other steps
+  output = processCNDICommentCalls(output);
 
   return [undefined, output];
 }

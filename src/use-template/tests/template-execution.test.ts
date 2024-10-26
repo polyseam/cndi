@@ -2,6 +2,7 @@ import { path, YAML } from "deps";
 import { useTemplate, UseTemplateResult } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
+import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
 
@@ -36,6 +37,26 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(!template.files["README.md"].includes("airflow"));
+  },
+);
+
+Deno.test(
+  "template execution: '$cndi.comment' calls should be processed in cndi_config.yaml",
+  mySanity,
+  async () => {
+    const [_, template] = await useTemplate(
+      `${getProjectRoot()}/src/use-template/tests/mock/templates/comment-mock.yaml`,
+      {
+        interactive: false,
+        overrides: {
+          deployment_target_provider: "aws",
+        },
+      },
+    );
+    const configStr = template?.files["cndi_config.yaml"];
+    assert(!!configStr);
+    assert(!configStr.includes("$cndi.comment"));
+    assert(configStr.includes("# This is a comment"));
   },
 );
 
