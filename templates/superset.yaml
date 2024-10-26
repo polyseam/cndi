@@ -68,12 +68,6 @@ prompts:
       - ==
       - true
 
-  - name: load_superset_examples
-    default: false
-    message: >-
-      Do you want to load example datasets and dashboards into superset?
-    type: Confirm
-
 outputs:
   cndi_config:
     cndi_version: v2
@@ -197,8 +191,8 @@ outputs:
           REDIS_PROTO: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_REDIS_PROTO)
           DB_HOST: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_HOST)
           DB_PORT: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_PORT)
-          DB_USER: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER)
-          DB_PASS: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
+          DB_USER: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_USER)
+          DB_PASS: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_USER_PASSWORD)
           DB_NAME: $cndi_on_ow.seal_secret_from_env_var(SUPERSET_POSTGRESQL_DB)
 
       external-dns-secret:
@@ -226,8 +220,6 @@ outputs:
                 enabled: true
           postgresql:
             enabled: false
-          init:
-            loadExamples: "{{ $cndi.get_prompt_response(load_superset_examples) }}"
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
