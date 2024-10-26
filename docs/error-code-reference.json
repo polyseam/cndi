@@ -524,6 +524,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/860"
   },
   {
+    "code": 16401,
+    "message": "failed to create repo, github credential issue",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/"
+  },
+  {
     "code": 1700,
     "message": "failed to spawn 'terraform init' during 'cndi show-outputs'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/903"

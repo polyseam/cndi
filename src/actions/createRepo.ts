@@ -123,7 +123,31 @@ export default async function createRepo(
     const createRepoOutput = await createRepoCmd.output();
     if (createRepoOutput.code !== 0) {
       await writeAll(Deno.stderr, createRepoOutput.stderr);
-      console.error(label, ccolors.error("failed to create repo"));
+      const ghCliErrorText = new TextDecoder().decode(createRepoOutput.stderr);
+      // brittle: relies on the error message from gh cli
+      if (ghCliErrorText.includes("401")) {
+        return new ErrOut([
+          ccolors.error("failed to create repo!\n"),
+          ccolors.error(
+            "please create your repo, set your repo secrets manually, then push your code!",
+          ),
+        ], {
+          code: 16401,
+          label,
+          id: "createRepo/!gh-repo-create/401",
+        });
+      }
+      return new ErrOut([
+        ccolors.error("failed to create repo\n"),
+        ccolors.error(
+          "please create your repo, set your repo secrets manually, then push your code!",
+        ),
+      ], {
+        code: 1602,
+        label,
+        id: "createRepo/!gh-repo-create/!401",
+        metadata: { ghCliErrorText },
+      });
     }
   } catch (e) {
     console.error("failed to create repo");
