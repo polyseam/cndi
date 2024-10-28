@@ -346,8 +346,48 @@
   },
   {
     "code": 918,
-    "message": "cndi_config invalid: taint on first node pool in aks is not allowed",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/905"
+    "message": "cndi_config invalid: node spec includes count alongside min_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1045"
+  },
+  {
+    "code": 919,
+    "message": "cndi_config invalid: node spec includes count with max_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1046"
+  },
+  {
+    "code": 920,
+    "message": "cndi_config invalid: node spec includes min_count without max_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1047"
+  },
+  {
+    "code": 921,
+    "message": "cndi_config invalid: node spec includes max_count without min_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1048"
+  },
+  {
+    "code": 922,
+    "message": "cndi_config invalid: node spec includes min_count which is not a number",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1049"
+  },
+  {
+    "code": 923,
+    "message": "cndi_config invalid: node spec includes max_count which is not a number",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1050"
+  },
+  {
+    "code": 924,
+    "message": "cndi_config invalid: node spec includes min_count of 0",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1051"
+  },
+  {
+    "code": 925,
+    "message": "cndi_config invalid: node spec includes max_count equal to min_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1052"
+  },
+  {
+    "code": 926,
+    "message": "cndi_config invalid: node spec includes max_count less than min_count",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1053"
   },
   {
     "code": 1000,
