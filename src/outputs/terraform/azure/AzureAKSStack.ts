@@ -135,6 +135,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         const count = nodeSpec.count || 1;
 
+        // reduce user intent to scaling configuration
+        // count /should/ never be assigned alongside min_count or max_count
         const scale = {
           nodeCount: count,
           maxCount: count,
@@ -147,7 +149,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
 
         if (nodeSpec.min_count) {
           scale.minCount = nodeSpec.min_count;
+          scale.nodeCount = nodeSpec.min_count;
         }
+
         const nodeTaints = nodeSpec.taints?.map((taint) =>
           `${taint.key}=${taint.value}:${
             getTaintEffectForDistribution(taint.effect, "aks") // taint.effect must be valid by now

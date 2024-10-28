@@ -322,9 +322,14 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     for (const nodeGroup of cndi_config.infrastructure.cndi.nodes) {
       const count = nodeGroup?.count || 1;
+
+      // reduce user intent to scaling configuration
+      // count /should/ never be assigned alongside min_count or max_count
+
       const maxCount = nodeGroup?.max_count;
       const minCount = nodeGroup?.min_count;
       const nodeGroupName = nodeGroup.name;
+
       const instanceType = nodeGroup?.instance_type ||
         DEFAULT_INSTANCE_TYPES.aws;
 
@@ -334,22 +339,20 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         DEFAULT_NODE_DISK_SIZE_MANAGED;
 
       const scalingConfig = {
-        desiredSize: minCount || count,
+        desiredSize: count,
         maxSize: count,
         minSize: count,
       };
-      if (count) {
-        scalingConfig.desiredSize = count;
+
+      if (minCount) {
+        scalingConfig.desiredSize = minCount;
+        scalingConfig.minSize = minCount;
       }
+
       if (maxCount) {
         scalingConfig.maxSize = maxCount;
       }
-      if (minCount) {
-        scalingConfig.minSize = minCount;
-      }
-      if (scalingConfig.desiredSize < scalingConfig.minSize) {
-        scalingConfig.desiredSize = scalingConfig.minSize;
-      }
+
       const taint = nodeGroup.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,

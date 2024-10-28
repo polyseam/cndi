@@ -56,7 +56,7 @@ export default function validateConfig(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has an unsupported"),
           ccolors.key_name('"cndi_version"'),
           ccolors.error("value. Only"),
@@ -81,7 +81,7 @@ export default function validateConfig(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"project_name"'),
         ccolors.error("key"),
@@ -100,7 +100,7 @@ export default function validateConfig(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but the"),
         ccolors.key_name('"project_name"'),
         ccolors.error("is not a valid slug"),
@@ -121,7 +121,7 @@ export default function validateConfig(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"provider"'),
         ccolors.error("key"),
@@ -140,7 +140,7 @@ export default function validateConfig(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has"),
           ccolors.key_name('"distribution"'),
           ccolors.error("set to"),
@@ -165,7 +165,7 @@ export default function validateConfig(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has"),
           ccolors.key_name('"infrastructure.cndi"'),
           ccolors.error("entries in clusterless mode"),
@@ -185,7 +185,7 @@ export default function validateConfig(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"distribution"'),
         ccolors.error("key"),
@@ -239,7 +239,7 @@ function validateInfrastructureComponentCndiNodes(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has at least one"),
           ccolors.key_name('"infrastructure.cndi.nodes"'),
           ccolors.error("entry that is missing a"),
@@ -254,6 +254,209 @@ function validateInfrastructureComponentCndiNodes(
       );
     }
 
+    const minType = typeof node?.min_count;
+    const maxType = typeof node?.max_count;
+
+    if (node.count) {
+      if (node.min_count) {
+        // min_count should not be specified along with count
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares both"),
+          ccolors.key_name("count"),
+          ccolors.error("and"),
+          ccolors.key_name("min_count"),
+          ccolors.error("values.\n"),
+          ccolors.key_name('"count"'),
+          ccolors.error(
+            "should only be set if you want to deploy a fixed number of nodes.",
+          ),
+        ], {
+          label,
+          code: 918,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].count&&min_count",
+        });
+      }
+
+      if (node.max_count) {
+        // max_count should not be specified along with count
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares both"),
+          ccolors.key_name('"count"'),
+          ccolors.error("and"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("values.\n"),
+          ccolors.key_name('"count"'),
+          ccolors.error(
+            "should only be set if you want to deploy a fixed number of nodes.",
+          ),
+        ], {
+          label,
+          code: 919,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].count&&max_count",
+        });
+      }
+    } else if (minType === "undefined" && maxType === "undefined") {
+      // do nothing because count, min_count, and max_count are not defined
+      // default to count = 1
+    } else {
+      if (maxType === "undefined") {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value but is missing a"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("value.\n"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("should be set to at least 1 if"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("is defined."),
+        ], {
+          label,
+          code: 920,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].max_count&&min_count",
+        });
+      }
+
+      if (minType === "undefined") {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("value but is missing a"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value.\n"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("should be set to at least 1 if"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("is defined."),
+        ], {
+          label,
+          code: 921,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].min_count&&max_count",
+        });
+      }
+
+      if (!(minType === "number")) {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value that is not a number.\n"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("should be a number greater than 0 if it is defined."),
+        ], {
+          label,
+          code: 922,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].min_count.type!=number",
+        });
+      }
+
+      if (!(maxType === "number")) {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("value that is not a number.\n"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("should be a number greater than 0 if it is defined."),
+        ], {
+          label,
+          code: 923,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].max_count.type!=number",
+        });
+      }
+
+      if (node.min_count === 0) {
+        // min_count should not be 0
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value of 0.\n"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("should be set to at least 1."),
+        ], {
+          label,
+          code: 924,
+          id: "validate/cndi_config/infrastructure.cndi.nodes[*].min_count===0",
+        });
+      }
+
+      if (node.max_count! === node.min_count!) {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("value that is equal to"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value.\n"),
+          ccolors.error("if you want to set a fixed number of nodes, use"),
+          ccolors.key_name('"count"'),
+          ccolors.error("instead"),
+        ], {
+          label,
+          code: 925,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].max_count===min_count",
+        });
+      }
+
+      if (node.max_count! < node.min_count!) {
+        return new ErrOut([
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has at least one"),
+          ccolors.key_name('"infrastructure.cndi.nodes"'),
+          ccolors.error("entry that delares a"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("value that is less than"),
+          ccolors.key_name('"min_count"'),
+          ccolors.error("value.\n"),
+          ccolors.key_name('"max_count"'),
+          ccolors.error("should be set to more than"),
+          ccolors.key_name('"min_count"'),
+        ], {
+          label,
+          code: 926,
+          id:
+            "validate/cndi_config/infrastructure.cndi.nodes[*].max_count<min_count",
+        });
+      }
+    }
+
     nodeNameSet.add(node.name);
 
     for (const taint of node.taints || []) {
@@ -261,7 +464,7 @@ function validateInfrastructureComponentCndiNodes(
         return new ErrOut(
           [
             ccolors.error("cndi_config file found was at "),
-            ccolors.user_input(`"${pathToConfig}"`),
+            ccolors.user_input(`"${pathToConfig}"\n`),
             ccolors.error("\nbut the"),
             ccolors.key_name('"infrastructure.cndi.nodes"'),
             ccolors.error("entry named"),
@@ -288,7 +491,7 @@ function validateInfrastructureComponentCndiNodes(
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.user_input(`"${pathToConfig}"\n`),
               ccolors.error("\nbut the"),
               ccolors.key_name('"infrastructure.cndi.nodes"'),
               ccolors.error("entry named"),
@@ -322,7 +525,7 @@ function validateInfrastructureComponentCndiNodes(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it has multiple "),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
         ccolors.error("entries with the same"),
@@ -344,7 +547,7 @@ function validateInfrastructureComponentCndiNodes(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it does not have any"),
         ccolors.key_name('"infrastructure.cndi.nodes"'),
         ccolors.error("entries"),
@@ -361,7 +564,7 @@ function validateInfrastructureComponentCndiNodes(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error(
             "but taints are not allowed on the first node in aks",
           ),
@@ -403,7 +606,7 @@ function validateInfrastructureComponentCndiNodes(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has a dev node with a"),
           ccolors.key_name("count"),
           ccolors.error("defined and not equal to"),
@@ -424,7 +627,7 @@ function validateInfrastructureComponentCndiNodes(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has a dev node with a"),
           ccolors.key_name("min_count"),
           ccolors.error("defined and not equal to"),
@@ -445,7 +648,7 @@ function validateInfrastructureComponentCndiNodes(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has a dev node with a"),
           ccolors.key_name("max_count"),
           ccolors.error("defined and not equal to"),
@@ -475,7 +678,7 @@ function validateInfrastructureSpec(
     return new ErrOut(
       [
         ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"`),
+        ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but it does not have the required"),
         ccolors.key_name('"infrastructure"'),
         ccolors.error("key"),
@@ -493,7 +696,7 @@ function validateInfrastructureSpec(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but it has"),
           ccolors.key_name('"infrastructure.cndi.keyless"'),
           ccolors.error("set to"),
@@ -522,7 +725,7 @@ function validateInfrastructureSpec(
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.user_input(`"${pathToConfig}"\n`),
               ccolors.error(
                 `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
               ),
@@ -541,7 +744,7 @@ function validateInfrastructureSpec(
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.user_input(`"${pathToConfig}"\n`),
               ccolors.error(
                 `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
               ),
@@ -559,7 +762,7 @@ function validateInfrastructureSpec(
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.user_input(`"${pathToConfig}"\n`),
               ccolors.error(
                 `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
               ),
@@ -576,7 +779,7 @@ function validateInfrastructureSpec(
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"`),
+              ccolors.user_input(`"${pathToConfig}"\n`),
               ccolors.error(
                 `but 'cndi_config.infrastructure.cndi.open_ports[${index}]' is missing the`,
               ),
@@ -596,7 +799,7 @@ function validateInfrastructureSpec(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("but"),
           ccolors.key_name('"infrastructure.cndi.open_ports"'),
           ccolors.error("must be an array of objects if set"),
@@ -620,7 +823,7 @@ function validateInfrastructureSpec(
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at"),
-          ccolors.user_input(`"${pathToConfig}"`),
+          ccolors.user_input(`"${pathToConfig}"\n`),
           ccolors.error("\nwith"),
           ccolors.key_name("infrastructure.cndi.cert_manager"),
           ccolors.error("present but missing one of the required keys:"),
