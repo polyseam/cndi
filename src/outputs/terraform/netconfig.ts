@@ -7,11 +7,12 @@ import {
   CNDIProvider,
 } from "src/types.ts";
 
-export default function getNetConfig(
+export function getNetConfig(
   cndi_config: CNDIConfig,
   provider: CNDIProvider,
 ) {
   let netconfig = cndi_config?.infrastructure?.cndi?.network;
+
   if (netconfig?.mode === "external") {
     if (provider === "azure") {
       netconfig = netconfig as CNDINetworkConfigExternalAzure;
