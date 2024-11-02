@@ -6,11 +6,19 @@ import {
   CompletionsCommand,
   ensureDirSync,
   HelpCommand,
+  // HelpHandler,
   homedir,
   path,
 } from "deps";
 import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
 import { ErrOut } from "errout";
+
+// import type {HelpHandler} from "deps";
+
+// const helpHandler: HelpHandler = function helpHandler(cmd, opt){
+//   console.log("helpHandler", cmd, opt)
+//   return cmd.getHelp();
+// }
 
 // commands
 import upgradeCommand from "src/commands/upgrade.ts";
@@ -22,9 +30,19 @@ import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";
 
-import { removeOldBinaryIfRequired } from "src/utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const label = ccolors.faded("\nsrc/cndi.ts:");
+
+// class CNDIHelpCommand extends HelpCommand {
+//   constructor(cmd?: Command) {
+//     super(cmd);
+//   }
+//   action() {
+//     this.action();
+//     console.log('after action')
+//   }
+// }
 
 export default async function cndi() {
   if (!deno_json?.version) {
@@ -77,15 +95,25 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
+    .globalOption("--first-time", "likely a users first execution", {
+      hidden: true,
+    })
     .command("create", createCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
-    .command("install", installCommand)
+    .command("install", installCommand) // backwards compatibility noop
     .command("show-outputs", showOutputsCommand)
     .command("completions", new CompletionsCommand().global())
     .command("help", new HelpCommand().global())
+    .helpOption("-h, --help", "help", {
+      action: async function (this) {
+        this.showHelp();
+        await emitExitEvent(0);
+      },
+      standalone: false,
+    })
     .parse(Deno.args);
 }
