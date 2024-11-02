@@ -70,7 +70,7 @@ main() {
     if [ "$shell_profile" = ".zshrc" ]; then
         echo "finalizing installation..."
         # running 'cndi --help' will save the user wait time on first run
-        $exe --help
+        $exe --help --welcome
         echo
         echo "cndi was installed successfully! Please restart your terminal."
         echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
@@ -84,15 +84,13 @@ main() {
         . "$HOME/$shell_profile"
         echo "finalizing installation..."
         # running 'cndi --help' will save the user wait time on first run
-        $exe --help
+        $exe --help --welcome
         echo
         echo "cndi was installed successfully! Please restart your terminal."
         echo "Need some help? Join our Discord https://cndi.run/di?utm_id=5096"
         echo
         exit 0
     fi
-
-
 }
 
 main "$@"
