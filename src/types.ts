@@ -231,7 +231,7 @@ interface CNDIPort {
   private?: boolean;
 }
 
-export type CNDINetworkMode = "encapsulated" | "external";
+export type CNDINetworkMode = "encapsulated" | "insert";
 
 export interface CNDINetworkConfigBase {
   mode?: CNDINetworkMode;
@@ -241,43 +241,26 @@ export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
   mode: "encapsulated";
 }
 
-export interface CNDINetworkConfigExternal extends CNDINetworkConfigBase {
-  mode: "external";
-}
+export type SubnetSpec = {
+  // The id of the subnet
+  id: string;
+};
 
-export interface CNDINetworkConfigExternalAWS
-  extends CNDINetworkConfigExternal {
-  aws: {
-    vpc_id: string;
-    primary_subnet: string;
-    private_subnets: Array<string>;
-  };
-}
-
-export interface CNDINetworkConfigExternalAzure
-  extends CNDINetworkConfigExternal {
-  azure: {
-    network_resource_id: string; // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
-    primary_subnet: string;
-    private_subnets: Array<string>;
-  };
-}
-
-export interface CNDINetworkConfigExternalGCP
-  extends CNDINetworkConfigExternal {
-  gcp: {
-    network_name: string;
-    primary_subnet: string;
-    private_subnets?: Array<string>;
-    project?: string;
-  };
+export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
+  mode: "insert";
+  /**
+   * The 'id' for the network to insert your cluster into.
+   */
+  id: string;
+  /**
+   * A set of one or more subnets to use for the cluster.
+   */
+  subnets: Array<SubnetSpec>;
 }
 
 export type CNDINetworkConfig =
   | CNDINetworkConfigEncapsulated
-  | CNDINetworkConfigExternalAWS
-  | CNDINetworkConfigExternalAzure
-  | CNDINetworkConfigExternalGCP;
+  | CNDINetworkConfigInsert;
 
 // https://github.com/bitnami/charts/blob/16f3174da9441d2bf6c2355ab0afe94d4a7a9e48/bitnami/external-dns/values.yaml#L112
 export type ExternalDNSProvider =

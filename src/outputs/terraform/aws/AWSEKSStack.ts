@@ -1,4 +1,9 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import {
+  CNDIConfig,
+  SubnetSpec,
+  TFBlocks,
+} from "src/types.ts";
+
 import {
   ARGOCD_HELM_VERSION,
   DEFAULT_INSTANCE_TYPES,
@@ -51,6 +56,9 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
+    const network = cndi_config?.infrastructure?.cndi?.network ||
+      { mode: "encapsulated" };
+
     const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
       this,
       "cndi_aws_efs_file_system",
@@ -66,7 +74,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`;
 
-    const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
+    const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
       this,
       "available-zones",
@@ -77,30 +85,42 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             values: ["opt-in-not-required"],
           },
         ],
+        state: "available",
       },
     );
 
-    const privateSubnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"];
+    let subnetIds: string | string[];
 
-    const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
-      name: `cndi-vpc_${project_name}`,
-      cidr: "10.0.0.0/16",
-      azs: availableByDefault.names.slice(0, 3),
-      createVpc: true,
-      privateSubnets,
-      publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
-      enableNatGateway: true,
-      singleNatGateway: true,
-      enableDnsHostnames: true,
-      publicSubnetTags: {
-        "kubernetes.io/role/elb": "1",
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-      privateSubnetTags: {
-        "kubernetes.io/role/internal-elb": "1",
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-    });
+    let vpcm: AwsVpcModule | undefined = undefined;
+    let vpcId: string;
+
+    if (network.mode === "encapsulated") {
+      vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
+        name: `cndi-vpc_${project_name}`,
+        cidr: "10.0.0.0/16",
+        azs: availabilityZones.names.slice(0, 3),
+        createVpc: true,
+        privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
+        publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
+        enableNatGateway: true,
+        singleNatGateway: true,
+        enableDnsHostnames: true,
+        publicSubnetTags: {
+          "kubernetes.io/role/elb": "1",
+          [`kubernetes.io/cluster/${project_name}`]: "owned",
+        },
+        privateSubnetTags: {
+          "kubernetes.io/role/internal-elb": "1",
+          [`kubernetes.io/cluster/${project_name}`]: "owned",
+        },
+      });
+
+      subnetIds = vpcm.privateSubnetsOutput;
+      vpcId = vpcm.vpcIdOutput;
+    } else if (network.mode === "insert") {
+      vpcId = network.id!;
+      subnetIds = network.subnets.map(({ id }: SubnetSpec) => id);
+    }
 
     const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
       this,
@@ -157,17 +177,19 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    // deno-lint-ignore no-explicit-any
-    const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
+    const EKSMDeps = [];
+
+    if (vpcm) EKSMDeps.push(vpcm);
 
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
-      dependsOn: [vpcm],
+      dependsOn: EKSMDeps,
       clusterName,
       clusterVersion: DEFAULT_K8S_VERSION,
       clusterEndpointPublicAccess: true,
       enableClusterCreatorAdminPermissions: true,
-      vpcId: vpcm.vpcIdOutput,
-      subnetIds: subnetIds,
+      vpcId: vpcId!,
+      // deno-lint-ignore no-explicit-any
+      subnetIds: subnetIds! as any,
       clusterAddons: {
         "aws-ebs-csi-driver": {
           serviceAccountRoleArn: iamAssumableRoleEbS.iamRoleArnOutput,
@@ -181,7 +203,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     });
 
     let subnetIdx = 0;
-    for (const _subnet of privateSubnets) {
+
+    for (const subnet of subnetIds!) {
+      const subnetId = (vpcm || false)
+        ? Fn.element(vpcm.privateSubnetsOutput, subnetIdx)
+        : subnet;
+
       const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
         .EfsMountTarget(
         this,
@@ -189,7 +216,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           fileSystemId: efsFs.id,
           securityGroups: [eksm.clusterPrimarySecurityGroupIdOutput],
-          subnetId: Fn.element(vpcm.privateSubnetsOutput, subnetIdx),
+          subnetId,
         },
       );
       subnetIdx++;
@@ -401,7 +428,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
           clusterName: eksm.clusterNameOutput,
-          subnetIds: subnetIds,
+          // deno-lint-ignore no-explicit-any
+          subnetIds: subnetIds! as any,
           amiType: "AL2_x86_64",
           instanceTypes: [instanceType],
           nodeGroupName,

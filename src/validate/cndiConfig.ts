@@ -715,6 +715,93 @@ function validateInfrastructureSpec(
     }
   }
 
+  const netconfig = infrastructure?.cndi?.network;
+
+  if (netconfig) {
+    const netconfigNotEmpty = Object.keys(netconfig).length > 0;
+
+    if (netconfigNotEmpty) {
+      if (netconfig.mode === "encapsulated") {
+        // do nothing
+      } else if (netconfig.mode === "insert") {
+        if (!netconfig.id) {
+          return new ErrOut(
+            [
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"\nwith`),
+              ccolors.error(
+                "cndi_config.infrastructure.cndi.network",
+              ),
+              ccolors.error("in"),
+              ccolors.key_name('"insert"'),
+              ccolors.error("mode"),
+              ccolors.error("but is missing the"),
+              ccolors.key_name('"id"'),
+              ccolors.error("key"),
+            ],
+            {
+              code: 911,
+              id: "validate/cndi_config/!network[id]",
+              label,
+            },
+          );
+        } else if (!netconfig.subnets) {
+          return new ErrOut(
+            [
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"\nwith`),
+              ccolors.error(
+                "cndi_config.infrastructure.cndi.network",
+              ),
+              ccolors.error("in"),
+              ccolors.key_name('"insert"'),
+              ccolors.error("mode"),
+              ccolors.error("but is missing the"),
+              ccolors.key_name('"subnet"'),
+              ccolors.error("array"),
+            ],
+            {
+              code: 911,
+              id: "validate/cndi_config/!network[id]",
+              label,
+            },
+          );
+        } else if (Array.isArray(netconfig.subnets)) {
+          const everySubnetHasId = netconfig.subnets.every((subnet) => {
+            return subnet.id && ((typeof subnet.id) === "string");
+          });
+
+          if (
+            everySubnetHasId
+          ) {
+            // do nothing
+          } else {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network.subnets",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("not every subnet has an"),
+                ccolors.key_name('"id"'),
+                ccolors.error("key"),
+              ],
+              {
+                code: 911,
+                id: "validate/cndi_config/!network[id]",
+                label,
+              },
+            );
+          }
+        }
+      }
+    }
+  }
+
   const open_ports = infrastructure?.cndi?.open_ports;
 
   if (open_ports) {
