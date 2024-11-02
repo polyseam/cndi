@@ -88,7 +88,7 @@ export default async function cndi() {
     .command("install", installCommand) // backwards compatibility noop
     .command("show-outputs", showOutputsCommand)
     .command("completions", new CompletionsCommand().global())
-    .helpOption("-h, --help", "help", {
+    .helpOption("-h, --help", "Show this help.", {
       action: async function (this) {
         this.showHelp();
         await emitExitEvent(0);
