@@ -1,7 +1,4 @@
-import {
-  CNDIConfig,
-  TFBlocks,
-} from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import { ccolors } from "deps";
 
@@ -35,6 +32,8 @@ import {
   patchAndStageTerraformFilesWithInput,
   useSshRepoAuth,
 } from "src/utils.ts";
+
+import { parseSubnetResourceId } from "./utils.ts";
 
 import { ErrOut } from "errout";
 
@@ -120,9 +119,20 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
       );
     } else if (network.mode === "insert") {
-      const id = network.subnets[0].id;
-      // deno-lint-ignore no-explicit-any
-      primary_subnet = { id } as any;
+      const { subnetName, resourceGroupName, vnetName } = parseSubnetResourceId(
+        network.subnets[0].id,
+      );
+
+      primary_subnet = new CDKTFProviderAzure.dataAzurermSubnet
+        .DataAzurermSubnet(
+        this,
+        "cndi_azure_subnet",
+        {
+          name: subnetName,
+          virtualNetworkName: vnetName,
+          resourceGroupName: resourceGroupName,
+        },
+      );
     } else {
       throw new Error(`unsupported network mode: ${JSON.stringify(network)}`);
     }
@@ -239,6 +249,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           // we could alternatively use podSubnetId to specify a different address space for pods
           networkPlugin: "azure",
           networkPolicy: "azure",
+          serviceCidr: "192.168.0.0/16",
+          dnsServiceIp: "192.168.10.0", // leave a few addresses at the start of the block
         },
         automaticChannelUpgrade: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
@@ -251,6 +263,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
+
         dependsOn: [this.rg],
       },
     );

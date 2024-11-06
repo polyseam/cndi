@@ -1,8 +1,4 @@
-import {
-  CNDIConfig,
-  SubnetSpec,
-  TFBlocks,
-} from "src/types.ts";
+import { CNDIConfig, SubnetSpec, TFBlocks } from "src/types.ts";
 
 import {
   ARGOCD_HELM_VERSION,

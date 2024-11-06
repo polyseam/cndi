@@ -1,5 +1,5 @@
-export function parseNetworkResourceId(networkResourceId: string) {
-  // /subscriptions/12345678/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
+export function parseSubnetResourceId(networkResourceId: string) {
+  // /subscriptions/16027ac8-8d35-45a5-9f0e-039ec792cfbe/resourceGroups/netconfig-insert-mode/providers/Microsoft.Network/virtualNetworks/insertion-target-vnet/subnets/my-subnet
   const [
     _leadingSlash,
     _subscriptions, // 'subscriptions'
@@ -9,12 +9,14 @@ export function parseNetworkResourceId(networkResourceId: string) {
     _providers, // 'providers'
     _provider, // 'Microsoft.Network'
     _virtualNetworks, // 'virtualNetworks'
-    virtualNetworkName, // 'my-vnet'
+    vnetName, // 'my-vnet'
+    _subnets, // 'subnets'
+    subnetName,
   ] = networkResourceId.split("/");
 
-  if (!resourceGroupName || !virtualNetworkName) {
+  if (!resourceGroupName || !vnetName || !subnetName) {
     throw new Error(`Invalid network resource id: ${networkResourceId}`);
   }
 
-  return { resourceGroupName, virtualNetworkName };
+  return { resourceGroupName, vnetName, subnetName };
 }
