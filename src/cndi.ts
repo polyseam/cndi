@@ -5,7 +5,6 @@ import {
   Command,
   CompletionsCommand,
   ensureDirSync,
-  HelpCommand,
   homedir,
   path,
 } from "deps";
@@ -22,7 +21,7 @@ import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";
 
-import { removeOldBinaryIfRequired } from "src/utils.ts";
+import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
 const label = ccolors.faded("\nsrc/cndi.ts:");
 
@@ -77,15 +76,26 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
+    .globalOption("--welcome", "a new user has arrived!", {
+      hidden: true,
+    })
     .command("create", createCommand)
     .command("init", initCommand)
     .command("overwrite", overwriteCommand)
     .command("run", runCommand)
     .command("destroy", destroyCommand)
     .command("upgrade", upgradeCommand)
-    .command("install", installCommand)
+    .command("install", installCommand) // backwards compatibility noop
     .command("show-outputs", showOutputsCommand)
     .command("completions", new CompletionsCommand().global())
-    .command("help", new HelpCommand().global())
+    .helpOption("-h, --help", "Show this help.", {
+      action: async function (this) {
+        this.showHelp();
+        await emitExitEvent(0);
+        Deno.exit(0);
+      },
+      standalone: false,
+      global: true,
+    })
     .parse(Deno.args);
 }
