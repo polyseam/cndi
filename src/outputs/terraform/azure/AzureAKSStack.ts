@@ -85,6 +85,15 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
+    // Calculate a multiplier for the VNet address space by multiplying
+    // the random integer (range 0-15) by 16. This local variable will
+    // be used in defining subnet address prefixes.
+    this.locals.address_space_random_multiplier_16 = new TerraformLocal(
+      this,
+      "cndi_address_space_random_multiplier_16",
+      "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
+    );
+
     let primary_subnet:
       | CDKTFProviderAzure.subnet.Subnet
       | CDKTFProviderAzure.dataAzurermSubnet.DataAzurermSubnet;
@@ -147,15 +156,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         min: 0,
         max: 15,
       },
-    );
-
-    // Calculate a multiplier for the VNet address space by multiplying
-    // the random integer (range 0-15) by 16. This local variable will
-    // be used in defining subnet address prefixes.
-    this.locals.address_space_random_multiplier_16 = new TerraformLocal(
-      this,
-      "cndi_address_space_random_multiplier_16",
-      "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
     );
 
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
