@@ -85,6 +85,18 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       },
     );
 
+    // Generate a random integer within the range 0 to 15.
+    // This will be used as a base multiplier for the VNet address space calculation.
+    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
+      .Integer(
+      this,
+      "cndi_random_integer_address_range_0_to_15",
+      {
+        min: 0,
+        max: 15,
+      },
+    );
+
     // Calculate a multiplier for the VNet address space by multiplying
     // the random integer (range 0-15) by 16. This local variable will
     // be used in defining subnet address prefixes.
@@ -146,18 +158,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       throw new Error(`unsupported network mode: ${JSON.stringify(network)}`);
     }
 
-    // Generate a random integer within the range 0 to 15.
-    // This will be used as a base multiplier for the VNet address space calculation.
-    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
-      .Integer(
-      this,
-      "cndi_random_integer_address_range_0_to_15",
-      {
-        min: 0,
-        max: 15,
-      },
-    );
-
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         const count = nodeSpec.count || 1;
@@ -199,7 +199,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
-          vnetSubnetId,
+          vnetSubnetId, // node pools
           tags,
           zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
         };
