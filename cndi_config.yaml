@@ -4,6 +4,12 @@ provider: aws # or 'gcp', 'azure'
 distribution: eks # or 'clusterless'
 infrastructure:
   cndi:
+    network:
+      mode: # 'insert' # or 'create'
+      vpc_id: hub-vpc-123
+      prefix: # defaults to '10.0.0.0/20'
+    #     private: false
+
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:

@@ -1,4 +1,4 @@
-import { CNDIConfig, SubnetSpec, TFBlocks } from "src/types.ts";
+import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   ARGOCD_HELM_VERSION,
@@ -19,7 +19,9 @@ import {
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
+  divideCIDRIntoSubnets,
   Fn,
+  parseNetworkConfig,
   stageCDKTFStack,
   TerraformLocal,
   TerraformOutput,
@@ -52,8 +54,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
-    const network = cndi_config?.infrastructure?.cndi?.network ||
-      { mode: "encapsulated" };
+    const network = parseNetworkConfig(cndi_config);
 
     const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
       this,
@@ -90,32 +91,83 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     let vpcm: AwsVpcModule | undefined = undefined;
     let vpcId: string;
 
+    const subnets = divideCIDRIntoSubnets(
+      network.subnet_address_space,
+      6,
+    );
+
+    const privateSubnets = subnets.slice(0, 3);
+    const publicSubnets = subnets.slice(3, 6);
+
+    const publicSubnetTags = {
+      "kubernetes.io/role/elb": "1",
+      [`kubernetes.io/cluster/${project_name}`]: "owned",
+    };
+
+    const privateSubnetTags = {
+      "kubernetes.io/role/internal-elb": "1",
+      [`kubernetes.io/cluster/${project_name}`]: "owned",
+    };
+
     if (network.mode === "encapsulated") {
       vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
         name: `cndi-vpc_${project_name}`,
-        cidr: "10.0.0.0/16",
+        cidr: network.vnet_address_space,
         azs: availabilityZones.names.slice(0, 3),
         createVpc: true,
-        privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
-        publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
+        privateSubnets,
+        publicSubnets,
         enableNatGateway: true,
         singleNatGateway: true,
         enableDnsHostnames: true,
-        publicSubnetTags: {
-          "kubernetes.io/role/elb": "1",
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-        },
-        privateSubnetTags: {
-          "kubernetes.io/role/internal-elb": "1",
-          [`kubernetes.io/cluster/${project_name}`]: "owned",
-        },
+        publicSubnetTags,
+        privateSubnetTags,
       });
 
       subnetIds = vpcm.privateSubnetsOutput;
       vpcId = vpcm.vpcIdOutput;
     } else if (network.mode === "insert") {
-      vpcId = network.id!;
-      subnetIds = network.subnets.map(({ id }: SubnetSpec) => id);
+      vpcId = network.vnet_identifier!;
+      subnetIds = [];
+
+      let ix = 0;
+      for (const cidrBlock of publicSubnets) {
+        new CDKTFProviderAWS.subnet.Subnet(
+          this,
+          `cndi_aws_subnet_${cidrBlock}`,
+          {
+            vpcId,
+            cidrBlock,
+            tags: {
+              Name: `cndi-public-subnet-${ix}_${project_name}`,
+              ...publicSubnetTags,
+            },
+            mapPublicIpOnLaunch: true,
+            availabilityZone: availabilityZones.names[ix],
+          },
+        );
+        ix++;
+      }
+
+      let iy = 0;
+      for (const cidrBlock of privateSubnets) {
+        const ps = new CDKTFProviderAWS.subnet.Subnet(
+          this,
+          `cndi_aws_subnet_${cidrBlock}`,
+          {
+            vpcId,
+            cidrBlock,
+            tags: {
+              Name: `cndi-private-subnet-${iy}_${project_name}`,
+              ...privateSubnetTags,
+            },
+            mapPublicIpOnLaunch: false,
+            availabilityZone: availabilityZones.names[iy],
+          },
+        );
+        subnetIds.push(ps.id);
+        iy++;
+      }
     }
 
     const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(

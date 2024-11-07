@@ -239,23 +239,22 @@ export interface CNDINetworkConfigBase {
 
 export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
   mode: "encapsulated";
+  vnet_address_space?: string;
+  subnet_address_space?: string;
+  vnet_identifier?: string; // Azure name; AWS ID, GCP
 }
-
-export type SubnetSpec = {
-  // The id of the subnet
-  id: string;
-};
 
 export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
   mode: "insert";
   /**
-   * The 'id' for the network to insert your cluster into.
+   * unique identifier for the network to create your cndi subnet in
    */
-  id: string;
+  vnet_identifier: string;
   /**
    * A set of one or more subnets to use for the cluster.
    */
-  subnets: Array<SubnetSpec>;
+  vnet_address_space?: string;
+  subnet_address_space?: string;
 }
 
 export type CNDINetworkConfig =

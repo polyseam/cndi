@@ -745,59 +745,84 @@ function validateInfrastructureSpec(
               label,
             },
           );
-        } else if (!netconfig.subnets) {
-          return new ErrOut(
-            [
-              ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"\nwith`),
-              ccolors.error(
-                "cndi_config.infrastructure.cndi.network",
-              ),
-              ccolors.error("in"),
-              ccolors.key_name('"insert"'),
-              ccolors.error("mode"),
-              ccolors.error("but is missing the"),
-              ccolors.key_name('"subnet"'),
-              ccolors.error("array"),
-            ],
-            {
-              code: 911,
-              id: "validate/cndi_config/!network[id]",
-              label,
-            },
-          );
-        } else if (Array.isArray(netconfig.subnets)) {
-          const everySubnetHasId = netconfig.subnets.every((subnet) => {
-            return subnet.id && ((typeof subnet.id) === "string");
-          });
-
-          if (
-            everySubnetHasId
-          ) {
-            // do nothing
-          } else {
+        } else if (netconfig.address_space) {
+          const [address, mask] = netconfig.address_space.split("/");
+          if (!address || !mask) {
             return new ErrOut(
               [
                 ccolors.error("cndi_config file found was at "),
                 ccolors.user_input(`"${pathToConfig}"\nwith`),
                 ccolors.error(
-                  "cndi_config.infrastructure.cndi.network.subnets",
+                  "cndi_config.infrastructure.cndi.network",
                 ),
                 ccolors.error("in"),
                 ccolors.key_name('"insert"'),
                 ccolors.error("mode"),
-                ccolors.error("not every subnet has an"),
-                ccolors.key_name('"id"'),
+                ccolors.error("but has an invalid"),
+                ccolors.key_name('"address_space"'),
                 ccolors.error("key"),
               ],
               {
                 code: 911,
-                id: "validate/cndi_config/!network[id]",
+                id: "validate/cndi_config/!network[address_space]",
                 label,
               },
             );
           }
         }
+        // } else if (!netconfig.subnets) {
+        //   return new ErrOut(
+        //     [
+        //       ccolors.error("cndi_config file found was at "),
+        //       ccolors.user_input(`"${pathToConfig}"\nwith`),
+        //       ccolors.error(
+        //         "cndi_config.infrastructure.cndi.network",
+        //       ),
+        //       ccolors.error("in"),
+        //       ccolors.key_name('"insert"'),
+        //       ccolors.error("mode"),
+        //       ccolors.error("but is missing the"),
+        //       ccolors.key_name('"subnet"'),
+        //       ccolors.error("array"),
+        //     ],
+        //     {
+        //       code: 911,
+        //       id: "validate/cndi_config/!network[id]",
+        //       label,
+        //     },
+        //   );
+        // } else if (Array.isArray(netconfig.subnets)) {
+        //   const everySubnetHasId = netconfig.subnets.every((subnet) => {
+        //     return subnet.id && ((typeof subnet.id) === "string");
+        //   });
+
+        //   if (
+        //     everySubnetHasId
+        //   ) {
+        //     // do nothing
+        //   } else {
+        //     return new ErrOut(
+        //       [
+        //         ccolors.error("cndi_config file found was at "),
+        //         ccolors.user_input(`"${pathToConfig}"\nwith`),
+        //         ccolors.error(
+        //           "cndi_config.infrastructure.cndi.network.subnets",
+        //         ),
+        //         ccolors.error("in"),
+        //         ccolors.key_name('"insert"'),
+        //         ccolors.error("mode"),
+        //         ccolors.error("not every subnet has an"),
+        //         ccolors.key_name('"id"'),
+        //         ccolors.error("key"),
+        //       ],
+        //       {
+        //         code: 911,
+        //         id: "validate/cndi_config/!network[id]",
+        //         label,
+        //       },
+        //     );
+        //   }
+        // }
       }
     }
   }
