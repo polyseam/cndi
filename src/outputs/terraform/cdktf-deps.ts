@@ -40,7 +40,7 @@ import { getPrettyJSONString, getStagingDirectory } from "src/utils.ts";
 import { path, walkSync } from "deps";
 import { ErrOut } from "errout";
 
-import { CNDIConfig, CNDINetwork } from "src/types.ts";
+import { CNDIConfig } from "src/types.ts";
 import {
   DEFAULT_SUBNET_ADDRESS_SPACE,
   DEFAULT_VNET_ADDRESS_SPACE,
@@ -84,15 +84,16 @@ type ParsedNetworkConfig = {
   vnet_address_space: string;
   mode: "insert";
 } | {
-  subnet_address_space: string;
-  vnet_address_space: string;
+  subnet_address_space?: string;
+  vnet_address_space?: string;
   mode: "encapsulated";
 };
 
 export function parseNetworkConfig(
   cndi_config: CNDIConfig,
 ): ParsedNetworkConfig {
-  const network: CNDINetwork = cndi_config?.infrastructure?.cndi?.network || {};
+  const network = cndi_config?.infrastructure?.cndi?.network ||
+    { mode: "encapsulated" };
 
   if (!network?.subnet_address_space) {
     network.subnet_address_space = DEFAULT_SUBNET_ADDRESS_SPACE;
@@ -102,13 +103,13 @@ export function parseNetworkConfig(
     network.vnet_address_space = DEFAULT_VNET_ADDRESS_SPACE;
   }
 
-  if (!network?.mode) {
-    network.mode = "encapsulated";
-  } else if (!network?.vnet_identifier) {
-    throw new Error(`Invalid network config: ${JSON.stringify(network)}`);
+  if (network.mode === "insert") {
+    if (!network?.vnet_identifier) {
+      throw new Error(`Invalid network config: ${JSON.stringify(network)}`);
+    }
   }
 
-  return network;
+  return network as ParsedNetworkConfig;
 }
 
 export function divideCIDRIntoSubnets(

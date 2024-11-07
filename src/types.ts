@@ -241,7 +241,6 @@ export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
   mode: "encapsulated";
   vnet_address_space?: string;
   subnet_address_space?: string;
-  vnet_identifier?: string; // Azure name; AWS ID, GCP
 }
 
 export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
