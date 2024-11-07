@@ -92,7 +92,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     let vpcId: string;
 
     const subnets = divideCIDRIntoSubnets(
-      network.subnet_address_space,
+      network.subnet_address_space!,
       6,
     );
 

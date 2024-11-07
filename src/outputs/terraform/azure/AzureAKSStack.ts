@@ -82,7 +82,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         {
           name: `cndi-azure-vnet-${project_name}`,
           resourceGroupName: this.rg.name,
-          addressSpace: [network.vnet_address_space],
+          addressSpace: [network.vnet_address_space!],
           location: this.rg.location,
           tags,
         },
@@ -106,7 +106,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
         virtualNetworkName: vnet.name,
         addressPrefixes: [
-          network.subnet_address_space,
+          network.subnet_address_space!,
         ],
       },
     );

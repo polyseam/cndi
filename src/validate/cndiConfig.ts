@@ -724,7 +724,7 @@ function validateInfrastructureSpec(
       if (netconfig.mode === "encapsulated") {
         // do nothing
       } else if (netconfig.mode === "insert") {
-        if (!netconfig.id) {
+        if (!netconfig.vnet_identifier) {
           return new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
@@ -745,8 +745,8 @@ function validateInfrastructureSpec(
               label,
             },
           );
-        } else if (netconfig.address_space) {
-          const [address, mask] = netconfig.address_space.split("/");
+        } else if (netconfig.subnet_address_space) {
+          const [address, mask] = netconfig.subnet_address_space.split("/");
           if (!address || !mask) {
             return new ErrOut(
               [

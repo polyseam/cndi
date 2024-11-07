@@ -132,7 +132,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       "cndi_google_compute_subnetwork",
       {
         name: truncateString(`cndi-compute-subnetwork-${project_name}`),
-        ipCidrRange: network.subnet_address_space,
+        ipCidrRange: network.subnet_address_space!,
         network: computeNetwork.selfLink,
         privateIpGoogleAccess: true,
         dependsOn: [computeNetwork],
