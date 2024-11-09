@@ -15,7 +15,7 @@ const showoutputsLabel = ccolors.faded("\nsrc/commands/showoutputs.ts:");
  * Shows terraform outputs pushing state
  */
 const showOutputsCommand = new Command()
-  .description(`Show outputs from the most recent run.`)
+  .description(`Show terraform outputs from the most recent run.`)
   .option("-p, --path <path:string>", "path to your cndi git repository", {
     default: Deno.cwd(),
   })
