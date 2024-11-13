@@ -47,8 +47,8 @@ const DEFAULT_OPEN_PORTS = [
   },
 ] as const;
 
-export const DEFAULT_SUBNET_ADDRESS_SPACE = "10.1.0.0/20";
 export const DEFAULT_VNET_ADDRESS_SPACE = "10.0.0.0/16";
+export const DEFAULT_SUBNET_ADDRESS_SPACE = "10.0.1.0/20";
 
 export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 

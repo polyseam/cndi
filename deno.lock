@@ -1257,6 +1257,7 @@
       "npm:lodash.get@4.4.2",
       "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2",
+      "npm:netmask@2.0.2",
       "npm:octokit@^3.1.2",
       "npm:simple-git@3.18.0",
       "npm:validator@13.11.0"

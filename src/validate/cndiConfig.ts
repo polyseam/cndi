@@ -1,4 +1,4 @@
-import { ccolors } from "deps";
+import { ccolors, Netmask } from "deps";
 import {
   CNDIConfig,
   CNDIDistribution,
@@ -7,7 +7,10 @@ import {
   CNDIProvider,
 } from "src/types.ts";
 import { isSlug } from "src/utils.ts";
+
 import {
+  DEFAULT_SUBNET_ADDRESS_SPACE,
+  DEFAULT_VNET_ADDRESS_SPACE,
   EFFECT_VALUES,
   NO_EXECUTE,
   NO_SCHEDULE,
@@ -40,6 +43,16 @@ interface Manifest {
   };
   [key: string]: unknown;
 }
+
+const isInAddressSpace = (
+  outerCidr = DEFAULT_VNET_ADDRESS_SPACE,
+  innerCidr = DEFAULT_SUBNET_ADDRESS_SPACE,
+) => {
+  const outerBlock = new Netmask(outerCidr);
+  const innerBlock = new Netmask(innerCidr);
+  console.log(outerBlock, innerBlock);
+  return outerBlock.contains(innerBlock);
+};
 
 // if the user's cndi_config.yaml can be statically analyzed to be critically invalid
 // we must catch it now before consuming resources and writing to the filesystem
@@ -736,7 +749,7 @@ function validateInfrastructureSpec(
               ccolors.key_name('"insert"'),
               ccolors.error("mode"),
               ccolors.error("but is missing the"),
-              ccolors.key_name('"id"'),
+              ccolors.key_name('"vnet_identifier"'),
               ccolors.error("key"),
             ],
             {
@@ -746,8 +759,10 @@ function validateInfrastructureSpec(
             },
           );
         } else if (netconfig.subnet_address_space) {
-          const [address, mask] = netconfig.subnet_address_space.split("/");
-          if (!address || !mask) {
+          const subnet_address_space = netconfig.subnet_address_space;
+          const [subnetAddress, subnetPrefixLength] = subnet_address_space
+            .split("/");
+          if (!subnetAddress || !subnetPrefixLength) {
             return new ErrOut(
               [
                 ccolors.error("cndi_config file found was at "),
@@ -769,60 +784,82 @@ function validateInfrastructureSpec(
               },
             );
           }
-        }
-        // } else if (!netconfig.subnets) {
-        //   return new ErrOut(
-        //     [
-        //       ccolors.error("cndi_config file found was at "),
-        //       ccolors.user_input(`"${pathToConfig}"\nwith`),
-        //       ccolors.error(
-        //         "cndi_config.infrastructure.cndi.network",
-        //       ),
-        //       ccolors.error("in"),
-        //       ccolors.key_name('"insert"'),
-        //       ccolors.error("mode"),
-        //       ccolors.error("but is missing the"),
-        //       ccolors.key_name('"subnet"'),
-        //       ccolors.error("array"),
-        //     ],
-        //     {
-        //       code: 911,
-        //       id: "validate/cndi_config/!network[id]",
-        //       label,
-        //     },
-        //   );
-        // } else if (Array.isArray(netconfig.subnets)) {
-        //   const everySubnetHasId = netconfig.subnets.every((subnet) => {
-        //     return subnet.id && ((typeof subnet.id) === "string");
-        //   });
 
-        //   if (
-        //     everySubnetHasId
-        //   ) {
-        //     // do nothing
-        //   } else {
-        //     return new ErrOut(
-        //       [
-        //         ccolors.error("cndi_config file found was at "),
-        //         ccolors.user_input(`"${pathToConfig}"\nwith`),
-        //         ccolors.error(
-        //           "cndi_config.infrastructure.cndi.network.subnets",
-        //         ),
-        //         ccolors.error("in"),
-        //         ccolors.key_name('"insert"'),
-        //         ccolors.error("mode"),
-        //         ccolors.error("not every subnet has an"),
-        //         ccolors.key_name('"id"'),
-        //         ccolors.error("key"),
-        //       ],
-        //       {
-        //         code: 911,
-        //         id: "validate/cndi_config/!network[id]",
-        //         label,
-        //       },
-        //     );
-        //   }
-        // }
+          if (subnetPrefixLength !== "20") {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("but has an invalid"),
+                ccolors.key_name('"subnet_mask"'),
+                ccolors.error("key"),
+              ],
+              {
+                code: 911,
+                id: "validate/cndi_config/!network[subnet_mask]",
+                label,
+              },
+            );
+          }
+
+          const vnet_address_space = netconfig?.vnet_address_space ||
+            DEFAULT_VNET_ADDRESS_SPACE;
+
+          const [vnetAddress, vnetPrefixLength] = vnet_address_space.split("/");
+
+          if (!vnetAddress || !vnetPrefixLength) {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("but has an invalid"),
+                ccolors.key_name('"vnet_address_space"'),
+                ccolors.error("key"),
+              ],
+              {
+                code: 911,
+                id: "validate/cndi_config/!network[vnet_address_space]",
+                label,
+              },
+            );
+          }
+
+          if (!isInAddressSpace(vnet_address_space, subnet_address_space)) {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("but the"),
+                ccolors.key_name('"subnet_address_space"'),
+                ccolors.error("is not a valid subspace of"),
+                ccolors.key_name('"vnet_address_space"'),
+              ],
+              {
+                code: 911,
+                id: "validate/cndi_config/!network[vnet_address_space]",
+                label,
+              },
+            );
+          }
+        }
       }
     }
   }
