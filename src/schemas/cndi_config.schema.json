@@ -114,6 +114,53 @@
           "required": ["nodes"],
           "additionalProperties": false,
           "properties": {
+            "network": {
+              "type": "object",
+              "description": "An object which defines the properties of the network in which your cluster will be deployed.",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": ["create", "insert"]
+                }
+              },
+              "if": {
+                "properties": {
+                  "mode": { "const": "create" }
+                }
+              },
+              "then": {
+                "additionalProperties": false,
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["create"]
+                  },
+                  "vnet_address_space": {
+                    "type": "string",
+                    "description": "The address space used to create your CNDI cluster virtual network in 'create' mode.",
+                    "default": "10.0.0.0/16"
+                  }
+                }
+              },
+              "else": {
+                "additionalProperties": false,
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["insert"]
+                  },
+                  "vnet_identifier": {
+                    "type": "string",
+                    "description": "The identifier of the virtual network which to deploy your cluster."
+                  },
+                  "subnet_address_space": {
+                    "type": "string",
+                    "description": "The address space used to create your CNDI cluster subnet in 'insert' mode.",
+                    "default": "10.0.0.0/20"
+                  }
+                }
+              }
+            },
             "functions": {
               "type": "object",
               "properties": {
