@@ -184,8 +184,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         },
       );
 
-
-
       let ix = 0;
       for (const cidrBlock of publicSubnets) {
         const publicSubnet = new CDKTFProviderAWS.subnet.Subnet(
@@ -221,12 +219,16 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
               },
             },
           );
-          
-          const _ngwRoute = new CDKTFProviderAWS.route.Route(this, "cndi_aws_route_ngw", {
-            routeTableId: privateRT.id,
-            destinationCidrBlock: "0.0.0.0/0",
-            natGatewayId: ngw.id,
-          })
+
+          const _ngwRoute = new CDKTFProviderAWS.route.Route(
+            this,
+            "cndi_aws_route_ngw",
+            {
+              routeTableId: privateRT.id,
+              destinationCidrBlock: "0.0.0.0/0",
+              natGatewayId: ngw.id,
+            },
+          );
         }
 
         new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(

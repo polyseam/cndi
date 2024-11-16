@@ -116,15 +116,28 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
     const network = parseNetworkConfig(cndi_config);
 
-    const computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
-      this,
-      "cndi_google_compute_network",
-      {
-        name: truncateString(`cndi-compute-network-${project_name}`),
-        autoCreateSubnetworks: false,
-        dependsOn: [projectServicesReady],
-      },
-    );
+    let computeNetwork:
+      | CDKTFProviderGCP.computeNetwork.ComputeNetwork
+      | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
+
+    if (network.mode === "encapsulated") {
+      computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: truncateString(`cndi-compute-network-${project_name}`),
+          autoCreateSubnetworks: false,
+          dependsOn: [projectServicesReady],
+        },
+      );
+    } else if (network.mode === "insert") {
+      computeNetwork = new CDKTFProviderGCP.dataGoogleComputeNetwork
+        .DataGoogleComputeNetwork(this, "cndi_google_compute_network", {
+        name: network.vnet_identifier,
+      });
+    } else {
+      throw new Error(`Invalid network mode: ${network.mode}`);
+    }
 
     const computeSubnet = new CDKTFProviderGCP.computeSubnetwork
       .ComputeSubnetwork(
@@ -135,7 +148,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ipCidrRange: network.subnet_address_space!,
         network: computeNetwork.selfLink,
         privateIpGoogleAccess: true,
-        dependsOn: [computeNetwork],
+        dependsOn: [computeNetwork!],
       },
     );
 
@@ -182,7 +195,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         removeDefaultNodePool: true,
         initialNodeCount: 1, // ^
         project: this.locals.gcp_project_id.asString,
-        dependsOn: [projectServicesReady, computeSubnet, computeNetwork],
+        dependsOn: [projectServicesReady, computeSubnet],
         network: computeNetwork.selfLink,
         subnetwork: computeSubnet.selfLink,
         deletionProtection: false,
