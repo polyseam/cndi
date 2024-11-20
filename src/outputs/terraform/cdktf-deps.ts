@@ -87,14 +87,14 @@ type ParsedNetworkConfig = {
 } | {
   subnet_address_space?: string;
   vnet_address_space?: string;
-  mode: "encapsulated";
+  mode: "create";
 };
 
 export function parseNetworkConfig(
   cndi_config: CNDIConfig,
 ): ParsedNetworkConfig {
   const network = cndi_config?.infrastructure?.cndi?.network ||
-    { mode: "encapsulated" };
+    { mode: "create" };
 
   if (!network?.subnet_address_space) {
     network.subnet_address_space = DEFAULT_SUBNET_ADDRESS_SPACE;

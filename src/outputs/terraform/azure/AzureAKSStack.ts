@@ -73,7 +73,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       | CDKTFProviderAzure.virtualNetwork.VirtualNetwork
       | CDKTFProviderAzure.dataAzurermVirtualNetwork.DataAzurermVirtualNetwork;
 
-    if (network.mode === "encapsulated") {
+    if (network.mode === "create") {
       // Create a virtual network (VNet) in Azure with a dynamic address space.
       // The address space is partially determined by the random integer generated above.
       vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(

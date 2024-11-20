@@ -111,7 +111,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     console.log("network.mode", network.mode);
 
-    if (network.mode === "encapsulated") {
+    if (network.mode === "create") {
       vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
         name: `cndi-vpc_${project_name}`,
         cidr: network.vnet_address_space,

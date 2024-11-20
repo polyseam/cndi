@@ -734,7 +734,7 @@ function validateInfrastructureSpec(
     const netconfigNotEmpty = Object.keys(netconfig).length > 0;
 
     if (netconfigNotEmpty) {
-      if (netconfig.mode === "encapsulated") {
+      if (netconfig.mode === "create") {
         // do nothing
       } else if (netconfig.mode === "insert") {
         if (!netconfig.vnet_identifier) {

@@ -231,14 +231,14 @@ interface CNDIPort {
   private?: boolean;
 }
 
-export type CNDINetworkMode = "encapsulated" | "insert";
+export type CNDINetworkMode = "create" | "insert";
 
 export interface CNDINetworkConfigBase {
   mode?: CNDINetworkMode;
 }
 
-export interface CNDINetworkConfigEncapsulated extends CNDINetworkConfigBase {
-  mode: "encapsulated";
+export interface CNDINetworkConfigcreate extends CNDINetworkConfigBase {
+  mode: "create";
   vnet_address_space?: string;
   subnet_address_space?: string;
 }
@@ -257,7 +257,7 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
 }
 
 export type CNDINetworkConfig =
-  | CNDINetworkConfigEncapsulated
+  | CNDINetworkConfigcreate
   | CNDINetworkConfigInsert;
 
 // https://github.com/bitnami/charts/blob/16f3174da9441d2bf6c2355ab0afe94d4a7a9e48/bitnami/external-dns/values.yaml#L112

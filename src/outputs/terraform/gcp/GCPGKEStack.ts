@@ -120,7 +120,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       | CDKTFProviderGCP.computeNetwork.ComputeNetwork
       | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
 
-    if (network.mode === "encapsulated") {
+    if (network.mode === "create") {
       computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
         this,
         "cndi_google_compute_network",
