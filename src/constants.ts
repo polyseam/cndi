@@ -9,6 +9,7 @@ const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 const EXTERNAL_DNS_VERSION = "6.35.0";
 const CERT_MANAGER_VERSION = "1.14.3";
 const NGINX_VERSION = "4.8.3";
+const EDGE_RUNTIME_VERSION = "1.62.2";
 
 const POLYSEAM_TEMPLATE_DIRECTORY_URL =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
@@ -46,6 +47,9 @@ const DEFAULT_OPEN_PORTS = [
     number: 22,
   },
 ] as const;
+
+export const DEFAULT_VNET_ADDRESS_SPACE = "10.0.0.0/16";
+export const DEFAULT_SUBNET_ADDRESS_SPACE = "10.0.0.0/20";
 
 export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 
@@ -131,6 +135,7 @@ export {
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
   DEFAULT_OPEN_PORTS,
+  EDGE_RUNTIME_VERSION,
   EXTERNAL_DNS_VERSION,
   KNOWN_TEMPLATES,
   KUBESEAL_VERSION,

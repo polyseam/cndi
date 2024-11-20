@@ -19,6 +19,8 @@ exceptions if the goal is to deploy some other type of infrastructure.
 
 ## infrastructure
 
+### basic usage
+
 CNDI will use the `provider` and `distribution` to determine which Stack to
 deploy, including a group of 3 Kubernetes cluster nodes with a provided
 `instance_type` of
@@ -40,7 +42,69 @@ infrastructure:
 
 By running this configuration, CNDI will deploy a Kubernetes cluster with 3
 nodes on [EKS](https://aws.amazon.com/eks/) including some platform features,
-but on it's own won't do very much!
+but on it's own won't do very much without [applications](#applications).
+
+### advanced usage
+
+**`infrastructure.cndi.network`**
+
+Generally CNDI will create a VPC and subnets for you, but if you need to point
+to some existing netwoek components you can do so with the `network` key.
+
+```yaml
+project_name: my-postgres-project
+cndi_version: v2
+provider: aws
+distribution: eks
+infrastructure:
+  cndi:
+    network:
+      mode: existing
+      id: vpc-1234567890abcdef0
+      subnets:
+        - id: subnet-1234567890abcdef0,
+        - id: subnet-1234567890abcdef1
+
+    nodes: [...]
+```
+
+**terraform passthru**
+
+If you'd like to go beyond basic infrastructure parameters, this section will
+discuss some elements of `infrastructure` config which can grant you complete
+control over your cluster and it's infrastructure.
+
+The first new tool is that the `infrastructure` key can optionally include a
+`terraform` section. This is an object which corresponds to the shape of the
+`cndi/terraform/cdk.tf.json` file we generate on your behalf. This means you can
+add keys which we will _merge_ into that generated terraform artifact. We call
+this feature _terraform passthru_ and it is probably best thought of as an
+escape hatch.
+
+For a quick example, lets consider how we might add an
+[S3 bucket](https://aws.amazon.com/s3) to our `cndi_config`:
+
+```yaml
+project_name: my-postgres-project
+cndi_version: v2
+provider: aws
+distribution: eks
+infrastructure:
+  terraform:
+    resource:
+      aws_s3_bucket:
+        my_pg_bucket:
+          bucket: pg-backups-bucket
+  cndi:
+    nodes:
+      - name: postgres-nodes
+        count: 3
+        instance_type: t3.medium
+```
+
+Remember that _terraform passthru_ is used when there is no existing
+`infrastructure.cndi` component, `application` or `cluster_manifest` available
+to accomplish your goal.
 
 ## applications
 

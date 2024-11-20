@@ -30,7 +30,7 @@ const echoDestroy = (options: EchoDestroyOptions) => {
  */
 const destroyCommand = new Command()
   .description(
-    `Destroy cluster infrastructure corresponding to project files.`,
+    `Destroy cndi cluster.`,
   )
   .env(
     "GIT_REPO=<value:string>",

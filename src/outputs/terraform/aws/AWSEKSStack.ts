@@ -1,4 +1,5 @@
 import { CNDIConfig, TFBlocks } from "src/types.ts";
+
 import {
   ARGOCD_HELM_VERSION,
   DEFAULT_INSTANCE_TYPES,
@@ -18,7 +19,9 @@ import {
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
+  divideCIDRIntoSubnets,
   Fn,
+  parseNetworkConfig,
   stageCDKTFStack,
   TerraformLocal,
   TerraformOutput,
@@ -51,6 +54,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const project_name = this.locals.cndi_project_name.asString;
 
+    const network = parseNetworkConfig(cndi_config);
+
     const efsFs = new CDKTFProviderAWS.efsFileSystem.EfsFileSystem(
       this,
       "cndi_aws_efs_file_system",
@@ -66,7 +71,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const efsRoleName = `AmazonEKSTFEFSCSIRole-${clusterName}`;
 
-    const availableByDefault = new CDKTFProviderAWS.dataAwsAvailabilityZones
+    const availabilityZones = new CDKTFProviderAWS.dataAwsAvailabilityZones
       .DataAwsAvailabilityZones(
       this,
       "available-zones",
@@ -77,30 +82,189 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
             values: ["opt-in-not-required"],
           },
         ],
+        state: "available",
       },
     );
 
-    const privateSubnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"];
+    let privateSubnetIds: string | string[];
 
-    const vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
-      name: `cndi-vpc_${project_name}`,
-      cidr: "10.0.0.0/16",
-      azs: availableByDefault.names.slice(0, 3),
-      createVpc: true,
-      privateSubnets,
-      publicSubnets: ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"],
-      enableNatGateway: true,
-      singleNatGateway: true,
-      enableDnsHostnames: true,
-      publicSubnetTags: {
-        "kubernetes.io/role/elb": "1",
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-      privateSubnetTags: {
-        "kubernetes.io/role/internal-elb": "1",
-        [`kubernetes.io/cluster/${project_name}`]: "owned",
-      },
-    });
+    let vpcm: AwsVpcModule | undefined = undefined;
+    let vpcId: string;
+
+    const subnets = divideCIDRIntoSubnets(
+      network.subnet_address_space!,
+      6,
+    );
+
+    const privateSubnets = subnets.slice(0, 3);
+    const publicSubnets = subnets.slice(3, 6);
+
+    const publicSubnetTags = {
+      "kubernetes.io/role/elb": "1",
+      [`kubernetes.io/cluster/${project_name}`]: "owned",
+    };
+
+    const privateSubnetTags = {
+      "kubernetes.io/role/internal-elb": "1",
+      [`kubernetes.io/cluster/${project_name}`]: "owned",
+    };
+
+    if (network.mode === "create") {
+      vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
+        name: `cndi-vpc_${project_name}`,
+        cidr: network.vnet_address_space,
+        azs: availabilityZones.names.slice(0, 3),
+        createVpc: true,
+        privateSubnets,
+        publicSubnets,
+        enableNatGateway: true,
+        singleNatGateway: true,
+        enableDnsHostnames: true,
+        publicSubnetTags,
+        privateSubnetTags,
+      });
+
+      privateSubnetIds = vpcm.privateSubnetsOutput;
+
+      vpcId = vpcm.vpcIdOutput;
+    } else if (network.mode === "insert") {
+      vpcId = network.vnet_identifier!;
+      privateSubnetIds = [];
+
+      const igw = new CDKTFProviderAWS.internetGateway.InternetGateway(
+        this,
+        "cndi_aws_internet_gateway",
+        {
+          vpcId: vpcId,
+          tags: {
+            Name: `cndi-igw_${project_name}`,
+          },
+        },
+      );
+
+      const publicRT = new CDKTFProviderAWS.routeTable.RouteTable(
+        this,
+        `cndi_aws_route_table_public`,
+        {
+          vpcId: vpcId,
+          tags: {
+            Name: `cndi-public-route-table_${project_name}`,
+          },
+        },
+      );
+
+      const privateRT = new CDKTFProviderAWS.routeTable.RouteTable(
+        this,
+        `cndi_aws_route_table_private`,
+        {
+          vpcId: vpcId,
+          tags: {
+            Name: `cndi-private-route-table_${project_name}`,
+          },
+        },
+      );
+
+      const _igwRoute = new CDKTFProviderAWS.route.Route(
+        this,
+        `cndi_aws_route_igw_public`,
+        {
+          routeTableId: publicRT.id,
+          destinationCidrBlock: "0.0.0.0/0",
+          gatewayId: igw.id,
+          timeouts: {
+            create: "5m", // from VPCM GitHub Repo
+          },
+        },
+      );
+
+      let ix = 0;
+      for (const cidrBlock of publicSubnets) {
+        const publicSubnet = new CDKTFProviderAWS.subnet.Subnet(
+          this,
+          `cndi_aws_subnet_public_${ix}`,
+          {
+            vpcId,
+            cidrBlock,
+            tags: {
+              Name: `cndi-public-subnet-${ix}_${project_name}`,
+              ...publicSubnetTags,
+            },
+            mapPublicIpOnLaunch: true,
+            availabilityZone: Fn.element(availabilityZones.names, ix),
+          },
+        );
+
+        if (ix === 0) {
+          // create nat gateway and eip in first public subnet
+          const eip = new CDKTFProviderAWS.eip.Eip(this, "cndi_aws_eip", {
+            tags: {
+              Name: `cndi-eip_${project_name}`,
+            },
+          });
+          const ngw = new CDKTFProviderAWS.natGateway.NatGateway(
+            this,
+            "cndi_aws_nat_gateway",
+            {
+              subnetId: publicSubnet.id,
+              allocationId: eip.id,
+              tags: {
+                Name: `cndi-ngw_${project_name}`,
+              },
+            },
+          );
+
+          const _ngwRoute = new CDKTFProviderAWS.route.Route(
+            this,
+            "cndi_aws_route_ngw",
+            {
+              routeTableId: privateRT.id,
+              destinationCidrBlock: "0.0.0.0/0",
+              natGatewayId: ngw.id,
+            },
+          );
+        }
+
+        new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+          this,
+          `cndi_aws_route_table_association_public_${ix}`,
+          {
+            routeTableId: publicRT.id,
+            subnetId: publicSubnet.id,
+          },
+        );
+        ix++;
+      }
+
+      let iy = 0;
+      for (const cidrBlock of privateSubnets) {
+        const ps = new CDKTFProviderAWS.subnet.Subnet(
+          this,
+          `cndi_aws_subnet_private_${iy}`,
+          {
+            vpcId,
+            cidrBlock,
+            tags: {
+              Name: `cndi-private-subnet-${iy}_${project_name}`,
+              ...privateSubnetTags,
+            },
+            mapPublicIpOnLaunch: false,
+            availabilityZone: Fn.element(availabilityZones.names, iy),
+          },
+        );
+        privateSubnetIds.push(ps.id);
+        new CDKTFProviderAWS.routeTableAssociation.RouteTableAssociation(
+          this,
+          `cndi_aws_route_table_association_private_${iy}`,
+          {
+            routeTableId: privateRT.id,
+            subnetId: ps.id,
+          },
+        );
+        iy++;
+      }
+    } else {
+      throw new Error(`Invalid network mode ${network?.["mode"]}`);
+    }
 
     const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(
       this,
@@ -157,17 +321,19 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       },
     );
 
-    // deno-lint-ignore no-explicit-any
-    const subnetIds = vpcm.privateSubnetsOutput as any; // this will actually be "${module.vpc.private_subnets}"
+    const EKSMDeps = [];
+
+    if (vpcm) EKSMDeps.push(vpcm);
 
     const eksm = new AwsEksModule(this, "cndi_aws_eks_module", {
-      dependsOn: [vpcm],
+      dependsOn: EKSMDeps,
       clusterName,
       clusterVersion: DEFAULT_K8S_VERSION,
       clusterEndpointPublicAccess: true,
       enableClusterCreatorAdminPermissions: true,
-      vpcId: vpcm.vpcIdOutput,
-      subnetIds: subnetIds,
+      vpcId: vpcId!,
+      // deno-lint-ignore no-explicit-any
+      subnetIds: privateSubnetIds! as any,
       clusterAddons: {
         "aws-ebs-csi-driver": {
           serviceAccountRoleArn: iamAssumableRoleEbS.iamRoleArnOutput,
@@ -181,18 +347,35 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
     });
 
     let subnetIdx = 0;
-    for (const _subnet of privateSubnets) {
-      const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
-        .EfsMountTarget(
-        this,
-        `cndi_aws_efs_mount_target_${subnetIdx}`,
-        {
-          fileSystemId: efsFs.id,
-          securityGroups: [eksm.clusterPrimarySecurityGroupIdOutput],
-          subnetId: Fn.element(vpcm.privateSubnetsOutput, subnetIdx),
-        },
-      );
-      subnetIdx++;
+
+    if (vpcm) {
+      for (const _subnet of privateSubnets) {
+        const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
+          .EfsMountTarget(
+          this,
+          `cndi_aws_efs_mount_target_${subnetIdx}`,
+          {
+            fileSystemId: efsFs.id,
+            securityGroups: [eksm.clusterPrimarySecurityGroupIdOutput],
+            subnetId: Fn.element(vpcm.privateSubnetsOutput, subnetIdx),
+          },
+        );
+        subnetIdx++;
+      }
+    } else {
+      for (const subnetId of privateSubnetIds!) {
+        const _efsMountTarget = new CDKTFProviderAWS.efsMountTarget
+          .EfsMountTarget(
+          this,
+          `cndi_aws_efs_mount_target_${subnetIdx}`,
+          {
+            fileSystemId: efsFs.id,
+            securityGroups: [eksm.clusterPrimarySecurityGroupIdOutput],
+            subnetId,
+          },
+        );
+        subnetIdx++;
+      }
     }
 
     const eksNodeGroupRole = new CDKTFProviderAWS.iamRole.IamRole(
@@ -244,6 +427,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         role: eksNodeGroupRole.name,
       },
     );
+
     const ebsEfsPolicy = new CDKTFProviderAWS.iamPolicy.IamPolicy(
       this,
       "cndi_aws_iam_policy_ebs_efs",
@@ -312,6 +496,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         role: eksNodeGroupRole.name,
       },
     );
+
     const eksManagedNodeGroups: Record<
       string,
       CDKTFProviderAWS.eksNodeGroup.EksNodeGroup
@@ -401,7 +586,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         `cndi_aws_eks_managed_node_group_${nodeGroupIndex}`,
         {
           clusterName: eksm.clusterNameOutput,
-          subnetIds: subnetIds,
+          // deno-lint-ignore no-explicit-any
+          subnetIds: privateSubnetIds! as any,
           amiType: "AL2_x86_64",
           instanceTypes: [instanceType],
           nodeGroupName,

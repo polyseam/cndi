@@ -7,13 +7,12 @@ import {
   CDKTFProviderAzure,
   CDKTFProviderHelm,
   CDKTFProviderKubernetes,
-  CDKTFProviderRandom,
   CDKTFProviderTime,
   CDKTFProviderTls,
   Construct,
   Fn,
+  parseNetworkConfig,
   stageCDKTFStack,
-  TerraformLocal,
   TerraformOutput,
   TerraformVariable,
 } from "cdktf-deps";
@@ -30,7 +29,6 @@ import {
   getCDKTFAppConfig,
   getTaintEffectForDistribution,
   patchAndStageTerraformFilesWithInput,
-  resolveCNDIPorts,
   useSshRepoAuth,
 } from "src/utils.ts";
 
@@ -64,61 +62,44 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     new CDKTFProviderTls.provider.TlsProvider(this, "cndi_tls_provider", {});
 
     const project_name = this.locals.cndi_project_name.asString;
-    const _open_ports = resolveCNDIPorts(cndi_config);
-    // Generate a random integer within the range 0 to 255.
-    // This is used for defining a part of the VNet address space.
-    const randomIntegerAddressRange0to255 = new CDKTFProviderRandom.integer
-      .Integer(
-      this,
-      "cndi_random_integer_address_range_0_to_255",
-      {
-        min: 0,
-        max: 255,
-      },
-    );
 
     const tags = {
       CNDIProject: project_name,
     };
 
-    // Generate a random integer within the range 0 to 15.
-    // This will be used as a base multiplier for the VNet address space calculation.
-    const _randomIntegerAddressRange0to15 = new CDKTFProviderRandom.integer
-      .Integer(
-      this,
-      "cndi_random_integer_address_range_0_to_15",
-      {
-        min: 0,
-        max: 15,
-      },
-    );
+    const network = parseNetworkConfig(cndi_config);
 
-    // Calculate a multiplier for the VNet address space by multiplying
-    // the random integer (range 0-15) by 16. This local variable will
-    // be used in defining subnet address prefixes.
-    this.locals.address_space_random_multiplier_16 = new TerraformLocal(
-      this,
-      "cndi_address_space_random_multiplier_16",
-      "${random_integer.cndi_random_integer_address_range_0_to_15.result*16}",
-    );
+    let vnet:
+      | CDKTFProviderAzure.virtualNetwork.VirtualNetwork
+      | CDKTFProviderAzure.dataAzurermVirtualNetwork.DataAzurermVirtualNetwork;
 
-    // Create a virtual network (VNet) in Azure with a dynamic address space.
-    // The address space is partially determined by the random integer generated above.
-    const vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
-      this,
-      "cndi_azure_vnet",
-      {
-        name: `cndi-azure-vnet-${project_name}`,
+    if (network.mode === "create") {
+      // Create a virtual network (VNet) in Azure with a dynamic address space.
+      // The address space is partially determined by the random integer generated above.
+      vnet = new CDKTFProviderAzure.virtualNetwork.VirtualNetwork(
+        this,
+        "cndi_azure_vnet",
+        {
+          name: `cndi-azure-vnet-${project_name}`,
+          resourceGroupName: this.rg.name,
+          addressSpace: [network.vnet_address_space!],
+          location: this.rg.location,
+          tags,
+        },
+      );
+    } else if (network.mode === "insert") {
+      vnet = new CDKTFProviderAzure.dataAzurermVirtualNetwork
+        .DataAzurermVirtualNetwork(this, "cndi_azure_vnet", {
+        name: network.vnet_identifier,
         resourceGroupName: this.rg.name,
-        addressSpace: [`10.${randomIntegerAddressRange0to255.id}.0.0/16`],
-        location: this.rg.location,
-        tags,
-      },
-    );
+      });
+    } else {
+      // should be unreachable because config is validated upstream
+      throw new Error(`Invalid network mode ${network?.["mode"]}`);
+    }
 
     // Create a subnet within the above VNet.
-    // The subnet address prefix is dynamically calculated using the address space multiplier.
-    const subnet = new CDKTFProviderAzure.subnet.Subnet(
+    const primary_subnet = new CDKTFProviderAzure.subnet.Subnet(
       this,
       "cndi_azure_subnet",
       {
@@ -126,7 +107,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
         virtualNetworkName: vnet.name,
         addressPrefixes: [
-          `10.${randomIntegerAddressRange0to255.id}.${this.locals.address_space_random_multiplier_16}.0/20`,
+          network.subnet_address_space!,
         ],
       },
     );
@@ -134,6 +115,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
     const nodePools: Array<AnonymousClusterNodePoolConfig> = cndi_config
       .infrastructure.cndi.nodes.map((nodeSpec) => {
         const count = nodeSpec.count || 1;
+        const vnetSubnetId = primary_subnet.id;
 
         // reduce user intent to scaling configuration
         // count /should/ never be assigned alongside min_count or max_count
@@ -171,14 +153,14 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskType: "Managed",
           enableAutoScaling: true,
           maxPods: 110,
-          vnetSubnetId: subnet.id,
+          vnetSubnetId, // node pools
           tags,
           zones: [DEFAULT_AZURE_NODEPOOL_ZONE],
         };
         return nodePoolSpec;
       });
 
-    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec
+    const defaultNodePool = nodePools.shift()!; // first nodePoolSpec array entry is the default
 
     this.variables.arm_client_id = new TerraformVariable(
       this,
@@ -216,8 +198,13 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         dnsPrefix: `cndi-aks-${project_name}`,
         networkProfile: {
           loadBalancerSku: "standard",
+          // Azure CNI= networkPlugin: "azure"
+          // in this mode pods share address space with nodes (vnetSubnetId)
+          // we could alternatively use podSubnetId to specify a different address space for pods
           networkPlugin: "azure",
           networkPolicy: "azure",
+          serviceCidr: "192.168.0.0/16",
+          dnsServiceIp: "192.168.10.0", // leave a few addresses at the start of the block
         },
         automaticChannelUpgrade: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
@@ -230,6 +217,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
+
+        //
         dependsOn: [this.rg],
       },
     );

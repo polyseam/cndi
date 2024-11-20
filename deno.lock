@@ -63,6 +63,7 @@
     "npm:lodash.get@4.4.2": "4.4.2",
     "npm:lodash.set@4.3.2": "4.3.2",
     "npm:lodash.unset@4.5.2": "4.5.2",
+    "npm:netmask@2.0.2": "2.0.2",
     "npm:octokit@^3.1.2": "3.2.1_@octokit+core@5.2.0",
     "npm:simple-git@3.18.0": "3.18.0",
     "npm:validator@13.11.0": "13.11.0"
@@ -1030,6 +1031,9 @@
     "ms@2.1.2": {
       "integrity": "sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w=="
     },
+    "netmask@2.0.2": {
+      "integrity": "sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg=="
+    },
     "normalize-path@3.0.0": {
       "integrity": "sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA=="
     },
@@ -1253,6 +1257,7 @@
       "npm:lodash.get@4.4.2",
       "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2",
+      "npm:netmask@2.0.2",
       "npm:octokit@^3.1.2",
       "npm:simple-git@3.18.0",
       "npm:validator@13.11.0"

@@ -231,6 +231,35 @@ interface CNDIPort {
   private?: boolean;
 }
 
+export type CNDINetworkMode = "create" | "insert";
+
+export interface CNDINetworkConfigBase {
+  mode?: CNDINetworkMode;
+}
+
+export interface CNDINetworkConfigcreate extends CNDINetworkConfigBase {
+  mode: "create";
+  vnet_address_space?: string;
+  subnet_address_space?: string;
+}
+
+export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
+  mode: "insert";
+  /**
+   * unique identifier for the network to create your cndi subnet in
+   */
+  vnet_identifier: string;
+  /**
+   * A set of one or more subnets to use for the cluster.
+   */
+  vnet_address_space?: string;
+  subnet_address_space?: string;
+}
+
+export type CNDINetworkConfig =
+  | CNDINetworkConfigcreate
+  | CNDINetworkConfigInsert;
+
 // https://github.com/bitnami/charts/blob/16f3174da9441d2bf6c2355ab0afe94d4a7a9e48/bitnami/external-dns/values.yaml#L112
 export type ExternalDNSProvider =
   | "akamai"
@@ -260,6 +289,7 @@ export type CNDIDistribution =
 
 export type CNDIInfrastructure = {
   cndi: {
+    network: CNDINetworkConfig;
     functions?: {
       hostname?: string;
     };

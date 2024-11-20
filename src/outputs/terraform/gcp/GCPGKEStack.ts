@@ -9,6 +9,7 @@ import {
   CDKTFProviderTls,
   Construct,
   Fn,
+  parseNetworkConfig,
   stageCDKTFStack,
   TerraformOutput,
 } from "cdktf-deps";
@@ -113,25 +114,42 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
-    const network = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
-      this,
-      "cndi_google_compute_network",
-      {
-        name: truncateString(`cndi-compute-network-${project_name}`),
-        autoCreateSubnetworks: false,
-        dependsOn: [projectServicesReady],
-      },
-    );
+    const network = parseNetworkConfig(cndi_config);
 
-    const subnet = new CDKTFProviderGCP.computeSubnetwork.ComputeSubnetwork(
+    let computeNetwork:
+      | CDKTFProviderGCP.computeNetwork.ComputeNetwork
+      | CDKTFProviderGCP.dataGoogleComputeNetwork.DataGoogleComputeNetwork;
+
+    if (network.mode === "create") {
+      computeNetwork = new CDKTFProviderGCP.computeNetwork.ComputeNetwork(
+        this,
+        "cndi_google_compute_network",
+        {
+          name: truncateString(`cndi-compute-network-${project_name}`),
+          autoCreateSubnetworks: false,
+          dependsOn: [projectServicesReady],
+        },
+      );
+    } else if (network.mode === "insert") {
+      computeNetwork = new CDKTFProviderGCP.dataGoogleComputeNetwork
+        .DataGoogleComputeNetwork(this, "cndi_google_compute_network", {
+        name: network.vnet_identifier,
+      });
+    } else {
+      // should be unreachable because config is validated upstream
+      throw new Error(`Invalid network mode ${network?.["mode"]}`);
+    }
+
+    const computeSubnet = new CDKTFProviderGCP.computeSubnetwork
+      .ComputeSubnetwork(
       this,
       "cndi_google_compute_subnetwork",
       {
         name: truncateString(`cndi-compute-subnetwork-${project_name}`),
-        ipCidrRange: "10.0.0.0/16",
-        network: network.selfLink,
+        ipCidrRange: network.subnet_address_space!,
+        network: computeNetwork.selfLink,
         privateIpGoogleAccess: true,
-        dependsOn: [network],
+        dependsOn: [computeNetwork!],
       },
     );
 
@@ -144,7 +162,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           `cndi-compute-firewall-allow-internal-${project_name}`,
         ),
         description: "Allow internal traffic inside cluster",
-        network: network.selfLink,
+        network: computeNetwork.selfLink,
         direction: "INGRESS",
         dependsOn: [projectServicesReady],
         allow: [
@@ -160,7 +178,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             ports: ["0-65535"],
           },
         ],
-        sourceRanges: [subnet.ipCidrRange],
+        sourceRanges: [computeSubnet.ipCidrRange],
       },
     );
 
@@ -178,9 +196,9 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         removeDefaultNodePool: true,
         initialNodeCount: 1, // ^
         project: this.locals.gcp_project_id.asString,
-        dependsOn: [projectServicesReady, subnet, network],
-        network: network.selfLink,
-        subnetwork: subnet.selfLink,
+        dependsOn: [projectServicesReady, computeSubnet],
+        network: computeNetwork.selfLink,
+        subnetwork: computeSubnet.selfLink,
         deletionProtection: false,
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
@@ -494,7 +512,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           name: "rwm",
         },
         parameters: {
-          network: network.name,
+          network: computeNetwork.name,
         },
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,

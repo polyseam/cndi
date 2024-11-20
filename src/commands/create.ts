@@ -98,7 +98,7 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
  * --label <provider-distribution-slug> to specify the label
  */
 const createCommand = new Command()
-  .description(`Create a new cndi project.`)
+  .description(`Create a new cndi project repo.`)
   .arguments("[owner/repo-slug:string]")
   .option(
     "-t, --template <template:string>",
