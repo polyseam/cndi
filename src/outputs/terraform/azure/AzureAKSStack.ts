@@ -94,7 +94,8 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         resourceGroupName: this.rg.name,
       });
     } else {
-      throw new Error(`unsupported network mode: ${JSON.stringify(network)}`);
+      // should be unreachable because config is validated upstream
+      throw new Error(`Invalid network mode ${network?.["mode"]}`);
     }
 
     // Create a subnet within the above VNet.

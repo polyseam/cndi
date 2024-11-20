@@ -109,8 +109,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       [`kubernetes.io/cluster/${project_name}`]: "owned",
     };
 
-    console.log("network.mode", network.mode);
-
     if (network.mode === "create") {
       vpcm = new AwsVpcModule(this, "cndi_aws_vpc_module", {
         name: `cndi-vpc_${project_name}`,
@@ -130,11 +128,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
       vpcId = vpcm.vpcIdOutput;
     } else if (network.mode === "insert") {
-      // TODO: Create Public Nat Gateway and EIP allocation in public_subnets[0]
-      // (from VPCM GitHub Repo)
-
-      // TODO: Create IGW
-      // required by NAT Gateway
       vpcId = network.vnet_identifier!;
       privateSubnetIds = [];
 
@@ -269,6 +262,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         );
         iy++;
       }
+    } else {
+      throw new Error(`Invalid network mode ${network?.["mode"]}`);
     }
 
     const ebsCsiPolicy = new CDKTFProviderAWS.dataAwsIamPolicy.DataAwsIamPolicy(

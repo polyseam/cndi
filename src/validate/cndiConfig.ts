@@ -735,7 +735,30 @@ function validateInfrastructureSpec(
 
     if (netconfigNotEmpty) {
       if (netconfig.mode === "create") {
-        // do nothing
+        // deno-lint-ignore no-explicit-any
+        const nc = netconfig as any;
+        if (nc?.vnet_identifier) {
+          return new ErrOut(
+            [
+              ccolors.error("cndi_config file found was at "),
+              ccolors.user_input(`"${pathToConfig}"\nwith`),
+              ccolors.error(
+                "cndi_config.infrastructure.cndi.network",
+              ),
+              ccolors.error("in"),
+              ccolors.key_name('"create"'),
+              ccolors.error("mode"),
+              ccolors.error("but the"),
+              ccolors.key_name('"vnet_identifier"'),
+              ccolors.error("key should not be set"),
+            ],
+            {
+              code: 932,
+              id: "validate/cndi_config/!network[vnet_identifier]",
+              label,
+            },
+          );
+        }
       } else if (netconfig.mode === "insert") {
         if (!netconfig.vnet_identifier) {
           return new ErrOut(
@@ -753,7 +776,7 @@ function validateInfrastructureSpec(
               ccolors.error("key"),
             ],
             {
-              code: 911,
+              code: 931,
               id: "validate/cndi_config/!network[id]",
               label,
             },
@@ -762,6 +785,7 @@ function validateInfrastructureSpec(
           const subnet_address_space = netconfig.subnet_address_space;
           const [subnetAddress, subnetPrefixLength] = subnet_address_space
             .split("/");
+
           if (!subnetAddress || !subnetPrefixLength) {
             return new ErrOut(
               [
@@ -778,31 +802,8 @@ function validateInfrastructureSpec(
                 ccolors.error("key"),
               ],
               {
-                code: 911,
+                code: 930,
                 id: "validate/cndi_config/!network[address_space]",
-                label,
-              },
-            );
-          }
-
-          if (subnetPrefixLength !== "20") {
-            return new ErrOut(
-              [
-                ccolors.error("cndi_config file found was at "),
-                ccolors.user_input(`"${pathToConfig}"\nwith`),
-                ccolors.error(
-                  "cndi_config.infrastructure.cndi.network",
-                ),
-                ccolors.error("in"),
-                ccolors.key_name('"insert"'),
-                ccolors.error("mode"),
-                ccolors.error("but has an invalid"),
-                ccolors.key_name('"subnet_mask"'),
-                ccolors.error("key"),
-              ],
-              {
-                code: 911,
-                id: "validate/cndi_config/!network[subnet_mask]",
                 label,
               },
             );
@@ -829,7 +830,7 @@ function validateInfrastructureSpec(
                 ccolors.error("key"),
               ],
               {
-                code: 911,
+                code: 929,
                 id: "validate/cndi_config/!network[vnet_address_space]",
                 label,
               },
@@ -853,13 +854,35 @@ function validateInfrastructureSpec(
                 ccolors.key_name('"vnet_address_space"'),
               ],
               {
-                code: 911,
+                code: 928,
                 id: "validate/cndi_config/!network[vnet_address_space]",
                 label,
               },
             );
           }
         }
+      } else if (netconfig?.["mode"]) {
+        return new ErrOut(
+          [
+            ccolors.error("cndi_config file found was at "),
+            ccolors.user_input(`"${pathToConfig}"\nwith`),
+            ccolors.error(
+              "cndi_config.infrastructure.cndi.network",
+            ),
+            ccolors.error("but the"),
+            ccolors.key_name('"mode"'),
+            ccolors.error("key must be either"),
+            ccolors.key_name('"create"'),
+            ccolors.error(","),
+            ccolors.key_name('"insert"'),
+            ccolors.error("or ommitted"),
+          ],
+          {
+            code: 927,
+            id: "validate/cndi_config/!network[mode]",
+            label,
+          },
+        );
       }
     }
   }
