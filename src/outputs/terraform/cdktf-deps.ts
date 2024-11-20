@@ -90,11 +90,23 @@ type ParsedNetworkConfig = {
   mode: "create";
 };
 
+// The user may specify any of the network configuration options in cndi_config.yaml[cndi][network]
+type CNDINetworkSpec = {
+  mode?: "create" | "insert";
+  subnet_address_space?: string;
+  vnet_address_space?: string;
+  vnet_identifier?: string;
+};
+
 export function parseNetworkConfig(
   cndi_config: CNDIConfig,
 ): ParsedNetworkConfig {
-  const network = cndi_config?.infrastructure?.cndi?.network ||
+  const network: CNDINetworkSpec = cndi_config?.infrastructure?.cndi?.network ||
     { mode: "create" };
+
+  if (!network?.mode) {
+    network.mode = "create";
+  }
 
   if (!network?.subnet_address_space) {
     network.subnet_address_space = DEFAULT_SUBNET_ADDRESS_SPACE;

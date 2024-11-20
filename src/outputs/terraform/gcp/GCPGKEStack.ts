@@ -136,7 +136,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: network.vnet_identifier,
       });
     } else {
-      throw new Error(`Invalid network mode: ${network.mode}`);
+      throw new Error(`Invalid network mode: ${network["mode"]}`);
     }
 
     const computeSubnet = new CDKTFProviderGCP.computeSubnetwork
