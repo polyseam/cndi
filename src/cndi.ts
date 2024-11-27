@@ -90,6 +90,9 @@ export default async function cndi() {
     .command("completions", new CompletionsCommand().global())
     .helpOption("-h, --help", "Show this help.", {
       action: async function (this) {
+        console.log();
+        console.log("HELPING");
+        console.log();
         this.showHelp();
         await emitExitEvent(0);
         Deno.exit(0);
