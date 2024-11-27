@@ -588,7 +588,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           clusterName: eksm.clusterNameOutput,
           // deno-lint-ignore no-explicit-any
           subnetIds: privateSubnetIds! as any,
-          amiType: "AL2023_x86_64_NVIDIA",
+          amiType: "AL2_x86_64",
           instanceTypes: [instanceType],
           nodeGroupName,
           nodeRoleArn: eksNodeGroupRole.arn,
