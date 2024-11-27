@@ -10,6 +10,8 @@ env: # this is a Read-Only token for Public Repositories see: https://github.com
 jobs:
   bin-build-test-ubuntu:
     runs-on: ubuntu-latest
+    env:
+      CNDI_TELEMETRY: "none"
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
