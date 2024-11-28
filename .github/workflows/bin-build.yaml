@@ -7,6 +7,7 @@ on:
       - "main"
 env: # this is a Read-Only token for Public Repositories see: https://github.com/polyseam/cndi/pull/863
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  CNDI_TELEMETRY: "none"
 jobs:
   bin-build-test-ubuntu:
     runs-on: ubuntu-latest
