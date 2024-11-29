@@ -38,6 +38,8 @@ import AWSCoreTerraformStack from "./AWSCoreStack.ts";
 
 import { ErrOut } from "errout";
 
+const AMI_TYPE = "AL2023_x86_64_NVIDIA";
+
 export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
     super(scope, name, cndi_config);
@@ -337,11 +339,11 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       clusterAddons: {
         "aws-ebs-csi-driver": {
           serviceAccountRoleArn: iamAssumableRoleEbS.iamRoleArnOutput,
-          addonVersion: "v1.31-eksbuild.1",
+          mostRecent: true,
         },
         "aws-efs-csi-driver": {
           serviceAccountRoleArn: iamAssumableRoleEfs.iamRoleArnOutput,
-          addonVersion: "v2.0.3-eksbuild.1",
+          mostRecent: true,
         },
       },
     });
@@ -555,9 +557,12 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         `cndi_aws_launch_template_${nodeGroupIndex}`,
         {
           namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
+          metadataOptions: {
+            httpTokens: "optional",
+          },
           blockDeviceMappings: [
             {
-              deviceName: "/dev/sdf",
+              deviceName: "/dev/xvda",
               ebs: {
                 volumeSize,
               },
@@ -588,7 +593,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           clusterName: eksm.clusterNameOutput,
           // deno-lint-ignore no-explicit-any
           subnetIds: privateSubnetIds! as any,
-          amiType: "AL2_x86_64",
+          amiType: AMI_TYPE,
           instanceTypes: [instanceType],
           nodeGroupName,
           nodeRoleArn: eksNodeGroupRole.arn,
