@@ -562,7 +562,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
           },
           blockDeviceMappings: [
             {
-              deviceName: "/dev/sdf",
+              deviceName: "/dev/xvda",
               ebs: {
                 volumeSize,
               },

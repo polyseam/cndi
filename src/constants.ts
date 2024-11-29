@@ -1,7 +1,7 @@
 const TERRAFORM_VERSION = "1.5.5";
 const KUBESEAL_VERSION = "0.26.0"; // used to install binary on client
 const SEALED_SECRETS_VERSION = "2.15.0"; // used to install controller on cluster
-const DEFAULT_K8S_VERSION = "1.28";
+const DEFAULT_K8S_VERSION = "1.31";
 const ARGOCD_VERSION = "2.11.2";
 const ARGOCD_HELM_VERSION = "7.1.1";
 const RELOADER_VERSION = "1.0.69";
