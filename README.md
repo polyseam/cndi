@@ -36,13 +36,13 @@ wizards to your team.
 Once your cluster is set up, manage the infrastructure and applications with
 ease using GitOps and Infrastructure as Code.
 
-## demo video 🎥
+## video 🎥
 
-If you'd like to see a walkthrough for setting up an Airflow cluster using CNDI,
-checkout this demo:
+If you'd like to see an overview of the tool followed by a walkthrough for
+setting up an Airflow cluster using CNDI, you can find both here:
 
-<a href="https://cndi.run/cndi-demo-sept23?utm_content=cndi_readme_yt_thumb_link&utm_campaign=cndi_readme_yt_thumb_link_0&utm_source=github.com/polyseam/cndi&utm_medium=github-readme&utm_id=5093">
-  <img src="/docs/img/demo-yt-thumb.png" alt="CNDI Airflow Walkthrough" width="360px"/>
+<a href="https://cndi.run/why-cndi-1024?utm_content=cndi_readme_yt_thumb_link&utm_campaign=cndi_readme_yt_thumb_link_0&utm_source=github.com/polyseam/cndi&utm_medium=github-readme&utm_id=5115">
+  <img src="/docs/img/demo-yt-thumb.png" alt="CNDI Overview" width="360px"/>
 </a>
 
 ## installation 🥁
