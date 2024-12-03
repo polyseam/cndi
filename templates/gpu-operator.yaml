@@ -5,30 +5,43 @@ blocks:
         - name: gpu-enabled
           $cndi.comment(aws_vantage): https://instances.vantage.sh/aws/ec2/g6.xlarge?region=us-east-1
           instance_type: g6.xlarge
-          labels:
-            cuda_capability: "8.9"
-            gpu: true
+          count: 2
+          disk_size: 200
 
   - name: azure-nodes
     content:
       nodes:
-        - name: gpuenabled
+        - name: gpugroup
           $cndi.comment(azure_vantage): https://instances.vantage.sh/azure/vm/nc4ast4-v3
-          instance_type: nc4ast4-v3
-          labels:
-            cuda_capability: "7.5"
-            gpu: true
+          instance_type: Standard_NC4as_T4_v3
+          count: 2
+          disk_size: 200
 
   - name: gcp-nodes
     content:
       nodes:
         - name: gpu-enabled
-          $cndi.comment(gcp_warning): This is not yet functional!
-          $cndi.comment(gcp_contd): The GPUs are addons in GCP, not node types
-          instance_type: g2-standard-3
-          labels:
-            cuda_capability: "8.9"
-            gpu: true
+          instance_type: g2-standard-4
+          count: 2
+          disk_size: 200
+
+  - name: gcp-resource-quota
+    content:
+      apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: gpu-operator-quota
+        namespace: gpu-operator
+      spec:
+        hard:
+          pods: 100
+        scopeSelector:
+          matchExpressions:
+            - operator: In
+              scopeName: PriorityClass
+              values:
+                - system-node-critical
+                - system-cluster-critical
 
 prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
@@ -76,6 +89,12 @@ outputs:
           {}
 
     cluster_manifests:
+      gpu-operator-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: gpu-operator
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
@@ -97,11 +116,33 @@ outputs:
             - ==
             - true
 
+      cuda-test:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: cuda-vectoradd
+          namespace: gpu-operator
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cuda-vectoradd
+              image: "nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda11.7.1-ubuntu20.04"
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+
+        gpu-operator-quota:
+          $cndi.get_block(gcp-resource-quota):
+            condition:
+              - "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+              - ==
+              - gcp
+
     applications:
       gpu-operator:
         repoURL: https://helm.ngc.nvidia.com/nvidia
         chart: gpu-operator
-        targetRevision: v24.3.0
+        targetRevision: v24.9.0
         destinationNamespace: gpu-operator
         values: {} # https://github.com/NVIDIA/gpu-operator/blob/master/deployments/gpu-operator/values.yaml
 
@@ -125,6 +166,6 @@ outputs:
     basic: |
       ## gpu-operator
 
-      * [GPU on K8s Webinar](https://info.nvidia.com/how-to-use-gpus-on-kubernetes-webinar.html)
-      * [gpu-operator Blog Post](https://developer.nvidia.com/blog/nvidia-gpu-operator-simplifying-gpu-management-in-kubernetes/)
-      * [Example values.yaml](https://github.com/NVIDIA/gpu-operator/blob/master/deployments/gpu-operator/values.yaml)
+      The [gpu-operator](https://github.com/nvidia/gpu-operator) is a Kubernetes operator will automatically add capacity information to your Kubernetes nodes which denotes that a GPU is present.
+
+      To see an example workload, check out the `cuda-vectoradd` pod in the `gpu-operator` namespace.

@@ -82,6 +82,10 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/wordpress.yaml`,
   },
   {
+    name: "gpu-operator",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/gpu-operator.yaml`,
+  },
+  {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
   },
