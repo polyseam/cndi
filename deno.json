@@ -1,5 +1,5 @@
 {
-  "version": "2.23.0",
+  "version": "2.23.1",
   "deno_version": "2.1.2",
   "tasks": {
     "tar-win": "tar -czvf dist/release-archives/cndi-win.tar.gz -C dist/win/in .",
