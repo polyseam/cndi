@@ -106,6 +106,12 @@ outputs:
         metadata:
           name: gpu-operator
 
+      vllm-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: vllm
+
       argo-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
