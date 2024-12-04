@@ -485,7 +485,7 @@
             },
             "values": {
             },
-            "syncOptions": {
+            "syncPolicy": {
             }
           }
         }
