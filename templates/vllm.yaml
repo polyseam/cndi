@@ -281,4 +281,8 @@ outputs:
 
       The [gpu-operator](https://github.com/nvidia/gpu-operator) is a Kubernetes operator will automatically add capacity information to your Kubernetes nodes which denotes that a GPU is present.
 
-      To see an example workload, check out the `cuda-vectoradd` pod in the `gpu-operator` namespace.
+      Once the GPU operator is installed, vllm will consume your huggingface API token and deploy the model you specified in your prompts.
+
+      Note: You will need to have a valid Hugging Face API token, and that token must be granted access to the model you want to deploy.
+
+      To learn more about the vllm deployment, take a look at the manifests defined in your [cndi_config.yaml](./cndi_config.yaml).
