@@ -86,6 +86,10 @@ const KNOWN_TEMPLATES = [
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/gpu-operator.yaml`,
   },
   {
+    name: "vllm",
+    url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/vllm.yaml`,
+  },
+  {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
   },
