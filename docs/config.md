@@ -49,7 +49,7 @@ but on it's own won't do very much without [applications](#applications).
 **`infrastructure.cndi.network`**
 
 Generally CNDI will create a VPC and subnets for you, but if you need to point
-to some existing netwoek components you can do so with the `network` key.
+to some existing network components you can do so with the `network` key.
 
 ```yaml
 project_name: my-postgres-project
