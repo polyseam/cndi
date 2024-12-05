@@ -47,9 +47,10 @@ but on it's own won't do very much without [applications](#applications).
 **`infrastructure.cndi.external_dns`**
 
 Another feature defined in the `infrastructure.cndi` block is `external_dns`.
-ExternalDNS is a Kubernetes controller which watches for `Ingress` resources and
-creates DNS records for them in a DNS provider. This is useful for creating a
-public endpoint for your applications.
+[ExternalDNS](https://github.com/bitnami/charts/blob/main/bitnami/external-dns/README.md)
+is a Kubernetes controller which watches for `Ingress` resources and creates DNS
+records for them in a DNS provider. This is useful for creating a public
+endpoint for your applications.
 
 The `external_dns` block is optional, and can be used to configure the
 ExternalDNS controller. The `provider` key is required, and the `domainFilter`
@@ -58,10 +59,11 @@ key is optional. The controller reads the `external-dns` Secret in the
 
 By default the `external-dns` Secret is configured with the same credentials you
 use to create your cluster. With this configuration you don't need to do any
-extra configuration if your DNS zone is in the same cloud as your cluster.For
-example if you are using Route53 with an EKS cluster, your `external-dns` Secret
-will be configured with the same `AWS_SECRET_ACCESS_KEY` and `AWS_ACCESS_KEY_ID`
-as your cluster.
+extra configuration if your DNS zone is in the same cloud as your cluster. For
+example if you are using [Route53](https://aws.amazon.com/route53/) with an
+[EKS](https://aws.amazon.com/eks/) cluster, your `external-dns` Secret will be
+configured with the same `AWS_SECRET_ACCESS_KEY` and `AWS_ACCESS_KEY_ID` as your
+cluster.
 
 ```yaml
 project_name: my-cluster
