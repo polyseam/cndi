@@ -44,7 +44,7 @@
     "jsr:@std/testing@0.221": "0.221.0",
     "jsr:@std/text@~1.0.7": "1.0.7",
     "jsr:@std/yaml@0.221": "0.221.0",
-    "npm:@cdktf/provider-aws@^19.25.0": "19.33.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-aws@^19.46.0": "19.46.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-azurerm@^12.23.0": "12.27.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-google@^13.26.0": "13.32.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-helm@^10.2.0": "10.3.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
@@ -274,8 +274,8 @@
     }
   },
   "npm": {
-    "@cdktf/provider-aws@19.33.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-21dhJPSMwTL/lLJacj7R+qnW7NrRFIWcvbSblKrAdNduMf24Th+9fcd8kTHoXv1jPGN9eC6kK/XOPxna6YHdrw==",
+    "@cdktf/provider-aws@19.46.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-Mapm2q3LuKxpISj667O7QeNRwevb5mlR1917P7xDvIku+wM/QwveyHpc3omBGgpsO0oYYMEIN0qnUeo+i1pULA==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
@@ -1242,7 +1242,7 @@
       "jsr:@std/streams@0.221",
       "jsr:@std/testing@0.221",
       "jsr:@std/yaml@0.221",
-      "npm:@cdktf/provider-aws@^19.25.0",
+      "npm:@cdktf/provider-aws@^19.46.0",
       "npm:@cdktf/provider-azurerm@^12.23.0",
       "npm:@cdktf/provider-google@^13.26.0",
       "npm:@cdktf/provider-helm@^10.2.0",
