@@ -205,6 +205,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/"
   },
   {
+    "code": 706,
+    "message": "Secret.data was loaded from env and is not a base64 encoded string",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1083"
+  },
+  {
     "code": 800,
     "message": "failed to stage all aws terraform objects during 'cndi overwrite'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/551"

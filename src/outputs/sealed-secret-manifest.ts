@@ -73,9 +73,35 @@ const parseCndiSecret = (
           }
           outputSecret.isPlaceholder = true;
         } else {
-          const decodedSecretEnvVal = atob(secretEnvVal);
-          outputSecret.stringData[dataEntryKey] = decodedSecretEnvVal;
-          outputSecret.isPlaceholder = false;
+          try {
+            const decodedSecretEnvVal = atob(secretEnvVal);
+            outputSecret.stringData[dataEntryKey] = decodedSecretEnvVal;
+            outputSecret.isPlaceholder = false;
+          } catch {
+            // secret data cannot be decoded, likely plaintext string instead of base64
+            return [
+              new ErrOut([
+                ccolors.error("Secret named"),
+                ccolors.key_name(`"${inputSecret.metadata.name}"`),
+                ccolors.error("loaded"),
+                ccolors.key_name(".data"),
+                ccolors.error("from environment variable"),
+                ccolors.key_name(`"${secretEnvName}"`),
+                ccolors.error(
+                  "and it was not base64 encoded.\n\nDid you mean to use",
+                ),
+                ccolors.key_name(
+                  ".stringData",
+                ),
+                ccolors.error("instead?"),
+              ], {
+                label,
+                id:
+                  "sealed-secret-manifest: !isBase64(env.secretLoadedFromEnv)",
+                code: 706,
+              }),
+            ];
+          }
         }
       } else {
         // if we find a secret that doesn't use our special token we tell the user that using secrets without it is unsupported
