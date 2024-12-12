@@ -66,6 +66,12 @@ outputs:
             - ==
             - true
 
+      airbyte-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: airbyte
+
     applications:
       airbyte:
         repoURL: https://airbytehq.github.io/helm-charts

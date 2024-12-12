@@ -202,6 +202,11 @@ outputs:
                 - name: dbOwner
                   db: "{{ $cndi.get_prompt_response(mongodb_name) }}"
               scramCredentialsSecretName: my-scram
+      mongodb-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ $cndi.get_prompt_response(mongodb_namespace) }}"
 
     applications:
       mongodb:

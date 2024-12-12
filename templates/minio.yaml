@@ -250,6 +250,11 @@ outputs:
             - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
             - ==
             - true
+      airbyte-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: minio
 
     applications:
       minio:

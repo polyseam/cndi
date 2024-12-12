@@ -201,6 +201,11 @@ outputs:
             - ==
             - true
 
+      redis-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: redis
     applications:
       redis-operator:
         repoURL: "https://ot-container-kit.github.io/helm-charts"

@@ -169,6 +169,12 @@ outputs:
             - ==
             - true
 
+      mssql-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: mssql
+
     applications:
       mssql:
         targetRevision: 0.1.8

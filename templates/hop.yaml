@@ -149,6 +149,12 @@ outputs:
             - ==
             - true
 
+      hop-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: hop
+
     applications:
       hop:
         targetRevision: HEAD

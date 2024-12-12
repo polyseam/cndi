@@ -377,6 +377,11 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_coder_ingress) }}"
             - ==
             - true
+      coder-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: coder
 
     applications:
       coder:

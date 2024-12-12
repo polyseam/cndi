@@ -118,6 +118,12 @@ outputs:
                         port:
                           number: 443
 
+      wordpress-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: wordpress
+
     applications:
       wordpress:
         repoURL: https://charts.bitnami.com/bitnami

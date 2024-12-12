@@ -301,6 +301,13 @@ outputs:
             - "{{ $cndi.get_prompt_response(deploy_airflow_ingress) }}"
             - ==
             - true
+
+      airflow-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: airflow
+
     applications:
       cnpg:
         targetRevision: 0.18.0
