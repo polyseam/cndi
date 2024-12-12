@@ -355,6 +355,12 @@ outputs:
             - ==
             - true
 
+      airbyte-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: kafka
+
     applications:
       kafka:
         targetRevision: 0.42.0

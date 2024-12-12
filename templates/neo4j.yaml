@@ -123,6 +123,12 @@ outputs:
             - ==
             - true
 
+      neo4j-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: neo4j
+
     applications:
       neo4j:
         targetRevision: 5.9.0
