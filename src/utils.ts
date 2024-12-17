@@ -391,17 +391,16 @@ async function stageFile(
 }
 
 async function stageDirectory(
-  relativePathOut: string,
-  relativePathIn: string,
+  sourceDir: string,
+  relativeStageDir: string,
 ): Promise<ErrOut | void> {
   const [err, stagingDirectory] = getStagingDirectory();
 
   if (err) return err;
 
   try {
-    const inputPath = path.join(Deno.cwd(), relativePathIn);
-    const outputPath = path.join(stagingDirectory, relativePathOut);
-    await copy(inputPath, outputPath); // fail if the output directory already exists
+    const stageDestDir = path.join(stagingDirectory, relativeStageDir);
+    await copy(sourceDir, stageDestDir, { overwrite: true }); // does overwrite need to be true?
   } catch (errorStaging) {
     return new ErrOut([ccolors.error("failed to stage directory")], {
       cause: errorStaging as Error,

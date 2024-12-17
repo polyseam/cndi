@@ -205,10 +205,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         "workflows",
         "cndi-fns.yaml",
       );
+
       const errStagingFnsDir = await stageDirectory(
+        path.join(options.output, "functions"),
         path.join("cndi", "functions", "src"),
-        path.join("functions"),
       );
+
       if (errStagingFnsDir) {
         await self.postMessage(errStagingFnsDir.owWorkerErrorMessage);
         return;
@@ -218,6 +220,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         path.join("cndi", "functions", "src", "main", "index.ts"),
         getFunctionsMainContent(),
       );
+
       if (errStagingFnsEntrySrc) {
         await self.postMessage(errStagingFnsEntrySrc.owWorkerErrorMessage);
         return;
@@ -248,6 +251,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         await self.postMessage(fnsBuildWorkflowErr.owWorkerErrorMessage);
         return;
       }
+
       console.log(
         ccolors.success("staged 'cndi-fns' GitHub workflow:"),
         ccolors.key_name(fnsWorkflowPath),
