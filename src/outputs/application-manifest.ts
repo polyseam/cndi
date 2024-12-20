@@ -24,7 +24,6 @@ type SyncPolicy = {
   automated: {
     prune: boolean;
     selfHeal: boolean;
-    allowEmpty: boolean;
   };
   syncOptions: string[];
   retry: {
@@ -63,7 +62,6 @@ const DEFAULT_SYNC_POLICY = {
   automated: {
     prune: true,
     selfHeal: true,
-    allowEmpty: false,
   },
   syncOptions: [
     "Validate=false",
