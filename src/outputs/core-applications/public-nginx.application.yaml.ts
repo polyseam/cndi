@@ -133,7 +133,6 @@ export default function getNginxApplicationManifest(cndi_config: CNDIConfig) {
         automated: {
           prune: true,
           selfHeal: true,
-          allowEmpty: false,
         },
         syncOptions: [
           "Validate=false",

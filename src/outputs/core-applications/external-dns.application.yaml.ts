@@ -96,7 +96,6 @@ export default function getExternalDNSApplicationManifest(
         automated: {
           prune: true,
           selfHeal: true,
-          allowEmpty: false,
         },
         syncOptions: [
           "Validate=false",
