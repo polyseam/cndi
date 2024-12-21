@@ -1,7 +1,7 @@
 import getPublicIngressManifest from "src/outputs/public-ingress-manifest.ts";
 
 export function getGrafanaIngressManifest(hostname: string): string {
-  return getPublicIngressManifest("argocd-ingress", {
+  return getPublicIngressManifest("grafana-ingress", {
     hostname,
     namespace: "observability",
     annotations: {

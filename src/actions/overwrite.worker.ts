@@ -320,7 +320,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
       const manifestEntries = Object.entries(config?.cluster_manifests || {});
 
-      if(!manifestEntries.length) {
+      if (!manifestEntries.length) {
         config.cluster_manifests = {};
       }
 
