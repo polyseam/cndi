@@ -1,5 +1,7 @@
+import { CNDIConfig } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
-import { RELOADER_CHART_VERSION } from "consts";
+import { deepMerge } from "deps";
+import { PROMTAIL_CHART_VERSION } from "consts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -7,8 +9,24 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-export default function getReloaderApplicationManifest(): string {
-  const releaseName = "reloader";
+export default function getKubePromtailApplicationManifest(
+  cndi_config: CNDIConfig,
+): string {
+  const releaseName = "promtail";
+
+  const defaultPromtailValues = {
+    config: {
+      clients: [{
+        url: "http://loki-gateway/loki/api/v1/push",
+        tenant_id: 1,
+      }],
+    },
+  };
+
+  const promtailValues = deepMerge(
+    defaultPromtailValues,
+    cndi_config?.infrastructure?.cndi?.observability?.promtail?.values || {},
+  );
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -21,17 +39,17 @@ export default function getReloaderApplicationManifest(): string {
     spec: {
       project: DEFAULT_PROJECT,
       source: {
-        repoURL: "https://stakater.github.io/stakater-charts",
-        chart: "reloader",
-        helm: { // installCRDs?
+        repoURL: "https://grafana.github.io/helm-charts",
+        chart: "promtail",
+        helm: {
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString({}),
+          values: getYAMLString(promtailValues),
         },
-        targetRevision: RELOADER_CHART_VERSION,
+        targetRevision: PROMTAIL_CHART_VERSION,
       },
       destination: {
         server: DEFAULT_DESTINATION_SERVER,
-        namespace: "reloader",
+        namespace: "observability",
       },
       syncPolicy: {
         automated: {

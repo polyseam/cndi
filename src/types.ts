@@ -287,12 +287,35 @@ export type CNDIDistribution =
   | "aks"
   | "clusterless";
 
+type CNDIObservability = {
+  enabled: boolean;
+  grafana?: {
+    hostname?: string;
+  };
+  kube_prometheus_stack?: {
+    enabled: boolean;
+    values: Record<string, unknown>;
+    targetRevision: string;
+  };
+  promtail?: {
+    enabled: boolean;
+    values: Record<string, unknown>;
+    targetRevision: string;
+  };
+  loki?: {
+    enabled: boolean;
+    values: Record<string, unknown>;
+    targetRevision: string;
+  };
+};
+
 export type CNDIInfrastructure = {
   cndi: {
     network: CNDINetworkConfig;
     functions?: {
       hostname?: string;
     };
+    observability?: CNDIObservability;
     keyless?: boolean; // default: false
     deployment_target_configuration?: DeploymentTargetConfiguration;
     ingress: {
@@ -332,6 +355,7 @@ export type CNDIInfrastructure = {
       };
     };
     argocd: {
+      hostname?: string; // auto ingress if set
       root_application: unknown; //
       install_url?: string; //
     };

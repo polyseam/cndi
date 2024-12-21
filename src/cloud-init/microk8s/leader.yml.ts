@@ -9,9 +9,9 @@ import getRwoStorageClassTemplate from "src/outputs/terraform/manifest-templates
 import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 
 import {
-  ARGOCD_VERSION,
+  ARGOCD_RELEASE_VERSION,
   DEFAULT_K8S_VERSION,
-  SEALED_SECRETS_VERSION,
+  SEALED_SECRETS_CHART_VERSION,
 } from "consts";
 
 const defaultAddons: Array<Microk8sAddon> = [
@@ -83,8 +83,8 @@ const getLeaderCloudInitYaml = (
     "stable";
 
   const DEFAULT_ARGOCD_INSTALL_URL = useClusterHA
-    ? `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/ha/install.yaml`
-    : `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_VERSION}/manifests/install.yaml`;
+    ? `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_RELEASE_VERSION}/manifests/ha/install.yaml`
+    : `https://raw.githubusercontent.com/argoproj/argo-cd/v${ARGOCD_RELEASE_VERSION}/manifests/install.yaml`;
 
   const userBefore =
     config.infrastructure.cndi?.microk8s?.["cloud-init"]?.leader_before || [];
@@ -235,7 +235,7 @@ const getLeaderCloudInitYaml = (
       ),
       `sleep 10`,
       loopUntilSuccess(
-        `sudo microk8s helm install sealed-secrets-controller sealed-secrets/sealed-secrets --version v${SEALED_SECRETS_VERSION} --namespace kube-system --set fullnameOverride=sealed-secrets-controller`,
+        `sudo microk8s helm install sealed-secrets-controller sealed-secrets/sealed-secrets --version v${SEALED_SECRETS_CHART_VERSION} --namespace kube-system --set fullnameOverride=sealed-secrets-controller`,
         "helm failed to install sealed-secrets-controller",
       ),
       `echo "sealed-secrets-controller installed"`,
