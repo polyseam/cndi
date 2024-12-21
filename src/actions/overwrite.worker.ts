@@ -403,60 +403,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         return;
       }
 
-      // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
-      try {
-        ksc = (await loadJSONC(
-          path.join(options.output, "cndi", "ks_checks.json"),
-        )) as Record<string, string>;
-      } catch {
-        // ks_checks.json did not exist or was invalid JSON
-      }
-
-      // restage the SealedSecret yaml file for every key in ks_checks.json
-      for (const key in ksc) {
-        ks_checks[key] = ksc[key];
-
-        let sealedManifest = "";
-
-        try {
-          sealedManifest = await Deno.readTextFileSync(
-            path.join(
-              options.output,
-              "cndi",
-              "cluster_manifests",
-              `${key}.yaml`,
-            ),
-          );
-        } catch {
-          console.error(
-            ccolors.warn(
-              `failed to read SealedSecret: "${
-                ccolors.key_name(
-                  key + ".yaml",
-                )
-              }" referenced in 'ks_checks.json'`,
-            ),
-          );
-          // sealedManifest from ks_checks.json did not exist
-          // so we remove it from the ks_check.json list
-          delete ks_checks[key];
-        }
-
-        try {
-          if (sealedManifest && cluster_manifests?.[key]) {
-            await stageFile(
-              path.join("cndi", "cluster_manifests", `${key}.yaml`),
-              sealedManifest,
-            );
-          } else {
-            // sealedManifest either did not exist or is no longer in cluster_manifests
-            delete ks_checks[key];
-          }
-        } catch {
-          // failed to stage sealedManifest from ks_checks.json
-        }
-      }
-
       await Deno.writeTextFile(
         tempPublicKeyFilePath,
         sealedSecretsKeys.sealed_secrets_public_key,
@@ -636,7 +582,122 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         return;
       }
 
+      // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
+      try {
+        ksc = (await loadJSONC(
+          path.join(options.output, "cndi", "ks_checks.json"),
+        )) as Record<string, string>;
+      } catch {
+        // ks_checks.json did not exist or was invalid JSON
+      }
+
+      // restage the SealedSecret yaml file for every key in ks_checks.json
+      for (const key in ksc) {
+        ks_checks[key] = ksc[key];
+
+        let sealedManifest = "";
+
+        try {
+          sealedManifest = await Deno.readTextFileSync(
+            path.join(
+              options.output,
+              "cndi",
+              "cluster_manifests",
+              `${key}.yaml`,
+            ),
+          );
+        } catch {
+          console.error(
+            ccolors.warn(
+              `failed to read SealedSecret: "${
+                ccolors.key_name(
+                  key + ".yaml",
+                )
+              }" referenced in 'ks_checks.json'`,
+            ),
+          );
+          // sealedManifest from ks_checks.json did not exist
+          // so we remove it from the ks_check.json list
+          delete ks_checks[key];
+        }
+
+        try {
+          if (sealedManifest && cluster_manifests?.[key]) {
+            await stageFile(
+              path.join("cndi", "cluster_manifests", `${key}.yaml`),
+              sealedManifest,
+            );
+          } else {
+            // sealedManifest either did not exist or is no longer in cluster_manifests
+            delete ks_checks[key];
+          }
+        } catch {
+          // failed to stage sealedManifest from ks_checks.json
+        }
+      }
+
+      const errStagingKSCJSON = await stageFile(
+        path.join("cndi", "ks_checks.json"),
+        getPrettyJSONString(ks_checks),
+      );
+      if (errStagingKSCJSON) {
+        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
+        return;
+      }
+      console.log(
+        ccolors.success("staged metadata:"),
+        ccolors.key_name("ks_checks.json"),
+      );
+
+      const skipExternalDNS =
+        config?.infrastructure?.cndi?.external_dns?.enabled === false;
+
+      if (!skipExternalDNS) {
+        const errStagingExtDnsApp = await stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "applications",
+            "external-dns.application.yaml",
+          ),
+          getExternalDNSManifest(config),
+        );
+        if (errStagingExtDnsApp) {
+          await self.postMessage(errStagingExtDnsApp.owWorkerErrorMessage);
+          return;
+        }
+        console.log(
+          ccolors.success("staged application manifest:"),
+          ccolors.key_name("external-dns.application.yaml"),
+        );
+      }
+
+      const { applications } = config;
+
+      // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
+      for (const releaseName in applications) {
+        const applicationSpec = applications[releaseName];
+        const [manifestContent, filename] = getApplicationManifest(
+          releaseName,
+          applicationSpec,
+        );
+        const errStagingApplication = await stageFile(
+          path.join("cndi", "cluster_manifests", "applications", filename),
+          manifestContent,
+        );
+        if (errStagingApplication) {
+          await self.postMessage(errStagingApplication.owWorkerErrorMessage);
+          return;
+        }
+        console.log(
+          ccolors.success("staged application manifest:"),
+          ccolors.key_name(filename),
+        );
+      }
+
       // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
+      // should be done after any other manifest so they can clobber more high-level manifests
+      // eg. Core Applications, user Applications, etc.
       for (const key in cluster_manifests) {
         const manifestObj = cluster_manifests[key] as KubernetesManifest;
 
@@ -704,65 +765,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         console.log(
           ccolors.success("staged manifest:"),
           ccolors.key_name(manifestFilename),
-        );
-      }
-
-      const errStagingKSCJSON = await stageFile(
-        path.join("cndi", "ks_checks.json"),
-        getPrettyJSONString(ks_checks),
-      );
-      if (errStagingKSCJSON) {
-        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
-        return;
-      }
-      console.log(
-        ccolors.success("staged metadata:"),
-        ccolors.key_name("ks_checks.json"),
-      );
-
-      const skipExternalDNS =
-        config?.infrastructure?.cndi?.external_dns?.enabled === false;
-
-      if (!skipExternalDNS) {
-        const errStagingExtDnsApp = await stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "applications",
-            "external-dns.application.yaml",
-          ),
-          getExternalDNSManifest(config),
-        );
-        if (errStagingExtDnsApp) {
-          await self.postMessage(errStagingExtDnsApp.owWorkerErrorMessage);
-          return;
-        }
-        console.log(
-          ccolors.success("staged application manifest:"),
-          ccolors.key_name("external-dns.application.yaml"),
-        );
-      }
-
-      const { applications } = config;
-
-      // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
-      for (const releaseName in applications) {
-        const applicationSpec = applications[releaseName];
-        const [manifestContent, filename] = getApplicationManifest(
-          releaseName,
-          applicationSpec,
-        );
-        const errStagingApplication = await stageFile(
-          path.join("cndi", "cluster_manifests", "applications", filename),
-          manifestContent,
-        );
-        if (errStagingApplication) {
-          await self.postMessage(errStagingApplication.owWorkerErrorMessage);
-          return;
-        }
-        console.log(
-          ccolors.success("staged application manifest:"),
-          ccolors.key_name(filename),
         );
       }
     }
