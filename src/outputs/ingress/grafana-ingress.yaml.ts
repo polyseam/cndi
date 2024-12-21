@@ -4,9 +4,6 @@ export function getGrafanaIngressManifest(hostname: string): string {
   return getPublicIngressManifest("grafana-ingress", {
     hostname,
     namespace: "observability",
-    annotations: {
-      "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-    },
     pathSpecs: [
       {
         serviceName: "kube-prometheus-stack-grafana",
