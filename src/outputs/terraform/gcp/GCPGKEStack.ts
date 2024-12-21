@@ -15,7 +15,7 @@ import {
 } from "cdktf-deps";
 
 import {
-  ARGOCD_HELM_VERSION,
+  ARGOCD_CHART_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   SEALED_SECRETS_CHART_VERSION,
@@ -331,7 +331,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         namespace: "argocd",
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
-        version: ARGOCD_HELM_VERSION,
+        version: ARGOCD_CHART_VERSION,
         setSensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",

@@ -4,6 +4,11 @@ provider: aws # or 'gcp', 'azure'
 distribution: eks # or 'clusterless'
 infrastructure:
   cndi:
+    argocd:
+      hostname: argocd.polyseam.io
+    observability:
+      grafana:
+        hostname: observability.polyseam.io
     cert_manager:
       email: matt.johnston@polyseam.io
     nodes:

@@ -114,6 +114,16 @@
           "required": ["nodes"],
           "additionalProperties": false,
           "properties": {
+            "argocd": {
+              "type": "object",
+              "description": "An object which defines the ArgoCD resources CNDI should deploy.",
+              "properties": {
+                "hostname": {
+                  "type": "string",
+                  "description": "The hostname on which to make your CNDI ArgoCD available."
+                }
+              }
+            },
             "observability": {
               "type": "object",
               "description": "An object which defines the observability resources CNDI should deploy.",
@@ -128,9 +138,16 @@
                   "type": "string",
                   "enum": ["in_cluster"]
                 },
-                "hostname": {
-                  "type": "string",
-                  "description": "The hostname on which to make your CNDI Observability Dashboards available."
+                "grafana": {
+                  "type": "object",
+                  "description": "An object which defines the Grafana resources CNDI should deploy.",
+                  "properties": {
+                    "hostname": {
+                      "type": "string",
+                      "description": "The hostname on which to make your CNDI Observability Dashboards available."
+                    }
+                  },
+                  "additionalProperties": false
                 },
                 "kube_prometheus_stack": {
                   "type": "object",

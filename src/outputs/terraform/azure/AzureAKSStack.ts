@@ -18,7 +18,7 @@ import {
 } from "cdktf-deps";
 
 import {
-  ARGOCD_HELM_VERSION,
+  ARGOCD_CHART_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
@@ -333,7 +333,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         namespace: "argocd",
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
-        version: ARGOCD_HELM_VERSION,
+        version: ARGOCD_CHART_VERSION,
         setSensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",
