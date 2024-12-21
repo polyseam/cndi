@@ -1,6 +1,6 @@
 import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
-import { NGINX_VERSION } from "consts";
+import { NGINX_CHART_VERSION } from "consts";
 import { deepMerge } from "deps";
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -121,7 +121,7 @@ export default function getNginxApplicationManifest(
           version: DEFAULT_HELM_VERSION,
           values: getYAMLString(values),
         },
-        targetRevision: NGINX_VERSION,
+        targetRevision: NGINX_CHART_VERSION,
       },
       destination: {
         server: DEFAULT_DESTINATION_SERVER,

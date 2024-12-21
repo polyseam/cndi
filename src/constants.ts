@@ -1,16 +1,34 @@
-const TERRAFORM_VERSION = "1.5.5";
-const KUBESEAL_VERSION = "0.26.0"; // used to install binary on client
-const SEALED_SECRETS_VERSION = "2.15.0"; // used to install controller on cluster
-const DEFAULT_K8S_VERSION = "1.28";
-const ARGOCD_VERSION = "2.11.2";
-const ARGOCD_HELM_VERSION = "7.7.10";
-const RELOADER_VERSION = "1.0.69";
-const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
-const EXTERNAL_DNS_VERSION = "6.35.0";
-const CERT_MANAGER_VERSION = "1.14.3";
-const NGINX_VERSION = "4.8.3";
-const EDGE_RUNTIME_VERSION = "1.62.2";
+// Terraform and Kubeseal CLI versions displayed in --version output
+// (installed by manually adding binaries to ./dist/$OS/in with binaries)
+const TERRAFORM_VERSION = "1.5.5"; // last version of terraform that was Apache 2.0 licensed
+const KUBESEAL_VERSION = "0.26.0";
 
+// NON-HELM INSTALL VERSION, prev. used in microk8s cloudinit
+const ARGOCD_RELEASE_VERSION = "2.11.2";
+
+// Multipass Terraform Provider Version used by dev/microk8s
+const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
+
+// Edge Runtime that powers CNDI Functions
+const EDGE_RUNTIME_IMAGE_TAG = "1.62.2";
+
+// used in terraform output to create clusters
+const DEFAULT_K8S_VERSION = "1.28";
+
+// Root Application Chart Versions (terraform managed)
+const ARGOCD_CHART_VERSION = "7.7.10";
+const SEALED_SECRETS_CHART_VERSION = "2.15.0";
+
+// Core Application Chart Versions (gitops managed)
+const CERT_MANAGER_CHART_VERSION = "1.14.3";
+const RELOADER_CHART_VERSION = "1.0.69";
+const NGINX_CHART_VERSION = "4.8.3";
+const EXTERNAL_DNS_CHART_VERSION = "6.35.0";
+const KUBE_PROMETHEUS_STACK_CHART_VERSION = "67.4.0";
+const PROMTAIL_CHART_VERSION = "6.16.6";
+const LOKI_CHART_VERSION = "6.24.0";
+
+// Polyseam-built CNDI Templates live here (./templates)
 const POLYSEAM_TEMPLATE_DIRECTORY_URL =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
 
@@ -20,8 +38,8 @@ const DEFAULT_INSTANCE_TYPES = {
   azure: "Standard_D2s_v3" as const,
 };
 
-const DEFAULT_NODE_DISK_SIZE_UNMANAGED = 100;
-const DEFAULT_NODE_DISK_SIZE_MANAGED = 30;
+const DEFAULT_NODE_DISK_SIZE_UNMANAGED = 100; // GB
+const DEFAULT_NODE_DISK_SIZE_MANAGED = 30; // GB
 
 const NODE_DISK_SIZE_KEY = {
   aws: "volume_size" as const,
@@ -134,26 +152,29 @@ export const EFFECT_VALUES = [
 ] as const;
 
 export {
-  ARGOCD_HELM_VERSION,
-  ARGOCD_VERSION,
-  CERT_MANAGER_VERSION,
+  ARGOCD_CHART_VERSION,
+  ARGOCD_RELEASE_VERSION,
+  CERT_MANAGER_CHART_VERSION,
   CLOUDINIT_RETRY_INTERVAL,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
   DEFAULT_NODE_DISK_SIZE_UNMANAGED,
   DEFAULT_OPEN_PORTS,
-  EDGE_RUNTIME_VERSION,
-  EXTERNAL_DNS_VERSION,
+  EDGE_RUNTIME_IMAGE_TAG,
+  EXTERNAL_DNS_CHART_VERSION,
   KNOWN_TEMPLATES,
+  KUBE_PROMETHEUS_STACK_CHART_VERSION,
   KUBESEAL_VERSION,
   LARSTOBI_MULTIPASS_PROVIDER_VERSION,
+  LOKI_CHART_VERSION,
   MANAGED_NODE_KINDS,
-  NGINX_VERSION,
+  NGINX_CHART_VERSION,
   NODE_DISK_SIZE_KEY,
   POLYSEAM_TEMPLATE_DIRECTORY_URL,
   PROCESS_ERROR_CODE_PREFIX,
-  RELOADER_VERSION,
-  SEALED_SECRETS_VERSION,
+  PROMTAIL_CHART_VERSION,
+  RELOADER_CHART_VERSION,
+  SEALED_SECRETS_CHART_VERSION,
   TERRAFORM_VERSION,
 };

@@ -132,9 +132,9 @@
                   "type": "string",
                   "description": "The hostname on which to make your CNDI Observability Dashboards available."
                 },
-                "kube-prometheus-stack": {
+                "kube_prometheus_stack": {
                   "type": "object",
-                  "description": "An object which defines the kube-prometheus-stack resources CNDI should deploy.",
+                  "description": "An object which defines the kube_prometheus_stack resources CNDI should deploy.",
                   "properties": {
                     "targetRevision": {
                       "type": "string",

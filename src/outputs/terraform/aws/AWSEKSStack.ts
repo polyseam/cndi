@@ -5,7 +5,7 @@ import {
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  SEALED_SECRETS_VERSION,
+  SEALED_SECRETS_CHART_VERSION,
 } from "consts";
 
 import {
@@ -824,7 +824,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
-        version: SEALED_SECRETS_VERSION,
+        version: SEALED_SECRETS_CHART_VERSION,
         timeout: 300,
         atomic: true,
       },
