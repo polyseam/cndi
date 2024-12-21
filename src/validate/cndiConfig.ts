@@ -231,13 +231,8 @@ export default function validateConfig(
 
   if (infrastructureE) return infrastructureE;
 
-  const cluster_manifests = (config?.cluster_manifests || {}) as Record<
-    string,
-    Manifest
-  >;
-
   const cluster_manifestsE = validateClusterManifestsSpec(
-    cluster_manifests,
+    config.cluster_manifests as Record<string, Manifest>,
     meta,
   );
 

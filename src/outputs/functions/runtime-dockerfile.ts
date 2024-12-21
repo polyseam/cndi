@@ -1,8 +1,6 @@
-import { EDGE_RUNTIME_IMAGE_TAG } from "consts";
+import { EDGE_RUNTIME_VERSION } from "consts";
 
-export function getFunctionsDockerfileContent(
-  version = EDGE_RUNTIME_IMAGE_TAG,
-) {
+export function getFunctionsDockerfileContent(version = EDGE_RUNTIME_VERSION) {
   return `
 FROM ghcr.io/supabase/edge-runtime:v${version}
 

@@ -251,9 +251,9 @@ transferrable to other applications beyond Airflow!
 
 If you understand a `cndi_config.yaml` file, you will be successful in using
 CNDI. The file enables configuring existing systems like cert-manager for TLS
-certs, external-dns, observability, and ingress. It also enables adding
-arbitrary Kubernetes Manifests and Terraform objects, yielding endless
-possibilities. To learn about all the configuration options, check out the
+certs, external-dns, and ingress. It also enables adding arbitrary Kubernetes
+Manifests and Terraform objects, yielding endless possibilities. To learn about
+all the configuration options, check out the
 [CNDI Config Guide](./docs/config.md) and accompanying jsonschema file.
 
 ## project structure 📂

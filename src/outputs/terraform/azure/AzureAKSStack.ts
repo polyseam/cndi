@@ -18,11 +18,11 @@ import {
 } from "cdktf-deps";
 
 import {
-  ARGOCD_CHART_VERSION,
+  ARGOCD_HELM_VERSION,
   DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
   DEFAULT_NODE_DISK_SIZE_MANAGED,
-  SEALED_SECRETS_CHART_VERSION,
+  SEALED_SECRETS_VERSION,
 } from "consts";
 
 import {
@@ -333,7 +333,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         namespace: "argocd",
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
-        version: ARGOCD_CHART_VERSION,
+        version: ARGOCD_HELM_VERSION,
         setSensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",
@@ -432,7 +432,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
-        version: SEALED_SECRETS_CHART_VERSION,
+        version: SEALED_SECRETS_VERSION,
         timeout: 300,
         atomic: true,
       },

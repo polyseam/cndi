@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CERT_MANAGER_CHART_VERSION } from "consts";
+import { CERT_MANAGER_VERSION } from "consts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -27,7 +27,7 @@ export default function getCertManagerApplicationManifest(): string {
           version: DEFAULT_HELM_VERSION,
           values: getYAMLString({ installCRDs: true }),
         },
-        targetRevision: CERT_MANAGER_CHART_VERSION,
+        targetRevision: CERT_MANAGER_VERSION,
       },
       destination: {
         server: DEFAULT_DESTINATION_SERVER,

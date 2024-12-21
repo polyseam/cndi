@@ -17,15 +17,11 @@ import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 
 import getApplicationManifest from "src/outputs/application-manifest.ts";
 import RootChartYaml from "src/outputs/root-chart.ts";
-
-// Sealed Secrets
 import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
 
-// Functions Source
 import { getFunctionsDockerfileContent } from "src/outputs/functions/runtime-dockerfile.ts";
 import { getFunctionsMainContent } from "src/outputs/functions/main-function.ts";
 
-// Functions Manifests
 import { getFunctionsNamespaceManifest } from "src/outputs/functions/manifests/fns-namespace.ts";
 import { getFunctionsServiceManifest } from "src/outputs/functions/manifests/fns-service.ts";
 import { getFunctionsIngressManifest } from "src/outputs/functions/manifests/fns-ingress.ts";
@@ -33,31 +29,21 @@ import { getFunctionsEnvSecretManifest } from "src/outputs/functions/manifests/f
 import { getFunctionsPullSecretManifest } from "src/outputs/functions/manifests/fns-pull-secret.ts";
 import { getFunctionsDeploymentManifest } from "src/outputs/functions/manifests/fns-deployment.ts";
 
-// GitHub Workflows
 import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
 import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
 import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/cndi-fns-workflow.ts";
 
-// Microk8s Manifests
 import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
 import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
 
-// Cert Manager Manifests
 import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
 import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
 
-// Core Apps
 import getExternalDNSManifest from "src/outputs/core-applications/external-dns.application.yaml.ts";
 import getCertManagerApplicationManifest from "src/outputs/core-applications/cert-manager.application.yaml.ts";
 import getPrivateNginxApplicationManifest from "src/outputs/core-applications/private-nginx.application.yaml.ts";
 import getPublicNginxApplicationManifest from "src/outputs/core-applications/public-nginx.application.yaml.ts";
 import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
-import getKubePrometheusStackApplicationManifest from "src/outputs/core-applications/kube-prometheus-stack.application.yaml.ts";
-import getPromtailApplicationManifest from "src/outputs/core-applications/promtail.application.yaml.ts";
-import getLokiApplicationManifest from "src/outputs/core-applications/loki.application.yaml.ts";
-import { getGrafanaIngressManifest } from "src/outputs/ingress/grafana-ingress.yaml.ts";
-import { getArgoIngressManifest } from "src/outputs/ingress/argo-ingress.yaml.ts";
-
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
 import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
@@ -131,7 +117,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     const config = result.config;
-
     const pathToConfig = result.pathToConfig;
 
     await loadEnv({ export: true, envPath });
@@ -318,13 +303,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
       let hasExistingFnsEnvSecret = false;
 
-      const manifestEntries = Object.entries(config?.cluster_manifests || {});
-
-      if (!manifestEntries.length) {
-        config.cluster_manifests = {};
-      }
-
-      manifestEntries.forEach(
+      Object.entries(config?.cluster_manifests || {}).forEach(
         (manifestEntry) => {
           const m = manifestEntry[1] as ManifestWithName;
           if (m?.metadata?.name === "fns-env-secret") {
@@ -422,6 +401,60 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         );
         await self.postMessage(err.owWorkerErrorMessage);
         return;
+      }
+
+      // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
+      try {
+        ksc = (await loadJSONC(
+          path.join(options.output, "cndi", "ks_checks.json"),
+        )) as Record<string, string>;
+      } catch {
+        // ks_checks.json did not exist or was invalid JSON
+      }
+
+      // restage the SealedSecret yaml file for every key in ks_checks.json
+      for (const key in ksc) {
+        ks_checks[key] = ksc[key];
+
+        let sealedManifest = "";
+
+        try {
+          sealedManifest = await Deno.readTextFileSync(
+            path.join(
+              options.output,
+              "cndi",
+              "cluster_manifests",
+              `${key}.yaml`,
+            ),
+          );
+        } catch {
+          console.error(
+            ccolors.warn(
+              `failed to read SealedSecret: "${
+                ccolors.key_name(
+                  key + ".yaml",
+                )
+              }" referenced in 'ks_checks.json'`,
+            ),
+          );
+          // sealedManifest from ks_checks.json did not exist
+          // so we remove it from the ks_check.json list
+          delete ks_checks[key];
+        }
+
+        try {
+          if (sealedManifest && cluster_manifests?.[key]) {
+            await stageFile(
+              path.join("cndi", "cluster_manifests", `${key}.yaml`),
+              sealedManifest,
+            );
+          } else {
+            // sealedManifest either did not exist or is no longer in cluster_manifests
+            delete ks_checks[key];
+          }
+        } catch {
+          // failed to stage sealedManifest from ks_checks.json
+        }
       }
 
       await Deno.writeTextFile(
@@ -603,282 +636,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         return;
       }
 
-      const skipExternalDNS =
-        config?.infrastructure?.cndi?.external_dns?.enabled === false;
-
-      if (!skipExternalDNS) {
-        const errStagingExtDnsApp = await stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "applications",
-            "external-dns.application.yaml",
-          ),
-          getExternalDNSManifest(config),
-        );
-        if (errStagingExtDnsApp) {
-          await self.postMessage(errStagingExtDnsApp.owWorkerErrorMessage);
-          return;
-        }
-        console.log(
-          ccolors.success("staged application manifest:"),
-          ccolors.key_name("external-dns.application.yaml"),
-        );
-      }
-
-      const argoIngressHostname = config?.infrastructure?.cndi?.argocd
-        ?.hostname;
-      if (argoIngressHostname) {
-        const errStagingArgoIngress = await stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "argo-ingress.yaml",
-          ),
-          getArgoIngressManifest(argoIngressHostname),
-        );
-        if (errStagingArgoIngress) {
-          await self.postMessage(errStagingArgoIngress.owWorkerErrorMessage);
-          return;
-        }
-        console.log(
-          ccolors.success("staged ingress manifest:"),
-          ccolors.key_name("argo-ingress.yaml"),
-        );
-      }
-
-      const skipObservability =
-        config?.infrastructure?.cndi?.observability?.enabled === false;
-
-      if (!skipObservability) {
-        const observabilityNsManifest = getYAMLString({
-          apiVersion: "v1",
-          kind: "Namespace",
-          metadata: { name: "observability" },
-        });
-
-        const errStagingObservabilityNs = await stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "observability-namespace.yaml",
-          ),
-          observabilityNsManifest,
-        );
-
-        if (errStagingObservabilityNs) {
-          await self.postMessage(
-            errStagingObservabilityNs.owWorkerErrorMessage,
-          );
-          return;
-        }
-
-        console.log(
-          ccolors.success("staged namespace manifest:"),
-          ccolors.key_name("observability-namespace.yaml"),
-        );
-
-        const skipKubePrometheusStack =
-          config?.infrastructure?.cndi?.observability?.kube_prometheus_stack
-            ?.enabled === false;
-
-        if (!skipKubePrometheusStack) {
-          const grafanaHostname = config?.infrastructure?.cndi?.observability
-            ?.grafana?.hostname;
-          if (grafanaHostname) {
-            const errStagingGrafanaIngress = await stageFile(
-              path.join(
-                "cndi",
-                "cluster_manifests",
-                "grafana-ingress.yaml",
-              ),
-              getGrafanaIngressManifest(grafanaHostname),
-            );
-            if (errStagingGrafanaIngress) {
-              await self.postMessage(
-                errStagingGrafanaIngress.owWorkerErrorMessage,
-              );
-              return;
-            }
-            console.log(
-              ccolors.success("staged ingress manifest:"),
-              ccolors.key_name("grafana-ingress.yaml"),
-            );
-          }
-
-          const errStagingKubePrometheusStackApp = await stageFile(
-            path.join(
-              "cndi",
-              "cluster_manifests",
-              "applications",
-              "kube-prometheus-stack.application.yaml",
-            ),
-            getKubePrometheusStackApplicationManifest(config),
-          );
-
-          console.log(
-            ccolors.success("staged application manifest:"),
-            ccolors.key_name("kube-prometheus-stack.application.yaml"),
-          );
-
-          if (errStagingKubePrometheusStackApp) {
-            await self.postMessage(
-              errStagingKubePrometheusStackApp.owWorkerErrorMessage,
-            );
-            return;
-          }
-
-          const skipPromtail =
-            config?.infrastructure?.cndi?.observability?.promtail?.enabled ===
-              false;
-          if (!skipPromtail) {
-            const errStagingPromtailApp = await stageFile(
-              path.join(
-                "cndi",
-                "cluster_manifests",
-                "applications",
-                "promtail.application.yaml",
-              ),
-              getPromtailApplicationManifest(config),
-            );
-
-            if (errStagingPromtailApp) {
-              await self.postMessage(
-                errStagingPromtailApp.owWorkerErrorMessage,
-              );
-              return;
-            }
-
-            console.log(
-              ccolors.success("staged application manifest:"),
-              ccolors.key_name("promtail.application.yaml"),
-            );
-          }
-
-          const skipLoki =
-            config?.infrastructure?.cndi?.observability?.loki?.enabled ===
-              false;
-          if (!skipLoki) {
-            const errStagingLokiApp = await stageFile(
-              path.join(
-                "cndi",
-                "cluster_manifests",
-                "applications",
-                "loki.application.yaml",
-              ),
-              getLokiApplicationManifest(config),
-            );
-
-            if (errStagingLokiApp) {
-              await self.postMessage(errStagingLokiApp.owWorkerErrorMessage);
-              return;
-            }
-            console.log(
-              ccolors.success("staged application manifest:"),
-              ccolors.key_name("loki.application.yaml"),
-            );
-          }
-        }
-      }
-
-      const { applications } = config;
-
-      // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
-      for (const releaseName in applications) {
-        const applicationSpec = applications[releaseName];
-        const [manifestContent, filename] = getApplicationManifest(
-          releaseName,
-          applicationSpec,
-        );
-        const errStagingApplication = await stageFile(
-          path.join("cndi", "cluster_manifests", "applications", filename),
-          manifestContent,
-        );
-        if (errStagingApplication) {
-          await self.postMessage(errStagingApplication.owWorkerErrorMessage);
-          return;
-        }
-        console.log(
-          ccolors.success("staged application manifest:"),
-          ccolors.key_name(filename),
-        );
-      }
-
-      // all cloberable manifests should be staged before this point,
-      // begin processing cluster_manifests, including Secrets
-
-      try {
-        // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
-        ksc = (await loadJSONC(
-          path.join(options.output, "cndi", "ks_checks.json"),
-        )) as Record<string, string>;
-      } catch {
-        // ks_checks.json did not exist or was invalid JSON
-      }
-
-      // restage the SealedSecret yaml file for every key in ks_checks.json
-      for (const key in ksc) {
-        ks_checks[key] = ksc[key];
-
-        let sealedManifest = "";
-
-        try {
-          sealedManifest = await Deno.readTextFileSync(
-            path.join(
-              options.output,
-              "cndi",
-              "cluster_manifests",
-              `${key}.yaml`,
-            ),
-          );
-        } catch {
-          console.error(
-            ccolors.warn(
-              `failed to read SealedSecret: "${
-                ccolors.key_name(
-                  key + ".yaml",
-                )
-              }" referenced in 'ks_checks.json'`,
-            ),
-          );
-          // sealedManifest from ks_checks.json did not exist
-          // so we remove it from the ks_check.json list
-          delete ks_checks[key];
-        }
-
-        try {
-          if (sealedManifest && cluster_manifests?.[key]) {
-            await stageFile(
-              path.join("cndi", "cluster_manifests", `${key}.yaml`),
-              sealedManifest,
-            );
-          } else {
-            // sealedManifest either did not exist or is no longer in cluster_manifests
-            delete ks_checks[key];
-          }
-        } catch {
-          // failed to stage sealedManifest from ks_checks.json
-        }
-      }
-
-      const errStagingKSCJSON = await stageFile(
-        path.join("cndi", "ks_checks.json"),
-        getPrettyJSONString(ks_checks),
-      );
-
-      if (errStagingKSCJSON) {
-        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
-        return;
-      }
-
-      console.log(
-        ccolors.success("staged metadata:"),
-        ccolors.key_name("ks_checks.json"),
-      );
-
       // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
-      // should be done after any other manifest so they can clobber more high-level manifests
-      // eg. Core Applications, user Applications, etc.
       for (const key in cluster_manifests) {
         const manifestObj = cluster_manifests[key] as KubernetesManifest;
 
@@ -946,6 +704,65 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         console.log(
           ccolors.success("staged manifest:"),
           ccolors.key_name(manifestFilename),
+        );
+      }
+
+      const errStagingKSCJSON = await stageFile(
+        path.join("cndi", "ks_checks.json"),
+        getPrettyJSONString(ks_checks),
+      );
+      if (errStagingKSCJSON) {
+        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
+        return;
+      }
+      console.log(
+        ccolors.success("staged metadata:"),
+        ccolors.key_name("ks_checks.json"),
+      );
+
+      const skipExternalDNS =
+        config?.infrastructure?.cndi?.external_dns?.enabled === false;
+
+      if (!skipExternalDNS) {
+        const errStagingExtDnsApp = await stageFile(
+          path.join(
+            "cndi",
+            "cluster_manifests",
+            "applications",
+            "external-dns.application.yaml",
+          ),
+          getExternalDNSManifest(config),
+        );
+        if (errStagingExtDnsApp) {
+          await self.postMessage(errStagingExtDnsApp.owWorkerErrorMessage);
+          return;
+        }
+        console.log(
+          ccolors.success("staged application manifest:"),
+          ccolors.key_name("external-dns.application.yaml"),
+        );
+      }
+
+      const { applications } = config;
+
+      // write the `cndi/cluster_manifests/applications/${applicationName}.application.yaml` file for each application
+      for (const releaseName in applications) {
+        const applicationSpec = applications[releaseName];
+        const [manifestContent, filename] = getApplicationManifest(
+          releaseName,
+          applicationSpec,
+        );
+        const errStagingApplication = await stageFile(
+          path.join("cndi", "cluster_manifests", "applications", filename),
+          manifestContent,
+        );
+        if (errStagingApplication) {
+          await self.postMessage(errStagingApplication.owWorkerErrorMessage);
+          return;
+        }
+        console.log(
+          ccolors.success("staged application manifest:"),
+          ccolors.key_name(filename),
         );
       }
     }
