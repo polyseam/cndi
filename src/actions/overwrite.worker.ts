@@ -131,6 +131,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     const config = result.config;
+
     const pathToConfig = result.pathToConfig;
 
     await loadEnv({ export: true, envPath });
@@ -317,7 +318,13 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
       let hasExistingFnsEnvSecret = false;
 
-      Object.entries(config?.cluster_manifests || {}).forEach(
+      const manifestEntries = Object.entries(config?.cluster_manifests || {});
+
+      if(!manifestEntries.length) {
+        config.cluster_manifests = {};
+      }
+
+      manifestEntries.forEach(
         (manifestEntry) => {
           const m = manifestEntry[1] as ManifestWithName;
           if (m?.metadata?.name === "fns-env-secret") {
