@@ -1,6 +1,6 @@
 # `functions`
 
-## `cndi.infrastructure.functions`
+## `infrastructure.cndi.functions`
 
 The `functions` block is used to configure the functions runtime for your
 cluster. The only value which can be customized today is the `hostname` on which

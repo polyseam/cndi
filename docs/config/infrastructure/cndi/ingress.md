@@ -1,12 +1,12 @@
 # `ingress`
 
-## `cndi.infrastructure.ingress`
+## `infrastructure.cndi.ingress`
 
 The `ingress` block is used to configure the
 [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
 component of your cluster.
 
-### `cndi.infrastructure.ingress.public`
+### `infrastructure.cndi.ingress.public`
 
 By default `cndi` will deploy a public ingress controller within the
 `public-ingress` namespace, and used to provide public endpoints for your
@@ -28,7 +28,7 @@ infrastructure:
     nodes: [...]
 ```
 
-### `cndi.infrastructure.ingress.private`
+### `infrastructure.cndi.ingress.private`
 
 By default `cndi` will **not** deploy a private ingress controller. To enable
 the deployment of a `private` ingress controller, it should be enabled in your

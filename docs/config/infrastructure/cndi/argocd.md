@@ -1,6 +1,6 @@
 # `argocd`
 
-## `cndi.infrastructure.argocd`
+## `infrastructure.cndi.argocd`
 
 The `argocd` block is used to configure the
 [ArgoCD](https://argoproj.github.io/argo-cd/) component of your cluster.

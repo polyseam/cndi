@@ -1,6 +1,6 @@
 # `external_dns`
 
-## `cndi.infrastructure.external_dns`
+## `infrastructure.cndi.external_dns`
 
 [ExternalDNS](https://github.com/bitnami/charts/blob/main/bitnami/external-dns/README.md)
 is used to enable Kubernetes to create and update DNS records corresponding to

@@ -1,6 +1,6 @@
 # `nodes`
 
-## `cndi.infrastructure.nodes`
+## `infrastructure.cndi.nodes`
 
 The `nodes` block is used to configure the nodes your cluster will run on. Each
 node can be customized with:

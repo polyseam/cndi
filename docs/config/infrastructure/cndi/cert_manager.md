@@ -1,6 +1,6 @@
 # `cert_manager`
 
-## `cndi.infrastructure.cert_manager`
+## `infrastructure.cndi.cert_manager`
 
 The `cert_manager` block is used to configure the
 [cert-manager](https://cert-manager.io/docs/) component of your cluster. The
