@@ -108,8 +108,9 @@ more detailed information you can refer to documentation page for each.
 
 The next block of config shows the `applications` section of `cndi_config.yaml`.
 This section of the config is a thin wrapper over the ArgoCD
-[Application CRD](), and is used to deploy applications to your cluster. Here's
-an example of the `applications` block in action:
+[Application CRD](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications),
+and is used to deploy applications to your cluster. Here's an example of the
+`applications` block in action:
 
 ```yaml
 # metadata
@@ -200,6 +201,9 @@ cluster_manifests:
       username: $cndi_on_ow.seal_secret_from_env_var(MY_USERNAME)
       password: $cndi_on_ow.seal_secret_from_env_var(MY_PASSWORD)
 ```
+
+For more information on how to configure `cluster_manifests`, see the
+[cluster_manifests](config/cluster_manifests.md) documentation.
 
 # Conclusion
 
