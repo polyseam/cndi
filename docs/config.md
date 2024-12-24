@@ -94,6 +94,7 @@ the `infrastructure.cndi` block:
 | `infrastructure.cndi.`                                         | Description                                                            |
 | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | [`nodes`](config/infrastructure/cndi/nodes.md)                 | Configure Cluster Nodes                                                |
+| [`cert_manager`](config/infrastructure/cndi/cert_manager.md)   | Configure Cert-Manager for your Cluster                                |
 | [`external_dns`](config/infrastructure/cndi/external_dns.md)   | Configure ExternalDNS to create DNS records for your Ingress resources |
 | [`argocd`](config/infrastructure/cndi/argocd.md)               | Configure ArgoCD for your Cluster                                      |
 | [`observability`](config/infrastructure/cndi/observability.md) | Configure Observability stack                                          |
