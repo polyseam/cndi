@@ -1,9 +1,6 @@
-# cndi network configuration 🔌
+# network
 
-> [!NOTE]
-> We're going to use the term VNet to refer to the concept of a virtual network.
-> AWS calls this a VPC, Azure calls this a VNet, and GCP calls this a Compute
-> Network.
+## `infrastructure.cndi.network`
 
 CNDI supports two modes for deploying your cluster:
 

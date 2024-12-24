@@ -17,7 +17,7 @@ cndi/terraform/.terraform*
 cndi/terraform/*.tfstate*
 cndi/terraform/.terraform/
 
-cndi
+./cndi
 
 benchee.json
 
