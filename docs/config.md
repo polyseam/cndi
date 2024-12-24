@@ -226,6 +226,7 @@ project_name: wordpress-cluster
 cndi_version: v2
 provider: azure
 distribution: aks
+
 infrastructure:
   cndi:
     nodes: # ./docs/config/infrastructure/cndi/nodes.md
@@ -241,6 +242,8 @@ infrastructure:
     observability: # ./docs/config/infrastructure/cndi/observability.md
       grafana:
         hostname: observability.my-cluster.example.com
+
+
 cluster_manifests: # ./docs/config/cluster_manifests.md
   wordpress-ingress: # https://kubernetes.io/docs/concepts/services-networking/ingress/
     wp-ingress:
@@ -271,6 +274,7 @@ cluster_manifests: # ./docs/config/cluster_manifests.md
                     name: wordpress
                     port:
                       number: 443
+
   wordpress-secret: # https://kubernetes.io/docs/concepts/configuration/secret/
     apiVersion: v1
     kind: Secret
@@ -279,11 +283,13 @@ cluster_manifests: # ./docs/config/cluster_manifests.md
       namespace: wordpress
     stringData:
       wordpress-password: $cndi_on_ow.seal_secret_from_env_var(WORDPRESS_PASSWORD)
+
   wordpress-ns: # https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
     apiVersion: v1
     kind: Namespace
     metadata:
       name: wordpress
+
   external-dns-secret: # https://kubernetes.io/docs/concepts/configuration/secret/
     apiVersion: v1
     kind: Secret
@@ -293,6 +299,7 @@ cluster_manifests: # ./docs/config/cluster_manifests.md
     stringData:
       # credentials in JSON string in .env used to modify DNS records
       azure.json: $cndi_on_ow.seal_secret_from_env_var(AZURE_CREDENTIALS)
+
 
 applications: # ./docs/config/applications.md
   wordpress:
