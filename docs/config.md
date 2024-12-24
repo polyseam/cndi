@@ -243,7 +243,6 @@ infrastructure:
       grafana:
         hostname: observability.my-cluster.example.com
 
-
 cluster_manifests: # ./docs/config/cluster_manifests.md
   wordpress-ingress: # https://kubernetes.io/docs/concepts/services-networking/ingress/
     wp-ingress:
@@ -299,7 +298,6 @@ cluster_manifests: # ./docs/config/cluster_manifests.md
     stringData:
       # credentials in JSON string in .env used to modify DNS records
       azure.json: $cndi_on_ow.seal_secret_from_env_var(AZURE_CREDENTIALS)
-
 
 applications: # ./docs/config/applications.md
   wordpress:
