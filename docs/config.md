@@ -211,6 +211,7 @@ Every section of a `cndi_config.yaml` file is documented more thoroughly in the
 - [applications](config/applications.md)
 - [cluster_manifests](config/cluster_manifests.md)
 - [infrastructure.cndi.nodes](config/infrastructure/cndi/nodes.md)
+- [infrastructure.cndi.cert_manager](config/infrastructure/cndi/cert_manager.md)
 - [infrastructure.cndi.argocd](config/infrastructure/cndi/argocd.md)
 - [infrastructure.cndi.external_dns](config/infrastructure/cndi/external_dns.md)
 - [infrastructure.cndi.functions](config/infrastructure/cndi/functions.md)
