@@ -15,6 +15,9 @@ export default function getKubeLokiApplicationManifest(
   const releaseName = "loki";
 
   const defaultLokiValues = {
+    chunksCache: {
+      allocatedMemory: 1024,
+    },
     loki: {
       auth_enabled: false,
       commonConfig: {
