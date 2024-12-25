@@ -154,7 +154,7 @@
     - ==
     - true
 
-- name: enable_grafana_ingress
+- name: deploy_grafana_ingress
   default: true
   message: >-
     Do you want to expose Grafana with an Ingress?
@@ -168,6 +168,6 @@
   validators:
     - hostname
   condition:
-    - "{{ $cndi.get_prompt_response(enable_grafana_ingress) }}"
+    - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
     - ==
     - true
