@@ -861,21 +861,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         }
       }
 
-      const errStagingKSCJSON = await stageFile(
-        path.join("cndi", "ks_checks.json"),
-        getPrettyJSONString(ks_checks),
-      );
-
-      if (errStagingKSCJSON) {
-        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
-        return;
-      }
-
-      console.log(
-        ccolors.success("staged metadata:"),
-        ccolors.key_name("ks_checks.json"),
-      );
-
       // write each manifest in the "cluster_manifests" section of the config to `cndi/cluster_manifests`
       // should be done after any other manifest so they can clobber more high-level manifests
       // eg. Core Applications, user Applications, etc.
@@ -948,6 +933,20 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.key_name(manifestFilename),
         );
       }
+      const errStagingKSCJSON = await stageFile(
+        path.join("cndi", "ks_checks.json"),
+        getPrettyJSONString(ks_checks),
+      );
+
+      if (errStagingKSCJSON) {
+        await self.postMessage(errStagingKSCJSON.owWorkerErrorMessage);
+        return;
+      }
+
+      console.log(
+        ccolors.success("staged metadata:"),
+        ccolors.key_name("ks_checks.json"),
+      );
     }
 
     try {
