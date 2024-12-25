@@ -80,24 +80,6 @@ prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
-  - name: deploy_argocd_ingress
-    default: true
-    message: >-
-      Do you want to expose ArgoCD with an Ingress?
-    type: Confirm
-
-  - name: argocd_hostname
-    default: argocd.example.com
-    message: >-
-      What hostname should ArgoCD be accessible at?
-    type: Input
-    validators:
-      - hostname # FQDN
-    condition:
-      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-      - ==
-      - true
-
   - name: deploy_airflow_ingress
     default: true
     message: >-
@@ -165,6 +147,18 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     infrastructure:
       cndi:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
+            - ==
+            - true
+
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/argocd-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
         external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
@@ -270,6 +264,7 @@ outputs:
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_CLUSTER_SUPERUSER_PASSWORD)
+
       cnpg-database-user-auth-secret:
         apiVersion: v1
         kind: Secret
@@ -280,20 +275,6 @@ outputs:
         stringData:
           username: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER)
           password: $cndi_on_ow.seal_secret_from_env_var(POSTGRESQL_USER_PASSWORD)
-
-      argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: argocd-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
-            service_name: argocd-server
-            service_port: 443
-            namespace: argocd
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-            - ==
-            - true
 
       airflow-ingress:
         $cndi.get_block(deploy_airflow_ingress_blk):

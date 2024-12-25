@@ -76,6 +76,18 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     infrastructure:
       cndi:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
+            - ==
+            - true
+
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/argocd-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
         cert_manager:
           email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
 
@@ -101,20 +113,6 @@ outputs:
         kind: Namespace
         metadata:
           name: superset
-
-      argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: argocd-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
-            service_name: argocd-server
-            service_port: 443
-            namespace: argocd
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-            - ==
-            - true
 
       superset-ingress:
         $cndi.get_block(deploy_superset_ingress_blk):

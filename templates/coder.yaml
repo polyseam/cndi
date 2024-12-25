@@ -117,24 +117,6 @@ prompts:
       - ==
       - true
 
-  - name: deploy_argocd_ingress
-    default: true
-    message: >-
-      Do you want to install ArgoCD and expose it via an ingress?
-    type: Confirm
-
-  - name: argocd_hostname
-    default: argocd.example.com
-    message: >-
-      What hostname should ArgoCD be accessible at?
-    type: Input
-    validators:
-      - hostname # FQDN
-    condition:
-      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-      - ==
-      - true
-
   - name: deploy_pgadmin_application
     default: true
     message: >-
@@ -223,6 +205,18 @@ outputs:
     # this is a Template comment
     infrastructure:
       cndi:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
+            - ==
+            - true
+
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/argocd-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
         external_dns:
           $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
             condition:
@@ -323,20 +317,6 @@ outputs:
         $cndi.get_block(pgadmin_login_password_secret_blk):
           condition:
             - "{{ $cndi.get_prompt_response(deploy_pgadmin_application) }}"
-            - ==
-            - true
-
-      argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: argocd-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
-            service_name: argocd-server
-            service_port: 443
-            namespace: argocd
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
             - ==
             - true
 
