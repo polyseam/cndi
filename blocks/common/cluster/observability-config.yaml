@@ -1,0 +1,3 @@
+observability:
+  grafana:
+    hostname: "{{ $cndi.get_prompt_response(grafana_hostname) }}"

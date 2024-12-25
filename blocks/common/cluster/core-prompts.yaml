@@ -135,3 +135,39 @@
     Enter an override for the default ArgoCD Admin Password?
   type: Input
   default: "{{ $cndi.get_random_string(32) }}"
+
+- name: deploy_argocd_ingress
+  default: true
+  message: >-
+    Do you want to expose ArgoCD with an Ingress?
+  type: Confirm
+
+- name: argocd_hostname
+  default: argocd.example.com
+  message: >-
+    What hostname should ArgoCD be accessible at?
+  type: Input
+  validators:
+    - hostname
+  condition:
+    - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+    - ==
+    - true
+
+- name: enable_grafana_ingress
+  default: true
+  message: >-
+    Do you want to expose Grafana with an Ingress?
+  type: Confirm
+
+- name: grafana_hostname
+  default: grafana.example.com
+  message: >-
+    What hostname should Grafana be accessible at?
+  type: Input
+  validators:
+    - hostname
+  condition:
+    - "{{ $cndi.get_prompt_response(enable_grafana_ingress) }}"
+    - ==
+    - true

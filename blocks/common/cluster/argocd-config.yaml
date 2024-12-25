@@ -1,0 +1,2 @@
+argocd:
+  hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
