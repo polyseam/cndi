@@ -12,25 +12,7 @@ prompts:
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
 
-  - name: deploy_argocd_ingress
-    default: true
-    message: >-
-      Do you want to expose ArgoCD with an Ingress?
-    type: Confirm
-
-  - name: argocd_hostname
-    default: argocd.example.com
-    message: >-
-      What hostname should ArgoCD be accessible at?
-    type: Input
-    validators:
-      - hostname
-    condition:
-      - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-      - ==
-      - true
-
-  - name: enable_fns_ingress
+  - name: deploy_fns_ingress
     default: true
     message: >-
       Do you want to expose Cloud Functions with an Ingress?
@@ -44,7 +26,7 @@ prompts:
     validators:
       - hostname
     condition:
-      - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+      - "{{ $cndi.get_prompt_response(deploy_fns_ingress) }}"
       - ==
       - true
 
@@ -56,10 +38,22 @@ outputs:
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
     infrastructure:
       cndi:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
+            - ==
+            - true
+
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/argocd-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
         functions:
           $cndi.get_block(functions):
             condition:
-              - "{{ $cndi.get_prompt_response(enable_fns_ingress) }}"
+              - "{{ $cndi.get_prompt_response(deploy_fns_ingress) }}"
               - ==
               - true
 
@@ -78,20 +72,6 @@ outputs:
             {}
 
     cluster_manifests:
-      argo-ingress:
-        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
-          args:
-            ingress_name: argocd-ingress
-            ingress_class_name: public
-            hostname: "{{ $cndi.get_prompt_response(argocd_hostname) }}"
-            service_name: argocd-server
-            service_port: 443
-            namespace: argocd
-          condition:
-            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
-            - ==
-            - true
-
       external-dns-secret:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
           condition:
