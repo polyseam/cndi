@@ -51,10 +51,10 @@ export default function getExternalDNSApplicationManifest(
     txtSuffix: "txt",
     policy: "sync",
     interval: "30s",
-    ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
     provider: externalDNSProvider,
     domainFilters: domain_filters,
     excludeDomains: EXCLUDED_FROM_EXTERNAL_DNS,
+    ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
   };
 
   if (externalDNSCannotUseEnvVars.includes(externalDNSProvider)) {

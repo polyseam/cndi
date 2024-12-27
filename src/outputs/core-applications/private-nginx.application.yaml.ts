@@ -8,7 +8,7 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-const getDefaultControllerConfig = () => ({
+const controller = {
   electionID: "private-controller-leader",
   ingressClassResource: {
     enabled: "true",
@@ -16,14 +16,10 @@ const getDefaultControllerConfig = () => ({
     default: "false",
     controllerValue: "k8s.io/ingress-nginx-private",
   },
-});
-const getBaseValues = (cndi_config: CNDIConfig) =>
-  deepMerge({
-    controller: getDefaultControllerConfig(),
-  }, cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {});
+};
 
-const eksValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
+const eksValues = (project_name: string) => {
+  return deepMerge({ controller }, {
     controller: {
       service: {
         internal: {
@@ -31,41 +27,52 @@ const eksValues = (cndi_config: CNDIConfig) =>
         },
         annotations: {
           "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal",
+          "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
+            `CNDIProject=${project_name}`,
         },
       },
     },
   });
-const devValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
+};
+
+const devValues = () => {
+  return deepMerge({ controller }, {
     controller: {
       service: {
         external: {
-          enabled: false,
+          enabled: "false",
         },
       },
     },
   });
-const gkeValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
+};
+
+const gkeValues = () => {
+  return deepMerge({ controller }, {
     controller: {
       service: {
+        internal: {
+          enabled: "true",
+        },
         annotations: {
           "networking.gke.io/load-balancer-type": "Internal",
         },
       },
     },
   });
+};
 
-const aksValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
+const aksValues = () => {
+  return deepMerge({ controller }, {
     controller: {
       service: {
+        internal: {
+          enabled: "true",
+        },
         annotations: {
           "service.beta.kubernetes.io/azure-load-balancer-internal": "/healthz",
           "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
             "/healthz",
-          "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
-            `CNDIProject=${cndi_config.project_name}`,
         },
       },
       defaultBackend: {
@@ -82,18 +89,23 @@ const aksValues = (cndi_config: CNDIConfig) =>
       },
     },
   });
+};
 
 const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
-  const cndiDistribution = cndi_config.distribution;
-  const providerConfigs = {
-    eks: eksValues(cndi_config),
-    gke: gkeValues(cndi_config),
-    aks: aksValues(cndi_config),
-    microk8s: devValues(cndi_config),
-    clusterless: null,
-  };
+  const { distribution, project_name } = cndi_config;
 
-  return providerConfigs[cndiDistribution];
+  switch (distribution) {
+    case "eks":
+      return eksValues(project_name || "my-cndi-project");
+    case "gke":
+      return gkeValues();
+    case "aks":
+      return aksValues();
+    case "microk8s":
+      return devValues();
+    default:
+      return {};
+  }
 };
 
 export default function getNginxApplicationManifest(
@@ -102,7 +114,11 @@ export default function getNginxApplicationManifest(
   if (cndi_config.distribution === "clusterless") return "";
 
   const releaseName = "ingress-nginx-private";
-  const values = getDefaultNginxValuesForCNDIProvider(cndi_config);
+  const defaultValues = getDefaultNginxValuesForCNDIProvider(cndi_config);
+  const userValues =
+    cndi_config?.infrastructure?.cndi?.ingress?.nginx?.private?.values || {};
+
+  const values = getYAMLString(deepMerge(defaultValues, userValues));
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -119,7 +135,7 @@ export default function getNginxApplicationManifest(
         chart: "ingress-nginx",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString(values),
+          values,
         },
         targetRevision: NGINX_CHART_VERSION,
       },
