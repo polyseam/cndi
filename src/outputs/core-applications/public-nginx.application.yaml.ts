@@ -9,7 +9,7 @@ const DEFAULT_HELM_VERSION = "v3";
 const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
-const getDefaultControllerConfig = () => ({
+const controller = {
   electionID: "public-controller-leader",
   ingressClassResource: {
     enabled: "true",
@@ -17,7 +17,7 @@ const getDefaultControllerConfig = () => ({
     default: "false",
     controllerValue: "k8s.io/ingress-nginx-public",
   },
-});
+};
 
 type TCPSpec = Record<number, string>;
 
@@ -30,27 +30,25 @@ const getTCPConfig = (open_ports: CNDIPort[]): TCPSpec => {
   return tcp;
 };
 
-const getBaseValues = (cndi_config: CNDIConfig) =>
-  deepMerge(
-    {
-      controller: getDefaultControllerConfig(),
-      tcp: getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []),
-    },
-    cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {},
-  );
+const getBaseValues = (cndi_config: CNDIConfig) => {
+  const tcp = getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []);
+  return { tcp, controller };
+};
 
-const eksValues = (cndi_config: CNDIConfig) =>
-  deepMerge(getBaseValues(cndi_config), {
+const eksValues = (cndi_config: CNDIConfig) => {
+  const { project_name } = cndi_config;
+  return deepMerge(getBaseValues(cndi_config), {
     controller: {
       service: {
         annotations: {
           "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
           "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
-            `CNDIProject=${cndi_config.project_name}`,
+            `CNDIProject=${project_name}`,
         },
       },
     },
   });
+};
 
 const gkeValues = (cndi_config: CNDIConfig) => getBaseValues(cndi_config);
 
@@ -89,22 +87,31 @@ const aksValues = (cndi_config: CNDIConfig) =>
   });
 
 const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
-  const cndiDistribution = cndi_config.distribution;
-  const providerConfigs = {
-    eks: eksValues(cndi_config),
-    gke: gkeValues(cndi_config),
-    aks: aksValues(cndi_config),
-    microk8s: devValues(cndi_config), // Not ready
-    clusterless: null,
-  };
+  const { distribution } = cndi_config;
 
-  return providerConfigs[cndiDistribution];
+  switch (distribution) {
+    case "eks":
+      return eksValues(cndi_config);
+    case "gke":
+      return gkeValues(cndi_config);
+    case "aks":
+      return aksValues(cndi_config);
+    case "microk8s":
+      return devValues(cndi_config);
+    default:
+      return {};
+  }
 };
 
 export default function getNginxApplicationManifest(cndi_config: CNDIConfig) {
   if (cndi_config.distribution === "clusterless") return "";
   const releaseName = "ingress-nginx-public";
-  const values = getDefaultNginxValuesForCNDIProvider(cndi_config);
+
+  const defaultValues = getDefaultNginxValuesForCNDIProvider(cndi_config);
+  const userValues =
+    cndi_config?.infrastructure?.cndi?.ingress?.nginx?.public?.values || {};
+
+  const values = getYAMLString(deepMerge(defaultValues, userValues));
 
   const manifest = {
     apiVersion: DEFAULT_ARGOCD_API_VERSION,
@@ -121,7 +128,7 @@ export default function getNginxApplicationManifest(cndi_config: CNDIConfig) {
         chart: "ingress-nginx",
         helm: {
           version: DEFAULT_HELM_VERSION,
-          values: getYAMLString(values),
+          values,
         },
         targetRevision: NGINX_CHART_VERSION,
       },

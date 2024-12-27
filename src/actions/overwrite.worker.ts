@@ -442,7 +442,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             "applications",
             "cert-manager.application.yaml",
           ),
-          getCertManagerApplicationManifest(),
+          getCertManagerApplicationManifest(config),
         );
         if (errStagingCertManApplication) {
           await self.postMessage(
@@ -499,7 +499,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             "applications",
             "reloader.application.yaml",
           ),
-          getReloaderApplicationManifest(),
+          getReloaderApplicationManifest(config),
         );
         if (errStagingReloaderApp) {
           await self.postMessage(errStagingReloaderApp.owWorkerErrorMessage);

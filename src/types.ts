@@ -322,11 +322,11 @@ export type CNDIInfrastructure = {
       nginx: {
         public: {
           enabled?: boolean; // default: true
-          values: Record<string, unknown>;
+          values?: Record<string, unknown>;
         };
         private: {
           enabled?: boolean; // default: false
-          values: Record<string, unknown>;
+          values?: Record<string, unknown>;
         };
       };
     };
@@ -334,15 +334,17 @@ export type CNDIInfrastructure = {
       enabled?: boolean; // default: true
       provider: ExternalDNSProvider;
       domain_filters: Array<string>;
-      values: Record<string, unknown>;
+      values?: Record<string, unknown>;
     };
     reloader: {
       enabled?: boolean; // default: true
+      values?: Record<string, unknown>;
     };
     cert_manager?: {
       enabled?: boolean; // default: true
       email: string;
       self_signed?: boolean;
+      values?: Record<string, unknown>;
     };
     nodes: Array<CNDINodeSpec>;
     microk8s: {
