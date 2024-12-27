@@ -2,6 +2,7 @@ import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
 import type { CNDIProvider, ExternalDNSProvider } from "src/types.ts";
 import { EXTERNAL_DNS_CHART_VERSION } from "consts";
+import { deepMerge } from "deps";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -39,14 +40,10 @@ export default function getExternalDNSApplicationManifest(
     "oci",
   ];
 
-  type ExternalDNSValues = {
-    provider: ExternalDNSProvider;
-    domainFilters: Array<string>;
-    [key: string]: unknown;
-    extraEnvVarsSecret?: string;
-  };
+  const userValues = cndi_config?.infrastructure?.cndi?.external_dns?.values ||
+    {};
 
-  const values: ExternalDNSValues = {
+  const values = deepMerge({
     txtOwnerId: cndi_config?.project_name || "external-dns",
     txtSuffix: "txt",
     policy: "sync",
@@ -54,8 +51,7 @@ export default function getExternalDNSApplicationManifest(
     provider: externalDNSProvider,
     domainFilters: domain_filters,
     excludeDomains: EXCLUDED_FROM_EXTERNAL_DNS,
-    ...cndi_config?.infrastructure?.cndi?.external_dns?.values || {},
-  };
+  }, userValues);
 
   if (externalDNSCannotUseEnvVars.includes(externalDNSProvider)) {
     // this dns provider uses another method for authentication, probably volume mounts
