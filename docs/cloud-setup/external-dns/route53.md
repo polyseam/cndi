@@ -17,7 +17,7 @@ that the IAM user has the necessary permissions to manage Route53 records.
 The values for both should be present in your environment, and when deploying
 CNDI on `aws/eks` they should be in your `.env` file.
 
-```bash
+```dotenv
 AWS_ACCESS_KEY_ID=AKIAIiojoijoojEXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUIHNUBIYBAyddbPxRfiCYEXAMPLEKEY
 ```
