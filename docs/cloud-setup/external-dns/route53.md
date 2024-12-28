@@ -3,21 +3,24 @@
 # with AWS Route53
 
 CNDI has built-in support for managing DNS records with AWS Route53. This guide
-will walk you through setting up External-DNS with AWS Route53.
+will walk you through setting it up.
 
-The key idea is that you need to specify a Secret with AWS credentials that
-External-DNS can use to manage Route53 records.
+The key idea is that you need to specify a Secret containing AWS credentials
+that External-DNS can use to manage Route53 records.
 
 This secret will be used to authenticate with AWS Route53 from inside your CNDI
-Cluster.
+Cluster, so that it can open your Ingress resources at a specified domain names.
 
 If you are using EKS and are comfortable using the same `AWS_ACCESS_KEY_ID` and
-`AWS_SECRET_ACCESS_KEY` you used for your EKS Cluster provisioning that is an
+`AWS_SECRET_ACCESS_KEY` you used for your EKS Cluster provisioning, that is an
 option, you just need to be sure that the IAM user has the necessary permissions
 to manage Route53 records.
 
 Alternatively, you can create a new IAM user with the necessary permissions for
 External-DNS, and that will work even if your cluster is _not_ hosted on AWS.
+
+First let's focus on the simplest case, using the same credentials you used to
+create your EKS Cluster. Most of the work is likely already done for you!
 
 ## Using Existing Cluster Credentials
 
@@ -29,16 +32,16 @@ AWS_SECRET_ACCESS_KEY=wJalrXUIHNUBIYBAyddbPxRfiCYEXAMPLEKEY
 ```
 
 If you selected the `aws` provider for `external_dns` when you created your
-cluster, these values should already be in your `.env` file, and the Secret that
-encrypts and holds those values should already be in your `cndi_config.yaml`
-file too.
+cluster with `cndi create ...`, these values should already be in your `.env`
+file, and the Secret that encrypts and holds those values should already be in
+your `cndi_config.yaml` file too.
 
 ```yaml
 infrastructure:
   cndi:
+    {...}
     external_dns:
       provider: aws
-    {...}
 cluster_manifests:
   {...}
   external-dns:
@@ -60,7 +63,7 @@ hosted on a cloud other than AWS, you can create a new IAM user with the
 necessary permissions to edit your Route53 zone records.
 
 The implementation is the same, all that changes is the IAM user credentials you
-"Seal" in your cluster with CNDI's Sealed Secrets feature.
+use in your `external-dns` Secret.
 
 If you want to create a new IAM user for External-DNS, you can follow these
 steps:
@@ -180,7 +183,9 @@ cluster_manifests:
 ## FAQ
 
 **Q**: My domain is not yet live, how can I monitor progress and check for
-errors? **A**: You may just want to wait an hour and go get a snack, otherwise:
+errors?
+
+**A**: You may just want to wait an hour and go get a snack, otherwise:
 
 1. Ensure all jobs in GitHub Actions have completed successfully.
 2. Run `cndi show-outputs` in your project directory.
