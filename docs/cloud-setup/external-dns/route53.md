@@ -8,7 +8,7 @@ will walk you through setting it up.
 The key idea is that you need to specify a Secret containing AWS credentials
 that External-DNS can use to manage Route53 records.
 
-This secret will be used to authenticate with AWS Route53 from inside your CNDI
+This Secret will be used to authenticate with AWS Route53 from inside your CNDI
 Cluster, so that it can open your Ingress resources at a specified domain names.
 
 If you are using EKS and are comfortable using the same `AWS_ACCESS_KEY_ID` and

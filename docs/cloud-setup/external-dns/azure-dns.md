@@ -5,15 +5,15 @@
 CNDI has built-in support for managing DNS records with Azure DNS. This guide
 will walk you through setting it up.
 
-The key idea is that you need to specify a Secret containing AWS credentials
+The key idea is that you need to specify a Secret containing Azure credentials
 that External-DNS can use to manage Azure DNS zones.
 
-This secret will be used to authenticate with Azure DNS from inside your CNDI
+This Secret will be used to authenticate with Azure DNS from inside your CNDI
 Cluster, so that it can open your Ingress resources at a specified domain names.
 
 If you are using AKS and are comfortable using the same `ARM_CLIENT_ID` you used
 for your AKS Cluster provisioning, that is an option, you just need to be sure
-that the credential has the necessary permissions to manage Azure DNS zones
+that the credential has the necessary permissions to manage Azure DNS zone
 records.
 
 Alternatively, you can create a new credential with the necessary permissions
