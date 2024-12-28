@@ -2,29 +2,36 @@
 
 # with AWS Route53
 
-CNDI has built in support for managing DNS records with AWS Route53. This guide
+CNDI has built-in support for managing DNS records with AWS Route53. This guide
 will walk you through setting up External-DNS with AWS Route53.
 
-The key idea is that you need to specify a secret with AWS credentials that
-External-DNS can use to manage Route53 records. This secret will be used to
-authenticate with AWS Route53. You have the option of either creating a new IAM
-user with the necessary permissions or using an existing IAM user.
+The key idea is that you need to specify a Secret with AWS credentials that
+External-DNS can use to manage Route53 records.
 
-If you are comfortable using your `AWS_ACCESS_KEY_ID` and
-`AWS_SECRET_ACCESS_KEY` you used for your EKS Cluster, you just need to be sure
-that the IAM user has the necessary permissions to manage Route53 records.
+This secret will be used to authenticate with AWS Route53 from inside your CNDI
+Cluster.
 
-The values for both should be present in your environment, and when deploying
-CNDI on `aws/eks` they should be in your `.env` file.
+If you are using EKS and are comfortable using the same `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY` you used for your EKS Cluster provisioning that is an
+option, you just need to be sure that the IAM user has the necessary permissions
+to manage Route53 records.
+
+Alternatively, you can create a new IAM user with the necessary permissions for
+External-DNS, and that will work even if your cluster is _not_ hosted on AWS.
+
+## Using Existing Cluster Credentials
+
+The AWS Credentials should look like this:
 
 ```dotenv
 AWS_ACCESS_KEY_ID=AKIAIiojoijoojEXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUIHNUBIYBAyddbPxRfiCYEXAMPLEKEY
 ```
 
-To use these existing credentials you should be able to add a new
-[Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret) to
-your `cndi_config.yaml` file with the following content:
+If you selected the `aws` provider for `external_dns` when you created your
+cluster, these values should already be in your `.env` file, and the Secret that
+encrypts and holds those values should already be in your `cndi_config.yaml`
+file too.
 
 ```yaml
 infrastructure:
@@ -44,15 +51,16 @@ cluster_manifests:
         AWS_SECRET_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(AWS_SECRET_ACCESS_KEY)
 ```
 
-Alternatively if you want to use a different IAM user, or if your cluster is
-hosted elsewhere, you can create a new IAM user with the necessary permissions
-to edit your Route53 zone records. The implementation is the same, all that
-changes is the IAM user credentials you "Seal" in your cluster with CNDI's
-Sealed Secrets feature.
-
 ## Getting Dedicated External DNS Credentials
 
 ## for AWS Route53
+
+Alternatively if you want to use a different IAM user, or if your cluster is
+hosted on a cloud other than AWS, you can create a new IAM user with the
+necessary permissions to edit your Route53 zone records.
+
+The implementation is the same, all that changes is the IAM user credentials you
+"Seal" in your cluster with CNDI's Sealed Secrets feature.
 
 If you want to create a new IAM user for External-DNS, you can follow these
 steps:
@@ -168,3 +176,19 @@ cluster_manifests:
 3. After some time, ArgoCD, ExternalDNS, and Cert-Manager will update your zone
    records with the new values found in your Ingress definitions, and you will
    be able to access your services using the new domain names.
+
+## FAQ
+
+**Q**: My domain is not yet live, how can I monitor progress and check for
+errors? **A**: You may just want to wait an hour and go get a snack, otherwise:
+
+1. Ensure all jobs in GitHub Actions have completed successfully.
+2. Run `cndi show-outputs` in your project directory.
+3. Take the the resulting command from the output `get_kubeconfig_command` and
+   run it in your terminal.
+4. Take the resulting command from the output `get_argocd_port_forward_command`
+   and run it in your terminal.
+5. Open your browser and navigate to `localhost:8080`.
+6. Log in to ArgoCD with username `admin` and the password from
+   `ARGOCD_ADMIN_PASSWORD` in your `.env` file.
+7. Check the `Applications` tab and search for any issues.
