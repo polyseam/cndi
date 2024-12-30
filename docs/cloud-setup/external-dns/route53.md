@@ -54,7 +54,10 @@ cluster_manifests:
         AWS_SECRET_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(AWS_SECRET_ACCESS_KEY)
 ```
 
-## Getting Dedicated External DNS Credentials
+If your `cndi_config.yaml` and `.env` files are already set up this way, you're
+all set and can begin using external-dns with Route53!
+
+## Getting Dedicated External-DNS Credentials
 
 ## for AWS Route53
 
