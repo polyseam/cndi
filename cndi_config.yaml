@@ -1,7 +1,7 @@
 cndi_version: v2
 project_name: basic-cluster
-provider: aws # or 'gcp', 'azure'
-distribution: eks # or 'clusterless'
+provider: aws # or 'gcp', 'azure', 'dev'
+distribution: eks # or 'clusterless', 'gke', 'aks', 'microk8s'
 infrastructure:
   cndi:
     argocd:

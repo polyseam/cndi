@@ -2,8 +2,9 @@
 
 # with Azure DNS
 
-CNDI has built-in support for managing DNS records with Azure DNS. This guide
-will walk you through setting it up.
+CNDI has built-in support for managing DNS records with
+[Azure DNS](https://portal.azure.com/#browse/Microsoft.Network%2FdnsZones). This
+guide will walk you through setting it up.
 
 The key idea is that you need to specify a Secret containing Azure credentials
 that External-DNS can use to manage Azure DNS zones.
@@ -62,101 +63,81 @@ cluster_manifests:
       azure.json: $cndi_on_ow.seal_secret_from_env_var(AZURE_CREDENTIALS)
 ```
 
-<!--
-## Getting Dedicated External DNS Credentials
+If your `cndi_config.yaml` and `.env` files are already set up this way, you're
+all set and can begin using external-dns with Azure DNS!
 
-## for AWS Route53
+## Getting Dedicated External-DNS Credentials
 
-Alternatively if you want to use a different IAM user, or if your cluster is
-hosted on a cloud other than AWS, you can create a new IAM user with the
-necessary permissions to edit your Route53 zone records.
+## for Azure DNS
 
-The implementation is the same, all that changes is the IAM user credentials you
-use in your `external-dns` Secret.
+Alternatively if you want to use a different Azure Principal, or if your cluster
+is hosted on a cloud other than Azure, you can create a new Principal with the
+necessary permissions to edit your Azure DNS zone records.
 
-If you want to create a new IAM user for External-DNS, you can follow these
-steps:
+The implementation is the same, all that changes is the content of your
+`azure.json` credentials variable you use in your `external-dns` Secret.
 
-### Step 1: Log in to the AWS Management Console
+If you want to create a new JSON credential for External-DNS, you can follow
+these steps:
 
-1. Open a web browser and navigate to the AWS Management Console.
-2. Sign in with your AWS account credentials.
+### Step 1: Log in to the Azure Console
 
-### Step 2: Navigate to the IAM Management Console
+1. Open a web browser and navigate to
+   [portal.azure.com](https://portal.azure.com).
+2. Sign in with your Azure account credentials.
 
-1. In the AWS Console, search for IAM in the search bar at the top.
-2. Click on the IAM service from the search results.
+### Step 2: Register a New Azure Active Directory (AAD) Application
 
-### Step 3: Create a New IAM Policy for ExternalDNS
+1. Navigate to Azure Active Directory > App registrations > New registration.
+2. Fill out the form: •	Name: Enter a descriptive name, e.g., ExternalDNSApp.
+   •	Supported account types: Select “Accounts in this organizational directory
+   only”. •	Leave the Redirect URI field empty for this use case.
+3. Click Register.
 
-1. In the IAM Console, click on Policies in the sidebar.
-2. Click Create Policy to start creating a new policy.
-3. Select the JSON tab and paste the following policy document, which grants the
-   necessary permissions for ExternalDNS to manage Route53:
+### Step 3: Assign Azure DNS Contributor Role
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "route53:ListHostedZones",
-        "route53:GetChange",
-        "route53:ChangeResourceRecordSets"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "route53:ListResourceRecordSets",
-      "Resource": "*"
-    }
-  ]
+1. Navigate to your Azure DNS Zone in the portal: •	Go to Resource Groups and
+   select the resource group containing your DNS Zone. •	Open the DNS Zone
+   resource.
+2. Click Access control (IAM) > Add role assignment.
+3. Assign the role: •	Role: Select “DNS Zone Contributor”. •	Assign access to:
+   Choose “User, group, or service principal”. •	Members: Click Select members,
+   search for the app you created, and select it.
+4. Click Save.
+
+### Step 4: Gather Required Information
+
+You’ll need the following details for the JSON object:
+
+1. Subscription ID: Navigate to Subscriptions in the Azure Portal, and copy your
+   subscription ID.
+2. Tenant ID: Navigate to Azure Active Directory > Overview and copy the tenant
+   ID.
+3. Client ID: Under your registered app, copy the Application (client) ID.
+
+### Step 5: Create the Azure Credentials JSON Object in `.env`
+
+1. Open the `.env` file in your project directory.
+2. Use the following template to create the JSON object:
+
+```dotenv
+AZURE_EXTERNAL_DNS_CREDENTIALS='{
+  "tenantId": "<your-tenant-id>",
+  "subscriptionId": "<your-subscription-id>",
+  "clientId": "<your-client-id>",
+  "clientSecret": "<your-client-secret>",
+  "resourceGroup": "<your-dns-zone-resource-group>"
 }
+'
 ```
 
-4. Click Next to review the policy.
-5. Give the policy a meaningful name, such as `My-ExternalDNS-Route53-Policy`,
-   and optionally add a description.
-6. Click Create Policy to save it.
+Replace the placeholders (<your-...>) with the appropriate values: •	tenantId:
+Your Azure AD tenant ID. •	subscriptionId: Your Azure subscription ID.
+•	clientId: Your app’s client ID. •	clientSecret: The client secret value you
+saved earlier. •	resourceGroup: The name of the resource group containing your
+Azure DNS Zone
 
-### Step 4: Create a New IAM User
-
-1. Go back to the IAM Console and click Users in the sidebar.
-2. Click Add Users to start creating a new user.
-3. Enter a username, such as externaldns-user.
-4. Click Next: Permissions.
-
-### Step 5: Attach the Custom Policy to the User
-
-1. On the permissions page, select Attach existing policies directly.
-2. Search for the policy you created earlier `My-ExternalDNS-Route53-Policy`.
-3. Select the checkbox next to the policy name.
-4. Click Next: Tags (optional), then click Next: Review.
-
-### Step 6: Create the User and Download Credentials
-
-1. Review the details on the final page to ensure everything is correct.
-2. Click Create User.
-3. Switch to the `Security Credentials` tab.
-4. Click on `Create access key`.
-5. Select `Other`
-6. Click `Next`
-7. Click `Create access key`
-8. Download the credentials file by clicking `Download .csv file`
-
-### Step 7: Set Up ExternalDNS with AWS Credentials
-
-1. Open your cluster's `.env` file and add the `Access key ID` and
-   `Secret access key` to the file as follows:
-
-```bash
-EXTERNAL_DNS_AWS_ACCESS_KEY_ID=AKIAIiojoijoojEXAMPLE
-EXTERNAL_DNS_AWS_SECRET_ACCESS_KEY=wJalrXUIHNUBIYBAyddbPxRfiCYEXAMPLEKEY
-```
-
-### Step 8: Update your `cndi_config.yaml` with the AWS credentials
+### Step 6: Update your Secret in `cndi_config.yaml` to use Azure credentials
 
 ```yaml
 infrastructure:
@@ -172,11 +153,10 @@ cluster_manifests:
       name: external-dns
       namespace: external-dns
       stringData:
-        AWS_ACCESS_KEY_ID: $cndi_on_ow.seal_secret_from_env_var(EXTERNAL_DNS_AWS_ACCESS_KEY_ID)
-        AWS_SECRET_ACCESS_KEY: $cndi_on_ow.seal_secret_from_env_var(EXTERNAL_DNS_AWS_SECRET_ACCESS_KEY)
+        azure.json: $cndi_on_ow.seal_secret_from_env_var(AZURE_EXTERNAL_DNS_CREDENTIALS)
 ```
 
-### Step 9: Deploy Updated Secret to Your Cluster Securely
+### Step 7: Deploy Updated Secret to Your Cluster Securely
 
 1. Run `cndi ow` and notice that the `external-dns` secret is now shown in the
    `./cndi/cluster_manifests/external-dns.yaml` file, and the values are
@@ -205,4 +185,4 @@ errors?
 5. Open your browser and navigate to `localhost:8080`.
 6. Log in to ArgoCD with username `admin` and the password from
    `ARGOCD_ADMIN_PASSWORD` in your `.env` file.
-7. Check the `Applications` tab and search for any issues. -->
+7. Check the `Applications` tab and search for any issues.
