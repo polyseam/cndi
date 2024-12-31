@@ -52,3 +52,22 @@ If you need to further customize the ExternalDNS configuration you can modify
 the `provider` and `Secret` data, or even provide a `values` block to override
 the default
 [values - as documented here](https://github.com/bitnami/charts/blob/main/bitnami/external-dns/values.yaml).
+
+### `provider` Guides
+
+As mentioned above the `provider` key is used to specify which DNS provider you
+are using, and CNDI has support for several providers pre-configured. For more
+information about how to wire up your provider we have the following guides:
+
+- [AWS Route53](/docs/cloud-setup/external-dns/route53.md)
+- [Azure DNS](/docs/cloud-setup/external-dns/azure-dns.md)
+- [Google Cloud DNS](/docs/cloud-setup/external-dns/google-cloud-dns.md)
+- [Cloudflare DNS](/docs/cloud-setup/external-dns/cloudflare.md)
+
+Of course even if we don't have a guide for your provider, you can still use
+ExternalDNS with CNDI by providing the necessary configuration in the `values`
+block.
+
+If you'd like to contribute a guide for a new provider, please open a PR!
+
+If you'd like us to write another one, please open an issue!
