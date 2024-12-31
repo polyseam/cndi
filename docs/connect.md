@@ -136,3 +136,6 @@ debugging:
 ```shell
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+
+**If you're using ArgoCD, your username is `admin` and your
+`ARGOCD_ADMIN_PASSWORD` is in your project's `.env` file**

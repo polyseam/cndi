@@ -3,14 +3,15 @@
 # with Azure DNS
 
 CNDI has built-in support for managing DNS records with
-[Azure DNS](https://portal.azure.com/#browse/Microsoft.Network%2FdnsZones). This
-guide will walk you through setting it up.
+[Azure DNS](https://azure.microsoft.com/en-ca/products/dns). This guide will
+walk you through setting it up.
 
 The key idea is that you need to specify a Secret containing Azure credentials
 that External-DNS can use to manage Azure DNS zones.
 
 This Secret will be used to authenticate with Azure DNS from inside your CNDI
-Cluster, so that it can open your Ingress resources at a specified domain names.
+Cluster, so that it can open your Ingress resources to your specified domain
+names.
 
 If you are using AKS and are comfortable using the same `ARM_CLIENT_ID` you used
 for your AKS Cluster provisioning, that is an option, you just need to be sure
@@ -51,6 +52,9 @@ infrastructure:
     {...}
     external_dns:
       provider: azure
+      values:
+        azure:
+          resourceGroup: 'my-dns-rg'
 cluster_manifests:
   {...}
   external-dns:
@@ -174,15 +178,6 @@ cluster_manifests:
 **Q**: My domain is not yet live, how can I monitor progress and check for
 errors?
 
-**A**: You may just want to wait an hour and go get a snack, otherwise:
-
-1. Ensure all jobs in GitHub Actions have completed successfully.
-2. Run `cndi show-outputs` in your project directory.
-3. Take the the resulting command from the output `get_kubeconfig_command` and
-   run it in your terminal.
-4. Take the resulting command from the output `get_argocd_port_forward_command`
-   and run it in your terminal.
-5. Open your browser and navigate to `localhost:8080`.
-6. Log in to ArgoCD with username `admin` and the password from
-   `ARGOCD_ADMIN_PASSWORD` in your `.env` file.
-7. Check the `Applications` tab and search for any issues.
+**A**: You may just want to wait a half hour and go get a snack. If you've tried
+that alreaady you might want to debug using `kubectl` or the `argocd` GUI. For
+more info checkout the [connect.md](/docs/connect.md) guide.

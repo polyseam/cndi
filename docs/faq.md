@@ -36,6 +36,12 @@ gh secret set -f .env
 
 ---
 
+### Some `cndi` command has failed, how do I fix it?
+
+If a `cndi` command fails, running the command often solves the issue.
+
+"When in doubt, run it again."
+
 ## Conclusion
 
 If you have any additional questions that are not covered in this FAQ, please

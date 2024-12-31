@@ -9,7 +9,8 @@ The key idea is that you need to specify a Secret containing AWS credentials
 that External-DNS can use to manage Route53 records.
 
 This Secret will be used to authenticate with AWS Route53 from inside your CNDI
-Cluster, so that it can open your Ingress resources at a specified domain names.
+Cluster, so that it can open your Ingress resources to your specified domain
+names.
 
 If you are using EKS and are comfortable using the same `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY` you used for your EKS Cluster provisioning, that is an
@@ -188,15 +189,6 @@ cluster_manifests:
 **Q**: My domain is not yet live, how can I monitor progress and check for
 errors?
 
-**A**: You may just want to wait an hour and go get a snack, otherwise:
-
-1. Ensure all jobs in GitHub Actions have completed successfully.
-2. Run `cndi show-outputs` in your project directory.
-3. Take the the resulting command from the output `get_kubeconfig_command` and
-   run it in your terminal.
-4. Take the resulting command from the output `get_argocd_port_forward_command`
-   and run it in your terminal.
-5. Open your browser and navigate to `localhost:8080`.
-6. Log in to ArgoCD with username `admin` and the password from
-   `ARGOCD_ADMIN_PASSWORD` in your `.env` file.
-7. Check the `Applications` tab and search for any issues.
+**A**: You may just want to wait a half hour and go get a snack. If you've tried
+that alreaady you might want to debug using `kubectl` or the `argocd` GUI. For
+more info checkout the [connect.md](/docs/connect.md) guide.
