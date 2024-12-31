@@ -1,8 +1,25 @@
 # Frequently Asked Questions (FAQ)
 
+### Some `cndi` command has failed, how do I fix it?
+
+If a `cndi` command fails, running the command often solves the issue.
+
+"When in doubt, run it again."
+
+This answer is _even less_ satisfying for us!
+
+We'd love to know more about the issue, please check out the discussion page we
+linked to when the command failed, or look for one here:
+[https://github.com/orgs/polyseam/discussions/categories/error-message-discussion](https://github.com/orgs/polyseam/discussions/categories/error-message-discussion).
+
+Feel free to [open an issue](https://github.com/polyseam/cndi/issues/new) too if
+you need further assistance.
+
+---
+
 ### Where I find the argocd admin password?
 
-You can find the password in the `.env` file in the cndi project directory.
+You can find the password in the `.env` file in your cndi project directory.
 
 ![Env file](/docs/img/argocd-password.png)
 
@@ -35,12 +52,6 @@ gh secret set -f .env
 ![uploaded-gh-secret](/docs/img/uploaded-gh-secret.png)
 
 ---
-
-### Some `cndi` command has failed, how do I fix it?
-
-If a `cndi` command fails, running the command often solves the issue.
-
-"When in doubt, run it again."
 
 ## Conclusion
 
