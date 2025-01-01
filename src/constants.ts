@@ -10,7 +10,7 @@ const ARGOCD_RELEASE_VERSION = "2.11.2";
 const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 
 // Edge Runtime that powers CNDI Functions
-const EDGE_RUNTIME_IMAGE_TAG = "1.62.2";
+const EDGE_RUNTIME_IMAGE_TAG = "1.66.1";
 
 // used in terraform output to create clusters
 const DEFAULT_K8S_VERSION = "1.28";
