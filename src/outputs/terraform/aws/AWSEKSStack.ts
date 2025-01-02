@@ -693,23 +693,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       kubernetes,
     });
 
-    const argocdAdminPasswordHashed = Fn.sensitive(
-      Fn.bcrypt(this.variables.argocd_admin_password.value, 10),
-    );
-
-    const argocdAdminPasswordMtime = new CDKTFProviderTime.staticResource
-      .StaticResource(
-      this,
-      "cndi_time_static_argocd_admin_password",
-      {
-        triggers: {
-          argocdAdminPassword: Fn.sensitive(
-            this.variables.argocd_admin_password.value,
-          ),
-        },
-      },
-    );
-
     const helmReleaseArgoCD = new CDKTFProviderHelm.release.Release(
       this,
       "cndi_helm_release_argocd",
@@ -725,27 +708,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         replace: true,
         repository: "https://argoproj.github.io/argo-helm",
         version: ARGOCD_CHART_VERSION,
-        setSensitive: [
-          {
-            name: "configs.secret.argocdServerAdminPassword",
-            value: Fn.sensitive(argocdAdminPasswordHashed),
-          },
-        ],
-        set: [
-          {
-            name: "server.service.annotations.redeployTime",
-            value: argocdAdminPasswordMtime.id,
-          },
-          {
-            name: "configs.secret.argocdServerAdminPasswordMtime",
-            value: argocdAdminPasswordMtime.id,
-          },
-          {
-            name:
-              "server.deploymentAnnotations.configmap\\.reloader\\.stakater\\.com/reload",
-            value: "argocd-cm",
-          },
-        ],
       },
     );
 

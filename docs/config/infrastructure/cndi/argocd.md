@@ -37,4 +37,4 @@ infrastructure:
 
 If the `cndi.argocd.hostname` property is provided we will generate the
 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) for
-you and it should be found at `./cndi/cluster_manifests/argo-ingress.yaml`
+you and it should be found at `./cndi/cluster_manifests/argocd-ingress.yaml`

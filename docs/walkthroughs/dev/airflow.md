@@ -126,7 +126,7 @@ The structure of the generated CNDI project will be as follows:
 │   ├── 📁 cluster_manifests
 │   │   ├── 📁 applications
 │   │   │   └── airflow.application.json
-│   │   ├── argo-ingress.json
+│   │   ├── argocd-ingress.json
 │   │   ├── cert-manager-cluster-issuer.json
 │   │   └── git-credentials-secret.json
 │   └── 📁 terraform

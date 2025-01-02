@@ -56,7 +56,7 @@ import getKubePrometheusStackApplicationManifest from "src/outputs/core-applicat
 import getPromtailApplicationManifest from "src/outputs/core-applications/promtail.application.yaml.ts";
 import getLokiApplicationManifest from "src/outputs/core-applications/loki.application.yaml.ts";
 import { getGrafanaIngressManifest } from "src/outputs/ingress/grafana-ingress.yaml.ts";
-import { getArgoIngressManifest } from "src/outputs/ingress/argo-ingress.yaml.ts";
+import { getArgoIngressManifest } from "../outputs/ingress/argocd-ingress.yaml.ts";
 
 import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
 
@@ -324,14 +324,12 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         config.cluster_manifests = {};
       }
 
-      manifestEntries.forEach(
-        (manifestEntry) => {
-          const m = manifestEntry[1] as ManifestWithName;
-          if (m?.metadata?.name === "fns-env-secret") {
-            hasExistingFnsEnvSecret = true;
-          }
-        },
-      );
+      manifestEntries.forEach((manifestEntry) => {
+        const m = manifestEntry[1] as ManifestWithName;
+        if (m?.metadata?.name === "fns-env-secret") {
+          hasExistingFnsEnvSecret = true;
+        }
+      });
 
       // only insert empty env secret to cluster_manifests if the user doesn't supply one
       if (!hasExistingFnsEnvSecret) {
@@ -391,24 +389,28 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       // these environment variables are required for clusters
       const sealedSecretsKeys = loadSealedSecretsKeys();
 
-      const argoUIAdminPassword = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
+      const argocdAdminPassword = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
 
       if (!sealedSecretsKeys) {
-        const err = new ErrOut([
-          ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
-          ccolors.error(`and/or`),
-          ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
-          ccolors.error(`are not present in environment`),
-        ], {
-          label,
-          code: 501,
-          id: "!env.SEALED_SECRETS_PUBLIC_KEY||!env.SEALED_SECRETS_PRIVATE_KEY",
-        });
+        const err = new ErrOut(
+          [
+            ccolors.key_name(`"SEALED_SECRETS_PUBLIC_KEY"`),
+            ccolors.error(`and/or`),
+            ccolors.key_name(`"SEALED_SECRETS_PRIVATE_KEY"`),
+            ccolors.error(`are not present in environment`),
+          ],
+          {
+            label,
+            code: 501,
+            id:
+              "!env.SEALED_SECRETS_PUBLIC_KEY||!env.SEALED_SECRETS_PRIVATE_KEY",
+          },
+        );
         await self.postMessage(err.owWorkerErrorMessage);
         return;
       }
 
-      if (!argoUIAdminPassword) {
+      if (!argocdAdminPassword) {
         const err = new ErrOut(
           [
             ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
@@ -630,11 +632,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         ?.hostname;
       if (argoIngressHostname) {
         const errStagingArgoIngress = await stageFile(
-          path.join(
-            "cndi",
-            "cluster_manifests",
-            "argo-ingress.yaml",
-          ),
+          path.join("cndi", "cluster_manifests", "argocd-ingress.yaml"),
           getArgoIngressManifest(argoIngressHostname),
         );
         if (errStagingArgoIngress) {
@@ -643,7 +641,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         }
         console.log(
           ccolors.success("staged ingress manifest:"),
-          ccolors.key_name("argo-ingress.yaml"),
+          ccolors.key_name("argocd-ingress.yaml"),
         );
       }
 
@@ -687,11 +685,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             ?.grafana?.hostname;
           if (grafanaHostname) {
             const errStagingGrafanaIngress = await stageFile(
-              path.join(
-                "cndi",
-                "cluster_manifests",
-                "grafana-ingress.yaml",
-              ),
+              path.join("cndi", "cluster_manifests", "grafana-ingress.yaml"),
               getGrafanaIngressManifest(grafanaHostname),
             );
             if (errStagingGrafanaIngress) {
@@ -805,7 +799,74 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
 
       // all cloberable manifests should be staged before this point,
+
       // begin processing cluster_manifests, including Secrets
+
+      // -- Begin ArgoCD Secret --
+
+      // the user is presumably trying to override argocd-secret fields
+      // that are _not_ admin.password
+      const userDefinedArgocdSecret = cluster_manifests?.["argocd-secret"] as {
+        data?: Record<string, string>;
+        stringData?: Record<string, string>;
+        metadata: {
+          name: string;
+          namespace: string;
+        };
+      };
+
+      const argocdSecret: {
+        apiVersion: string;
+        kind: string;
+        metadata: { name: string; namespace: string };
+        stringData: Record<string, string>; // Allow dynamic keys
+      } = {
+        apiVersion: "v1",
+        kind: "Secret",
+        metadata: {
+          name: "argocd-secret",
+          namespace: "argocd",
+        },
+        stringData: {
+          // admin.password in it's final form is actually the bcrypt hash of this variable!
+          // see getSealedSecretManifestWithKSC() implementation for more info
+          "admin.password":
+            "$cndi_on_ow.seal_secret_from_env_var(ARGOCD_ADMIN_PASSWORD)",
+        },
+      };
+
+      // build a ks_check entry based on the entire secret manifest
+      // as if the admin.password field contained the password and not the bcrypt
+
+      if (userDefinedArgocdSecret) {
+        if (
+          userDefinedArgocdSecret?.metadata?.name == "argocd-secret" &&
+          userDefinedArgocdSecret?.metadata?.namespace == "argocd"
+        ) {
+          if (userDefinedArgocdSecret?.data) {
+            userDefinedArgocdSecret.stringData = {};
+            for (const key in userDefinedArgocdSecret.data) {
+              // decode the base64 encoded value
+              // in favor of the stringData field
+              userDefinedArgocdSecret.stringData[key] = atob(
+                userDefinedArgocdSecret.data[key],
+              );
+            }
+          }
+          for (const key in userDefinedArgocdSecret.stringData) {
+            argocdSecret.stringData[key] =
+              userDefinedArgocdSecret.stringData[key];
+          }
+        } else {
+          console.log(
+            "if you want to modify argocd-secret, you must use the proper name and namespace",
+          );
+        }
+      }
+
+      cluster_manifests["argocd-secret"] = argocdSecret;
+
+      // -- end ArgoCD Secret --
 
       try {
         // This is being loaded _from_ the CNDI directory to determine if we need to seal new secrets
@@ -871,16 +932,14 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           const secret = cluster_manifests[key] as KubernetesSecret;
           const secretFileName = `${key}.yaml`;
 
+          // alert! this does weird stuff with ARGOCD_ADMIN_PASSWORD
           const [err, sealedSecretManifestWithKSC] =
-            await getSealedSecretManifestWithKSC(
-              secret,
-              {
-                publicKeyFilePath: tempPublicKeyFilePath,
-                envPath,
-                ks_checks,
-                secretFileName,
-              },
-            );
+            await getSealedSecretManifestWithKSC(secret, {
+              publicKeyFilePath: tempPublicKeyFilePath,
+              envPath,
+              ks_checks,
+              secretFileName,
+            });
 
           if (err) {
             await self.postMessage(err.owWorkerErrorMessage);

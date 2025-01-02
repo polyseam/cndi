@@ -75,7 +75,7 @@ outputs:
             {}
 
     cluster_manifests:
-      argo-ingress:
+      argocd-ingress:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/default-ingress.yaml):
           args:
             ingress_name: argocd-ingress

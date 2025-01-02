@@ -1,4 +1,4 @@
-import { ccolors, platform } from "deps";
+import { bcrypt, ccolors, platform } from "deps";
 import { KubernetesSecret, KubernetesSecretWithStringData } from "src/types.ts";
 import {
   getPathToKubesealBinary,
@@ -12,9 +12,7 @@ import { ErrOut } from "errout";
 const CNDI_SECRETS_PREFIX = "$cndi_on_ow.seal_secret_from_env_var(";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
-const label = ccolors.faded(
-  "\nsrc/outputs/sealed-secret-manifest.ts:",
-);
+const label = ccolors.faded("\nsrc/outputs/sealed-secret-manifest.ts:");
 
 const parseCndiSecret = (
   inputSecret: KubernetesSecret,
@@ -37,7 +35,8 @@ const parseCndiSecret = (
 
       // if we recognize our special token we use the value from the environment
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
-        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
+        const secretEnvName = dataEntryValue
+          .replace(CNDI_SECRETS_PREFIX, "")
           .replace(")", "");
         const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
@@ -47,12 +46,10 @@ const parseCndiSecret = (
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.error(
             ccolors.warn(
-              `\n\n${
-                ccolors.error(
-                  "IMPORTANT",
+              `\n\n${ccolors.error("IMPORTANT")}: ${
+                ccolors.key_name(
+                  `"${secretEnvName}"`,
                 )
-              }: ${
-                ccolors.key_name(`"${secretEnvName}"`)
               } not found in environment`,
             ),
           );
@@ -63,9 +60,7 @@ const parseCndiSecret = (
             `\nwith the desired value in`,
             ccolors.user_input(`"${dotEnvPath}"`),
             "\nthen run",
-            ccolors.success(
-              "cndi ow\n",
-            ),
+            ccolors.success("cndi ow\n"),
           );
 
           if (!secretEnvVal) {
@@ -80,26 +75,27 @@ const parseCndiSecret = (
           } catch {
             // secret data cannot be decoded, likely plaintext string instead of base64
             return [
-              new ErrOut([
-                ccolors.error("Secret named"),
-                ccolors.key_name(`"${inputSecret.metadata.name}"`),
-                ccolors.error("loaded"),
-                ccolors.key_name(".data"),
-                ccolors.error("from environment variable"),
-                ccolors.key_name(`"${secretEnvName}"`),
-                ccolors.error(
-                  "and it was not base64 encoded.\n\nDid you mean to use",
-                ),
-                ccolors.key_name(
-                  ".stringData",
-                ),
-                ccolors.error("instead?"),
-              ], {
-                label,
-                id:
-                  "sealed-secret-manifest: !isBase64(env.secretLoadedFromEnv)",
-                code: 706,
-              }),
+              new ErrOut(
+                [
+                  ccolors.error("Secret named"),
+                  ccolors.key_name(`"${inputSecret.metadata.name}"`),
+                  ccolors.error("loaded"),
+                  ccolors.key_name(".data"),
+                  ccolors.error("from environment variable"),
+                  ccolors.key_name(`"${secretEnvName}"`),
+                  ccolors.error(
+                    "and it was not base64 encoded.\n\nDid you mean to use",
+                  ),
+                  ccolors.key_name(".stringData"),
+                  ccolors.error("instead?"),
+                ],
+                {
+                  label,
+                  id:
+                    "sealed-secret-manifest: !isBase64(env.secretLoadedFromEnv)",
+                  code: 706,
+                },
+              ),
             ];
           }
         }
@@ -134,7 +130,8 @@ const parseCndiSecret = (
       const [dataEntryKey, dataEntryValue] = dataEntry;
 
       if (dataEntryValue.indexOf(CNDI_SECRETS_PREFIX) === 0) {
-        const secretEnvName = dataEntryValue.replace(CNDI_SECRETS_PREFIX, "")
+        const secretEnvName = dataEntryValue
+          .replace(CNDI_SECRETS_PREFIX, "")
           .replace(")", "");
         const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
         const secretEnvVal = Deno.env.get(secretEnvName);
@@ -144,9 +141,7 @@ const parseCndiSecret = (
         if (secretValueIsPlaceholder || !secretEnvVal) {
           console.error(
             label,
-            ccolors.error(
-              "IMPORTANT",
-            ),
+            ccolors.error("IMPORTANT"),
             ccolors.key_name(`"${secretEnvName}"`),
             ccolors.warn("not found in environment"),
           );
@@ -192,16 +187,19 @@ const parseCndiSecret = (
     }
   } else {
     return [
-      new ErrOut([
-        ccolors.error(`Secret`),
-        ccolors.key_name(`"${inputSecret.metadata.name}"`),
-        ccolors.error("has no data or stringData"),
-      ], {
-        label,
-        id:
-          "sealed-secret-manifest: !inputSecret.data && !inputSecret.stringData",
-        code: 702,
-      }),
+      new ErrOut(
+        [
+          ccolors.error(`Secret`),
+          ccolors.key_name(`"${inputSecret.metadata.name}"`),
+          ccolors.error("has no data or stringData"),
+        ],
+        {
+          label,
+          id:
+            "sealed-secret-manifest: !inputSecret.data && !inputSecret.stringData",
+          code: 702,
+        },
+      ),
     ];
   }
   delete outputSecret.data;
@@ -249,8 +247,12 @@ type SealedSecretManifestWithKSC = {
 
 const getSealedSecretManifestWithKSC = async (
   secret: KubernetesSecret,
-  { publicKeyFilePath, envPath, ks_checks, secretFileName }:
-    GetSealedSecretManifestOptions,
+  {
+    publicKeyFilePath,
+    envPath,
+    ks_checks,
+    secretFileName,
+  }: GetSealedSecretManifestOptions,
 ): Promise<PxResult<SealedSecretManifestWithKSC | null>> => {
   let sealed = "";
   const pathToKubeseal = getPathToKubesealBinary();
@@ -259,14 +261,15 @@ const getSealedSecretManifestWithKSC = async (
     secretPath = await Deno.makeTempFile();
   } catch (err) {
     return [
-      new ErrOut([
-        "Failed to create temporary file while encrypting your secret",
-      ], {
-        label,
-        code: 704,
-        id: "sealed-secret-manifest: !Deno.makeTempFile",
-        cause: err as Error,
-      }),
+      new ErrOut(
+        ["Failed to create temporary file while encrypting your secret"],
+        {
+          label,
+          code: 704,
+          id: "sealed-secret-manifest: !Deno.makeTempFile",
+          cause: err as Error,
+        },
+      ),
     ];
   }
 
@@ -297,6 +300,19 @@ const getSealedSecretManifestWithKSC = async (
     secretFileOptions.mode = 0o777;
   }
 
+  // we do the switcheroo here so that the change checking operates on the password
+  // rather than the bcrypt and "time modified"
+  const isArgocdSecret = secretWithStringData.metadata.namespace == "argocd" &&
+    secretWithStringData.metadata.name == "argocd-secret";
+
+  if (isArgocdSecret) {
+    const plaintext = secretWithStringData.stringData["admin.password"];
+    const hashedPassword = await bcrypt.hash(plaintext, 12);
+    secretWithStringData.stringData["admin.password"] = hashedPassword;
+    secretWithStringData.stringData["admin.passwordMtime"] = new Date()
+      .toISOString();
+  }
+
   try {
     await Deno.writeTextFile(
       secretPath,
@@ -305,16 +321,19 @@ const getSealedSecretManifestWithKSC = async (
     );
   } catch (err) {
     return [
-      new ErrOut([
-        ccolors.error("failed to write Secret manifest to seal with"),
-        ccolors.key_name("kubeseal"),
-      ], {
-        label,
-        code: 705,
-        id: "sealed-secret-manifest: !Deno.writeTextFile(UnsealedSecret)",
-        cause: err as Error,
-        metadata: { secretPath },
-      }),
+      new ErrOut(
+        [
+          ccolors.error("failed to write Secret manifest to seal with"),
+          ccolors.key_name("kubeseal"),
+        ],
+        {
+          label,
+          code: 705,
+          id: "sealed-secret-manifest: !Deno.writeTextFile(UnsealedSecret)",
+          cause: err as Error,
+          metadata: { secretPath },
+        },
+      ),
     ];
   }
 
@@ -334,14 +353,14 @@ const getSealedSecretManifestWithKSC = async (
   if (kubesealCommandOutput.code !== 0) {
     Deno.stdout.write(kubesealCommandOutput.stderr);
     return [
-      new ErrOut([
-        ccolors.key_name("kubeseal"),
-        ccolors.error("failed to seal secret"),
-      ], {
-        label,
-        code: 703,
-        id: "src/outputs/sealed-secret-manifest/kubeseal/exit_code/!0",
-      }),
+      new ErrOut(
+        [ccolors.key_name("kubeseal"), ccolors.error("failed to seal secret")],
+        {
+          label,
+          code: 703,
+          id: "src/outputs/sealed-secret-manifest/kubeseal/exit_code/!0",
+        },
+      ),
     ];
   } else {
     sealed = new TextDecoder().decode(kubesealCommandOutput.stdout);

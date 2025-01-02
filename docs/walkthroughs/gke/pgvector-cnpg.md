@@ -177,7 +177,7 @@ The structure of the generated CNDI project will be something like this:
 |   │   │   ├── public_nginx.application.yaml
 |   │   │   ├── jupyter-notebook-deployment.yaml
 |   │   │   └── etc
-│   │   ├── argo-ingress.yaml
+│   │   ├── argocd-ingress.yaml
 │   │   ├── jupyter-notebook-ingress.yaml
 │   │   ├── cert-manager-cluster-issuer.yaml
 │   │   └── etc

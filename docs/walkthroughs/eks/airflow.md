@@ -188,7 +188,7 @@ The structure of the generated CNDI project will be something like:
 │   │   ├── 📁 applications
 |   |   |   ├── cnpg.yaml 
 │   │   │   └── airflow.application.yaml
-│   │   ├── argo-ingress.yaml
+│   │   ├── argocd-ingress.yaml
 │   │   ├── cert-manager-cluster-issuer.yaml
 │   │   ├── git-credentials-secret.yaml
 │   │   └── etc
