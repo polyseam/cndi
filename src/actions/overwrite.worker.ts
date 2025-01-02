@@ -835,31 +835,40 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         },
       };
 
-      // build a ks_check entry based on the entire secret manifest
-      // as if the admin.password field contained the password and not the bcrypt
-
       if (userDefinedArgocdSecret) {
         if (
           userDefinedArgocdSecret?.metadata?.name == "argocd-secret" &&
           userDefinedArgocdSecret?.metadata?.namespace == "argocd"
         ) {
-          if (userDefinedArgocdSecret?.data) {
-            userDefinedArgocdSecret.stringData = {};
-            for (const key in userDefinedArgocdSecret.data) {
-              // decode the base64 encoded value
-              // in favor of the stringData field
-              userDefinedArgocdSecret.stringData[key] = atob(
-                userDefinedArgocdSecret.data[key],
-              );
-            }
+          if (
+            userDefinedArgocdSecret?.data?.["admin.password"] ||
+            userDefinedArgocdSecret?.stringData?.["admin.password"]
+          ) {
+            console.log(
+              ccolors.warn(`Modifying the`),
+              ccolors.key_name("admin.password"),
+              ccolors.warn("field in"),
+              ccolors.key_name("argocd-secret"),
+              ccolors.warn(`may lead to unexpected behaviour.\n`),
+              ccolors.warn(`Instead, please modify the`),
+              ccolors.key_name("ARGOCD_ADMIN_PASSWORD"),
+              ccolors.warn(`environment variable instead, then run`),
+              ccolors.user_input("cndi overwrite"),
+            );
           }
-          for (const key in userDefinedArgocdSecret.stringData) {
-            argocdSecret.stringData[key] =
-              userDefinedArgocdSecret.stringData[key];
-          }
+          const data = userDefinedArgocdSecret?.data ||
+            userDefinedArgocdSecret?.stringData || {};
+          argocdSecret.stringData = { ...argocdSecret.stringData, ...data };
         } else {
           console.log(
-            "if you want to modify argocd-secret, you must use the proper name and namespace",
+            ccolors.warn("to modify"),
+            ccolors.key_name("argocd-secret"),
+            ccolors.warn("you must use the"),
+            ccolors.key_name("name"),
+            ccolors.user_input("argocd-secret"),
+            ccolors.warn("and"),
+            ccolors.key_name("namespace"),
+            ccolors.user_input("argocd"),
           );
         }
       }
