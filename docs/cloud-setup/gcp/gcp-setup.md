@@ -22,8 +22,8 @@ resources you no longer want.
 
 3. Now click `Create and Continue` and then add the following roles: Role:
    `Compute Admin`,`Compute Network Admin`, `Compute Load Balancer Admin`,
-   `Service Management Administrator`, `Quota Admin`, and if your using an GKE
-   cluster add the `Kubernetes Engine Service Agent` role as well
+   `Service Management Administrator`, `Quota Administrator`, and if you're
+   using an GKE cluster add the `Kubernetes Engine Service Agent` role as well
 
 ![service account access](/docs/cloud-setup/gcp/img/service-account-access.png)
 
