@@ -83,22 +83,6 @@ export default async function setTF_VARs(
   }
 
   if (!isClusterless) {
-    const argocd_admin_password = Deno.env.get("ARGOCD_ADMIN_PASSWORD");
-    if (!argocd_admin_password) {
-      return new ErrOut(
-        [
-          ccolors.key_name(`"ARGOCD_ADMIN_PASSWORD"`),
-          ccolors.error("env var is not set"),
-        ],
-        {
-          code: 103,
-          label,
-          id:
-            "setTF_VARs: !env.ARGOCD_ADMIN_PASSWORD && cndi_config.distribution !== 'clusterless'",
-        },
-      );
-    }
-
     const sealed_secrets_private_key = Deno.env
       .get("SEALED_SECRETS_PRIVATE_KEY")
       ?.trim();
@@ -136,7 +120,6 @@ export default async function setTF_VARs(
         },
       );
     }
-    Deno.env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
     Deno.env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);
     Deno.env.set(
       "TF_VAR_sealed_secrets_private_key",

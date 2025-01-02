@@ -802,8 +802,6 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
 
       // begin processing cluster_manifests, including Secrets
 
-      // -- Begin ArgoCD Secret --
-
       // the user is presumably trying to override argocd-secret fields
       // that are _not_ admin.password
       const userDefinedArgocdSecret = cluster_manifests?.["argocd-secret"] as {
@@ -845,15 +843,11 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
             userDefinedArgocdSecret?.stringData?.["admin.password"]
           ) {
             console.log(
-              ccolors.warn(`Modifying the`),
-              ccolors.key_name("admin.password"),
-              ccolors.warn("field in"),
-              ccolors.key_name("argocd-secret"),
-              ccolors.warn(`may lead to unexpected behaviour.\n`),
-              ccolors.warn(`Instead, please modify the`),
+              ccolors.warn("Changes to"),
               ccolors.key_name("ARGOCD_ADMIN_PASSWORD"),
-              ccolors.warn(`environment variable instead, then run`),
-              ccolors.user_input("cndi overwrite"),
+              ccolors.warn("are picked up automatically during"),
+              "cndi overwrite",
+              ccolors.warn("!"),
             );
           }
           const data = userDefinedArgocdSecret?.data ||

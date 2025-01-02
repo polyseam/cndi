@@ -34,15 +34,6 @@ export class CNDITerraformStack extends TerraformStack {
       description: "repository URL to access",
     });
 
-    this.variables.argocd_admin_password = new TerraformVariable(
-      this,
-      "argocd_admin_password",
-      {
-        type: "string",
-        description: "password for accessing the argo ui",
-      },
-    );
-
     this.variables.sealed_secrets_private_key = new TerraformVariable(
       this,
       "sealed_secrets_private_key",

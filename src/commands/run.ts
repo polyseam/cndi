@@ -40,11 +40,6 @@ const runCommand = new Command()
     { required: false },
   )
   .env(
-    "ARGOCD_ADMIN_PASSWORD=<value:string>",
-    "Password used to authenticate to the ArgoCD UI.",
-    { required: false },
-  )
-  .env(
     "GIT_USERNAME=<value:string>",
     "Username ArgoCD will use to authenticate to your git repository.",
     { required: false },

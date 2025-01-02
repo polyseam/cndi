@@ -51,11 +51,6 @@ const destroyCommand = new Command()
     "SEALED_SECRETS_PUBLIC_KEY=<value:string>",
     "Public key used to encrypt your sealed secrets.",
     { required: false },
-  )
-  .env(
-    "ARGOCD_ADMIN_PASSWORD=<value:string>",
-    "Password used to authenticate to the ArgoCD UI.",
-    { required: false },
   ).env(
     "GIT_USERNAME=<value:string>",
     "Username ArgoCD will use to authenticate to your git repository.",
