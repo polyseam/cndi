@@ -30,6 +30,15 @@ or [PostgreSQL](https://cloudnative-pg.io) and CNDI will help you deploy it on
 your own infrastructure - just as easily as you can sign up for a cloud-based
 Platform as a Service.
 
+Visit [cndi.dev/templates](https://cndi.dev/templates) for a full list of
+Templates, all available on [aws](https://aws.com),
+[gcp](https://cloud.google.com), and [azure](https://azure.microsoft.com), then
+launch the interactive CLI with:
+
+```bash
+cndi create <owner>/<repo> --template <template>
+```
+
 You can also develop your own Templates to provide fill-in-the-blanks style
 wizards to your team.
 
@@ -277,8 +286,14 @@ learn more about how to connect to your cluster, check out
 ## templates 🏗️
 
 Templates are YAML files which define a relationship between prompts and file
-outputs. To learn more about building new CNDI Templates and distributing them
-to your team, checkout the
+outputs.
+
+CNDI includes a set of Templates out of the box based on the YAML source in
+[./templates](./templates), and you can learn more about them on our
+[Template Registry](https://www.cndi.dev/templates).
+
+To learn more about building new CNDI Templates and distributing them to your
+team, checkout the
 [CNDI Template Authoring Guide](./docs/template-authoring.md). To request new
 Templates or bump existing requests, check out
 [our Template wishlist](https://github.com/orgs/polyseam/projects/6/views/7)
