@@ -24,19 +24,22 @@
   </a>
 </p>
 
-Start with a [Template](https://www.cndi.dev/templates) for a popular service
-like [Airflow](https://airflow.apache.org), [Kafka](https://kafka.apache.org),
-or [PostgreSQL](https://cloudnative-pg.io) and CNDI will help you deploy it on
-your own infrastructure - just as easily as you can sign up for a cloud-based
-Platform as a Service.
+Start with a [Template](https://cndi.dev/templates) for a popular service like
+[Airflow](https://cndi.dev/templates/airflow),
+[Kafka](https://cndi.dev/templates/kafka), or
+[PostgreSQL](https://cndi.dev/templates/postgres) and CNDI will help you deploy
+it on your own infrastructure - just as easily as you can sign up for a
+cloud-based Platform as a Service.
 
 Visit [cndi.dev/templates](https://cndi.dev/templates) for a full list of
 Templates, all available on [aws](https://aws.com),
-[gcp](https://cloud.google.com), and [azure](https://azure.microsoft.com), then
-launch the interactive CLI with:
+[gcp](https://cloud.google.com), and [azure](https://azure.microsoft.com).
+
+Once you've found what you're looking for launch the interactive CLI and select
+your Template and Deployment Target:
 
 ```bash
-cndi create <owner>/<repo> --template <template>
+cndi create <owner>/<repo> && cd <repo>
 ```
 
 You can also develop your own Templates to provide fill-in-the-blanks style
