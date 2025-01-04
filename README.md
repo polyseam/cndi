@@ -9,6 +9,7 @@
   </a>
   <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
   <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi" alt="GitHub code size in bytes">
+  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi?label=commits" alt="GitHub commit activity">
   <a href="https://github.com/polyseam/cndi/issues">
     <img src="https://img.shields.io/github/issues/polyseam/cndi" alt="GitHub issues">
   </a>
