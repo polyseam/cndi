@@ -324,6 +324,7 @@ const getSealedSecretManifestWithKSC = async (
       `--secret-file=${secretPath}`,
       `--scope=cluster-wide`,
       `--allow-empty-data`,
+      `--format=yaml`,
     ],
     stderr: "piped",
     stdout: "piped",
