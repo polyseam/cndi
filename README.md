@@ -9,7 +9,7 @@
   </a>
   <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
   <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi" alt="GitHub code size in bytes">
-  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi" alt="GitHub commit activity">
+  <img src="https://img.shields.io/github/commit-activity/w/polyseam/cndi?label=commits" alt="GitHub commit activity">
   <a href="https://github.com/polyseam/cndi/issues">
     <img src="https://img.shields.io/github/issues/polyseam/cndi" alt="GitHub issues">
   </a>
@@ -24,11 +24,23 @@
   </a>
 </p>
 
-Start with a [Template](https://www.cndi.dev/templates) for a popular service
-like [Airflow](https://airflow.apache.org), [Kafka](https://kafka.apache.org),
-or [PostgreSQL](https://cloudnative-pg.io) and CNDI will help you deploy it on
-your own infrastructure - just as easily as you can sign up for a cloud-based
-Platform as a Service.
+Start with a [Template](https://cndi.dev/templates) for a popular service like
+[Airflow](https://cndi.dev/templates/airflow),
+[Kafka](https://cndi.dev/templates/kafka), or
+[PostgreSQL](https://cndi.dev/templates/postgres) and CNDI will help you deploy
+it on your own infrastructure - just as easily as you can sign up for a
+cloud-based Platform as a Service.
+
+Visit [cndi.dev/templates](https://cndi.dev/templates) for a full list of
+Templates, all available on [aws](https://aws.com),
+[gcp](https://cloud.google.com), and [azure](https://azure.microsoft.com).
+
+Once you've found what you're looking for launch the interactive CLI and select
+your Template and Deployment Target:
+
+```bash
+cndi create <owner>/<repo> && cd <repo>
+```
 
 You can also develop your own Templates to provide fill-in-the-blanks style
 wizards to your team.
@@ -277,8 +289,14 @@ learn more about how to connect to your cluster, check out
 ## templates 🏗️
 
 Templates are YAML files which define a relationship between prompts and file
-outputs. To learn more about building new CNDI Templates and distributing them
-to your team, checkout the
+outputs.
+
+CNDI includes a set of Templates out of the box based on the YAML source in
+[./templates](./templates), and you can learn more about them on our
+[Template Registry](https://www.cndi.dev/templates).
+
+To learn more about building new CNDI Templates and distributing them to your
+team, checkout the
 [CNDI Template Authoring Guide](./docs/template-authoring.md). To request new
 Templates or bump existing requests, check out
 [our Template wishlist](https://github.com/orgs/polyseam/projects/6/views/7)
