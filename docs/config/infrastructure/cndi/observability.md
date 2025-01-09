@@ -20,9 +20,9 @@ infrastructure:
     argocd:
       hostname: argocd.my-cluster.example.com
     observability:
-    # enabled: true (default)
-    grafana:
-      hostname: observability.my-cluster.example.com
+      # enabled: true (default)
+      grafana:
+        hostname: observability.my-cluster.example.com
   nodes: [...]
 ```
 
