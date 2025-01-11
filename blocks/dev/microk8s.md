@@ -53,3 +53,12 @@ but substitute the service name and namespace into the `port-forward` command.
 ```bash
 multipass exec my-project-node -- sudo microk8s kubectl port-forward svc/my-service -n my-namespace 8080:80 --address $NODE_IP
 ```
+
+### FAQ
+
+### I'm Seeing `ssh connection failed: 'Failed to connect: No route to host'`
+
+If you see this error on MacOS you should visit
+`Settings > Privacy & Security > Local Network` and enable the terminal you are
+using to connect to access your Local Network, eg. Terminal, iTerm2, Hyper,
+Ghostty, etc.
