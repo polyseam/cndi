@@ -2,7 +2,7 @@ import { ccolors, Command, path } from "deps";
 
 import { pullStateForTerraform } from "src/tfstate/git/read-state.ts";
 
-import setTF_VARs from "src/setTF_VARs.ts";
+import { getTF_VARs } from "../getTF_VARs.ts";
 
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
@@ -74,7 +74,7 @@ const showOutputsCommand = new Command()
 
     const pathToTerraformBinary = getPathToTerraformBinary();
 
-    const setTF_VARsError = await setTF_VARs(options.path);
+    const [setTF_VARsError, env] = await getTF_VARs(options.path);
 
     if (setTF_VARsError) {
       await setTF_VARsError.out();
@@ -94,10 +94,12 @@ const showOutputsCommand = new Command()
       if (!options?.quiet) {
         console.log(ccolors.faded("\n-- terraform init --\n"));
       }
+
       const terraformInitCommand = new Deno.Command(pathToTerraformBinary, {
         args: [`-chdir=${pathToTerraformResources}`, "init"],
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformInitCommandOutput = await terraformInitCommand.output();
@@ -142,6 +144,7 @@ const showOutputsCommand = new Command()
         args: outputArgs,
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformOutputChildProcess = terraformOutputCommand.spawn();
