@@ -1,4 +1,12 @@
 blocks:
+  - name: dev-nodes
+    content:
+      nodes:
+        - name: "gpu-operator-node"
+          cpus: 2
+          memory: 12G
+          disk: 100G
+
   - name: aws-nodes
     content:
       nodes:
