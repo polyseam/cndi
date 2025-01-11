@@ -6,16 +6,17 @@ in Local Development enviroment.
 > [!NOTE]
 > Using `cndi` to deploy a cluster locally is the least reliable way to deploy
 > because every computer is different. As always, if you run into issues please
-> reach out to us on [discord](https://cndi.run/di?utm_id=5116)
+> reach out to us on [discord](https://cndi.run/di?utm_id=5116)!
 
 ## overview 🔭
 
 This walkthough uses `cndi` to customize and deploy our `airflow` Template with
 the `dev/microk8s` deployment target. In just a few minutes we will be able to
-deploy a new Kubernetes cluster to DEV that has been optimally configured for
-Airflow, including GitOps with Secrets management, right out-of-the-box. This
-framework will enable quick iteration of infrastructure, applications and
-manifests in a GitHub workflow you are already comfortable with.
+deploy a new Kubernetes cluster to your dev environment that has been optimally
+configured for Airflow, including GitOps with Secrets management, right
+out-of-the-box. This framework will enable quick iteration of infrastructure,
+applications and manifests in a GitHub workflow you are already comfortable
+with.
 
 ![cndi cluster](/docs/walkthroughs/dev/img/cndi-cluster-0.png)
 
@@ -182,10 +183,11 @@ within the Multipass instance) and run the following command to display the IP
 address of the dev Multipass instance.
 
 ```
-multipass exec ${node.name} -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '\\n'
+# run `cndi show-outputs` to display your version of this command
+multipass exec $YOUR_NODE_NAME -- ip route get 1.2.3.4 | awk '{print $7}' | tr -d '\\n'
 ```
 
-> ![WARNING] If you're using MacOS and you're having trouble with Multipass,
+> [!WARNING] If you're using MacOS and you're having trouble with Multipass,
 > ensure that your terminal has Local Network access. You can do this by going
 > to `System Preferences > Privacy & Security > Local Network` and checking the
 > box next to your terminal application.
@@ -194,11 +196,11 @@ In the terminal on your local machine, run the port forward command using the IP
 address obtained from the previous step:
 
 ```
-multipass exec ${node.name} -- sudo microk8s kubectl port-forward
+multipass exec $YOUR_NODE_NAME -- sudo microk8s kubectl port-forward
 svc/argocd-server -n argocd 8080:443 --address <ip address of node>
 ```
 
-Using the web browser on your local machine, now access Argocd by navigating to
+Using the web browser on your local machine, now access ArgoCD by navigating to
 http://<ip address of node>:8080
 
 ![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-0.png)
@@ -217,8 +219,8 @@ repository matches config in the ArgoCD UI
 └── 📁 cndi
    └── 📁 cluster_manifests
        ├── 📁 applications
-       │   └── airflow.application.json
-       └────── git-credentials-secret.json
+       │   └── airflow.application.yaml
+       └────── git-credentials-secret.yaml
 ```
 
 Verify all applications and manifests in the GitHub repository are present and
