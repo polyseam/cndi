@@ -1,7 +1,12 @@
 # dev/airflow walkthrough
 
 A guide for using CNDI to deploy a GitOps enabled Airflow cluster on Kubernetes
-in Local DEV enviroment
+in Local Development enviroment.
+
+> [!NOTE]
+> Using `cndi` to deploy a cluster locally is the least reliable way to deploy
+> because every computer is different. As always, if you run into issues please
+> reach out to us on [discord](https://cndi.run/di?utm_id=5116)
 
 ## overview 🔭
 
