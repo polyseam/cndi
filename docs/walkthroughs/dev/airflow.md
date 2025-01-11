@@ -175,9 +175,9 @@ Two actions will take place
    instructions on how to access the argocd ui
    ![terraform outputs](/docs/walkthroughs/dev/img/terraform-outputs.png)
 
-## Access the Argocd UI 🌐
+## Access the ArgoCD UI 🌐
 
-Now, you need to set up port forwarding to access the argocd and airflow web
+Now, you need to set up port forwarding to access the ArgoCD and airflow web
 server from your local machine. Open a new terminal on your local machine (not
 within the Multipass instance) and run the following command to display the IP
 address of the dev Multipass instance.
@@ -210,9 +210,9 @@ To log in, use the username `admin` and the password which is the value of the
 
 ![.env file](/docs/walkthroughs/dev/img/argocd-admin-password.png)
 
-![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-1.png)
+![ArgoCD UI](/docs/walkthroughs/dev/img/argocd-ui-1.png)
 
-Notice once inside the Argocd UI that the `cluster_manifests` in the GitHub
+Notice once inside the ArgoCD UI that the `cluster_manifests` in the GitHub
 repository matches config in the ArgoCD UI
 
 ```shell
@@ -226,11 +226,11 @@ repository matches config in the ArgoCD UI
 Verify all applications and manifests in the GitHub repository are present and
 their status is healthy in the ArgoCD UI
 
-![Argocd UI](/docs/walkthroughs/dev/img/argocd-ui-2.png)
+![ArgoCD UI](/docs/walkthroughs/dev/img/argocd-ui-2.png)
 
 ## verify that Airflow app is healthy 🧐
 
-To do this, the user can simply go to the go to the argocd UI and check Airflow
+To do this, the user can simply go to the go to the ArgoCD UI and check Airflow
 status or they can can try to port forward the Airflow webserver and see if they
 can see Airflow's login page. The command to port forward the airflow ui is:
 
@@ -260,7 +260,7 @@ the correct credentials:
 ## and you are done! ⚡️
 
 You now have a fully-configured single node Kubernetes cluster with Airflow and
-Argocd
+ArgoCD
 
 ## destroying resources in the cluster! 💣
 
