@@ -150,37 +150,37 @@ export async function getTF_VARs(
         ),
       ];
     }
-    env.set("TF_VAR_argocd_admin_password", argocd_admin_password);
-    env.set("TF_VAR_sealed_secrets_public_key", sealed_secrets_public_key);
+    env.set("TF_VAR_ARGOCD_ADMIN_PASSWORD", argocd_admin_password);
+    env.set("TF_VAR_SEALED_SECRETS_PUBLIC_KEY", sealed_secrets_public_key);
     env.set(
-      "TF_VAR_sealed_secrets_private_key",
+      "TF_VAR_SEALED_SECRETS_PRIVATE_KEY",
       sealed_secrets_private_key,
     );
   }
 
   if (git_ssh_private_key) {
-    env.set("TF_VAR_git_ssh_private_key", git_ssh_private_key);
+    env.set("TF_VAR_GIT_SSH_PRIVATE_KEY", git_ssh_private_key);
   } else {
-    git_username && env.set("TF_VAR_git_username", git_username);
-    git_token && env.set("TF_VAR_git_token", git_token);
+    git_username && env.set("TF_VAR_GIT_USERNAME", git_username);
+    git_token && env.set("TF_VAR_GIT_TOKEN", git_token);
   }
 
   const ssh_public_key = Deno.env.get("SSH_PUBLIC_KEY");
 
   // only required for microk8s
   if (ssh_public_key) {
-    env.set("TF_VAR_ssh_public_key", ssh_public_key);
+    env.set("TF_VAR_SSH_PUBLIC_KEY", ssh_public_key);
   } else {
-    env.set("TF_VAR_ssh_public_key", "");
+    env.set("TF_VAR_SSH_PUBLIC_KEY", "");
   }
 
-  env.set("TF_VAR_git_repo", git_repo);
+  env.set("TF_VAR_GIT_REPO", git_repo);
 
   // aks module requires cred be set explicitly
   const azurerm_client_id = Deno.env.get("ARM_CLIENT_ID") || "";
   const azurerm_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
-  env.set("TF_VAR_arm_client_id", azurerm_client_id);
-  env.set("TF_VAR_arm_client_secret", azurerm_client_secret);
+  env.set("TF_VAR_ARM_CLIENT_ID", azurerm_client_id);
+  env.set("TF_VAR_ARM_CLIENT_SECRET", azurerm_client_secret);
 
   return [undefined, Object.fromEntries(env)];
 }
