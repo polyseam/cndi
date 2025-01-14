@@ -11,23 +11,23 @@
     "jsr:@cliffy/keycode@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/prompt@^1.0.0-rc.5": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
-    "jsr:@cndi/cdktf@~0.1.2": "0.1.2",
+    "jsr:@cndi/cdktf@0.3": "0.3.0",
     "jsr:@polyseam/cliffy-provider-gh-releases@1.0.0-rc.11": "1.0.0-rc.11",
     "jsr:@polyseam/inflate-response@1.1.2": "1.1.2",
     "jsr:@polyseam/silky@^1.1.2": "1.1.2",
     "jsr:@std/archive@0.214.0": "0.214.0",
     "jsr:@std/assert@0.214": "0.214.0",
     "jsr:@std/assert@0.221": "0.221.0",
-    "jsr:@std/assert@~1.0.6": "1.0.6",
+    "jsr:@std/assert@~1.0.6": "1.0.10",
     "jsr:@std/async@0.221": "0.221.0",
     "jsr:@std/bytes@0.214": "0.214.0",
     "jsr:@std/bytes@0.221": "0.221.0",
     "jsr:@std/cli@0.221": "0.221.0",
     "jsr:@std/collections@0.221": "0.221.0",
     "jsr:@std/dotenv@0.221": "0.221.0",
-    "jsr:@std/encoding@~1.0.5": "1.0.5",
+    "jsr:@std/encoding@~1.0.5": "1.0.6",
     "jsr:@std/fmt@0.221": "0.221.0",
-    "jsr:@std/fmt@~1.0.2": "1.0.2",
+    "jsr:@std/fmt@~1.0.2": "1.0.4",
     "jsr:@std/fs@0.214.0": "0.214.0",
     "jsr:@std/fs@0.221": "0.221.0",
     "jsr:@std/io@0.214": "0.214.0",
@@ -39,12 +39,12 @@
     "jsr:@std/path@0.214": "0.214.0",
     "jsr:@std/path@0.214.0": "0.214.0",
     "jsr:@std/path@0.221": "0.221.0",
-    "jsr:@std/path@~1.0.6": "1.0.6",
+    "jsr:@std/path@~1.0.6": "1.0.8",
     "jsr:@std/semver@^1.0.3": "1.0.3",
     "jsr:@std/testing@0.221": "0.221.0",
-    "jsr:@std/text@~1.0.7": "1.0.7",
+    "jsr:@std/text@~1.0.7": "1.0.10",
     "jsr:@std/yaml@0.221": "0.221.0",
-    "npm:@cdktf/provider-aws@^19.25.0": "19.33.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-aws@^19.49.1": "19.49.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-azurerm@^12.23.0": "12.27.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-google@^14.13.1": "14.13.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-helm@^10.2.0": "10.3.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
@@ -56,6 +56,7 @@
     "npm:@octokit/types@^13.4.1": "13.5.0",
     "npm:@peculiar/x509@1.11.0": "1.11.0",
     "npm:@types/node@*": "22.5.1",
+    "npm:cdktf@0.20.10": "0.20.10_constructs@10.3.0",
     "npm:cdktf@0.20.7": "0.20.7_constructs@10.3.0",
     "npm:cdktf@~0.20.8": "0.20.8_constructs@10.3.0",
     "npm:constructs@10.3.0": "10.3.0",
@@ -119,10 +120,10 @@
         "jsr:@std/fmt@~1.0.2"
       ]
     },
-    "@cndi/cdktf@0.1.2": {
-      "integrity": "01f4eb30dd4a53770f04774a7e0cd0c3d069508de42e5bd7f1002cdd260f3872",
+    "@cndi/cdktf@0.3.0": {
+      "integrity": "862746ba7aa04e0699fd56b1880e74709d433ef98e317580971b2fb333e616fe",
       "dependencies": [
-        "npm:cdktf@0.20.7",
+        "npm:cdktf@0.20.10",
         "npm:constructs"
       ]
     },
@@ -172,6 +173,9 @@
     "@std/assert@1.0.6": {
       "integrity": "1904c05806a25d94fe791d6d883b685c9e2dcd60e4f9fc30f4fc5cf010c72207"
     },
+    "@std/assert@1.0.10": {
+      "integrity": "59b5cbac5bd55459a19045d95cc7c2ff787b4f8527c0dd195078ff6f9481fbb3"
+    },
     "@std/async@0.221.0": {
       "integrity": "f5519861754a1bb2898d227dd8ccb545abc975534aa9063e53911d6cb4e365cf",
       "dependencies": [
@@ -199,11 +203,17 @@
     "@std/encoding@1.0.5": {
       "integrity": "ecf363d4fc25bd85bd915ff6733a7e79b67e0e7806334af15f4645c569fefc04"
     },
+    "@std/encoding@1.0.6": {
+      "integrity": "ca87122c196e8831737d9547acf001766618e78cd8c33920776c7f5885546069"
+    },
     "@std/fmt@0.221.0": {
       "integrity": "379fed69bdd9731110f26b9085aeb740606b20428ce6af31ef6bd45ef8efa62a"
     },
     "@std/fmt@1.0.2": {
       "integrity": "87e9dfcdd3ca7c066e0c3c657c1f987c82888eb8103a3a3baa62684ffeb0f7a7"
+    },
+    "@std/fmt@1.0.4": {
+      "integrity": "e14fe5bedee26f80877e6705a97a79c7eed599e81bb1669127ef9e8bc1e29a74"
     },
     "@std/fs@0.214.0": {
       "integrity": "bc880fea0be120cb1550b1ed7faf92fe071003d83f2456a1e129b39193d85bea",
@@ -260,6 +270,9 @@
     "@std/path@1.0.6": {
       "integrity": "ab2c55f902b380cf28e0eec501b4906e4c1960d13f00e11cfbcd21de15f18fed"
     },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    },
     "@std/semver@1.0.3": {
       "integrity": "7c139c6076a080eeaa4252c78b95ca5302818d7eafab0470d34cafd9930c13c8"
     },
@@ -269,13 +282,16 @@
     "@std/text@1.0.7": {
       "integrity": "344a820af99fde81ae1d4f9ce586da3f47a58cda25ac4c4dd688166cf5ed97f1"
     },
+    "@std/text@1.0.10": {
+      "integrity": "9dcab377450253c0efa9a9a0c731040bfd4e1c03f8303b5934381467b7954338"
+    },
     "@std/yaml@0.221.0": {
       "integrity": "bac8913ee4f6fc600d4b92cc020f755070e22687ad242341f31d123ff690ae98"
     }
   },
   "npm": {
-    "@cdktf/provider-aws@19.33.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-21dhJPSMwTL/lLJacj7R+qnW7NrRFIWcvbSblKrAdNduMf24Th+9fcd8kTHoXv1jPGN9eC6kK/XOPxna6YHdrw==",
+    "@cdktf/provider-aws@19.49.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-jgcezv/cTglFBIVOciPa03xzvEc2jbfzmI/sOcDHrGLPsTfWN7vuMnXHKLgOKzPVz1vEFo+u4pKeXQ3LCiFVAA==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
@@ -773,6 +789,15 @@
         "set-function-length"
       ]
     },
+    "cdktf@0.20.10_constructs@10.3.0": {
+      "integrity": "sha512-I8c838lNDHUeOIFCeZ6NsLHivAaYVoc+3a8k84hYP+BkQtoqCiOhcYjrm7lH42CwqfBBR+BoD7lB5AFeHekd5A==",
+      "dependencies": [
+        "archiver",
+        "constructs",
+        "json-stable-stringify",
+        "semver@7.6.3"
+      ]
+    },
     "cdktf@0.20.7_constructs@10.3.0": {
       "integrity": "sha512-7za8QQYM1G0/6JUCYY+5smwNfNfbiZVPCMD7SeX2rTYmOLaGEkHZtMvuUTEKSqsE56fKudnfVd2J2edz2CETFg==",
       "dependencies": [
@@ -1120,6 +1145,9 @@
     "semver@7.6.2": {
       "integrity": "sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w=="
     },
+    "semver@7.6.3": {
+      "integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A=="
+    },
     "set-function-length@1.2.2": {
       "integrity": "sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==",
       "dependencies": [
@@ -1225,7 +1253,7 @@
       "jsr:@cliffy/ansi@^1.0.0-rc.5",
       "jsr:@cliffy/command@^1.0.0-rc.5",
       "jsr:@cliffy/prompt@^1.0.0-rc.5",
-      "jsr:@cndi/cdktf@~0.1.2",
+      "jsr:@cndi/cdktf@0.3",
       "jsr:@polyseam/cliffy-provider-gh-releases@1.0.0-rc.11",
       "jsr:@polyseam/silky@^1.1.2",
       "jsr:@std/assert@0.221",
@@ -1242,7 +1270,7 @@
       "jsr:@std/streams@0.221",
       "jsr:@std/testing@0.221",
       "jsr:@std/yaml@0.221",
-      "npm:@cdktf/provider-aws@^19.25.0",
+      "npm:@cdktf/provider-aws@^19.49.1",
       "npm:@cdktf/provider-azurerm@^12.23.0",
       "npm:@cdktf/provider-google@^14.13.1",
       "npm:@cdktf/provider-helm@^10.2.0",
