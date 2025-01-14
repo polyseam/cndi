@@ -29,14 +29,14 @@ export class CNDITerraformStack extends TerraformStack {
       cndi_project_name,
     );
 
-    this.variables.git_repo = new TerraformVariable(this, "git_repo", {
+    this.variables.git_repo = new TerraformVariable(this, "GIT_REPO", {
       type: "string",
       description: "repository URL to access",
     });
 
     this.variables.argocd_admin_password = new TerraformVariable(
       this,
-      "argocd_admin_password",
+      "ARGOCD_ADMIN_PASSWORD",
       {
         type: "string",
         description: "password for accessing the argo ui",
@@ -45,7 +45,7 @@ export class CNDITerraformStack extends TerraformStack {
 
     this.variables.sealed_secrets_private_key = new TerraformVariable(
       this,
-      "sealed_secrets_private_key",
+      "SEALED_SECRETS_PRIVATE_KEY",
       {
         type: "string",
         description: "private key for decrypting sealed secrets",
@@ -54,7 +54,7 @@ export class CNDITerraformStack extends TerraformStack {
 
     this.variables.sealed_secrets_public_key = new TerraformVariable(
       this,
-      "sealed_secrets_public_key",
+      "SEALED_SECRETS_PUBLIC_KEY",
       {
         type: "string",
         description: "public key for encrypting sealed secrets",
@@ -63,7 +63,7 @@ export class CNDITerraformStack extends TerraformStack {
 
     this.variables.ssh_public_key = new TerraformVariable(
       this,
-      "ssh_public_key",
+      "SSH_PUBLIC_KEY",
       {
         type: "string",
         description: "public key for accessing cluster nodes",
@@ -73,20 +73,20 @@ export class CNDITerraformStack extends TerraformStack {
     if (useSshRepoAuth()) {
       this.variables.git_ssh_private_key = new TerraformVariable(
         this,
-        "git_ssh_private_key",
+        "GIT_SSH_PRIVATE_KEY",
         {
           type: "string",
           description: "private key for accessing cluster repository",
         },
       );
     } else {
-      this.variables.git_token = new TerraformVariable(this, "git_token", {
+      this.variables.git_token = new TerraformVariable(this, "GIT_TOKEN", {
         type: "string",
         description: "password for accessing cluster repository",
       });
       this.variables.git_username = new TerraformVariable(
         this,
-        "git_username",
+        "GIT_USERNAME",
         {
           type: "string",
           description: "username for accessing cluster repository",

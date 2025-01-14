@@ -18,12 +18,12 @@ outputs:
     infrastructure:
       terraform:
         variable:
-          visitor:
+          VISITOR:
             type: "string"
             description: "The name of the visitor"
         output:
           greeting:
-            value: "Hello, ${upper(var.visitor)}!"
+            value: "Hello, ${upper(var.VISITOR)}!"
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
@@ -35,7 +35,7 @@ outputs:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/clusterless/env.yaml):
       {}
     $cndi.comment(configure_greeter): "Change who you are greeting:"
-    TF_VAR_visitor: "{{ $cndi.get_prompt_response(visitor) }}"
+    TF_VAR_VISITOR: "{{ $cndi.get_prompt_response(visitor) }}"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
