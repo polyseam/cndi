@@ -210,8 +210,8 @@ const getEnv = (
   for (
     const key of Object.keys(config?.infrastructure?.terraform?.variable || {})
   ) {
-    const envKey = `TF_VAR_${key.toLowerCase()}`;
-    const envVal = `\${{ secrets.TF_VAR_${key.toLowerCase()} }}`;
+    const envKey = `TF_VAR_${key.toUpperCase()}`;
+    const envVal = `\${{ secrets.TF_VAR_${key.toUpperCase()} }}`;
     injectEnv[envKey] = envVal;
   }
 
