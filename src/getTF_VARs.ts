@@ -4,6 +4,8 @@ import { ErrOut } from "errout";
 
 const label = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
+const BACKWARDS_COMPATIBILITY = true;
+
 export async function getTF_VARs(
   projectDir: string,
 ): Promise<PxResult<Record<string, string>>> {
@@ -181,6 +183,17 @@ export async function getTF_VARs(
   const azurerm_client_secret = Deno.env.get("ARM_CLIENT_SECRET") || "";
   env.set("TF_VAR_ARM_CLIENT_ID", azurerm_client_id);
   env.set("TF_VAR_ARM_CLIENT_SECRET", azurerm_client_secret);
+
+  // We want to set TF_VAR_UPPERCASED and TF_VAR_lowercase for backwards compatibility <= 2.25.3
+  if (BACKWARDS_COMPATIBILITY) {
+    for (const [key, value] of env.entries()) {
+      const components = key.split("TF_VAR_");
+      if (components && components.length > 1) {
+        const newKey = `TF_VAR_${components[1].toLowerCase()}`;
+        env.set(newKey, value);
+      }
+    }
+  }
 
   return [undefined, Object.fromEntries(env)];
 }
