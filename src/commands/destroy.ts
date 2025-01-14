@@ -1,6 +1,6 @@
 import { pullStateForTerraform } from "src/tfstate/git/read-state.ts";
 import { pushStateFromTerraform } from "src/tfstate/git/write-state.ts";
-import setTF_VARs from "src/setTF_VARs.ts";
+import { getTF_VARs } from "../getTF_VARs.ts";
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { ccolors, Command, path } from "deps";
@@ -91,7 +91,7 @@ const destroyCommand = new Command()
 
     const pathToTerraformBinary = getPathToTerraformBinary();
 
-    const setTF_VARsError = await setTF_VARs(options.path);
+    const [setTF_VARsError, env] = await getTF_VARs(options.path);
 
     if (setTF_VARsError) {
       await setTF_VARsError.out();
@@ -117,6 +117,7 @@ const destroyCommand = new Command()
         ],
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformInitCommandOutput = await terraformInitCommand.output();
@@ -155,6 +156,7 @@ const destroyCommand = new Command()
         stdin: "inherit",
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformDestroyChildProcess = terraformDestroyCommand

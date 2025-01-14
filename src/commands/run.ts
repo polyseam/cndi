@@ -3,7 +3,7 @@ import { ccolors, Command, path } from "deps";
 import { pullStateForTerraform } from "src/tfstate/git/read-state.ts";
 import { pushStateFromTerraform } from "src/tfstate/git/write-state.ts";
 
-import setTF_VARs from "src/setTF_VARs.ts";
+import { getTF_VARs } from "../getTF_VARs.ts";
 import { emitExitEvent, getPathToTerraformBinary } from "src/utils.ts";
 
 import { PROCESS_ERROR_CODE_PREFIX } from "consts";
@@ -71,7 +71,7 @@ const runCommand = new Command()
 
     const pathToTerraformBinary = getPathToTerraformBinary();
 
-    const setTF_VARsError = await setTF_VARs(options.path);
+    const [setTF_VARsError, env] = await getTF_VARs(options.path);
 
     if (setTF_VARsError) {
       await setTF_VARsError.out();
@@ -94,6 +94,7 @@ const runCommand = new Command()
         args: [`-chdir=${pathToTerraformResources}`, "init"],
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformInitCommandOutput = await terraformInitCommand.output();
@@ -130,6 +131,7 @@ const runCommand = new Command()
         ],
         stderr: "piped",
         stdout: "piped",
+        env,
       });
 
       const terraformApplyChildProcess = terraformApplyCommand.spawn();
