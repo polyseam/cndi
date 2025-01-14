@@ -56,7 +56,7 @@ export default async function cndi() {
 
   try {
     ensureDirSync(stagingDirectory);
-  } catch (errorEnsuringDirectory) {
+  } catch (_errorEnsuringDirectory) {
     const err = new ErrOut([
       ccolors.error(`Could not create staging directory`),
       ccolors.key_name(`"${stagingDirectory}"`),
@@ -64,7 +64,6 @@ export default async function cndi() {
       label,
       code: 10,
       id: "error-ensuring-stagingDirectory",
-      cause: errorEnsuringDirectory as Error,
     });
     await err.out();
     return;
