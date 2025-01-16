@@ -1,23 +1,23 @@
-const DEFAULT_INSTANCE_TYPES = {
+export const DEFAULT_INSTANCE_TYPES = {
   aws: "t3.large" as const,
   gcp: "n2-standard-2" as const,
   azure: "Standard_D2s_v3" as const,
 };
 
-const DEFAULT_NODE_DISK_SIZE_UNMANAGED = 100; // GB
-const DEFAULT_NODE_DISK_SIZE_MANAGED = 30; // GB
+export const DEFAULT_NODE_DISK_SIZE_UNMANAGED = 100; // GB
+export const DEFAULT_NODE_DISK_SIZE_MANAGED = 30; // GB
 
-const NODE_DISK_SIZE_KEY = {
+export const NODE_DISK_SIZE_KEY = {
   aws: "volume_size" as const,
   gcp: "size" as const,
   azure: "disk_size_gb" as const,
 };
 
-const MANAGED_NODE_KINDS = ["eks", "gke", "aks"] as const;
+export const MANAGED_NODE_KINDS = ["eks", "gke", "aks"] as const;
 
-const CLOUDINIT_RETRY_INTERVAL = 90; // seconds
+export const CLOUDINIT_RETRY_INTERVAL = 90; // seconds
 
-const DEFAULT_OPEN_PORTS = [
+export const DEFAULT_OPEN_PORTS = [
   {
     name: "http",
     number: 80,
@@ -37,7 +37,7 @@ export const DEFAULT_SUBNET_ADDRESS_SPACE = "10.0.0.0/20";
 
 export { default as error_code_reference } from "../docs/error-code-reference.json" with { type: "json" };
 
-const PROCESS_ERROR_CODE_PREFIX = {
+export const PROCESS_ERROR_CODE_PREFIX = {
   terraform: 1000,
   kubeseal: 2000,
   "ssh-keygen": 3000,
@@ -52,14 +52,3 @@ export const EFFECT_VALUES = [
   PREFER_NO_SCHEDULE,
   NO_EXECUTE,
 ] as const;
-
-export {
-  CLOUDINIT_RETRY_INTERVAL,
-  DEFAULT_INSTANCE_TYPES,
-  DEFAULT_NODE_DISK_SIZE_MANAGED,
-  DEFAULT_NODE_DISK_SIZE_UNMANAGED,
-  DEFAULT_OPEN_PORTS,
-  MANAGED_NODE_KINDS,
-  NODE_DISK_SIZE_KEY,
-  PROCESS_ERROR_CODE_PREFIX,
-};

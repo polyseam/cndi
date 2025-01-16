@@ -217,7 +217,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
-        dependsOn: [this.rg],
       },
     );
 
@@ -324,7 +323,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [cluster],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -426,7 +424,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [cluster, sealedSecretsSecret],
+        dependsOn: [sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",
