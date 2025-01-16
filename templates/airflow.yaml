@@ -31,20 +31,20 @@ blocks:
     content:
       webserver:
         expose_config: "True"
-        instance_name: Polyseam
+        instance_name: CNDI
         enable_proxy_fix: "True"
         base_url: "https://{{ $cndi.get_arg(hostname) }}"
       operators:
-        default_owner: Polyseam
+        default_owner: CNDI
 
   - name: airflow_private_config
     content:
       webserver:
         expose_config: "True"
-        instance_name: Polyseam
+        instance_name: CNDI
         enable_proxy_fix: "True"
       operators:
-        default_owner: Polyseam
+        default_owner: CNDI
 
   - name: deploy_airflow_ingress_blk
     content:
@@ -289,12 +289,21 @@ outputs:
         metadata:
           name: airflow
 
+      cnpg-system-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: cnpg-system
+
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.23.0
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        syncPolicy:
+          syncOptions:
+            - ServerSideApply=true
 
       airflow:
         targetRevision: 1.11.0
@@ -342,8 +351,12 @@ outputs:
               storageClassName: rwm
           createUserJob:
             useHelmHooks: false
+            applyCustomEnv: false
           migrateDatabaseJob:
+            jobAnnotations:
+              "argocd.argoproj.io/hook": Sync
             useHelmHooks: false
+            applyCustomEnv: false
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):

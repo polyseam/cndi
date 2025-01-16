@@ -14,12 +14,9 @@ import {
   TerraformOutput,
 } from "cdktf-deps";
 
-import {
-  ARGOCD_CHART_VERSION,
-  DEFAULT_INSTANCE_TYPES,
-  DEFAULT_NODE_DISK_SIZE_MANAGED,
-  SEALED_SECRETS_CHART_VERSION,
-} from "consts";
+import { ARGOCD_CHART_VERSION, SEALED_SECRETS_CHART_VERSION } from "versions";
+
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -189,6 +186,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         name: project_name,
         location: this.locals.gcp_region.asString,
         nodeLocations: [this.locals.gcp_zone.asString],
+        // minMasterVersion: GCP Recommends not setting this
         // https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#example-usage---with-a-separately-managed-node-pool-recommended
         // "We can't create a cluster with no node pool defined, but we want to only use
         // separately managed node pools. So we create the smallest possible default

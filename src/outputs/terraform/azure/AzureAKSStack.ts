@@ -19,11 +19,11 @@ import {
 
 import {
   ARGOCD_CHART_VERSION,
-  DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
-  DEFAULT_NODE_DISK_SIZE_MANAGED,
   SEALED_SECRETS_CHART_VERSION,
-} from "consts";
+} from "versions";
+
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 import {
   getCDKTFAppConfig,
@@ -151,7 +151,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
           osDiskType: "Managed",
-          enableAutoScaling: true,
+          autoScalingEnabled: true,
           maxPods: 110,
           vnetSubnetId, // node pools
           tags,
@@ -206,7 +206,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           serviceCidr: "192.168.0.0/16",
           dnsServiceIp: "192.168.10.0", // leave a few addresses at the start of the block
         },
-        automaticChannelUpgrade: "patch",
+        automaticUpgradeChannel: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
         storageProfile: {
           fileDriverEnabled: true,
@@ -217,9 +217,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
-
-        //
-        dependsOn: [this.rg],
       },
     );
 
@@ -326,7 +323,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         chart: "argo-cd",
         cleanupOnFail: true,
         createNamespace: true,
-        dependsOn: [cluster],
         timeout: 600,
         atomic: true,
         name: "argocd",
@@ -428,7 +424,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       "cndi_helm_release_sealed_secrets",
       {
         chart: "sealed-secrets",
-        dependsOn: [cluster, sealedSecretsSecret],
+        dependsOn: [sealedSecretsSecret],
         name: "sealed-secrets",
         namespace: "kube-system",
         repository: "https://bitnami-labs.github.io/sealed-secrets",

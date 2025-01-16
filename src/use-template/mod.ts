@@ -16,7 +16,7 @@ import type {
   PromptType,
 } from "./types.ts";
 
-import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "consts";
+import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "known-templates";
 
 import {
   findPositionOfCNDICallEndToken,

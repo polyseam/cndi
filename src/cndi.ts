@@ -8,7 +8,7 @@ import {
   homedir,
   path,
 } from "deps";
-import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "consts";
+import { KUBESEAL_VERSION, TERRAFORM_VERSION } from "versions";
 import { ErrOut } from "errout";
 
 // commands

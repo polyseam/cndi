@@ -1,4 +1,4 @@
-import { EDGE_RUNTIME_IMAGE_TAG } from "consts";
+import { EDGE_RUNTIME_IMAGE_TAG } from "versions";
 
 export function getFunctionsDockerfileContent(
   version = EDGE_RUNTIME_IMAGE_TAG,

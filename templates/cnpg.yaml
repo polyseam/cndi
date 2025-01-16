@@ -549,10 +549,13 @@ outputs:
 
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.23.0
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        syncPolicy:
+          syncOptions:
+            - ServerSideApply=true
 
       pgadmin:
         $cndi.get_block(deploy_pgadmin_application_blk):
