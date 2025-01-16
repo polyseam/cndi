@@ -15,9 +15,7 @@ blocks:
       stringData:
         GIT_SYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
-        $cndi.comment(gitsync-pain): "both forms are required per https://github.com/apache/airflow/pull/43264"
-        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_USERNAME)
-        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_SYNC_PASSWORD)
+
   - name: git_sync_shared
     content:
       apiVersion: v1
@@ -28,28 +26,25 @@ blocks:
       stringData:
         GIT_SYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
         GIT_SYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
-        $cndi.comment(gitsync-pain): "both forms are required per https://github.com/apache/airflow/pull/43264"
-        GITSYNC_USERNAME: $cndi_on_ow.seal_secret_from_env_var(GIT_USERNAME)
-        GITSYNC_PASSWORD: $cndi_on_ow.seal_secret_from_env_var(GIT_TOKEN)
 
   - name: airflow_public_config
     content:
       webserver:
         expose_config: "True"
-        instance_name: Polyseam
+        instance_name: CNDI
         enable_proxy_fix: "True"
         base_url: "https://{{ $cndi.get_arg(hostname) }}"
       operators:
-        default_owner: Polyseam
+        default_owner: CNDI
 
   - name: airflow_private_config
     content:
       webserver:
         expose_config: "True"
-        instance_name: Polyseam
+        instance_name: CNDI
         enable_proxy_fix: "True"
       operators:
-        default_owner: Polyseam
+        default_owner: CNDI
 
   - name: deploy_airflow_ingress_blk
     content:
@@ -308,7 +303,7 @@ outputs:
         chart: cloudnative-pg
 
       airflow:
-        targetRevision: 1.15.0
+        targetRevision: 1.11.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
