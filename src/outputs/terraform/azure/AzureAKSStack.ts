@@ -151,7 +151,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
           osDiskType: "Managed",
-          enableAutoScaling: true,
+          autoScalingEnabled: true,
           maxPods: 110,
           vnetSubnetId, // node pools
           tags,
@@ -206,7 +206,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           serviceCidr: "192.168.0.0/16",
           dnsServiceIp: "192.168.10.0", // leave a few addresses at the start of the block
         },
-        automaticChannelUpgrade: "patch",
+        automaticUpgradeChannel: "patch",
         roleBasedAccessControlEnabled: false, // Tamika
         storageProfile: {
           fileDriverEnabled: true,
@@ -217,8 +217,6 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           type: "SystemAssigned",
         },
         nodeResourceGroup: `rg-${project_name}-cluster-resources`,
-
-        //
         dependsOn: [this.rg],
       },
     );

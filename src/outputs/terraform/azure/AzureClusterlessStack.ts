@@ -43,7 +43,7 @@ class AzureClusterlessTerraformStack extends TerraformStack {
       this,
       "cndi_azurerm_provider",
       {
-        features: {},
+        features: [{}],
       },
     );
 

@@ -23,7 +23,7 @@ export default class AzureCoreTerraformStack extends CNDITerraformStack {
       this,
       "cndi_azurerm_provider",
       {
-        features: {},
+        features: [{}],
       },
     );
 
