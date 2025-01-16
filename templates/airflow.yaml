@@ -234,7 +234,7 @@ outputs:
             $cndi.comment(why_propagation_policy): PrunePropagationPolicy=background should prevent PDBs from blocking cluster destruction
             argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,PrunePropagationPolicy=background
         spec:
-          imageName: "ghcr.io/cloudnative-pg/postgresql:17"
+          imageName: "ghcr.io/cloudnative-pg/postgresql:16"
           instances: 3
           storage:
             size: 1Gi
