@@ -16,8 +16,8 @@ export const EDGE_RUNTIME_IMAGE_TAG = "1.62.2";
 export const DEFAULT_K8S_VERSION = "1.31";
 
 // Root Application Chart Versions (terraform managed)
-export const ARGOCD_CHART_VERSION = "7.7.10";
-export const SEALED_SECRETS_CHART_VERSION = "2.15.0";
+export const ARGOCD_CHART_VERSION = "7.7.16";
+export const SEALED_SECRETS_CHART_VERSION = "2.17.0";
 
 // Core Application Chart Versions (gitops managed)
 export const CERT_MANAGER_CHART_VERSION = "1.14.3";
