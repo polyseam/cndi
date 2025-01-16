@@ -70,9 +70,8 @@ interface OverwriteActionOptions {
   output: string;
   file?: string;
   initializing: boolean;
-  workflowSourceRef?: string;
-  updateGhWorkflow?: boolean;
-  enablePrChecks?: boolean;
+  runWorkflowSourceRef?: string;
+  updateWorkflow: ("run" | "check")[];
 }
 
 type WorkerMessageType =
@@ -150,7 +149,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     // resources outside of ./cndi should only be staged if initializing or manually requested
-    if (options.initializing || options.updateGhWorkflow) {
+    if (options.initializing || options.updateWorkflow.includes("run")) {
       const runWorkflowPath = path.join(
         ".github",
         "workflows",
@@ -162,7 +161,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           runWorkflowPath,
           getCndiRunGitHubWorkflowYamlContents(
             config,
-            options?.workflowSourceRef,
+            options?.runWorkflowSourceRef,
           ),
         );
 
@@ -182,29 +181,29 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
           ccolors.success("provider"),
         );
       }
+    }
 
-      if (options?.enablePrChecks) {
-        const onPullWorkflowPath = path.join(
-          ".github",
-          "workflows",
-          "cndi-onpull.yaml",
-        );
+    if (options.initializing || options.updateWorkflow.includes("check")) {
+      const onPullWorkflowPath = path.join(
+        ".github",
+        "workflows",
+        "cndi-onpull.yaml",
+      );
 
-        const errStagingOnPullWorkflow = await stageFile(
-          onPullWorkflowPath,
-          getCndiOnPullGitHubWorkflowYamlContents(),
-        );
+      const errStagingOnPullWorkflow = await stageFile(
+        onPullWorkflowPath,
+        getCndiOnPullGitHubWorkflowYamlContents(),
+      );
 
-        if (errStagingOnPullWorkflow) {
-          await self.postMessage(errStagingOnPullWorkflow.owWorkerErrorMessage);
-          return;
-        }
-
-        console.log(
-          ccolors.success("staged 'cndi-onpull' GitHub workflow:"),
-          ccolors.key_name(onPullWorkflowPath),
-        );
+      if (errStagingOnPullWorkflow) {
+        await self.postMessage(errStagingOnPullWorkflow.owWorkerErrorMessage);
+        return;
       }
+
+      console.log(
+        ccolors.success("staged 'cndi-onpull' GitHub workflow:"),
+        ccolors.key_name(onPullWorkflowPath),
+      );
     }
 
     const pathToFunctionsInput = path.join(options.output, "functions");

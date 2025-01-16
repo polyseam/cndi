@@ -40,7 +40,6 @@ type EchoInitOptions = {
   keep?: boolean;
   create?: boolean;
   skipPush?: boolean;
-  enablePrChecks?: boolean; // will become default
 };
 
 const echoInit = (options: EchoInitOptions) => {
@@ -96,8 +95,8 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "Specify a ref to build a cndi workflow with",
+    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
     },
@@ -111,7 +110,6 @@ const initCommand = new Command()
   .option("--skip-push", "Skip pushing to the remote repository", {
     depends: ["create"],
   })
-  .option("--enable-pr-checks", "Enable pull request checks", { hidden: true })
   .action(async (options) => {
     // default to the current working directory if -o, --output is ommitted
     const destinationDirectory = options?.output || Deno.cwd();
@@ -492,10 +490,9 @@ const initCommand = new Command()
     await owAction({
       output: destinationDirectory,
       initializing: true,
-      workflowSourceRef: options.workflowSourceRef,
+      runWorkflowSourceRef: options.runWorkflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
-      enablePrChecks: !!options.enablePrChecks, // will become default
     });
   });
 

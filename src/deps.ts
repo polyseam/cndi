@@ -32,6 +32,9 @@ export const YAML = {
 //  - cliffy
 export { Command } from "@cliffy/command";
 export { CompletionsCommand } from "@cliffy/command/completions";
+import { EnumType } from "@cliffy/command";
+
+export const WorkflowType = new EnumType(["run", "check"]);
 
 import { colors } from "@cliffy/ansi/colors";
 
