@@ -1,7 +1,7 @@
 import { CNDIConfig } from "src/types.ts";
 import { getYAMLString } from "src/utils.ts";
 import { deepMerge } from "deps";
-import { KUBE_PROMETHEUS_STACK_CHART_VERSION } from "consts";
+import { KUBE_PROMETHEUS_STACK_CHART_VERSION } from "versions";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";

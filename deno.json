@@ -74,7 +74,9 @@
     "test-deps": "./src/tests/deps.ts",
     "px": "./src/px/mod.ts",
     "validator": "npm:validator@13.11.0",
-    "errout": "./src/ErrOut.ts"
+    "errout": "./src/ErrOut.ts",
+    "versions": "./src/versions.ts",
+    "known-templates": "./src/known-templates.ts"
   },
   "lint": {
     "exclude": ["dist/*"]

@@ -15,7 +15,7 @@ import {
 } from "src/utils.ts";
 import { CNDIConfig, MultipassNodeItemSpec } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
-import { LARSTOBI_MULTIPASS_PROVIDER_VERSION } from "consts";
+import { LARSTOBI_MULTIPASS_PROVIDER_VERSION } from "versions";
 import { ccolors, deepMerge } from "deps";
 
 const LOCAL_CLOUDINIT_FILE_NAME =

@@ -1,6 +1,6 @@
 import { YAML } from "deps";
 import { CNDIConfig } from "src/types.ts";
-import { DEFAULT_K8S_VERSION } from "consts";
+import { DEFAULT_K8S_VERSION } from "versions";
 import { loopUntilSuccess } from "src/cloud-init/utils.ts";
 
 type GetFollowerCloudInitOptions = {

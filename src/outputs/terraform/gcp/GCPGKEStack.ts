@@ -14,12 +14,9 @@ import {
   TerraformOutput,
 } from "cdktf-deps";
 
-import {
-  ARGOCD_CHART_VERSION,
-  DEFAULT_INSTANCE_TYPES,
-  DEFAULT_NODE_DISK_SIZE_MANAGED,
-  SEALED_SECRETS_CHART_VERSION,
-} from "consts";
+import { ARGOCD_CHART_VERSION, SEALED_SECRETS_CHART_VERSION } from "versions";
+
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 import {
   getCDKTFAppConfig,

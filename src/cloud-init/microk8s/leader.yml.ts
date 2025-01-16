@@ -12,7 +12,7 @@ import {
   ARGOCD_RELEASE_VERSION,
   DEFAULT_K8S_VERSION,
   SEALED_SECRETS_CHART_VERSION,
-} from "consts";
+} from "versions";
 
 const defaultAddons: Array<Microk8sAddon> = [
   {

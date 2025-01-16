@@ -2,11 +2,11 @@ import { CNDIConfig, TFBlocks } from "src/types.ts";
 
 import {
   ARGOCD_CHART_VERSION,
-  DEFAULT_INSTANCE_TYPES,
   DEFAULT_K8S_VERSION,
-  DEFAULT_NODE_DISK_SIZE_MANAGED,
   SEALED_SECRETS_CHART_VERSION,
-} from "consts";
+} from "versions";
+
+import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
 import {
   App,

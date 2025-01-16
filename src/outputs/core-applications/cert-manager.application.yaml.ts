@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CERT_MANAGER_CHART_VERSION } from "consts";
+import { CERT_MANAGER_CHART_VERSION } from "versions";
 import { CNDIConfig } from "src/types.ts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";

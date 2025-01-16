@@ -17,7 +17,7 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import { KNOWN_TEMPLATES } from "consts";
+import { KNOWN_TEMPLATES } from "known-templates";
 
 import { owAction } from "src/commands/overwrite.ts";
 

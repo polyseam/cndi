@@ -1,7 +1,7 @@
 import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
 import type { CNDIProvider, ExternalDNSProvider } from "src/types.ts";
-import { EXTERNAL_DNS_CHART_VERSION } from "consts";
+import { EXTERNAL_DNS_CHART_VERSION } from "versions";
 import { deepMerge } from "deps";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
