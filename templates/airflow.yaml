@@ -301,6 +301,9 @@ outputs:
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
+        syncPolicy:
+          syncOptions:
+            - ServerSideApply=true
 
       airflow:
         targetRevision: 1.11.0
@@ -348,8 +351,12 @@ outputs:
               storageClassName: rwm
           createUserJob:
             useHelmHooks: false
+            applyCustomEnv: false
           migrateDatabaseJob:
+            jobAnnotations:
+              "argocd.argoproj.io/hook": Sync
             useHelmHooks: false
+            applyCustomEnv: false
 
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
