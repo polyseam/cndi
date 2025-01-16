@@ -289,15 +289,21 @@ outputs:
         metadata:
           name: airflow
 
+      cnpg-system-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: cnpg-system
+
     applications:
       cnpg:
-        targetRevision: 0.18.0
+        targetRevision: 0.23.0
         destinationNamespace: cnpg-system
         repoURL: "https://cloudnative-pg.github.io/charts"
         chart: cloudnative-pg
 
       airflow:
-        targetRevision: 1.11.0
+        targetRevision: 1.15.0
         destinationNamespace: airflow
         repoURL: "https://airflow.apache.org"
         chart: airflow
