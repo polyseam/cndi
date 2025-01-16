@@ -149,7 +149,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
     }
 
     // resources outside of ./cndi should only be staged if initializing or manually requested
-    if (options.initializing || options.updateWorkflow.includes("run")) {
+    if (options.initializing || options?.updateWorkflow?.includes("run")) {
       const runWorkflowPath = path.join(
         ".github",
         "workflows",
@@ -183,7 +183,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
       }
     }
 
-    if (options.initializing || options.updateWorkflow.includes("check")) {
+    if (options.initializing || options?.updateWorkflow?.includes("check")) {
       const onPullWorkflowPath = path.join(
         ".github",
         "workflows",
