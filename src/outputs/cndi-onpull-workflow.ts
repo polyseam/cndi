@@ -12,6 +12,8 @@ const skip_check = [
   "CKV_GCP_66", // Severity "low", This requires all images be "signed". too much operational risk for first pass
   "CKV_GCP_13", // Severity "low", Requires pre-configured service account, too much user burden
   "CKV_GCP_69", // Severity "low", Requires Workload Identity, needs significant development effort
+  "CKV_GCP_25", // Severity "medium" GKE Failed to pull a remote image
+  "CKV_GCP_20", // Severity "low" Terraform cannot contact the GKE API server from GitHub Actions
 ].join(",");
 
 const cndiCheckovSteps = [
