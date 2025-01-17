@@ -6,6 +6,10 @@ const skip_check = [
   "CKV_SECRET_6", // SealedSecrets is used to encrypt secrets so this is a non-issue
   "CKV_AWS_341", // Launch Template should have a hop limit of 2 because the nodes are in EKS
   "CKV_AWS_184", // System Managed Keys and their automation are Better for CNDI's user profile
+  "CKV_GCP_26", // Severity "info", GCP wants us to enable VPC logs but it's not necessary
+  "CKV_GCP_65", // Severirty "low", GCP wants us to use gsuite groups but it's not necessary
+  "CKV_GCP_66", // Severity "low", This requires all images be "signed". too much operational risk for first pass
+  "CKV_GCP_13", // Severity "low", Requires pre-configured service account, too much user burden
 ].join(",");
 
 const cndiCheckovSteps = [
