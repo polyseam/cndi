@@ -1,12 +1,5 @@
 import { YAML } from "deps";
 
-// these are somewhat brittle, they are pinned to how checkov outputs empty markdown results
-// TODO: Seems like this did actually break
-const NO_CHECKOV_FAILURES_EXPRESSION =
-  "${{ steps.checkov.outputs.results == '\n\n---' }}";
-const CHECKOV_FAILURES_EXPRESSION =
-  "${{ steps.checkov.outputs.results != '\n\n---' }}";
-
 const comment_tag = "checkov-failures-comment";
 
 const skip_check = [
@@ -36,8 +29,21 @@ const cndiCheckovSteps = [
     },
   },
   {
+    name: "Check if Checkov Results are Empty",
+    id: "check_empty_results",
+    run: `RESULTS="\${{ steps.checkov.outputs.results }}"
+          # Using grep to find any character not in the set of '-' or whitespace
+          if echo "$RESULTS" | grep -Eq '[^-\s]'; then
+            echo "empty_results=false" >> $GITHUB_OUTPUT
+          else
+            echo "empty_results=true" >> $GITHUB_OUTPUT
+          fi
+    `,
+    shell: "bash",
+  },
+  {
     name: "Comment Checkov Issues",
-    if: CHECKOV_FAILURES_EXPRESSION,
+    if: "${{ steps.check_empty_results.outputs.empty_results == 'false' }}",
     uses: "thollander/actions-comment-pull-request@v2",
     with: {
       mode: "recreate", // recreate the comment if it already exists
@@ -51,7 +57,7 @@ Checkov found issues in your pull request. Please review and fix them.
   },
   {
     name: "Delete Comment Checkov",
-    if: NO_CHECKOV_FAILURES_EXPRESSION,
+    if: "${{ steps.check_empty_results.outputs.empty_results == 'true' }}",
     uses: "thollander/actions-comment-pull-request@v2",
     with: {
       mode: "delete", // delete the comment if it exists: no errors
@@ -61,7 +67,7 @@ Checkov found issues in your pull request. Please review and fix them.
   },
   {
     name: "Print Checkov Results",
-    if: NO_CHECKOV_FAILURES_EXPRESSION,
+    if: "${{ steps.check_empty_results.outputs.empty_results == 'true' }}",
     run: 'echo "Checkov found no issues"', // log to console if no issues
   },
 ];
