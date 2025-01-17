@@ -179,12 +179,25 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
       },
     );
 
+    const basicNodeConfig = {
+      workloadMetadataConfig: {
+        mode: "GCE_METADATA",
+      },
+      shieldedInstanceConfig: {
+        enableSecureBoot: true,
+        enableIntegrityMonitoring: true,
+      },
+    };
+
     const gkeCluster = new CDKTFProviderGCP.containerCluster.ContainerCluster(
       this,
       "cndi_google_container_cluster",
       {
         name: project_name,
         location: this.locals.gcp_region.asString,
+        resourceLabels: {
+          cndi_project: project_name, // GCP wants at least one resourceLabel entry
+        },
         nodeLocations: [this.locals.gcp_zone.asString],
         // minMasterVersion: GCP Recommends not setting this
         // https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#example-usage---with-a-separately-managed-node-pool-recommended
@@ -197,7 +210,22 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         dependsOn: [projectServicesReady, computeSubnet],
         network: computeNetwork.selfLink,
         subnetwork: computeSubnet.selfLink,
+        networkPolicy: {
+          enabled: true, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-7
+        },
+        ipAllocationPolicy: {
+          // encouraged by https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-15
+        },
+        masterAuthorizedNetworksConfig: {}, // cidr blocks for allowed remote management; does empty constitute empty whitelist?
         deletionProtection: false,
+        releaseChannel: {
+          channel: "REGULAR",
+        },
+        nodeConfig: basicNodeConfig,
+        privateClusterConfig: {
+          enablePrivateNodes: true, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-6
+        },
+        enableIntranodeVisibility: true, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/enable-vpc-flow-logs-and-intranode-visibility
         addonsConfig: {
           gcpFilestoreCsiDriverConfig: {
             enabled: true,
@@ -251,7 +279,13 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
 
       const labels = nodePoolSpec.labels || {};
 
+      const management = {
+        autoRepair: true,
+        autoUpgrade: true,
+      };
+
       const nodeConfig = {
+        ...basicNodeConfig,
         diskSizeGb,
         diskType,
         labels,
@@ -271,6 +305,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
             cluster: gkeCluster.name,
             name: nodePoolSpec.name,
             nodeConfig,
+            management,
             autoscaling: {
               minNodeCount: nodePoolSpec?.min_count ?? nodeCount,
               maxNodeCount: nodePoolSpec?.max_count ?? nodeCount,
@@ -286,6 +321,7 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
           {
             cluster: gkeCluster.name,
             name: nodePoolSpec.name,
+            management,
             nodeConfig,
             nodeCount,
           },

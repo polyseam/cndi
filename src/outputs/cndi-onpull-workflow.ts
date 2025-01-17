@@ -10,6 +10,7 @@ const skip_check = [
   "CKV_GCP_65", // Severirty "low", GCP wants us to use gsuite groups but it's not necessary
   "CKV_GCP_66", // Severity "low", This requires all images be "signed". too much operational risk for first pass
   "CKV_GCP_13", // Severity "low", Requires pre-configured service account, too much user burden
+  "CKV_GCP_69", // Severity "low", Requires Workload Identity, needs significant development effort
 ].join(",");
 
 const cndiCheckovSteps = [
@@ -35,7 +36,7 @@ const cndiCheckovSteps = [
   {
     name: "Check if Checkov Results are Empty",
     id: "check_empty_results",
-    run: `RESULTS="\${{ steps.checkov.outputs.results }}"
+    run: `RESULTS='\${{ steps.checkov.outputs.results }}'
           # Using grep to find any character not in the set of '-' or whitespace
           if echo "$RESULTS" | grep -Eq '[^-\s]'; then
             echo "empty_results=false" >> $GITHUB_OUTPUT
