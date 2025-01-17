@@ -216,14 +216,13 @@ export default class GCPGKETerraformStack extends GCPCoreTerraformStack {
         ipAllocationPolicy: {
           // encouraged by https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-15
         },
-        masterAuthorizedNetworksConfig: {}, // cidr blocks for allowed remote management; does empty constitute empty whitelist?
         deletionProtection: false,
         releaseChannel: {
           channel: "REGULAR",
         },
         nodeConfig: basicNodeConfig,
         privateClusterConfig: {
-          enablePrivateNodes: true, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-6
+          enablePrivateNodes: false, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/bc-gcp-kubernetes-6
         },
         enableIntranodeVisibility: true, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/google-cloud-policies/google-cloud-kubernetes-policies/enable-vpc-flow-logs-and-intranode-visibility
         addonsConfig: {
