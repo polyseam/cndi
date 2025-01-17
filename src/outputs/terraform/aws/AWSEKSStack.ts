@@ -63,6 +63,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       "cndi_aws_efs_file_system",
       {
         creationToken: `cndi_aws_efs_token_for_${project_name}`,
+        encrypted: true,
         tags: {
           Name: `cndi-elastic-file-system_${project_name}`,
         },
@@ -320,6 +321,13 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         tags: {
           Name: `cndi-elastic-file-system-access-point_${project_name}`,
         },
+        rootDirectory: {
+          path: "/efs",
+        },
+        posixUser: {
+          gid: 1000,
+          uid: 1000,
+        },
       },
     );
 
@@ -558,7 +566,8 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         {
           namePrefix: `cndi-${nodeGroupName}-${nodeGroupIndex}-`,
           metadataOptions: {
-            httpTokens: "optional",
+            httpTokens: "required",
+            httpPutResponseHopLimit: 2, // https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/bc-aws-general-31
           },
           blockDeviceMappings: [
             {
@@ -663,7 +672,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
-        dependsOn: [firstNodeGroup!],
       },
     );
 
@@ -685,7 +693,6 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
         reclaimPolicy: "Delete",
         allowVolumeExpansion: true,
         volumeBindingMode: "WaitForFirstConsumer",
-        dependsOn: [firstNodeGroup!],
       },
     );
 

@@ -1,12 +1,19 @@
 import { YAML } from "deps";
 
 // these are somewhat brittle, they are pinned to how checkov outputs empty markdown results
+// TODO: Seems like this did actually break
 const NO_CHECKOV_FAILURES_EXPRESSION =
   "${{ steps.checkov.outputs.results == '\n\n---' }}";
 const CHECKOV_FAILURES_EXPRESSION =
   "${{ steps.checkov.outputs.results != '\n\n---' }}";
 
 const comment_tag = "checkov-failures-comment";
+
+const skip_check = [
+  "CKV_SECRET_6", // SealedSecrets is used to encrypt secrets so this is a non-issue
+  "CKV_AWS_341", // Launch Template should have a hop limit of 2 because the nodes are in EKS
+  "CKV_AWS_184", // System Managed Keys and their automation are Better for CNDI's user profile
+].join(",");
 
 const cndiCheckovSteps = [
   {
@@ -25,7 +32,7 @@ const cndiCheckovSteps = [
       directory: "./cndi", // run on all cndi artifacts
       output_format: "github_failed_only", // github markdown of failed checks
       output_file_path: "console,checkov", // Save results to ./checkov and print to console
-      skip_check: "CKV_SECRET_6", // Skip check for hardcoded secrets by entropy (we encrypt them)
+      skip_check,
     },
   },
   {
