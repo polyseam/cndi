@@ -22,7 +22,8 @@ jobs:
       - name: linux cndi --help
         run: ./dist/linux/in/cndi --help
         timeout-minutes: 1
-  bin-build-test-macos:
+
+  bin-build-test-macos-amd64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +31,26 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.1.4"
-      - name: deno build-mac
-        run: deno task build-mac
+      - name: deno build-mac-amd64
+        run: deno task build-mac-amd64
       - name: mac cndi --help
-        run: ./dist/mac/in/cndi --help
+        run: ./dist/mac-amd64/in/cndi --help
         timeout-minutes: 1
+
+  bin-build-test-macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: "v2.1.4"
+      - name: deno build-mac-arm64
+        run: deno task build-mac-arm64
+      - name: mac cndi --help
+        run: ./dist/mac-arm64/in/cndi --help
+        timeout-minutes: 1
+
   bin-build-test-windows:
     runs-on: windows-latest
     steps:
