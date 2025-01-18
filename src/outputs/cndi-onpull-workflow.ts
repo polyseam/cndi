@@ -2,9 +2,6 @@ import { YAML } from "deps";
 
 const comment_tag = "checkov-failures-comment";
 
-// The following Checkov checks are skipped
-// If you would like to contribute fixes we'd welcome an Issue and a PR!
-
 const skip_check = [
   "CKV_SECRET_6", // N/A: Severity "low", SealedSecrets is used to encrypt secrets so this is a non-issue
   "CKV_SECRET_3", // N/A: Severity "high", SealedSecrets is used to encrypt secrets so this is a non-issue
