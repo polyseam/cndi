@@ -3,17 +3,29 @@ import { YAML } from "deps";
 const comment_tag = "checkov-failures-comment";
 
 const skip_check = [
-  "CKV_SECRET_6", // SealedSecrets is used to encrypt secrets so this is a non-issue
-  "CKV_SECRET_3", // SealedSecrets is used to encrypt secrets so this is a non-issue
-  "CKV_AWS_341", // Launch Template should have a hop limit of 2 because the nodes are in EKS
-  "CKV_AWS_184", // System Managed Keys and their automation are Better for CNDI's user profile
+  "CKV_SECRET_6", // Severity "n/a", SealedSecrets is used to encrypt secrets so this is a non-issue
+  "CKV_SECRET_3", // Severity "n/a", SealedSecrets is used to encrypt secrets so this is a non-issue
+  "CKV_AWS_341", // Severity "n/a", Launch Template should have a hop limit of 2 because the nodes are in EKS
+  "CKV_AWS_184", // Severity "n/a", System Managed Keys and their automation are Better for CNDI's user profile
   "CKV_GCP_26", // Severity "info", GCP wants us to enable VPC logs but it's not necessary
   "CKV_GCP_65", // Severirty "low", GCP wants us to use gsuite groups but it's not necessary
   "CKV_GCP_66", // Severity "low", This requires all images be "signed". too much operational risk for first pass
   "CKV_GCP_13", // Severity "low", Requires pre-configured service account, too much user burden
   "CKV_GCP_69", // Severity "low", Requires Workload Identity, needs significant development effort
-  "CKV_GCP_25", // Severity "medium" GKE Failed to pull a remote image
-  "CKV_GCP_20", // Severity "low" Terraform cannot contact the GKE API server from GitHub Actions
+  "CKV_GCP_20", // Severity "low", Terraform cannot contact the GKE API server from GitHub Actions
+  "CKV_GCP_25", // Severity "medium", GKE Failed to pull a remote image
+  "CKV_AZURE_4", // Severity "info", Azure wants us to enable their monitoring, we use self-managed observability
+  "CKV_AZURE_117", // Severity "low", Azure wants us to manage our own keys, too much user burden (Consider provisioning them in TF)
+  "CKV_AZURE_170", // Severity "low", Azure wants us to use the Paid tier of AKS, we use the free tier
+  "CKV_AZURE_116", // Severity "low", Azure wants us to use their policy addon, We will use OPA eventually
+  "CKV_AZURE_6", // Severity "low", Azure wants us to whitelist IPs for kubeapi access
+  "CKV2_AZURE_31", // Severity "low", Azure wants us to create and attach an NSG
+  "CKV_AZURE_115", // Severity "low", Azure wants private clusters but GitHub Actions won't connect
+  "CKV_AZURE_141", // Severity "low", Azure wants "no local users" but we don't have the requisite Azure AD setup
+  "CKV_AZURE_226", // Severity "medium", Azure wants Ephemeral OS disk, but claims our default instance type is too small
+  "CKV_AZURE_5", // Severity "medium", Azure wants us to enable RBAC, we will do more eventually
+  "CKV_AZURE_227", // Severity "high", Azure requires enryption to be enabled in your Subscription before deployment, too much user burden
+  "CKV_AZURE_232", // Severity "high", Azure wants us to have a separate node pool for system services, cash and complexity cost is high
 ].join(",");
 
 const cndiCheckovSteps = [
