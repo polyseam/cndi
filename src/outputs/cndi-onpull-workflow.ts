@@ -2,11 +2,14 @@ import { YAML } from "deps";
 
 const comment_tag = "checkov-failures-comment";
 
+// The following Checkov checks are skipped
+// If you would like to contribute fixes we'd welcome an Issue and a PR!
+
 const skip_check = [
-  "CKV_SECRET_6", // Severity "n/a", SealedSecrets is used to encrypt secrets so this is a non-issue
-  "CKV_SECRET_3", // Severity "n/a", SealedSecrets is used to encrypt secrets so this is a non-issue
-  "CKV_AWS_341", // Severity "n/a", Launch Template should have a hop limit of 2 because the nodes are in EKS
-  "CKV_AWS_184", // Severity "n/a", System Managed Keys and their automation are Better for CNDI's user profile
+  "CKV_SECRET_6", // N/A: Severity "low", SealedSecrets is used to encrypt secrets so this is a non-issue
+  "CKV_SECRET_3", // N/A: Severity "high", SealedSecrets is used to encrypt secrets so this is a non-issue
+  "CKV_AWS_341", // N/A: Severity "medium" Launch Template should have a hop limit of 2 because the nodes are in EKS
+  "CKV_AWS_184", // Severity "low", System Managed Keys and their automation are Better for CNDI's user profile
   "CKV_GCP_26", // Severity "info", GCP wants us to enable VPC logs but it's not necessary
   "CKV_GCP_65", // Severirty "low", GCP wants us to use gsuite groups but it's not necessary
   "CKV_GCP_66", // Severity "low", This requires all images be "signed". too much operational risk for first pass
