@@ -67,7 +67,6 @@ type EchoCreateOptions = {
   deploymentTargetLabel?: string;
   responsesFile: string;
   skipPush?: boolean;
-  enablePrChecks?: boolean; // will become default
 };
 
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
@@ -133,13 +132,12 @@ const createCommand = new Command()
     "Label in the form of <provider>/<distribution> slug to specifying a deployment target",
   )
   .option(
-    "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "Specify a ref to build a cndi workflow with",
+    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
     },
   )
-  .option("--enable-pr-checks", "Enable PR checks", { hidden: true })
   .action(async (options, slug) => {
     echoCreate(options, slug);
     const skipPush = options.skipPush;
@@ -568,9 +566,8 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      workflowSourceRef: options.workflowSourceRef,
+      runWorkflowSourceRef: options.runWorkflowSourceRef,
       skipPush: !!skipPush,
-      enablePrChecks: !!options.enablePrChecks,
     });
   });
 

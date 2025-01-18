@@ -1,4 +1,4 @@
-import { Command, Spinner } from "deps";
+import { Command, Spinner, WorkflowType } from "deps";
 import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
@@ -14,9 +14,8 @@ export type OwActionOptions = {
   skipPush: boolean;
   file?: string;
   output: string;
-  workflowSourceRef?: string;
-  updateGhWorkflow?: boolean;
-  enablePrChecks?: boolean;
+  runWorkflowSourceRef?: string;
+  updateWorkflow?: ("run" | "check")[];
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -111,18 +110,20 @@ const overwriteCommand = new Command()
   )
   .option(
     "-w, --workflow-source-ref <workflow_source_ref:string>",
-    "Specify a ref to build a cndi workflow with",
+    "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
     },
   )
-  .option("--update-gh-workflow", "Update the cndi-run GitHub Workflow")
-  .option("--enable-pr-checks", "Enable pull request checks", { hidden: true })
+  .type("workflow", WorkflowType)
+  .option("--update-workflow <items:workflow[]>", "Update GitHub Workflows")
   .action((options) => {
     const output = options?.output || Deno.cwd();
+    const updateWorkflows = options?.updateWorkflow || [];
     owAction({
       ...options,
       output,
+      updateWorkflow: updateWorkflows,
     });
   });
 

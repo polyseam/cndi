@@ -150,8 +150,9 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           vmSize: nodeSpec.instance_type || DEFAULT_INSTANCE_TYPES.azure,
           osDiskSizeGb: nodeSpec.disk_size || DEFAULT_NODE_DISK_SIZE_MANAGED,
           osSku: "Ubuntu",
-          osDiskType: "Managed",
+          osDiskType: "Managed", // CKV_AZURE_226 "Ephemeral" is recommended by but the disk for our nodespec is not supported
           autoScalingEnabled: true,
+          // hostEncryptionEnabled: true, // CKV_AZURE_227 SubscriptionNotEnabledEncryptionAtHost
           maxPods: 110,
           vnetSubnetId, // node pools
           tags,
@@ -207,7 +208,12 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
           dnsServiceIp: "192.168.10.0", // leave a few addresses at the start of the block
         },
         automaticUpgradeChannel: "patch",
-        roleBasedAccessControlEnabled: false, // Tamika
+        roleBasedAccessControlEnabled: false, // CKV_AZURE_5 - Azure wants RBAC enabled
+        // localAccountDisabled: true, // CKV_AZURE_141 - Azure wants "no local users" but we don't have the requisite Azure AD setup
+        // privateClusterEnabled: true, // CKV_AZURE_115 - risk of tf failure
+        keyVaultSecretsProvider: {
+          secretRotationEnabled: true,
+        },
         storageProfile: {
           fileDriverEnabled: true,
           diskDriverEnabled: true,
