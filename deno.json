@@ -13,7 +13,7 @@
     "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-amd64/in/cndi main.ts",
     "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-arm64/in/cndi main.ts",
     "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-amd64/in/cndi main.ts",
-    "compile-all": "deno task compile-win-amd64 && deno task compile-linux-amd64 && compile-linux-arm64 && deno task compile-mac-arm64 && deno task compile-mac-amd64",
+    "compile-all": "deno task compile-win-amd64 && deno task compile-linux-amd64 && deno task compile-linux-arm64 && deno task compile-mac-arm64 && deno task compile-mac-amd64",
     "clean-mac-amd64": "rm dist/mac-amd64/in/cndi || true && rm dist/release-archives/cndi-mac-amd64.tar.gz || true",
     "clean-mac-arm64": "rm dist/mac-arm64/in/cndi || true && rm dist/release-archives/cndi-mac-arm64.tar.gz || true",
     "clean-win-amd64": "rm dist/win-amd64/in/cndi.exe || true && rm dist/release-archives/cndi-win-amd64.tar.gz || true",
