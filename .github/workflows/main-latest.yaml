@@ -5,7 +5,7 @@ on:
       - "main"
 jobs:
   main-test-and-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -18,12 +18,12 @@ jobs:
       - run: deno lint
 
       - name: Install cndi dependency binaries
-        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux/in/* /home/runner/.cndi/bin
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
 
       - run: deno task test
 
   main-build: # cndi
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout
         uses: actions/checkout@v3
