@@ -79,6 +79,15 @@ outputs:
             - ==
             - true
 
+      fns-env-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: fns-env-secret
+          namespace: fns
+        stringData:
+          GREETING: $cndi_on_ow.seal_secret_from_env_var(DEFAULT_GREETING)
+
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -86,6 +95,7 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+    DEFAULT_GREETING: "Yo"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
@@ -103,6 +113,5 @@ outputs:
       please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
 
   extra_files:
-    ./functions/hello-world/index.ts: |
-      Deno.serve(() => (new Response('hello world!', { status: 200 })));
+    ./functions/hello-world/index.ts: https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/greet/index.ts
     ./functions/cowsay/index.ts: "https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts"
