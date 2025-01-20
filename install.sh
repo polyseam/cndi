@@ -12,17 +12,16 @@ main() {
         target="win.exe"
     else
         case $(uname -sm) in
-            "Darwin x86_64") target="mac" ;;
-            "Darwin arm64") target="mac" ;;
+            "Darwin x86_64") target="mac-amd64" ;;
+            "Darwin arm64") target="mac-arm64" ;;
             "Linux aarch64")
-                echo "Error: Official CNDI builds for Linux aarch64 are not available" 1>&2
-                exit 1
+                target="linux-arm64"
             ;;
             "Linux x86_64")
-                target="linux"
+                target="linux-amd64"
             ;;
             *)
-                target="linux"
+                target="linux-amd64"
         esac
     fi
 
