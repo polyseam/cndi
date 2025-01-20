@@ -19,7 +19,7 @@
     "clean-win-amd64": "rm dist/win-amd64/in/cndi.exe || true && rm dist/release-archives/cndi-win-amd64.tar.gz || true",
     "clean-linux-amd64": "rm dist/linux-amd64/in/cndi || true && rm dist/release-archives/cndi-linux-amd64.tar.gz || true",
     "clean-linux-arm64": "rm dist/linux-arm64/in/cndi || true && rm dist/release-archives/cndi-linux-arm64.tar.gz || true",
-    "clean-dist": "deno task clean-mac-arm64 && deno task clean-mac-amd64 && deno task clean-win && deno task clean-linux",
+    "clean-dist": "deno task clean-mac-arm64 && deno task clean-mac-amd64 && deno task clean-win-amd64 && deno task clean-linux-amd64 && deno task clean-linux-arm64",
     "build": "deno lint && deno fmt && deno task clean-dist && deno task compile-all && deno task tar-all",
     "build-mac-arm64": "deno lint && deno fmt && deno task clean-dist && deno task compile-mac-arm64",
     "build-mac-amd64": "deno lint && deno fmt && deno task clean-dist && deno task compile-mac-amd64",
