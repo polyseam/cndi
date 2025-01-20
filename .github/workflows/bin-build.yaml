@@ -19,7 +19,7 @@ jobs:
           deno-version: "v2.1.4"
       - name: deno build-linux-amd64
         run: deno task build-linux-amd64
-      - name: linux cndi --help
+      - name: linux-amd cndi --help
         run: ./dist/linux-amd64/in/cndi --help
         timeout-minutes: 1
 
@@ -33,8 +33,8 @@ jobs:
           deno-version: "v2.1.4"
       - name: deno build-linux-arm64
         run: deno task build-linux-arm64
-      - name: linux cndi --help
-        run: ./dist/linux-amd64/in/cndi --help
+      - name: linux-arm cndi --help
+        run: ./dist/linux-arm64/in/cndi --help
         timeout-minutes: 1
 
   bin-build-test-macos-amd64:
@@ -47,7 +47,7 @@ jobs:
           deno-version: "v2.1.4"
       - name: deno build-mac-amd64
         run: deno task build-mac-amd64
-      - name: mac cndi --help
+      - name: mac-amd cndi --help
         run: ./dist/mac-amd64/in/cndi --help
         timeout-minutes: 1
 
@@ -61,11 +61,11 @@ jobs:
           deno-version: "v2.1.4"
       - name: deno build-mac-arm64
         run: deno task build-mac-arm64
-      - name: mac cndi --help
+      - name: mac-arm cndi --help
         run: ./dist/mac-arm64/in/cndi --help
         timeout-minutes: 1
 
-  bin-build-test-windows:
+  bin-build-test-windows-amd64:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
