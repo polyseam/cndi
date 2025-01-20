@@ -9,22 +9,36 @@ env: # this is a Read-Only token for Public Repositories see: https://github.com
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   CNDI_TELEMETRY: "none"
 jobs:
-  bin-build-test-ubuntu:
-    runs-on: ubuntu-latest
+  bin-build-test-ubuntu-amd64:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.1.4"
-      - name: deno build-linux
-        run: deno task build-linux
+      - name: deno build-linux-amd64
+        run: deno task build-linux-amd64
       - name: linux cndi --help
-        run: ./dist/linux/in/cndi --help
+        run: ./dist/linux-amd64/in/cndi --help
+        timeout-minutes: 1
+
+  bin-build-test-ubuntu-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: "v2.1.4"
+      - name: deno build-linux-arm64
+        run: deno task build-linux-arm64
+      - name: linux cndi --help
+        run: ./dist/linux-amd64/in/cndi --help
         timeout-minutes: 1
 
   bin-build-test-macos-amd64:
-    runs-on: macos-latest
+    runs-on: macos-13 # macOS 13 Ventura intel-based
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
@@ -38,7 +52,7 @@ jobs:
         timeout-minutes: 1
 
   bin-build-test-macos-arm64:
-    runs-on: macos-latest
+    runs-on: macos-15 # macOS 15 Sequoia apple silicon
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
@@ -59,8 +73,8 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.1.4"
-      - name: deno build-win
-        run: deno task build-win
+      - name: deno build-win-amd64
+        run: deno task build-win-amd64
       - name: win cndi --help
-        run: ./dist/win/in/cndi.exe --help
+        run: ./dist/win-amd64/in/cndi.exe --help
         timeout-minutes: 1
