@@ -21,9 +21,9 @@ $CNDITarGz = "$BinDir\cndi.tar.gz"
 $CNDIExe = "$BinDir\cndi.exe"
 
 $DownloadUrl = if (!$Version) {
-  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win.tar.gz"
+  "https://github.com/polyseam/cndi/releases/latest/download/cndi-win-amd64.tar.gz"
 } else {
-  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win.tar.gz"
+  "https://github.com/polyseam/cndi/releases/download/${Version}/cndi-win-amd64.tar.gz"
 }
 
 if (!(Test-Path $BinDir)) {
