@@ -9,7 +9,7 @@ main() {
 
     if [ "$OS" = "Windows_NT" ]; then # WSL or Git Bash or Cygwin
         bin_suffix=".exe"
-        target="win.exe"
+        target="win-amd64"
     else
         case $(uname -sm) in
             "Darwin x86_64") target="mac-amd64" ;;
