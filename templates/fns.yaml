@@ -113,5 +113,5 @@ outputs:
       please refer to the [CNDI Functions Guide](https://github.com/polyseam/cndi/blob/main/docs/functions.md).
 
   extra_files:
-    ./functions/hello-world/index.ts: "https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/greet/index.ts"
+    ./functions/greet/index.ts: "https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/greet/index.ts"
     ./functions/cowsay/index.ts: "https://raw.githubusercontent.com/polyseam/fns-examples/main/functions/cowsay/index.ts"
