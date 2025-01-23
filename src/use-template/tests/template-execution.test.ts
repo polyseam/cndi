@@ -5,12 +5,12 @@ import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
+// Deno.cwd() is the root of the project
 
 Deno.test(
   "template execution: 'airflow' template should reference 'airflow' in 'README.md'",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
     const templateResult = await useTemplate("airflow", {
       interactive: false,
       overrides: {
@@ -27,7 +27,7 @@ Deno.test(
   "template execution: 'basic' template should not reference 'airflow' in 'README.md'",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -64,7 +64,7 @@ Deno.test(
   "template execution: 'basic' .env with target provider aws should reference aws credentials",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -83,7 +83,7 @@ Deno.test(
   "template execution: 'basic' .env with target provider gcp should reference GOOGLE_CREDENTIALS",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -101,7 +101,7 @@ Deno.test(
   "template execution: 'basic' .env with target provider azure should reference azure credentials",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -122,7 +122,7 @@ Deno.test(
   "template execution: 'basic' README.md with target provider 'azure' should reference azure",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -139,7 +139,7 @@ Deno.test(
   "template execution: 'basic' README.md with target provider 'gcp' should reference gcp",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -156,7 +156,7 @@ Deno.test(
   "template execution: 'basic' README.md with target provider 'aws' should reference aws",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -173,7 +173,7 @@ Deno.test(
   "template execution: 'basic' aws template should have aws provider in cndi_config.yaml",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -192,7 +192,7 @@ Deno.test(
   "template execution: 'basic' gcp template should have gcp provider in cndi_config.yaml",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -211,7 +211,7 @@ Deno.test(
   "template execution: 'basic' azure template should have azure provider in cndi_config.yaml",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -230,7 +230,7 @@ Deno.test(
   "template execution: when external_dns is disabled the 'basic' template should not have external_dns in cndi_config.yaml",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
+    // () is the root of the project
 
     const templateResult = await useTemplate("basic", {
       interactive: false,

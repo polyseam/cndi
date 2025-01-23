@@ -14,48 +14,42 @@ import { path, YAML } from "src/deps.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
-import getProjectRoot from "get-project-root";
-
-const ogDir = getProjectRoot();
-
-const cleanup = () => {
-  Deno.chdir(ogDir);
-};
-
 Deno.test(
   "'cndi ow' should do nothing if no config or inputs have changed",
   async (t) => {
-    let dir = "";
+    const cwd = Deno.makeTempDirSync();
+
     await t.step("setup", async () => {
-      dir = await Deno.makeTempDir();
-      Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+      await runCndi({
+        args: ["init", "-t", "basic", "-l", "aws/eks"],
+        cwd,
+      });
     });
 
     await t.step("test", async () => {
       const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-        const { status } = await runCndi("ow");
+        const { status } = await runCndi({ args: ["ow"], cwd });
         assert(status.success);
       });
       assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
-
-    await t.step("cleanup", cleanup);
   },
 );
 
 Deno.test(
   "'cndi ow' should not create cndi-run GitHub workflow for 'dev' provider",
   async (t) => {
-    let dir = "";
+    const cwd = Deno.makeTempDirSync();
+
     await t.step("setup", async () => {
-      dir = await Deno.makeTempDir();
-      Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "dev/microk8s");
+      await runCndi({
+        args: ["init", "-t", "basic", "-l", "dev/microk8s "],
+        cwd,
+      });
     });
 
     await t.step("test", async () => {
-      const filepaths = await listAllFilePaths(dir);
+      const filepaths = await listAllFilePaths(cwd);
       const pathToCndiRunWorkflow = path.join(
         ".github",
         "workflows",
@@ -63,22 +57,19 @@ Deno.test(
       );
       assert(!filepaths.includes(pathToCndiRunWorkflow));
     });
-
-    await t.step("cleanup", cleanup);
   },
 );
 
 Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, async (t) => {
-  let dir = "";
+  const cwd = Deno.makeTempDirSync();
+
   await t.step("setup", async () => {
-    dir = await Deno.makeTempDir();
-    Deno.chdir(dir);
-    await runCndi("init", "-t", "basic", "-l", "aws/eks");
+    await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
   });
 
   await t.step("test", async () => {
     const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-      const [errorLoadingConfig, result] = await loadCndiConfig(dir);
+      const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
       if (errorLoadingConfig) {
         assert(false, errorLoadingConfig.message);
@@ -108,10 +99,10 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
       };
 
       await Deno.writeTextFile(
-        `${dir}/cndi_config.yaml`,
+        `${cwd}/cndi_config.yaml`,
         YAML.stringify(config),
       );
-      await runCndi("ow");
+      await runCndi({ args: ["ow"], cwd });
     });
 
     const beforeSet = new Set(before);
@@ -126,26 +117,23 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
     ]);
 
     assert(setsAreEquivalent(added, expectedToAdd));
-    const dotenv = await Deno.readTextFile(path.join(dir, ".env"));
+    const dotenv = await Deno.readTextFile(path.join(cwd, ".env"));
     assert(dotenv.includes("BAR_SECRET"));
   });
-
-  await t.step("cleanup", cleanup);
 });
 
 Deno.test(
   `'cndi ow' should fail if secrets use plaintext in their definition`,
   async (t) => {
-    let dir = "";
+    const cwd = Deno.makeTempDirSync();
+
     await t.step("setup", async () => {
-      dir = await Deno.makeTempDir();
-      Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+      await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
     });
 
     await t.step("test", async () => {
       const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-        const [errorLoadingConfig, result] = await loadCndiConfig(dir);
+        const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
         if (errorLoadingConfig) {
           assert(false, errorLoadingConfig.message);
@@ -162,31 +150,28 @@ Deno.test(
           },
         };
         await Deno.writeTextFile(
-          `${dir}/cndi_config.yaml`,
+          `${cwd}/cndi_config.yaml`,
           YAML.stringify(config),
         );
-        await runCndi("ow");
+        await runCndi({ args: ["ow"], cwd });
       });
       assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
-
-    await t.step("cleanup", cleanup);
   },
 );
 
 Deno.test(
   "'cndi ow' should create a manifest file if one has been added to config",
   async (t) => {
-    let dir = "";
+    const cwd = Deno.makeTempDirSync();
+
     await t.step("setup", async () => {
-      dir = await Deno.makeTempDir();
-      Deno.chdir(dir);
-      await runCndi("init", "-t", "basic", "-l", "aws/eks");
+      await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
     });
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        const [errorLoadingConfig, result] = await loadCndiConfig(dir);
+        const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
         if (errorLoadingConfig) {
           assert(false, errorLoadingConfig.message);
@@ -200,21 +185,20 @@ Deno.test(
           },
         };
         await Deno.writeTextFile(
-          `${dir}/cndi_config.yaml`,
+          `${cwd}/cndi_config.yaml`,
           YAML.stringify(config),
         );
-        await runCndi("ow");
+        await runCndi({ args: ["ow"], cwd });
       });
       assert(changedFilePaths.length === 1);
     });
-
-    await t.step("cleanup", cleanup);
   },
 );
 
 Deno.test(
   "'cndi ow' should bootstrap functions if source typescript is provided",
   async (t) => {
+    const cwd = Deno.makeTempDirSync();
     const filePathsCreatedForFunctions = new Set([
       path.join("cndi", "functions", "Dockerfile"),
       path.join("cndi", "functions", "src", "hello", "index.ts"),
@@ -228,30 +212,32 @@ Deno.test(
       path.join("functions", "hello", "index.ts"),
     ]);
 
-    let dir = "";
     await t.step("setup", async () => {
-      dir = await Deno.makeTempDir();
-      Deno.chdir(dir);
-      await runCndi(
-        "init",
-        "-t",
-        "basic",
-        "-l",
-        "aws/eks",
-        "--set",
-        "git_repo=https://github.com/polyseam/example-repo",
-      );
+      await runCndi({
+        args: [
+          "init",
+          "-t",
+          "basic",
+          "-l",
+          "aws/eks",
+          "--set",
+          "git_repo=https://github.com/polyseam/example-repo",
+        ],
+        cwd,
+      });
     });
 
     await t.step("test", async () => {
       const changedFilePaths = await listChangedFilePaths(async () => {
-        await Deno.mkdir(`./functions/hello`, { recursive: true });
+        await Deno.mkdir(path.join(cwd, `functions`, `hello`), {
+          recursive: true,
+        });
         await Deno.writeTextFile(
           path.join("functions", "hello", "index.ts"),
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        const { status } = await runCndi("ow");
+        const { status } = await runCndi({ args: ["ow"], cwd });
         assert(status.success);
       });
       const changedFilePathsSet = new Set(changedFilePaths);
@@ -260,7 +246,5 @@ Deno.test(
         setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),
       );
     });
-
-    await t.step("cleanup", cleanup);
   },
 );
