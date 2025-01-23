@@ -26,7 +26,7 @@
     "build-linux-amd64": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux-amd64",
     "build-linux-arm64": "deno lint && deno fmt && deno task clean-dist && deno task compile-linux-arm64",
     "build-win-amd64": "deno lint && deno fmt && deno task clean-dist && deno task compile-win-amd64",
-    "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000",
+    "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel",
     "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
     "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
   },
