@@ -20,6 +20,9 @@ jobs:
       - name: Lint
         run: deno lint
 
+      - name: Type check
+        run: deno task check
+
       - name: Install cndi dependency binaries
         run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
 
