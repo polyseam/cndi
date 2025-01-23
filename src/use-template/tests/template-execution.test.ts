@@ -5,7 +5,6 @@ import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
-// Deno.cwd() is the root of the project
 
 Deno.test(
   "template execution: 'airflow' template should reference 'airflow' in 'README.md'",
@@ -255,7 +254,7 @@ Deno.test(
   async () => {
     const fns_hostname = "fns.example.com";
     const mockYamlFileUri = "file://" +
-      Deno.cwd() +
+      getProjectRoot() +
       "/src/use-template/tests/mock/templates/get_block-mock.yaml";
     const templateResult = await useTemplate(mockYamlFileUri, {
       interactive: false,
@@ -280,7 +279,7 @@ Deno.test(
   mySanity,
   async () => {
     const mockYamlFileUri = "file://" +
-      Deno.cwd() +
+      getProjectRoot() +
       "/src/use-template/tests/mock/templates/extra_files-mock.yaml";
     const templateResult = await useTemplate(mockYamlFileUri, {
       interactive: false,
@@ -300,7 +299,7 @@ Deno.test(
   mySanity,
   async () => {
     const mockYamlFileUri = "file://" +
-      Deno.cwd() +
+      getProjectRoot() +
       "/src/use-template/tests/mock/templates/extra_files_invalid-mock.yaml";
 
     const templateResult = await useTemplate(mockYamlFileUri, {
@@ -320,7 +319,7 @@ Deno.test(
   mySanity,
   async () => {
     const mockYamlFileUri = "file://" +
-      Deno.cwd() +
+      getProjectRoot() +
       "/src/use-template/tests/mock/templates/get_block_with_peer-mock.yaml";
     const [errUsingTemplate, template] = await useTemplate(mockYamlFileUri, {
       interactive: false,

@@ -64,7 +64,11 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
   const cwd = await Deno.makeTempDir();
 
   await t.step("setup", async () => {
-    await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
+    await runCndi({
+      args: ["init", "-t", "basic", "-l", "aws/eks"],
+      cwd,
+      loud: true,
+    });
   });
 
   await t.step("test", async () => {
@@ -72,6 +76,7 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
       const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
       if (errorLoadingConfig) {
+        console.log("\n\n\nerrorLoadingConfig", errorLoadingConfig);
         assert(false, errorLoadingConfig.message);
       }
 
@@ -102,7 +107,7 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
         `${cwd}/cndi_config.yaml`,
         YAML.stringify(config),
       );
-      await runCndi({ args: ["ow"], cwd });
+      await runCndi({ args: ["ow"], cwd, loud: true });
     });
 
     const beforeSet = new Set(before);
@@ -110,12 +115,10 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
 
     const added = afterSet.difference(beforeSet);
     const _removed = beforeSet.difference(afterSet);
-
     const expectedToAdd = new Set([
-      path.join("cndi", "cluster_manifests", "new-secret.yaml"),
+      path.join(cwd, "cndi", "cluster_manifests", "new-secret.yaml"),
       // new-secret-yet-to-be-defined will update .env with a placeholder, but not yield a secret
     ]);
-
     assert(setsAreEquivalent(added, expectedToAdd));
     const dotenv = await Deno.readTextFile(path.join(cwd, ".env"));
     assert(dotenv.includes("BAR_SECRET"));
@@ -185,11 +188,11 @@ Deno.test(
           },
         };
         await Deno.writeTextFile(
-          `${cwd}/cndi_config.yaml`,
+          path.join(cwd, `cndi_config.yaml`),
           YAML.stringify(config),
         );
-        await runCndi({ args: ["ow"], cwd });
-      });
+        await runCndi({ args: ["ow"], cwd, loud: true });
+      }, cwd);
       assert(changedFilePaths.length === 1);
     });
   },
@@ -200,16 +203,16 @@ Deno.test(
   async (t) => {
     const cwd = await Deno.makeTempDir();
     const filePathsCreatedForFunctions = new Set([
-      path.join("cndi", "functions", "Dockerfile"),
-      path.join("cndi", "functions", "src", "hello", "index.ts"),
-      path.join("cndi", "functions", "src", "main", "index.ts"),
-      path.join("cndi", "cluster_manifests", "fns-pull-secret.yaml"),
-      path.join("cndi", "cluster_manifests", "fns-deployment.yaml"),
-      path.join("cndi", "cluster_manifests", "fns-env-secret.yaml"),
-      path.join("cndi", "cluster_manifests", "fns-namespace.yaml"),
-      path.join("cndi", "cluster_manifests", "fns-service.yaml"),
-      path.join(".github", "workflows", "cndi-fns.yaml"),
-      path.join("functions", "hello", "index.ts"),
+      path.join(cwd, "cndi", "functions", "Dockerfile"),
+      path.join(cwd, "cndi", "functions", "src", "hello", "index.ts"),
+      path.join(cwd, "cndi", "functions", "src", "main", "index.ts"),
+      path.join(cwd, "cndi", "cluster_manifests", "fns-pull-secret.yaml"),
+      path.join(cwd, "cndi", "cluster_manifests", "fns-deployment.yaml"),
+      path.join(cwd, "cndi", "cluster_manifests", "fns-env-secret.yaml"),
+      path.join(cwd, "cndi", "cluster_manifests", "fns-namespace.yaml"),
+      path.join(cwd, "cndi", "cluster_manifests", "fns-service.yaml"),
+      path.join(cwd, ".github", "workflows", "cndi-fns.yaml"),
+      path.join(cwd, "functions", "hello", "index.ts"),
     ]);
 
     await t.step("setup", async () => {
@@ -224,6 +227,7 @@ Deno.test(
           "git_repo=https://github.com/polyseam/example-repo",
         ],
         cwd,
+        loud: true,
       });
     });
 
@@ -233,13 +237,13 @@ Deno.test(
           recursive: true,
         });
         await Deno.writeTextFile(
-          path.join("functions", "hello", "index.ts"),
+          path.join(cwd, "functions", "hello", "index.ts"),
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        const { status } = await runCndi({ args: ["ow"], cwd });
+        const { status } = await runCndi({ args: ["ow"], cwd, loud: true });
         assert(status.success);
-      });
+      }, cwd);
       const changedFilePathsSet = new Set(changedFilePaths);
 
       assert(

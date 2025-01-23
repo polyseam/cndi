@@ -25,7 +25,7 @@ Deno.test(
       });
 
       const cndi_responses = await Deno.readTextFile(
-        path.join(Deno.cwd(), `cndi_responses.yaml`),
+        path.join(cwd, `cndi_responses.yaml`),
       );
       assert(YAML.parse(cndi_responses));
     });

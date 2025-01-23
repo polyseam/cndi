@@ -28,7 +28,7 @@
     "build-win-amd64": "deno lint && deno fmt && deno task clean-dist && deno task compile-win-amd64",
     "check": "deno check .",
     "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel",
-    "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast",
+    "test-fast": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --fail-fast --parallel",
     "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
   },
   "imports": {

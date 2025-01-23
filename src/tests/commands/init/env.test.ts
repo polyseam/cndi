@@ -28,7 +28,7 @@ Deno.test(
         ],
         cwd,
       });
-      const dotenv = await Deno.readTextFile(path.join(Deno.cwd(), `.env`));
+      const dotenv = await Deno.readTextFile(path.join(cwd, `.env`));
       assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
       // assert(status.success);
     });
@@ -55,7 +55,7 @@ Deno.test(
         ],
         cwd,
       });
-      const dotenv = await Deno.readTextFile(path.join(Deno.cwd(), `.env`));
+      const dotenv = await Deno.readTextFile(path.join(cwd, `.env`));
       assert(dotenv.indexOf(`AWS_REGION`) > -1);
       assert(dotenv.indexOf(`AWS_SECRET_ACCESS_KEY`) > -1);
       assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);

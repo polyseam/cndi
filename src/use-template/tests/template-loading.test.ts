@@ -8,7 +8,6 @@ Deno.test(
   "template loading: alpha template should be loadable by filepath",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/alpha.yaml`,
       {
@@ -26,7 +25,6 @@ Deno.test(
   "template loading: alpha template should fail with bad filepath",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/non-existent.yaml`,
       {

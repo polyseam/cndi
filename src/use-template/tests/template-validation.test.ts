@@ -7,9 +7,6 @@ Deno.test(
   "template validation: basic template should pass validation",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
-    //Should this be `file://${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
-
     const template = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
@@ -27,7 +24,6 @@ Deno.test(
   "template validation: more provided values should pass validation",
   mySanity,
   async () => {
-    // Deno.cwd() is the root of the project
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {

@@ -1,5 +1,7 @@
 import { assert } from "test-deps";
 
+import { path } from "deps";
+
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
@@ -22,9 +24,10 @@ Deno.test(
           "deployment_target_provider=azure",
         ],
         cwd,
+        loud: true,
       });
 
-      const readme = await Deno.readTextFile(`README.md`);
+      const readme = await Deno.readTextFile(path.join(cwd, `README.md`));
       assert(status.success);
       assert(readme.startsWith(`# ${project_name}`));
     });
