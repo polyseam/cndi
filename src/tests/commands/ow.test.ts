@@ -17,7 +17,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi ow' should do nothing if no config or inputs have changed",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("setup", async () => {
       await runCndi({
@@ -39,7 +39,7 @@ Deno.test(
 Deno.test(
   "'cndi ow' should not create cndi-run GitHub workflow for 'dev' provider",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("setup", async () => {
       await runCndi({
@@ -61,7 +61,7 @@ Deno.test(
 );
 
 Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, async (t) => {
-  const cwd = Deno.makeTempDirSync();
+  const cwd = await Deno.makeTempDir();
 
   await t.step("setup", async () => {
     await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
@@ -125,7 +125,7 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
 Deno.test(
   `'cndi ow' should fail if secrets use plaintext in their definition`,
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("setup", async () => {
       await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
@@ -163,7 +163,7 @@ Deno.test(
 Deno.test(
   "'cndi ow' should create a manifest file if one has been added to config",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("setup", async () => {
       await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
@@ -198,7 +198,7 @@ Deno.test(
 Deno.test(
   "'cndi ow' should bootstrap functions if source typescript is provided",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
     const filePathsCreatedForFunctions = new Set([
       path.join("cndi", "functions", "Dockerfile"),
       path.join("cndi", "functions", "src", "hello", "index.ts"),

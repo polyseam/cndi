@@ -7,7 +7,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -t basic -l gcp/gke should succeed",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const { status } = await runCndi({
@@ -32,7 +32,7 @@ Deno.test(
 Deno.test(
   "'cndi init -t neo4j --set deployment_target_provider=gcp' should generate a .env file with GCP credentials",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const run = await runCndi({

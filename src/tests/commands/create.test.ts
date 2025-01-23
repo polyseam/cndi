@@ -7,7 +7,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi create' should throw an error if the repo-slug argument contains invalid characters",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const result = await runCndi({

@@ -7,7 +7,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -t basic -l azure/aks should succeed",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const { status } = await runCndi({
@@ -22,7 +22,7 @@ Deno.test(
 Deno.test(
   "'cndi init -t airflow --set deployment_target_provider=azure' should generate a .env file with Azure credentials",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const { status } = await runCndi({

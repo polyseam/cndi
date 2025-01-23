@@ -6,7 +6,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -t basic -l gcp/microk8s should succeed",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const { status } = await runCndi({

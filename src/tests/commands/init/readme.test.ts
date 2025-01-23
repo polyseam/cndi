@@ -7,7 +7,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init' should create a readme that begins with the 'project_name' if specified in --set",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       const project_name = "foobar-proj";

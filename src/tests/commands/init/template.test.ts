@@ -9,7 +9,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -t foo' should throw an error because 'foo' is not a valid template",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       assert(
@@ -28,7 +28,7 @@ Deno.test(
 Deno.test(
   "'cndi init -t https://example.com/does-not-exist.yaml' should throw an error because there is no template found there",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
     await t.step("test", async () => {
       assert(
         await hasSameFilesAfter(async () => {

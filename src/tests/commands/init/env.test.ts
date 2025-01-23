@@ -9,7 +9,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -d' should set CNDI_TELEMETRY=debug in .env",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     // TODO: This is unvalidated, CNDI_TELEMETRY was set above
     await t.step("setup", () => {
@@ -42,7 +42,7 @@ Deno.test(
 Deno.test(
   "'cndi init -t airflow --set deployment_target_provider=aws' should generate a .env file with AWS credentials",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       /* const { status } = */ await runCndi({

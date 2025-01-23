@@ -8,7 +8,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init' without any flags or config files present should fail",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
     await t.step("test", async () => {
       assert(
         await hasSameFilesAfter(async () => {

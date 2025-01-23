@@ -9,7 +9,7 @@ Deno.env.set("CNDI_TELEMETRY", "debug");
 Deno.test(
   "'cndi init -t airflow -l aws/microk8s -k' should generate a cndi_responses.yaml which parses successfully",
   async (t) => {
-    const cwd = Deno.makeTempDirSync();
+    const cwd = await Deno.makeTempDir();
 
     await t.step("test", async () => {
       await runCndi({
