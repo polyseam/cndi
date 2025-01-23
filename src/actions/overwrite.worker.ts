@@ -72,7 +72,6 @@ interface OverwriteActionOptions {
   initializing: boolean;
   runWorkflowSourceRef?: string;
   updateWorkflow: ("run" | "check")[];
-  globalThis: { stagingDirectory: string };
 }
 
 type WorkerMessageType =
@@ -86,6 +85,16 @@ export type OverwriteWorkerMessage = {
     code?: number;
   };
 };
+
+export interface OverwriteWorkerMessageIncoming extends OverwriteWorkerMessage {
+  data: {
+    type: "begin-overwrite";
+    options: OverwriteActionOptions;
+    globalThis: {
+      stagingDirectory: string;
+    };
+  };
+}
 
 export type OverwriteWorkerMessageOutgoing = {
   type: WorkerMessageType;
@@ -116,36 +125,15 @@ type ManifestWithName = {
   };
 };
 
-self.onmessage = async (message: OverwriteWorkerMessage) => {
+self.onmessage = async (msg: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
-  if (message.data.type === "begin-overwrite") {
+  if (msg.data.type === "begin-overwrite") {
+    const message = msg as OverwriteWorkerMessageIncoming;
     const options = message.data.options as OverwriteActionOptions;
 
     // deno-lint-ignore no-explicit-any
-    (globalThis as any).stagingDirectory = options?.globalThis
-      ?.stagingDirectory;
-
-    // deno-lint-ignore no-explicit-any
-    if (!(globalThis as any)?.stagingDirectory) {
-      const err = new ErrOut(
-        [
-          ccolors.error(`stagingDirectory is not set`),
-        ],
-        {
-          label,
-          code: 9999999,
-          id: "!globalThis.stagingDirectory",
-        },
-      );
-      await self.postMessage(err.owWorkerErrorMessage);
-      return;
-    }
-
-    console.log(
-      "stagingDirectory in worker:",
-      // deno-lint-ignore no-explicit-any
-      (globalThis as any).stagingDirectory,
-    );
+    (globalThis as any).stagingDirectory =
+      message.data.globalThis.stagingDirectory;
 
     const envPath = path.join(options.output, ".env");
 

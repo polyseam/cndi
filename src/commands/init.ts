@@ -7,7 +7,6 @@ import {
   checkInitialized,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
-  getStagingDirectory,
   persistStagedFiles,
   stageFile,
 } from "src/utils.ts";
@@ -489,22 +488,12 @@ const initCommand = new Command()
 
     await persistStagedFiles(destinationDirectory);
 
-    const [err, stagingDirectory] = getStagingDirectory();
-
-    if (err) {
-      await err.out();
-      return;
-    }
-
     await owAction({
       output: destinationDirectory,
       initializing: true,
       runWorkflowSourceRef: options.runWorkflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
-      globalThis: {
-        stagingDirectory,
-      },
     });
   });
 

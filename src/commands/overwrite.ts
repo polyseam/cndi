@@ -20,7 +20,6 @@ export type OwActionOptions = {
   output: string;
   runWorkflowSourceRef?: string;
   updateWorkflow?: ("run" | "check")[];
-  globalThis: { stagingDirectory: string };
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -34,7 +33,7 @@ const echoOw = (options: EchoOwOptions) => {
   console.log(`${cndiOverwrite}${cndiOverwriteFile}${cndiOverwriteOutput}\n`);
 };
 
-const owAction = (options: OwActionOptions) => {
+const owAction = async (options: OwActionOptions) => {
   echoOw(options);
 
   const spinner = new Spinner({
@@ -54,11 +53,23 @@ const owAction = (options: OwActionOptions) => {
 
   spinner.start();
 
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) {
+    spinner.stop();
+    await err.out();
+    return;
+  }
+
   const w = new Worker(import.meta.resolve("src/actions/overwrite.worker.ts"), {
     type: "module",
   });
 
-  w.postMessage({ options, type: "begin-overwrite" });
+  w.postMessage({
+    options,
+    type: "begin-overwrite",
+    globalThis: { stagingDirectory },
+  });
 
   w.onmessage = async (e) => {
     console.log();
@@ -122,21 +133,14 @@ const overwriteCommand = new Command()
   )
   .type("workflow", WorkflowType)
   .option("--update-workflow <items:workflow[]>", "Update GitHub Workflows")
-  .action(async (options) => {
+  .action((options) => {
     const output = options?.output || Deno.cwd();
     const updateWorkflows = options?.updateWorkflow || [];
-    const [err, stagingDirectory] = getStagingDirectory();
 
-    if (err) {
-      await err.out();
-      return;
-    }
-
-    owAction({
+    owAction({ // TODO: should await?
       ...options,
       output,
       updateWorkflow: updateWorkflows,
-      globalThis: { stagingDirectory },
     });
   });
 
