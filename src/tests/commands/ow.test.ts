@@ -67,7 +67,6 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
     await runCndi({
       args: ["init", "-t", "basic", "-l", "aws/eks"],
       cwd,
-      loud: true,
     });
   });
 
@@ -76,7 +75,6 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
       const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
       if (errorLoadingConfig) {
-        console.log("\n\n\nerrorLoadingConfig", errorLoadingConfig);
         assert(false, errorLoadingConfig.message);
       }
 
@@ -107,7 +105,7 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
         path.join(cwd, "cndi_config.yaml"),
         YAML.stringify(config),
       );
-      await runCndi({ args: ["ow"], cwd, loud: true });
+      await runCndi({ args: ["ow"], cwd });
     }, cwd);
 
     const beforeSet = new Set(before);
@@ -191,7 +189,7 @@ Deno.test(
           path.join(cwd, `cndi_config.yaml`),
           YAML.stringify(config),
         );
-        await runCndi({ args: ["ow"], cwd, loud: true });
+        await runCndi({ args: ["ow"], cwd });
       }, cwd);
       assert(changedFilePaths.length === 1);
     });
@@ -227,7 +225,6 @@ Deno.test(
           "git_repo=https://github.com/polyseam/example-repo",
         ],
         cwd,
-        loud: true,
       });
     });
 
@@ -241,7 +238,7 @@ Deno.test(
           `Deno.serve(() => (new Response('', { status: 200 })));`,
           { create: true },
         );
-        const { status } = await runCndi({ args: ["ow"], cwd, loud: true });
+        const { status } = await runCndi({ args: ["ow"], cwd });
         assert(status.success);
       }, cwd);
       const changedFilePathsSet = new Set(changedFilePaths);

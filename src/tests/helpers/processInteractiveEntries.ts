@@ -23,8 +23,6 @@ export async function processInteractiveEntries(
   for (const [key, value] of Object.entries(entries)) {
     const encoded = encoder.encode(`${value}\n`);
     await wr.write(encoded);
-    console.log(`${key}:${value}`);
-    console.log(`Waiting ${secondsBetweenEntries} seconds...`);
     await delay(1000 * secondsBetweenEntries);
   }
 

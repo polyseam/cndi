@@ -24,7 +24,6 @@ Deno.test(
           "deployment_target_provider=azure",
         ],
         cwd,
-        loud: true,
       });
 
       const readme = await Deno.readTextFile(path.join(cwd, `README.md`));
