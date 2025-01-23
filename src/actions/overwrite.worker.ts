@@ -837,7 +837,7 @@ self.onmessage = async (msg: OverwriteWorkerMessage) => {
         let sealedManifest = "";
 
         try {
-          sealedManifest = await Deno.readTextFileSync(
+          sealedManifest = await Deno.readTextFile(
             path.join(
               options.output,
               "cndi",

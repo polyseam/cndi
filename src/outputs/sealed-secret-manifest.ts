@@ -210,12 +210,12 @@ const parseCndiSecret = (
 
 // if a user passes in a cndi_config.yaml file in non-interactive mode
 // we want to write placeholders for the $.cndi.secrets entries to the .env file
-function addSecretPlaceholderToDotenv(
+async function addSecretPlaceholderToDotenv(
   secretEnvName: string,
   dotEnvPath: string,
 ) {
   const placeholder = `__${secretEnvName}${PLACEHOLDER_SUFFIX}`;
-  const dotEnv = Deno.readTextFileSync(dotEnvPath);
+  const dotEnv = await Deno.readTextFile(dotEnvPath);
   const dotEnvLines = dotEnv.split("\n");
 
   if (dotEnvLines.some((line) => line.indexOf(secretEnvName) === 0)) {

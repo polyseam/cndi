@@ -135,7 +135,7 @@ const initCommand = new Command()
     if (options.responsesFile === defaultResponsesFilePath) {
       // attempting to load responses file from CWD, if it doesn't exist that's fine
       try {
-        const responseFileText = Deno.readTextFileSync(options.responsesFile);
+        const responseFileText = await Deno.readTextFile(options.responsesFile);
         const responses = YAML.parse(responseFileText);
         if (responses) {
           overrides = responses as Record<
@@ -151,7 +151,7 @@ const initCommand = new Command()
       let responseFileText = "";
 
       try {
-        responseFileText = Deno.readTextFileSync(options.responsesFile);
+        responseFileText = await Deno.readTextFile(options.responsesFile);
       } catch (errorReadingSuppliedResponseFile) {
         const err = new ErrOut(
           [ccolors.error("Could not load responses file from provided path")],
