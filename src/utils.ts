@@ -248,21 +248,22 @@ interface TFResourceFileObject {
   };
 }
 
+// critically depends on being set in both the parent and worker threads
 function getStagingDirectory(): PxResult<string> {
-  const stagingDirectory = Deno.env.get("CNDI_STAGING_DIRECTORY");
+  // deno-lint-ignore no-explicit-any
+  const stagingDirectory = (globalThis as any)?.stagingDirectory;
   if (!stagingDirectory) {
     return [
       new ErrOut(
         [
           ccolors.error("internal error!"),
-          ccolors.error("Environment Variable"),
-          ccolors.key_name("CNDI_STAGING_DIRECTORY"),
+          ccolors.key_name("stagingDirectory"),
           ccolors.error("is not defined"),
         ],
         {
           label: "src/utils.ts",
           code: 202,
-          id: "getStagingDirectory/!env.CNDI_STAGING_DIRECTORY",
+          id: "getStagingDirectory/!globalThis.stagingDirectory",
         },
       ),
     ];

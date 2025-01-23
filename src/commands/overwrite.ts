@@ -1,5 +1,9 @@
 import { Command, Spinner, WorkflowType } from "deps";
-import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getProjectDirectoryFromFlag,
+  getStagingDirectory,
+} from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
 type EchoOwOptions = {
@@ -29,7 +33,7 @@ const echoOw = (options: EchoOwOptions) => {
   console.log(`${cndiOverwrite}${cndiOverwriteFile}${cndiOverwriteOutput}\n`);
 };
 
-const owAction = (options: OwActionOptions) => {
+const owAction = async (options: OwActionOptions) => {
   echoOw(options);
 
   const spinner = new Spinner({
@@ -49,11 +53,23 @@ const owAction = (options: OwActionOptions) => {
 
   spinner.start();
 
+  const [err, stagingDirectory] = getStagingDirectory();
+
+  if (err) {
+    spinner.stop();
+    await err.out();
+    return;
+  }
+
   const w = new Worker(import.meta.resolve("src/actions/overwrite.worker.ts"), {
     type: "module",
   });
 
-  w.postMessage({ options, type: "begin-overwrite" });
+  w.postMessage({
+    options,
+    type: "begin-overwrite",
+    globalThis: { stagingDirectory },
+  });
 
   w.onmessage = async (e) => {
     console.log();
@@ -120,6 +136,7 @@ const overwriteCommand = new Command()
   .action((options) => {
     const output = options?.output || Deno.cwd();
     const updateWorkflows = options?.updateWorkflow || [];
+
     owAction({
       ...options,
       output,

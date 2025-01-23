@@ -88,7 +88,7 @@ export async function pullStateForTerraform({
   let state;
 
   try {
-    state = Deno.readTextFileSync(
+    state = await Deno.readTextFile(
       path.join(pathToTerraformResources, "terraform.tfstate.encrypted"),
     );
   } catch {
@@ -118,7 +118,7 @@ export async function pullStateForTerraform({
 
   if (state) {
     const decryptedState = await decrypt(state, secret);
-    Deno.writeTextFileSync(
+    await Deno.writeTextFile(
       path.join(pathToTerraformResources, "terraform.tfstate"),
       decryptedState,
     );

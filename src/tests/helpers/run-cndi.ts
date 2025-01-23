@@ -20,16 +20,20 @@ function getRunningCNDIProcess(...args: string[]): Deno.ChildProcess {
   return cndiCommand.spawn();
 }
 
-async function runCndi(...args: string[]) {
-  const decoder = new TextDecoder("utf-8");
-  const lastIndex = args.length - 1;
-  if (args[lastIndex] === "--loud") {
-    args.pop();
+export type RunCndiOptions = {
+  args: string[];
+  cwd: string;
+  loud?: boolean;
+};
 
+async function runCndi({ args, cwd, loud = false }: RunCndiOptions) {
+  const decoder = new TextDecoder("utf-8");
+  if (loud) {
     const cndiCommand = new Deno.Command(deno, {
       args: [...cmd, ...args],
       stdout: "piped",
       stderr: "piped",
+      cwd,
     });
 
     const output = await cndiCommand.output();
@@ -55,6 +59,7 @@ async function runCndi(...args: string[]) {
       args: [...cmd, ...args],
       stdout: "piped",
       stderr: "piped",
+      cwd,
     });
 
     const output = await cndiCommand.output();

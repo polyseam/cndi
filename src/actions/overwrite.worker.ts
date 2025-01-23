@@ -86,6 +86,16 @@ export type OverwriteWorkerMessage = {
   };
 };
 
+export interface OverwriteWorkerMessageIncoming extends OverwriteWorkerMessage {
+  data: {
+    type: "begin-overwrite";
+    options: OverwriteActionOptions;
+    globalThis: {
+      stagingDirectory: string;
+    };
+  };
+}
+
 export type OverwriteWorkerMessageOutgoing = {
   type: WorkerMessageType;
   code?: number;
@@ -115,10 +125,15 @@ type ManifestWithName = {
   };
 };
 
-self.onmessage = async (message: OverwriteWorkerMessage) => {
+self.onmessage = async (msg: OverwriteWorkerMessage) => {
   // EVERY EXIT MUST BE PASSED UP TO THE WORKFLOW OWNER
-  if (message.data.type === "begin-overwrite") {
+  if (msg.data.type === "begin-overwrite") {
+    const message = msg as OverwriteWorkerMessageIncoming;
     const options = message.data.options as OverwriteActionOptions;
+
+    // deno-lint-ignore no-explicit-any
+    (globalThis as any).stagingDirectory =
+      message.data.globalThis.stagingDirectory;
 
     const envPath = path.join(options.output, ".env");
 
@@ -822,7 +837,7 @@ self.onmessage = async (message: OverwriteWorkerMessage) => {
         let sealedManifest = "";
 
         try {
-          sealedManifest = await Deno.readTextFileSync(
+          sealedManifest = Deno.readTextFileSync(
             path.join(
               options.output,
               "cndi",

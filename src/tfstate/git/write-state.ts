@@ -54,7 +54,7 @@ export async function pushStateFromTerraform({
   let state: string;
 
   try {
-    state = Deno.readTextFileSync(pathToState);
+    state = await Deno.readTextFile(pathToState);
   } catch (errorReadingState) {
     if (errorReadingState instanceof Deno.errors.NotFound) {
       return new ErrOut(
@@ -123,7 +123,7 @@ export async function pushStateFromTerraform({
   );
 
   try {
-    Deno.writeTextFileSync(pathToNewState, encryptedState);
+    await Deno.writeTextFile(pathToNewState, encryptedState);
   } catch (errorWritingState) {
     console.error(
       label,

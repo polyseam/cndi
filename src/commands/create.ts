@@ -562,6 +562,7 @@ const createCommand = new Command()
     }
 
     await persistStagedFiles(destinationDirectory);
+
     await owAction({
       output: destinationDirectory,
       initializing: true,

@@ -9,7 +9,7 @@ type InteractiveEntries = Record<string, string>;
  * @param entries An ordered object of entries to be written to the process' stdin
  * @returns status of the process after entries have been written
  */
-export default async function processInteractiveEntries(
+export async function processInteractiveEntries(
   p: Deno.ChildProcess,
   entries: InteractiveEntries,
   secondsBetweenEntries = 1,

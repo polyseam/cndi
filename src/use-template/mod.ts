@@ -614,7 +614,7 @@ async function presentCliffyPrompt(
               return;
             } else {
               try {
-                const data = Deno.readTextFileSync(absPath);
+                const data = await Deno.readTextFile(absPath);
                 if (data.length) {
                   value = data;
                 } else {
