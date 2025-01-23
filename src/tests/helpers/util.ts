@@ -57,7 +57,7 @@ type FilePathsBeforeAndAfter = {
 
 export async function listFilepathsBeforeAndAfter(
   operationFn: () => Promise<void>,
-  dir = ".",
+  dir: string,
 ): Promise<FilePathsBeforeAndAfter> {
   const before = await listAllFilePaths(dir);
   await operationFn();
@@ -67,7 +67,7 @@ export async function listFilepathsBeforeAndAfter(
 
 export async function listChangedFilePaths(
   operationFn: () => Promise<void>,
-  dir = ".",
+  dir: string,
 ): Promise<Array<string>> {
   const originalContents = await listAllFilePaths(dir);
   await operationFn();

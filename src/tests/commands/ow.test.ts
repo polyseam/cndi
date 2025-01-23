@@ -30,7 +30,7 @@ Deno.test(
       const { before, after } = await listFilepathsBeforeAndAfter(async () => {
         const { status } = await runCndi({ args: ["ow"], cwd });
         assert(status.success);
-      });
+      }, cwd);
       assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
   },
@@ -104,11 +104,11 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
       };
 
       await Deno.writeTextFile(
-        `${cwd}/cndi_config.yaml`,
+        path.join(cwd, "cndi_config.yaml"),
         YAML.stringify(config),
       );
       await runCndi({ args: ["ow"], cwd, loud: true });
-    });
+    }, cwd);
 
     const beforeSet = new Set(before);
     const afterSet = new Set(after);
@@ -157,7 +157,7 @@ Deno.test(
           YAML.stringify(config),
         );
         await runCndi({ args: ["ow"], cwd });
-      });
+      }, cwd);
       assert(setsAreEquivalent(new Set(before), new Set(after)));
     });
   },
