@@ -9,7 +9,7 @@ type InteractiveEntries = Record<string, string>;
  * @param entries An ordered object of entries to be written to the process' stdin
  * @returns status of the process after entries have been written
  */
-export default async function processInteractiveEntries(
+export async function processInteractiveEntries(
   p: Deno.ChildProcess,
   entries: InteractiveEntries,
   secondsBetweenEntries = 1,
@@ -20,9 +20,11 @@ export default async function processInteractiveEntries(
 
   const wr = p.stdin.getWriter();
 
-  for (const [_, value] of Object.entries(entries)) {
+  for (const [key, value] of Object.entries(entries)) {
     const encoded = encoder.encode(`${value}\n`);
     await wr.write(encoded);
+    console.log(`${key}:${value}`);
+    console.log(`Waiting ${secondsBetweenEntries} seconds...`);
     await delay(1000 * secondsBetweenEntries);
   }
 
