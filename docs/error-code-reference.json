@@ -46,7 +46,7 @@
   },
   {
     "code": 202,
-    "message": "'CNDI_STAGING_DIRECTORY' is not set",
+    "message": "'globalThis.stagingDirectory' is not set",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/474"
   },
   {

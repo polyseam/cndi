@@ -45,13 +45,17 @@ export default async function cndi() {
   const CNDI_VERSION = `${deno_json?.version}`;
   const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
   const id = Math.random().toString().substring(2);
+
   const stagingDirectory = path.join(CNDI_HOME, "staging", id);
+  console.log("stagingDirectory at top", stagingDirectory);
+
+  // deno-lint-ignore no-explicit-any
+  (globalThis as any).stagingDirectory = stagingDirectory; // _just this once_
 
   // if cndi was updated in the previous execution, remove the old unused binary
   // this is necessary because Windows will not allow you to delete a binary while it is running
   await removeOldBinaryIfRequired(CNDI_HOME);
 
-  Deno.env.set("CNDI_STAGING_DIRECTORY", stagingDirectory);
   Deno.env.set("CNDI_HOME", CNDI_HOME);
 
   try {

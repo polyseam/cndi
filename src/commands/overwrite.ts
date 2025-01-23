@@ -16,6 +16,7 @@ export type OwActionOptions = {
   output: string;
   runWorkflowSourceRef?: string;
   updateWorkflow?: ("run" | "check")[];
+  globalThis: { stagingDirectory: string };
 };
 
 const echoOw = (options: EchoOwOptions) => {
@@ -120,10 +121,14 @@ const overwriteCommand = new Command()
   .action((options) => {
     const output = options?.output || Deno.cwd();
     const updateWorkflows = options?.updateWorkflow || [];
+
+    // deno-lint-ignore no-explicit-any
+    const stagingDirectory = (globalThis as any).stagingDirectory;
     owAction({
       ...options,
       output,
       updateWorkflow: updateWorkflows,
+      globalThis: { stagingDirectory },
     });
   });
 
