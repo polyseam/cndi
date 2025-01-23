@@ -1,5 +1,9 @@
 import { Command, Spinner, WorkflowType } from "deps";
-import { emitExitEvent, getProjectDirectoryFromFlag } from "src/utils.ts";
+import {
+  emitExitEvent,
+  getProjectDirectoryFromFlag,
+  getStagingDirectory,
+} from "src/utils.ts";
 import createRepo from "src/actions/createRepo.ts";
 
 type EchoOwOptions = {
@@ -118,12 +122,16 @@ const overwriteCommand = new Command()
   )
   .type("workflow", WorkflowType)
   .option("--update-workflow <items:workflow[]>", "Update GitHub Workflows")
-  .action((options) => {
+  .action(async (options) => {
     const output = options?.output || Deno.cwd();
     const updateWorkflows = options?.updateWorkflow || [];
+    const [err, stagingDirectory] = getStagingDirectory();
 
-    // deno-lint-ignore no-explicit-any
-    const stagingDirectory = (globalThis as any).stagingDirectory;
+    if (err) {
+      await err.out();
+      return;
+    }
+
     owAction({
       ...options,
       output,

@@ -12,6 +12,7 @@ import {
   checkInitialized,
   getPrettyJSONString,
   getProjectDirectoryFromFlag,
+  getStagingDirectory,
   isSlug,
   persistStagedFiles,
   stageFile,
@@ -562,12 +563,23 @@ const createCommand = new Command()
     }
 
     await persistStagedFiles(destinationDirectory);
+
+    const [err, stagingDirectory] = await getStagingDirectory();
+
+    if (err) {
+      await err.out();
+      return;
+    }
+
     await owAction({
       output: destinationDirectory,
       initializing: true,
       create: true,
       runWorkflowSourceRef: options.runWorkflowSourceRef,
       skipPush: !!skipPush,
+      globalThis: {
+        stagingDirectory,
+      },
     });
   });
 
