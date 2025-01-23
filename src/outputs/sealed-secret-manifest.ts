@@ -231,7 +231,7 @@ async function addSecretPlaceholderToDotenv(
       dotEnvLines.push(`${secretEnvName}='${placeholder}'`);
     }
 
-    Deno.writeTextFileSync(dotEnvPath, dotEnvLines.join("\n"));
+    await Deno.writeTextFile(dotEnvPath, dotEnvLines.join("\n"));
   }
 }
 

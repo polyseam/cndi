@@ -4,7 +4,9 @@ import { path } from "deps";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
-const ogDir = Deno.cwd();
+import getProjectRoot from "get-project-root";
+
+const ogDir = getProjectRoot();
 
 const cleanup = () => {
   Deno.chdir(ogDir);

@@ -6,7 +6,9 @@ import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
-const ogDir = Deno.cwd();
+import getProjectRoot from "get-project-root";
+
+const ogDir = getProjectRoot();
 
 const cleanup = () => {
   Deno.chdir(ogDir);
