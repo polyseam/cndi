@@ -137,7 +137,7 @@ const overwriteCommand = new Command()
     const output = options?.output || Deno.cwd();
     const updateWorkflows = options?.updateWorkflow || [];
 
-    owAction({ // TODO: should await?
+    owAction({
       ...options,
       output,
       updateWorkflow: updateWorkflows,

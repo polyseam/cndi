@@ -123,7 +123,7 @@ export async function pushStateFromTerraform({
   );
 
   try {
-    Deno.writeTextFileSync(pathToNewState, encryptedState);
+    await Deno.writeTextFile(pathToNewState, encryptedState);
   } catch (errorWritingState) {
     console.error(
       label,
