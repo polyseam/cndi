@@ -31,7 +31,7 @@ Deno.test(
         "deployment_target_provider=azure",
       );
 
-      const readme = Deno.readTextFileSync(`README.md`);
+      const readme = await Deno.readTextFile(`README.md`);
       assert(status.success);
       assert(readme.startsWith(`# ${project_name}`));
     });

@@ -34,7 +34,7 @@ Deno.test(
         "--set",
         "deployment_target_provider=aws",
       );
-      const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
+      const dotenv = await Deno.readTextFile(path.join(Deno.cwd(), `.env`));
       assert(dotenv.indexOf(`CNDI_TELEMETRY=debug`) > -1);
       // assert(status.success);
     });
@@ -59,7 +59,7 @@ Deno.test(
         "--set",
         "deployment_target_provider=aws",
       );
-      const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
+      const dotenv = await Deno.readTextFile(path.join(Deno.cwd(), `.env`));
       assert(dotenv.indexOf(`AWS_REGION`) > -1);
       assert(dotenv.indexOf(`AWS_SECRET_ACCESS_KEY`) > -1);
       assert(dotenv.indexOf(`AWS_ACCESS_KEY_ID`) > -1);

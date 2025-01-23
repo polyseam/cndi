@@ -52,7 +52,7 @@ Deno.test(
         "--set",
         "deployment_target_provider=azure",
       );
-      const dotenv = Deno.readTextFileSync(path.join(Deno.cwd(), `.env`));
+      const dotenv = await Deno.readTextFile(path.join(Deno.cwd(), `.env`));
       // assert(dotenv.indexOf(`# Azure Resource Manager`) > -1);
       assert(dotenv.indexOf(`ARM_REGION`) > -1);
       assert(dotenv.indexOf(`ARM_CLIENT_SECRET`) > -1);
