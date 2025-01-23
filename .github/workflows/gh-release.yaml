@@ -37,6 +37,18 @@ jobs:
       - name: Build
         run: deno task build
 
+      # this ensures `cndi upgrade` works for users with cndi@<v2.27
+      # it's a waste of disk space for GitHub and we should remove it when we are certain all users have upgraded
+      - name: duplicate macos archive for backwards compatibility
+        # assumes the user will be on apple silicon despite the previous macos version being amd64
+        run: cp ./dist/release-archives/cndi-mac-arm64.tar.gz ./dist/release-archives/cndi-mac.tar.gz
+
+      - name: duplicate linux archive for backwards compatibility
+        run: cp ./dist/release-archives/cndi-linux-amd64.tar.gz ./dist/release-archives/cndi-linux.tar.gz
+
+      - name: duplicate windows archive for backwards compatibility
+        run: cp ./dist/release-archives/cndi-win-amd64.tar.gz ./dist/release-archives/cndi-win.tar.gz
+
       - name: Install cndi dependency binaries
         run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
 
