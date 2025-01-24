@@ -171,8 +171,24 @@ const initCommand = new Command()
       }
 
       try {
-        const responses = YAML.parse(responseFileText);
-        if (responses) {
+        const responses = YAML.parse(responseFileText) as Record<
+          string,
+          CNDITemplatePromptResponsePrimitive
+        >;
+
+        const responseCount = Object.keys(responses).length;
+
+        if (responseCount) {
+          console.log();
+          console.log(
+            ccolors.key_name("cndi"),
+            "is pulling",
+            ccolors.success(responseCount.toString()),
+            "responses from",
+            ccolors.success(options.responsesFile) +
+              "!",
+          );
+          console.log();
           overrides = responses as Record<
             string,
             CNDITemplatePromptResponsePrimitive
