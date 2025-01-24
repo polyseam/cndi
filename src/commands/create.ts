@@ -234,8 +234,8 @@ const createCommand = new Command()
         console.error(
           label,
           ccolors.error("Error loading"),
-          ccolors.key_name("cndi_responses.yaml"),
-          ccolors.error("file"),
+          ccolors.key_name(options.responsesFile),
+          ccolors.error("as responses file"),
         );
         ccolors.caught(errLoadingResponsesFile as Error, 1502);
         console.log(
@@ -257,8 +257,8 @@ const createCommand = new Command()
       const err = new ErrOut(
         [
           ccolors.error("Error parsing"),
-          ccolors.key_name("cndi_responses.yaml"),
-          ccolors.error("file"),
+          ccolors.key_name(options.responsesFile),
+          ccolors.error("as responses file"),
         ],
         {
           label,
