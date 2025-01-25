@@ -3,7 +3,13 @@
 export const POLYSEAM_TEMPLATE_DIRECTORY_URL =
   "https://raw.githubusercontent.com/polyseam/cndi/main/templates/";
 
-export const KNOWN_TEMPLATES = [
+type KnownTemplate = {
+  name: string;
+  url: string;
+  aliases?: string[];
+};
+
+export const KNOWN_TEMPLATES: KnownTemplate[] = [
   {
     name: "basic",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/basic.yaml`,
@@ -15,10 +21,12 @@ export const KNOWN_TEMPLATES = [
   {
     name: "cnpg",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
+    aliases: ["pg", "postgres", "postgresql"],
   },
   {
     name: "kafka",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
+    aliases: ["strimzi"],
   },
   {
     name: "wordpress",
@@ -35,6 +43,7 @@ export const KNOWN_TEMPLATES = [
   {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
+    aliases: ["functions"],
   },
   {
     name: "neo4j",
