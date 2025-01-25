@@ -16,7 +16,10 @@ import type {
   PromptType,
 } from "./types.ts";
 
-import { POLYSEAM_TEMPLATE_DIRECTORY_URL } from "known-templates";
+import {
+  KNOWN_TEMPLATES,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
+} from "known-templates";
 
 import {
   findPositionOfCNDICallEndToken,
@@ -417,8 +420,20 @@ async function getTemplateBodyStringForIdentifier(
       }
     } else {
       // Bare Name
+      const found = KNOWN_TEMPLATES.find(
+        (kt) => {
+          // check if the template identifier matches a name or an alias
+          if (kt.name === templateIdentifier) return true;
+          if (kt?.aliases) return kt.aliases.includes(templateIdentifier);
+        },
+      );
+
+      // construct a URL to enable --template 'foo' where 'foo' is in /templates but not in KNOWN_TEMPLATES
+      const preReleaseTemplateURL =
+        `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/${templateIdentifier}.yaml`;
+
       templateIdentifierURL = new URL(
-        POLYSEAM_TEMPLATE_DIRECTORY_URL + templateIdentifier + ".yaml",
+        found?.url || preReleaseTemplateURL,
       );
     }
   }
