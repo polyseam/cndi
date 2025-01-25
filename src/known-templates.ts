@@ -15,10 +15,12 @@ export const KNOWN_TEMPLATES = [
   {
     name: "cnpg",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
+    aliases: ['postgres']
   },
   {
     name: "kafka",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/kafka.yaml`,
+    aliases: ['strimzi']
   },
   {
     name: "wordpress",
@@ -35,6 +37,7 @@ export const KNOWN_TEMPLATES = [
   {
     name: "fns",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/fns.yaml`,
+    aliases: ['functions']
   },
   {
     name: "neo4j",
