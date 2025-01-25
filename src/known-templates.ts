@@ -21,7 +21,7 @@ export const KNOWN_TEMPLATES: KnownTemplate[] = [
   {
     name: "cnpg",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
-    aliases: ["postgres"],
+    aliases: ["pg", "postgres", "postgresql"],
   },
   {
     name: "kafka",
