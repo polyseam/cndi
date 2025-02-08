@@ -81,6 +81,8 @@
   message: "Please enter your Git Repo URL:"
   type: Input
   default: ""
+  validators:
+    - url
 
 - name: cert_manager_email
   message: >-
@@ -88,6 +90,8 @@
     registration?
   type: Input
   default: jane.doe@example.com
+  validators:
+    - email
 
 - name: enable_external_dns
   message: >-
