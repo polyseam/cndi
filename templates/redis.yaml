@@ -52,7 +52,7 @@ prompts:
 
   - name: default_redis_password
     message: "Please enter Redis default user password"
-    default: password
+    default: "{{ $cndi.get_random_string(32) }}"
     type: Secret
 
   - name: cluster_size
