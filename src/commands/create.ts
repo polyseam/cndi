@@ -69,6 +69,11 @@ type EchoCreateOptions = {
   skipPush?: boolean;
 };
 
+const DEFAULT_RESPONSES_FILE_PATH = path.join(
+  Deno.cwd(),
+  "cndi_responses.yaml",
+);
+
 const echoCreate = (options: EchoCreateOptions, slug?: string) => {
   const cndiCreate = "cndi create";
   const cndiCreateSlug = slug ? ` ${slug}` : "";
@@ -84,8 +89,12 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
     ? ` --deployment-target-label ${options.deploymentTargetLabel}`
     : "";
   const cndiCreateSkipPush = options.skipPush ? " --skip-push" : "";
+  const cndiCreateResponsesFile =
+    options.responsesFile === DEFAULT_RESPONSES_FILE_PATH
+      ? ""
+      : ` --responses-file ${options.responsesFile}`;
   console.log(
-    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateOutput}${cndiCreateDeploymentTargetLabel}${cndiCreateSet}${cndiCreateSkipPush}\n`,
+    `${cndiCreate}${cndiCreateSlug}${cndiCreateInteractive}${cndiCreateTemplate}${cndiCreateDeploymentTargetLabel}${cndiCreateResponsesFile}${cndiCreateOutput}${cndiCreateSet}${cndiCreateSkipPush}\n`,
   );
 };
 
@@ -108,7 +117,7 @@ const createCommand = new Command()
     "-r, --responses-file <responses_file:string>",
     "Path to YAML 'responses file' to supply to Template prompts.",
     {
-      default: path.join(Deno.cwd(), "cndi_responses.yaml"),
+      default: DEFAULT_RESPONSES_FILE_PATH,
     },
   )
   .option("--skip-push", "Skip pushing to remote repository")
@@ -144,6 +153,101 @@ const createCommand = new Command()
     const interactive = !options.nonInteractive;
     let template: string | undefined = options?.template;
     let overrides: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
+    // load responses from file
+    let responsesFileText = "";
+
+    try {
+      console.log("options.responsesFile", options.responsesFile);
+      responsesFileText = await Deno.readTextFile(options.responsesFile);
+    } catch (errLoadingResponsesFile) {
+      if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
+        // no responses file found, continue with defaults
+      } else {
+        console.error(
+          label,
+          ccolors.error("Error loading"),
+          ccolors.key_name(options.responsesFile),
+          ccolors.error("as responses file"),
+        );
+        ccolors.caught(errLoadingResponsesFile as Error, 1502);
+        console.log(
+          ccolors.warn(
+            "⚠️ continuing with defaults in spite of unexpected error",
+          ),
+        );
+      }
+    }
+
+    const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+
+    if (responsesFileText) {
+      try {
+        const parsed = YAML.parse(responsesFileText) as Record<
+          string,
+          CNDITemplatePromptResponsePrimitive
+        >;
+        for (const [key, value] of Object.entries(parsed)) {
+          if (typeof value === "string") {
+            responses[key] = value;
+          }
+        }
+      } catch (errorParsingResponses) {
+        const err = new ErrOut(
+          [
+            ccolors.error("Error parsing"),
+            ccolors.key_name(options.responsesFile),
+            ccolors.error("as responses file"),
+          ],
+          {
+            label,
+            code: 1503,
+            id: "create/!isValidYAML(responsesFile)",
+            cause: errorParsingResponses as Error,
+          },
+        );
+        await err.out();
+        return;
+      }
+
+      const responseCount = Object.keys(responses).length;
+
+      if (responseCount) {
+        console.log();
+        console.log(
+          ccolors.key_name("cndi"),
+          "is pulling",
+          ccolors.success(responseCount.toString()),
+          "responses from",
+          ccolors.success(options.responsesFile) +
+            "!",
+        );
+        console.log();
+        overrides = responses as Record<
+          string,
+          CNDITemplatePromptResponsePrimitive
+        >;
+      }
+    }
+
+    if (options.set) {
+      for (const set of options.set) {
+        const [key, value] = set.split("=");
+        overrides[key] = value;
+      }
+    }
+
+    if (typeof overrides?.git_repo === "string" && !slug) {
+      try {
+        slug = new URL(overrides.git_repo as string).pathname.slice(1);
+      } catch (_error) {
+        console.log(
+          ccolors.warn("Failed to parse"),
+          ccolors.key_name("git_repo"),
+          ccolors.warn("response as URL!"),
+        );
+      }
+    }
 
     if (!slug) {
       if (interactive) {
@@ -220,81 +324,6 @@ const createCommand = new Command()
       );
       await err.out();
       return;
-    }
-
-    // load responses from file
-    let responsesFileText = "";
-
-    try {
-      responsesFileText = await Deno.readTextFile(options.responsesFile);
-    } catch (errLoadingResponsesFile) {
-      if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
-        // no responses file found, continue with defaults
-      } else {
-        console.error(
-          label,
-          ccolors.error("Error loading"),
-          ccolors.key_name(options.responsesFile),
-          ccolors.error("as responses file"),
-        );
-        ccolors.caught(errLoadingResponsesFile as Error, 1502);
-        console.log(
-          ccolors.warn(
-            "⚠️ continuing with defaults in spite of unexpected error",
-          ),
-        );
-      }
-    }
-
-    let responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
-
-    try {
-      responses = YAML.parse(responsesFileText) as Record<
-        string,
-        CNDITemplatePromptResponsePrimitive
-      >;
-    } catch (errorParsingResponses) {
-      const err = new ErrOut(
-        [
-          ccolors.error("Error parsing"),
-          ccolors.key_name(options.responsesFile),
-          ccolors.error("as responses file"),
-        ],
-        {
-          label,
-          code: 1503,
-          id: "create/!isValidYAML(responsesFile)",
-          cause: errorParsingResponses as Error,
-        },
-      );
-      await err.out();
-      return;
-    }
-
-    const responseCount = Object.keys(responses).length;
-
-    if (responseCount) {
-      console.log();
-      console.log(
-        ccolors.key_name("cndi"),
-        "is pulling",
-        ccolors.success(responseCount.toString()),
-        "responses from",
-        ccolors.success(options.responsesFile) +
-          "!",
-      );
-      console.log();
-      overrides = responses as Record<
-        string,
-        CNDITemplatePromptResponsePrimitive
-      >;
-    }
-
-    if (options.set) {
-      for (const set of options.set) {
-        const [key, value] = set.split("=");
-        overrides[key] = value;
-      }
     }
 
     if (options.deploymentTargetLabel) {
