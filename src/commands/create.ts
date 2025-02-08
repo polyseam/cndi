@@ -158,6 +158,7 @@ const createCommand = new Command()
     let responsesFileText = "";
 
     try {
+      console.log("options.responsesFile", options.responsesFile);
       responsesFileText = await Deno.readTextFile(options.responsesFile);
     } catch (errLoadingResponsesFile) {
       if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
@@ -178,48 +179,55 @@ const createCommand = new Command()
       }
     }
 
-    let responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
+    const responses: Record<string, CNDITemplatePromptResponsePrimitive> = {};
 
-    try {
-      responses = YAML.parse(responsesFileText) as Record<
-        string,
-        CNDITemplatePromptResponsePrimitive
-      >;
-    } catch (errorParsingResponses) {
-      const err = new ErrOut(
-        [
-          ccolors.error("Error parsing"),
-          ccolors.key_name(options.responsesFile),
-          ccolors.error("as responses file"),
-        ],
-        {
-          label,
-          code: 1503,
-          id: "create/!isValidYAML(responsesFile)",
-          cause: errorParsingResponses as Error,
-        },
-      );
-      await err.out();
-      return;
-    }
+    if (responsesFileText) {
+      try {
+        const parsed = YAML.parse(responsesFileText) as Record<
+          string,
+          CNDITemplatePromptResponsePrimitive
+        >;
+        for (const [key, value] of Object.entries(parsed)) {
+          if (typeof value === "string") {
+            responses[key] = value;
+          }
+        }
+      } catch (errorParsingResponses) {
+        const err = new ErrOut(
+          [
+            ccolors.error("Error parsing"),
+            ccolors.key_name(options.responsesFile),
+            ccolors.error("as responses file"),
+          ],
+          {
+            label,
+            code: 1503,
+            id: "create/!isValidYAML(responsesFile)",
+            cause: errorParsingResponses as Error,
+          },
+        );
+        await err.out();
+        return;
+      }
 
-    const responseCount = Object.keys(responses).length;
+      const responseCount = Object.keys(responses).length;
 
-    if (responseCount) {
-      console.log();
-      console.log(
-        ccolors.key_name("cndi"),
-        "is pulling",
-        ccolors.success(responseCount.toString()),
-        "responses from",
-        ccolors.success(options.responsesFile) +
-          "!",
-      );
-      console.log();
-      overrides = responses as Record<
-        string,
-        CNDITemplatePromptResponsePrimitive
-      >;
+      if (responseCount) {
+        console.log();
+        console.log(
+          ccolors.key_name("cndi"),
+          "is pulling",
+          ccolors.success(responseCount.toString()),
+          "responses from",
+          ccolors.success(options.responsesFile) +
+            "!",
+        );
+        console.log();
+        overrides = responses as Record<
+          string,
+          CNDITemplatePromptResponsePrimitive
+        >;
+      }
     }
 
     if (options.set) {
@@ -229,7 +237,7 @@ const createCommand = new Command()
       }
     }
 
-    if (typeof overrides?.git_repo === "string") {
+    if (typeof overrides?.git_repo === "string" && !slug) {
       try {
         slug = new URL(overrides.git_repo as string).pathname.slice(1);
       } catch (_error) {
