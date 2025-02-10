@@ -31,6 +31,10 @@ Start with a [Template](https://cndi.dev/templates) for a popular service like
 it on your own infrastructure - just as easily as you can sign up for a
 cloud-based Platform as a Service.
 
+If you'd like to experiment with CNDI Templates in the browser, you can use
+[cndi.dev/configurator](https://cndi.dev/configurator) to get started before
+installing the `cndi` CLI.
+
 Visit [cndi.dev/templates](https://cndi.dev/templates) for a full list of
 Templates, all available on [aws](https://aws.com),
 [gcp](https://cloud.google.com), and [azure](https://azure.microsoft.com).
