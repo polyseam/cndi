@@ -165,7 +165,7 @@ const initCommand = new Command()
         );
         await err.out();
         return;
-      } else {
+      } else if (!(errLoadingResponsesFile instanceof Deno.errors.NotFound)) {
         console.error(
           label,
           ccolors.error("Error loading"),
