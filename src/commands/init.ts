@@ -148,8 +148,23 @@ const initCommand = new Command()
     try {
       responsesFileText = await Deno.readTextFile(options.responsesFile);
     } catch (errLoadingResponsesFile) {
-      if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
-        // no responses file found, continue with defaults
+      if (options.responsesFile !== defaultResponsesFilePath) {
+        // user specified a responses file that doesn't exist
+        const err = new ErrOut(
+          [
+            ccolors.error("Error reading"),
+            ccolors.key_name(options.responsesFile),
+            ccolors.error("as responses file"),
+          ],
+          {
+            label,
+            code: 401,
+            id: "init/!isValidYAML(responsesFile)",
+            cause: errLoadingResponsesFile as Error,
+          },
+        );
+        await err.out();
+        return;
       } else {
         console.error(
           label,
@@ -182,11 +197,11 @@ const initCommand = new Command()
           [
             ccolors.error("Error parsing"),
             ccolors.key_name(options.responsesFile),
-            ccolors.error("as responses file"),
+            ccolors.error("as yaml responses file"),
           ],
           {
             label,
-            code: 1503,
+            code: 402,
             id: "init/!isValidYAML(responsesFile)",
             cause: errorParsingResponses as Error,
           },
