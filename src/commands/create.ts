@@ -69,7 +69,7 @@ type EchoCreateOptions = {
   skipPush?: boolean;
 };
 
-const DEFAULT_RESPONSES_FILE_PATH = path.join(
+const defaultResponsesFilePath = path.join(
   Deno.cwd(),
   "cndi_responses.yaml",
 );
@@ -90,7 +90,7 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
     : "";
   const cndiCreateSkipPush = options.skipPush ? " --skip-push" : "";
   const cndiCreateResponsesFile =
-    options.responsesFile === DEFAULT_RESPONSES_FILE_PATH
+    options.responsesFile === defaultResponsesFilePath
       ? ""
       : ` --responses-file ${options.responsesFile}`;
   console.log(
@@ -117,7 +117,7 @@ const createCommand = new Command()
     "-r, --responses-file <responses_file:string>",
     "Path to YAML 'responses file' to supply to Template prompts.",
     {
-      default: DEFAULT_RESPONSES_FILE_PATH,
+      default: defaultResponsesFilePath,
     },
   )
   .option("--skip-push", "Skip pushing to remote repository")
@@ -158,12 +158,26 @@ const createCommand = new Command()
     let responsesFileText = "";
 
     try {
-      console.log("options.responsesFile", options.responsesFile);
       responsesFileText = await Deno.readTextFile(options.responsesFile);
     } catch (errLoadingResponsesFile) {
-      if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
-        // no responses file found, continue with defaults
-      } else {
+      if (options.responsesFile !== defaultResponsesFilePath) {
+        // user specified a responses file that doesn't exist
+        const err = new ErrOut(
+          [
+            ccolors.error("Error reading"),
+            ccolors.key_name(options.responsesFile),
+            ccolors.error("as responses file"),
+          ],
+          {
+            label,
+            code: 1503,
+            id: "create/!isValidYAML(responsesFile)",
+            cause: errLoadingResponsesFile as Error,
+          },
+        );
+        await err.out();
+        return;
+      } else if (!(errLoadingResponsesFile instanceof Deno.errors.NotFound)) {
         console.error(
           label,
           ccolors.error("Error loading"),
@@ -188,9 +202,7 @@ const createCommand = new Command()
           CNDITemplatePromptResponsePrimitive
         >;
         for (const [key, value] of Object.entries(parsed)) {
-          if (typeof value === "string") {
-            responses[key] = value;
-          }
+          responses[key] = value;
         }
       } catch (errorParsingResponses) {
         const err = new ErrOut(

@@ -76,7 +76,7 @@
   },
   {
     "code": 401,
-    "message": "failed to load `./cndi_responses.yaml` during 'cndi init'",
+    "message": "failed to load custom `cndi_responses.yaml` during 'cndi init'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/889"
   },
   {
@@ -560,7 +560,7 @@
   },
   {
     "code": 1502,
-    "message": "failed to read `./cndi_responses.yaml` during 'cndi create'",
+    "message": "failed to read custom `cndi_responses.yaml` during 'cndi create'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/898"
   },
   {
