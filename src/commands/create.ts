@@ -69,7 +69,7 @@ type EchoCreateOptions = {
   skipPush?: boolean;
 };
 
-const DEFAULT_RESPONSES_FILE_PATH = path.join(
+const defaultResponsesFilePath = path.join(
   Deno.cwd(),
   "cndi_responses.yaml",
 );
@@ -90,7 +90,7 @@ const echoCreate = (options: EchoCreateOptions, slug?: string) => {
     : "";
   const cndiCreateSkipPush = options.skipPush ? " --skip-push" : "";
   const cndiCreateResponsesFile =
-    options.responsesFile === DEFAULT_RESPONSES_FILE_PATH
+    options.responsesFile === defaultResponsesFilePath
       ? ""
       : ` --responses-file ${options.responsesFile}`;
   console.log(
@@ -117,7 +117,7 @@ const createCommand = new Command()
     "-r, --responses-file <responses_file:string>",
     "Path to YAML 'responses file' to supply to Template prompts.",
     {
-      default: DEFAULT_RESPONSES_FILE_PATH,
+      default: defaultResponsesFilePath,
     },
   )
   .option("--skip-push", "Skip pushing to remote repository")
