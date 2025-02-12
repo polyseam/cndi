@@ -158,7 +158,6 @@ const createCommand = new Command()
     let responsesFileText = "";
 
     try {
-      console.log("options.responsesFile", options.responsesFile);
       responsesFileText = await Deno.readTextFile(options.responsesFile);
     } catch (errLoadingResponsesFile) {
       if (errLoadingResponsesFile instanceof Deno.errors.NotFound) {
@@ -188,9 +187,7 @@ const createCommand = new Command()
           CNDITemplatePromptResponsePrimitive
         >;
         for (const [key, value] of Object.entries(parsed)) {
-          if (typeof value === "string") {
-            responses[key] = value;
-          }
+          responses[key] = value;
         }
       } catch (errorParsingResponses) {
         const err = new ErrOut(
