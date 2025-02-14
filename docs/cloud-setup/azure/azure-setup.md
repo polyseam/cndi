@@ -46,7 +46,7 @@ From the "Overview" pane, you can add a client secret to your app registration,
 and that will give us a couple additional credentials we need for your CNDI
 cluster deployment.
 
-1. Select Certificates & secrets > Client secrets > New client secret.
+1. Select "Certificates & secrets" > "Client secrets" > "New client secret".
 2. Add a description for your client secret.
 3. Select an expiration for the secret or specify a custom lifetime.
 4. Client secret lifetime is limited to two years (24 months) or less. You can't
