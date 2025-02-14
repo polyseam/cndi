@@ -28,51 +28,43 @@ tried or paid for Azure before, you can sign up for the Azure free account.
 
 ![Register an application](/docs/cloud-setup/azure/img/register-application-1.png)
 
-3. Enter a display Name for your application. The app registration's
-   automatically generated Application (client) ID, not its display name,
-   uniquely identifies your app within the identity platform.
-
-4. Specify who can use the application
-
-5. Don't enter anything for Redirect URI
+3. Enter a display name for your app registration, and note it down, leave all
+   other fields as default.
 
 ![Add role assignment](/docs/cloud-setup/azure/img/register-application-2.png)
 
-5. When registration finishes, the Azure portal displays the app registration's
-   Overview pane. You see the Application (client) ID. Also called the client
-   ID, this value uniquely identifies your application in the Microsoft identity
-   platform.
+5. Once your app registration has been created, you should see it's "Overview"
+   pane, where you can see a arm-client-id value and an arm-tenant-id value.
+   We'll use these as part of the credentials for the cluster deployment later.
 
 ![Credentials](/docs/cloud-setup/azure/img/register-application-3.png)
 
 ### Step 3: Add credentials
 
-Credentials are used by confidential client applications that access a web API.
-Examples of confidential clients are web apps, other web APIs, or service-type
-and daemon-type applications. These Credentials allow your application to
-authenticate as itself, requiring no interaction from a user at runtime.
+From the "Overview" pane, you can add a client secret to your app registration,
+and that will give us a couple additional credentials we need for your CNDI
+cluster deployment.
 
-1. In the Azure portal, in App registrations, select your application.
-2. Select Certificates & secrets > Client secrets > New client secret.
-3. Add a description for your client secret.
-4. Select an expiration for the secret or specify a custom lifetime.
-5. Client secret lifetime is limited to two years (24 months) or less. You can't
+1. Select Certificates & secrets > Client secrets > New client secret.
+2. Add a description for your client secret.
+3. Select an expiration for the secret or specify a custom lifetime.
+4. Client secret lifetime is limited to two years (24 months) or less. You can't
    specify a custom lifetime longer than 24 months.
-6. Select Add.
-7. Record the secret's value for use in your client application code. This
+5. Select "Add".
+6. Record the secret's value for use in your client application code. This
    secret value is never displayed again after you leave this page.
 
 ![Certificates-secrets](/docs/cloud-setup/azure/img/certificates-secrets.png)
 
 ### Step 4: Set up [Access Control (IAM)](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal?tabs=current)
 
-Azure role-based access control (Azure RBAC) is the authorization system you use
-to manage access to Azure resources. To grant access, you assign roles to users,
-groups, service principals, or managed identities at a particular scope.
+The app registration represents the identity of the application that will
+request resources from Azure cloud, so the next steps are to define which
+resources that app registration can access.
 
 1. Sign in to the [Azure portal](https://portal.azure.com/).
 
-2. Go to your Subscriptions.
+2. Go to your "Subscriptions".
 
 3. Select the Subscription you want to use CNDI within.
 
@@ -80,7 +72,7 @@ groups, service principals, or managed identities at a particular scope.
 
 ![Access control (IAM) page](/docs/cloud-setup/azure/img/sub-access-control.png)
 
-6. Click "Add +" > "Add custom role"
+6. Click "Add +" > "Add custom role".
 
 ![Add custom role](/docs/cloud-setup/azure/img/add-custom-role-button.png)
 
@@ -133,16 +125,17 @@ groups, service principals, or managed identities at a particular scope.
 }
 ```
 
-9. Finally Click "Review + Create" to create the custom role
+9. Finally Click "Review + Create" to create the custom role. Note: you can use
+   this custom role for multiple app registrations down the line.
 
-10. After creating the custom role, we want to assign it to our app
+10. After creating the new custom role, we want to assign it to our app
     registration. To do this, return to the Access control (IAM) page and click
-    "Add +" > "Add role assignment"
+    "Add +" > "Add role assignment".
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-menu.png)
 
 11. Filter through "Job function roles" to locate the custom role you created by
-    name
+    name.
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-custom.png)
 
@@ -153,17 +146,15 @@ groups, service principals, or managed identities at a particular scope.
 13. Then click "Select members" and search for the app registration you created
     earlier.
 
-14. Click "Select" to add the app to the Members list.
-
-15. Click "Next".
+14. Click "Select" to add the app to the Members list, then click "Next".
 
 ![Select-member](/docs/cloud-setup/azure/img/select-members.png)
 
-17. On the "Review + assign" tab, review the role assignment settings.
+15. On the "Review + assign" tab, review the role assignment settings.
 
 ![Assign role](/docs/cloud-setup/azure/img/review-assign.png)
 
-18. Click "Review + assign" to assign the custom role.
+16. Click "Review + assign" to assign the custom role.
 
 ![Review Assigned role](/docs/cloud-setup/azure/img/r-role-assignments.png)
 
