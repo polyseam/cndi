@@ -83,26 +83,75 @@ groups, service principals, or managed identities at a particular scope.
 
 ![Access control (IAM) page](/docs/cloud-setup/azure/img/sub-access-control.png)
 
-6. Click the Role assignments tab to view the role assignments at this scope.
+6. Click Add > Add custom role.\
+   If you don't have permissions to create custom roles, the Add custom role
+   option will be disabled.
+
+![Add custom role](/docs/cloud-setup/azure/img/add-custom-role-button.png)
+
+8. To create a custom role, begin by assigning a name and description to the
+   role.
+
+![Basic Role Information](/docs/cloud-setup/azure/img/custom-role-basic-tab.png)
+
+9. The proceedto the JSON tab and click "edit" to update the JSON to include
+   `"actions"` as follows:
+
+![JSON Role Information](/docs/cloud-setup/azure/img/custom-role-json-tab.png)
+
+```json
+{
+  "properties": {
+    "roleName": "cndi-min-role",
+    "description": "minimum permissions required for deploying a CNDI cluster to AKS",
+    "assignableScopes": [
+      "/subscriptions/<subscription-id>"
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.ContainerService/managedClusters/write",
+          "Microsoft.ContainerService/managedClusters/delete",
+          "Microsoft.ContainerService/managedClusters/read",
+          "Microsoft.ContainerService/managedClusters/listClusterUserCredential/action",
+          "Microsoft.Resources/subscriptions/resourceGroups/write",
+          "Microsoft.Resources/subscriptions/resourceGroups/delete",
+          "Microsoft.Resources/subscriptions/resourceGroups/read",
+          "Microsoft.Network/virtualNetworks/write",
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/delete",
+          "Microsoft.Network/virtualNetworks/subnets/delete",
+          "Microsoft.Network/virtualNetworks/subnets/write",
+          "Microsoft.Network/virtualNetworks/subnets/read",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/dnszones/A/write",
+          "Microsoft.Network/dnszones/A/read",
+          "Microsoft.Network/dnszones/A/delete",
+          "Microsoft.Network/dnszones/TXT/write",
+          "Microsoft.Network/dnszones/TXT/read",
+          "Microsoft.Network/dnszones/TXT/delete",
+          "Microsoft.Network/dnszones/read"
+        ]
+      }
+    ]
+  }
+}
+```
+
+10. Finally Click "Review + Create" to create the custom role
+
+11. After creating the custom role, we want to assign it to our app
+    registration. To do this, return to the Access control (IAM) page and click
+    "Add" > "Add role assignment"
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-menu.png)
 
-7. Click Add > Add role assignment.\
-   If you don't have permissions to assign roles, the Add role assignment option
-   will be disabled.
+9. Filter through "Job function roles" to locate the custom role you created by
+   name
 
-8. On the Roles tab, select a role that you want to use.\
-   You can search for a role by name or by description. You can also filter
-   roles by type and category.
+![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-custom.png)
 
-Add the Contributor Role and if your using a AKS cluster add the Network
-contributor role once you finish adding the Contributor role
-
-![Add role assignment](/docs/cloud-setup/azure/img/roles.png)
-
-9. Click Next.
-
-10. On the Members tab, select User, group, or service principal to assign the
+10. On the Members tab, select "User, group, or service principal" to assign the
     selected role to one or more Azure AD users, groups, or service principals
     (applications).
 
@@ -112,6 +161,7 @@ contributor role once you finish adding the Contributor role
 
 2. Find and select the users, groups, or service principals.\
    You can type in the Select box to search the directory for your app name
+
 3. Click Select to add the app to the Members list.
 
 4. Click Next.
