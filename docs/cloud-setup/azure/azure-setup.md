@@ -74,27 +74,22 @@ groups, service principals, or managed identities at a particular scope.
 
 2. Go to your Subscriptions.
 
-3. Open the Add role assignment page\
-   Access control (IAM) is the page that you typically use to assign roles to
-   grant access to Azure resources. It's also known as identity and access
-   management (IAM) and appears in several locations in the Azure portal.
+3. Select the Subscription you want to use CNDI within.
 
 4. Click Access control (IAM).
 
 ![Access control (IAM) page](/docs/cloud-setup/azure/img/sub-access-control.png)
 
-6. Click Add > Add custom role.\
-   If you don't have permissions to create custom roles, the Add custom role
-   option will be disabled.
+6. Click "Add +" > "Add custom role"
 
 ![Add custom role](/docs/cloud-setup/azure/img/add-custom-role-button.png)
 
-8. To create a custom role, begin by assigning a name and description to the
+7. To create a custom role, begin by assigning a name and description to the
    role.
 
 ![Basic Role Information](/docs/cloud-setup/azure/img/custom-role-basic-tab.png)
 
-9. Next, proceed to the JSON tab and click "edit" to update the JSON to include
+8. Next, proceed to the JSON tab and click "edit" to update the JSON to include
    `"actions"` as follows:
 
 ![JSON Role Information](/docs/cloud-setup/azure/img/custom-role-json-tab.png)
@@ -138,43 +133,43 @@ groups, service principals, or managed identities at a particular scope.
 }
 ```
 
-10. Finally Click "Review + Create" to create the custom role
+9. Finally Click "Review + Create" to create the custom role
 
-11. After creating the custom role, we want to assign it to our app
+10. After creating the custom role, we want to assign it to our app
     registration. To do this, return to the Access control (IAM) page and click
-    "Add" > "Add role assignment"
+    "Add +" > "Add role assignment"
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-menu.png)
 
-9. Filter through "Job function roles" to locate the custom role you created by
-   name
+11. Filter through "Job function roles" to locate the custom role you created by
+    name
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-custom.png)
 
-10. On the Members tab, select "User, group, or service principal" to assign the
+12. On the Members tab, select "User, group, or service principal" to assign the
     selected role to one or more Azure AD users, groups, or service principals
     (applications).
 
 ![Add role assignment](/docs/cloud-setup/azure/img/members.png)
 
-1. Select the "users, groups, or service principals".
+13. Select the "users, groups, or service principals".
 
-2. Then click "Select members" and search for the app registration you created
-   earlier.
+14. Then click "Select members" and search for the app registration you created
+    earlier.
 
-3. Click "Select" to add the app to the Members list.
+15. Click "Select" to add the app to the Members list.
 
-4. Click Next.
+16. Click Next.
 
 ![Select-member](/docs/cloud-setup/azure/img/select-members.png)
 
-5. On the Review + assign tab, review the role assignment settings.
+17. On the Review + assign tab, review the role assignment settings.
 
 ![Assign role](/docs/cloud-setup/azure/img/review-assign.png)
 
-6. Click Review + assign to assign the role.\
-   After a few moments, the security principal is assigned the role at the
-   selected scope.
+18. Click Review + assign to assign the role.\
+    After a few moments, the security principal is assigned the role at the
+    selected scope.
 
 ![Review Assigned role](/docs/cloud-setup/azure/img/r-role-assignments.png)
 
