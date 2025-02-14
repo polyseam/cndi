@@ -34,9 +34,10 @@ tried or paid for Azure before, you can sign up for the Azure free account.
 ![Add role assignment](/docs/cloud-setup/azure/img/register-application-2.png)
 
 5. Once your app registration has been created, you should see it's "Overview"
-   pane, where you can see a `ARM_CLIENT_ID` _shown as "Application (client)
-   ID"_ value and an `ARM_TENANT_ID` _shown as "Directory (tenant) ID"_ value.
-   We'll use these as part of the credentials for the cluster deployment later.
+   pane, where you can see an `ARM_CLIENT_ID` value _shown as "Application
+   (client) ID"_ and an `ARM_TENANT_ID` value _shown as "Directory (tenant)
+   ID"_. We'll use both as part of the credentials for the cluster deployment
+   later.
 
 ![Credentials](/docs/cloud-setup/azure/img/register-application-3.png)
 
