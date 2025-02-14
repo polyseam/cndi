@@ -328,7 +328,7 @@ prompts:
     type: Input
 
   - name: deploy_jupyter_notebook_manifests
-    default: true
+    default: false
     message: >-
       Do you want to install jupyterhub, a web-based data analytics tool?
     type: Confirm
