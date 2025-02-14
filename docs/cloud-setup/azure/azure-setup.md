@@ -146,30 +146,24 @@ groups, service principals, or managed identities at a particular scope.
 
 ![Add role assignment](/docs/cloud-setup/azure/img/add-role-assignment-custom.png)
 
-12. On the Members tab, select "User, group, or service principal" to assign the
-    selected role to one or more Azure AD users, groups, or service principals
-    (applications).
+12. On the "Members" tab Select the "User, group, or service principal".
 
 ![Add role assignment](/docs/cloud-setup/azure/img/members.png)
 
-13. Select the "users, groups, or service principals".
-
-14. Then click "Select members" and search for the app registration you created
+13. Then click "Select members" and search for the app registration you created
     earlier.
 
-15. Click "Select" to add the app to the Members list.
+14. Click "Select" to add the app to the Members list.
 
-16. Click Next.
+15. Click "Next".
 
 ![Select-member](/docs/cloud-setup/azure/img/select-members.png)
 
-17. On the Review + assign tab, review the role assignment settings.
+17. On the "Review + assign" tab, review the role assignment settings.
 
 ![Assign role](/docs/cloud-setup/azure/img/review-assign.png)
 
-18. Click Review + assign to assign the role.\
-    After a few moments, the security principal is assigned the role at the
-    selected scope.
+18. Click "Review + assign" to assign the custom role.
 
 ![Review Assigned role](/docs/cloud-setup/azure/img/r-role-assignments.png)
 
