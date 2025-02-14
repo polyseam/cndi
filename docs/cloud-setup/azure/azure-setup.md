@@ -94,7 +94,7 @@ groups, service principals, or managed identities at a particular scope.
 
 ![Basic Role Information](/docs/cloud-setup/azure/img/custom-role-basic-tab.png)
 
-9. The proceedto the JSON tab and click "edit" to update the JSON to include
+9. Next, proceed to the JSON tab and click "edit" to update the JSON to include
    `"actions"` as follows:
 
 ![JSON Role Information](/docs/cloud-setup/azure/img/custom-role-json-tab.png)
@@ -157,12 +157,12 @@ groups, service principals, or managed identities at a particular scope.
 
 ![Add role assignment](/docs/cloud-setup/azure/img/members.png)
 
-1. Click Select members.
+1. Select the "users, groups, or service principals".
 
-2. Find and select the users, groups, or service principals.\
-   You can type in the Select box to search the directory for your app name
+2. Then click "Select members" and search for the app registration you created
+   earlier.
 
-3. Click Select to add the app to the Members list.
+3. Click "Select" to add the app to the Members list.
 
 4. Click Next.
 
