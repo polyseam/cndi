@@ -4,6 +4,8 @@
     Please name your CNDI project:
   type: Input
   default: "my-cndi-project"
+  validators:
+    - is_slug
 
 - name: deployment_target_provider
   type: Select
