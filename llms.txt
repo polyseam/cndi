@@ -1,8 +1,6 @@
 # cndi
 
-> CNDI is a framework for deploying cloud-native applications that integrates
-> ArgoCD, Terraform, and more, to enable a seamless end-to-end GitOps workflow
-> with interactive Template-based setup.
+> CNDI is a framework for deploying cloud-native applications that integrates ArgoCD, Terraform, and more, to enable a seamless end-to-end GitOps workflow with interactive Template-based setup.
 
 Use interactive pre-built Templates to deploy applications like
 [Airflow](https://airflow.apache.org), [Kafka](https://strimzi.io), and
