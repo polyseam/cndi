@@ -1,0 +1,47 @@
+# cndi
+
+> CNDI is a framework for deploying cloud-native applications that integrates
+> ArgoCD, Terraform, and more, to enable a seamless end-to-end GitOps workflow
+> with interactive Template-based setup.
+
+Use interactive pre-built Templates to deploy applications like
+[Airflow](https://airflow.apache.org), [Kafka](https://strimzi.io), and
+[Postgres](https://cloudnative-pg.io), to your own infrastructure, on
+[AWS](https://aws.com), [GCP](https://cloud.google.com),
+[Azure](https://azure.com), or your local machine. You can even create custom
+Templates to automate cluster creation for your team.
+
+## Documentation
+
+- [CNDI README.md](https://github.com/polyseam/cndi/blob/main/README.md): The
+  core README for the project with links to detailed guides.
+
+## Web Pages
+
+- [CNDI Website](https://cndi.dev): Official website with project overview and
+  useful info.
+- [CNDI Blog](https://cndi.dev/blog): Blogs about the project and related topics
+  by the CNDI team.
+
+## Tools
+
+- [CNDI Templates](https://cndi.dev/templates): Browse verified Templates for a
+  variety of services.
+- [CNDI Configurator](https://cndi.dev/configurator): Experiment with CNDI
+  Templates directly in your browser.
+
+## Project Links
+
+- [CNDI GitHub Repo](https://github.com/polyseam/cndi): The main repository for
+  the project.
+- [Latest Release](https://github.com/polyseam/cndi/releases/latest): The latest
+  release of the CNDI CLI.
+- [Pre-built Templates](https://github.com/polyseam/cndi/blob/main/templates):
+  Official templates built by the CNDI Team.
+- [Discord](https://cndi.run/di?utm_content=llms.txt): Join the CNDI Discord
+  server to chat with the community.
+
+## Optional
+
+- [More Documentation](https://github.com/polyseam/cndi/blob/main/docs):
+  Additional documentation for the project, including guides and walkthroughs.

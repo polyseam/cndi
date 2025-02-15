@@ -9,7 +9,8 @@
   "deno.inlayHints.functionLikeReturnTypes.enabled": false,
   "deno.inlayHints.enumMemberValues.enabled": false,
   "files.associations": {
-    "*.sh.tftpl": "shellscript"
+    "*.sh.tftpl": "shellscript",
+    "llms.txt": "markdown"
   },
   "yaml.schemas": {
     "src/schemas/cndi_config.schema.json": [
