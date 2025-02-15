@@ -285,6 +285,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/568"
   },
   {
+    "code": 903,
+    "message": "cndi_config invalid: 'project_name' failed validation",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1126"
+  },
+  {
     "code": 905,
     "message": "cndi_config invalid: contains at least one node with a missing 'name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/571"
