@@ -290,6 +290,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1126"
   },
   {
+    "code": 904,
+    "message": "cndi_config invalid: 'project_name' is too long",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1133"
+  },
+  {
     "code": 905,
     "message": "cndi_config invalid: contains at least one node with a missing 'name'",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/571"

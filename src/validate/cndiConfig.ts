@@ -139,10 +139,12 @@ export default function validateConfig(
         ccolors.user_input(`"${pathToConfig}"\n`),
         ccolors.error("but the"),
         ccolors.key_name('"project_name"'),
-        ccolors.error("is too long"),
+        ccolors.error("value is too long.\n"),
         ccolors.error(
-          `it must be ${PROJECT_NAME_MAX_LENGTH} characters or less`,
+          "It must be",
         ),
+        ccolors.warn(`${PROJECT_NAME_MAX_LENGTH}`),
+        ccolors.error("characters or less."),
       ],
       {
         code: 904,
