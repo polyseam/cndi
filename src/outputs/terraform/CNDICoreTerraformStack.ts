@@ -8,6 +8,8 @@ import {
 
 import { useSshRepoAuth } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
+import { ccolors } from "deps";
+import { PROJECT_NAME_MAX_LENGTH } from "consts";
 
 export class CNDITerraformStack extends TerraformStack {
   variables: Record<string, TerraformVariable> = {};
@@ -23,11 +25,34 @@ export class CNDITerraformStack extends TerraformStack {
 
     const cndi_project_name = cndi_config.project_name!;
 
-    this.locals.cndi_project_name = new TerraformLocal(
-      this,
-      "cndi_project_name",
-      cndi_project_name,
-    );
+    if (
+      cndi_config && cndi_config.project_name &&
+      cndi_config.project_name.length > PROJECT_NAME_MAX_LENGTH
+    ) {
+      // should be unreachable, validated upstream
+      this.locals.cndi_project_name = new TerraformLocal(
+        this,
+        "cndi_project_name",
+        cndi_project_name.substring(0, 48),
+      );
+      console.log();
+      console.log(
+        ccolors.key_name("cndi_config.yaml[project_name]"),
+        ccolors.warn("value"),
+        ccolors.user_input(`"${cndi_project_name}"`),
+        ccolors.warn(
+          `is too long.`,
+        ),
+        ccolors.warn(`truncating to ${PROJECT_NAME_MAX_LENGTH} characters.`),
+      );
+      console.log();
+    } else {
+      this.locals.cndi_project_name = new TerraformLocal(
+        this,
+        "cndi_project_name",
+        cndi_project_name,
+      );
+    }
 
     this.variables.git_repo = new TerraformVariable(this, "GIT_REPO", {
       type: "string",

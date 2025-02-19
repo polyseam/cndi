@@ -53,6 +53,10 @@ const AKSStackLabel = ccolors.faded(
   "\nsrc/outputs/terraform/azure/AzureAKSStack.ts:",
 );
 
+// https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/create-upgrade-delete/aks-common-issues-faq#what-naming-restrictions-are-enforced-for-aks-resources-and-parameters-
+
+// cluster names must be between 1-63 chars, letters, numbers, underscores, and hyphens
+
 // TODO: ensure that splicing project_name into tags.Name is safe
 export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
   constructor(scope: Construct, name: string, cndi_config: CNDIConfig) {
@@ -186,7 +190,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       `cndi_azurerm_kubernetes_cluster`,
       {
         location: this.locals.arm_region.asString,
-        name: `cndi-aks-cluster-${project_name}`,
+        name: `cndi-aks-${project_name}`,
         kubernetesVersion: DEFAULT_K8S_VERSION,
         resourceGroupName: this.rg.name,
         defaultNodePool: {
@@ -196,7 +200,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         tags,
         skuTier: "Free",
-        dnsPrefix: `cndi-aks-${project_name}`,
+        dnsPrefix: `cndi-${project_name}`,
         networkProfile: {
           loadBalancerSku: "standard",
           // Azure CNI= networkPlugin: "azure"
@@ -222,7 +226,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         identity: {
           type: "SystemAssigned",
         },
-        nodeResourceGroup: `rg-${project_name}-cluster-resources`,
+        nodeResourceGroup: `nrg-cndi-${project_name}`,
       },
     );
 

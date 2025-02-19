@@ -6,6 +6,7 @@
   default: "my-cndi-project"
   validators:
     - is_slug
+    - max_length: 48
 
 - name: deployment_target_provider
   type: Select

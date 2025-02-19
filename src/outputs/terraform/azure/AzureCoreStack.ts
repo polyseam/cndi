@@ -3,7 +3,6 @@ import { CNDIConfig } from "src/types.ts";
 import { CNDITerraformStack } from "../CNDICoreTerraformStack.ts";
 
 const DEFAULT_ARM_REGION = "eastus";
-// const CNDI_MAJOR_VERSION = "v2";
 
 export default class AzureCoreTerraformStack extends CNDITerraformStack {
   rg: CDKTFProviderAzure.resourceGroup.ResourceGroup;
@@ -32,7 +31,7 @@ export default class AzureCoreTerraformStack extends CNDITerraformStack {
       "cndi_azurerm_resource_group",
       {
         location: this.locals.arm_region.asString,
-        name: `rg-${this.locals.cndi_project_name.asString}`,
+        name: `rg-cndi-${this.locals.cndi_project_name.asString}`,
         tags: { CNDIProject: this.locals.cndi_project_name.asString },
       },
     );

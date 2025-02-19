@@ -15,6 +15,7 @@ import {
   NO_EXECUTE,
   NO_SCHEDULE,
   PREFER_NO_SCHEDULE,
+  PROJECT_NAME_MAX_LENGTH,
 } from "consts";
 
 import { ErrOut } from "errout";
@@ -124,6 +125,29 @@ export default function validateConfig(
       {
         code: 903,
         id: "validate/cndi_config/!isSlug(project_name)",
+        metadata: { config },
+        label,
+      },
+    );
+  } else if (config.project_name?.length > PROJECT_NAME_MAX_LENGTH) {
+    // project_name must be less than 48 characters
+    // because it is used downstream when provisioning infrastructure
+    console.log();
+    return new ErrOut(
+      [
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"\n`),
+        ccolors.error("but the"),
+        ccolors.key_name('"project_name"'),
+        ccolors.error("is too long"),
+        ccolors.error(
+          `it must be ${PROJECT_NAME_MAX_LENGTH} characters or less`,
+        ),
+      ],
+      {
+        code: 904,
+        id:
+          `validate/cndi_config/project_name.length>${PROJECT_NAME_MAX_LENGTH}`,
         metadata: { config },
         label,
       },
