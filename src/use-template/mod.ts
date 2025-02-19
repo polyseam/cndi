@@ -670,6 +670,7 @@ async function presentCliffyPrompt(
                 BuiltInValidators[validatorName as BuiltInValidator];
 
               if (typeof validate != "function") {
+                console.log();
                 console.log(
                   ccolors.warn("skipping validation of missing validator:"),
                   ccolors.error(validatorName),
