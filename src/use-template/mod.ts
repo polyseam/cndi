@@ -670,19 +670,12 @@ async function presentCliffyPrompt(
                 BuiltInValidators[validatorName as BuiltInValidator];
 
               if (typeof validate != "function") {
-                // TODO: find alternative to throwing error
-                throw new Error(
-                  [
-                    label,
-                    ccolors.error("template error:\n"),
-                    ccolors.error("validator"),
-                    ccolors.user_input(validatorName),
-                    ccolors.error("not found"),
-                  ].join(" "),
-                  {
-                    cause: 1203,
-                  },
+                console.log(
+                  ccolors.warn("skipping validation of missing validator:"),
+                  ccolors.error(validatorName),
                 );
+                validity.push(true);
+                continue;
               } else {
                 const validationError = validate({
                   value,
