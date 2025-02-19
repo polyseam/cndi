@@ -58,6 +58,14 @@ export const BuiltInValidators: Record<string, CNDIValidator> = {
     }
     return `'${val}' is not a valid URL`;
   },
+  max_length: ({ value, arg }: CNDIValidatorInput) => {
+    const len = arg as number;
+    if ((value as string).length <= len) {
+      return null;
+    }
+
+    return `must be at most ${len} characters long`;
+  },
   min_length: ({ value, type, arg }: CNDIValidatorInput) => {
     const len = arg as number;
     if ((value as string).length >= len) {

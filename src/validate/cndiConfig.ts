@@ -128,6 +128,26 @@ export default function validateConfig(
         label,
       },
     );
+  } else if (config.project_name?.length > 32) {
+    // project_name must be less than 32 characters
+    // because it is used downstream when provisioning infrastructure
+    console.log();
+    return new ErrOut(
+      [
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"\n`),
+        ccolors.error("but the"),
+        ccolors.key_name('"project_name"'),
+        ccolors.error("is too long"),
+        ccolors.error("it must be 32 characters or less"),
+      ],
+      {
+        code: 904,
+        id: "validate/cndi_config/project_name.length>32",
+        metadata: { config },
+        label,
+      },
+    );
   }
 
   if (!config?.provider) {
