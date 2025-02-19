@@ -190,7 +190,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
       `cndi_azurerm_kubernetes_cluster`,
       {
         location: this.locals.arm_region.asString,
-        name: `cndi-aks-cluster-${project_name}`,
+        name: `cndi-aks-${project_name}`,
         kubernetesVersion: DEFAULT_K8S_VERSION,
         resourceGroupName: this.rg.name,
         defaultNodePool: {
@@ -200,7 +200,7 @@ export default class AzureAKSTerraformStack extends AzureCoreTerraformStack {
         },
         tags,
         skuTier: "Free",
-        dnsPrefix: `cndi-aks-${project_name}`,
+        dnsPrefix: `cndi-${project_name}`,
         networkProfile: {
           loadBalancerSku: "standard",
           // Azure CNI= networkPlugin: "azure"

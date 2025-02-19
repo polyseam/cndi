@@ -52,3 +52,5 @@ export const EFFECT_VALUES = [
   PREFER_NO_SCHEDULE,
   NO_EXECUTE,
 ] as const;
+
+export const PROJECT_NAME_MAX_LENGTH = 48;

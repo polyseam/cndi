@@ -9,6 +9,7 @@ import {
 import { useSshRepoAuth } from "src/utils.ts";
 import { CNDIConfig } from "src/types.ts";
 import { ccolors } from "deps";
+import { PROJECT_NAME_MAX_LENGTH } from "consts";
 
 export class CNDITerraformStack extends TerraformStack {
   variables: Record<string, TerraformVariable> = {};
@@ -26,13 +27,13 @@ export class CNDITerraformStack extends TerraformStack {
 
     if (
       cndi_config && cndi_config.project_name &&
-      cndi_config.project_name.length > 32
+      cndi_config.project_name.length > PROJECT_NAME_MAX_LENGTH
     ) {
       // should be unreachable, validated upstream
       this.locals.cndi_project_name = new TerraformLocal(
         this,
         "cndi_project_name",
-        cndi_project_name.substring(0, 32),
+        cndi_project_name.substring(0, 48),
       );
       console.log();
       console.log(
@@ -42,7 +43,7 @@ export class CNDITerraformStack extends TerraformStack {
         ccolors.warn(
           `is too long.`,
         ),
-        ccolors.warn(`truncating to 32 characters.`),
+        ccolors.warn(`truncating to ${PROJECT_NAME_MAX_LENGTH} characters.`),
       );
       console.log();
     } else {

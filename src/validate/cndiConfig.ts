@@ -15,6 +15,7 @@ import {
   NO_EXECUTE,
   NO_SCHEDULE,
   PREFER_NO_SCHEDULE,
+  PROJECT_NAME_MAX_LENGTH,
 } from "consts";
 
 import { ErrOut } from "errout";
@@ -128,8 +129,8 @@ export default function validateConfig(
         label,
       },
     );
-  } else if (config.project_name?.length > 32) {
-    // project_name must be less than 32 characters
+  } else if (config.project_name?.length > PROJECT_NAME_MAX_LENGTH) {
+    // project_name must be less than 48 characters
     // because it is used downstream when provisioning infrastructure
     console.log();
     return new ErrOut(
@@ -139,11 +140,14 @@ export default function validateConfig(
         ccolors.error("but the"),
         ccolors.key_name('"project_name"'),
         ccolors.error("is too long"),
-        ccolors.error("it must be 32 characters or less"),
+        ccolors.error(
+          `it must be ${PROJECT_NAME_MAX_LENGTH} characters or less`,
+        ),
       ],
       {
         code: 904,
-        id: "validate/cndi_config/project_name.length>32",
+        id:
+          `validate/cndi_config/project_name.length>${PROJECT_NAME_MAX_LENGTH}`,
         metadata: { config },
         label,
       },
