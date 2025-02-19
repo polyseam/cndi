@@ -1,5 +1,5 @@
 {
-  "version": "2.28.0",
+  "version": "2.28.1",
   "deno_version": "2.2.0",
   "tasks": {
     "tar-win-amd64": "tar -czvf dist/release-archives/cndi-win-amd64.tar.gz -C dist/win-amd64/in .",
