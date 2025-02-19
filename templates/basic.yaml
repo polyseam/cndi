@@ -3,11 +3,6 @@ prompts:
       {}
   - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
       {}
-  - name: arbitrary_prompt
-    message: >-
-      This is an arbitrary prompt
-    type: Input
-    default: "arbitrary"
 
 outputs:
   cndi_config:
