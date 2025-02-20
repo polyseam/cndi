@@ -21,7 +21,6 @@ export default function App({ Component, url }: PageProps) {
         {!devMode
           ? (
             <SegmentSnippet
-              domain=".cndi.dev"
               mixpanelCode="26ce66c5e540b010ebdfa66679a34601"
               analyticsCode="mos3oCk9omHRbDaWH8jp1FCM8UHAKHFh"
             />
