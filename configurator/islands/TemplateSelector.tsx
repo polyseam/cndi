@@ -13,7 +13,7 @@ const templates: Template[] = [
     ({ name, configurator_name }) => ({
       name,
       configurator_name,
-    })
+    }),
   ),
 ];
 
@@ -60,17 +60,19 @@ const TemplateLinks = () => {
           ? abbreviateTemplateIdentifier(templateParam) === name
           : false;
 
-        return isActive ? (
-          <ActiveTemplateLink
-            name={name}
-            configurator_name={configurator_name}
-          />
-        ) : (
-          <InactiveTemplateLink
-            name={name}
-            configurator_name={configurator_name}
-          />
-        );
+        return isActive
+          ? (
+            <ActiveTemplateLink
+              name={name}
+              configurator_name={configurator_name}
+            />
+          )
+          : (
+            <InactiveTemplateLink
+              name={name}
+              configurator_name={configurator_name}
+            />
+          );
       })}
     </div>
   );
@@ -130,13 +132,15 @@ export default function TemplateSelector() {
             }}
           />
         </div>
-        {isValidTemplateIdentifier.value ? (
-          <div class="text-cyan-400 mt-2 underline">
-            <a href={`?t=${templateIdentifier.value}`}>
-              configurator.cndi.dev/?t={templateIdentifier.value}
-            </a>
-          </div>
-        ) : null}
+        {isValidTemplateIdentifier.value
+          ? (
+            <div class="text-cyan-400 mt-2 underline">
+              <a href={`?t=${templateIdentifier.value}`}>
+                configurator.cndi.dev/?t={templateIdentifier.value}
+              </a>
+            </div>
+          )
+          : null}
       </div>
     </>
   );

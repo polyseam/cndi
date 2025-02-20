@@ -2,8 +2,14 @@ name: Deploy
 on:
   push:
     branches: main
+    paths:
+      - "configurator/**"
+      - "shared-modules/**"
   pull_request:
     branches: main
+    paths:
+      - "configurator/**"
+      - "shared-modules/**"
 
 jobs:
   deploy:
