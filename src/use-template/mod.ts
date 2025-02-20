@@ -7,7 +7,7 @@ import {
   YAML,
 } from "deps";
 
-import { BuiltInValidators } from "./util/validation.ts";
+import { BuiltInValidators } from "shared-modules/prompt-validators.ts";
 import { CNDITemplateComparators } from "./util/conditions.ts";
 import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
