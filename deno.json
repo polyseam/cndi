@@ -88,6 +88,9 @@
     "versions": "./src/versions.ts",
     "known-templates": "./shared-modules/known-templates.ts"
   },
+  "check": {
+    "exclude": ["dist/*", "configurator/*"]
+  },
   "lint": {
     "exclude": ["dist/*", "configurator/*"]
   },
