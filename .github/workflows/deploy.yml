@@ -31,5 +31,5 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "cndi-configurator"
-          entrypoint: "main.ts"
-          root: "configurator"
+          entrypoint: "configurator/main.ts"
+          include: "configurator/**, shared-modules/**"
