@@ -7,6 +7,7 @@ type KnownTemplate = {
   name: string;
   url: string;
   aliases?: string[];
+  configurator_name?: string;
 };
 
 export const KNOWN_TEMPLATES: KnownTemplate[] = [
@@ -22,6 +23,7 @@ export const KNOWN_TEMPLATES: KnownTemplate[] = [
     name: "cnpg",
     url: `${POLYSEAM_TEMPLATE_DIRECTORY_URL}/cnpg.yaml`,
     aliases: ["pg", "postgres", "postgresql"],
+    configurator_name: "postgres",
   },
   {
     name: "kafka",

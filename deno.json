@@ -79,13 +79,14 @@
     "lodash.unset": "npm:lodash.unset@4.5.2",
     "octokit": "npm:octokit@^3.1.2",
     "simple-git": "npm:simple-git@3.18.0",
+    "shared-modules/": "./shared-modules/",
     "src/": "./src/",
     "test-deps": "./src/tests/deps.ts",
     "px": "./src/px/mod.ts",
     "validator": "npm:validator@13.11.0",
     "errout": "./src/ErrOut.ts",
     "versions": "./src/versions.ts",
-    "known-templates": "./src/known-templates.ts"
+    "known-templates": "./shared-modules/known-templates.ts"
   },
   "lint": {
     "exclude": ["dist/*"]
