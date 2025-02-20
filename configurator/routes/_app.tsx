@@ -23,7 +23,7 @@ export default function App({ Component, url }: PageProps) {
             <SegmentSnippet
               domain=".cndi.dev"
               mixpanelCode="26ce66c5e540b010ebdfa66679a34601"
-              analyticsCode="MS1j3f3cwJSgjFxigYY2bTQ6LtPjypXG"
+              analyticsCode="mos3oCk9omHRbDaWH8jp1FCM8UHAKHFh"
             />
           )
           : <meta name="devmode" />}
