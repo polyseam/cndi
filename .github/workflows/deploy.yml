@@ -10,7 +10,7 @@ on:
     paths:
       - "configurator/**"
       - "shared-modules/**"
-      
+
 jobs:
   deploy:
     name: Deploy
