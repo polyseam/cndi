@@ -24,13 +24,12 @@ jobs:
           deno-version: v2.x
 
       - name: Build step
+        working-directory: ./configurator
         run: "deno task build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
           project: "cndi-configurator"
-          entrypoint: "configurator/main.ts"
+          entrypoint: "main.ts"
           root: "configurator"
-          
-          
