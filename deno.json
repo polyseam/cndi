@@ -89,7 +89,7 @@
     "known-templates": "./shared-modules/known-templates.ts"
   },
   "lint": {
-    "exclude": ["dist/*"]
+    "exclude": ["dist/*", "configurator/*"]
   },
   "fmt": {
     "exclude": ["dist/*"]
