@@ -10,6 +10,7 @@ export default function SourceShower({ source, name = "Source" }: Props) {
     <>
       <div class={`my-4 p-4 bg-[#333] text-purple-200 rounded`}>
         <button
+          type="button"
           class="text-purple-200 border-gray-300 rounded focus:ring-blue-400 hover:cursor-pointer"
           id="show-source-button"
           onClick={() => {

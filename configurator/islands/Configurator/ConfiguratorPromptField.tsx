@@ -51,7 +51,7 @@ export const ConfiguratorPromptFieldError = ({
   return (
     <div class="mx-2 text-red-500">
       <span class="font-mono text-xs">{responseName}</span>
-      <span class="text-xs text-red-400">{" "}{message}</span>
+      <span class="text-xs text-red-400">{message}</span>
     </div>
   );
 };

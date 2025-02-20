@@ -82,14 +82,14 @@ export function CNDICreateConfiguratorCLISnippet(
         but inline on larger screens. Adjust the breakpoints as needed.
       */
       }
-      <span class="verb text-purple-200 block sm:inline">cndi{" "}</span>
-      <span class="verb text-purple-200 block sm:inline">create{" "}</span>
-      <span class="option-name text-green-600 block sm:inline">-r{" "}</span>
+      <span class="verb text-purple-200 block sm:inline">cndi</span>
+      <span class="verb text-purple-200 block sm:inline">create</span>
+      <span class="option-name text-green-600 block sm:inline">-r</span>
       <span class="option-val text-purple-200 block sm:inline">
         {filepath}
         {" "}
       </span>
-      <span class="option-name text-green-600 block sm:inline">-t{" "}</span>
+      <span class="option-name text-green-600 block sm:inline">-t</span>
       <span class="option-val text-purple-200 block sm:inline">
         {templateIdentifier}
         {" "}
