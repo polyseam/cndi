@@ -20,7 +20,7 @@ import {
 import { owAction } from "src/commands/overwrite.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
-import { KNOWN_TEMPLATES } from "known-templates";
+import { KNOWN_TEMPLATES } from "@cndi/known-templates";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";

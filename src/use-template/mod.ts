@@ -7,7 +7,7 @@ import {
   YAML,
 } from "deps";
 
-import { BuiltInValidators } from "shared-modules/prompt-validators.ts";
+import { CNDIValidators } from "@cndi/validators";
 import { CNDITemplateComparators } from "./util/conditions.ts";
 import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
@@ -19,7 +19,7 @@ import type {
 import {
   KNOWN_TEMPLATES,
   POLYSEAM_TEMPLATE_DIRECTORY_URL,
-} from "known-templates";
+} from "@cndi/known-templates";
 
 import {
   findPositionOfCNDICallEndToken,
@@ -34,7 +34,7 @@ import { unsetValueForKeyPath } from "deps";
 
 import { ErrOut } from "errout";
 
-type BuiltInValidator = keyof typeof BuiltInValidators;
+type CNDIValidator = keyof typeof CNDIValidators;
 
 const label = ccolors.faded("\n@cndi/use-template:");
 
@@ -666,8 +666,7 @@ async function presentCliffyPrompt(
                 validatorName = validatorSpec;
               }
 
-              const validate =
-                BuiltInValidators[validatorName as BuiltInValidator];
+              const validate = CNDIValidators[validatorName as CNDIValidator];
 
               if (typeof validate != "function") {
                 console.log();
