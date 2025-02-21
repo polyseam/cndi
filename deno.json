@@ -86,7 +86,7 @@
     "validator": "npm:validator@13.11.0",
     "errout": "./src/ErrOut.ts",
     "versions": "./src/versions.ts",
-    "known-templates": "./shared-modules/known-templates.ts"
+    "@cndi/known-templates": "jsr:@cndi/known-templates@^0.1.0"
   },
-  "exclude": ["dist/*", "configurator/*"]
+  "exclude": ["dist/*"]
 }
