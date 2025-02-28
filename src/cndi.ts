@@ -78,6 +78,11 @@ export default async function cndi() {
     .description("Cloud-Native Data Infrastructure")
     .meta("kubeseal", `v${KUBESEAL_VERSION}`)
     .meta("terraform", `v${TERRAFORM_VERSION}`)
+    .action(async function () {
+      this.showHelp();
+      await emitExitEvent(0);
+      Deno.exit(0);
+    })
     .globalOption("--welcome", "a new user has arrived!", {
       hidden: true,
     })
