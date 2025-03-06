@@ -74,8 +74,8 @@
     "build-linux-arm64": {
       "dependencies": [
         "checks",
-        "clean-linux-amd64",
-        "compile-linux-amd64"
+        "clean-linux-arm64",
+        "compile-linux-arm64"
       ]
     },
 
