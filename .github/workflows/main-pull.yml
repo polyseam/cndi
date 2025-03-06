@@ -14,14 +14,8 @@ jobs:
         with:
           deno-version: v2.2.2
 
-      - name: Check formatting
-        run: deno fmt --check
-
-      - name: Lint
-        run: deno lint
-
-      - name: Type check
-        run: deno task check
+      - name: Checks
+        run: deno task checks
 
       - name: Install cndi dependency binaries
         run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
