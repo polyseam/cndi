@@ -2,34 +2,123 @@
   "version": "2.29.0",
   "deno_version": "2.2.2",
   "tasks": {
-    "tar-win-amd64": "tar -czvf dist/release-archives/cndi-win-amd64.tar.gz -C dist/win-amd64/in .",
-    "tar-linux-amd64": "tar -czvf dist/release-archives/cndi-linux-amd64.tar.gz -C dist/linux-amd64/in .",
-    "tar-linux-arm64": "tar -czvf dist/release-archives/cndi-linux-arm64.tar.gz -C dist/linux-arm64/in .",
-    "tar-mac-amd64": "tar -czvf dist/release-archives/cndi-mac-amd64.tar.gz -C dist/mac-amd64/in .",
-    "tar-mac-arm64": "tar -czvf dist/release-archives/cndi-mac-arm64.tar.gz -C dist/mac-arm64/in .",
-    "tar-all": "deno task tar-mac-arm64 && deno task tar-mac-amd64 && deno task tar-win-amd64 && deno task tar-linux-amd64 && deno task tar-linux-arm64",
+    "checks": {
+      "command": "deno lint && deno check . && deno fmt --check"
+    },
+
+    "archive-all": {
+      "dependencies": [
+        "archive-win-amd64",
+        "archive-linux-amd64",
+        "archive-linux-arm64",
+        "archive-mac-amd64",
+        "archive-mac-arm64"
+      ]
+    },
+
+    "archive-win-amd64": "tar -czvf dist/release-archives/cndi-win-amd64.tar.gz -C dist/win-amd64/in .",
+    "archive-linux-amd64": "tar -czvf dist/release-archives/cndi-linux-amd64.tar.gz -C dist/linux-amd64/in .",
+    "archive-linux-arm64": "tar -czvf dist/release-archives/cndi-linux-arm64.tar.gz -C dist/linux-arm64/in .",
+    "archive-mac-amd64": "tar -czvf dist/release-archives/cndi-mac-amd64.tar.gz -C dist/mac-amd64/in .",
+    "archive-mac-arm64": "tar -czvf dist/release-archives/cndi-mac-arm64.tar.gz -C dist/mac-arm64/in .",
+
+    "compile-all": {
+      "dependencies": [
+        "compile-win-amd64",
+        "compile-linux-amd64",
+        "compile-linux-arm64",
+        "compile-mac-amd64",
+        "compile-mac-arm64"
+      ]
+    },
+
     "compile-win-amd64": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/win-amd64/in/cndi.exe main.ts",
     "compile-linux-arm64": "deno compile --allow-all --target aarch64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-arm64/in/cndi main.ts",
     "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-amd64/in/cndi main.ts",
     "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-arm64/in/cndi main.ts",
     "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-amd64/in/cndi main.ts",
-    "compile-all": "deno task compile-win-amd64 && deno task compile-linux-amd64 && deno task compile-linux-arm64 && deno task compile-mac-arm64 && deno task compile-mac-amd64",
+
+    "clean-dist": {
+      "dependencies": [
+        "clean-mac-arm64",
+        "clean-mac-amd64",
+        "clean-win-amd64",
+        "clean-linux-amd64",
+        "clean-linux-arm64"
+      ]
+    },
+
     "clean-mac-amd64": "rm dist/mac-amd64/in/cndi || true && rm dist/release-archives/cndi-mac-amd64.tar.gz || true",
     "clean-mac-arm64": "rm dist/mac-arm64/in/cndi || true && rm dist/release-archives/cndi-mac-arm64.tar.gz || true",
     "clean-win-amd64": "rm dist/win-amd64/in/cndi.exe || true && rm dist/release-archives/cndi-win-amd64.tar.gz || true",
     "clean-linux-amd64": "rm dist/linux-amd64/in/cndi || true && rm dist/release-archives/cndi-linux-amd64.tar.gz || true",
     "clean-linux-arm64": "rm dist/linux-arm64/in/cndi || true && rm dist/release-archives/cndi-linux-arm64.tar.gz || true",
-    "clean-dist": "deno task clean-mac-arm64 && deno task clean-mac-amd64 && deno task clean-win-amd64 && deno task clean-linux-amd64 && deno task clean-linux-arm64",
-    "build": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-all && deno task tar-all",
-    "build-mac-arm64": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-mac-arm64",
-    "build-mac-amd64": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-mac-amd64",
-    "build-linux-amd64": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-linux-amd64",
-    "build-linux-arm64": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-linux-arm64",
-    "build-win-amd64": "deno lint && deno task check && deno fmt && deno task clean-dist && deno task compile-win-amd64",
-    "check": "deno check .",
-    "test": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check",
+
+    "build": {
+      "dependencies": [
+        "checks",
+        "clean-dist",
+        "compile-all",
+        "archive-all"
+      ]
+    },
+
+    "build-linux-amd64": {
+      "dependencies": [
+        "checks",
+        "clean-linux-amd64",
+        "compile-linux-amd64"
+      ]
+    },
+
+    "build-linux-arm64": {
+      "dependencies": [
+        "checks",
+        "clean-linux-amd64",
+        "compile-linux-amd64"
+      ]
+    },
+
+    "build-mac-amd64": {
+      "dependencies": [
+        "checks",
+        "clean-mac-amd64",
+        "compile-mac-amd64"
+      ]
+    },
+
+    "build-mac-arm64": {
+      "dependencies": [
+        "checks",
+        "clean-mac-arm64",
+        "compile-mac-arm64"
+      ]
+    },
+
+    "build-win-amd64": {
+      "dependencies": [
+        "checks",
+        "clean-win-amd64",
+        "compile-win-amd64"
+      ]
+    },
+
+    "test": {
+      "command": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+    },
+
     "test-slow": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel",
-    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
+    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
+
+    "fix": {
+      "dependencies": [
+        "fmt",
+        "lint-fix"
+      ]
+    },
+
+    "fmt": "deno fmt",
+    "lint-fix": "deno lint --fix"
   },
   "imports": {
     "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.49.1",
