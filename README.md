@@ -4,8 +4,8 @@
 </div>
 <br>
 <p align="center">
-  <a href="https://github.com/polyseam/cndi/actions/workflows/main-latest.yaml">
-    <img src="https://github.com/polyseam/cndi/actions/workflows/main-latest.yaml/badge.svg" alt="main" style="max-width: 100%;">
+  <a href="https://github.com/polyseam/cndi/actions/workflows/checks.yaml">
+    <img src="https://github.com/polyseam/cndi/actions/workflows/checks.yaml/badge.svg" alt="checks" style="max-width: 100%;">
   </a>
   <img src="https://img.shields.io/badge/Dependabot-active-brightgreen.svg" alt="Dependabot Badge">
   <img src="https://img.shields.io/github/languages/code-size/polyseam/cndi" alt="GitHub code size in bytes">

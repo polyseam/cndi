@@ -16,8 +16,7 @@ jobs:
         with:
           deno-version: "v2.2.2"
 
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get version from deno.json
         uses: polyseam/get-version-key-from-json@v1.0.0
@@ -34,8 +33,11 @@ jobs:
         run: |
           echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ steps.get_version_from_ref.outputs.VERSION }}" && exit 1
 
-      - name: Build
-        run: deno task build
+      - run: deno task checks
+
+      - run: deno task test
+
+      - run: deno task build
 
       # this ensures `cndi upgrade` works for users with cndi@<v2.27
       # it's a waste of disk space for GitHub and we should remove it when we are certain all users have upgraded
@@ -51,9 +53,6 @@ jobs:
 
       - name: Install cndi dependency binaries
         run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
-
-      - name: Test
-        run: deno task test
 
       - name: Release
         uses: softprops/action-gh-release@v1
