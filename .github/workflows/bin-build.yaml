@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.2.2"
-      
+
       - run: deno task checks
-      
+
       - run: deno task build-linux-amd64
-      
+
       - run: ./dist/linux-amd64/in/cndi --help
         timeout-minutes: 1
 
@@ -29,15 +29,15 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.2.2"
-      
+
       - run: deno task checks
-      
+
       - run: deno task build-linux-arm64
-      
+
       - run: ./dist/linux-arm64/in/cndi --help
         timeout-minutes: 1
 
@@ -45,15 +45,15 @@ jobs:
     runs-on: macos-13 # macOS 13 Ventura intel-based
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.2.2"
-      
+
       - run: deno task checks
-      
+
       - run: deno task build-mac-amd64
-      
+
       - run: ./dist/mac-amd64/in/cndi --help
         timeout-minutes: 1
 
@@ -61,15 +61,15 @@ jobs:
     runs-on: macos-15 # macOS 15 Sequoia apple silicon
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.2.2"
-      
+
       - run: deno task checks
-     
+
       - run: deno task build-mac-arm64
-      
+
       - run: ./dist/mac-arm64/in/cndi --help
         timeout-minutes: 1
 
@@ -77,14 +77,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: "v2.2.2"
-      
+
       - run: deno task checks
-      
+
       - run: deno task build-win-amd64
-      
+
       - run: ./dist/win-amd64/in/cndi.exe --help
         timeout-minutes: 1
