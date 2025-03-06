@@ -18,20 +18,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Get version from deno.json
-        uses: polyseam/get-version-key-from-json@v1.0.0
-        id: get_deno_json
-        with:
-          path-to-json: "./deno.json"
-
-      - name: Get the tag version without prefix
-        id: get_version_from_ref
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
-
-      - name: Compare Git Tag to CNDI Version
-        if: ${{ steps.get_deno_json.outputs.version != steps.get_version_from_ref.outputs.VERSION }}
-        run: |
-          echo "CNDI Version: ${{ steps.get_deno_json.outputs.version }} does not match Tag version: ${{ steps.get_version_from_ref.outputs.VERSION }}" && exit 1
+      - uses: polyseam/tag-matches-version@v1
 
       - run: deno task checks
 
