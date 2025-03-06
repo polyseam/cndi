@@ -7,11 +7,9 @@ jobs:
   main-test-and-lint:
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: use deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.2.2
 
@@ -25,11 +23,9 @@ jobs:
   main-build: # cndi
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: use deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.2.2
 

@@ -6,19 +6,15 @@ jobs:
   test_and_lint: # cndi
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: use deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.2.2
 
-      - name: Checks
-        run: deno task checks
+      - run: deno task checks
 
       - name: Install cndi dependency binaries
         run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
 
-      - name: Test
-        run: deno task test
+      - run: deno task test

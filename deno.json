@@ -56,7 +56,6 @@
 
     "build": {
       "dependencies": [
-        "checks",
         "clean-dist",
         "compile-all",
         "archive-all"
@@ -65,7 +64,6 @@
 
     "build-linux-amd64": {
       "dependencies": [
-        "checks",
         "clean-linux-amd64",
         "compile-linux-amd64"
       ]
@@ -73,7 +71,6 @@
 
     "build-linux-arm64": {
       "dependencies": [
-        "checks",
         "clean-linux-arm64",
         "compile-linux-arm64"
       ]
@@ -81,7 +78,6 @@
 
     "build-mac-amd64": {
       "dependencies": [
-        "checks",
         "clean-mac-amd64",
         "compile-mac-amd64"
       ]
@@ -89,7 +85,6 @@
 
     "build-mac-arm64": {
       "dependencies": [
-        "checks",
         "clean-mac-arm64",
         "compile-mac-arm64"
       ]
@@ -97,7 +92,6 @@
 
     "build-win-amd64": {
       "dependencies": [
-        "checks",
         "clean-win-amd64",
         "compile-win-amd64"
       ]
