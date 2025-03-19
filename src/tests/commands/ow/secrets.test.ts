@@ -1,5 +1,5 @@
 import { assert } from "test-deps";
-
+import { describe, it } from "@std/testing/bdd";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import {
@@ -10,19 +10,17 @@ import {
 import { loadCndiConfig } from "src/utils.ts";
 import { path, YAML } from "src/deps.ts";
 
-// Deno.env.set("CNDI_TELEMETRY", "debug");
+describe("cndi ow secrets", () => {
+  it("should successfully convert secrets if correctly defined", async () => {
+    const cwd = await Deno.makeTempDir();
 
-Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, async (t) => {
-  const cwd = await Deno.makeTempDir();
-
-  await t.step("setup", async () => {
+    // Setup
     await runCndi({
       args: ["init", "-t", "basic", "-l", "aws/eks"],
       cwd,
     });
-  });
 
-  await t.step("test", async () => {
+    // Test
     const { before, after } = await listFilepathsBeforeAndAfter(async () => {
       const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
@@ -73,42 +71,37 @@ Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, 
     const dotenv = await Deno.readTextFile(path.join(cwd, ".env"));
     assert(dotenv.includes("BAR_SECRET"));
   });
-});
 
-Deno.test(
-  `'cndi ow' should fail if secrets use plaintext in their definition`,
-  async (t) => {
+  it("should fail if secrets use plaintext in their definition", async () => {
     const cwd = await Deno.makeTempDir();
 
-    await t.step("setup", async () => {
-      await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
-    });
+    // Setup
+    await runCndi({ args: ["init", "-t", "basic", "-l", "aws/eks"], cwd });
 
-    await t.step("test", async () => {
-      const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-        const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
+    // Test
+    const { before, after } = await listFilepathsBeforeAndAfter(async () => {
+      const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
-        if (errorLoadingConfig) {
-          assert(false, errorLoadingConfig.message);
-        }
+      if (errorLoadingConfig) {
+        assert(false, errorLoadingConfig.message);
+      }
 
-        const { config } = result;
-        config.cluster_manifests["new-secret"] = {
-          kind: "Secret",
-          metadata: {
-            name: "my-secret",
-          },
-          stringData: {
-            password: "plaintext",
-          },
-        };
-        await Deno.writeTextFile(
-          `${cwd}/cndi_config.yaml`,
-          YAML.stringify(config),
-        );
-        await runCndi({ args: ["ow"], cwd });
-      }, cwd);
-      assert(setsAreEquivalent(new Set(before), new Set(after)));
-    });
-  },
-);
+      const { config } = result;
+      config.cluster_manifests["new-secret"] = {
+        kind: "Secret",
+        metadata: {
+          name: "my-secret",
+        },
+        stringData: {
+          password: "plaintext",
+        },
+      };
+      await Deno.writeTextFile(
+        `${cwd}/cndi_config.yaml`,
+        YAML.stringify(config),
+      );
+      await runCndi({ args: ["ow"], cwd });
+    }, cwd);
+    assert(setsAreEquivalent(new Set(before), new Set(after)));
+  });
+});

@@ -3,7 +3,6 @@ import getNginxApplicationManifest from "src/outputs/core-applications/public-ng
 import { loadCndiConfig } from "src/utils.ts";
 import { YAML } from "deps";
 import getProjectRootDir from "get-project-root";
-// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 const [err, loadConfigResult] = await loadCndiConfig(getProjectRootDir());
 

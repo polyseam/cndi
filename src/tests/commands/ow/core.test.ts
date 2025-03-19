@@ -12,8 +12,6 @@ import {
 import { loadCndiConfig } from "src/utils.ts";
 import { path, YAML } from "src/deps.ts";
 
-// Deno.env.set("CNDI_TELEMETRY", "debug");
-
 describe("cndi ow command", () => {
   it("should do nothing if no config or inputs have changed", async () => {
     const cwd = await Deno.makeTempDir();
