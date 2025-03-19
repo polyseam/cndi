@@ -169,7 +169,7 @@
     "validator": "npm:validator@13.11.0",
     "errout": "./src/ErrOut.ts",
     "versions": "./src/versions.ts",
-    "@cndi/known-templates": "jsr:@cndi/known-templates@^0.1.0",
+    "@cndi/known-templates": "jsr:@cndi/known-templates@^1.0.1",
     "@cndi/validators": "jsr:@cndi/validators@^0.1.0"
   },
   "exclude": ["dist/*"]
