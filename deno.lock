@@ -70,14 +70,13 @@
     "npm:cdktf@0.20.10": "0.20.10_constructs@10.3.0",
     "npm:cdktf@~0.20.11": "0.20.11_constructs@10.3.0",
     "npm:constructs@10.3.0": "10.3.0",
-    "npm:crypto-js@4.1.1": "4.1.1",
+    "npm:crypto-js@4.2.0": "4.2.0",
     "npm:lodash.get@4.4.2": "4.4.2",
     "npm:lodash.set@4.3.2": "4.3.2",
     "npm:lodash.unset@4.5.2": "4.5.2",
     "npm:netmask@2.0.2": "2.0.2",
     "npm:octokit@^3.1.2": "3.2.1_@octokit+core@5.2.0",
-    "npm:simple-git@3.18.0": "3.18.0",
-    "npm:validator@13.11.0": "13.11.0",
+    "npm:simple-git@3.27.0": "3.27.0",
     "npm:validator@13.12.0": "13.12.0",
     "npm:validator@^13.12.0": "13.12.0"
   },
@@ -879,8 +878,8 @@
         "readable-stream@3.6.2"
       ]
     },
-    "crypto-js@4.1.1": {
-      "integrity": "sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw=="
+    "crypto-js@4.2.0": {
+      "integrity": "sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q=="
     },
     "debug@4.4.0": {
       "integrity": "sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==",
@@ -1185,8 +1184,8 @@
         "has-property-descriptors"
       ]
     },
-    "simple-git@3.18.0": {
-      "integrity": "sha512-Yt0GJ5aYrpPci3JyrYcsPz8Xc05Hi4JPSOb+Sgn/BmPX35fn/6Fp9Mef8eMBCrL2siY5w4j49TA5Q+bxPpri1Q==",
+    "simple-git@3.27.0": {
+      "integrity": "sha512-ivHoFS9Yi9GY49ogc6/YAi3Fl9ROnF4VyubNylgCkA+RVqLaKWnDSzXOVzya8csELIaWaYNutsEuAhZrtOjozA==",
       "dependencies": [
         "@kwsites/file-exists",
         "@kwsites/promise-deferred",
@@ -1255,9 +1254,6 @@
     },
     "util-deprecate@1.0.2": {
       "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="
-    },
-    "validator@13.11.0": {
-      "integrity": "sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ=="
     },
     "validator@13.12.0": {
       "integrity": "sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg=="
@@ -1459,14 +1455,13 @@
       "npm:@cdktf/provider-tls@^10.0.1",
       "npm:cdktf@~0.20.11",
       "npm:constructs@10.3.0",
-      "npm:crypto-js@4.1.1",
+      "npm:crypto-js@4.2.0",
       "npm:lodash.get@4.4.2",
       "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2",
       "npm:netmask@2.0.2",
-      "npm:octokit@^3.1.2",
-      "npm:simple-git@3.18.0",
-      "npm:validator@13.11.0"
+      "npm:simple-git@3.27.0",
+      "npm:validator@13.12.0"
     ]
   }
 }
