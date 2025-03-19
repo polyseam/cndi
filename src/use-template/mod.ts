@@ -323,6 +323,7 @@ async function getBlockForIdentifier(
   try {
     blockBodyResponse = await fetch(blockIdentifierURL);
   } catch {
+    await blockBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -341,6 +342,7 @@ async function getBlockForIdentifier(
   }
 
   if (!blockBodyResponse.ok) {
+    await blockBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -442,6 +444,7 @@ async function getTemplateBodyStringForIdentifier(
   try {
     templateBodyResponse = await fetch(templateIdentifierURL);
   } catch {
+    await templateBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -459,6 +462,7 @@ async function getTemplateBodyStringForIdentifier(
   }
 
   if (!templateBodyResponse.ok) {
+    await templateBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1038,6 +1042,7 @@ async function getStringForIdentifier(
   try {
     stringResponse = await fetch(identifierURL!);
   } catch {
+    await stringResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1054,6 +1059,7 @@ async function getStringForIdentifier(
   }
 
   if (!stringResponse.ok) {
+    await stringResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1254,6 +1260,7 @@ async function processCNDIExtraFilesOutput(
       if (response.ok) {
         extra_files[key] = await response.text();
       } else {
+        await response.body?.cancel();
         return [
           new ErrOut(
             [

@@ -9,7 +9,7 @@ import {
 } from "src/tests/helpers/util.ts";
 
 import { path } from "src/deps.ts";
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 describe("cndi ow functions", () => {
   it("should bootstrap functions if source typescript is provided", async () => {

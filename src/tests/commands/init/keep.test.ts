@@ -4,7 +4,7 @@ import { path, YAML } from "deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test(
   "'cndi init -t airflow -l aws/microk8s -k' should generate a cndi_responses.yaml which parses successfully",

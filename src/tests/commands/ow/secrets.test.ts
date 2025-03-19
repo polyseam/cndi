@@ -10,7 +10,7 @@ import {
 import { loadCndiConfig } from "src/utils.ts";
 import { path, YAML } from "src/deps.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test(`'cndi ow' should successfully convert secrets if correctly defined`, async (t) => {
   const cwd = await Deno.makeTempDir();

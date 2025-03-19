@@ -98,11 +98,16 @@
     },
 
     "test": {
-      "command": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
     },
 
-    "test-slow": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel",
-    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
+    "test-slow": {
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel"
+    },
+
+    "test-watch": {
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --watch"
+    },
 
     "fix": {
       "dependencies": [

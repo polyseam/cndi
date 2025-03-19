@@ -2,7 +2,7 @@ import { assert } from "test-deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 import { path } from "deps";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test(
   "'cndi init -t basic -l gcp/gke should succeed",

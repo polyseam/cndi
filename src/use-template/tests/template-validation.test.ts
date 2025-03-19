@@ -3,11 +3,7 @@ import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
 import { describe, it } from "@std/testing/bdd";
 
-// This would replace the mySanity object in the BDD style
-
-const mySanity = { sanitizeResources: false, sanitizeOps: false };
-
-describe("Template Validation", mySanity, () => {
+describe("Template Validation", () => {
   it("should pass validation when a 'basic' template is given minimum configuration", async () => {
     const template = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,

@@ -4,7 +4,7 @@ import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import { hasSameFilesAfter } from "src/tests/helpers/util.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test(
   "'cndi init -t foo' should throw an error because 'foo' is not a valid template",

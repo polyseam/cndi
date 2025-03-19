@@ -4,7 +4,7 @@ import { path } from "deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 Deno.test(
   "'cndi init' should create a readme that begins with the 'project_name' if specified in --set",

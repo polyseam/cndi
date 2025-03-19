@@ -2,9 +2,6 @@ import { assert } from "test-deps";
 import { describe, it } from "@std/testing/bdd";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
-
-Deno.env.set("CNDI_TELEMETRY", "debug");
-
 describe("cndi create command", () => {
   it("should throw an error if the repo-slug argument contains invalid characters", async () => {
     const cwd = await Deno.makeTempDir();

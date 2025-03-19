@@ -3,7 +3,7 @@ import { describe, it } from "@std/testing/bdd";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
+// Deno.env.set("CNDI_TELEMETRY", "debug");
 
 describe("cndi global command", () => {
   it("should show help message when no subcommands are provided", async () => {

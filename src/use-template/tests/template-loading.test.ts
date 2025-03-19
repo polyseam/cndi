@@ -3,9 +3,7 @@ import { useTemplate } from "../mod.ts";
 import { assert } from "test-deps";
 import { describe, it } from "@std/testing/bdd";
 
-const mySanity = { sanitizeResources: false, sanitizeOps: false };
-
-describe("Template Loading", mySanity, () => {
+describe("Template Loading", () => {
   // This might be duplicate of the file URL test
   it("should load the alpha template from the filesystem with a valid path", async () => {
     const [_, template] = await useTemplate(
