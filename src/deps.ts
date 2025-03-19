@@ -14,7 +14,7 @@ export {
 } from "@std/fs";
 export { load as loadEnv, loadSync as loadEnvSync } from "@std/dotenv";
 export { writeAll } from "@std/io";
-export { Spinner, type SpinnerOptions } from "@std/cli";
+export { Spinner, type SpinnerOptions } from "@std/cli/unstable-spinner";
 
 // node std lib
 export { homedir, platform } from "node:os";
