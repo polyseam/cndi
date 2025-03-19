@@ -98,15 +98,15 @@
     },
 
     "test": {
-      "command": "CNDI_TELEMETRY=DEBUG deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+      "command": "cat test.env && deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
     },
 
     "test-slow": {
-      "command": "CNDI_TELEMETRY=DEBUG --allow-all --v8-flags=--max-old-space-size=8000 --parallel"
+      "command": "cat test.env && deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel"
     },
 
     "test-watch": {
-      "command": "CNDI_TELEMETRY=DEBUG deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch"
+      "command": "cat test.env && deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --watch"
     },
 
     "fix": {
