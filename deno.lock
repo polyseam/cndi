@@ -12,7 +12,7 @@
     "jsr:@cliffy/prompt@^1.0.0-rc.5": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cndi/cdktf@0.4": "0.4.0",
-    "jsr:@cndi/known-templates@0.1": "0.1.0",
+    "jsr:@cndi/known-templates@^1.0.1": "1.0.1",
     "jsr:@cndi/validators@0.1": "0.1.0",
     "jsr:@polyseam/cliffy-provider-gh-releases@2.0.0": "2.0.0",
     "jsr:@polyseam/inflate-response@1.1.2": "1.1.2",
@@ -26,6 +26,7 @@
     "jsr:@std/bytes@0.221": "0.221.0",
     "jsr:@std/cli@0.221": "0.221.0",
     "jsr:@std/collections@0.221": "0.221.0",
+    "jsr:@std/data-structures@0.221": "0.221.0",
     "jsr:@std/dotenv@0.221": "0.221.0",
     "jsr:@std/encoding@~1.0.5": "1.0.6",
     "jsr:@std/fmt@0.221": "0.221.0",
@@ -42,25 +43,28 @@
     "jsr:@std/path@0.214.0": "0.214.0",
     "jsr:@std/path@0.221": "0.221.0",
     "jsr:@std/path@~1.0.6": "1.0.8",
+    "jsr:@std/semver@*": "1.0.3",
+    "jsr:@std/semver@1.0.4": "1.0.4",
     "jsr:@std/semver@^1.0.3": "1.0.3",
+    "jsr:@std/streams@0.221": "0.221.0",
     "jsr:@std/testing@0.221": "0.221.0",
     "jsr:@std/text@~1.0.7": "1.0.10",
     "jsr:@std/yaml@0.221": "0.221.0",
-    "npm:@cdktf/provider-aws@^19.49.1": "19.49.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
-    "npm:@cdktf/provider-azurerm@^13.15.0": "13.15.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
-    "npm:@cdktf/provider-google@^14.15.0": "14.15.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-aws@^19.57.0": "19.57.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-azurerm@^13.22.0": "13.22.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-google@^14.24.0": "14.24.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-helm@^10.5.0": "10.5.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
-    "npm:@cdktf/provider-kubernetes@^11.10.1": "11.10.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-kubernetes@^11.11.0": "11.11.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-local@^10.1.1": "10.1.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
-    "npm:@cdktf/provider-random@^11.0.3": "11.0.3_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
-    "npm:@cdktf/provider-time@^10.2.1": "10.2.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-random@^11.1.0": "11.1.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
+    "npm:@cdktf/provider-time@^10.3.0": "10.3.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-tls@^10.0.1": "10.0.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0",
     "npm:@octokit/types@^13.4.1": "13.5.0",
     "npm:@peculiar/x509@1.11.0": "1.11.0",
     "npm:@types/node@*": "22.5.1",
     "npm:cdktf@0.20.10": "0.20.10_constructs@10.3.0",
     "npm:cdktf@0.20.7": "0.20.7_constructs@10.3.0",
-    "npm:cdktf@~0.20.8": "0.20.8_constructs@10.3.0",
+    "npm:cdktf@~0.20.11": "0.20.11_constructs@10.3.0",
     "npm:constructs@10.3.0": "10.3.0",
     "npm:crypto-js@4.1.1": "4.1.1",
     "npm:lodash.get@4.4.2": "4.4.2",
@@ -130,8 +134,8 @@
         "npm:constructs"
       ]
     },
-    "@cndi/known-templates@0.1.0": {
-      "integrity": "b13a4fb5383ac183d4d8aaec06d7f6eada85eac3deccb44edd9f9759de8bfdde"
+    "@cndi/known-templates@1.0.1": {
+      "integrity": "a0c7ddf9265d01c54db95ddd35873216285a5554dbbf625829b14007e930c009"
     },
     "@cndi/validators@0.1.0": {
       "integrity": "39bb014c3e63f3d60276b00afaac8c566f445a50b3d3b2d0d898a876d7ece46f",
@@ -147,7 +151,7 @@
         "jsr:@polyseam/inflate-response",
         "jsr:@std/cli",
         "jsr:@std/fs@0.221",
-        "jsr:@std/semver",
+        "jsr:@std/semver@^1.0.3",
         "npm:@octokit/types",
         "npm:octokit"
       ]
@@ -208,6 +212,9 @@
     },
     "@std/collections@0.221.0": {
       "integrity": "789a365bb79b06c4da79d2b93fe32ddfe03b93ab083e72c1de96303d12f84be5"
+    },
+    "@std/data-structures@0.221.0": {
+      "integrity": "46b16fd296a75cabc0c85c9063795145f8fdf669ec882a52dc1367201172a044"
     },
     "@std/dotenv@0.221.0": {
       "integrity": "60358ec8a55ff177ca000e5028d8e995b4f1380a90d5a83f087acf0d729cc817"
@@ -288,8 +295,26 @@
     "@std/semver@1.0.3": {
       "integrity": "7c139c6076a080eeaa4252c78b95ca5302818d7eafab0470d34cafd9930c13c8"
     },
+    "@std/semver@1.0.4": {
+      "integrity": "a62af791917d8fd6c48d6ebbb872f83fad3fc6671ffadbbd39ea229c2d34d175"
+    },
+    "@std/streams@0.221.0": {
+      "integrity": "47f2f74634b47449277c0ee79fe878da4424b66bd8975c032e3afdca88986e61",
+      "dependencies": [
+        "jsr:@std/assert@0.221",
+        "jsr:@std/bytes@0.221",
+        "jsr:@std/io@0.221"
+      ]
+    },
     "@std/testing@0.221.0": {
-      "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e"
+      "integrity": "d9b5ed7d5dc4e8d193734a594e7f80c04a5a6f34c2493e69c6713ae7fe6f880e",
+      "dependencies": [
+        "jsr:@std/assert@0.221",
+        "jsr:@std/data-structures",
+        "jsr:@std/fmt@0.221",
+        "jsr:@std/fs@0.221",
+        "jsr:@std/path@0.221"
+      ]
     },
     "@std/text@1.0.7": {
       "integrity": "344a820af99fde81ae1d4f9ce586da3f47a58cda25ac4c4dd688166cf5ed97f1"
@@ -302,22 +327,22 @@
     }
   },
   "npm": {
-    "@cdktf/provider-aws@19.49.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-jgcezv/cTglFBIVOciPa03xzvEc2jbfzmI/sOcDHrGLPsTfWN7vuMnXHKLgOKzPVz1vEFo+u4pKeXQ3LCiFVAA==",
+    "@cdktf/provider-aws@19.57.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-cklq7zIoga3MT52qbNuK3V4+NgjTILlT5DK2TR+St78uMy/052FdlcNtgSR93dwJArCbe5lbx5RcKuKkNVffqA==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
       ]
     },
-    "@cdktf/provider-azurerm@13.15.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-LVw1q13w4dY9KetKmrQusSieRDLHK6HxDNIkOmYL17CdQuz4SVFVFHRZietsXoq90FCYpbW91y2yQCgz/w17WQ==",
+    "@cdktf/provider-azurerm@13.22.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-Kwg/GERCksHpee9O3eESrpGGxfeRY4KgCgKk13zvbnbOjy730hmvlTHIpbgs2umNn6bmOi5Uokg4PQFHJ9zrsQ==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
       ]
     },
-    "@cdktf/provider-google@14.15.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-6HFP/aNVeF+gqS5xpiE5VrnDeNMRTClDABX/q4po2KKxBovjFpfUgPFRU2Ixn3ZFD+zPvLPMAb3QbrpSiEPqgg==",
+    "@cdktf/provider-google@14.24.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-2HXgODBwKRFA3k2UiXE1Cd/GmogFBF2lmJhL8HY9kyC7dHcYy3hMHwGGrAeqHOIKB6uc5owuHvULjX8sRIyRjA==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
@@ -330,8 +355,8 @@
         "constructs"
       ]
     },
-    "@cdktf/provider-kubernetes@11.10.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-Lz/RFwQ501pa59SR+hhykCQ5rmXtwUSqRkJy0ksuKgpx1G3YTwuAoG131z9boVR/yRjdYmsRKlzG16+qzNvKsg==",
+    "@cdktf/provider-kubernetes@11.11.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-Q0F8ehQJUwKNX2sa9t5MN33/iffjTLURZi22TiYmsVmPzmk37fz7XscvnWOdFVITeKR2AacAUYjQjoNWOHiIuQ==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
@@ -344,15 +369,15 @@
         "constructs"
       ]
     },
-    "@cdktf/provider-random@11.0.3_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-dsYU/yALzXIPA64lhowy8RdOR0KQZjI77wDFH+LFb39dJtfuGhjAhVh2KIXbv3rxiXyITR6dtv+b9w1G08TmMQ==",
+    "@cdktf/provider-random@11.1.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-qyA4NLQUPjxAbjhqqEJT+sAOSF6gE8Lv2LJ7fcqHcf6KcZU5m+fKlZujDTQ9Znwa14oRYIBJk5zj5jbFpZy1qg==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
       ]
     },
-    "@cdktf/provider-time@10.2.1_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-I4hRjCOS2Kv2TqGxpZojtkpjVMkj9mb9iZZ3mdlKrAC3GGTtqpiIgNLQ3rLh7QiOYPivbaiYiUCFFvLDExgWJA==",
+    "@cdktf/provider-time@10.3.0_cdktf@0.20.7__constructs@10.3.0_constructs@10.3.0": {
+      "integrity": "sha512-f173BwAmP9jkzdohYA5dtBmz2uyB74PflxYVu8hpRmfJGIOe8Ffn9yQreuz99Xlbfa4YDZQAL+moVNmAVhpaZw==",
       "dependencies": [
         "cdktf@0.20.7_constructs@10.3.0",
         "constructs"
@@ -810,6 +835,15 @@
         "semver@7.6.3"
       ]
     },
+    "cdktf@0.20.11_constructs@10.3.0": {
+      "integrity": "sha512-YoubhokJ8s60WNrP2+cpQinb0DdMXlaFFDnPPv2A/tcRkzkwO9dWuMiXhhA0XlBJ1qA5pibaonu9Cc4B9JgKuQ==",
+      "dependencies": [
+        "archiver",
+        "constructs",
+        "json-stable-stringify",
+        "semver@7.6.3"
+      ]
+    },
     "cdktf@0.20.7_constructs@10.3.0": {
       "integrity": "sha512-7za8QQYM1G0/6JUCYY+5smwNfNfbiZVPCMD7SeX2rTYmOLaGEkHZtMvuUTEKSqsE56fKudnfVd2J2edz2CETFg==",
       "dependencies": [
@@ -817,15 +851,6 @@
         "constructs",
         "json-stable-stringify",
         "semver@7.6.0"
-      ]
-    },
-    "cdktf@0.20.8_constructs@10.3.0": {
-      "integrity": "sha512-O4O5h0b1E6scc/tqq9EUIQGDbPmdrCQpdkPdbDtUHHzhZGtmFpIMc5MgP1SgB+EzAutnG2oUDefjCqWMnhDe9A==",
-      "dependencies": [
-        "archiver",
-        "constructs",
-        "json-stable-stringify",
-        "semver@7.6.2"
       ]
     },
     "clean-stack@2.2.0": {
@@ -1422,7 +1447,7 @@
       "jsr:@cliffy/command@^1.0.0-rc.5",
       "jsr:@cliffy/prompt@^1.0.0-rc.5",
       "jsr:@cndi/cdktf@0.4",
-      "jsr:@cndi/known-templates@0.1",
+      "jsr:@cndi/known-templates@^1.0.1",
       "jsr:@cndi/validators@0.1",
       "jsr:@polyseam/cliffy-provider-gh-releases@2.0.0",
       "jsr:@polyseam/silky@^1.1.2",
@@ -1435,21 +1460,20 @@
       "jsr:@std/io@0.221",
       "jsr:@std/jsonc@0.221",
       "jsr:@std/path@0.221",
-      "jsr:@std/semver@*",
-      "jsr:@std/semver@0.221",
+      "jsr:@std/semver@1.0.4",
       "jsr:@std/streams@0.221",
       "jsr:@std/testing@0.221",
       "jsr:@std/yaml@0.221",
-      "npm:@cdktf/provider-aws@^19.49.1",
-      "npm:@cdktf/provider-azurerm@^13.15.0",
-      "npm:@cdktf/provider-google@^14.15.0",
+      "npm:@cdktf/provider-aws@^19.57.0",
+      "npm:@cdktf/provider-azurerm@^13.22.0",
+      "npm:@cdktf/provider-google@^14.24.0",
       "npm:@cdktf/provider-helm@^10.5.0",
-      "npm:@cdktf/provider-kubernetes@^11.10.1",
+      "npm:@cdktf/provider-kubernetes@^11.11.0",
       "npm:@cdktf/provider-local@^10.1.1",
-      "npm:@cdktf/provider-random@^11.0.3",
-      "npm:@cdktf/provider-time@^10.2.1",
+      "npm:@cdktf/provider-random@^11.1.0",
+      "npm:@cdktf/provider-time@^10.3.0",
       "npm:@cdktf/provider-tls@^10.0.1",
-      "npm:cdktf@~0.20.8",
+      "npm:cdktf@~0.20.11",
       "npm:constructs@10.3.0",
       "npm:crypto-js@4.1.1",
       "npm:lodash.get@4.4.2",
