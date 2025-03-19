@@ -1,4 +1,5 @@
 import { assert } from "test-deps";
+import { describe, it } from "@std/testing/bdd";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
@@ -8,12 +9,10 @@ import {
 } from "src/tests/helpers/util.ts";
 
 import { path } from "src/deps.ts";
-
 Deno.env.set("CNDI_TELEMETRY", "debug");
 
-Deno.test(
-  "'cndi ow' should bootstrap functions if source typescript is provided",
-  async (t) => {
+describe("cndi ow functions", () => {
+  it("should bootstrap functions if source typescript is provided", async () => {
     const cwd = await Deno.makeTempDir();
     const filePathsCreatedForFunctions = new Set([
       path.join(cwd, "cndi", "functions", "Dockerfile"),
@@ -28,39 +27,37 @@ Deno.test(
       path.join(cwd, "functions", "hello", "index.ts"),
     ]);
 
-    await t.step("setup", async () => {
-      await runCndi({
-        args: [
-          "init",
-          "-t",
-          "basic",
-          "-l",
-          "aws/eks",
-          "--set",
-          "git_repo=https://github.com/polyseam/example-repo",
-        ],
-        cwd,
+    // Setup
+    await runCndi({
+      args: [
+        "init",
+        "-t",
+        "basic",
+        "-l",
+        "aws/eks",
+        "--set",
+        "git_repo=https://github.com/polyseam/example-repo",
+      ],
+      cwd,
+    });
+
+    // Test
+    const changedFilePaths = await listChangedFilePaths(async () => {
+      await Deno.mkdir(path.join(cwd, `functions`, `hello`), {
+        recursive: true,
       });
-    });
-
-    await t.step("test", async () => {
-      const changedFilePaths = await listChangedFilePaths(async () => {
-        await Deno.mkdir(path.join(cwd, `functions`, `hello`), {
-          recursive: true,
-        });
-        await Deno.writeTextFile(
-          path.join(cwd, "functions", "hello", "index.ts"),
-          `Deno.serve(() => (new Response('', { status: 200 })));`,
-          { create: true },
-        );
-        const { status } = await runCndi({ args: ["ow"], cwd });
-        assert(status.success);
-      }, cwd);
-      const changedFilePathsSet = new Set(changedFilePaths);
-
-      assert(
-        setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),
+      await Deno.writeTextFile(
+        path.join(cwd, "functions", "hello", "index.ts"),
+        `Deno.serve(() => (new Response('', { status: 200 })));`,
+        { create: true },
       );
-    });
-  },
-);
+      const { status } = await runCndi({ args: ["ow"], cwd });
+      assert(status.success);
+    }, cwd);
+    const changedFilePathsSet = new Set(changedFilePaths);
+
+    assert(
+      setsAreEquivalent(filePathsCreatedForFunctions, changedFilePathsSet),
+    );
+  });
+});
