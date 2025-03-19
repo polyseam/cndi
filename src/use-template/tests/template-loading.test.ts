@@ -7,7 +7,7 @@ const mySanity = { sanitizeResources: false, sanitizeOps: false };
 
 describe("Template Loading", mySanity, () => {
   // This might be duplicate of the file URL test
-  it("alpha template should be loadable by filepath", async () => {
+  it("should load the alpha template from the filesystem with a valid path", async () => {
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/alpha.yaml`,
       {
@@ -20,7 +20,7 @@ describe("Template Loading", mySanity, () => {
     assert(!!template);
   });
 
-  it("alpha template should fail with bad filepath", async () => {
+  it("should fail to load the alpha template from the filesystem with an invalid path", async () => {
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/non-existent.yaml`,
       {
@@ -46,7 +46,7 @@ describe("Template Loading", mySanity, () => {
     assert(!!template);
   });
 
-  it("airflow template should be loadable by remote HTTP URL", async () => {
+  it("should load the airflow template from the web with a valid URL", async () => {
     const [_, template] = await useTemplate(
       "https://raw.githubusercontent.com/polyseam/cndi/main/templates/airflow.yaml",
       {
@@ -59,7 +59,7 @@ describe("Template Loading", mySanity, () => {
     assert(!!template);
   });
 
-  it("airflow template should fail with a bad remote HTTP URL", async () => {
+  it("should fail to load the airflow template from the web with an invalid URL", async () => {
     const [_, template] = await useTemplate(
       "https://raw.githubusercontent.com/polyseam/cndi/main/xyz.yaml",
       {
@@ -72,7 +72,7 @@ describe("Template Loading", mySanity, () => {
     assert(!template);
   });
 
-  it("airflow template should be loadable by bare name", async () => {
+  it("should load the airflow template from the polyseam directory with a bare name", async () => {
     const [_, template] = await useTemplate("airflow", {
       interactive: false,
       overrides: {
@@ -82,7 +82,7 @@ describe("Template Loading", mySanity, () => {
     assert(!!template);
   });
 
-  it("bare name specifier for unknown template should fail", async () => {
+  it("should fail to load a template with a bare name that isn't in the polyseam registry", async () => {
     const [_, template] = await useTemplate("unknown", {
       interactive: false,
       overrides: {
@@ -93,7 +93,7 @@ describe("Template Loading", mySanity, () => {
     assert(!template);
   });
 
-  it("non-yaml file should fail", async () => {
+  it("should fail to load a template if it is not YAML", async () => {
     const [_, template] = await useTemplate(
       "https://raw.githubusercontent.com/polyseam/cndi/main/README.md",
       {

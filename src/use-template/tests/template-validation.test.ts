@@ -3,13 +3,12 @@ import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
 import { describe, it } from "@std/testing/bdd";
 
-// Use Deno.env.set to configure test options if needed
 // This would replace the mySanity object in the BDD style
 
 const mySanity = { sanitizeResources: false, sanitizeOps: false };
 
 describe("Template Validation", mySanity, () => {
-  it("basic template should pass validation", async () => {
+  it("should pass validation when a 'basic' template is given minimum configuration", async () => {
     const template = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
@@ -22,8 +21,7 @@ describe("Template Validation", mySanity, () => {
     assert(!!template);
   });
 
-  // This throws error from fetch() cause it is looking for file:// and is getting "C" as protocol
-  it("more provided values should pass validation", async () => {
+  it("should pass validation when more values are provided as overrides", async () => {
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/tests/mocks/templates/basic.yaml`,
       {
