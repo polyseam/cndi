@@ -31,7 +31,7 @@ describe("Template Loading", () => {
     assert(!template);
   });
 
-  it("alpha template should be loadable by file URL", async () => {
+  it("should load alpha template using a file URL", async () => {
     const [_, template] = await useTemplate(
       `file://${getProjectRoot()}/src/tests/mocks/templates/alpha.yaml`,
       {

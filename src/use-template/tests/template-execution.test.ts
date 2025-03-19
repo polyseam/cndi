@@ -4,6 +4,7 @@ import { assert, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
 import { describe, it } from "@std/testing/bdd";
+
 describe("Template Execution", () => {
   it("should reference 'airflow' in README.md when using airflow template", async () => {
     const templateResult = await useTemplate("airflow", {
@@ -18,7 +19,6 @@ describe("Template Execution", () => {
   });
 
   it("should not reference 'airflow' in README.md when using basic template", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -47,7 +47,6 @@ describe("Template Execution", () => {
   });
 
   it("should include aws credentials in .env when using basic template with aws provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -62,7 +61,6 @@ describe("Template Execution", () => {
   });
 
   it("should include GOOGLE_CREDENTIALS in .env when using basic template with gcp provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -76,7 +74,6 @@ describe("Template Execution", () => {
   });
 
   it("should include azure credentials in .env when using basic template with azure provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -93,7 +90,6 @@ describe("Template Execution", () => {
   });
 
   it("should reference 'azure' in README.md when using basic template with azure provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -106,7 +102,6 @@ describe("Template Execution", () => {
   });
 
   it("should reference 'gcp' in README.md when using basic template with gcp provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -119,7 +114,6 @@ describe("Template Execution", () => {
   });
 
   it("should reference 'aws' in README.md when using basic template with aws provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -132,7 +126,6 @@ describe("Template Execution", () => {
   });
 
   it("should have aws provider in cndi_config.yaml when using basic template with aws provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -147,7 +140,6 @@ describe("Template Execution", () => {
   });
 
   it("should have gcp provider in cndi_config.yaml when using basic template with gcp provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -162,7 +154,6 @@ describe("Template Execution", () => {
   });
 
   it("should have azure provider in cndi_config.yaml when using basic template with azure provider", async () => {
-    // () is the root of the project
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -177,8 +168,6 @@ describe("Template Execution", () => {
   });
 
   it("should not include external_dns in cndi_config.yaml when disabled in basic template", async () => {
-    // () is the root of the project
-
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
