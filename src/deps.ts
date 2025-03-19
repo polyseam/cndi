@@ -3,7 +3,6 @@ import * as yaml from "@std/yaml";
 export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
 export { deepMerge } from "@std/collections";
-export { delay } from "@std/async";
 export {
   copy,
   ensureDirSync,
