@@ -1,5 +1,4 @@
-import { assert } from "test-deps";
-import { describe, it } from "@std/testing/bdd";
+import { assert, describe, it } from "test-deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 import {

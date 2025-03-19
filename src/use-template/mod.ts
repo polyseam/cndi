@@ -1,13 +1,15 @@
 import {
   ccolors,
+  CNDIValidators,
   cprompt,
   getValueFromKeyPath,
+  KNOWN_TEMPLATES,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
   PromptTypes,
   setValueForKeyPath,
   YAML,
 } from "deps";
 
-import { CNDIValidators } from "@cndi/validators";
 import { CNDITemplateComparators } from "./util/conditions.ts";
 import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
@@ -15,11 +17,6 @@ import type {
   CNDITemplatePromptResponsePrimitive,
   PromptType,
 } from "./types.ts";
-
-import {
-  KNOWN_TEMPLATES,
-  POLYSEAM_TEMPLATE_DIRECTORY_URL,
-} from "@cndi/known-templates";
 
 import {
   findPositionOfCNDICallEndToken,

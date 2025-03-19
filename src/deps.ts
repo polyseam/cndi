@@ -103,6 +103,14 @@ export const ccolors = {
 };
 
 // Polyseam Modules
+
+export {
+  KNOWN_TEMPLATES,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
+} from "@cndi/known-templates";
+
+export { CNDIValidators } from "@cndi/validators";
+
 export * as silky from "@polyseam/silky";
 
 export {

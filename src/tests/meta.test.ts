@@ -1,5 +1,4 @@
-import { assert } from "test-deps";
-import { describe, it } from "@std/testing/bdd";
+import { assert, describe, it } from "test-deps";
 
 describe("testing framework", () => {
   it("should always be executed with CNDI_TELEMETRY='DEBUG' mode", () => {

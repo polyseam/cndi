@@ -1,7 +1,6 @@
 import getProjectRoot from "get-project-root";
 import { useTemplate } from "../mod.ts";
-import { assert } from "test-deps";
-import { describe, it } from "@std/testing/bdd";
+import { assert, describe, it } from "test-deps";
 
 describe("Template Loading", () => {
   // This might be duplicate of the file URL test

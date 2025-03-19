@@ -3,7 +3,7 @@ import { useTemplate, UseTemplateResult } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it } from "test-deps";
 
 describe("Template Execution", () => {
   it("should reference 'airflow' in README.md when using airflow template", async () => {

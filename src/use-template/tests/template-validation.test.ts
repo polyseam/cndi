@@ -1,7 +1,7 @@
 import { useTemplate } from "../mod.ts";
 import { assert } from "test-deps";
 import getProjectRoot from "get-project-root";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it } from "test-deps";
 
 describe("Template Validation", () => {
   it("should pass validation when a 'basic' template is given minimum configuration", async () => {
