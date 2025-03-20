@@ -15,7 +15,7 @@ describe("GCP MicroK8s initialization", () => {
         "--set",
         "dns_provider=google",
         "--set",
-        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
+        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
       ],
       cwd,
     });
