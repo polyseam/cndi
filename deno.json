@@ -55,10 +55,9 @@
     "clean-linux-arm64": "rm dist/linux-arm64/in/cndi || true && rm dist/release-archives/cndi-linux-arm64.tar.gz || true",
 
     "build": {
+      "command": "deno task compile-all && deno task archive-all",
       "dependencies": [
-        "clean-dist",
-        "compile-all",
-        "archive-all"
+        "clean-dist"
       ]
     },
 
