@@ -1,20 +1,15 @@
-import { assert } from "test-deps";
+import { assert, describe, it } from "test-deps";
 
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
-
-Deno.test(
-  "'cndi' should show help message when no subcommands are provided",
-  async (t) => {
+describe("cndi global command", () => {
+  it("should show help message when no subcommands are provided", async () => {
     const cwd = await Deno.makeTempDir();
 
-    await t.step("setup", async () => {
-      const { output } = await runCndi({
-        args: [],
-        cwd,
-      });
-      assert(output.includes("Usage:"));
+    const { output } = await runCndi({
+      args: [],
+      cwd,
     });
-  },
-);
+    assert(output.includes("Usage:"));
+  });
+});

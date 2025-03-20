@@ -3,7 +3,6 @@ import * as yaml from "@std/yaml";
 export * as path from "@std/path";
 export * as JSONC from "@std/jsonc";
 export { deepMerge } from "@std/collections";
-export { delay } from "@std/async";
 export {
   copy,
   ensureDirSync,
@@ -14,7 +13,7 @@ export {
 } from "@std/fs";
 export { load as loadEnv, loadSync as loadEnvSync } from "@std/dotenv";
 export { writeAll } from "@std/io";
-export { Spinner, type SpinnerOptions } from "@std/cli";
+export { Spinner, type SpinnerOptions } from "@std/cli/unstable-spinner";
 
 // node std lib
 export { homedir, platform } from "node:os";
@@ -104,6 +103,14 @@ export const ccolors = {
 };
 
 // Polyseam Modules
+
+export {
+  KNOWN_TEMPLATES,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
+} from "@cndi/known-templates";
+
+export { CNDIValidators } from "@cndi/validators";
+
 export * as silky from "@polyseam/silky";
 
 export {

@@ -1,4 +1,11 @@
-import { ccolors, Command, path, PromptTypes, YAML } from "deps";
+import {
+  ccolors,
+  Command,
+  KNOWN_TEMPLATES,
+  path,
+  PromptTypes,
+  YAML,
+} from "deps";
 
 const { Input, Select } = PromptTypes;
 
@@ -16,8 +23,6 @@ import { ErrOut } from "errout";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
-
-import { KNOWN_TEMPLATES } from "@cndi/known-templates";
 
 import { owAction } from "src/commands/overwrite.ts";
 

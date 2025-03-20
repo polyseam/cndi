@@ -174,9 +174,6 @@ export default async function createRepo(
     try {
       const setSecretOutput = await setSecretCmd.output();
       setSecretOutputCode = setSecretOutput.code; // break loop if successful
-      // writing logs is not helpful for GitHub Secrets
-      // await writeAll(Deno.stdout, setSecretOutput.stdout);
-      // await writeAll(Deno.stderr, setSecretOutput.stderr);
     } catch (e) {
       console.error("failed to set GitHub Secrets");
       console.error(e);

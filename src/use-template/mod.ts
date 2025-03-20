@@ -1,13 +1,15 @@
 import {
   ccolors,
+  CNDIValidators,
   cprompt,
   getValueFromKeyPath,
+  KNOWN_TEMPLATES,
+  POLYSEAM_TEMPLATE_DIRECTORY_URL,
   PromptTypes,
   setValueForKeyPath,
   YAML,
 } from "deps";
 
-import { CNDIValidators } from "@cndi/validators";
 import { CNDITemplateComparators } from "./util/conditions.ts";
 import { makeAbsolutePath, sanitizeFilePath } from "./util/fs.ts";
 
@@ -15,11 +17,6 @@ import type {
   CNDITemplatePromptResponsePrimitive,
   PromptType,
 } from "./types.ts";
-
-import {
-  KNOWN_TEMPLATES,
-  POLYSEAM_TEMPLATE_DIRECTORY_URL,
-} from "@cndi/known-templates";
 
 import {
   findPositionOfCNDICallEndToken,
@@ -323,6 +320,7 @@ async function getBlockForIdentifier(
   try {
     blockBodyResponse = await fetch(blockIdentifierURL);
   } catch {
+    await blockBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -341,6 +339,7 @@ async function getBlockForIdentifier(
   }
 
   if (!blockBodyResponse.ok) {
+    await blockBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -442,6 +441,7 @@ async function getTemplateBodyStringForIdentifier(
   try {
     templateBodyResponse = await fetch(templateIdentifierURL);
   } catch {
+    await templateBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -459,6 +459,7 @@ async function getTemplateBodyStringForIdentifier(
   }
 
   if (!templateBodyResponse.ok) {
+    await templateBodyResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1038,6 +1039,7 @@ async function getStringForIdentifier(
   try {
     stringResponse = await fetch(identifierURL!);
   } catch {
+    await stringResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1054,6 +1056,7 @@ async function getStringForIdentifier(
   }
 
   if (!stringResponse.ok) {
+    await stringResponse.body?.cancel();
     return [
       new ErrOut(
         [
@@ -1254,6 +1257,7 @@ async function processCNDIExtraFilesOutput(
       if (response.ok) {
         extra_files[key] = await response.text();
       } else {
+        await response.body?.cancel();
         return [
           new ErrOut(
             [

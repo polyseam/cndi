@@ -1,19 +1,14 @@
-import { assert } from "test-deps";
+import { assert, describe, it } from "test-deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
-Deno.env.set("CNDI_TELEMETRY", "debug");
-
-Deno.test(
-  "'cndi init -t basic -l azure/microk8s should succeed",
-  async (t) => {
+describe("Azure MicroK8s initialization", () => {
+  it("should succeed with basic template", async () => {
     const cwd = await Deno.makeTempDir();
 
-    await t.step("test", async () => {
-      const { status } = await runCndi({
-        args: ["init", "-t", "basic", "-l", "azure/microk8s"],
-        cwd,
-      });
-      assert(status.success);
+    const { status } = await runCndi({
+      args: ["init", "-t", "basic", "-l", "azure/microk8s"],
+      cwd,
     });
-  },
-);
+    assert(status.success);
+  });
+});

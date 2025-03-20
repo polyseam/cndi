@@ -98,11 +98,16 @@
     },
 
     "test": {
-      "command": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
     },
 
-    "test-slow": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --parallel",
-    "test-watch": "deno test --allow-all --v8-flags=--max-old-space-size=8000 --watch",
+    "test-slow": {
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel"
+    },
+
+    "test-watch": {
+      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --watch"
+    },
 
     "fix": {
       "dependencies": [
@@ -115,14 +120,14 @@
     "lint-fix": "deno lint --fix"
   },
   "imports": {
-    "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.49.1",
-    "@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@^13.15.0",
-    "@cdktf/provider-google": "npm:@cdktf/provider-google@^14.15.0",
+    "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.57.0",
+    "@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@^13.22.0",
+    "@cdktf/provider-google": "npm:@cdktf/provider-google@^14.24.0",
     "@cdktf/provider-helm": "npm:@cdktf/provider-helm@^10.5.0",
-    "@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@^11.10.1",
+    "@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@^11.11.0",
     "@cdktf/provider-local": "npm:@cdktf/provider-local@^10.1.1",
-    "@cdktf/provider-random": "npm:@cdktf/provider-random@^11.0.3",
-    "@cdktf/provider-time": "npm:@cdktf/provider-time@^10.2.1",
+    "@cdktf/provider-random": "npm:@cdktf/provider-random@^11.1.0",
+    "@cdktf/provider-time": "npm:@cdktf/provider-time@^10.3.0",
     "@cdktf/provider-tls": "npm:@cdktf/provider-tls@^10.0.1",
     "netmask": "npm:netmask@2.0.2",
     "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
@@ -134,42 +139,37 @@
     "@cndi/cdktf/modules/aws-vpc.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-vpc.ts",
     "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@2.0.0",
     "@polyseam/silky": "jsr:@polyseam/silky@^1.1.2",
-    "@std/assert": "jsr:@std/assert@^0.221.0",
-    "@std/async": "jsr:@std/async@^0.221.0",
-    "@std/cli": "jsr:@std/cli@^0.221.0",
-    "@std/collections": "jsr:@std/collections@^0.221.0",
-    "@std/dotenv": "jsr:@std/dotenv@^0.221.0",
-    "@std/fs": "jsr:@std/fs@^0.221.0",
-    "@std/io": "jsr:@std/io@^0.221.0",
-    "@std/jsonc": "jsr:@std/jsonc@^0.221.0",
-    "@std/path": "jsr:@std/path@^0.221.0",
-    "@std/path/constants": "jsr:@std/path/constants@^0.221.0",
-    "@std/semver": "jsr:@std/semver@^0.221.0",
-    "@std/semver/compare": "jsr:@std/semver/compare.ts",
-    "@std/streams": "jsr:@std/streams@^0.221.0",
-    "@std/testing": "jsr:@std/testing@^0.221.0",
-    "@std/yaml": "jsr:@std/yaml@^0.221.0",
-    "cdktf": "npm:cdktf@^0.20.8",
+    "@std/assert": "jsr:@std/assert@^1.0.11",
+    "@std/async": "jsr:@std/async@^1.0.11",
+    "@std/cli": "jsr:@std/cli@^1.0.14",
+    "@std/collections": "jsr:@std/collections@^1.0.10",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
+    "@std/fs": "jsr:@std/fs@^1.0.14",
+    "@std/io": "jsr:@std/io@^0.225.2",
+    "@std/jsonc": "jsr:@std/jsonc@^1.0.1",
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "@std/testing": "jsr:@std/testing@^1.0.9",
+    "@std/yaml": "jsr:@std/yaml@^1.0.5",
+    "cdktf": "npm:cdktf@^0.20.11",
     "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
     "child_process": "node:child_process",
     "constructs": "npm:constructs@10.3.0",
     "consts": "./src/constants.ts",
-    "crypto-js": "npm:crypto-js@4.1.1",
+    "crypto-js": "npm:crypto-js@4.2.0",
     "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
     "lodash.get": "npm:lodash.get@4.4.2",
     "lodash.set": "npm:lodash.set@4.3.2",
     "lodash.unset": "npm:lodash.unset@4.5.2",
-    "octokit": "npm:octokit@^3.1.2",
-    "simple-git": "npm:simple-git@3.18.0",
+    "simple-git": "npm:simple-git@3.27.0",
     "shared-modules/": "./shared-modules/",
     "src/": "./src/",
     "test-deps": "./src/tests/deps.ts",
     "px": "./src/px/mod.ts",
-    "validator": "npm:validator@13.11.0",
+    "validator": "npm:validator@13.12.0",
     "errout": "./src/ErrOut.ts",
     "versions": "./src/versions.ts",
-    "@cndi/known-templates": "jsr:@cndi/known-templates@^0.1.0",
+    "@cndi/known-templates": "jsr:@cndi/known-templates@^1.0.1",
     "@cndi/validators": "jsr:@cndi/validators@^0.1.0"
   },
   "exclude": ["dist/*"]

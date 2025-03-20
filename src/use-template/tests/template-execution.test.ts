@@ -3,13 +3,10 @@ import { useTemplate, UseTemplateResult } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
 import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
+import { describe, it } from "test-deps";
 
-const mySanity = { sanitizeResources: false, sanitizeOps: false };
-
-Deno.test(
-  "template execution: 'airflow' template should reference 'airflow' in 'README.md'",
-  mySanity,
-  async () => {
+describe("Template Execution", () => {
+  it("should reference 'airflow' in README.md when using airflow template", async () => {
     const templateResult = await useTemplate("airflow", {
       interactive: false,
       overrides: {
@@ -19,14 +16,9 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("airflow"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' template should not reference 'airflow' in 'README.md'",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should not reference 'airflow' in README.md when using basic template", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -36,13 +28,9 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(!template.files["README.md"].includes("airflow"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: '$cndi.comment' calls should be processed in cndi_config.yaml",
-  mySanity,
-  async () => {
+  it("should process $cndi.comment calls in cndi_config.yaml", async () => {
     const [_, template] = await useTemplate(
       `${getProjectRoot()}/src/use-template/tests/mock/templates/comment-mock.yaml`,
       {
@@ -56,14 +44,9 @@ Deno.test(
     assert(!!configStr);
     assert(!configStr.includes("$cndi.comment"));
     assert(configStr.includes("# This is a comment"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' .env with target provider aws should reference aws credentials",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should include aws credentials in .env when using basic template with aws provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -75,14 +58,9 @@ Deno.test(
     const env = parseDotEnv(template.files[".env"]);
     assert(typeof env.AWS_ACCESS_KEY_ID === "string");
     assert(typeof env.AWS_SECRET_ACCESS_KEY === "string");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' .env with target provider gcp should reference GOOGLE_CREDENTIALS",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should include GOOGLE_CREDENTIALS in .env when using basic template with gcp provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -93,14 +71,9 @@ Deno.test(
     assert(!!template);
     const env = parseDotEnv(template.files[".env"]);
     assert(env.GOOGLE_CREDENTIALS);
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' .env with target provider azure should reference azure credentials",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should include azure credentials in .env when using basic template with azure provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -114,14 +87,9 @@ Deno.test(
     assert(env.ARM_CLIENT_SECRET);
     assert(env.ARM_SUBSCRIPTION_ID);
     assert(env.ARM_TENANT_ID);
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' README.md with target provider 'azure' should reference azure",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should reference 'azure' in README.md when using basic template with azure provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -131,14 +99,9 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("azure"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' README.md with target provider 'gcp' should reference gcp",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should reference 'gcp' in README.md when using basic template with gcp provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -148,14 +111,9 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("gcp"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' README.md with target provider 'aws' should reference aws",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should reference 'aws' in README.md when using basic template with aws provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -165,14 +123,9 @@ Deno.test(
     const template = templateResult[1] as UseTemplateResult;
     assert(!!template);
     assert(template.files["README.md"].includes("aws"));
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' aws template should have aws provider in cndi_config.yaml",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should have aws provider in cndi_config.yaml when using basic template with aws provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -184,14 +137,9 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "aws");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' gcp template should have gcp provider in cndi_config.yaml",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should have gcp provider in cndi_config.yaml when using basic template with gcp provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -203,14 +151,9 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "gcp");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: 'basic' azure template should have azure provider in cndi_config.yaml",
-  mySanity,
-  async () => {
-    // () is the root of the project
+  it("should have azure provider in cndi_config.yaml when using basic template with azure provider", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -222,15 +165,9 @@ Deno.test(
     // deno-lint-ignore no-explicit-any
     const parsed = YAML.parse(template.files["cndi_config.yaml"]) as any;
     assert(parsed.provider === "azure");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: when external_dns is disabled the 'basic' template should not have external_dns in cndi_config.yaml",
-  mySanity,
-  async () => {
-    // () is the root of the project
-
+  it("should not include external_dns in cndi_config.yaml when disabled in basic template", async () => {
     const templateResult = await useTemplate("basic", {
       interactive: false,
       overrides: {
@@ -245,13 +182,9 @@ Deno.test(
     assert(!parsed.infrastructure?.cndi?.external_dns);
     assert(!parsed.infrastructure?.cndi?.external_dns?.enabled);
     assert(JSON.stringify(parsed.infrastructure?.cndi?.external_dns) !== "{}");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: a template should be able to insert a blocks using $cndi.get_block(block_name)",
-  mySanity,
-  async () => {
+  it("should insert blocks using $cndi.get_block", async () => {
     const fns_hostname = "fns.example.com";
     const mockYamlFileUri = "file://" +
       getProjectRoot() +
@@ -271,13 +204,9 @@ Deno.test(
     const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
     assert(config?.cluster_manifests?.kind === "Namespace");
-  },
-);
+  });
 
-Deno.test(
-  "template execution: a template should be able to add extra files to the output",
-  mySanity,
-  async () => {
+  it("should add extra files to the output", async () => {
     const mockYamlFileUri = "file://" +
       getProjectRoot() +
       "/src/use-template/tests/mock/templates/extra_files-mock.yaml";
@@ -291,13 +220,9 @@ Deno.test(
     const text = "Hello World!";
     const template = templateResult[1] as UseTemplateResult;
     assert(template.files[path.join("my", "extra_file.txt")] === text);
-  },
-);
+  });
 
-Deno.test(
-  "template execution: a template should fail validation if it has an extra_files block which does not begin with a './'",
-  mySanity,
-  async () => {
+  it("should fail validation for extra_files not beginning with './'", async () => {
     const mockYamlFileUri = "file://" +
       getProjectRoot() +
       "/src/use-template/tests/mock/templates/extra_files_invalid-mock.yaml";
@@ -311,13 +236,9 @@ Deno.test(
     });
     const err = templateResult[0];
     assert(err);
-  },
-);
+  });
 
-Deno.test(
-  "template execution: $cndi.get_block(identifier) macro should not clobber siblings",
-  mySanity,
-  async () => {
+  it("should not clobber siblings when using $cndi.get_block", async () => {
     const mockYamlFileUri = "file://" +
       getProjectRoot() +
       "/src/use-template/tests/mock/templates/get_block_with_peer-mock.yaml";
@@ -345,5 +266,5 @@ Deno.test(
     assert(values.some_beta_content?.should_exist);
     assert(values?.some_charlie_content?.should_exist);
     assert(values?.details.example_a === "value_a");
-  },
-);
+  });
+});
