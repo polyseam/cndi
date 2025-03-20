@@ -22,6 +22,9 @@ jobs:
 
       - run: deno task checks
 
+      - name: Install cndi dependency binaries
+        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
+
       - run: deno task test
 
       - run: deno task build
@@ -37,9 +40,6 @@ jobs:
 
       - name: duplicate windows archive for backwards compatibility
         run: cp ./dist/release-archives/cndi-win-amd64.tar.gz ./dist/release-archives/cndi-win.tar.gz
-
-      - name: Install cndi dependency binaries
-        run: mkdir -p /home/runner/.cndi/bin && cp ./dist/linux-amd64/in/* /home/runner/.cndi/bin
 
       - name: Release
         uses: softprops/action-gh-release@v1
