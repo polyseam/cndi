@@ -309,12 +309,20 @@ type CNDIObservability = {
   };
 };
 
+export type CNDIFnsConfig = {
+  hostname?: string;
+  noModuleCache?: boolean;
+  maxMemoryLimitMb?: number;
+  cpuTimeHardLimitMs?: number;
+  cpuTimeSoftLimitMs?: number;
+  workerTimeoutMs?: number;
+  edgeRuntimeImageTag?: string;
+};
+
 export type CNDIInfrastructure = {
   cndi: {
     network: CNDINetworkConfig;
-    functions?: {
-      hostname?: string;
-    };
+    functions?: CNDIFnsConfig;
     observability?: CNDIObservability;
     keyless?: boolean; // default: false
     deployment_target_configuration?: DeploymentTargetConfiguration;
