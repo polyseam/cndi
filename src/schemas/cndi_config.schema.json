@@ -264,6 +264,30 @@
                 "hostname": {
                   "type": "string",
                   "description": "The hostname on which to make your CNDI Functions available."
+                },
+                "noModuleCache": {
+                  "type": "boolean",
+                  "description": "Disables module cache in functions runtime."
+                },
+                "maxMemoryLimitMb": {
+                  "type": "number",
+                  "description": "The maximum memory limit in MB for a function executed by the runtime."
+                },
+                "cpuTimeHardLimitMs": {
+                  "type": "number",
+                  "description": "The maximum CPU time hard limit in milliseconds for a function executed by the runtime."
+                },
+                "cpuTimeSoftLimitMs": {
+                  "type": "number",
+                  "description": "The maximum CPU time soft limit in milliseconds for a function executed by the runtime."
+                },
+                "workerTimeoutMs": {
+                  "type": "number",
+                  "description": "The maximum time in milliseconds a function can run before being terminated."
+                },
+                "edgeRuntimeImageTag": {
+                  "type": "string",
+                  "description": "The tag of the edge runtime image to use."
                 }
               }
             },

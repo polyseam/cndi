@@ -234,12 +234,10 @@ self.onmessage = async (msg: OverwriteWorkerMessage) => {
         "workflows",
         "cndi-fns.yaml",
       );
-
       const errStagingFnsDir = await stageDirectory(
         path.join(options.output, "functions"),
         path.join("cndi", "functions", "src"),
       );
-
       if (errStagingFnsDir) {
         await self.postMessage(errStagingFnsDir.owWorkerErrorMessage);
         return;
@@ -247,9 +245,10 @@ self.onmessage = async (msg: OverwriteWorkerMessage) => {
 
       const errStagingFnsEntrySrc = await stageFile(
         path.join("cndi", "functions", "src", "main", "index.ts"),
-        getFunctionsMainContent(),
+        getFunctionsMainContent({
+          ...config?.infrastructure?.cndi?.functions,
+        }),
       );
-
       if (errStagingFnsEntrySrc) {
         await self.postMessage(errStagingFnsEntrySrc.owWorkerErrorMessage);
         return;
@@ -261,7 +260,9 @@ self.onmessage = async (msg: OverwriteWorkerMessage) => {
 
       const errStagingFnsDockerfile = await stageFile(
         path.join("cndi", "functions", "Dockerfile"),
-        getFunctionsDockerfileContent(),
+        getFunctionsDockerfileContent(
+          config?.infrastructure?.cndi?.functions?.edgeRuntimeImageTag,
+        ),
       );
       if (errStagingFnsDockerfile) {
         await self.postMessage(errStagingFnsDockerfile.owWorkerErrorMessage);

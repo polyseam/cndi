@@ -1,5 +1,11 @@
 // import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";
 
+const MAX_MEMORY_LIMIT_MB = 150;
+const WORKER_TIMEOUT_MS = 30000;
+const NO_MODULE_CACHE = false;
+const CPU_TIME_SOFT_LIMIT_MS = 10000;
+const CPU_TIME_HARD_LIMIT_MS = 20000;
+
 function mainContent() {
   Deno.serve(async (req: Request) => {
     const headers = new Headers({
@@ -60,9 +66,11 @@ function mainContent() {
     const servicePath = `./${service_name}`;
     // console.error(`serving the request with ${servicePath}`);
     const createWorker = async () => {
-      const memoryLimitMb = 150;
-      const workerTimeoutMs = 5 * 60 * 1000;
-      const noModuleCache = false;
+      const memoryLimitMb = MAX_MEMORY_LIMIT_MB;
+      const workerTimeoutMs = WORKER_TIMEOUT_MS;
+      const noModuleCache = NO_MODULE_CACHE;
+      const cpuTimeSoftLimitMs = CPU_TIME_SOFT_LIMIT_MS;
+      const cpuTimeHardLimitMs = CPU_TIME_HARD_LIMIT_MS;
       // you can provide an import map inline
       // const inlineImportMap = {
       //   imports: {
@@ -79,15 +87,13 @@ function mainContent() {
       ]);
       const forceCreate = false;
       const netAccessDisabled = false;
+
       // load source from an eszip
       // const maybeEszip = await Deno.readFile('./bin.eszip');
       // const maybeEntrypoint = 'file:///src/index.ts';
       // const maybeEntrypoint = 'file:///src/index.ts';
       // or load module source from an inline module
       // const maybeModuleCode = 'Deno.serve((req) => new Response("Hello from Module Code"));';
-      //
-      const cpuTimeSoftLimitMs = 10000;
-      const cpuTimeHardLimitMs = 20000;
 
       // @ts-ignore - EdgeRuntime global is provided downstream
       return await EdgeRuntime.userWorkers.create({
@@ -136,7 +142,7 @@ function mainContent() {
           // return await callWorker();
         }
         const error = {
-          msg: e.toString(),
+          msg: e?.toString(),
         };
         return new Response(JSON.stringify(error), {
           // @ts-ignore - downstream import provides STATUS_CODE
@@ -150,7 +156,24 @@ function mainContent() {
 }
 
 // it's possible that this is all silly, and we should instead just fetch this from a URL
-export function getFunctionsMainContent() {
+
+type getFunctionsMainContentOptions = {
+  noModuleCache?: boolean;
+  maxMemoryLimitMb?: number;
+  workerTimeoutMs?: number;
+  cpuTimeSoftLimitMs?: number;
+  cpuTimeHardLimitMs?: number;
+};
+
+export function getFunctionsMainContent(
+  {
+    noModuleCache = NO_MODULE_CACHE,
+    maxMemoryLimitMb = MAX_MEMORY_LIMIT_MB,
+    workerTimeoutMs = WORKER_TIMEOUT_MS,
+    cpuTimeHardLimitMs = CPU_TIME_HARD_LIMIT_MS,
+    cpuTimeSoftLimitMs = CPU_TIME_SOFT_LIMIT_MS,
+  }: getFunctionsMainContentOptions,
+) {
   // divide typescript code into headings, imports and content
   const headings = [
     "// https://github.com/supabase/edge-runtime/blob/main/examples/main/index.ts",
@@ -160,6 +183,14 @@ export function getFunctionsMainContent() {
     `import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";`,
   ];
 
+  const constants = [
+    `const NO_MODULE_CACHE = ${noModuleCache};`,
+    `const MAX_MEMORY_LIMIT_MB = ${maxMemoryLimitMb};`,
+    `const WORKER_TIMEOUT_MS = ${workerTimeoutMs};`,
+    `const CPU_TIME_SOFT_LIMIT_MS = ${cpuTimeSoftLimitMs};`,
+    `const CPU_TIME_HARD_LIMIT_MS = ${cpuTimeHardLimitMs};`,
+  ];
+
   // get the content of the main function excluding: function signature, curly braces, and indentation
   const content = mainContent.toString()
     .split("\n") // split the function into lines
@@ -167,5 +198,7 @@ export function getFunctionsMainContent() {
     .slice(1, -1) // remove the first and last line
     .join("\n"); // join the lines
 
-  return `${headings.join("\n")}\n\n${imports.join("\n")}\n\n${content}\n`;
+  return `${headings.join("\n")}\n\n${constants.join("\n")}\n\n${
+    imports.join("\n")
+  }\n\n${content}\n`;
 }
