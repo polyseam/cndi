@@ -61,7 +61,7 @@ const getWorkflowJob = (
 
   return {
     permissions: "write-all",
-    "runs-on": "ubuntu-20.04",
+    "runs-on": "ubuntu-latest",
     env: {
       GIT_REPO: "${{ secrets.GIT_REPO }}",
       GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",

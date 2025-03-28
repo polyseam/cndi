@@ -106,7 +106,7 @@ const getWorkflowYaml = () => {
       "cndi-onpull": {
         // TODO: determine min scope
         permissions: "write-all",
-        "runs-on": "ubuntu-20.04",
+        "runs-on": "ubuntu-latest",
         env: {
           GIT_REPO: "${{ secrets.GIT_REPO }}",
           CNDI_TELEMETRY: "${{ secrets.CNDI_TELEMETRY }}",
