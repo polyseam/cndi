@@ -22,7 +22,7 @@ export const SEALED_SECRETS_CHART_VERSION = "2.17.0";
 // Core Application Chart Versions (gitops managed)
 export const CERT_MANAGER_CHART_VERSION = "1.14.3";
 export const RELOADER_CHART_VERSION = "1.0.69";
-export const NGINX_CHART_VERSION = "4.8.3";
+export const NGINX_CHART_VERSION = "4.12.1";
 export const EXTERNAL_DNS_CHART_VERSION = "6.35.0";
 export const KUBE_PROMETHEUS_STACK_CHART_VERSION = "67.4.0";
 export const PROMTAIL_CHART_VERSION = "6.16.6";
