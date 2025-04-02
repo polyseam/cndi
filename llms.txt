@@ -14,6 +14,14 @@ Templates to automate cluster creation for your team.
 - [CNDI README.md](https://github.com/polyseam/cndi/blob/main/README.md): The
   core README for the project with links to detailed guides.
 
+## JSON Schema
+
+- [cndi_config.schema.json](https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_config.schema.json):
+  The JSON-Schema for CNDI's configuration file, `cndi_config.yaml`.
+- [cndi_template.schema.json](https://raw.githubusercontent.com/polyseam/cndi/main/src/schemas/cndi_template.schema.json):
+  The JSON-Schema for the CNDI Template Syntax which enables configuring and
+  templating CNDI projects interactively.
+
 ## Web Pages
 
 - [CNDI Website](https://cndi.dev): Official website with project overview and
