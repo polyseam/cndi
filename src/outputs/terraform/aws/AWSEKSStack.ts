@@ -340,6 +340,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
       clusterName,
       clusterVersion: DEFAULT_K8S_VERSION,
       clusterEndpointPublicAccess: true,
+      // clusterComputeConfig: {},
       enableClusterCreatorAdminPermissions: true,
       vpcId: vpcId!,
       // deno-lint-ignore no-explicit-any
