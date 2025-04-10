@@ -4,20 +4,30 @@
   "title": "cndi_config",
   "$comment": "The root of the cndi config schema",
   "description": "A configuration file for CNDI that defines the hardware and software of your cluster",
-  "required": ["infrastructure"],
+  "required": [
+    "infrastructure"
+  ],
   "additionalProperties": false,
   "allOf": [
     {
       "if": {
         "properties": {
-          "provider": { "const": "aws" }
+          "provider": {
+            "const": "aws"
+          }
         },
-        "required": ["provider"]
+        "required": [
+          "provider"
+        ]
       },
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "eks", "clusterless"]
+            "enum": [
+              "microk8s",
+              "eks",
+              "clusterless"
+            ]
           }
         }
       }
@@ -25,14 +35,22 @@
     {
       "if": {
         "properties": {
-          "provider": { "const": "gcp" }
+          "provider": {
+            "const": "gcp"
+          }
         },
-        "required": ["provider"]
+        "required": [
+          "provider"
+        ]
       },
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "gke", "clusterless"]
+            "enum": [
+              "microk8s",
+              "gke",
+              "clusterless"
+            ]
           }
         }
       }
@@ -40,14 +58,22 @@
     {
       "if": {
         "properties": {
-          "provider": { "const": "azure" }
+          "provider": {
+            "const": "azure"
+          }
         },
-        "required": ["provider"]
+        "required": [
+          "provider"
+        ]
       },
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "aks", "clusterless"]
+            "enum": [
+              "microk8s",
+              "aks",
+              "clusterless"
+            ]
           }
         }
       }
@@ -55,14 +81,20 @@
     {
       "if": {
         "properties": {
-          "provider": { "const": "dev" }
+          "provider": {
+            "const": "dev"
+          }
         },
-        "required": ["provider"]
+        "required": [
+          "provider"
+        ]
       },
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s"]
+            "enum": [
+              "microk8s"
+            ]
           }
         }
       }
@@ -83,17 +115,30 @@
     "provider": {
       "type": "string",
       "description": "The cloud provider to use for the infrastructure.",
-      "enum": ["aws", "gcp", "azure", "dev"]
+      "enum": [
+        "aws",
+        "gcp",
+        "azure",
+        "dev"
+      ]
     },
     "distribution": {
       "type": "string",
       "description": "The distribution of Kubernetes to use for the infrastructure.",
-      "enum": ["microk8s", "eks", "gke", "aks", "clusterless"]
+      "enum": [
+        "microk8s",
+        "eks",
+        "gke",
+        "aks",
+        "clusterless"
+      ]
     },
     "infrastructure": {
       "type": "object",
       "description": "An object which defines the infrastructure resources CNDI should deploy.",
-      "required": ["cndi"],
+      "required": [
+        "cndi"
+      ],
       "properties": {
         "terraform": {
           "properties": {
@@ -111,7 +156,9 @@
         "cndi": {
           "type": "object",
           "description": "An object which contains the resources CNDI should deploy, which are defined by the CNDI project.",
-          "required": ["nodes"],
+          "required": [
+            "nodes"
+          ],
           "additionalProperties": false,
           "properties": {
             "argocd": {
@@ -136,7 +183,9 @@
                 },
                 "mode": {
                   "type": "string",
-                  "enum": ["in_cluster"]
+                  "enum": [
+                    "in_cluster"
+                  ]
                 },
                 "grafana": {
                   "type": "object",
@@ -217,12 +266,17 @@
               "properties": {
                 "mode": {
                   "type": "string",
-                  "enum": ["create", "insert"]
+                  "enum": [
+                    "create",
+                    "insert"
+                  ]
                 }
               },
               "if": {
                 "properties": {
-                  "mode": { "const": "create" }
+                  "mode": {
+                    "const": "create"
+                  }
                 }
               },
               "then": {
@@ -230,7 +284,9 @@
                 "properties": {
                   "mode": {
                     "type": "string",
-                    "enum": ["create"]
+                    "enum": [
+                      "create"
+                    ]
                   },
                   "vnet_address_space": {
                     "type": "string",
@@ -244,7 +300,9 @@
                 "properties": {
                   "mode": {
                     "type": "string",
-                    "enum": ["insert"]
+                    "enum": [
+                      "insert"
+                    ]
                   },
                   "vnet_identifier": {
                     "type": "string",
@@ -347,7 +405,9 @@
               "oneOf": [
                 {
                   "properties": {
-                    "self_signed": { "const": true },
+                    "self_signed": {
+                      "const": true
+                    },
                     "email": {
                       "not": {}
                     },
@@ -356,19 +416,27 @@
                       "default": true
                     }
                   },
-                  "required": ["self_signed"],
+                  "required": [
+                    "self_signed"
+                  ],
                   "additionalProperties": false
                 },
                 {
                   "properties": {
-                    "self_signed": { "enum": [false] },
+                    "self_signed": {
+                      "enum": [
+                        false
+                      ]
+                    },
                     "email": {},
                     "enabled": {
                       "type": "boolean",
                       "default": true
                     }
                   },
-                  "required": ["email"],
+                  "required": [
+                    "email"
+                  ],
                   "additionalProperties": false
                 }
               ],
@@ -406,66 +474,79 @@
               }
             },
             "nodes": {
-              "$comment": "An array of CNDI cluster nodes to deploy.",
-              "minItems": 1,
-              "type": "array",
-              "uniqueItems": true,
-              "items": {
-                "type": "object",
-                "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
-                "required": ["name"],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name of the node or node group to deploy."
-                  },
-                  "role": {
-                    "type": "string",
-                    "description": "Role of the node",
-                    "enum": ["leader", "controller", "worker"]
-                  },
-                  "instance_type": {},
-                  "volume_size": {
-                    "type": "number",
-                    "description": "The amount of disk to allocate to the node in G.",
-                    "minimum": 1
-                  },
-                  "count": {
-                    "type": "number",
-                    "description": "The number of nodes to deploy.",
-                    "minimum": 1,
-                    "default": 1
-                  },
-                  "disk": {
-                    "oneOf": [
-                      {
+              "oneOf": [
+                {
+                  "$comment": "An array of CNDI cluster nodes to deploy.",
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "description": "An object which defines the properties of a new Kubernetes node for CNDI to deploy. At least one must be have the \"role\" property set to \"leader\".",
+                    "required": [
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
                         "type": "string",
-                        "description": "The amount of disk to allocate to the node.",
-                        "pattern": "^[0-9]+(?:G|M|K)$"
+                        "description": "The name of the node or node group to deploy."
                       },
-                      {
+                      "role": {
+                        "type": "string",
+                        "description": "Role of the node",
+                        "enum": [
+                          "leader",
+                          "controller",
+                          "worker"
+                        ]
+                      },
+                      "instance_type": {},
+                      "volume_size": {
                         "type": "number",
                         "description": "The amount of disk to allocate to the node in G.",
                         "minimum": 1
-                      }
-                    ]
-                  },
-                  "memory": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "description": "The amount of memory to allocate to the node.",
-                        "pattern": "^[0-9]+(?:G|M|K)$"
                       },
-                      {
+                      "count": {
                         "type": "number",
-                        "description": "The amount of memory to allocate to the node in G.",
-                        "minimum": 1
+                        "description": "The number of nodes to deploy.",
+                        "minimum": 1,
+                        "default": 1
+                      },
+                      "disk": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "The amount of disk to allocate to the node.",
+                            "pattern": "^[0-9]+(?:G|M|K)$"
+                          },
+                          {
+                            "type": "number",
+                            "description": "The amount of disk to allocate to the node in G.",
+                            "minimum": 1
+                          }
+                        ]
+                      },
+                      "memory": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "The amount of memory to allocate to the node.",
+                            "pattern": "^[0-9]+(?:G|M|K)$"
+                          },
+                          {
+                            "type": "number",
+                            "description": "The amount of memory to allocate to the node in G.",
+                            "minimum": 1
+                          }
+                        ]
                       }
-                    ]
+                    }
                   }
+                },
+                {
+                  "const": "auto"
                 }
-              }
+              ]
             },
             "ingress": {
               "type": "object",
@@ -523,7 +604,11 @@
         "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
           "type": "object",
           "description": "An object which represents a single manifest CNDI should apply to your cluster.",
-          "required": ["kind", "apiVersion", "metadata"],
+          "required": [
+            "kind",
+            "apiVersion",
+            "metadata"
+          ],
           "properties": {
             "kind": {
               "type": "string",
@@ -536,7 +621,9 @@
             "metadata": {
               "type": "object",
               "description": "The metadata of the Kubernetes resource to deploy.",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
                 "name": {
                   "type": "string",
@@ -574,13 +661,21 @@
       "patternProperties": {
         "^[a-z0-9]+(?:-[a-z0-9]+)*$": {
           "type": "object",
-          "required": ["targetRevision", "destinationNamespace", "repoURL"],
+          "required": [
+            "targetRevision",
+            "destinationNamespace",
+            "repoURL"
+          ],
           "oneOf": [
             {
-              "required": ["chart"]
+              "required": [
+                "chart"
+              ]
             },
             {
-              "required": ["path"]
+              "required": [
+                "path"
+              ]
             }
           ],
           "properties": {
@@ -604,10 +699,8 @@
               "type": "string",
               "description": "The path to the Helm Chart from the root of the git-hosted repository."
             },
-            "values": {
-            },
-            "syncPolicy": {
-            }
+            "values": {},
+            "syncPolicy": {}
           }
         }
       }

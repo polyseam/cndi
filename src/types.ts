@@ -354,7 +354,7 @@ export type CNDIInfrastructure = {
       self_signed?: boolean;
       values?: Record<string, unknown>;
     };
-    nodes: Array<CNDINodeSpec>;
+    nodes: Array<CNDINodeSpec> | "auto";
     microk8s: {
       addons: Array<Microk8sAddon>;
       version?: string; // 1.27
