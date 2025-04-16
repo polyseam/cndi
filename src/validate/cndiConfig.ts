@@ -271,11 +271,13 @@ export default function validateConfig(
 }
 
 function validateInfrastructureComponentCndiNodes(
-  nodes: CNDINodeSpec[],
+  nodes: CNDINodeSpec[] | "auto",
   meta: CNDIMeta,
 ): ErrOut | void {
   const { pathToConfig, distribution, provider } = meta;
 
+  if (nodes === "auto") return
+  
   const nodeNameSet = new Set();
 
   for (const node of nodes) {
