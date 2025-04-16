@@ -251,7 +251,7 @@ you can safely delete your git repo or achive it for reference later.
 
 We've got a few walkthroughs you can follow if you'd like, one for each
 deployment target. These walkthroughs hold your hand through the process of
-deploying [Airflow](https://cndi.dev/templates-airflow) to the provider and
+deploying [Airflow](https://cndi.dev/templates/airflow) to the provider and
 distribution of your choice. They include info about how to get credentials,
 explanations about prompts, screenshots, and more.
 
