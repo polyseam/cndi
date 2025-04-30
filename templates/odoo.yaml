@@ -1,0 +1,135 @@
+prompts:
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-prompts.yaml):
+      {}
+  - $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core-prompts.yaml):
+      {}
+
+  - name: deploy_odoo_ingress
+    default: true
+    message: >-
+      Do you want to expose the Odoo UI to the web?
+    type: Confirm
+
+  - name: odoo_hostname
+    default: odoo.example.com
+    message: >-
+      What hostname should Odoo be accessible at?
+    type: Input
+    validators:
+      - hostname # FQDN
+      - min_length: 3
+    condition:
+      - "{{ $cndi.get_prompt_response(deploy_odoo_ingress) }}"
+      - ==
+      - true
+
+  - name: odoo_edition
+    default: community
+    message: >-
+      Which edition of Odoo do you want to deploy?
+    type: Select
+    options:
+      - community
+      - enterprise
+
+outputs:
+  cndi_config:
+    cndi_version: v2
+    project_name: "{{ $cndi.get_prompt_response(project_name) }}"
+    provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
+    distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    infrastructure:
+      cndi:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_grafana_ingress) }}"
+            - ==
+            - true
+
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/argocd-config.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(deploy_argocd_ingress) }}"
+            - ==
+            - true
+
+        cert_manager:
+          email: "{{ $cndi.get_prompt_response(cert_manager_email) }}"
+
+        external_dns:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/config/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+            condition:
+              - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+              - ==
+              - true
+
+        nodes:
+          $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/basic-node-pool.yaml):
+            {}
+
+    cluster_manifests:
+      external-dns-secret:
+        $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/external-dns/secret/{{ $cndi.get_prompt_response(dns_provider) }}.yaml):
+          condition:
+            - "{{ $cndi.get_prompt_response(enable_external_dns) }}"
+            - ==
+            - true
+
+      odoo-ns:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: odoo
+
+      odoo-ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: odoo-ingress
+          namespace: odoo
+          annotations:
+            cert-manager.io/cluster-issuer: cluster-issuer
+            kubernetes.io/tls-acme: "true"
+            external-dns.alpha.kubernetes.io/hostname: "{{ $cndi.get_prompt_response(odoo_hostname) }}"
+        spec:
+          ingressClassName: public
+          tls:
+            - hosts:
+                - "{{ $cndi.get_prompt_response(odoo_hostname) }}"
+              secretName: cluster-issuer-private-key
+          rules:
+            - host: "{{ $cndi.get_prompt_response(odoo_hostname) }}"
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: odoo
+                        port:
+                          number: 80
+    applications:
+      odoo:
+        chart: odoo
+        repoURL: registry-1.docker.io/bitnamicharts
+        targetRevision: 28.2.2
+        destinationNamespace: odoo
+        values: {}
+  env:
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/env.yaml):
+      {}
+    $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
+      {}
+
+  readme:
+    project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/core-readme.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/core.md):
+      {}
+    $cndi.get_string(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/{{ $cndi.get_prompt_response(deployment_target_provider) }}/{{ $cndi.get_prompt_response(deployment_target_distribution) }}.md):
+      {}
+
+    odoo: |
+      # Odoo Deployment Guide
