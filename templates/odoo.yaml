@@ -23,14 +23,20 @@ prompts:
       - ==
       - true
 
-  - name: odoo_edition
-    default: community
-    message: >-
-      Which edition of Odoo do you want to deploy?
-    type: Select
-    options:
-      - community
-      - enterprise
+  - name: odoo_admin_email
+    type: Input
+    default: john.odoole@example.com
+    message: What should your Odoo admin login be?
+    validators:
+      - email
+      - min_length: 3
+
+  - name: odoo_admin_password
+    type: Secret
+    default: "{{ $cndi.get_random_string(16) }}"
+    message: What should your Odoo admin password be?
+    validators:
+      - min_length: 3
 
 outputs:
   cndi_config:
@@ -107,13 +113,36 @@ outputs:
                         name: odoo
                         port:
                           number: 80
+
+      odoo-smtp-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: odoo-smtp-password-secret
+          namespace: odoo
+        stringData:
+          smtp-password: $cndi_on_ow.seal_secret_from_env_var(ODOO_SMTP_PASSWORD)
+
+      odoo-secret:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: odoo-admin-password-secret
+          namespace: odoo
+        stringData:
+          odoo-password: $cndi_on_ow.seal_secret_from_env_var(ODOO_USER_PASSWORD)
+
     applications:
       odoo:
         chart: odoo
         repoURL: registry-1.docker.io/bitnamicharts
         targetRevision: 28.2.2
         destinationNamespace: odoo
-        values: {}
+        values:
+          odooEmail: "{{ $cndi.get_prompt_response(odoo_admin_email) }}"
+          existingSecret: odoo-admin-password-secret
+          existingSmtpSecret: odoo-smtp-password-secret
+
   env:
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/git-credentials-{{ $cndi.get_prompt_response(git_credentials_mode) }}-env.yaml):
       {}
@@ -121,6 +150,9 @@ outputs:
       {}
     $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/env.yaml):
       {}
+    $cndi.comment(Odoo Secrets): Odoo Secrets
+    ODOO_USER_PASSWORD: "{{ $cndi.get_prompt_response(odoo_admin_password) }}"
+    ODOO_SMTP_PASSWORD: "{{ $cndi.get_random_string(16) }}"
 
   readme:
     project_name: "# {{ $cndi.get_prompt_response(project_name) }}"
@@ -133,3 +165,5 @@ outputs:
 
     odoo: |
       # Odoo Deployment Guide
+
+      This guide will help you operate your Odoo Cluster
