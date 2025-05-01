@@ -275,7 +275,11 @@ function getStagingDirectory(): PxResult<string> {
 async function patchAndStageTerraformFilesWithInput(
   input: TFBlocks,
 ): Promise<ErrOut | void> {
-  const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
+  const pathToTerraformObject = path.join(
+    "cndi",
+    "terraform",
+    "cndi.terraform.json",
+  );
 
   const [err, stagingDirectory] = getStagingDirectory();
 

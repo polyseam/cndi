@@ -17,6 +17,7 @@ export const DEFAULT_K8S_VERSION = "1.31";
 
 // Root Application Chart Versions (terraform managed)
 export const ARGOCD_CHART_VERSION = "7.7.16";
+export const ARGOCD_APPS_CHART_VERSION = "1.4.1";
 export const SEALED_SECRETS_CHART_VERSION = "2.17.0";
 
 // Core Application Chart Versions (gitops managed)

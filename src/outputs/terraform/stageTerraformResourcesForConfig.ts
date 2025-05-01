@@ -2,7 +2,7 @@ import { ccolors, path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { stageFile, useSshRepoAuth } from "src/utils.ts";
 import { stageTerraformSynthAWSMicrok8s } from "src/outputs/terraform/aws/AWSMicrok8sStack.ts";
-import { stageTerraformSynthAWSEKS } from "src/outputs/terraform/aws/AWSEKSStack.ts";
+import { stageTerraformSynthAWSEKS } from "./aws/AWSEKSStack.ts";
 import { stageTerraformSynthAWSClusterless } from "src/outputs/terraform/aws/AWSClusterlessStack.ts";
 import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
 import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
