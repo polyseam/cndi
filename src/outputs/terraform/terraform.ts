@@ -8,7 +8,7 @@ const REQUIRED_PROVIDERS = {
   aws: {
     aws: {
       source: "hashicorp/aws",
-      version: "~> 5.0",
+      version: "5.91.0",
     },
   },
   gcp: {
