@@ -390,7 +390,7 @@ export default class AWSEKSTerraformStack extends AWSCoreTerraformStack {
 
     const eksNodeGroupRole = new CDKTFProviderAWS.iamRole.IamRole(
       this,
-      "cndi_iam_role_compute",
+      "cndi_aws_iam_role",
       {
         namePrefix: "COMPUTE",
         assumeRolePolicy: JSON.stringify({

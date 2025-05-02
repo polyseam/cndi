@@ -89,7 +89,7 @@ export default function (cndi_config: CNDIConfig) {
           version:
             `\${aws_launch_template.cndi_aws_launch_template_${i}.latest_version}`,
         },
-        node_role_arn: "${aws_iam_role.cndi_iam_role_compute.arn}",
+        node_role_arn: "${aws_iam_role.cndi_aws_iam_role.arn}",
         scaling_config,
         labels,
         tags,

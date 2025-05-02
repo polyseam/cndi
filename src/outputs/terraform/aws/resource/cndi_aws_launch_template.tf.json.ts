@@ -17,7 +17,7 @@ interface AWS_LAUNCH_TEMPLATE {
   };
   name_prefix: string;
   tag_specifications: Array<{
-    resourceType: string;
+    resource_type: string;
     tags: Record<string, string>;
   }>;
 }
@@ -53,7 +53,7 @@ export default function (cndi_config: CNDIConfig) {
           http_tokens: "required",
         },
         name_prefix: `cndi-${nodeSpec.name}-${i}-`,
-        tag_specifications: [{ resourceType: "instance", tags }],
+        tag_specifications: [{ resource_type: "instance", tags }],
       };
       i++;
     }
