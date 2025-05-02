@@ -68,8 +68,10 @@ export default function getProviderTfJSON(
     case "aws":
       out.aws = [{
         default_tags: [{
-          CNDIProject: "${local.cndi_project_name}",
-          CNDIVersion: "v2",
+          tags: {
+            CNDIProject: "${local.cndi_project_name}",
+            CNDIVersion: "v2",
+          },
         }],
         region: "${local.aws_region}",
       }];
