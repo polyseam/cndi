@@ -1,16 +1,8 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import { CNDIConfig } from "src/types.ts";
 import { path } from "deps";
-import {
-  ARGOCD_APPS_CHART_VERSION,
-  ARGOCD_CHART_VERSION,
-  // DEFAULT_K8S_VERSION,
-  SEALED_SECRETS_CHART_VERSION,
-} from "versions";
+import {} from "versions";
 
 import {
-  getPrettyJSONString,
-  // getTaintEffectForDistribution,
-  patchAndStageTerraformFilesWithInput,
   stageFile,
   // useSshRepoAuth,
 } from "src/utils.ts";
