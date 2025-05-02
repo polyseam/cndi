@@ -34,8 +34,7 @@ export default function (_cndi_config: CNDIConfig) {
         set_sensitive: [
           {
             name: "configs.secret.argocdServerAdminPassword",
-            value:
-              "${sensitive(sensitive(bcrypt(var.ARGOCD_ADMIN_PASSWORD, 10)))}",
+            value: "${sensitive(bcrypt(var.ARGOCD_ADMIN_PASSWORD, 10))}",
           },
         ],
         timeout: 600,

@@ -5,7 +5,7 @@ export default function (_cndi_config: CNDIConfig) {
   // TODO: learn what this is
   const resource = {
     time_static: {
-      cndi_time_static: {
+      cndi_time_static_argocd_admin_password: {
         triggers: {
           argocdAdminPassword: "${var.ARGOCD_ADMIN_PASSWORD}",
         },

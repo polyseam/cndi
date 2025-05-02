@@ -44,7 +44,7 @@ import cndi_helm_release_argocd_apps from "src/outputs/terraform/shared/resource
 import cndi_helm_release_sealed_secrets from "src/outputs/terraform/shared/resource/cndi_helm_release_sealed_secrets.tf.json.ts";
 import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_sealed_secrets_key.tf.json.ts";
 import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
-import cndi_time_static from "src/outputs/terraform/shared/resource/cndi_time_static.tf.json.ts";
+import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
 export async function stageAWSEKSClassicTerraformFiles(
   cndi_config: CNDIConfig,
@@ -172,7 +172,7 @@ export async function stageAWSEKSClassicTerraformFiles(
     ),
     stageFile(
       path.join("cndi", "terraform", "cndi_time_static.tf.json"),
-      cndi_time_static(cndi_config),
+      cndi_time_static_argocd_admin_password(cndi_config),
     ),
   ]);
 
