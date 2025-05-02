@@ -171,7 +171,7 @@ export async function stageAWSEKSClassicTerraformFiles(
       cndi_kubernetes_secret_argocd_private_repo(cndi_config),
     ),
     stageFile(
-      path.join("cndi", "terraform", "cndi_time_static.tf.json"),
+      path.join("cndi", "terraform", "cndi_time_static_argocd_admin_password.tf.json"),
       cndi_time_static_argocd_admin_password(cndi_config),
     ),
   ]);
