@@ -32,21 +32,25 @@ const REQUIRED_PROVIDERS = {
 } as const;
 
 const CORE_REQUIRED_PROVIDERS = {
-  kubernetes: {
-    source: "hashicorp/kubernetes",
-    version: "~> 2.0",
-  },
   helm: {
-    source: "hashicorp/helm",
-    version: "~> 3.0",
+    source: "helm",
+    version: "2.17.0",
   },
-  tls: {
-    source: "hashicorp/tls",
-    version: "~> 4.0",
+  kubernetes: {
+    source: "kubernetes",
+    version: "2.36.0",
+  },
+  random: {
+    source: "hashicorp/random",
+    version: "3.7.1",
   },
   time: {
     source: "hashicorp/time",
-    version: "~> 2.0",
+    version: "0.13.0",
+  },
+  tls: {
+    source: "hashicorp/tls",
+    version: "4.0.6",
   },
 } as const;
 
