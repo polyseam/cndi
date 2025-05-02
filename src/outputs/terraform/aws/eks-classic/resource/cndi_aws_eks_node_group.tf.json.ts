@@ -30,6 +30,7 @@ interface AWS_EKS_NODE_GROUP {
     value: string;
     effect: string;
   }>;
+  subnet_ids: string;
 }
 
 export default function (cndi_config: CNDIConfig) {
@@ -94,6 +95,7 @@ export default function (cndi_config: CNDIConfig) {
         labels,
         tags,
         taint,
+        subnet_ids: "${module.cndi_aws_vpc_module.private_subnets}",
       };
       i++;
     }

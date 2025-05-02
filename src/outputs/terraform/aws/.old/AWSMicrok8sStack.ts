@@ -19,7 +19,7 @@ import {
   useSshRepoAuth,
 } from "src/utils.ts";
 import { CNDIConfig, NodeRole, TFBlocks } from "src/types.ts";
-import AWSCoreTerraformStack from "./AWSCoreStack.ts";
+import AWSCoreTerraformStack from "../.old/AWSCoreStack.ts";
 
 import { ErrOut } from "errout";
 

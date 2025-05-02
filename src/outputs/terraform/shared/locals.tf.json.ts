@@ -20,7 +20,9 @@ type GCPKeyJSON = {
 
 const label = ccolors.faded("\nsrc/outputs/terraform/locals.tf.json.ts:");
 
-const getLocalsFor = {
+type LocalsGetter = (cndi_config: CNDIConfig) => Locals;
+
+const getLocalsFor: Record<string, LocalsGetter> = {
   gcp: (_cndi_config: CNDIConfig): Locals => {
     const key = Deno.env.get("GOOGLE_CREDENTIALS");
 

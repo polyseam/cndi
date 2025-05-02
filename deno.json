@@ -171,5 +171,5 @@
     "@cndi/known-templates": "jsr:@cndi/known-templates@^1.0.1",
     "@cndi/validators": "jsr:@cndi/validators@^0.1.0"
   },
-  "exclude": ["dist/*"]
+  "exclude": ["dist/*", "**/.old/**"]
 }
