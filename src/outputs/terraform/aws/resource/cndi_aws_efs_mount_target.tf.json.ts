@@ -16,7 +16,7 @@ export default function (_cndi_config: CNDIConfig) {
     // loop over each subnet ID in vpc
     cndi_aws_efs_mount_target: {
       for_each: "${toset(module.cndi_aws_vpc_module.private_subnets)}",
-      file_system_id: "${aws_efs_file_system.fs.id}",
+      file_system_id: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",
       subnet_id: "${each.value}",
       security_groups: [
         "${module.cndi_aws_eks_module.cluster_primary_security_group_id}",

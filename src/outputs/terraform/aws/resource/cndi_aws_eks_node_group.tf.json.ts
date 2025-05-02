@@ -85,10 +85,9 @@ export default function (cndi_config: CNDIConfig) {
         node_group_name: nodeSpec.name,
 
         launch_template: {
-          id:
-            "${module.cndi_aws_eks_launch_template.cndi_aws_launch_template_0.id}",
+          id: `\${aws_launch_template.cndi_aws_launch_template_${i}.id}`,
           version:
-            "$${module.cndi_aws_eks_launch_template.cndi_aws_launch_template_0.latest_version}",
+            `\${aws_launch_template.cndi_aws_launch_template_${i}.latest_version}`,
         },
         node_role_arn: "${aws_iam_role.cndi_iam_role_compute.arn}",
         scaling_config,
