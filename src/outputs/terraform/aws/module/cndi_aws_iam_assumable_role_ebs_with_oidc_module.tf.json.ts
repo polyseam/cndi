@@ -7,16 +7,18 @@ const MODULE_SOURCE =
 export default function (_cndi_config: CNDIConfig) {
   return getPrettyJSONString({
     module: {
-      create_role: true,
-      oidc_fully_qualified_subjects: [
-        "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-      ],
-      provider_url: "${module.cndi_aws_eks_module.oidc_provider}",
-      role_name: "AmazonEKSTFEBSCSIRole-${local.cluster_name}",
-      role_policy_arns: [
-        "${data.aws_iam_policy.ebs_csi_policy.arn}",
-      ],
-      source: MODULE_SOURCE,
+      cndi_aws_iam_assumable_role_ebs_with_oidc: {
+        create_role: true,
+        oidc_fully_qualified_subjects: [
+          "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+        ],
+        provider_url: "${module.cndi_aws_eks_module.oidc_provider}",
+        role_name: "AmazonEKSTFEBSCSIRole-${local.cluster_name}",
+        role_policy_arns: [
+          "${data.aws_iam_policy.ebs_csi_policy.arn}",
+        ],
+        source: MODULE_SOURCE,
+      },
     },
   });
 }

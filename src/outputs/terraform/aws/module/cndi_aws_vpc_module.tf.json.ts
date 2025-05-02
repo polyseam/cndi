@@ -21,24 +21,26 @@ export default function (cndi_config: CNDIConfig): string | null {
   if (network.mode === "create") {
     return getPrettyJSONString({
       module: {
-        azs: "${data.aws_availability_zones.available-zones.names}",
-        cidr: "10.0.0.0/16",
-        create_vpc: true,
-        enable_dns_hostnames: true,
-        enable_nat_gateway: true,
-        name: "cndi-vpc_${local.cndi_project_name}",
-        private_subnet_tags: {
-          "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
-          "kubernetes.io/role/internal-elb": "1",
+        cndi_aws_vpc_module: {
+          azs: "${data.aws_availability_zones.available-zones.names}",
+          cidr: "10.0.0.0/16",
+          create_vpc: true,
+          enable_dns_hostnames: true,
+          enable_nat_gateway: true,
+          name: "cndi-vpc_${local.cndi_project_name}",
+          private_subnet_tags: {
+            "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
+            "kubernetes.io/role/internal-elb": "1",
+          },
+          private_subnets,
+          public_subnet_tags: {
+            "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
+            "kubernetes.io/role/elb": "1",
+          },
+          public_subnets,
+          single_nat_gateway: true,
+          source: MODULE_SOURCE,
         },
-        private_subnets,
-        public_subnet_tags: {
-          "kubernetes.io/cluster/${local.cndi_project_name}": "owned",
-          "kubernetes.io/role/elb": "1",
-        },
-        public_subnets,
-        single_nat_gateway: true,
-        source: MODULE_SOURCE,
       },
     });
   } else if (network.mode === "insert") {
@@ -46,11 +48,13 @@ export default function (cndi_config: CNDIConfig): string | null {
     console.warn("cndi previously just ignored the vpc module on insert");
     return getPrettyJSONString({
       module: {
-        create_vpc: false,
-        tags: {
-          CNDIProject: "${local.cndi_project_name}",
+        cndi_aws_vpc_module: {
+          create_vpc: false,
+          tags: {
+            CNDIProject: "${local.cndi_project_name}",
+          },
+          source: MODULE_SOURCE,
         },
-        source: MODULE_SOURCE,
       },
     });
   }
