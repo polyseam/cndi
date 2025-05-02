@@ -278,7 +278,7 @@ async function patchAndStageTerraformFilesWithInput(
   const pathToTerraformObject = path.join(
     "cndi",
     "terraform",
-    "cndi.terraform.json",
+    "cdk.tf.json",
   );
 
   const [err, stagingDirectory] = getStagingDirectory();
@@ -374,8 +374,9 @@ function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
 
 async function stageFile(
   relativePath: string,
-  fileContents: string,
+  fileContents: string | null,
 ): Promise<ErrOut | void> {
+  if (fileContents === null) return;
   const [err, stagingDirectory] = getStagingDirectory();
   if (err) return err;
   const stagingPath = path.join(stagingDirectory, relativePath);
