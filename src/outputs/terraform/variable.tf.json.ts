@@ -1,5 +1,5 @@
 import { CNDIConfig } from "src/types.ts";
-import { getPrettyJSONString } from "src/utils.ts";
+import { getPrettyJSONString, useSshRepoAuth } from "src/utils.ts";
 import { ccolors } from "deps";
 
 type Variables = Record<string, {
@@ -20,20 +20,6 @@ const VARIABLE: Variables = {
     type: "string",
     description: "Cluster git repository URL",
   },
-  GIT_SSH_PRIVATE_KEY: {
-    type: "string",
-    description: "SSH private key for Git repository access",
-    sensitive: true,
-  },
-  GIT_TOKEN: {
-    type: "string",
-    description: "Git token for repository access",
-    sensitive: true,
-  },
-  GIT_USERNAME: {
-    type: "string",
-    description: "Git username for repository access",
-  },
   SEALED_SECRETS_PUBLIC_KEY: {
     type: "string",
     description:
@@ -51,9 +37,33 @@ const VARIABLE: Variables = {
   },
 } as const;
 
+const SSH_REPO_AUTH_VARIABLES = {
+  GIT_SSH_PRIVATE_KEY: {
+    type: "string",
+    description: "SSH private key for Git repository access",
+    sensitive: true,
+  },
+};
+
+const TOKEN_REPO_AUTH_VARIABLES = {
+  GIT_TOKEN: {
+    type: "string",
+    description: "Git token for repository access",
+    sensitive: true,
+  },
+  GIT_USERNAME: {
+    type: "string",
+    description: "Git username for repository access",
+  },
+};
+
 export default function getVariableTfJSON(
   _cndi_config: CNDIConfig,
 ): string {
+  const variable = {
+    ...VARIABLE,
+    ...(useSshRepoAuth() ? SSH_REPO_AUTH_VARIABLES : TOKEN_REPO_AUTH_VARIABLES),
+  };
   // TODO: some variables are not used in every stack
-  return getPrettyJSONString({ variable: VARIABLE });
+  return getPrettyJSONString({ variable });
 }

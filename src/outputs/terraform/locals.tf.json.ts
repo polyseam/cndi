@@ -52,7 +52,7 @@ const getLocalsFor = {
       gcp_client_email,
     };
   },
-  aws: (cndi_config: CNDIConfig): Locals => {
+  aws: (_cndi_config: CNDIConfig): Locals => {
     const aws_region = Deno.env.get("AWS_REGION") || "us-east-1";
     return { aws_region };
   },
