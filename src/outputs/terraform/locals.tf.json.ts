@@ -60,7 +60,10 @@ const getLocalsFor = {
     const arm_region = Deno.env.get("ARM_REGION") || "eastus";
     return { arm_region };
   },
-  dev: (_cndi_config: CNDIConfig): Locals => ({}),
+  dev: (_cndi_config: CNDIConfig): Locals => ({
+    bootstrap_token:
+      "${random_password.cndi_random_password_bootstrap_token.result}",
+  }),
 };
 
 export default function getLocalsTfJSON(
@@ -81,8 +84,6 @@ export default function getLocalsTfJSON(
   const locals: Locals = {
     cndi_project_name,
     cluster_name: "${local.cndi_project_name}",
-    bootstrap_token:
-      "${random_password.cndi_random_password_bootstrap_token.result}",
     ...getLocalsFor[cndi_config.provider](cndi_config),
   };
 
