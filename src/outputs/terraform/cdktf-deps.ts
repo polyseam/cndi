@@ -22,7 +22,6 @@ export {
 
 // Terraform CDKTF Providers
 export * as CDKTFProviderRandom from "@cdktf/provider-random";
-export * as CDKTFProviderAWS from "@cdktf/provider-aws";
 export * as CDKTFProviderAzure from "@cdktf/provider-azurerm";
 export * as CDKTFProviderGCP from "@cdktf/provider-google";
 export * as CDKTFProviderHelm from "@cdktf/provider-helm";
@@ -30,11 +29,6 @@ export * as CDKTFProviderKubernetes from "@cdktf/provider-kubernetes";
 export * as CDKTFProviderTime from "@cdktf/provider-time";
 export * as CDKTFProviderTls from "@cdktf/provider-tls";
 export * as CDKTFProviderLocal from "@cdktf/provider-local";
-
-export { AwsEks as AwsEksModule } from "@cndi/cdktf/modules/aws-eks.ts";
-export { AwsVpc as AwsVpcModule } from "@cndi/cdktf/modules/aws-vpc.ts";
-export { AwsIamAssumableRoleWithOidc as AwsIamAssumableRoleWithOidcModule } from "@cndi/cdktf/modules/aws-iam-assumable-role-with-oidc.ts";
-export { AwsEksManagedNodeGroup as AwsEksManagedNodeGroupModule } from "@cndi/cdktf/modules/aws-eks-managed-node-group.ts";
 
 import { getPrettyJSONString, getStagingDirectory } from "src/utils.ts";
 import { path, walkSync } from "deps";

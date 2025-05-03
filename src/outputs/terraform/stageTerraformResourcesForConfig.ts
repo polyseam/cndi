@@ -1,9 +1,7 @@
 import { ccolors, path } from "deps";
 import { CNDIConfig } from "src/types.ts";
 import { stageFile, useSshRepoAuth } from "src/utils.ts";
-import { stageTerraformSynthAWSMicrok8s } from "./aws/.old/AWSMicrok8sStack.ts";
 import stageTerraformFilesForAWSEKS from "./aws/stage.ts";
-import { stageTerraformSynthAWSClusterless } from "./aws/.old/AWSClusterlessStack.ts";
 import { stageTerraformSynthAzureMicrok8s } from "src/outputs/terraform/azure/AzureMicrok8sStack.ts";
 import { stageTerraformSynthAzureAKS } from "src/outputs/terraform/azure/AzureAKSStack.ts";
 import { stageTerraformSynthAzureClusterless } from "src/outputs/terraform/azure/AzureClusterlessStack.ts";
@@ -31,13 +29,13 @@ export default async function stageTerraformResourcesForConfig(
 
   switch (deploymentTargetLabel) {
     case "aws/microk8s":
-      errStagingStack = await stageTerraformSynthAWSMicrok8s(config);
+      // errStagingStack = await stageTerraformSynthAWSMicrok8s(config);
       break;
     case "aws/eks":
       errStagingStack = await stageTerraformFilesForAWSEKS(config);
       break;
     case "aws/clusterless":
-      errStagingStack = await stageTerraformSynthAWSClusterless(config);
+      // errStagingStack = await stageTerraformSynthAWSClusterless(config);
       break;
     case "gcp/gke":
       errStagingStack = await stageTerraformSynthGCPGKE(config);

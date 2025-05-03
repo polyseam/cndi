@@ -3,7 +3,7 @@
   "deno_version": "2.2.10",
   "tasks": {
     "checks": {
-      "command": "deno lint && deno check . && deno fmt --check"
+      "command": "deno lint && deno check && deno fmt --check"
     },
 
     "archive-all": {
@@ -119,7 +119,6 @@
     "lint-fix": "deno lint --fix"
   },
   "imports": {
-    "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.57.0",
     "@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@^13.22.0",
     "@cdktf/provider-google": "npm:@cdktf/provider-google@^14.24.0",
     "@cdktf/provider-helm": "npm:@cdktf/provider-helm@^10.5.0",
@@ -128,14 +127,10 @@
     "@cdktf/provider-random": "npm:@cdktf/provider-random@^11.1.0",
     "@cdktf/provider-time": "npm:@cdktf/provider-time@^10.3.0",
     "@cdktf/provider-tls": "npm:@cdktf/provider-tls@^10.0.1",
-    "netmask": "npm:netmask@2.0.2",
+    "netmask": "npm:netmask@^2.0.2",
     "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.5",
     "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.5",
-    "@cndi/cdktf/modules/aws-eks-managed-node-group.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-eks-managed-node-group.ts",
-    "@cndi/cdktf/modules/aws-eks.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-eks.ts",
-    "@cndi/cdktf/modules/aws-iam-assumable-role-with-oidc.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-iam-assumable-role-with-oidc.ts",
-    "@cndi/cdktf/modules/aws-vpc.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-vpc.ts",
     "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@2.0.1",
     "@polyseam/silky": "jsr:@polyseam/silky@^1.1.2",
     "@std/assert": "jsr:@std/assert@^1.0.11",

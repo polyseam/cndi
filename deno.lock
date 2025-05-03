@@ -1,5 +1,5 @@
 {
-  "version": "4",
+  "version": "5",
   "specifiers": {
     "jsr:@cliffy/ansi@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/ansi@^1.0.0-rc.5": "1.0.0-rc.7",
@@ -11,7 +11,6 @@
     "jsr:@cliffy/keycode@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/prompt@^1.0.0-rc.5": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
-    "jsr:@cndi/cdktf@0.4": "0.4.0",
     "jsr:@cndi/known-templates@^1.0.1": "1.0.1",
     "jsr:@cndi/validators@0.1": "0.1.0",
     "jsr:@polyseam/cliffy-provider-gh-releases@2.0.1": "2.0.1",
@@ -29,12 +28,14 @@
     "jsr:@std/cli@0.221": "0.221.0",
     "jsr:@std/cli@^1.0.14": "1.0.15",
     "jsr:@std/collections@^1.0.10": "1.0.10",
+    "jsr:@std/data-structures@^1.0.6": "1.0.7",
     "jsr:@std/dotenv@~0.225.3": "0.225.3",
     "jsr:@std/encoding@~1.0.5": "1.0.8",
     "jsr:@std/fmt@~1.0.2": "1.0.6",
     "jsr:@std/fs@0.214.0": "0.214.0",
     "jsr:@std/fs@0.221": "0.221.0",
     "jsr:@std/fs@^1.0.14": "1.0.15",
+    "jsr:@std/fs@^1.0.9": "1.0.15",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/io@0.214": "0.214.0",
     "jsr:@std/io@0.214.0": "0.214.0",
@@ -51,7 +52,6 @@
     "jsr:@std/testing@^1.0.9": "1.0.9",
     "jsr:@std/text@~1.0.7": "1.0.12",
     "jsr:@std/yaml@^1.0.5": "1.0.5",
-    "npm:@cdktf/provider-aws@^19.57.0": "19.57.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-azurerm@^13.22.0": "13.22.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-google@^14.24.0": "14.24.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0",
     "npm:@cdktf/provider-helm@^10.5.0": "10.5.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0",
@@ -69,7 +69,7 @@
     "npm:lodash.get@4.4.2": "4.4.2",
     "npm:lodash.set@4.3.2": "4.3.2",
     "npm:lodash.unset@4.5.2": "4.5.2",
-    "npm:netmask@2.0.2": "2.0.2",
+    "npm:netmask@^2.0.2": "2.0.2",
     "npm:octokit@^3.1.2": "3.2.1_@octokit+core@5.2.1",
     "npm:simple-git@3.27.0": "3.27.0",
     "npm:validator@13.12.0": "13.12.0",
@@ -124,13 +124,6 @@
       "integrity": "9fdd9776eda28a0b397981c400eeb1aa36da2371b43eefe12e6ff555290e3180",
       "dependencies": [
         "jsr:@std/fmt"
-      ]
-    },
-    "@cndi/cdktf@0.4.0": {
-      "integrity": "6e2ef3220078a694e4f4dd1daa2fa9fdb78d38b446473cfec3b583fe674583de",
-      "dependencies": [
-        "npm:cdktf@0.20.10",
-        "npm:constructs"
       ]
     },
     "@cndi/known-templates@1.0.1": {
@@ -211,6 +204,9 @@
     },
     "@std/collections@1.0.10": {
       "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
+    },
+    "@std/data-structures@1.0.7": {
+      "integrity": "16932d2c8d281f65eaaa2209af2473209881e33b1ced54cd1b015e7b4cdbb0d2"
     },
     "@std/dotenv@0.225.3": {
       "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
@@ -299,7 +295,10 @@
       "integrity": "9bdd4ac07cb13e7594ac30e90f6ceef7254ac83a9aeaa089be0008f33aab5cd4",
       "dependencies": [
         "jsr:@std/assert@^1.0.10",
-        "jsr:@std/internal"
+        "jsr:@std/data-structures",
+        "jsr:@std/fs@^1.0.9",
+        "jsr:@std/internal",
+        "jsr:@std/path@^1.0.8"
       ]
     },
     "@std/text@1.0.11": {
@@ -313,13 +312,6 @@
     }
   },
   "npm": {
-    "@cdktf/provider-aws@19.57.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0": {
-      "integrity": "sha512-cklq7zIoga3MT52qbNuK3V4+NgjTILlT5DK2TR+St78uMy/052FdlcNtgSR93dwJArCbe5lbx5RcKuKkNVffqA==",
-      "dependencies": [
-        "cdktf@0.20.10_constructs@10.3.0",
-        "constructs"
-      ]
-    },
     "@cdktf/provider-azurerm@13.22.0_cdktf@0.20.10__constructs@10.3.0_constructs@10.3.0": {
       "integrity": "sha512-Kwg/GERCksHpee9O3eESrpGGxfeRY4KgCgKk13zvbnbOjy730hmvlTHIpbgs2umNn6bmOi5Uokg4PQFHJ9zrsQ==",
       "dependencies": [
@@ -861,7 +853,8 @@
       "integrity": "sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ=="
     },
     "crc-32@1.2.2": {
-      "integrity": "sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ=="
+      "integrity": "sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==",
+      "bin": true
     },
     "crc32-stream@5.0.1": {
       "integrity": "sha512-lO1dFui+CEUh/ztYIpgpKItKW9Bb4NWakCRJrnqAbFIYD+OZAwb2VfD5T5eXMw2FNcsDHkQcNl/Wh3iVXYwU6g==",
@@ -955,7 +948,8 @@
         "inherits",
         "minimatch",
         "once"
-      ]
+      ],
+      "deprecated": true
     },
     "gopd@1.2.0": {
       "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="
@@ -986,7 +980,8 @@
       "dependencies": [
         "once",
         "wrappy"
-      ]
+      ],
+      "deprecated": true
     },
     "inherits@2.0.4": {
       "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="
@@ -1046,7 +1041,8 @@
       ]
     },
     "lodash.get@4.4.2": {
-      "integrity": "sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ=="
+      "integrity": "sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==",
+      "deprecated": true
     },
     "lodash.includes@4.3.0": {
       "integrity": "sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w=="
@@ -1168,7 +1164,8 @@
       "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ=="
     },
     "semver@7.6.3": {
-      "integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A=="
+      "integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==",
+      "bin": true
     },
     "set-function-length@1.2.2": {
       "integrity": "sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==",
@@ -1192,9 +1189,11 @@
     "streamx@2.22.0": {
       "integrity": "sha512-sLh1evHOzBy/iWRiR6d1zRcLao4gGZr3C1kzNz4fopCOKJb6xD9ub8Mpi9Mr1R6id5o43S+d93fI48UC5uM9aw==",
       "dependencies": [
-        "bare-events",
         "fast-fifo",
         "text-decoder"
+      ],
+      "optionalDependencies": [
+        "bare-events"
       ]
     },
     "string_decoder@1.1.1": {
@@ -1271,7 +1270,6 @@
       "jsr:@cliffy/ansi@^1.0.0-rc.5",
       "jsr:@cliffy/command@^1.0.0-rc.5",
       "jsr:@cliffy/prompt@^1.0.0-rc.5",
-      "jsr:@cndi/cdktf@0.4",
       "jsr:@cndi/known-templates@^1.0.1",
       "jsr:@cndi/validators@0.1",
       "jsr:@polyseam/cliffy-provider-gh-releases@2.0.1",
@@ -1287,7 +1285,6 @@
       "jsr:@std/path@^1.0.8",
       "jsr:@std/testing@^1.0.9",
       "jsr:@std/yaml@^1.0.5",
-      "npm:@cdktf/provider-aws@^19.57.0",
       "npm:@cdktf/provider-azurerm@^13.22.0",
       "npm:@cdktf/provider-google@^14.24.0",
       "npm:@cdktf/provider-helm@^10.5.0",
@@ -1302,7 +1299,7 @@
       "npm:lodash.get@4.4.2",
       "npm:lodash.set@4.3.2",
       "npm:lodash.unset@4.5.2",
-      "npm:netmask@2.0.2",
+      "npm:netmask@^2.0.2",
       "npm:simple-git@3.27.0",
       "npm:validator@13.12.0"
     ]
