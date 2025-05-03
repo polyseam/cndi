@@ -12,8 +12,9 @@ export default function (_cndi_config: CNDIConfig) {
       policy: JSON.stringify({
         Version: "2012-10-17",
         Statement: [{
+          Resource: "*",
           Effect: "Allow",
-          Action: [[
+          Action: [
             "ec2:CreateVolume",
             "ec2:AttachVolume",
             "ec2:DetachVolume",
@@ -52,8 +53,7 @@ export default function (_cndi_config: CNDIConfig) {
             "elasticfilesystem:TagResource",
             "elasticfilesystem:ClientWrite",
             "elasticfilesystem:DescribeTags",
-          ]],
-          Resource: "*",
+          ],
         }],
       }),
     },
