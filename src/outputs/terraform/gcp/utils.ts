@@ -3,6 +3,8 @@ import { ccolors } from "deps";
 
 const label = ccolors.faded("src/outputs/terraform/gcp/utils.ts:");
 
+
+
 export const ensureValidGoogleCredentials = (): ErrOut | void => {
   const key = Deno.env.get("GOOGLE_CREDENTIALS");
 
