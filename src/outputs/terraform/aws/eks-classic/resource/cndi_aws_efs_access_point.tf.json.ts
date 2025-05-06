@@ -2,7 +2,7 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 import { CNDIConfig } from "src/types.ts";
 
-interface AWS_EFS_ACCESS_POINT {
+interface AwsEfsAccessPoint {
   file_system_id: string;
   posix_user: {
     gid: number;
@@ -15,7 +15,7 @@ interface AWS_EFS_ACCESS_POINT {
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const aws_efs_access_point: Record<string, AWS_EFS_ACCESS_POINT> = {
+  const aws_efs_access_point: Record<string, AwsEfsAccessPoint> = {
     cndi_aws_efs_access_point: {
       file_system_id: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",
       posix_user: {

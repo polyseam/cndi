@@ -7,7 +7,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import { DEFAULT_AMI_TYPE, DEFAULT_INSTANCE_TYPES } from "consts";
 
-interface AWS_EKS_NODE_GROUP {
+interface AwsEksNodeGroup {
   ami_type: string;
   capacity_type: string;
   cluster_name: string;
@@ -34,7 +34,7 @@ interface AWS_EKS_NODE_GROUP {
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const aws_eks_node_group: Record<string, AWS_EKS_NODE_GROUP> = {};
+  const aws_eks_node_group: Record<string, AwsEksNodeGroup> = {};
 
   if (cndi_config.infrastructure.cndi.nodes as unknown !== "automatic") {
     // original non-automatic node group

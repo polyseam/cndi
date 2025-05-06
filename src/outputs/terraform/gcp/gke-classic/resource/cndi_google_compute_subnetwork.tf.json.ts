@@ -2,7 +2,7 @@ import { getPrettyJSONString, truncateString } from "src/utils.ts";
 
 import { CNDIConfig } from "src/types.ts";
 
-interface GOOGLE_COMPUTE_SUBNETWORK {
+interface GoogleComputeSubnetwork {
   name: string;
   // traditional GKE clusters should leverage custom compute subnetworks
   ip_cidr_range: string;
@@ -17,7 +17,7 @@ export default function (cndi_config: CNDIConfig) {
     64 - prefix.length,
   );
   const name = `cndi-subnet-${project_name}`;
-  const google_compute_subnetwork: Record<string, GOOGLE_COMPUTE_SUBNETWORK> = {
+  const google_compute_subnetwork: Record<string, GoogleComputeSubnetwork> = {
     cndi_google_compute_subnetwork: {
       name,
       network: "${google_compute_network.cndi_google_compute_network.name}",

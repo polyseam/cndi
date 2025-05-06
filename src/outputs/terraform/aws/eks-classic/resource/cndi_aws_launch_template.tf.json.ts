@@ -4,7 +4,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import { DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
-interface AWS_LAUNCH_TEMPLATE {
+interface AwsLaunchTemplate {
   block_device_mappings: Array<{
     device_name: string;
     ebs: {
@@ -23,7 +23,7 @@ interface AWS_LAUNCH_TEMPLATE {
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const aws_launch_template: Record<string, AWS_LAUNCH_TEMPLATE> = {};
+  const aws_launch_template: Record<string, AwsLaunchTemplate> = {};
 
   if (Array.isArray(cndi_config.infrastructure.cndi.nodes)) {
     // original non-automatic node group

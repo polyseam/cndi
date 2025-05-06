@@ -7,7 +7,7 @@ interface GoogleAllowEntry {
   ports?: string[];
 }
 
-interface GOOGLE_COMPUTE_FIREWALL {
+interface GoogleComputeFirewall {
   direction: "INGRESS" | "EGRESS";
   name: string;
   description: string;
@@ -17,7 +17,7 @@ interface GOOGLE_COMPUTE_FIREWALL {
 }
 
 export default function (_cndi_config: CNDIConfig) {
-  const google_compute_firewall: Record<string, GOOGLE_COMPUTE_FIREWALL> = {
+  const google_compute_firewall: Record<string, GoogleComputeFirewall> = {
     cndi_google_compute_firewall: {
       allow: [
         {

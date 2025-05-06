@@ -1,7 +1,7 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
-interface AZURERM_RESOURCE_GROUP {
+interface AzurermResourceGroup {
   location: string;
   name: string;
   tags: {
@@ -10,7 +10,7 @@ interface AZURERM_RESOURCE_GROUP {
 }
 
 export default function (_cndi_config: CNDIConfig) {
-  const azurerm_resource_group: Record<string, AZURERM_RESOURCE_GROUP> = {
+  const azurerm_resource_group: Record<string, AzurermResourceGroup> = {
     cndi_azurerm_resource_group: {
       location: "${local.cndi_arm_region}",
       name: "rg-cndi-${local.cndi_project_name}",

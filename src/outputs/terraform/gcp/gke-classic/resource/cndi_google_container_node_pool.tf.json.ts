@@ -7,7 +7,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
-interface GOOGLE_CONTAINER_NODE_POOL {
+interface GoogleContainerNodePool {
   cluster: string;
   name: string;
   autoscaling: {
@@ -35,7 +35,7 @@ interface GOOGLE_CONTAINER_NODE_POOL {
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const google_container_node_pool: Record<string, GOOGLE_CONTAINER_NODE_POOL> =
+  const google_container_node_pool: Record<string, GoogleContainerNodePool> =
     {};
 
   if (cndi_config.infrastructure.cndi.nodes as unknown !== "automatic") {

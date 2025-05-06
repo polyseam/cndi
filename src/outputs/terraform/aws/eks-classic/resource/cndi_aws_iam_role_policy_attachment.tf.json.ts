@@ -2,7 +2,7 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 import { CNDIConfig } from "src/types.ts";
 
-interface AWS_IAM_ROLE_POLICY_ATTACHMENT {
+interface AwsIamRolePolicyAttachment {
   policy_arn: string;
   role: string;
 }
@@ -10,7 +10,7 @@ interface AWS_IAM_ROLE_POLICY_ATTACHMENT {
 export default function (_cndi_config: CNDIConfig) {
   const aws_iam_role_policy_attachment: Record<
     string,
-    AWS_IAM_ROLE_POLICY_ATTACHMENT
+    AwsIamRolePolicyAttachment
   > = {
     cndi_aws_iam_role_policy_attachment_ebs_efs: {
       policy_arn: "${aws_iam_policy.cndi_aws_iam_policy.arn}",

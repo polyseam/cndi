@@ -4,7 +4,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import { ccolors } from "deps";
 
-interface AWS_EFS_MOUNT_TARGET {
+interface AwsEfsMountTarget {
   file_system_id: string;
   security_groups: string[];
   subnet_id: string;
@@ -12,7 +12,7 @@ interface AWS_EFS_MOUNT_TARGET {
 }
 
 export default function (_cndi_config: CNDIConfig) {
-  const aws_efs_mount_target: Record<string, AWS_EFS_MOUNT_TARGET> = {
+  const aws_efs_mount_target: Record<string, AwsEfsMountTarget> = {
     // Use count instead of for_each to create one mount target per subnet
     cndi_aws_efs_mount_target: {
       count: "${length(module.cndi_aws_vpc_module.private_subnets)}",

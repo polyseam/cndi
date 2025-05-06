@@ -2,13 +2,13 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 import { CNDIConfig } from "src/types.ts";
 
-interface AWS_IAM_ROLE {
+interface AwsIamRole {
   assume_role_policy: string;
   name_prefix: string;
 }
 
 export default function (_cndi_config: CNDIConfig) {
-  const aws_iam_role: Record<string, AWS_IAM_ROLE> = {
+  const aws_iam_role: Record<string, AwsIamRole> = {
     cndi_aws_iam_role: {
       assume_role_policy: JSON.stringify({
         Version: "2012-10-17",

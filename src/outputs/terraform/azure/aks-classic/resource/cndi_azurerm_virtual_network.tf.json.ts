@@ -1,7 +1,7 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
-interface AZURERM_VIRTUAL_NETWORK {
+interface AzurermVirtualNetwork {
   name: string;
   address_space: string[];
   location: string;
@@ -12,7 +12,7 @@ interface AZURERM_VIRTUAL_NETWORK {
 }
 
 export default function (_cndi_config: CNDIConfig) {
-  const azurerm_virtual_network: Record<string, AZURERM_VIRTUAL_NETWORK> = {
+  const azurerm_virtual_network: Record<string, AzurermVirtualNetwork> = {
     cndi_azurerm_virtual_network: {
       name: "cndi-azurerm-vnet-${local.cndi_project_name}",
       address_space: [

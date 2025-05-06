@@ -1,8 +1,9 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
+import type { KubernetesStorageClass } from "src/outputs/terraform/shared/resource/KubernetesStorageClass.ts";
 
 export default function (_cndi_config: CNDIConfig) {
-  const kubernetes_storage_class = {
+  const kubernetes_storage_class: Record<string, KubernetesStorageClass> = {
     cndi_kubernetes_storage_class_rwo: {
       allow_volume_expansion: true,
       metadata: {
