@@ -8,7 +8,6 @@ interface GoogleAllowEntry {
 }
 
 interface GOOGLE_COMPUTE_FIREWALL {
-  depends_on: string[];
   direction: "INGRESS" | "EGRESS";
   name: string;
   description: string;
@@ -41,7 +40,6 @@ export default function (_cndi_config: CNDIConfig) {
       source_ranges: [
         "${google_compute_subnetwork.cndi_google_compute_subnetwork.ip_cidr_range}",
       ],
-      depends_on: ["timesleep.cndi_time_sleep_services_ready"],
     },
   };
 

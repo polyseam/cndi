@@ -78,7 +78,7 @@ export default function getProviderTfJSON(
       break;
     case "gcp":
       out.google = [{
-        project: "${local.gcp_project}", // TODO: get provider config for gcp from env
+        project: "${local.gcp_project_id}",
         region: "${local.gcp_region}",
         zone: "${local.gcp_zone}",
       }];

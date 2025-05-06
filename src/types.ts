@@ -59,15 +59,15 @@ export interface CNDINodeSpec {
   name: string;
   role?: NodeRole; // default: controller
   volume_size?: number;
-  size?: number | string;
+  size?: number | string; // number: 500 or string: az machine type
   disk_size_gb?: number;
   disk_size?: number;
+  disk_type?: string;
   instance_type?: string;
   machine_type?: string;
   min_count?: number;
   max_count?: number;
   count?: number;
-  disk_type?: string;
   labels?: Label;
   taints?: Taint[];
 }

@@ -2,19 +2,21 @@ import { CNDIConfig } from "src/types.ts";
 import { ccolors } from "deps";
 import { ErrOut } from "errout";
 
+// TODO: GCP Clusterless
+
 const label = ccolors.faded(
-  "\nsrc/outputs/terraform/aws/eks-automatic/stage.ts:",
+  "\nsrc/outputs/terraform/gcp/clusterless/stage.ts:",
 );
 
 // deno-lint-ignore require-await
-export async function stageAWSEKSAutomaticTerraformFiles(
+export async function stageGCPClusterlessTerraformFiles(
   _cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
   return new ErrOut([
-    ccolors.error("EKS Automatic is still under construction!"),
+    ccolors.error("GCP Clusterless is still under construction!"),
   ], {
     code: -1,
-    id: "EKS-Automatic-Not-Implemented",
+    id: "GCP-Clusterless-Autopilot-Not-Implemented",
     label,
   });
 }

@@ -6,6 +6,7 @@ interface AddonConfig {
   enabled: boolean;
 }
 
+// @link https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#addons_config
 type GOOGLE_CONTAINER_CLUSTER = {
   name: string;
   project: string;
@@ -47,53 +48,55 @@ type GOOGLE_CONTAINER_CLUSTER = {
 export default function (_cndi_config: CNDIConfig) {
   const google_container_cluster: Record<string, GOOGLE_CONTAINER_CLUSTER> = {
     cndi_google_container_cluster: {
-      "addons_config": {
-        "gce_persistent_disk_csi_driver_config": {
-          "enabled": true,
-        },
-        "gcp_filestore_csi_driver_config": {
-          "enabled": true,
-        },
-        "gcs_fuse_csi_driver_config": {
-          "enabled": false,
-        },
-      },
-      "deletion_protection": false,
-      "enable_intranode_visibility": true,
-      "initial_node_count": 1,
-      "ip_allocation_policy": {},
-      "location": "${local.gcp_region}",
-      "name": "${local.cndi_project_name}",
-      "network":
-        "${google_compute_network.cndi_google_compute_network.self_link}",
-      "network_policy": {
-        "enabled": true,
-      },
-      "node_config": {
-        "shielded_instance_config": {
-          "enable_integrity_monitoring": true,
-          "enable_secure_boot": true,
-        },
-        "workload_metadata_config": {
-          "mode": "GCE_METADATA",
-        },
-      },
-      "node_locations": [
+      name: "${local.cndi_project_name}",
+      project: "${local.gcp_project_id}",
+      location: "${local.gcp_region}",
+      node_locations: [
         "${local.gcp_zone}",
       ],
-      "private_cluster_config": {
-        "enable_private_nodes": false,
-      },
-      "project": "${local.project_id}",
-      "release_channel": {
-        "channel": "REGULAR",
-      },
-      "remove_default_node_pool": true,
-      "resource_labels": {
-        "cndi_project": "${local.cndi_project_name}",
-      },
-      "subnetwork":
+      network:
+        "${google_compute_network.cndi_google_compute_network.self_link}",
+      subnetwork:
         "${google_compute_subnetwork.cndi_google_compute_subnetwork.self_link}",
+      addons_config: {
+        gce_persistent_disk_csi_driver_config: {
+          enabled: true,
+        },
+        gcp_filestore_csi_driver_config: {
+          enabled: true,
+        },
+        gcs_fuse_csi_driver_config: {
+          enabled: false,
+        },
+      },
+      deletion_protection: false,
+      enable_intranode_visibility: true,
+      initial_node_count: 1,
+      ip_allocation_policy: {},
+
+      network_policy: {
+        enabled: true,
+      },
+      node_config: {
+        shielded_instance_config: {
+          enable_integrity_monitoring: true,
+          enable_secure_boot: true,
+        },
+        workload_metadata_config: {
+          mode: "GCE_METADATA",
+        },
+      },
+
+      private_cluster_config: {
+        enable_private_nodes: false,
+      },
+      release_channel: {
+        channel: "REGULAR",
+      },
+      remove_default_node_pool: true,
+      resource_labels: {
+        cndi_project: "${local.cndi_project_name}",
+      },
     },
   };
 

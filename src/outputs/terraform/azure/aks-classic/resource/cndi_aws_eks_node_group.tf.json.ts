@@ -7,7 +7,7 @@ import { CNDIConfig } from "src/types.ts";
 
 import { DEFAULT_AMI_TYPE, DEFAULT_INSTANCE_TYPES } from "consts";
 
-interface AWS_EKS_NODE_GROUP {
+interface Azure_AKS_NODE_GROUP {
   ami_type: string;
   capacity_type: string;
   cluster_name: string;
@@ -34,9 +34,9 @@ interface AWS_EKS_NODE_GROUP {
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const aws_eks_node_group: Record<string, AWS_EKS_NODE_GROUP> = {};
+  const azure_aks_node_group: Record<string, Azure_AKS_NODE_GROUP> = {};
 
-  if (cndi_config.infrastructure.cndi.nodes as unknown !== "automatic") {
+  if (Array.isArray(cndi_config.infrastructure.cndi.nodes)) {
     // original non-automatic node group
     let i = 0;
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
@@ -48,7 +48,7 @@ export default function (cndi_config: CNDIConfig) {
       const { min_count, max_count } = nodeSpec;
 
       const instance_type = nodeSpec?.instance_type ||
-        DEFAULT_INSTANCE_TYPES.aws;
+        DEFAULT_INSTANCE_TYPES.azure;
 
       const scaling_config = {
         desired_size: count,
@@ -68,42 +68,44 @@ export default function (cndi_config: CNDIConfig) {
       const labels = nodeSpec.labels || {};
 
       const tags = {
-        Name: `cndi-eks-node-group-${nodeSpec.name}`,
+        Name: `cndi-aks-node-group-${nodeSpec.name}`,
         CNDIProject: cndi_config.project_name!,
       };
 
       const taint = nodeSpec.taints?.map((taint) => ({
         key: taint.key,
         value: taint.value,
-        effect: getTaintEffectForDistribution(taint.effect, "eks"), // taint.effect must be valid by now
+        effect: getTaintEffectForDistribution(taint.effect, "aks"), // taint.effect must be valid by now
       })) || [];
 
-      aws_eks_node_group[`cndi_aws_eks_node_group_${i}`] = {
+      azure_aks_node_group[`cndi_azure_aks_node_group_${i}`] = {
         ami_type: DEFAULT_AMI_TYPE,
         capacity_type: "ON_DEMAND",
-        cluster_name: "${module.cndi_aws_eks_module.cluster_name}",
+        cluster_name: "${module.cndi_azure_aks_module.cluster_name}",
         instance_types: [instance_type],
         node_group_name: nodeSpec.name,
 
         launch_template: {
-          id: `\${aws_launch_template.cndi_aws_launch_template_${i}.id}`,
+          id: `\${azure_launch_template.cndi_azure_launch_template_${i}.id}`,
           version:
-            `\${aws_launch_template.cndi_aws_launch_template_${i}.latest_version}`,
+            `\${azure_launch_template.cndi_azure_launch_template_${i}.latest_version}`,
         },
-        node_role_arn: "${aws_iam_role.cndi_aws_iam_role.arn}",
+        node_role_arn: "${azure_iam_role.cndi_azure_iam_role.arn}",
         scaling_config,
         labels,
         tags,
         taint,
-        subnet_ids: "${module.cndi_aws_vpc_module.private_subnets}",
+        subnet_ids: "${module.cndi_azure_vpc_module.private_subnets}",
       };
       i++;
     }
+  } else if (cndi_config.infrastructure.cndi.nodes === "automatic") {
+    // automatic node group
   }
 
   return getPrettyJSONString({
     resource: {
-      aws_eks_node_group,
+      azure_aks_node_group,
     },
   });
 }

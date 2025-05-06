@@ -3,18 +3,18 @@ import { ccolors } from "deps";
 import { ErrOut } from "errout";
 
 const label = ccolors.faded(
-  "\nsrc/outputs/terraform/aws/eks-automatic/stage.ts:",
+  "\nsrc/outputs/terraform/gcp/gke-automatic/stage.ts:",
 );
 
 // deno-lint-ignore require-await
-export async function stageAWSEKSAutomaticTerraformFiles(
+export async function stageGCPGKEAutopilotTerraformFiles(
   _cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
   return new ErrOut([
-    ccolors.error("EKS Automatic is still under construction!"),
+    ccolors.error("GKE Autopilot is still under construction!"),
   ], {
     code: -1,
-    id: "EKS-Automatic-Not-Implemented",
+    id: "GKE-Autopilot-Not-Implemented",
     label,
   });
 }

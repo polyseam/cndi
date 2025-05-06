@@ -18,6 +18,14 @@ import getProviderTfJSON from "src/outputs/terraform/shared/provider.tf.json.ts"
 import getVariableTfJSON from "src/outputs/terraform/shared/variable.tf.json.ts";
 import getOutputTfJSON from "src/outputs/terraform/shared/output.tf.json.ts";
 
+// Shared Kubernetes Terraform Resources
+import cndi_helm_release_argocd from "src/outputs/terraform/shared/resource/cndi_helm_release_argocd.tf.json.ts";
+import cndi_helm_release_argocd_apps from "src/outputs/terraform/shared/resource/cndi_helm_release_argocd_apps.tf.json.ts";
+import cndi_helm_release_sealed_secrets from "src/outputs/terraform/shared/resource/cndi_helm_release_sealed_secrets.tf.json.ts";
+import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_sealed_secrets_key.tf.json.ts";
+import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
+import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
+
 // AWS EKS Classic Terraform Modules
 import getCndiAWSEKSModuleTfJSON from "./module/cndi_aws_eks_module.tf.json.ts";
 import getCndiAWSVPCModuleTfJSON from "./module/cndi_aws_vpc_module.tf.json.ts";
@@ -35,16 +43,8 @@ import cndi_aws_iam_role_policy_attachment from "./resource/cndi_aws_iam_role_po
 import cndi_aws_launch_template from "./resource/cndi_aws_launch_template.tf.json.ts";
 import cndi_aws_resourcegroups_group from "./resource/cndi_aws_resourcegroups_group.tf.json.ts";
 
-// AWS EKS Classic Terraform Resources
+// AWS EKS Classic Terraform Kubernetes Resources
 import cndi_kubernetes_storage_class from "./resource/cndi_kubernetes_storage_class.tf.json.ts";
-
-// Shared Kubernetes Terraform Resources
-import cndi_helm_release_argocd from "src/outputs/terraform/shared/resource/cndi_helm_release_argocd.tf.json.ts";
-import cndi_helm_release_argocd_apps from "src/outputs/terraform/shared/resource/cndi_helm_release_argocd_apps.tf.json.ts";
-import cndi_helm_release_sealed_secrets from "src/outputs/terraform/shared/resource/cndi_helm_release_sealed_secrets.tf.json.ts";
-import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_sealed_secrets_key.tf.json.ts";
-import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
-import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
 export async function stageAWSEKSClassicTerraformFiles(
   cndi_config: CNDIConfig,

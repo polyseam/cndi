@@ -12,7 +12,7 @@ const OUTPUT = {
 
 const GET_KUBECONFIG_COMMAND = {
   gcp:
-    "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.gcp_region} --project ${local.project_id}",
+    "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.gcp_region} --project ${local.gcp_project_id}",
   aws:
     "aws eks update-kubeconfig --region ${local.aws_region} --name ${local.cluster_name}",
   azure:
@@ -21,7 +21,8 @@ const GET_KUBECONFIG_COMMAND = {
 };
 
 const RESOURCE_GROUP_URL = {
-  gcp: "https://console.cloud.google.com/welcome?project=${local.project_id}",
+  gcp:
+    "https://console.cloud.google.com/welcome?project=${local.gcp_project_id}",
   aws:
     "https://${local.aws_region}.console.aws.amazon.com/resource-groups/group/cndi-rg_${local.cndi_project_name}",
   azure:

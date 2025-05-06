@@ -58,7 +58,7 @@ import getLokiApplicationManifest from "src/outputs/core-applications/loki.appli
 import { getGrafanaIngressManifest } from "src/outputs/ingress/grafana-ingress.yaml.ts";
 import { getArgoIngressManifest } from "src/outputs/ingress/argo-ingress.yaml.ts";
 
-import stageTerraformResourcesForConfig from "src/outputs/terraform/stageTerraformResourcesForConfig.ts";
+import stageTerraformFiles from "../outputs/terraform/stage.ts";
 
 import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 
@@ -965,7 +965,7 @@ self.onmessage = async (msg: OverwriteWorkerMessage) => {
     }
 
     try {
-      await stageTerraformResourcesForConfig(config); //, options);
+      await stageTerraformFiles(config); //, options);
     } catch (errorStagingTerraformResources) {
       const error = errorStagingTerraformResources as Error;
       self.postMessage({

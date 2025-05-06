@@ -4,7 +4,7 @@ import {
   DEFAULT_VNET_ADDRESS_SPACE,
 } from "consts";
 
-import { Netmask } from "netmask";
+import { Netmask } from "deps";
 
 type ParsedNetworkConfig = {
   vnet_identifier: string;

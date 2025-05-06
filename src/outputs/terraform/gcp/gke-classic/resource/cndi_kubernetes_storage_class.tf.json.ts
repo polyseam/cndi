@@ -5,6 +5,7 @@ export default function (_cndi_config: CNDIConfig) {
   const resource = {
     kubernetes_storage_class: {
       cndi_kubernetes_storage_class_rwo: {
+        storage_provisioner: "pd.csi.storage.gke.io",
         allow_volume_expansion: true,
         metadata: {
           annotations: {
@@ -13,30 +14,22 @@ export default function (_cndi_config: CNDIConfig) {
           name: "rwo",
         },
         parameters: {
-          fsType: "ext4",
-          type: "gp3",
+          type: "pd-balanced",
         },
         reclaim_policy: "Delete",
-        storage_provisioner: "ebs.csi.aws.com",
         volume_binding_mode: "WaitForFirstConsumer",
+        depends_on: ["google_compute_network.cndi_google_compute_network"],
       },
       cndi_kubernetes_storage_class_rwm: {
+        storage_provisioner: "filestore.csi.storage.gke.io",
         allow_volume_expansion: true,
         metadata: {
-          annotations: {
-            "storageclass.kubernetes.io/is-default-class": "false",
-          },
           name: "rwm",
         },
         parameters: {
-          directoryPerms: "700",
-          fileSystemId: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",
-          gidRangeEnd: "2000",
-          gidRangeStart: "1000",
-          provisioningMode: "efs-ap",
+          network: "${google_compute_network.cndi_google_compute_network.name}",
         },
         reclaim_policy: "Delete",
-        storage_provisioner: "efs.csi.aws.com",
         volume_binding_mode: "WaitForFirstConsumer",
       },
     },
