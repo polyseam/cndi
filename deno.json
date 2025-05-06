@@ -118,7 +118,6 @@
     "fmt": "deno fmt",
     "lint-fix": "deno lint --fix"
   },
-  "nodeModulesDir": "auto",
   "imports": {
     "netmask": "npm:netmask@^2.0.2",
     "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
