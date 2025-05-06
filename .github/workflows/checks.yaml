@@ -17,7 +17,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.2.10
+          deno-version: v2.2.12
 
       - run: deno task checks
 
@@ -34,7 +34,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v2.2.10"
+          deno-version: "v2.2.12"
 
       - run: deno task build-linux-amd64
 
@@ -49,7 +49,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v2.2.10"
+          deno-version: "v2.2.12"
 
       - run: deno task build-linux-arm64
 
@@ -64,7 +64,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v2.2.10"
+          deno-version: "v2.2.12"
 
       - run: deno task build-mac-amd64
 
@@ -79,7 +79,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v2.2.10"
+          deno-version: "v2.2.12"
 
       - run: deno task build-mac-arm64
 
@@ -94,7 +94,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v2.2.10"
+          deno-version: "v2.2.12"
 
       - run: deno task build-win-amd64
 

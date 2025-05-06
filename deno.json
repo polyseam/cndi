@@ -1,6 +1,6 @@
 {
   "version": "2.30.3",
-  "deno_version": "2.2.10",
+  "deno_version": "2.2.12",
   "tasks": {
     "checks": {
       "command": "deno lint && deno check && deno fmt --check"
@@ -118,15 +118,8 @@
     "fmt": "deno fmt",
     "lint-fix": "deno lint --fix"
   },
+  "nodeModulesDir": "auto",
   "imports": {
-    "@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@^13.22.0",
-    "@cdktf/provider-google": "npm:@cdktf/provider-google@^14.24.0",
-    "@cdktf/provider-helm": "npm:@cdktf/provider-helm@^10.5.0",
-    "@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@^11.11.0",
-    "@cdktf/provider-local": "npm:@cdktf/provider-local@^10.1.1",
-    "@cdktf/provider-random": "npm:@cdktf/provider-random@^11.1.0",
-    "@cdktf/provider-time": "npm:@cdktf/provider-time@^10.3.0",
-    "@cdktf/provider-tls": "npm:@cdktf/provider-tls@^10.0.1",
     "netmask": "npm:netmask@^2.0.2",
     "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.5",
@@ -144,8 +137,6 @@
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "@std/yaml": "jsr:@std/yaml@^1.0.5",
-    "cdktf": "npm:cdktf@^0.20.11",
-    "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
     "child_process": "node:child_process",
     "constructs": "npm:constructs@10.3.0",
     "consts": "./src/constants.ts",

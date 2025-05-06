@@ -39,8 +39,6 @@ import cndi_google_container_cluster from "./resource/cndi_google_container_clus
 import cndi_google_container_node_pool from "./resource/cndi_google_container_node_pool.tf.json.ts";
 import cndi_google_compute_firewall from "./resource/cndi_google_compute_firewall.tf.json.ts";
 
-import cndi_time_sleep from "./resource/cndi_time_sleep.tf.json.ts";
-
 export async function stageGCPGKEClassicTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
@@ -58,10 +56,6 @@ export async function stageGCPGKEClassicTerraformFiles(
     stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider),
     stageFile(path.join("cndi", "terraform", "variable.tf.json"), variable),
     stageFile(path.join("cndi", "terraform", "terraform.tf.json"), terraform),
-    stageFile(
-      path.join("cndi", "terraform", "time_sleep.tf.json"),
-      cndi_time_sleep(cndi_config),
-    ),
     stageFile(
       path.join(
         "cndi",
