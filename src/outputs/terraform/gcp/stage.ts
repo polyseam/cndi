@@ -14,4 +14,3 @@ export default async function stageTerraformFilesForAWSGKE(
   }
   return await stageGCPGKEClassicTerraformFiles(cndi_config);
 }
-

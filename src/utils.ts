@@ -320,6 +320,13 @@ async function patchAndStageTerraformFilesWithInput(
   }
 }
 
+function truncateString(str: string, num = 63) {
+  if (str.length <= num) {
+    return str;
+  }
+  return str.slice(0, num);
+}
+
 function getPathToTerraformBinary() {
   const DEFAULT_CNDI_HOME = path.join(homedir(), ".cndi");
   const CNDI_HOME = Deno.env.get("CNDI_HOME") || DEFAULT_CNDI_HOME;
@@ -712,5 +719,6 @@ export {
   sha256Digest,
   stageDirectory,
   stageFile,
+  truncateString,
   useSshRepoAuth,
 };

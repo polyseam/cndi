@@ -3,7 +3,7 @@
   "deno_version": "2.2.12",
   "tasks": {
     "checks": {
-      "command": "deno lint && deno check && deno fmt --check"
+      "command": "deno lint && deno check . && deno fmt --check"
     },
 
     "archive-all": {
