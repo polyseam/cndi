@@ -49,10 +49,10 @@ export default function (_cndi_config: CNDIConfig) {
   const google_container_cluster: Record<string, GOOGLE_CONTAINER_CLUSTER> = {
     cndi_google_container_cluster: {
       name: "${local.cndi_project_name}",
-      project: "${local.gcp_project_id}",
-      location: "${local.gcp_region}",
+      project: "${local.cndi_gcp_project_id}",
+      location: "${local.cndi_gcp_region}",
       node_locations: [
-        "${local.gcp_zone}",
+        "${local.cndi_gcp_zone}",
       ],
       network:
         "${google_compute_network.cndi_google_compute_network.self_link}",

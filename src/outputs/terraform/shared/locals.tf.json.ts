@@ -34,9 +34,9 @@ const getLocalsFor: Record<string, LocalsGetter> = {
     // assumes key was validated earlier
     const parsedKey = JSON.parse(key) as GCPKeyJSON;
 
-    const gcp_project_id = parsedKey?.project_id;
+    const cndi_gcp_project_id = parsedKey?.project_id;
 
-    if (!gcp_project_id) {
+    if (!cndi_gcp_project_id) {
       throw new Error([
         label,
         ccolors.key_name(`'GOOGLE_CREDENTIALS'`),
@@ -44,23 +44,23 @@ const getLocalsFor: Record<string, LocalsGetter> = {
       ].join(" "));
     }
 
-    const gcp_region = Deno.env.get("GCP_REGION") || "us-central1";
-    const gcp_zone = `${gcp_region}-a`;
-    const gcp_client_email = parsedKey.client_email;
+    const cndi_gcp_region = Deno.env.get("GCP_REGION") || "us-central1";
+    const cndi_gcp_zone = `${cndi_gcp_region}-a`;
+    const cndi_gcp_client_email = parsedKey.client_email;
     return {
-      gcp_region,
-      gcp_zone,
-      gcp_project_id,
-      gcp_client_email,
+      cndi_gcp_region,
+      cndi_gcp_zone,
+      cndi_gcp_project_id,
+      cndi_gcp_client_email,
     };
   },
   aws: (_cndi_config: CNDIConfig): Locals => {
-    const aws_region = Deno.env.get("AWS_REGION") || "us-east-1";
-    return { aws_region };
+    const cndi_aws_region = Deno.env.get("AWS_REGION") || "us-east-1";
+    return { cndi_aws_region };
   },
   azure: (_cndi_config: CNDIConfig): Locals => {
-    const arm_region = Deno.env.get("ARM_REGION") || "eastus";
-    return { arm_region };
+    const cndi_arm_region = Deno.env.get("ARM_REGION") || "eastus";
+    return { cndi_arm_region };
   },
   dev: (_cndi_config: CNDIConfig): Locals => ({
     bootstrap_token:
@@ -85,7 +85,6 @@ export default function getLocalsTfJSON(
 
   const locals: Locals = {
     cndi_project_name,
-    cluster_name: "${local.cndi_project_name}",
     ...getLocalsFor[cndi_config.provider](cndi_config),
   };
 

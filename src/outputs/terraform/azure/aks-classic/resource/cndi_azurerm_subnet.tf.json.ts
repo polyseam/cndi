@@ -17,7 +17,8 @@ export default function (_cndi_config: CNDIConfig) {
       ],
       resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      virtual_network_name: "${azurerm_virtual_network.cndi_azure_vnet.name}",
+      virtual_network_name:
+        "${azurerm_virtual_network.cndi_azurerm_virtual_network.name}",
     },
   };
 

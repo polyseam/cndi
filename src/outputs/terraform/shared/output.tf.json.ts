@@ -12,9 +12,9 @@ const OUTPUT = {
 
 const GET_KUBECONFIG_COMMAND = {
   gcp:
-    "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.gcp_region} --project ${local.gcp_project_id}",
+    "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.cndi_gcp_region} --project ${local.cndi_gcp_project_id}",
   aws:
-    "aws eks update-kubeconfig --region ${local.aws_region} --name ${local.cluster_name}",
+    "aws eks update-kubeconfig --region ${local.cndi_aws_region} --name ${local.cndi_project_name}",
   azure:
     "az aks get-credentials --resource-group rg-${local.cndi_project_name} --name cndi-aks-cluster-${local.cndi_project_name} --overwrite-existing",
   dev: "N/A", // TODO: actually solve
@@ -22,9 +22,9 @@ const GET_KUBECONFIG_COMMAND = {
 
 const RESOURCE_GROUP_URL = {
   gcp:
-    "https://console.cloud.google.com/welcome?project=${local.gcp_project_id}",
+    "https://console.cloud.google.com/welcome?project=${cndi_gcp_project_id}",
   aws:
-    "https://${local.aws_region}.console.aws.amazon.com/resource-groups/group/cndi-rg_${local.cndi_project_name}",
+    "https://${local.cndi_aws_region}.console.aws.amazon.com/resource-groups/group/cndi-rg_${local.cndi_project_name}",
   azure:
     "https://portal.azure.com/#view/HubsExtension/BrowseResourcesWithTag/tagName/CNDIProject/tagValue/${local.cndi_project_name}",
   dev: "N/A", // TODO: actually solve

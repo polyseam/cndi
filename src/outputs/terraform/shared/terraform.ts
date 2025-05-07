@@ -20,7 +20,7 @@ const REQUIRED_PROVIDERS = {
   azure: {
     azurerm: {
       source: "azurerm",
-      version: "4.23.0",
+      version: "4.27.0",
     },
   },
   dev: {

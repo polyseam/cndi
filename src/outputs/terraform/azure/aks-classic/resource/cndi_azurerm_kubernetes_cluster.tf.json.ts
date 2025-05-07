@@ -1,72 +1,82 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
+import { DEFAULT_K8S_VERSION } from "versions";
+
+import {
+  type AzurermKubernetesClusterDefaultNodePool,
+  getNodePools,
+} from "src/outputs/terraform/azure/aks-classic/resource/cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
 
 interface AzurermKubernetesCluster {
   location: string;
   name: string;
-  tags: {
-    CNDIProject: string;
+  tags: Record<string, string>;
+  automatic_upgrade_channel: string;
+  dns_prefix: string;
+  identity: {
+    type: "SystemAssigned";
   };
+  key_vault_secrets_provider: {
+    secret_rotation_enabled: boolean;
+  };
+  kubernetes_version: string;
+  network_profile: {
+    dns_service_ip: string;
+    load_balancer_sku: string;
+    network_plugin: string;
+    network_policy: string;
+    service_cidr: string;
+  };
+  node_resource_group: string;
+  resource_group_name: string;
+  role_based_access_control_enabled: boolean;
+  sku_tier: string;
+  storage_profile: {
+    blob_driver_enabled: boolean;
+    disk_driver_enabled: boolean;
+    file_driver_enabled: boolean;
+  };
+  default_node_pool: AzurermKubernetesClusterDefaultNodePool;
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (cndi_config: CNDIConfig) {
+  const [default_node_pool] = getNodePools(cndi_config);
   const azurerm_kubernetes_cluster: Record<string, AzurermKubernetesCluster> = {
     cndi_azurerm_kubernetes_cluster: {
-      "automatic_upgrade_channel": "patch",
-      "default_node_pool": {
-        "auto_scaling_enabled": true,
-        "max_count": 3,
-        "max_pods": 110,
-        "min_count": 3,
-        "name": "xnodegroup",
-        "node_count": 3,
-        "node_labels": {},
-        "os_disk_size_gb": 100,
-        "os_disk_type": "Managed",
-        "os_sku": "Ubuntu",
-        "tags": {
-          "CNDIProject": "${local.cndi_project_name}",
-        },
-        "temporary_name_for_rotation": "temp0",
-        "type": "VirtualMachineScaleSets",
-        "vm_size": "Standard_D2s_v3",
-        "vnet_subnet_id": "${azurerm_subnet.cndi_azure_subnet.id}",
-        "zones": [
-          "1",
-        ],
+      default_node_pool,
+      automatic_upgrade_channel: "patch",
+      dns_prefix: "cndi-${local.cndi_project_name}",
+      identity: {
+        type: "SystemAssigned",
       },
-      "dns_prefix": "cndi-${local.cndi_project_name}",
-      "identity": {
-        "type": "SystemAssigned",
+      key_vault_secrets_provider: {
+        secret_rotation_enabled: true,
       },
-      "key_vault_secrets_provider": {
-        "secret_rotation_enabled": true,
+      kubernetes_version: DEFAULT_K8S_VERSION,
+      location: "${local.cndi_arm_region}",
+      name: "cndi-aks-${local.cndi_project_name}",
+      network_profile: {
+        load_balancer_sku: "standard",
+        network_plugin: "azure",
+        network_policy: "azure",
+        service_cidr: "192.168.0.0/16",
+        dns_service_ip: "192.168.10.0",
       },
-      "kubernetes_version": "1.31",
-      "location": "${local.cndi_arm_region}",
-      "name": "cndi-aks-${local.cndi_project_name}",
-      "network_profile": {
-        "dns_service_ip": "192.168.10.0",
-        "load_balancer_sku": "standard",
-        "network_plugin": "azure",
-        "network_policy": "azure",
-        "service_cidr": "192.168.0.0/16",
-      },
-      "node_resource_group": "nrg-cndi-${local.cndi_project_name}",
-      "resource_group_name":
+      node_resource_group: "nrg-cndi-${local.cndi_project_name}",
+      resource_group_name:
         "${azurerm_resource_group.cndi_azurerm_resource_group.name}",
-      "role_based_access_control_enabled": false,
-      "sku_tier": "Free",
-      "storage_profile": {
-        "blob_driver_enabled": false,
-        "disk_driver_enabled": true,
-        "file_driver_enabled": true,
+      role_based_access_control_enabled: false,
+      sku_tier: "Free",
+      storage_profile: {
+        blob_driver_enabled: false,
+        disk_driver_enabled: true,
+        file_driver_enabled: true,
       },
-      "tags": {
-        "CNDIProject": "${local.cndi_project_name}",
+      tags: {
+        CNDIProject: "${local.cndi_project_name}",
       },
     },
   };
 
-  return getPrettyJSONString({ resource: { azurerm_resource_group } });
+  return getPrettyJSONString({ resource: { azurerm_kubernetes_cluster } });
 }

@@ -20,7 +20,7 @@ export default function (_cndi_config: CNDIConfig) {
               "${module.cndi_aws_iam_assumable_role_efs_with_oidc.iam_role_arn}",
           },
         },
-        cluster_name: "${local.cluster_name}",
+        cluster_name: "${local.cndi_project_name}",
         cluster_version: DEFAULT_K8S_VERSION,
         cluster_endpoint_public_access: true, // TODO: probably bad
         enable_cluster_creator_admin_permissions: true,

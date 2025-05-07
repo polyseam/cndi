@@ -60,6 +60,7 @@ export interface CNDINodeSpec {
   role?: NodeRole; // default: controller
   volume_size?: number;
   size?: number | string; // number: 500 or string: az machine type
+  vm_size?: string; // az machine type
   disk_size_gb?: number;
   disk_size?: number;
   disk_type?: string;

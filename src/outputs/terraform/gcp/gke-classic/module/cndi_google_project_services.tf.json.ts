@@ -11,7 +11,7 @@ export default function (_cndi_config: CNDIConfig): string | null {
       cndi_google_project_services_module: {
         version: "~> 18.0",
         source: MODULE_SOURCE,
-        project_id: "${local.gcp_project_id}",
+        project_id: "${local.cndi_gcp_project_id}",
         disable_services_on_destroy: true,
         activate_apis: [
           "cloudresourcemanager.googleapis.com",
