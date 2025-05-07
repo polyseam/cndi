@@ -119,7 +119,6 @@
     "lint-fix": "deno lint --fix"
   },
   "imports": {
-    "netmask": "npm:netmask@^2.0.2",
     "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.5",
     "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.5",

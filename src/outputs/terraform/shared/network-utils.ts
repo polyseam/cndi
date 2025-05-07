@@ -3,8 +3,7 @@ import {
   DEFAULT_SUBNET_ADDRESS_SPACE,
   DEFAULT_VNET_ADDRESS_SPACE,
 } from "consts";
-
-import { Netmask } from "deps";
+import { BasicNetmask } from "src/BasicNetmask.ts";
 
 type ParsedNetworkConfig = {
   vnet_identifier: string;
@@ -57,7 +56,7 @@ export function divideCIDRIntoSubnets(
   numSubnets: number,
 ): string[] {
   const blocks: string[] = [];
-  const baseBlock = new Netmask(cidr);
+  const baseBlock = new BasicNetmask(cidr);
   const originalPrefix = baseBlock.bitmask;
 
   // Calculate the new prefix (y) needed to create the specified number of subnets
@@ -74,7 +73,7 @@ export function divideCIDRIntoSubnets(
   // Generate the subnets
   let baseAddress = baseBlock.base;
   for (let i = 0; i < numSubnets; i++) {
-    const subnet = new Netmask(`${baseAddress}/${newPrefix}`);
+    const subnet = new BasicNetmask(`${baseAddress}/${newPrefix}`);
     blocks.push(subnet.base + `/${newPrefix}`);
     baseAddress = subnet.next().base;
   }

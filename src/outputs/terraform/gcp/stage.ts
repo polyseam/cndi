@@ -14,7 +14,8 @@ const label = ccolors.faded(
 export default async function stageTerraformFilesForAZUREEKS(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
-  switch (cndi_config.distribution) {
+  const distribution = cndi_config?.distribution ?? "gke";
+  switch (distribution) {
     case "gke":
       return await stageGCPGKEClassicTerraformFiles(cndi_config);
     case "microk8s":

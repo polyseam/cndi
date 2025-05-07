@@ -394,6 +394,7 @@ const initCommand = new Command()
       // .env must be extended using generated values
       if (key === ".env") {
         const env = value;
+        console.log("env out", env);
 
         // GENERATE ENV VARS
         const sealedSecretsKeys = isClusterless

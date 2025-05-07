@@ -1,4 +1,5 @@
-import { ccolors, Netmask } from "deps";
+import { ccolors } from "deps";
+import { BasicNetmask } from "src/BasicNetmask.ts";
 import {
   CNDIConfig,
   CNDIDistribution,
@@ -49,8 +50,8 @@ const isInAddressSpace = (
   outerCidr = DEFAULT_VNET_ADDRESS_SPACE,
   innerCidr = DEFAULT_SUBNET_ADDRESS_SPACE,
 ) => {
-  const outerBlock = new Netmask(outerCidr);
-  const innerBlock = new Netmask(innerCidr);
+  const outerBlock = new BasicNetmask(outerCidr);
+  const innerBlock = new BasicNetmask(innerCidr);
   console.log(outerBlock, innerBlock);
   return outerBlock.contains(innerBlock);
 };

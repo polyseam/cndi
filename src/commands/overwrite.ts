@@ -153,7 +153,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
   const [errorLoadingConfig, result] = await loadCndiConfig(output);
 
   if (errorLoadingConfig) {
-    errorLoadingConfig.out();
+    await errorLoadingConfig.out();
     return;
   }
 
@@ -166,7 +166,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
   const validationError = validateConfig(config, pathToConfig);
 
   if (validationError) {
-    validationError.out();
+    await validationError.out();
     return;
   }
 
@@ -194,7 +194,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       );
 
       if (errStagingOnRunWorkflow) {
-        errStagingOnRunWorkflow.out();
+        await errStagingOnRunWorkflow.out();
         return;
       }
 
@@ -224,7 +224,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingOnPullWorkflow) {
-      errStagingOnPullWorkflow.out();
+      await errStagingOnPullWorkflow.out();
       return;
     }
 
@@ -252,7 +252,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       path.join("cndi", "functions", "src"),
     );
     if (errStagingFnsDir) {
-      errStagingFnsDir.out();
+      await errStagingFnsDir.out();
       return;
     }
 
@@ -264,7 +264,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingFnsEntrySrc) {
-      errStagingFnsEntrySrc.out();
+      await errStagingFnsEntrySrc.out();
       return;
     }
 
@@ -281,7 +281,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingFnsDockerfile) {
-      errStagingFnsDockerfile.out();
+      await errStagingFnsDockerfile.out();
       return;
     }
 
@@ -296,7 +296,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (fnsBuildWorkflowErr) {
-      fnsBuildWorkflowErr.out();
+      await fnsBuildWorkflowErr.out();
       return;
     }
     console.log(
@@ -309,7 +309,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       getFunctionsNamespaceManifest(),
     );
     if (errStagingFnsNamespace) {
-      errStagingFnsNamespace.out();
+      await errStagingFnsNamespace.out();
       return;
     }
     console.log(
@@ -322,7 +322,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       getFunctionsServiceManifest(),
     );
     if (errStagingFnsSvc) {
-      errStagingFnsSvc.out();
+      await errStagingFnsSvc.out();
       return;
     }
     console.log(
@@ -339,7 +339,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getFunctionsIngressManifest(functionsIngressHostname),
       );
       if (errStagingFnsIngress) {
-        errStagingFnsIngress.out();
+        await errStagingFnsIngress.out();
         return;
       }
       console.log(
@@ -380,7 +380,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingFnsDeployment) {
-      errStagingFnsDeployment.out();
+      await errStagingFnsDeployment.out();
       return;
     }
     console.log(
@@ -403,7 +403,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         id: "!env.TERRAFORM_STATE_PASSPHRASE",
       },
     );
-    err.out();
+    await err.out();
     return;
   }
 
@@ -436,7 +436,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         code: 501,
         id: "!env.SEALED_SECRETS_PUBLIC_KEY||!env.SEALED_SECRETS_PRIVATE_KEY",
       });
-      err.out();
+      await err.out();
       return;
     }
 
@@ -452,7 +452,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
           id: "!env.ARGOCD_ADMIN_PASSWORD",
         },
       );
-      err.out();
+      await err.out();
       return;
     }
 
@@ -478,7 +478,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       );
 
       if (errStagingCertManApplication) {
-        errStagingCertManApplication.out();
+        await errStagingCertManApplication.out();
         return;
       }
       console.log(
@@ -509,7 +509,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
           getProductionClusterIssuerManifest(cert_manager?.email),
         );
         if (errStagingProdCertManIssuer) {
-          errStagingProdCertManIssuer.out();
+          await errStagingProdCertManIssuer.out();
           return;
         }
       }
@@ -529,7 +529,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getReloaderApplicationManifest(config),
       );
       if (errStagingReloaderApp) {
-        errStagingReloaderApp.out();
+        await errStagingReloaderApp.out();
         return;
       }
     }
@@ -549,7 +549,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getPublicNginxApplicationManifest(config),
       );
       if (errStagingPublicIngApp) {
-        errStagingPublicIngApp.out();
+        await errStagingPublicIngApp.out();
         return;
       }
       console.log(
@@ -569,7 +569,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getPrivateNginxApplicationManifest(config),
       );
       if (errStagingPrivateIngApp) {
-        errStagingPrivateIngApp.out();
+        await errStagingPrivateIngApp.out();
         return;
       }
       console.log(
@@ -593,7 +593,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getMicrok8sIngressTcpServicesConfigMapManifest(open_ports),
       );
       if (errStagingMicrok8sIngConfigMap) {
-        errStagingMicrok8sIngConfigMap.out();
+        await errStagingMicrok8sIngConfigMap.out();
         return;
       }
       console.log(
@@ -606,7 +606,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getMicrok8sIngressDaemonsetManifest(open_ports),
       );
       if (errStagingmicrok8sIngDaemonset) {
-        errStagingmicrok8sIngDaemonset.out();
+        await errStagingmicrok8sIngDaemonset.out();
         return;
       }
       console.log(
@@ -622,7 +622,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingChartYaml) {
-      errStagingChartYaml.out();
+      await errStagingChartYaml.out();
       return;
     }
 
@@ -640,7 +640,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getExternalDNSManifest(config),
       );
       if (errStagingExtDnsApp) {
-        errStagingExtDnsApp.out();
+        await errStagingExtDnsApp.out();
         return;
       }
       console.log(
@@ -661,7 +661,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getArgoIngressManifest(argoIngressHostname),
       );
       if (errStagingArgoIngress) {
-        errStagingArgoIngress.out();
+        await errStagingArgoIngress.out();
         return;
       }
       console.log(
@@ -690,7 +690,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       );
 
       if (errStagingObservabilityNs) {
-        errStagingObservabilityNs.out();
+        await errStagingObservabilityNs.out();
         return;
       }
       console.log(
@@ -715,7 +715,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
             getGrafanaIngressManifest(grafanaHostname),
           );
           if (errStagingGrafanaIngress) {
-            errStagingGrafanaIngress.out();
+            await errStagingGrafanaIngress.out();
             return;
           }
           console.log(
@@ -740,7 +740,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         );
 
         if (errStagingKubePrometheusStackApp) {
-          errStagingKubePrometheusStackApp.out();
+          await errStagingKubePrometheusStackApp.out();
           return;
         }
 
@@ -759,7 +759,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
           );
 
           if (errStagingPromtailApp) {
-            errStagingPromtailApp.out();
+            await errStagingPromtailApp.out();
             return;
           }
           console.log(
@@ -783,7 +783,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
           );
 
           if (errStagingLokiApp) {
-            errStagingLokiApp.out();
+            await errStagingLokiApp.out();
             return;
           }
           console.log(
@@ -808,7 +808,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         manifestContent,
       );
       if (errStagingApplication) {
-        errStagingApplication.out();
+        await errStagingApplication.out();
         return;
       }
       console.log(
@@ -915,7 +915,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
           );
 
           if (errStagingASecretClusterManifest) {
-            errStagingASecretClusterManifest.out();
+            await errStagingASecretClusterManifest.out();
             return;
           }
 
@@ -934,7 +934,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         getYAMLString(manifestObj),
       );
       if (errStagingAClusterManifest) {
-        errStagingAClusterManifest.out();
+        await errStagingAClusterManifest.out();
         return;
       }
       console.log(
@@ -948,7 +948,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     );
 
     if (errStagingKSCJSON) {
-      errStagingKSCJSON.out();
+      await errStagingKSCJSON.out();
       return;
     }
 
@@ -961,7 +961,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
   try {
     const errStagingTerraformFiles = await stageTerraformFiles(config);
     if (errStagingTerraformFiles) {
-      errStagingTerraformFiles.out();
+      await errStagingTerraformFiles.out();
       return;
     }
   } catch (caughtError) {
@@ -973,7 +973,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
       code: 504,
       id: "!terraform.stage",
     });
-    err.out();
+    await err.out();
     return;
   }
 
@@ -986,7 +986,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
   });
 
   if (errPersistingStagedFiles) {
-    errPersistingStagedFiles.out();
+    await errPersistingStagedFiles.out();
     return;
   }
   console.log("  ");

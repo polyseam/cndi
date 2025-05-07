@@ -14,7 +14,8 @@ const label = ccolors.faded(
 export default async function stageTerraformFilesForAWSEKS(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
-  switch (cndi_config.distribution) {
+  const distribution = cndi_config?.distribution ?? "aks";
+  switch (distribution) {
     case "eks":
       return await stageAWSEKSClassicTerraformFiles(cndi_config);
     case "microk8s":
