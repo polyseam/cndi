@@ -620,7 +620,7 @@ const createCommand = new Command()
       output: destinationDirectory,
       initializing: true,
       create: true,
-      workflowSourceRef: options.workflowSourceRef,
+      workflowSourceRef: options?.workflowSourceRef,
       skipPush: !!skipPush,
     });
   });

@@ -6,7 +6,7 @@ import getClusterRepoSecretHTTPSTemplate from "src/outputs/terraform/manifest-te
 import getRootApplicationTemplate from "src/outputs/terraform/manifest-templates/argocd_root_application_manifest.yaml.tftpl.ts";
 import getRwmStorageClassTemplate from "src/outputs/terraform/manifest-templates/rwm_storage_class.yaml.tftpl.ts";
 import getRwoStorageClassTemplate from "src/outputs/terraform/manifest-templates/rwo_storage_class.yaml.tftpl.ts";
-import { loopUntilSuccess } from "src/cloud-init/utils.ts";
+import { loopUntilSuccess } from "src/outputs/terraform/cloud-init/utils.ts";
 
 import {
   ARGOCD_RELEASE_VERSION,

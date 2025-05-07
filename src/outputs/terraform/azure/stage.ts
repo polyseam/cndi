@@ -1,16 +1,36 @@
 import { CNDIConfig } from "src/types.ts";
 import { stageAzureAKSClassicTerraformFiles } from "./aks-classic/stage.ts";
-import { stageAzureAKSAutomaticTerraformFiles } from "./aks-automatic/stage.ts";
+import { ErrOut } from "src/ErrOut.ts";
+import { ccolors } from "src/deps.ts";
 
-const useAKSAutomatic = (
+const _useAKSAutomatic = (
   cndi_config: CNDIConfig,
 ) => (cndi_config?.infrastructure?.cndi?.nodes as unknown === "automatic");
 
-export default async function stageTerraformFilesForAzureAKS(
+const label = ccolors.faded(
+  "src/outputs/terraform/azure/stage.ts:",
+);
+
+export default async function stageTerraformFilesForAZUREEKS(
   cndi_config: CNDIConfig,
-) {
-  if (useAKSAutomatic(cndi_config)) {
-    return await stageAzureAKSAutomaticTerraformFiles(cndi_config);
+): Promise<null | ErrOut> {
+  switch (cndi_config.distribution) {
+    case "aks":
+      return await stageAzureAKSClassicTerraformFiles(cndi_config);
+    case "microk8s":
+    case "clusterless":
+    default:
+      return new ErrOut([
+        ccolors.error(
+          "Unsupported Azure distribution. Please use",
+        ),
+        "aks",
+        ccolors.error("instead of"),
+        cndi_config.distribution,
+      ], {
+        label,
+        code: -1,
+        id: "unsupported-azure-distribution",
+      });
   }
-  return await stageAzureAKSClassicTerraformFiles(cndi_config);
 }

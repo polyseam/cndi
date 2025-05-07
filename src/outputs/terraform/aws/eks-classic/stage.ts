@@ -2,10 +2,7 @@ import { CNDIConfig } from "src/types.ts";
 import { path } from "deps";
 import {} from "versions";
 
-import {
-  stageFile,
-  // useSshRepoAuth,
-} from "src/utils.ts";
+import { stageFile } from "src/utils.ts";
 
 import getDataTfJSON from "./data.tf.json.ts";
 
@@ -179,16 +176,5 @@ export async function stageAWSEKSClassicTerraformFiles(
       cndi_time_static_argocd_admin_password(cndi_config),
     ),
   ]);
-
-  // const input: TFBlocks = {
-  //   ...cndi_config?.infrastructure?.terraform,
-  // };
-
-  // // patch cndi.terraform.json with user's terraform pass-through
-  // const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
-  //   input,
-  // );
-
-  // if (errorPatchingAndStaging) return errorPatchingAndStaging;
   return null;
 }

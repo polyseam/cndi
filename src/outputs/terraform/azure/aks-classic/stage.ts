@@ -20,6 +20,7 @@ import cndi_azurerm_kubernetes_cluster from "./resource/cndi_azurerm_kubernetes_
 import cndi_azurerm_kubernetes_cluster_node_pool from "./resource/cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
 import cndi_azurerm_virtual_network from "./resource/cndi_azurerm_virtual_network.tf.json.ts";
 import cndi_azurerm_subnet from "./resource/cndi_azurerm_subnet.tf.json.ts";
+import cndi_data from "./data.tf.json.ts";
 
 // Azure AKS Classic Terraform Resources
 import cndi_kubernetes_storage_class from "./resource/cndi_kubernetes_storage_class.tf.json.ts";
@@ -40,6 +41,7 @@ export async function stageAzureAKSClassicTerraformFiles(
   const provider = getProviderTfJSON(cndi_config);
   const variable = getVariableTfJSON(cndi_config);
   const output = getOutputTfJSON(cndi_config);
+  const data = cndi_data(cndi_config);
 
   await Promise.all([
     stageFile(path.join("cndi", "terraform", "locals.tf.json"), locals),
@@ -47,6 +49,7 @@ export async function stageAzureAKSClassicTerraformFiles(
     stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider),
     stageFile(path.join("cndi", "terraform", "variable.tf.json"), variable),
     stageFile(path.join("cndi", "terraform", "terraform.tf.json"), terraform),
+    stageFile(path.join("cndi", "terraform", "data.tf.json"), data),
     stageFile(
       path.join("cndi", "terraform", "cndi_azurerm_resource_group.tf.json"),
       cndi_azurerm_resource_group(cndi_config),
@@ -118,15 +121,5 @@ export async function stageAzureAKSClassicTerraformFiles(
     ),
   ]);
 
-  // const input: TFBlocks = {
-  //   ...cndi_config?.infrastructure?.terraform,
-  // };
-
-  // // patch cndi.terraform.json with user's terraform pass-through
-  // const errorPatchingAndStaging = await patchAndStageTerraformFilesWithInput(
-  //   input,
-  // );
-
-  // if (errorPatchingAndStaging) return errorPatchingAndStaging;
   return null;
 }

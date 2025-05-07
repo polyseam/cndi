@@ -524,7 +524,7 @@ const initCommand = new Command()
     await overwrite({
       output: destinationDirectory,
       initializing: true,
-      workflowSourceRef: options.workflowSourceRef,
+      workflowSourceRef: options?.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
     });

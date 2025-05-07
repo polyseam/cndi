@@ -1,7 +1,6 @@
 import {
   ccolors,
   copy,
-  deepMerge,
   exists,
   homedir,
   JSONC,
@@ -19,7 +18,6 @@ import {
   CNDIPort,
   CNDITaintEffect,
   NodeRole,
-  TFBlocks,
 } from "src/types.ts";
 
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
@@ -269,55 +267,6 @@ function getStagingDirectory(): PxResult<string> {
     ];
   }
   return [undefined, stagingDirectory];
-}
-
-// MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithInput(
-  input: TFBlocks,
-): Promise<ErrOut | void> {
-  const pathToTerraformObject = path.join(
-    "cndi",
-    "terraform",
-    "cdk.tf.json",
-  );
-
-  const [err, stagingDirectory] = getStagingDirectory();
-
-  if (err) return err;
-
-  const cdktfObj = (await loadJSONC(
-    path.join(stagingDirectory, pathToTerraformObject),
-  )) as TFBlocks;
-
-  // this is highly inefficient
-  const cdktfWithEmpties = {
-    ...cdktfObj,
-    resource: deepMerge(cdktfObj?.resource || {}, input?.resource || {}),
-    terraform: deepMerge(cdktfObj?.terraform || {}, input?.terraform || {}),
-    variable: deepMerge(cdktfObj?.variable || {}, input?.variable || {}),
-    locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
-    output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
-    module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
-    data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
-    provider: deepMerge(cdktfObj?.provider || {}, input?.provider || {}),
-  };
-
-  const output: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(cdktfWithEmpties)) {
-    if (Object.keys(value).length) {
-      output[key] = value;
-    }
-  }
-
-  const errorStagingTFObj = await stageFile(
-    pathToTerraformObject,
-    getPrettyJSONString(output),
-  );
-
-  if (errorStagingTFObj) {
-    return errorStagingTFObj;
-  }
 }
 
 function truncateString(str: string, num = 63) {
@@ -681,7 +630,6 @@ export {
   isSlug,
   loadCndiConfig,
   loadJSONC,
-  patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,
   replaceRange,

@@ -8,6 +8,8 @@ import dev from "./dev/stage.ts";
 
 import { ErrOut } from "errout";
 
+import { processAndStageTerraformPassthru } from "./passthru.ts";
+
 const _label = ccolors.faded(
   "src/outputs/terraform/stage.ts:",
 );
@@ -26,7 +28,15 @@ const stagers: Stagers = {
 export default async function stageTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
-  return await stagers[cndi_config.provider](cndi_config);
+  const err = await stagers[cndi_config.provider](cndi_config);
+
+  if (err) return err;
+
+  const errPassthru = await processAndStageTerraformPassthru(cndi_config);
+
+  if (errPassthru) return errPassthru;
+
+  return null;
 }
 
 // if (distribution === "microk8s") {
