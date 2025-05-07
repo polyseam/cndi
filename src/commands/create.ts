@@ -18,7 +18,7 @@ import {
   stageFile,
 } from "src/utils.ts";
 
-import { owAction } from "src/commands/overwrite.ts";
+import { overwrite } from "src/commands/overwrite.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
@@ -141,7 +141,7 @@ const createCommand = new Command()
     "Label in the form of <provider>/<distribution> slug to specifying a deployment target",
   )
   .option(
-    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
@@ -616,11 +616,11 @@ const createCommand = new Command()
 
     await persistStagedFiles(destinationDirectory);
 
-    await owAction({
+    await overwrite({
       output: destinationDirectory,
       initializing: true,
       create: true,
-      runWorkflowSourceRef: options.runWorkflowSourceRef,
+      workflowSourceRef: options.workflowSourceRef,
       skipPush: !!skipPush,
     });
   });

@@ -24,7 +24,7 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import { owAction } from "src/commands/overwrite.ts";
+import { overwrite } from "src/commands/overwrite.ts";
 
 import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 import { createSshKeys } from "src/initialize/sshKeys.ts";
@@ -110,7 +110,7 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
@@ -521,10 +521,10 @@ const initCommand = new Command()
 
     await persistStagedFiles(destinationDirectory);
 
-    await owAction({
+    await overwrite({
       output: destinationDirectory,
       initializing: true,
-      runWorkflowSourceRef: options.runWorkflowSourceRef,
+      workflowSourceRef: options.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
     });

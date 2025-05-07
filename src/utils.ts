@@ -436,35 +436,6 @@ async function checkDirectoryForFileSuffix(directory: string, suffix: string) {
   }
   return false;
 }
-type CDKTFAppConfig = {
-  outdir: string;
-};
-
-async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
-  const [err, stagingDirectory] = getStagingDirectory();
-  if (err) return [err];
-
-  const outdir = path.join(stagingDirectory, "cndi", "terraform");
-  try {
-    await Deno.mkdir(outdir, { recursive: true });
-  } catch (errorCreatingDirectory) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("failed to create staging directory for terraform at"),
-          ccolors.key_name(outdir),
-        ],
-        {
-          cause: errorCreatingDirectory as Error,
-          code: 510,
-          label,
-          id: "!getCDKTFAppConfig",
-        },
-      ),
-    ];
-  }
-  return [undefined, { outdir }];
-}
 
 type PersistStagedFilesOptions = {
   purge: string[]; // a list of subpaths to purge from the target directory
@@ -693,7 +664,6 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
-  getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
   getPathToCndiBinary,
