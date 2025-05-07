@@ -1,5 +1,5 @@
 import { assert, describe, it } from "test-deps";
-import getNginxApplicationManifest from "src/outputs/core-applications/public-nginx.application.yaml.ts";
+import getNginxApplicationManifest from "src/outputs/cluster_manifests/core-applications/public-nginx.application.yaml.ts";
 import { loadCndiConfig } from "src/utils.ts";
 import { YAML } from "deps";
 import getProjectRootDir from "get-project-root";

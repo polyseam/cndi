@@ -18,48 +18,48 @@ import { ErrOut } from "errout";
 
 import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
 
-import getApplicationManifest from "src/outputs/application-manifest.ts";
-import RootChartYaml from "src/outputs/root-chart.ts";
+import getApplicationManifest from "src/outputs/cluster_manifests/application-manifest.ts";
+import RootChartYaml from "src/outputs/cluster_manifests/root-chart.ts";
 
 // Sealed Secrets
-import getSealedSecretManifestWithKSC from "src/outputs/sealed-secret-manifest.ts";
+import getSealedSecretManifestWithKSC from "src/outputs/cluster_manifests/sealed-secret-manifest.ts";
 
 // Functions Source
 import { getFunctionsDockerfileContent } from "src/outputs/functions/runtime-dockerfile.ts";
 import { getFunctionsMainContent } from "src/outputs/functions/main-function.ts";
 
 // Functions Manifests
-import { getFunctionsNamespaceManifest } from "src/outputs/functions/manifests/fns-namespace.ts";
-import { getFunctionsServiceManifest } from "src/outputs/functions/manifests/fns-service.ts";
-import { getFunctionsIngressManifest } from "src/outputs/functions/manifests/fns-ingress.ts";
-import { getFunctionsEnvSecretManifest } from "src/outputs/functions/manifests/fns-env-secret.ts";
-import { getFunctionsPullSecretManifest } from "src/outputs/functions/manifests/fns-pull-secret.ts";
-import { getFunctionsDeploymentManifest } from "src/outputs/functions/manifests/fns-deployment.ts";
+import { getFunctionsNamespaceManifest } from "src/outputs/cluster_manifests/functions/fns-namespace.ts";
+import { getFunctionsServiceManifest } from "src/outputs/cluster_manifests/functions/fns-service.ts";
+import { getFunctionsIngressManifest } from "src/outputs/cluster_manifests/functions/fns-ingress.ts";
+import { getFunctionsEnvSecretManifest } from "src/outputs/cluster_manifests/functions/fns-env-secret.ts";
+import { getFunctionsPullSecretManifest } from "src/outputs/cluster_manifests/functions/fns-pull-secret.ts";
+import { getFunctionsDeploymentManifest } from "src/outputs/cluster_manifests/functions/fns-deployment.ts";
 
 // GitHub Workflows
-import getCndiRunGitHubWorkflowYamlContents from "src/outputs/cndi-run-workflow.ts";
-import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/cndi-onpull-workflow.ts";
-import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/cndi-fns-workflow.ts";
+import getCndiRunGitHubWorkflowYamlContents from "src/outputs/github/cndi-run-workflow.ts";
+import getCndiOnPullGitHubWorkflowYamlContents from "src/outputs/github/cndi-onpull-workflow.ts";
+import getCndiFnsGitHubWorkflowYamlContents from "src/outputs/github/cndi-fns-workflow.ts";
 
 // Microk8s Manifests
-import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/custom-port-manifests/microk8s/ingress-tcp-services-configmap.ts";
-import getMicrok8sIngressDaemonsetManifest from "src/outputs/custom-port-manifests/microk8s/ingress-daemonset.ts";
+import getMicrok8sIngressTcpServicesConfigMapManifest from "src/outputs/cluster_manifests/ingress/microk8s/ingress-tcp-services-configmap.ts";
+import getMicrok8sIngressDaemonsetManifest from "src/outputs/cluster_manifests/ingress/microk8s/ingress-daemonset.ts";
 
 // Cert Manager Manifests
-import getProductionClusterIssuerManifest from "src/outputs/cert-manager-manifests/production-cluster-issuer.ts";
-import getDevClusterIssuerManifest from "src/outputs/cert-manager-manifests/self-signed/dev-cluster-issuer.ts";
+import getProductionClusterIssuerManifest from "src/outputs/cluster_manifests/cert-manager/production-cluster-issuer.ts";
+import getDevClusterIssuerManifest from "src/outputs/cluster_manifests/cert-manager/self-signed/dev-cluster-issuer.ts";
 
 // Core Apps
-import getExternalDNSManifest from "src/outputs/core-applications/external-dns.application.yaml.ts";
-import getCertManagerApplicationManifest from "src/outputs/core-applications/cert-manager.application.yaml.ts";
-import getPrivateNginxApplicationManifest from "src/outputs/core-applications/private-nginx.application.yaml.ts";
-import getPublicNginxApplicationManifest from "src/outputs/core-applications/public-nginx.application.yaml.ts";
-import getReloaderApplicationManifest from "src/outputs/core-applications/reloader.application.yaml.ts";
-import getKubePrometheusStackApplicationManifest from "src/outputs/core-applications/kube-prometheus-stack.application.yaml.ts";
-import getPromtailApplicationManifest from "src/outputs/core-applications/promtail.application.yaml.ts";
-import getLokiApplicationManifest from "src/outputs/core-applications/loki.application.yaml.ts";
-import { getGrafanaIngressManifest } from "src/outputs/ingress/grafana-ingress.yaml.ts";
-import { getArgoIngressManifest } from "src/outputs/ingress/argo-ingress.yaml.ts";
+import getExternalDNSManifest from "src/outputs/cluster_manifests/core-applications/external-dns.application.yaml.ts";
+import getCertManagerApplicationManifest from "src/outputs/cluster_manifests/core-applications/cert-manager.application.yaml.ts";
+import getPrivateNginxApplicationManifest from "src/outputs/cluster_manifests/core-applications/private-nginx.application.yaml.ts";
+import getPublicNginxApplicationManifest from "src/outputs/cluster_manifests/core-applications/public-nginx.application.yaml.ts";
+import getReloaderApplicationManifest from "src/outputs/cluster_manifests/core-applications/reloader.application.yaml.ts";
+import getKubePrometheusStackApplicationManifest from "src/outputs/cluster_manifests/core-applications/kube-prometheus-stack.application.yaml.ts";
+import getPromtailApplicationManifest from "src/outputs/cluster_manifests/core-applications/promtail.application.yaml.ts";
+import getLokiApplicationManifest from "src/outputs/cluster_manifests/core-applications/loki.application.yaml.ts";
+import { getGrafanaIngressManifest } from "src/outputs/cluster_manifests/ingress/grafana-ingress.yaml.ts";
+import { getArgoIngressManifest } from "src/outputs/cluster_manifests/ingress/argo-ingress.yaml.ts";
 
 import stageTerraformFiles from "../outputs/terraform/stage.ts";
 

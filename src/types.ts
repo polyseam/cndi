@@ -4,7 +4,7 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
-import type { CNDIApplicationSpec } from "src/outputs/application-manifest.ts";
+import type { CNDIApplicationSpec } from "src/outputs/cluster_manifests/application-manifest.ts";
 
 export const NODE_KIND = {
   aws: "aws",

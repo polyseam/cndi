@@ -1,4 +1,4 @@
-import getPublicIngressManifest from "src/outputs/public-ingress-manifest.ts";
+import getPublicIngressManifest from "src/outputs/cluster_manifests/ingress/public-ingress-manifest.ts";
 
 export function getGrafanaIngressManifest(hostname: string): string {
   return getPublicIngressManifest("grafana-ingress", {
