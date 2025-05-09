@@ -6,6 +6,7 @@ export const DEFAULT_INSTANCE_TYPES = {
 
 export const DEFAULT_NODE_DISK_SIZE_UNMANAGED = 100; // GB
 export const DEFAULT_NODE_DISK_SIZE_MANAGED = 30; // GB
+export const DEFAULT_AMI_TYPE = "AL2023_x86_64_NVIDIA" as const;
 
 export const NODE_DISK_SIZE_KEY = {
   aws: "volume_size" as const,

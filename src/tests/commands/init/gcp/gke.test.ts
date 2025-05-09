@@ -27,6 +27,7 @@ describe("GCP GKE initialization", () => {
     const cwd = await Deno.makeTempDir();
 
     const run = await runCndi({
+      loud: true,
       args: [
         "init",
         "-t",

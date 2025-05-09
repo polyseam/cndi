@@ -4,7 +4,7 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
-import type { CNDIApplicationSpec } from "src/outputs/application-manifest.ts";
+import type { CNDIApplicationSpec } from "src/outputs/cluster_manifests/application-manifest.ts";
 
 export const NODE_KIND = {
   aws: "aws",
@@ -59,15 +59,16 @@ export interface CNDINodeSpec {
   name: string;
   role?: NodeRole; // default: controller
   volume_size?: number;
-  size?: number | string;
+  size?: number | string; // number: 500 or string: az machine type
+  vm_size?: string; // az machine type
   disk_size_gb?: number;
   disk_size?: number;
+  disk_type?: string;
   instance_type?: string;
   machine_type?: string;
   min_count?: number;
   max_count?: number;
   count?: number;
-  disk_type?: string;
   labels?: Label;
   taints?: Taint[];
 }

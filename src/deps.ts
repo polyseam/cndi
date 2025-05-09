@@ -68,15 +68,13 @@ export const PromptTypes = {
 } as const;
 
 //  - validator
-export { default as validator } from "validator";
+import * as validator from "validator";
+export { validator };
 
 // - lodash
 export { default as getValueFromKeyPath } from "lodash.get";
 export { default as setValueForKeyPath } from "lodash.set";
 export { default as unsetValueForKeyPath } from "lodash.unset";
-
-//  - netmask
-export { Netmask } from "netmask";
 
 //  - simple-git
 export { simpleGit } from "simple-git";

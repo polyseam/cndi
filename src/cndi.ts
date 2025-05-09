@@ -16,7 +16,7 @@ import upgradeCommand from "src/commands/upgrade.ts";
 import runCommand from "src/commands/run.ts";
 import createCommand from "src/commands/create.ts";
 import initCommand from "src/commands/init.ts";
-import { overwriteCommand } from "src/commands/overwrite.ts";
+import overwriteCommand from "src/commands/overwrite.ts";
 import destroyCommand from "src/commands/destroy.ts";
 import installCommand from "src/commands/install.ts";
 import showOutputsCommand from "src/commands/show-outputs.ts";

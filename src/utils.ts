@@ -1,7 +1,6 @@
 import {
   ccolors,
   copy,
-  deepMerge,
   exists,
   homedir,
   JSONC,
@@ -19,7 +18,6 @@ import {
   CNDIPort,
   CNDITaintEffect,
   NodeRole,
-  TFBlocks,
 } from "src/types.ts";
 
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
@@ -271,49 +269,11 @@ function getStagingDirectory(): PxResult<string> {
   return [undefined, stagingDirectory];
 }
 
-// MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithInput(
-  input: TFBlocks,
-): Promise<ErrOut | void> {
-  const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
-
-  const [err, stagingDirectory] = getStagingDirectory();
-
-  if (err) return err;
-
-  const cdktfObj = (await loadJSONC(
-    path.join(stagingDirectory, pathToTerraformObject),
-  )) as TFBlocks;
-
-  // this is highly inefficient
-  const cdktfWithEmpties = {
-    ...cdktfObj,
-    resource: deepMerge(cdktfObj?.resource || {}, input?.resource || {}),
-    terraform: deepMerge(cdktfObj?.terraform || {}, input?.terraform || {}),
-    variable: deepMerge(cdktfObj?.variable || {}, input?.variable || {}),
-    locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
-    output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
-    module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
-    data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
-    provider: deepMerge(cdktfObj?.provider || {}, input?.provider || {}),
-  };
-
-  const output: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(cdktfWithEmpties)) {
-    if (Object.keys(value).length) {
-      output[key] = value;
-    }
+function truncateString(str: string, num = 63) {
+  if (str.length <= num) {
+    return str;
   }
-
-  const errorStagingTFObj = await stageFile(
-    pathToTerraformObject,
-    getPrettyJSONString(output),
-  );
-
-  if (errorStagingTFObj) {
-    return errorStagingTFObj;
-  }
+  return str.slice(0, num);
 }
 
 function getPathToTerraformBinary() {
@@ -370,8 +330,9 @@ function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
 
 async function stageFile(
   relativePath: string,
-  fileContents: string,
+  fileContents: string | null,
 ): Promise<ErrOut | void> {
+  if (fileContents === null) return;
   const [err, stagingDirectory] = getStagingDirectory();
   if (err) return err;
   const stagingPath = path.join(stagingDirectory, relativePath);
@@ -423,35 +384,6 @@ async function checkDirectoryForFileSuffix(directory: string, suffix: string) {
     // directory doesn't exist
   }
   return false;
-}
-type CDKTFAppConfig = {
-  outdir: string;
-};
-
-async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
-  const [err, stagingDirectory] = getStagingDirectory();
-  if (err) return [err];
-
-  const outdir = path.join(stagingDirectory, "cndi", "terraform");
-  try {
-    await Deno.mkdir(outdir, { recursive: true });
-  } catch (errorCreatingDirectory) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("failed to create staging directory for terraform at"),
-          ccolors.key_name(outdir),
-        ],
-        {
-          cause: errorCreatingDirectory as Error,
-          code: 510,
-          label,
-          id: "!getCDKTFAppConfig",
-        },
-      ),
-    ];
-  }
-  return [undefined, { outdir }];
 }
 
 type PersistStagedFilesOptions = {
@@ -681,7 +613,6 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
-  getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
   getPathToCndiBinary,
@@ -699,7 +630,6 @@ export {
   isSlug,
   loadCndiConfig,
   loadJSONC,
-  patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,
   replaceRange,
@@ -707,5 +637,6 @@ export {
   sha256Digest,
   stageDirectory,
   stageFile,
+  truncateString,
   useSshRepoAuth,
 };
