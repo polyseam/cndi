@@ -1,5 +1,5 @@
 import { CNDIConfig } from "src/types.ts";
-import { stageDevMicrok8sTerraformFiles } from "./microk8s/stage.ts";
+import stageDevMicrok8sTerraformFiles from "./microk8s/stage.ts";
 
 export default async function stageTerraformFilesForAWSEKS(
   cndi_config: CNDIConfig,

@@ -28,6 +28,14 @@ const REQUIRED_PROVIDERS = {
       source: "larstobi/multipass",
       version: "1.4.2",
     },
+    local: {
+      source: "hashicorp/local",
+      version: "2.5.2",
+    },
+    random: {
+      source: "hashicorp/random",
+      version: "3.7.1",
+    },
   },
 } as const;
 
@@ -39,10 +47,6 @@ const CORE_REQUIRED_PROVIDERS = {
   kubernetes: {
     source: "kubernetes",
     version: "2.36.0",
-  },
-  random: {
-    source: "hashicorp/random",
-    version: "3.7.1",
   },
   time: {
     source: "hashicorp/time",

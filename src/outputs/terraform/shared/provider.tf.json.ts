@@ -51,7 +51,6 @@ export default function getProviderTfJSON(
       kubernetes,
     }],
     kubernetes: [kubernetes],
-    random: [{}],
     time: [{}],
     tls: [{}],
   };
@@ -91,6 +90,7 @@ export default function getProviderTfJSON(
     case "dev":
       out.multipass = [{}];
       out.local = [{}];
+      out.random = [{}];
       break;
     default:
       throw new Error(`Unsupported provider: ${provider}`);
