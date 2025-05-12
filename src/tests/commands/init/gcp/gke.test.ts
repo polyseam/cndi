@@ -16,7 +16,7 @@ describe("GCP GKE initialization", () => {
         "--set",
         "dns_provider=google",
         "--set",
-        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       ],
       cwd,
     });
@@ -37,7 +37,7 @@ describe("GCP GKE initialization", () => {
         "--set",
         "deployment_target_provider=gcp",
         "--set",
-        `google_credentials='{"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}'`,
+        `google_credentials={"type": "service_account", "project_id": "example-project", "universe_domain": "googleapis.com",  "client_email": "my-sa@myproject.iam.gserviceaccount.com"}`,
       ],
       cwd,
     });
