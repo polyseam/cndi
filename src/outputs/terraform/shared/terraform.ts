@@ -36,6 +36,8 @@ const REQUIRED_PROVIDERS = {
       source: "hashicorp/random",
       version: "3.7.1",
     },
+    kubernetes: undefined,
+    helm: undefined,
   },
 } as const;
 
@@ -63,8 +65,8 @@ export default function getTerraformTfJSON(
 ): string {
   const terraform = {
     required_providers: {
-      ...REQUIRED_PROVIDERS[provider],
       ...CORE_REQUIRED_PROVIDERS,
+      ...REQUIRED_PROVIDERS[provider],
     },
   };
   // TODO: some variables are not used in every stack

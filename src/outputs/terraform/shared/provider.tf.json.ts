@@ -91,6 +91,8 @@ export default function getProviderTfJSON(
       out.multipass = [{}];
       out.local = [{}];
       out.random = [{}];
+      delete out.kubernetes;
+      delete out.helm;
       break;
     default:
       throw new Error(`Unsupported provider: ${provider}`);
