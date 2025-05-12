@@ -22,7 +22,7 @@ const getFollowerCloudInitYaml = (
   const microk8sFollowerLaunchConfig: Microk8sFollowerLaunchConfig = {
     version: "0.1.0",
     join: {
-      url: "\${leader_node_ip}:25000/\${bootstrap_token}",
+      url: "\${leader_node_ip}:25000/\${join_token}",
     },
   };
 

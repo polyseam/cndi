@@ -275,7 +275,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           if (useSshRepoAuth()) {
             userData = Fn.base64encode(
               Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-                bootstrap_token: this.locals.bootstrap_token.asString!,
+                join_token: this.locals.join_token.asString!,
                 git_repo_encoded: Fn.base64encode(
                   this.variables.git_repo.stringValue,
                 ),
@@ -296,7 +296,7 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
           } else {
             userData = Fn.base64encode(
               Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-                bootstrap_token: this.locals.bootstrap_token.asString!,
+                join_token: this.locals.join_token.asString!,
                 git_repo: this.variables.git_repo.stringValue,
                 git_token: this.variables.git_token.stringValue,
                 git_username: this.variables.git_username.stringValue,
@@ -314,14 +314,14 @@ export class AzureMicrok8sStack extends AzureCoreTerraformStack {
         } else if (role === "worker") {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
-              bootstrap_token: this.locals.bootstrap_token.asString!,
+              join_token: this.locals.join_token.asString!,
               leader_node_ip: leaderInstance!.privateIpAddress,
             }),
           );
         } else {
           userData = Fn.base64encode(
             Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
-              bootstrap_token: this.locals.bootstrap_token.asString!,
+              join_token: this.locals.join_token.asString!,
               leader_node_ip: leaderInstance!.privateIpAddress,
             }),
           );

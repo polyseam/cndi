@@ -63,8 +63,7 @@ const getLocalsFor: Record<string, LocalsGetter> = {
     return { cndi_arm_region };
   },
   dev: (_cndi_config: CNDIConfig): Locals => ({
-    bootstrap_token:
-      "${random_password.cndi_random_password_bootstrap_token.result}",
+    join_token: "${random_password.cndi_random_password_join_token.result}",
   }),
 };
 

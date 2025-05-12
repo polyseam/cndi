@@ -2,9 +2,9 @@ import { CNDIConfig } from "src/types.ts";
 import { ccolors, path } from "deps";
 import { ErrOut } from "errout";
 
-import { stageFile } from "src/utils.ts";
+import { stageFile, useSshRepoAuth } from "src/utils.ts";
 
-const label = ccolors.faded(
+const _label = ccolors.faded(
   "\nsrc/outputs/terraform/dev/microk8s/stage.ts:",
 );
 
@@ -26,6 +26,13 @@ import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared
 // Microk8s Dev Terraform Resources
 import cndi_multipass_instance from "src/outputs/terraform/dev/microk8s/resource/cndi_multipass_instance.tf.json.ts";
 
+import cndi_local_sensitive_file_microk8s_leader_cloud_init, {
+  filename
+    as cndi_local_sensitive_file_microk8s_leader_cloud_init_template_filename,
+} from "src/outputs/terraform/dev/microk8s/resource/cndi_local_sensitive_file.tf.json.ts";
+
+import cndi_local_sensitive_file_microk8s_leader_cloud_init_template from "src/outputs/terraform/dev/microk8s/templatefiles/cndi_local_sensitive_file_microk8s_leader_cloud_init.template.yml.tftpl.ts";
+
 export default async function stageDevMicrok8sTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
@@ -41,6 +48,25 @@ export default async function stageDevMicrok8sTerraformFiles(
     stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider),
     stageFile(path.join("cndi", "terraform", "variable.tf.json"), variable),
     stageFile(path.join("cndi", "terraform", "terraform.tf.json"), terraform),
+
+    stageFile(
+      path.join(
+        "cndi",
+        "terraform",
+        cndi_local_sensitive_file_microk8s_leader_cloud_init_template_filename,
+      ),
+      cndi_local_sensitive_file_microk8s_leader_cloud_init_template(
+        cndi_config,
+        {
+          useSshRepoAuth: useSshRepoAuth(),
+          useClusterHA: false,
+        },
+      ),
+    ),
+    stageFile(
+      path.join("cndi", "terraform", "cndi_local_sensitive_file.tf.json"),
+      cndi_local_sensitive_file_microk8s_leader_cloud_init(cndi_config),
+    ),
 
     stageFile(
       path.join("cndi", "terraform", "cndi_multipass_instance.tf.json"),

@@ -55,7 +55,7 @@ import {
         userData = Fn.templatefile(
           "microk8s-cloud-init-leader.yml.tftpl",
           {
-            bootstrap_token: this.locals.bootstrap_token.asString!,
+            join_token: this.locals.join_token.asString!,
             git_repo_encoded: Fn.base64encode(
               this.variables.git_repo.stringValue,
             ),
@@ -75,7 +75,7 @@ import {
         );
       } else {
         userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-          bootstrap_token: this.locals.bootstrap_token.asString!,
+          join_token: this.locals.join_token.asString!,
           git_repo: this.variables.git_repo.stringValue,
           git_token: this.variables.git_token.stringValue,
           git_username: this.variables.git_username.stringValue,

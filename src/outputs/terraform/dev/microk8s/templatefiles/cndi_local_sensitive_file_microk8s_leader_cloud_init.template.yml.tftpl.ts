@@ -97,7 +97,7 @@ const getLeaderCloudInitYaml = (
 
   const microk8sLeaderLaunchConfig = {
     version: "0.1.0",
-    // persistentClusterToken: "\${bootstrap_token}", //TODO: figure out how to get this to be reused
+    // persistentClusterToken: "\${join_token}", //TODO: figure out how to get this to be reused
     addons,
     addonRepositories: [
       {
@@ -227,7 +227,7 @@ const getLeaderCloudInitYaml = (
       `sudo microk8s status --wait-ready`,
       `echo "microk8s is ready"`,
 
-      `sudo microk8s add-node --token \${bootstrap_token} -l ${MICROK8S_ADD_NODE_TOKEN_TTL}`,
+      `sudo microk8s add-node --token \${join_token} -l ${MICROK8S_ADD_NODE_TOKEN_TTL}`,
 
       `echo "Installing sealed-secrets-controller"`,
       loopUntilSuccess(

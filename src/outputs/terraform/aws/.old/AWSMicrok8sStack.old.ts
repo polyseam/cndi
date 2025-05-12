@@ -184,7 +184,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
       if (role === "leader") {
         if (useSshRepoAuth()) {
           userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-            bootstrap_token: this.locals.bootstrap_token.asString!,
+            join_token: this.locals.join_token.asString!,
             git_repo_encoded: Fn.base64encode(
               this.variables.git_repo.stringValue,
             ),
@@ -203,7 +203,7 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
           });
         } else {
           userData = Fn.templatefile("microk8s-cloud-init-leader.yml.tftpl", {
-            bootstrap_token: this.locals.bootstrap_token.asString!,
+            join_token: this.locals.join_token.asString!,
             git_repo: this.variables.git_repo.stringValue,
             git_token: this.variables.git_token.stringValue,
             git_username: this.variables.git_username.stringValue,
@@ -219,12 +219,12 @@ export class AWSMicrok8sStack extends AWSCoreTerraformStack {
         }
       } else if (role === "worker") {
         userData = Fn.templatefile("microk8s-cloud-init-worker.yml.tftpl", {
-          bootstrap_token: this.locals.bootstrap_token.asString!,
+          join_token: this.locals.join_token.asString!,
           leader_node_ip: leaderInstance!.privateIp,
         });
       } else {
         userData = Fn.templatefile("microk8s-cloud-init-controller.yml.tftpl", {
-          bootstrap_token: this.locals.bootstrap_token.asString!,
+          join_token: this.locals.join_token.asString!,
           leader_node_ip: leaderInstance!.privateIp,
         });
       }

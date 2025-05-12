@@ -2,8 +2,8 @@ import { CNDIConfig, MultipassNodeItemSpec } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 import {
-  cndi_cloud_init_filename,
-  cndi_cloud_init_name,
+  cndi_local_sensitive_file_microk8s_leader_cloud_init,
+  filename as cloudinit_file,
 } from "./cndi_local_sensitive_file.tf.json.ts";
 
 const _label = ccolors.faded(
@@ -76,11 +76,13 @@ export default function (cndi_config: CNDIConfig) {
     multipass_instance: {
       cndi_multipass_instance: {
         name,
-        cloudinit_file: cndi_cloud_init_filename,
+        cloudinit_file,
         memory,
         cpus,
         disk,
-        depends_on: [`\${local_sensitive_file.${cndi_cloud_init_name}}`],
+        depends_on: [
+          `local_sensitive_file.${cndi_local_sensitive_file_microk8s_leader_cloud_init}`,
+        ],
       },
     },
   };
