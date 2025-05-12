@@ -25,6 +25,7 @@ import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared
 
 // Microk8s Dev Terraform Resources
 import cndi_multipass_instance from "src/outputs/terraform/dev/microk8s/resource/cndi_multipass_instance.tf.json.ts";
+import cndi_random_password_join_token from "./resource/cndi_random_password_join_token.tf.json.ts";
 
 import cndi_local_sensitive_file_microk8s_leader_cloud_init, {
   filename
@@ -48,7 +49,10 @@ export default async function stageDevMicrok8sTerraformFiles(
     stageFile(path.join("cndi", "terraform", "provider.tf.json"), provider),
     stageFile(path.join("cndi", "terraform", "variable.tf.json"), variable),
     stageFile(path.join("cndi", "terraform", "terraform.tf.json"), terraform),
-
+    stageFile(
+      path.join("cndi", "terraform", "cndi_random_password_join_token.tf.json"),
+      cndi_random_password_join_token(cndi_config),
+    ),
     stageFile(
       path.join(
         "cndi",
