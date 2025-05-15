@@ -1,5 +1,5 @@
 import { CNDIConfig } from "src/types.ts";
-import { stageAWSEKSClassicTerraformFiles } from "./eks-classic/stage.ts";
+import { stageAWSEKSTerraformFiles } from "./eks/stage.ts";
 import { ErrOut } from "src/ErrOut.ts";
 import { ccolors } from "src/deps.ts";
 
@@ -14,10 +14,10 @@ const label = ccolors.faded(
 export default async function stageTerraformFilesForAWSEKS(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
-  const distribution = cndi_config?.distribution ?? "aks";
+  const distribution = cndi_config?.distribution ?? "eks";
   switch (distribution) {
     case "eks":
-      return await stageAWSEKSClassicTerraformFiles(cndi_config);
+      return await stageAWSEKSTerraformFiles(cndi_config);
     case "microk8s":
     case "clusterless":
     default:

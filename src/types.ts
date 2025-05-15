@@ -238,7 +238,7 @@ export interface CNDINetworkConfigBase {
   mode?: CNDINetworkMode;
 }
 
-export interface CNDINetworkConfigcreate extends CNDINetworkConfigBase {
+export interface CNDINetworkConfigCreate extends CNDINetworkConfigBase {
   mode: "create";
   vnet_address_space?: string;
   subnet_address_space?: string;
@@ -258,7 +258,7 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
 }
 
 export type CNDINetworkConfig =
-  | CNDINetworkConfigcreate
+  | CNDINetworkConfigCreate
   | CNDINetworkConfigInsert;
 
 // https://github.com/bitnami/charts/blob/16f3174da9441d2bf6c2355ab0afe94d4a7a9e48/bitnami/external-dns/values.yaml#L112
