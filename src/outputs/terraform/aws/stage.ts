@@ -8,7 +8,7 @@ const _useEKSAutomatic = (
 ) => (cndi_config?.infrastructure?.cndi?.nodes as unknown === "automatic");
 
 const label = ccolors.faded(
-  "src/outputs/terraform/aws/stage.ts:",
+  "\nsrc/outputs/terraform/aws/stage.ts:\n",
 );
 
 export default async function stageTerraformFilesForAWSEKS(
@@ -18,8 +18,9 @@ export default async function stageTerraformFilesForAWSEKS(
   switch (distribution) {
     case "eks":
       return await stageAWSEKSTerraformFiles(cndi_config);
-    case "microk8s":
     case "clusterless":
+      return null;
+    case "microk8s":
     default:
       return new ErrOut([
         ccolors.error(

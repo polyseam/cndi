@@ -2,7 +2,7 @@ import { ccolors, loadEnvSync, path } from "deps";
 import { loadCndiConfig, type PxResult } from "src/utils.ts";
 import { ErrOut } from "errout";
 
-const label = ccolors.faded("\nsrc/setTF_VARs.ts:");
+const label = ccolors.faded("\nsrc/setTF_VARs.ts:\n");
 
 const BACKWARDS_COMPATIBILITY = true;
 

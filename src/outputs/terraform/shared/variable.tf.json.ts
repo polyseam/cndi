@@ -8,7 +8,7 @@ type Variables = Record<string, {
   sensitive?: boolean;
 }>;
 
-const _label = ccolors.faded("\nsrc/outputs/terraform/variable.tf.json.ts:");
+const _label = ccolors.faded("\nsrc/outputs/terraform/variable.tf.json.ts:\n");
 
 const VARIABLE: Variables = {
   ARGOCD_ADMIN_PASSWORD: {

@@ -11,7 +11,7 @@ import { ccolors } from "deps";
 import { ErrOut } from "errout";
 
 const label = ccolors.faded(
-  "\nsrc/outputs/terraform/azure/aks-automatic/stage.ts:",
+  "\nsrc/outputs/terraform/azure/aks-automatic/stage.ts:\n",
 );
 
 // deno-lint-ignore require-await

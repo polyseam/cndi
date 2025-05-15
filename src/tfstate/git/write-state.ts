@@ -5,7 +5,7 @@ import { ErrOut } from "errout";
 
 const git = simpleGit();
 
-const label = ccolors.faded("\nsrc/tfstate/git/write-state.ts:");
+const label = ccolors.faded("\nsrc/tfstate/git/write-state.ts:\n");
 type PushStateForRunOptions = {
   pathToTerraformResources: string;
   cmd: string;

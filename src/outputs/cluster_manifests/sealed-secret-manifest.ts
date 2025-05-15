@@ -13,7 +13,7 @@ const CNDI_SECRETS_PREFIX = "$cndi_on_ow.seal_secret_from_env_var(";
 const PLACEHOLDER_SUFFIX = "_PLACEHOLDER__";
 
 const label = ccolors.faded(
-  "\nsrc/outputs/sealed-secret-manifest.ts:",
+  "\nsrc/outputs/sealed-secret-manifest.ts:\n",
 );
 
 const parseCndiSecret = (

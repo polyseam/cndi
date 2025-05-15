@@ -23,7 +23,7 @@ import showOutputsCommand from "src/commands/show-outputs.ts";
 
 import { emitExitEvent, removeOldBinaryIfRequired } from "src/utils.ts";
 
-const label = ccolors.faded("\nsrc/cndi.ts:");
+const label = ccolors.faded("\nsrc/cndi.ts:\n");
 
 export default async function cndi() {
   if (!deno_json?.version) {

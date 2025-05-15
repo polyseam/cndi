@@ -29,7 +29,7 @@ export class ErrOut extends Error {
   id: string;
 
   constructor(msg: Msg, options: ErrOutOptions) {
-    const message = `${options.label}  ${
+    const message = `${options.label}${
       Array.isArray(msg) ? msg.join(" ") : msg
     }`;
     super(message, { cause: options.cause });

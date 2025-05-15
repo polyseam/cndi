@@ -9,20 +9,10 @@ export default function (_cndi_config: CNDIConfig) {
           filter: [
             {
               name: "opt-in-status",
-              values: [
-                "opt-in-not-required",
-              ],
+              values: ["opt-in-not-required"],
             },
           ],
           state: "available",
-        },
-      },
-      aws_iam_policy: {
-        ebs_csi_policy: {
-          arn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-        },
-        efs_csi_policy: {
-          arn: "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy",
         },
       },
     },

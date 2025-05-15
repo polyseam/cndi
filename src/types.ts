@@ -253,8 +253,7 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
   /**
    * A set of one or more subnets to use for the cluster.
    */
-  vnet_address_space?: string;
-  subnet_address_space?: string;
+  subnet_identifiers: string[];
 }
 
 export type CNDINetworkConfig =

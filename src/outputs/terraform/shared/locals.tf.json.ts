@@ -2,7 +2,12 @@ import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
-type Locals = Record<string, string>;
+type Primitive = string | number | boolean | null;
+type JSONValue = Primitive | JSONObject | JSONArray;
+type JSONObject = { [key: string]: JSONValue };
+type JSONArray = JSONValue[];
+
+type Locals = Record<string, JSONValue>;
 
 type GCPKeyJSON = {
   type: string;
@@ -18,7 +23,7 @@ type GCPKeyJSON = {
   universe_domain: string;
 };
 
-const label = ccolors.faded("\nsrc/outputs/terraform/locals.tf.json.ts:");
+const label = ccolors.faded("\nsrc/outputs/terraform/locals.tf.json.ts:\n");
 
 type LocalsGetter = (cndi_config: CNDIConfig) => Locals;
 
@@ -69,6 +74,7 @@ const getLocalsFor: Record<string, LocalsGetter> = {
 
 export default function getLocalsTfJSON(
   cndi_config: CNDIConfig,
+  patch: Locals = {},
 ): string {
   const cndi_project_name = cndi_config.project_name;
 
@@ -85,6 +91,7 @@ export default function getLocalsTfJSON(
   const locals: Locals = {
     cndi_project_name,
     ...getLocalsFor[cndi_config.provider](cndi_config),
+    ...patch,
   };
 
   return getPrettyJSONString({ locals });

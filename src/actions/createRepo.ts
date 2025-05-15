@@ -1,7 +1,7 @@
 import { ccolors, loadEnv, path, simpleGit, writeAll } from "deps";
 import { ErrOut } from "errout";
 
-const label = ccolors.faded("\nsrc/actions/createRepo.ts:");
+const label = ccolors.faded("\nsrc/actions/createRepo.ts:\n");
 
 type CreateRepoOptions = {
   output: string;

@@ -2,7 +2,7 @@ import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
-const _label = ccolors.faded("\nsrc/outputs/terraform/terraform.tf.json.ts:");
+const _label = ccolors.faded("\nsrc/outputs/terraform/terraform.tf.json.ts:\n");
 
 const REQUIRED_PROVIDERS = {
   aws: {

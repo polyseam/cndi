@@ -26,7 +26,7 @@ import { ErrOut } from "errout";
 
 import { emitTelemetryEvent } from "src/telemetry/telemetry.ts";
 
-const label = ccolors.faded("src/utils.ts:");
+const label = ccolors.faded("\nsrc/utils.ts:\n");
 
 // YAML.stringify but easier to work with
 function getYAMLString(object: unknown, skipInvalid = true): string {

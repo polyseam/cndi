@@ -67,7 +67,7 @@ import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 
 import validateConfig from "src/validate/cndiConfig.ts";
 
-const label = ccolors.faded("\nsrc/commands/overwrite.ts:");
+const label = ccolors.faded("\nsrc/commands/overwrite.ts:\n");
 
 type EchoOwOptions = {
   file?: string;
@@ -848,9 +848,7 @@ export const overwrite = async (options: OverwriteActionOptions) => {
         console.error(
           ccolors.warn(
             `failed to read SealedSecret: "${
-              ccolors.key_name(
-                key + ".yaml",
-              )
+              ccolors.key_name(key + ".yaml")
             }" referenced in 'ks_checks.json'`,
           ),
         );

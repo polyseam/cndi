@@ -1,10 +1,7 @@
-import { CNDIConfig } from "src/types.ts";
-import { path } from "deps";
-import {} from "versions";
+import { CNDIConfig, CNDINetworkConfigInsert } from "src/types.ts";
+import { ccolors, path } from "deps";
 
 import { stageFile } from "src/utils.ts";
-
-import getDataTfJSON from "./data.tf.json.ts";
 
 import { ErrOut } from "errout";
 
@@ -23,42 +20,136 @@ import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/sha
 import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
 import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
+// Core Terraform Insert Mode Blocks
+import getDataTfJSON from "../shared/data.tf.json.ts";
+
 // AWS EKS Classic Terraform Modules
 import getCndiAWSEKSModuleTfJSON from "./module/cndi_aws_eks_module.tf.json.ts";
-import getCndiAWSVPCModuleTfJSON from "./module/cndi_aws_vpc_module.tf.json.ts";
-import getCndiAWSIAMAssumableRoleEBSWithOIDCModuleTfJSON from "./module/cndi_aws_iam_assumable_role_ebs_with_oidc_module.tf.json.ts";
-import getCndiAWSIAMAssumableRoleEFSWithOIDCModuleTfJSON from "./module/cndi_aws_iam_assumable_role_efs_with_oidc_module.tf.json.ts";
+import getCndiAWSIAMAssumableRoleEBSWithOIDCModuleTfJSON from "../shared/module/cndi_aws_iam_assumable_role_ebs_with_oidc_module.tf.json.ts";
+import getCndiAWSIAMAssumableRoleEFSWithOIDCModuleTfJSON from "../shared/module/cndi_aws_iam_assumable_role_efs_with_oidc_module.tf.json.ts";
 
 // AWS EKS Classic Terraform Resources
-import cndi_aws_efs_access_point from "./resource/cndi_aws_efs_access_point.tf.json.ts";
-import cndi_aws_efs_file_system from "./resource/cndi_aws_efs_file_system.tf.json.ts";
-import cndi_aws_efs_mount_target from "./resource/cndi_aws_efs_mount_target.tf.json.ts";
-import cndi_aws_eks_node_group from "./resource/cndi_aws_eks_node_group.tf.json.ts";
-import cndi_aws_iam_policy from "./resource/cndi_aws_iam_policy.tf.json.ts";
-import cndi_aws_iam_role from "./resource/cndi_aws_iam_role.tf.json.ts";
-import cndi_aws_iam_role_policy_attachment from "./resource/cndi_aws_iam_role_policy_attachment.tf.json.ts";
-import cndi_aws_launch_template from "./resource/cndi_aws_launch_template.tf.json.ts";
-import cndi_aws_resourcegroups_group from "./resource/cndi_aws_resourcegroups_group.tf.json.ts";
+import cndi_aws_efs_access_point from "../shared/resource/cndi_aws_efs_access_point.tf.json.ts";
+import cndi_aws_efs_file_system from "../shared/resource/cndi_aws_efs_file_system.tf.json.ts";
+import cndi_aws_iam_policy from "../shared/resource/cndi_aws_iam_policy.tf.json.ts";
+import cndi_aws_iam_role from "../shared/resource/cndi_aws_iam_role.tf.json.ts";
+import cndi_aws_iam_role_policy_attachment from "../shared/resource/cndi_aws_iam_role_policy_attachment.tf.json.ts";
+import cndi_aws_launch_template from "../shared/resource/cndi_aws_launch_template.tf.json.ts";
+import cndi_aws_resourcegroups_group from "../shared/resource/cndi_aws_resourcegroups_group.tf.json.ts";
+
+// AWS EKS Classic Insert Terraform Resources
+import cndi_aws_efs_mount_target from "../shared/resource/cndi_aws_efs_mount_target.tf.json.ts";
+import cndi_aws_eks_node_group from "../shared/resource/cndi_aws_eks_node_group.tf.json.ts";
 
 // AWS EKS Classic Terraform Kubernetes Resources
-import cndi_kubernetes_storage_class from "./resource/cndi_kubernetes_storage_class.tf.json.ts";
+import cndi_kubernetes_storage_class from "../shared/resource/cndi_kubernetes_storage_class.tf.json.ts";
 
-export async function stageAWSEKSClassicTerraformFiles(
+const label = ccolors.faded(
+  "src/outputs/terraform/aws/eks/classic/network-mode-insert/stage.ts:\n",
+);
+
+export async function stageAWSEKSClassicNetworkModeInsertTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
-  const data = getDataTfJSON(cndi_config);
-  const locals = getLocalsTfJSON(cndi_config);
+  const networkSpec = cndi_config?.infrastructure?.cndi
+    ?.network as CNDINetworkConfigInsert;
+
+  const { vnet_identifier, subnet_identifiers } = networkSpec;
+
+  if (!vnet_identifier) {
+    return new ErrOut([
+      ccolors.warn("cndi_config.yaml:"),
+      ccolors.error("vnet_identifier"),
+      ccolors.error(
+        "must be defined in",
+      ),
+      ccolors.key_path("infrastructure.cndi.network"),
+      ccolors.error("when running cndi in"),
+      ccolors.key_name("'insert'"),
+      ccolors.error("network mode"),
+    ], {
+      label,
+      code: -1,
+      id: "vnet-identifier-not-defined",
+    });
+  }
+
+  if (!vnet_identifier.startsWith("vpc-")) {
+    return new ErrOut([
+      ccolors.warn("cndi_config.yaml:"),
+      ccolors.key_path("infrastructure.cndi.network.vnet_identifier"),
+      ccolors.error(
+        "must start with",
+      ),
+      ccolors.user_input("vpc-"),
+      ccolors.error("when running cndi in"),
+      ccolors.key_name("'insert'"),
+      ccolors.error("network mode"),
+    ], {
+      label,
+      code: -1,
+      id: "vnet-identifier-not-valid",
+    });
+  }
+
+  if (!Array.isArray(subnet_identifiers) || subnet_identifiers?.length < 2) {
+    return new ErrOut([
+      ccolors.warn("cndi_config.yaml:"),
+      ccolors.key_path("infrastructure.cndi.network.subnet_identifiers"),
+      ccolors.error(
+        "must be an array of at least",
+      ),
+      ccolors.user_input("2"),
+      ccolors.error("subnet identifiers"),
+      ccolors.error("when running cndi in"),
+      ccolors.key_name("'insert'"),
+      ccolors.error("network mode"),
+    ], {
+      label,
+      code: -1,
+      id: "subnet-identifiers-not-defined",
+    });
+  }
+
+  for (const subnet_id of subnet_identifiers) {
+    if (!subnet_id.startsWith("subnet-")) {
+      return new ErrOut([
+        ccolors.warn("cndi_config.yaml:"),
+
+        ccolors.error("each entry in"),
+        ccolors.key_path("infrastructure.cndi.network.subnet_identifiers"),
+        ccolors.error(
+          "must begin with",
+        ),
+        ccolors.user_input("subnet-"),
+        ccolors.error("when running cndi in"),
+        ccolors.key_name("'insert'"),
+        ccolors.error("network mode"),
+      ], {
+        label,
+        code: -1,
+        id: "subnet-identifiers-not-valid",
+      });
+    }
+  }
+
   const terraform = getTerraformTfJSON(cndi_config);
   const provider = getProviderTfJSON(cndi_config);
   const variable = getVariableTfJSON(cndi_config);
   const output = getOutputTfJSON(cndi_config);
+
+  const data = getDataTfJSON(cndi_config);
+
+  const locals = getLocalsTfJSON(cndi_config, {
+    vnet_identifier,
+    subnet_identifiers,
+  });
 
   const cndi_aws_eks_module = getCndiAWSEKSModuleTfJSON(cndi_config);
   const cndi_aws_iam_assumable_role_ebs_with_oidc_module =
     getCndiAWSIAMAssumableRoleEBSWithOIDCModuleTfJSON(cndi_config);
   const cndi_aws_iam_assumable_role_efs_with_oidc_module =
     getCndiAWSIAMAssumableRoleEFSWithOIDCModuleTfJSON(cndi_config);
-  const cndi_aws_vpc_module = getCndiAWSVPCModuleTfJSON(cndi_config);
 
   await Promise.all([
     stageFile(path.join("cndi", "terraform", "data.tf.json"), data),
@@ -86,10 +177,6 @@ export async function stageAWSEKSClassicTerraformFiles(
         "cndi_aws_iam_assumable_role_efs_with_oidc_module.tf.json",
       ),
       cndi_aws_iam_assumable_role_efs_with_oidc_module,
-    ),
-    stageFile(
-      path.join("cndi", "terraform", "cndi_aws_vpc_module.tf.json"),
-      cndi_aws_vpc_module,
     ),
     stageFile(
       path.join("cndi", "terraform", "cndi_aws_efs_access_point.tf.json"),

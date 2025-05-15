@@ -34,7 +34,7 @@ import getFinalEnvString from "src/outputs/dotenv.ts";
 import { ErrOut } from "errout";
 
 // Error Domain: 15XX
-const label = ccolors.faded("\nsrc/commands/create.ts:");
+const label = ccolors.faded("\nsrc/commands/create.ts:\n");
 
 function validateGitHubSlug(value: string): ValidateResult {
   if (!value.includes("/")) {

@@ -2,7 +2,7 @@ import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
-const _label = ccolors.faded("\nsrc/outputs/terraform/provider.tf.json.ts:");
+const _label = ccolors.faded("\nsrc/outputs/terraform/provider.tf.json.ts:\n");
 
 const KUBERNETES_PROVIDER_CONFIG = {
   aws: {

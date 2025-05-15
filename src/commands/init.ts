@@ -33,7 +33,7 @@ import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
-const label = ccolors.faded("\nsrc/commands/init.ts:");
+const label = ccolors.faded("\nsrc/commands/init.ts:\n");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 

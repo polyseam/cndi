@@ -24,8 +24,8 @@ export default function (_cndi_config: CNDIConfig) {
         cluster_version: DEFAULT_K8S_VERSION,
         cluster_endpoint_public_access: true, // TODO: probably bad
         enable_cluster_creator_admin_permissions: true,
-        vpc_id: "${module.cndi_aws_vpc_module.vpc_id}",
-        subnet_ids: "${module.cndi_aws_vpc_module.private_subnets}",
+        vpc_id: "${local.vnet_identifier}",
+        subnet_ids: "${local.subnet_identifiers}",
         source: MODULE_SOURCE,
       },
     },

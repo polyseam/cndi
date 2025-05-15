@@ -84,7 +84,6 @@ export default function (cndi_config: CNDIConfig) {
         cluster_name: "${module.cndi_aws_eks_module.cluster_name}",
         instance_types: [instance_type],
         node_group_name: nodeSpec.name,
-
         launch_template: {
           id: `\${aws_launch_template.cndi_aws_launch_template_${i}.id}`,
           version:
@@ -95,7 +94,7 @@ export default function (cndi_config: CNDIConfig) {
         labels,
         tags,
         taint,
-        subnet_ids: "${module.cndi_aws_vpc_module.private_subnets}",
+        subnet_ids: "${local.subnet_identifiers}",
       };
       i++;
     }

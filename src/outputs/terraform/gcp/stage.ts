@@ -18,8 +18,9 @@ export default async function stageTerraformFilesForAZUREEKS(
   switch (distribution) {
     case "gke":
       return await stageGCPGKEClassicTerraformFiles(cndi_config);
-    case "microk8s":
     case "clusterless":
+      return null;
+    case "microk8s":
     default:
       return new ErrOut([
         ccolors.error(

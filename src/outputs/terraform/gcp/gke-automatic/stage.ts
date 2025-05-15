@@ -3,7 +3,7 @@ import { ccolors } from "deps";
 import { ErrOut } from "errout";
 
 const label = ccolors.faded(
-  "\nsrc/outputs/terraform/gcp/gke-automatic/stage.ts:",
+  "\nsrc/outputs/terraform/gcp/gke-automatic/stage.ts:\n",
 );
 
 // deno-lint-ignore require-await

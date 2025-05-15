@@ -87,13 +87,14 @@ export { CryptoJS };
 
 // custom colors
 export const ccolors = {
-  faded: colors.white,
+  faded: colors.gray,
   user_input: colors.brightWhite,
   warn: colors.yellow,
   error: colors.brightRed,
   prompt: colors.cyan,
   success: colors.green,
   key_name: colors.cyan,
+  key_path: colors.blue,
   caught: (e: Error, num?: number) => {
     const errCode = num ? `E${num}` : `E`;
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;
