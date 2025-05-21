@@ -33,7 +33,7 @@ import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/sha
 import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
 import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
-export async function stageAzureAKSClassicTerraformFiles(
+export async function stageAzureAKSClassicNetworkModeCreateTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
   const locals = getLocalsTfJSON(cndi_config);

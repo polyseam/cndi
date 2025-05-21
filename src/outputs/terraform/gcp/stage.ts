@@ -1,23 +1,19 @@
 import { CNDIConfig } from "src/types.ts";
-import { stageGCPGKEClassicTerraformFiles } from "./gke-classic/stage.ts";
-import { ErrOut } from "src/ErrOut.ts";
-import { ccolors } from "src/deps.ts";
-
-const _useAKSAutomatic = (
-  cndi_config: CNDIConfig,
-) => (cndi_config?.infrastructure?.cndi?.nodes as unknown === "automatic");
+import { stageGCPGKETerraformFiles } from "./gke/stage.ts";
+import { ErrOut } from "errout";
+import { ccolors } from "deps";
 
 const label = ccolors.faded(
-  "src/outputs/terraform/azure/stage.ts:",
+  "\nsrc/outputs/terraform/gcp/stage.ts:\n",
 );
 
-export default async function stageTerraformFilesForAZUREEKS(
+export default async function stageTerraformFilesForGCPGKE(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
   const distribution = cndi_config?.distribution ?? "gke";
   switch (distribution) {
     case "gke":
-      return await stageGCPGKEClassicTerraformFiles(cndi_config);
+      return await stageGCPGKETerraformFiles(cndi_config);
     case "clusterless":
       return null;
     case "microk8s":

@@ -39,7 +39,7 @@ import cndi_google_container_cluster from "./resource/cndi_google_container_clus
 import cndi_google_container_node_pool from "./resource/cndi_google_container_node_pool.tf.json.ts";
 import cndi_google_compute_firewall from "./resource/cndi_google_compute_firewall.tf.json.ts";
 
-export async function stageGCPGKEClassicTerraformFiles(
+export async function stageGCPGKEClassicNetworkModeCreateTerraformFiles(
   cndi_config: CNDIConfig,
 ): Promise<null | ErrOut> {
   const data = getDataTfJSON(cndi_config);

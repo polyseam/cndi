@@ -1,5 +1,5 @@
 import { CNDIConfig } from "src/types.ts";
-import { stageAzureAKSClassicTerraformFiles } from "./aks-classic/stage.ts";
+import { stageAzureAKSTerraformFiles } from "./aks/stage.ts";
 import { ErrOut } from "src/ErrOut.ts";
 import { ccolors } from "src/deps.ts";
 
@@ -17,7 +17,7 @@ export default async function stageTerraformFilesForAZUREEKS(
   const distribution = cndi_config?.distribution ?? "aks";
   switch (distribution) {
     case "aks":
-      return await stageAzureAKSClassicTerraformFiles(cndi_config);
+      return await stageAzureAKSTerraformFiles(cndi_config);
     case "clusterless":
       return null;
     case "microk8s":
