@@ -33,5 +33,5 @@ export default function (_cndi_config: CNDIConfig) {
       volume_binding_mode: "WaitForFirstConsumer",
     },
   };
-  return getPrettyJSONString({ resource: kubernetes_storage_class });
+  return getPrettyJSONString({ resource: { kubernetes_storage_class } });
 }

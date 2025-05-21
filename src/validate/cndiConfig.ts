@@ -186,28 +186,29 @@ export default function validateConfig(
         },
       );
     }
+
     if (config?.infrastructure?.terraform && !config?.infrastructure?.cndi) {
       return;
     }
-  }
 
-  // assumes all objects under infrastructure.cndi are not applicable in clusterless mode
-  if (config?.infrastructure?.cndi) {
-    return new ErrOut(
-      [
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
-        ccolors.error("but it has"),
-        ccolors.key_name('"infrastructure.cndi"'),
-        ccolors.error("entries in clusterless mode"),
-      ],
-      {
-        code: 919,
-        id: "validate/cndi_config/clusterless/infrastructure.cndi.nodes.length",
-        metadata: { config },
-        label,
-      },
-    );
+    if (config?.infrastructure?.cndi) {
+      return new ErrOut(
+        [
+          ccolors.error("cndi_config file found was at "),
+          ccolors.user_input(`"${pathToConfig}"\n`),
+          ccolors.error("but it has"),
+          ccolors.key_name('"infrastructure.cndi"'),
+          ccolors.error("entries in clusterless mode"),
+        ],
+        {
+          code: 919,
+          id:
+            "validate/cndi_config/clusterless/infrastructure.cndi.nodes.length",
+          metadata: { config },
+          label,
+        },
+      );
+    }
   }
 
   if (!config?.distribution) {
