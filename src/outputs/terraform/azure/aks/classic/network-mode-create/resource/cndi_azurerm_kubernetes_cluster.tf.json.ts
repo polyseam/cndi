@@ -5,7 +5,7 @@ import { DEFAULT_K8S_VERSION } from "versions";
 import {
   type AzurermKubernetesClusterDefaultNodePool,
   getNodePools,
-} from "src/outputs/terraform/azure/aks-classic/resource/cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
+} from "./cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
 
 interface AzurermKubernetesCluster {
   location: string;

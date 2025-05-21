@@ -15,7 +15,7 @@ import getOutputTfJSON from "src/outputs/terraform/shared/output.tf.json.ts";
 // Azure AKS Classic Terraform Modules
 
 // Azure AKS Classic Terraform Resources
-import cndi_azurerm_resource_group from "src/outputs/terraform/azure/aks-classic/resource/cndi_azurerm_resource_group.tf.json.ts";
+import cndi_azurerm_resource_group from "./resource/cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_kubernetes_cluster from "./resource/cndi_azurerm_kubernetes_cluster.tf.json.ts";
 import cndi_azurerm_kubernetes_cluster_node_pool from "./resource/cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
 import cndi_azurerm_virtual_network from "./resource/cndi_azurerm_virtual_network.tf.json.ts";
