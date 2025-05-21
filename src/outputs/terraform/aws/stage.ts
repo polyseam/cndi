@@ -1,11 +1,7 @@
 import { CNDIConfig } from "src/types.ts";
 import { stageAWSEKSTerraformFiles } from "./eks/stage.ts";
-import { ErrOut } from "src/ErrOut.ts";
-import { ccolors } from "src/deps.ts";
-
-const _useEKSAutomatic = (
-  cndi_config: CNDIConfig,
-) => (cndi_config?.infrastructure?.cndi?.nodes as unknown === "automatic");
+import { ErrOut } from "errout";
+import { ccolors } from "deps";
 
 const label = ccolors.faded(
   "\nsrc/outputs/terraform/aws/stage.ts:\n",

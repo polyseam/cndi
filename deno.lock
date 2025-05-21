@@ -54,6 +54,7 @@
     "jsr:@std/yaml@^1.0.5": "1.0.5",
     "npm:@octokit/types@^13.4.1": "13.10.0",
     "npm:@peculiar/x509@1.11.0": "1.11.0",
+    "npm:@types/node@*": "22.12.0",
     "npm:constructs@10.3.0": "10.3.0",
     "npm:crypto-js@4.2.0": "4.2.0",
     "npm:lodash.get@4.4.2": "4.4.2",

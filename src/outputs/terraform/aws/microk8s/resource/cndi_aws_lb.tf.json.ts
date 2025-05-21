@@ -1,7 +1,7 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function (cndi_config: CNDIConfig) {
+export default function (_cndi_config: CNDIConfig) {
   const project_name = "${local.cndi_project_name}";
 
   return getPrettyJSONString({

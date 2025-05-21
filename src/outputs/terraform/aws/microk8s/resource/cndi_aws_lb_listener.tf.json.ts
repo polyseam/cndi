@@ -2,11 +2,30 @@ import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { resolveCNDIPorts } from "src/utils.ts";
 
+type AWSLBListener = {
+  load_balancer_arn: string;
+  port: number;
+  protocol: string;
+  default_action: {
+    type: string;
+    target_group_arn: string;
+  }[];
+  tags: {
+    Name: string;
+  };
+};
+
+type AWSLBTargetGroupAttachment = {
+  target_group_arn: string;
+  target_id: string;
+  port: number;
+};
+
 export default function (cndi_config: CNDIConfig) {
   const project_name = "${local.cndi_project_name}";
   const open_ports = resolveCNDIPorts(cndi_config);
-  const listeners: Record<string, any> = {};
-  const attachments: Record<string, any> = {};
+  const listeners: Record<string, AWSLBListener> = {};
+  const attachments: Record<string, AWSLBTargetGroupAttachment> = {};
 
   open_ports.forEach((port) => {
     listeners[`cndi_aws_lb_listener_${port.name}`] = {

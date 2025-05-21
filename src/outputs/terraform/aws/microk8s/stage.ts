@@ -21,7 +21,7 @@ import getCndiAWSLBTfJSON from "./resource/cndi_aws_lb.tf.json.ts";
 import getCndiAWSLBTargetGroupTfJSON from "./resource/cndi_aws_lb_target_group.tf.json.ts";
 import getCndiAWSLBListenerTfJSON from "./resource/cndi_aws_lb_listener.tf.json.ts";
 
-function getMicrok8sOutputsTfJSON(cndi_config: CNDIConfig) {
+function getMicrok8sOutputsTfJSON(_cndi_config: CNDIConfig) {
   return getPrettyJSONString({
     output: {
       public_host: {

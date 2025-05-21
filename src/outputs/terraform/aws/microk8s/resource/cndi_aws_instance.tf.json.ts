@@ -8,10 +8,29 @@ import { useSshRepoAuth } from "src/utils.ts";
 
 const DEFAULT_EC2_AMI = "ami-0c1704bac156af62c";
 
+type AWSInstance = {
+  ami: string;
+  instance_type: string;
+  key_name: string;
+  subnet_id: string;
+  vpc_security_group_ids: string[];
+  user_data: string;
+  user_data_replace_on_change: boolean;
+  root_block_device: {
+    volume_type: string;
+    volume_size: number;
+    delete_on_termination: boolean;
+  };
+  tags: {
+    Name: string;
+  };
+  depends_on: string[];
+};
+
 export default function (cndi_config: CNDIConfig) {
-  const project_name = "${local.cndi_project_name}";
+  const _project_name = "${local.cndi_project_name}";
   const nodes = cndi_config.infrastructure.cndi.nodes;
-  const instances: Record<string, any> = {};
+  const instances: Record<string, AWSInstance> = {};
 
   nodes.forEach((node, index) => {
     const count = node?.count || 1;
