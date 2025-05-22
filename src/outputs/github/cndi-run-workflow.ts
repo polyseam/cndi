@@ -111,6 +111,24 @@ const AWS_STEPS: Array<WorkflowStep> = [
   },
 ];
 
+const GCP_STEPS: Array<WorkflowStep> = [
+  //# 1. Download Google’s APT GPG key and store it in /usr/share/keyrings
+  {
+    run: `curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+  | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg`,
+  },
+  //# 2. Add the Cloud SDK APT repo, pointing to that keyring
+  {
+    run: `echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
+  https://packages.cloud.google.com/apt cloud-sdk main" \
+  | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list`,
+  },
+  {
+    run:
+      "sudo apt-get update && sudo apt-get install google-cloud-cli-gke-gcloud-auth-plugin",
+  },
+];
+
 const AWS_STEPS_KEYLESS: Array<WorkflowStep> = [{
   name: "configure aws credentials",
   uses: "aws-actions/configure-aws-credentials@v3",
@@ -162,7 +180,7 @@ const getProviderSteps = (
     case "azure":
       return keyless ? AZURE_STEPS_KEYLESS : [];
     case "gcp":
-      return keyless ? GCP_STEPS_KEYLESS : [];
+      return keyless ? GCP_STEPS_KEYLESS : GCP_STEPS;
     default:
       return [];
   }
@@ -175,6 +193,7 @@ const AWS_ENV = {
 
 const GOOGLE_ENV = {
   GOOGLE_CREDENTIALS: "${{ secrets.GOOGLE_CREDENTIALS }}",
+  USE_GKE_GCLOUD_AUTH_PLUGIN: "True",
 };
 
 const GOOGLE_ENV_KEYLESS = {

@@ -1,9 +1,10 @@
 import { CNDIConfig } from "src/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ARGOCD_CHART_VERSION } from "versions";
+import { getDependsOnForClusterWithCNDIConfig } from "src/outputs/terraform/shared/utils.ts";
 
-export default function (_cndi_config: CNDIConfig) {
-  const depends_on: Array<string> = [];
+export default function (cndi_config: CNDIConfig) {
+  const depends_on = getDependsOnForClusterWithCNDIConfig(cndi_config);
   const resource = {
     helm_release: {
       cndi_helm_release_argocd: {
@@ -11,7 +12,6 @@ export default function (_cndi_config: CNDIConfig) {
         chart: "argo-cd",
         cleanup_on_fail: true,
         create_namespace: true,
-        depends_on,
         name: "argocd",
         namespace: "argocd",
         replace: true,
@@ -37,6 +37,7 @@ export default function (_cndi_config: CNDIConfig) {
             value: "${sensitive(bcrypt(var.ARGOCD_ADMIN_PASSWORD, 10))}",
           },
         ],
+        depends_on,
         timeout: 600,
         version: ARGOCD_CHART_VERSION,
       },

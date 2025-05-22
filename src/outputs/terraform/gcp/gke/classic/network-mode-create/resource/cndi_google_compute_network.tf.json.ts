@@ -6,7 +6,7 @@ interface GoogleComputeNetwork {
   name: string;
   // traditional GKE clusters should leverage custom compute subnetworks
   auto_create_subnetworks: boolean;
-  depends_on: string[];
+  depends_on?: string[];
 }
 
 export default function (cndi_config: CNDIConfig) {

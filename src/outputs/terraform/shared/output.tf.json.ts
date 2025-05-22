@@ -24,7 +24,7 @@ function getOutputsForProvider(
         },
         resource_group_url: {
           value:
-            "https://console.cloud.google.com/welcome?project=${cndi_gcp_project_id}",
+            "https://console.cloud.google.com/welcome?project=${local.cndi_gcp_project_id}",
         },
       };
     case "aws":
