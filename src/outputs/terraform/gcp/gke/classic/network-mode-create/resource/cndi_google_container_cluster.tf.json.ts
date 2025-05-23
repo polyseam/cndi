@@ -73,7 +73,6 @@ export default function (_cndi_config: CNDIConfig) {
       enable_intranode_visibility: true,
       initial_node_count: 1,
       ip_allocation_policy: {},
-
       network_policy: {
         enabled: true,
       },
@@ -86,7 +85,6 @@ export default function (_cndi_config: CNDIConfig) {
           mode: "GCE_METADATA",
         },
       },
-
       private_cluster_config: {
         enable_private_nodes: false,
       },

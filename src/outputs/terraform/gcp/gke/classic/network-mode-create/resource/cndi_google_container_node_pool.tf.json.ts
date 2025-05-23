@@ -19,6 +19,7 @@ interface GoogleContainerNodePool {
     auto_upgrade: boolean;
   };
   node_config: {
+    service_account: string;
     disk_type: string;
     disk_size_gb: number;
     labels: Record<string, string>;
@@ -88,6 +89,7 @@ export default function (cndi_config: CNDIConfig) {
           labels,
           machine_type,
           taint,
+          service_account: "${local.cndi_gcp_client_email}",
           workload_metadata_config: {
             mode: "GCE_METADATA",
           },
