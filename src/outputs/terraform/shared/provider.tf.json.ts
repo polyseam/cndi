@@ -31,12 +31,11 @@ const KUBERNETES_PROVIDER_CONFIG = {
       "${azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.kube_config[0].host}",
   },
   gcp: {
-    cluster_ca_certificate:
-      "${base64decode(google_container_cluster.cndi_google_container_cluster.master_auth[0].cluster_ca_certificate)}",
-    host:
-      "https://${google_container_cluster.cndi_google_container_cluster.endpoint}",
+    host: "https://${module.cndi_gcp_gke_module.endpoint}",
     token:
       "${data.google_client_config.cndi_google_client_config.access_token}",
+    cluster_ca_certificate:
+      "${base64decode(module.cndi_gcp_gke_module.ca_certificate)}",
   },
   dev: {}, // TODO: actually solve
 };

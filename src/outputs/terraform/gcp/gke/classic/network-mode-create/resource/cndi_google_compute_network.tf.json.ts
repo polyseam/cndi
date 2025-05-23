@@ -20,7 +20,7 @@ export default function (cndi_config: CNDIConfig) {
     cndi_google_compute_network: {
       name,
       auto_create_subnetworks: false,
-      depends_on: ["time_sleep.cndi_time_sleep"],
+      depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
     },
   };
 

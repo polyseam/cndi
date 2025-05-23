@@ -32,6 +32,10 @@ interface GoogleContainerNodePool {
     workload_metadata_config: {
       mode: string;
     };
+    shielded_instance_config: {
+      enable_integrity_monitoring: boolean;
+      enable_secure_boot: boolean;
+    };
   };
 }
 
@@ -43,8 +47,7 @@ export default function (cndi_config: CNDIConfig) {
     // original non-automatic node group
     let i = 0;
 
-    const cluster =
-      "${google_container_cluster.cndi_google_container_cluster.name}";
+    const cluster = "${module.cndi_gcp_gke_module.name}";
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
       const key = `cndi_google_container_node_pool_${i}`;
       const count = nodeSpec?.count || 1;
@@ -90,6 +93,10 @@ export default function (cndi_config: CNDIConfig) {
           machine_type,
           taint,
           service_account: "${local.cndi_gcp_client_email}",
+          shielded_instance_config: {
+            enable_integrity_monitoring: true,
+            enable_secure_boot: true,
+          },
           workload_metadata_config: {
             mode: "GCE_METADATA",
           },

@@ -5,9 +5,9 @@ export function getDependsOnForClusterWithCNDIConfig(
 ): string[] {
   switch (cndi_config.provider) {
     case "gcp":
-      return ["google_container_cluster.cndi_google_container_cluster"];
+      return ["module.cndi_gcp_gke_module"];
     case "aws":
-      return ["aws_eks_cluster.cndi_aws_eks_cluster"];
+      return ["module.cndi_aws_eks_module"];
     case "azure":
       return ["azurerm_kubernetes_cluster.cndi_azure_kubernetes_cluster"];
     default:
