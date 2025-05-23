@@ -91,8 +91,7 @@ export function getNodePools(
           ) || [];
           return {
             ...pool,
-            kubernetes_cluster_id:
-              "${azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.id}",
+            kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
             node_taints,
           } as AzurermKubernetesClusterNodePool;
         }

@@ -110,15 +110,19 @@ export async function processAndStageTerraformPassthru(
           unknown
         >;
 
-        await stageFile(
-          path.join(
-            pathToTerraformObjects,
-            `${key}.tf.json`,
-          ),
-          getPrettyJSONString(
-            deepMerge(existingTfObject, { [key]: tfObjectSpec }),
-          ),
-        );
+        const tfObject = deepMerge(existingTfObject, { [key]: tfObjectSpec });
+
+        if (Object.keys(tfObject[key]).length > 0) {
+          await stageFile(
+            path.join(
+              pathToTerraformObjects,
+              `${key}.tf.json`,
+            ),
+            getPrettyJSONString(
+              tfObject,
+            ),
+          );
+        }
       }
     } else {
       return new ErrOut([

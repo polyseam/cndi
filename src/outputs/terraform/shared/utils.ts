@@ -9,7 +9,7 @@ export function getDependsOnForClusterWithCNDIConfig(
     case "aws":
       return ["module.cndi_aws_eks_module"];
     case "azure":
-      return ["azurerm_kubernetes_cluster.cndi_azure_kubernetes_cluster"];
+      return ["module.cndi_azurerm_aks_module"];
     default:
       return [];
   }

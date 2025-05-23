@@ -21,14 +21,12 @@ const KUBERNETES_PROVIDER_CONFIG = {
     host: "${module.cndi_aws_eks_module.cluster_endpoint}",
   },
   azure: {
+    host: "${module.cndi_azurerm_aks_module.host}",
     client_certificate:
-      "${base64decode(azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.kube_config[0].client_certificate)}",
-    client_key:
-      "${base64decode(azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.kube_config[0].client_key)}",
+      "${base64decode(module.cndi_azurerm_aks_module.client_certificate)}",
+    client_key: "${base64decode(module.cndi_azurerm_aks_module.client_key)}",
     cluster_ca_certificate:
-      "${base64decode(azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.kube_config[0].cluster_ca_certificate)}",
-    host:
-      "${azurerm_kubernetes_cluster.cndi_azurerm_kubernetes_cluster.kube_config[0].host}",
+      "${base64decode(module.cndi_azurerm_aks_module.cluster_ca_certificate)}",
   },
   gcp: {
     host: "https://${module.cndi_gcp_gke_module.endpoint}",
