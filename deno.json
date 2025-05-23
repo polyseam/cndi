@@ -135,17 +135,13 @@
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "@std/yaml": "jsr:@std/yaml@^1.0.5",
-    "child_process": "node:child_process",
-    "constructs": "npm:constructs@10.3.0",
     "consts": "./src/constants.ts",
-    "crypto-js": "npm:crypto-js@4.2.0",
     "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
     "lodash.get": "npm:lodash.get@4.4.2",
     "lodash.set": "npm:lodash.set@4.3.2",
     "lodash.unset": "npm:lodash.unset@4.5.2",
     "simple-git": "npm:simple-git@3.27.0",
-    "shared-modules/": "./shared-modules/",
     "src/": "./src/",
     "test-deps": "./src/tests/deps.ts",
     "px": "./src/px/mod.ts",
@@ -155,5 +151,5 @@
     "@cndi/known-templates": "jsr:@cndi/known-templates@^1.0.1",
     "@cndi/validators": "jsr:@cndi/validators@^0.1.0"
   },
-  "exclude": ["dist/*", "**/.old/**"]
+  "exclude": ["dist/*"]
 }

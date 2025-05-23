@@ -115,7 +115,7 @@ export async function pushStateFromTerraform({
     await git.checkout("_state");
   }
 
-  const encryptedState = encrypt(state!, secret);
+  const encryptedState = await encrypt(state!, secret);
 
   const pathToNewState = path.join(
     pathToTerraformResources,
