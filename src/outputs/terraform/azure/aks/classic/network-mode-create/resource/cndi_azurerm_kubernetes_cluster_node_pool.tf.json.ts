@@ -18,7 +18,7 @@ export interface AzurermKubernetesClusterDefaultNodePool {
   os_sku: string;
   tags: Record<string, string>;
   temporary_name_for_rotation?: string;
-  type: "VirtualMachineScaleSets" | "AvailabilitySet";
+  // type: "VirtualMachineScaleSets" | "AvailabilitySet";
   vm_size: string;
   vnet_subnet_id: string;
   zones: string[];
@@ -35,13 +35,10 @@ export interface AzurermKubernetesClusterNodePool extends
 
 export function getNodePools(
   cndi_config: CNDIConfig,
-): [
-  AzurermKubernetesClusterDefaultNodePool,
-  ...AzurermKubernetesClusterNodePool[],
-] {
-  const [default_node_pool, ...azurerm_kubernetes_cluster_node_pool] =
-    cndi_config.infrastructure.cndi.nodes.map(
-      (nodeSpec: CNDINodeSpec, index) => {
+): AzurermKubernetesClusterNodePool[] {
+  const azurerm_kubernetes_cluster_node_pool = cndi_config.infrastructure.cndi
+    .nodes.map(
+      (nodeSpec: CNDINodeSpec) => {
         const node_count = nodeSpec?.count ?? 1;
 
         const max_count = nodeSpec?.max_count || node_count;
@@ -58,56 +55,46 @@ export function getNodePools(
         const vm_size = nodeSpec?.vm_size || nodeSpec?.instance_type ||
           DEFAULT_INSTANCE_TYPES["azure"];
 
-        const pool:
-          | AzurermKubernetesClusterNodePool
-          | AzurermKubernetesClusterDefaultNodePool = {
-            name,
-            type: "VirtualMachineScaleSets",
-            os_disk_size_gb,
-            os_disk_type,
-            auto_scaling_enabled: true,
-            max_count,
-            min_count,
-            node_count,
-            vm_size,
-            node_labels,
-            max_pods: 110,
-            os_sku: "Ubuntu",
-            tags: {
-              CNDIProject: "${local.cndi_project_name}",
-            },
-            vnet_subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
-            zones: ["1"],
-          };
+        const pool = {
+          name,
+          // type: "VirtualMachineScaleSets",
+          os_disk_size_gb,
+          os_disk_type,
+          auto_scaling_enabled: true,
+          max_count,
+          min_count,
+          node_count,
+          vm_size,
+          node_labels,
+          max_pods: 110,
+          os_sku: "Ubuntu",
+          tags: {
+            CNDIProject: "${local.cndi_project_name}",
+          },
+          vnet_subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
+          zones: ["1"],
+        };
 
-        if (!index) {
-          pool.temporary_name_for_rotation = "temp0";
-          return pool as AzurermKubernetesClusterDefaultNodePool;
-        } else {
-          const node_taints = nodeSpec.taints?.map((taint) =>
+        const node_taints =
+          nodeSpec.taints?.map((taint) =>
             `${taint.key}=${taint.value}:${
               getTaintEffectForDistribution(taint.effect, "aks")
             }` // taint.effect must be valid by now
           ) || [];
-          return {
-            ...pool,
-            kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
-            node_taints,
-          } as AzurermKubernetesClusterNodePool;
-        }
+
+        return {
+          ...pool,
+          kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
+          node_taints,
+        } as AzurermKubernetesClusterNodePool;
       },
     );
-  return [
-    default_node_pool,
-    ...azurerm_kubernetes_cluster_node_pool,
-  ] as [
-    AzurermKubernetesClusterDefaultNodePool,
-    ...AzurermKubernetesClusterNodePool[],
-  ];
+
+  return azurerm_kubernetes_cluster_node_pool as AzurermKubernetesClusterNodePool[];
 }
 
 export default function (cndi_config: CNDIConfig) {
-  const [_, ...cndi_azurerm_kubernetes_cluster_node_pool] = getNodePools(
+  const cndi_azurerm_kubernetes_cluster_node_pool = getNodePools(
     cndi_config,
   );
 
