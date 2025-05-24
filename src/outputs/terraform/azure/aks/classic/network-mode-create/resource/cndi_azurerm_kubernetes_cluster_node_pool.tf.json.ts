@@ -5,7 +5,7 @@ import {
 } from "src/utils.ts";
 import { DEFAULT_INSTANCE_TYPES, DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
-export interface AzurermKubernetesClusterDefaultNodePool {
+export interface AzurermKubernetesClusterNodePool {
   name: string;
   auto_scaling_enabled: boolean;
   max_count: number;
@@ -18,19 +18,10 @@ export interface AzurermKubernetesClusterDefaultNodePool {
   os_sku: string;
   tags: Record<string, string>;
   temporary_name_for_rotation?: string;
-  // type: "VirtualMachineScaleSets" | "AvailabilitySet";
   vm_size: string;
-  vnet_subnet_id: string;
-  zones: string[];
-}
-
-export interface AzurermKubernetesClusterNodePool extends
-  Omit<
-    AzurermKubernetesClusterDefaultNodePool,
-    "temporary_name_for_rotation"
-  > {
   node_taints: string[];
   kubernetes_cluster_id: string;
+  zones: string[];
 }
 
 export function getNodePools(
@@ -55,9 +46,15 @@ export function getNodePools(
         const vm_size = nodeSpec?.vm_size || nodeSpec?.instance_type ||
           DEFAULT_INSTANCE_TYPES["azure"];
 
-        const pool = {
+        const node_taints =
+          nodeSpec.taints?.map((taint) =>
+            `${taint.key}=${taint.value}:${
+              getTaintEffectForDistribution(taint.effect, "aks")
+            }` // taint.effect must be valid by now
+          ) || [];
+
+        return {
           name,
-          // type: "VirtualMachineScaleSets",
           os_disk_size_gb,
           os_disk_type,
           auto_scaling_enabled: true,
@@ -71,19 +68,7 @@ export function getNodePools(
           tags: {
             CNDIProject: "${local.cndi_project_name}",
           },
-          vnet_subnet_id: "${azurerm_subnet.cndi_azurerm_subnet.id}",
           zones: ["1"],
-        };
-
-        const node_taints =
-          nodeSpec.taints?.map((taint) =>
-            `${taint.key}=${taint.value}:${
-              getTaintEffectForDistribution(taint.effect, "aks")
-            }` // taint.effect must be valid by now
-          ) || [];
-
-        return {
-          ...pool,
           kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
           node_taints,
         } as AzurermKubernetesClusterNodePool;
