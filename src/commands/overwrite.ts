@@ -66,6 +66,7 @@ import stageTerraformFiles from "../outputs/terraform/stage.ts";
 import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 
 import validateConfig from "src/validate/cndiConfig.ts";
+import createRepo from "src/repo/create.ts";
 
 const label = ccolors.faded("\nsrc/commands/overwrite.ts:\n");
 
@@ -998,6 +999,15 @@ export const overwrite = async (options: OverwriteActionOptions) => {
     }!`;
 
   console.log("\n" + completionMessage);
+
+  if (options?.create) {
+    const { output, skipPush } = options;
+    const error = await createRepo({ output, skipPush });
+    if (error) {
+      await error.out();
+      return;
+    }
+  }
 };
 
 export default overwriteCommand;
