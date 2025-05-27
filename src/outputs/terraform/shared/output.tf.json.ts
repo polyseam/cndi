@@ -40,11 +40,12 @@ function getOutputsForProvider(
         },
       };
     case "azure":
+      // az aks get-credentials --resource-group rg-cndi-json-aks --name cndi-aks-json-aks-aks --overwrite-existing
       return {
         get_argocd_port_forward_command,
         get_kubeconfig_command: {
           value:
-            "az aks get-credentials --resource-group rg-${local.cndi_project_name} --name cndi-aks-cluster-${local.cndi_project_name} --overwrite-existing",
+            "az aks get-credentials --resource-group  ${azurerm_resource_group.cndi_azurerm_resource_group.name} --name ${module.cndi_azurerm_aks_module.aks_name} --overwrite-existing",
         },
         resource_group_url: {
           value:

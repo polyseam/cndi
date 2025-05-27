@@ -2,7 +2,7 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-  assertRejects,
+  assertThrows,
 } from "@std/assert";
 
 import encrypt from "./encrypt.ts";
@@ -10,11 +10,11 @@ import decrypt from "./decrypt.ts";
 
 const TEST_SECRET = "test-secret-123";
 
-Deno.test("encrypt and decrypt roundtrip works correctly", async () => {
+Deno.test("encrypt and decrypt roundtrip works correctly", () => {
   const originalText = "This is a test message";
 
-  const encrypted = await encrypt(originalText, TEST_SECRET);
-  const decrypted = await decrypt(encrypted, TEST_SECRET);
+  const encrypted = encrypt(originalText, TEST_SECRET);
+  const decrypted = decrypt(encrypted, TEST_SECRET);
 
   assert(encrypted);
   assertNotEquals(
@@ -25,11 +25,11 @@ Deno.test("encrypt and decrypt roundtrip works correctly", async () => {
   assertEquals(decrypted, originalText, "Decrypted text should match original");
 });
 
-Deno.test("encrypt produces different outputs for same input", async () => {
+Deno.test("encrypt produces different outputs for same input", () => {
   const text = "Same input text";
 
-  const encrypted1 = await encrypt(text, TEST_SECRET);
-  const encrypted2 = await encrypt(text, TEST_SECRET);
+  const encrypted1 = encrypt(text, TEST_SECRET);
+  const encrypted2 = encrypt(text, TEST_SECRET);
 
   assertNotEquals(
     encrypted1,
@@ -38,26 +38,28 @@ Deno.test("encrypt produces different outputs for same input", async () => {
   );
 
   // Both should still decrypt to the same text
-  assertEquals(await decrypt(encrypted1, TEST_SECRET), text);
-  assertEquals(await decrypt(encrypted2, TEST_SECRET), text);
+  assertEquals(decrypt(encrypted1, TEST_SECRET), text);
+  assertEquals(decrypt(encrypted2, TEST_SECRET), text);
 });
 
-Deno.test("decrypt throws error with wrong secret", async () => {
+Deno.test("decrypt throws error with wrong secret", () => {
   const originalText = "Sensitive data";
-  const encrypted = await encrypt(originalText, TEST_SECRET);
+  const encrypted = encrypt(originalText, TEST_SECRET);
 
-  await assertRejects(
-    () => decrypt(encrypted, "wrong-secret"),
+  assertThrows(
+    () => {
+      decrypt(encrypted, "wrong-secret");
+    },
     Error,
-    "failed to decrypt tfstate file from your",
+    "failed to decrypt",
   );
 });
 
-Deno.test("encrypt and decrypt handle empty string", async () => {
+Deno.test("encrypt and decrypt handle empty string", () => {
   const originalText = "";
 
-  const encrypted = await encrypt(originalText, TEST_SECRET);
-  const decrypted = await decrypt(encrypted, TEST_SECRET);
+  const encrypted = encrypt(originalText, TEST_SECRET);
+  const decrypted = decrypt(encrypted, TEST_SECRET);
 
   assertEquals(decrypted, originalText, "Should handle empty string correctly");
 });

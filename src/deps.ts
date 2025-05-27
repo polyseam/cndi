@@ -79,6 +79,9 @@ export { default as unsetValueForKeyPath } from "lodash.unset";
 //  - simple-git
 export { simpleGit } from "simple-git";
 
+import CryptoJS from "crypto-js";
+export { CryptoJS };
+
 // custom colors
 export const ccolors = {
   faded: colors.gray,
