@@ -26,7 +26,8 @@ export default function (_cndi_config: CNDIConfig): string | null {
         storage_profile_disk_driver_enabled: true,
         storage_profile_file_driver_enabled: true,
         node_resource_group: "nrg-cndi-${local.cndi_project_name}",
-        log_analytics_workspace_enabled: false, // true caused permission error
+        log_analytics_workspace_enabled: false,
+        azure_policy_enabled: false,
         depends_on: ["azurerm_resource_group.cndi_azurerm_resource_group"],
         resource_group_name:
           "${azurerm_resource_group.cndi_azurerm_resource_group.name}",

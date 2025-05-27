@@ -45,7 +45,7 @@ function getOutputsForProvider(
         get_argocd_port_forward_command,
         get_kubeconfig_command: {
           value:
-            "az aks get-credentials --resource-group  ${azurerm_resource_group.cndi_azurerm_resource_group.name} --name ${module.cndi_azurerm_aks_module.aks_name} --overwrite-existing",
+            "az aks get-credentials --resource-group ${azurerm_resource_group.cndi_azurerm_resource_group.name} --name ${module.cndi_azurerm_aks_module.aks_name} --overwrite-existing",
         },
         resource_group_url: {
           value:

@@ -115,6 +115,29 @@ export async function pushStateFromTerraform({
     await git.checkout("_state");
   }
 
+  // pull the latest changes from _state branch
+  // (required in environments where _state is persisted)
+  // eg. cndi show-outputs locally
+  try {
+    await git.pull("origin", "_state");
+  } catch (errorPullingState) {
+    if (errorPullingState instanceof Error) {
+      return new ErrOut(
+        [
+          ccolors.error("failed to pull state from _state branch"),
+          ccolors.error("likely because you have no _state branch"),
+          ccolors.error("or your _state branch is not up to date"),
+        ],
+        {
+          code: 1005,
+          label,
+          id: "read-state/pull-state/!pull",
+          metadata: { cmd, originalBranch },
+        },
+      );
+    }
+  }
+
   const encryptedState = await encrypt(state!, secret);
 
   const pathToNewState = path.join(

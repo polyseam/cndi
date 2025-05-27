@@ -127,6 +127,55 @@ const showOutputsCommand = new Command()
       Deno.exit(1700);
     }
 
+    // try {
+    //   if (!options?.quiet) {
+    //     console.log(ccolors.faded("\n-- terraform apply -refresh-only --\n"));
+    //   }
+
+    //   const terraformApplyRefreshCommand = new Deno.Command(
+    //     pathToTerraformBinary,
+    //     {
+    //       args: [
+    //         `-chdir=${pathToTerraformResources}`,
+    //         "apply",
+    //         "-refresh-only",
+    //         "-auto-approve",
+    //       ],
+    //       stderr: "piped",
+    //       stdout: "piped",
+    //       env,
+    //     },
+    //   );
+
+    //   const terraformApplyRefreshCommandOutput =
+    //     await terraformApplyRefreshCommand.output();
+
+    //   if (!options?.quiet) {
+    //     // await Deno.stdout.write(terraformApplyRefreshCommandOutput.stdout);
+    //   }
+    //   await Deno.stderr.write(terraformApplyRefreshCommandOutput.stderr);
+
+    //   if (terraformApplyRefreshCommandOutput.code !== 0) {
+    //     console.log(
+    //       showoutputsLabel,
+    //       ccolors.error("terraform apply -refresh failed"),
+    //     );
+    //     const cndiExitCode = parseInt(
+    //       `${PROCESS_ERROR_CODE_PREFIX.terraform}${terraformApplyRefreshCommandOutput.code}`,
+    //     );
+    //     await emitExitEvent(cndiExitCode);
+    //     Deno.exit(terraformApplyRefreshCommandOutput.code);
+    //   }
+    // } catch (err) {
+    //   console.log(
+    //     showoutputsLabel,
+    //     ccolors.error("failed to spawn 'terraform apply -refresh-only'"),
+    //   );
+    //   console.log(ccolors.caught(err as Error));
+    //   await emitExitEvent(1700);
+    //   Deno.exit(1700);
+    // }
+
     try {
       if (!options?.quiet) {
         console.log(ccolors.faded("\n-- terraform output --\n"));
