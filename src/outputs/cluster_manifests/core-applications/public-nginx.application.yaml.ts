@@ -2,6 +2,7 @@ import { getYAMLString } from "src/utils.ts";
 import { CNDIConfig, CNDIPort } from "src/types.ts";
 import { NGINX_CHART_VERSION } from "versions";
 import { deepMerge } from "deps";
+import { getNodeResourceGroupName } from "src/outputs/terraform/azure/utils.ts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -68,8 +69,12 @@ const aksValues = (cndi_config: CNDIConfig) =>
     controller: {
       service: {
         annotations: {
+          "service.beta.kubernetes.io/azure-load-balancer-resource-group":
+            getNodeResourceGroupName(cndi_config),
           "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path":
             "/healthz",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-port":
+            "10254",
         },
       },
       defaultBackend: {
