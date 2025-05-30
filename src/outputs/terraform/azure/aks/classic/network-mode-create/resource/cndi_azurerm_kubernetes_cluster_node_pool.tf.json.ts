@@ -29,7 +29,7 @@ export function getNodePools(
 ): AzurermKubernetesClusterNodePool[] {
   const azurerm_kubernetes_cluster_node_pool = cndi_config.infrastructure.cndi
     .nodes.map(
-      (nodeSpec: CNDINodeSpec) => {
+      (nodeSpec: CNDINodeSpec, i) => {
         const node_count = nodeSpec?.count ?? 1;
 
         const max_count = nodeSpec?.max_count || node_count;
@@ -53,6 +53,8 @@ export function getNodePools(
             }` // taint.effect must be valid by now
           ) || [];
 
+        const temporary_name_for_rotation = `tmpnodep${i}`;
+
         return {
           name,
           os_disk_size_gb,
@@ -71,6 +73,7 @@ export function getNodePools(
           zones: ["1"],
           kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
           node_taints,
+          temporary_name_for_rotation,
         } as AzurermKubernetesClusterNodePool;
       },
     );
