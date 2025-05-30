@@ -75,7 +75,7 @@ export default function getStandardPublicIngress(
       tls: [
         {
           hosts: [hostname],
-          secretName: "cluster-issuer-private-key",
+          secretName: `cipk-${namespace}-${name}`,
         },
       ],
       rules: [
