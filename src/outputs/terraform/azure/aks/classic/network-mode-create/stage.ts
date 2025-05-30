@@ -71,7 +71,6 @@ export async function stageAzureAKSClassicNetworkModeCreateTerraformFiles(
       path.join("cndi", "terraform", "cndi_azurerm_subnet.tf.json"),
       cndi_azurerm_subnet(cndi_config),
     ),
-
     stageFile(
       path.join("cndi", "terraform", "cndi_kubernetes_storage_class.tf.json"),
       cndi_kubernetes_storage_class(cndi_config),
