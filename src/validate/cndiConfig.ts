@@ -829,25 +829,48 @@ function validateInfrastructureSpec(
         }
 
         if (netconfig?.subnet_identifiers?.length < 2) {
-          return new ErrOut(
-            [
-              ccolors.error("cndi_config file found was at "),
-              ccolors.user_input(`"${pathToConfig}"\nwith`),
-              ccolors.error(
-                "cndi_config.infrastructure.cndi.network",
-              ),
-              ccolors.error("in"),
-              ccolors.key_name('"insert"'),
-              ccolors.error("mode"),
-              ccolors.error("but has fewer than 2"),
-              ccolors.key_name('"subnet_identifiers"'),
-            ],
-            {
-              code: 930,
-              id: "validate/cndi_config/!network[subnet_identifiers]",
-              label,
-            },
-          );
+          if (provider === "aws") {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("but has fewer than 2"),
+                ccolors.key_name('"subnet_identifiers"'),
+              ],
+              {
+                code: 930,
+                id: "validate/cndi_config/!network[subnet_identifiers]",
+                label,
+              },
+            );
+          } else if (!netconfig?.subnet_identifiers.length) {
+            return new ErrOut(
+              [
+                ccolors.error("cndi_config file found was at "),
+                ccolors.user_input(`"${pathToConfig}"\nwith`),
+                ccolors.error(
+                  "cndi_config.infrastructure.cndi.network",
+                ),
+                ccolors.error("in"),
+                ccolors.key_name('"insert"'),
+                ccolors.error("mode"),
+                ccolors.error("but has an empty"),
+                ccolors.key_name('"subnet_identifiers"'),
+                ccolors.error("array"),
+              ],
+              {
+                code: 930,
+                id: "validate/cndi_config/!network[subnet_identifiers]",
+                label,
+              },
+            );
+          }
         }
       } else if (netconfig?.["mode"]) {
         return new ErrOut(

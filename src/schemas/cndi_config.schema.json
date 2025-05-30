@@ -250,10 +250,12 @@
                     "type": "string",
                     "description": "The identifier of the virtual network which to deploy your cluster."
                   },
-                  "subnet_address_space": {
-                    "type": "string",
-                    "description": "The address space used to create your CNDI cluster subnet in 'insert' mode.",
-                    "default": "10.0.0.0/20"
+                  "subnet_identifiers": {
+                    "type": "array",
+                    "description": "The identifiers of the subnets in which to deploy your cluster.",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }
