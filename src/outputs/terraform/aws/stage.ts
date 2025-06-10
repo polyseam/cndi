@@ -1,5 +1,6 @@
 import { CNDIConfig } from "src/types.ts";
 import { stageAWSEKSTerraformFiles } from "./eks/stage.ts";
+import { stageAWSMicrok8sTerraformFiles } from "./microk8s/stage.ts";
 import { ErrOut } from "errout";
 import { ccolors } from "deps";
 
@@ -17,6 +18,7 @@ export default async function stageTerraformFilesForAWSEKS(
     case "clusterless":
       return null;
     case "microk8s":
+      return await stageAWSMicrok8sTerraformFiles(cndi_config);
     default:
       return new ErrOut([
         ccolors.error(

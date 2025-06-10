@@ -1,5 +1,6 @@
 import { CNDIConfig } from "src/types.ts";
 import { stageAzureAKSTerraformFiles } from "./aks/stage.ts";
+import { stageAzureMicrok8sTerraformFiles } from "./microk8s/stage.ts";
 import { ErrOut } from "src/ErrOut.ts";
 import { ccolors } from "src/deps.ts";
 
@@ -21,6 +22,7 @@ export default async function stageTerraformFilesForAZUREEKS(
     case "clusterless":
       return null;
     case "microk8s":
+      return await stageAzureMicrok8sTerraformFiles(cndi_config);
     default:
       return new ErrOut([
         ccolors.error(
