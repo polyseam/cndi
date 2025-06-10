@@ -3,11 +3,18 @@ import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
 type Primitive = string | number | boolean | null;
-type JSONValue = Primitive | JSONObject | JSONArray;
+type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 type JSONObject = { [key: string]: JSONValue };
 type JSONArray = JSONValue[];
 
-type Locals = Record<string, JSONValue>;
+type Locals = {
+  cndi_arm_region?: string;
+  vnet_identifier?: string;
+  subnet_identifier?: string;
+  subnet_identifiers?: string[] | string; // can be a terraform string or an array of strings
+  cndi_project_name?: string;
+  [key: string]: unknown;
+};
 
 type GCPKeyJSON = {
   type: string;
@@ -63,9 +70,30 @@ const getLocalsFor: Record<string, LocalsGetter> = {
     const cndi_aws_region = Deno.env.get("AWS_REGION") || "us-east-1";
     return { cndi_aws_region };
   },
-  azure: (_cndi_config: CNDIConfig): Locals => {
+  azure: (cndi_config: CNDIConfig): Locals => {
     const cndi_arm_region = Deno.env.get("ARM_REGION") || "eastus";
-    return { cndi_arm_region };
+    const networkSpec = cndi_config?.infrastructure?.cndi?.network;
+
+    const locals: Locals = { cndi_arm_region };
+
+    if (networkSpec?.mode === "insert") {
+      locals.vnet_identifier = networkSpec.vnet_identifier;
+
+      // Store all subnet identifiers for AKS to use
+      if (networkSpec.subnet_identifiers?.length) {
+        // Store all subnet identifiers for the AKS module
+        locals.subnet_identifiers = networkSpec.subnet_identifiers;
+        // Keep subnet_identifier for backward compatibility (uses first subnet)
+        locals.subnet_identifier = networkSpec.subnet_identifiers[0];
+      } else {
+        // Default to a subnet named 'default' in the VNet if no subnets provided
+        const defaultSubnet = `${networkSpec.vnet_identifier}/subnets/default`;
+        locals.subnet_identifiers = [defaultSubnet];
+        locals.subnet_identifier = defaultSubnet;
+      }
+    }
+
+    return locals;
   },
   dev: (_cndi_config: CNDIConfig): Locals => ({
     join_token: "${random_password.cndi_random_password_join_token.result}",

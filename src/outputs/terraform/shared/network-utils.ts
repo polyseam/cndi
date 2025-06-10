@@ -7,6 +7,7 @@ import { BasicNetmask } from "src/BasicNetmask.ts";
 
 type ParsedNetworkConfig = {
   vnet_identifier: string;
+  subnet_identifiers?: string[];
   subnet_address_space: string;
   vnet_address_space: string;
   mode: "insert";
@@ -22,6 +23,7 @@ type CNDINetworkSpec = {
   subnet_address_space?: string;
   vnet_address_space?: string;
   vnet_identifier?: string;
+  subnet_identifiers?: string[];
 };
 
 export function parseNetworkConfig(

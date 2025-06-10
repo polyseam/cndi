@@ -18,8 +18,6 @@ import cndi_azurerm_aks_module from "./module/cndi_azurerm_aks_module.tf.json.ts
 // Azure AKS Classic Terraform Resources
 import cndi_azurerm_resource_group from "./resource/cndi_azurerm_resource_group.tf.json.ts";
 import cndi_azurerm_kubernetes_cluster_node_pool from "./resource/cndi_azurerm_kubernetes_cluster_node_pool.tf.json.ts";
-import cndi_azurerm_virtual_network from "./resource/cndi_azurerm_virtual_network.tf.json.ts";
-import cndi_azurerm_subnet from "./resource/cndi_azurerm_subnet.tf.json.ts";
 
 // Azure AKS Classic Terraform Resources
 import cndi_kubernetes_storage_class from "./resource/cndi_kubernetes_storage_class.tf.json.ts";
@@ -62,14 +60,6 @@ export async function stageAzureAKSClassicNetworkModeCreateTerraformFiles(
         "cndi_azurerm_kubernetes_cluster_node_pool.tf.json",
       ),
       cndi_azurerm_kubernetes_cluster_node_pool(cndi_config),
-    ),
-    stageFile(
-      path.join("cndi", "terraform", "cndi_azurerm_virtual_network.tf.json"),
-      cndi_azurerm_virtual_network(cndi_config),
-    ),
-    stageFile(
-      path.join("cndi", "terraform", "cndi_azurerm_subnet.tf.json"),
-      cndi_azurerm_subnet(cndi_config),
     ),
     stageFile(
       path.join("cndi", "terraform", "cndi_kubernetes_storage_class.tf.json"),
