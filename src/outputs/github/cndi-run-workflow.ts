@@ -1,6 +1,6 @@
 import { YAML } from "deps";
 
-import { CNDIConfig, CNDIProvider } from "src/types.ts";
+import { CNDIProvider, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 type WorkflowStep = {
   name?: string;
@@ -218,7 +218,7 @@ const AZURE_ENV_KEYLESS = {
 };
 
 const getEnv = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   keyless = false,
 ): Record<string, string> => {
   // keyless MUST be false for now
@@ -280,7 +280,7 @@ type WorkflowJob = {
 };
 
 const getWorkflowJob = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   sourceRef?: string,
 ): WorkflowJob => {
   // TODO: const isKeyless = config?.infrastructure?.cndi?.keyless === true;
@@ -325,7 +325,7 @@ const getWorkflowJob = (
 };
 
 const getWorkflowYaml = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   sourceRef?: string,
   disable = false,
 ) => {

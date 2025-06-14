@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { resolveCNDIPorts } from "src/utils.ts";
 
@@ -21,7 +21,7 @@ type AWSLBTargetGroupAttachment = {
   port: number;
 };
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const project_name = "${local.cndi_project_name}";
   const open_ports = resolveCNDIPorts(cndi_config);
   const listeners: Record<string, AWSLBListener> = {};

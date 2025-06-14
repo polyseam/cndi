@@ -1,8 +1,8 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
-export default function (_cndi_config: CNDIConfig): string | null {
+export default function (_cndi_config: NormalizedCNDIConfig): string | null {
   const google_project_service = {
     cndi_google_project_service_cloudresourcemanager: {
       disable_on_destroy: false,

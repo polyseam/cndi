@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { path } from "deps";
 import { stageFile } from "src/utils.ts";
 import { ErrOut } from "errout";
@@ -21,7 +21,7 @@ import getCndiAWSLBTfJSON from "./resource/cndi_aws_lb.tf.json.ts";
 import getCndiAWSLBTargetGroupTfJSON from "./resource/cndi_aws_lb_target_group.tf.json.ts";
 import getCndiAWSLBListenerTfJSON from "./resource/cndi_aws_lb_listener.tf.json.ts";
 
-function getMicrok8sOutputsTfJSON(_cndi_config: CNDIConfig) {
+function getMicrok8sOutputsTfJSON(_cndi_config: NormalizedCNDIConfig) {
   return getPrettyJSONString({
     output: {
       public_host: {
@@ -40,7 +40,7 @@ function getMicrok8sOutputsTfJSON(_cndi_config: CNDIConfig) {
 }
 
 export async function stageAWSMicrok8sTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const data = getDataTfJSON(cndi_config);
   const locals = getLocalsTfJSON(cndi_config);

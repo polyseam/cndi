@@ -1,4 +1,4 @@
-import { CNDIConfig, CNDINodeSpec } from "src/types.ts";
+import { CNDINodeSpec, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import {
   getPrettyJSONString,
   getTaintEffectForDistribution,
@@ -25,11 +25,11 @@ export interface AzurermKubernetesClusterNodePool {
 }
 
 export function getNodePools(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): AzurermKubernetesClusterNodePool[] {
   const azurerm_kubernetes_cluster_node_pool = cndi_config.infrastructure.cndi
     .nodes.map(
-      (nodeSpec: CNDINodeSpec, i) => {
+      (nodeSpec: CNDINodeSpec, i: number) => {
         const node_count = nodeSpec?.count ?? 1;
 
         const max_count = nodeSpec?.max_count || node_count;
@@ -81,7 +81,7 @@ export function getNodePools(
   return azurerm_kubernetes_cluster_node_pool as AzurermKubernetesClusterNodePool[];
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const cndi_azurerm_kubernetes_cluster_node_pool = getNodePools(
     cndi_config,
   );

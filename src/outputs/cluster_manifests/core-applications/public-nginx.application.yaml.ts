@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CNDIConfig, CNDIPort } from "src/types.ts";
+import { CNDIPort, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { NGINX_CHART_VERSION } from "versions";
 import { deepMerge } from "deps";
 import { getNodeResourceGroupName } from "src/outputs/terraform/azure/utils.ts";
@@ -31,12 +31,12 @@ const getTCPConfig = (open_ports: CNDIPort[]): TCPSpec => {
   return tcp;
 };
 
-const getBaseValues = (cndi_config: CNDIConfig) => {
+const getBaseValues = (cndi_config: NormalizedCNDIConfig) => {
   const tcp = getTCPConfig(cndi_config?.infrastructure?.cndi?.open_ports || []);
   return { tcp, controller };
 };
 
-const eksValues = (cndi_config: CNDIConfig) => {
+const eksValues = (cndi_config: NormalizedCNDIConfig) => {
   const { project_name } = cndi_config;
   return deepMerge(getBaseValues(cndi_config), {
     controller: {
@@ -51,9 +51,10 @@ const eksValues = (cndi_config: CNDIConfig) => {
   });
 };
 
-const gkeValues = (cndi_config: CNDIConfig) => getBaseValues(cndi_config);
+const gkeValues = (cndi_config: NormalizedCNDIConfig) =>
+  getBaseValues(cndi_config);
 
-const devValues = (cndi_config: CNDIConfig) =>
+const devValues = (cndi_config: NormalizedCNDIConfig) =>
   deepMerge(getBaseValues(cndi_config), {
     controller: {
       service: {
@@ -64,7 +65,7 @@ const devValues = (cndi_config: CNDIConfig) =>
     },
   });
 
-const aksValues = (cndi_config: CNDIConfig) =>
+const aksValues = (cndi_config: NormalizedCNDIConfig) =>
   deepMerge(getBaseValues(cndi_config), {
     controller: {
       service: {
@@ -91,7 +92,9 @@ const aksValues = (cndi_config: CNDIConfig) =>
     },
   });
 
-const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
+const getDefaultNginxValuesForCNDIProvider = (
+  cndi_config: NormalizedCNDIConfig,
+) => {
   const { distribution } = cndi_config;
 
   switch (distribution) {
@@ -108,7 +111,9 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
   }
 };
 
-export default function getNginxApplicationManifest(cndi_config: CNDIConfig) {
+export default function getNginxApplicationManifest(
+  cndi_config: NormalizedCNDIConfig,
+) {
   if (cndi_config.distribution === "clusterless") return "";
   const releaseName = "ingress-nginx-public";
 

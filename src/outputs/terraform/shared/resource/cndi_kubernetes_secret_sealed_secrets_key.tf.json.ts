@@ -1,8 +1,8 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { getDependsOnForClusterWithCNDIConfig } from "src/outputs/terraform/shared/utils.ts";
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const depends_on = getDependsOnForClusterWithCNDIConfig(cndi_config);
   const resource = {
     kubernetes_secret: {

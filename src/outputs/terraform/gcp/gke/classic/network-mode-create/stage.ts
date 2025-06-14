@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { path } from "deps";
 import {} from "versions";
 
@@ -41,7 +41,7 @@ import cndi_google_project_service from "./resource/cndi_google_project_service.
 import cndi_time_sleep_services from "./resource/cndi_time_sleep_services_ready.ts";
 
 export async function stageGCPGKEClassicNetworkModeCreateTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const data = getDataTfJSON(cndi_config);
   const locals = getLocalsTfJSON(cndi_config);

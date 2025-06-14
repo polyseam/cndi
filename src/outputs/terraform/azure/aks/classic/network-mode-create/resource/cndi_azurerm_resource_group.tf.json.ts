@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
 interface AzurermResourceGroup {
@@ -9,7 +9,7 @@ interface AzurermResourceGroup {
   };
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const azurerm_resource_group: Record<string, AzurermResourceGroup> = {
     cndi_azurerm_resource_group: {
       location: "${local.cndi_arm_region}",

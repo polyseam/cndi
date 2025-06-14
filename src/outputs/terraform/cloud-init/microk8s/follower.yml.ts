@@ -1,5 +1,5 @@
 import { YAML } from "deps";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { DEFAULT_K8S_VERSION } from "versions";
 import { loopUntilSuccess } from "src/outputs/terraform/cloud-init/utils.ts";
 
@@ -16,7 +16,7 @@ type Microk8sFollowerLaunchConfig = {
 };
 
 const getFollowerCloudInitYaml = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   options?: GetFollowerCloudInitOptions,
 ) => {
   const microk8sFollowerLaunchConfig: Microk8sFollowerLaunchConfig = {

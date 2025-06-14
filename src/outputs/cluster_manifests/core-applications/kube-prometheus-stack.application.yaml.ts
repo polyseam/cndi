@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getYAMLString } from "src/utils.ts";
 import { deepMerge } from "deps";
 import { KUBE_PROMETHEUS_STACK_CHART_VERSION } from "versions";
@@ -10,7 +10,7 @@ const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
 export default function getKubePrometheusStackApplicationManifest(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): string {
   const releaseName = "kube-prometheus-stack";
 

@@ -4,7 +4,7 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
-import type { CNDIApplicationSpec } from "src/outputs/cluster_manifests/application-manifest.ts";
+import type { CNDIApplicationSpec } from "src/types/CNDIConfig.ts";
 
 export const NODE_KIND = {
   aws: "aws",
@@ -240,7 +240,7 @@ export interface CNDINetworkConfigBase {
 
 export interface CNDINetworkConfigCreate extends CNDINetworkConfigBase {
   mode: "create";
-  vnet_address_space?: string;
+  network_address_space?: string;
   subnet_address_space?: string;
 }
 
@@ -249,11 +249,11 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
   /**
    * unique identifier for the network to create your cndi subnet in
    */
-  vnet_identifier: string;
+  network_identifier: string;
   /**
    * A set of one or more subnets to use for the cluster.
    */
-  subnet_identifiers: string[];
+  subnets: string[];
 }
 
 export type CNDINetworkConfig =

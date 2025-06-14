@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { NGINX_CHART_VERSION } from "versions";
 import { deepMerge } from "deps";
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
@@ -91,7 +91,9 @@ const aksValues = () => {
   });
 };
 
-const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
+const getDefaultNginxValuesForCNDIProvider = (
+  cndi_config: NormalizedCNDIConfig,
+) => {
   const { distribution, project_name } = cndi_config;
 
   switch (distribution) {
@@ -109,7 +111,7 @@ const getDefaultNginxValuesForCNDIProvider = (cndi_config: CNDIConfig) => {
 };
 
 export default function getNginxApplicationManifest(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ) {
   if (cndi_config.distribution === "clusterless") return "";
 

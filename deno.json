@@ -139,6 +139,7 @@
     "crypto-js": "npm:crypto-js@4.2.0",
     "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
+    "net-utils": "./src/utils/net.ts",
     "lodash.get": "npm:lodash.get@4.4.2",
     "lodash.set": "npm:lodash.set@4.3.2",
     "lodash.unset": "npm:lodash.unset@4.5.2",

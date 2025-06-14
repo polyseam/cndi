@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
@@ -61,7 +61,7 @@ const CORE_REQUIRED_PROVIDERS = {
 } as const;
 
 export default function getTerraformTfJSON(
-  { provider }: CNDIConfig,
+  { provider }: NormalizedCNDIConfig,
 ): string {
   const terraform = {
     required_providers: {

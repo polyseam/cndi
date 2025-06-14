@@ -1,8 +1,8 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ARGOCD_APPS_CHART_VERSION } from "versions";
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const resource = {
     helm_release: {
       cndi_helm_release_argocd_apps: {

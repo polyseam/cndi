@@ -1,9 +1,9 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { ErrOut } from "errout";
 
 // TODO: Implement GCP/Azure specific implementation
 export function stageGCPGKEClassicNetworkModeInsertTerraformFiles(
-  _cndi_config: CNDIConfig,
+  _cndi_config: NormalizedCNDIConfig,
 ): Promise<ErrOut | null> {
   throw new ErrOut([
     "GCP/Azure specific implementation not implemented yet",

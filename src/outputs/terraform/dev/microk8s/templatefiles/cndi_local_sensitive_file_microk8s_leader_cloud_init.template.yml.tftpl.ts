@@ -1,4 +1,4 @@
-import { CNDIConfig, Microk8sAddon } from "src/types.ts";
+import { Microk8sAddon, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { YAML } from "deps";
 
 import getClusterRepoSecretSSHTemplate from "src/outputs/terraform/manifest-templates/argocd_private_repo_secret_ssh_manifest.yaml.tftpl.ts";
@@ -28,11 +28,13 @@ const defaultAddons: Array<Microk8sAddon> = [
   },
 ];
 
-const isDevCluster = (config: CNDIConfig) => {
+const isDevCluster = (config: NormalizedCNDIConfig) => {
   return config.provider === "dev";
 };
 
-const getMicrok8sAddons = (config: CNDIConfig): Array<Microk8sAddon> => {
+const getMicrok8sAddons = (
+  config: NormalizedCNDIConfig,
+): Array<Microk8sAddon> => {
   const addons = defaultAddons;
 
   if (isDevCluster(config)) {
@@ -74,7 +76,7 @@ type GetLeaderCloudInitYamlOptions = {
 };
 
 const getLeaderCloudInitYaml = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   { useSshRepoAuth, useClusterHA }: GetLeaderCloudInitYamlOptions,
 ) => {
   const addons = getMicrok8sAddons(config);

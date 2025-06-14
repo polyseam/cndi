@@ -1,13 +1,13 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface AwsIamRolePolicyAttachment {
   policy_arn: string;
   role: string;
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const aws_iam_role_policy_attachment: Record<
     string,
     AwsIamRolePolicyAttachment

@@ -1,6 +1,6 @@
 import { getYAMLString } from "src/utils.ts";
 import { RELOADER_CHART_VERSION } from "versions";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 const DEFAULT_DESTINATION_SERVER = "https://kubernetes.default.svc";
 const DEFAULT_ARGOCD_API_VERSION = "argoproj.io/v1alpha1";
@@ -9,7 +9,7 @@ const DEFAULT_PROJECT = "default";
 const DEFAULT_FINALIZERS = ["resources-finalizer.argocd.argoproj.io"];
 
 export default function getReloaderApplicationManifest(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): string {
   const releaseName = "reloader";
   const values = cndi_config?.infrastructure?.cndi?.reloader?.values || {};

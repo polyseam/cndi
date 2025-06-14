@@ -1,12 +1,12 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface AwsIamPolicy {
   policy: string;
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const aws_iam_policy: Record<string, AwsIamPolicy> = {
     cndi_aws_iam_policy: {
       policy: JSON.stringify({

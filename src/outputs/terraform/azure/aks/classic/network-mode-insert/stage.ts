@@ -1,6 +1,5 @@
-import { CNDIConfig } from "src/types.ts";
-import { parseNetworkConfig } from "src/outputs/terraform/shared/network-utils.ts";
-import { ccolors, path } from "deps";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
+import { path } from "deps";
 import { stageFile } from "src/utils.ts";
 import { ErrOut } from "errout";
 
@@ -28,38 +27,14 @@ import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/sh
 import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
 export async function stageAzureAKSClassicNetworkModeInsertTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
-  let networkSpec;
-  try {
-    networkSpec = parseNetworkConfig(cndi_config);
-  } catch (e) {
-    return new ErrOut([
-      ccolors.error(e instanceof Error ? e.message : String(e)),
-    ], {
-      code: -1,
-      id: "invalid-network-config",
-      label:
-        "src/outputs/terraform/azure/aks/classic/network-mode-insert/stage.ts",
-    });
-  }
-  if (networkSpec.mode !== "insert") {
-    return new ErrOut([
-      ccolors.error("network mode must be 'insert' for this stage"),
-    ], {
-      code: -1,
-      id: "invalid-network-mode",
-      label:
-        "src/outputs/terraform/azure/aks/classic/network-mode-insert/stage.ts",
-    });
-  }
-
   const terraform = getTerraformTfJSON(cndi_config);
   const provider = getProviderTfJSON(cndi_config);
   const variable = getVariableTfJSON(cndi_config);
   const output = getOutputTfJSON(cndi_config);
 
-  // For network-mode-insert, we expect vnet_identifier to be set
+  // For network-mode-insert, we expect network_identifier to be set
   // The subnet_identifier is now handled in the azure locals getter
   const locals = getLocalsTfJSON(cndi_config);
 

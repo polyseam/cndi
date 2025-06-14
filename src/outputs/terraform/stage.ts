@@ -1,5 +1,5 @@
 import { ccolors } from "deps";
-import { CNDIConfig, CNDIProvider } from "src/types.ts";
+import { CNDIProvider, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 import aws from "./aws/stage.ts";
 import gcp from "./gcp/stage.ts";
@@ -15,7 +15,9 @@ const _label = ccolors.faded(
 );
 
 type Stagers = {
-  [key in CNDIProvider]: (cndi_config: CNDIConfig) => Promise<null | ErrOut>;
+  [key in CNDIProvider]: (
+    cndi_config: NormalizedCNDIConfig,
+  ) => Promise<null | ErrOut>;
 };
 
 const stagers: Stagers = {
@@ -26,7 +28,7 @@ const stagers: Stagers = {
 };
 
 export default async function stageTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const err = await stagers[cndi_config.provider](cndi_config);
 

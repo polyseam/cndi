@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface GoogleAllowEntry {
   protocol: string;
@@ -16,7 +16,7 @@ interface GoogleComputeFirewall {
   allow: GoogleAllowEntry[];
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const google_compute_firewall: Record<string, GoogleComputeFirewall> = {
     cndi_google_compute_firewall: {
       allow: [

@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString, useSshRepoAuth } from "src/utils.ts";
 import { ccolors } from "deps";
 
@@ -58,7 +58,7 @@ const TOKEN_REPO_AUTH_VARIABLES = {
 };
 
 export default function getVariableTfJSON(
-  _cndi_config: CNDIConfig,
+  _cndi_config: NormalizedCNDIConfig,
 ): string {
   const variable = {
     ...VARIABLE,

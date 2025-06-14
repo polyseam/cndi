@@ -1,11 +1,11 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { getNodeResourceGroupName } from "src/outputs/terraform/azure/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { DEFAULT_K8S_VERSION } from "versions";
 
 const MODULE_SOURCE = "Azure/aks/azurerm//v4";
 
-export default function (cndi_config: CNDIConfig): string | null {
+export default function (cndi_config: NormalizedCNDIConfig): string | null {
   const node_resource_group = getNodeResourceGroupName(cndi_config);
   return getPrettyJSONString({
     module: {

@@ -3,11 +3,12 @@ import { getProjectDirectoryFromFlag } from "src/utils.ts";
 
 import { ccolors, loadEnv, path } from "deps";
 
+import { loadCNDIConfig } from "src/cndi_config/load.ts";
+
 import {
   checkDirectoryForFileSuffix,
   getPrettyJSONString,
   getYAMLString,
-  loadCndiConfig,
   loadJSONC,
   persistStagedFiles,
   stageDirectory,
@@ -65,7 +66,6 @@ import stageTerraformFiles from "../outputs/terraform/stage.ts";
 
 import { KubernetesManifest, KubernetesSecret } from "src/types.ts";
 
-import validateConfig from "src/validate/cndiConfig.ts";
 import createRepo from "src/repo/create.ts";
 
 const label = ccolors.faded("\nsrc/commands/overwrite.ts:\n");
@@ -151,31 +151,21 @@ export const overwrite = async (options: OverwriteActionOptions) => {
 
   const envPath = path.join(output, ".env");
 
-  const [errorLoadingConfig, result] = await loadCndiConfig(output);
+  const [errorLoadingCNDIConfig, result] = await loadCNDIConfig(output);
 
-  if (errorLoadingConfig) {
-    await errorLoadingConfig.out();
+  if (errorLoadingCNDIConfig) {
+    await errorLoadingCNDIConfig.out();
     return;
   }
 
   const config = result.config;
 
-  const pathToConfig = result.pathToConfig;
-
   await loadEnv({ export: true, envPath });
 
-  const validationError = validateConfig(config, pathToConfig);
-
-  if (validationError) {
-    await validationError.out();
-    return;
-  }
-
-  const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
-
-  if (tryKeyless) {
-    // TODO: implement keyless
-  }
+  // TODO: implement keyless; needs upstream https://github.com/Azure/login/issues/467
+  // const tryKeyless = config?.infrastructure?.cndi?.keyless === true;
+  // if (tryKeyless) {
+  // }
 
   // resources outside of ./cndi should only be staged if initializing or manually requested
   if (options.initializing || updateWorkflows.includes("run")) {

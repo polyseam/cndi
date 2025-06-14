@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { stageGCPGKETerraformFiles } from "./gke/stage.ts";
 import { ErrOut } from "errout";
 import { ccolors } from "deps";
@@ -8,7 +8,7 @@ const label = ccolors.faded(
 );
 
 export default async function stageTerraformFilesForGCPGKE(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const distribution = cndi_config?.distribution ?? "gke";
   switch (distribution) {

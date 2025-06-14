@@ -1,6 +1,6 @@
 import { getPrettyJSONString, truncateString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface GoogleComputeNetwork {
   name: string;
@@ -9,7 +9,7 @@ interface GoogleComputeNetwork {
   depends_on?: string[];
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const prefix = `cndi-net-`;
   const project_name = truncateString(
     cndi_config?.project_name || "x",

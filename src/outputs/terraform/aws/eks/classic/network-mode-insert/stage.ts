@@ -1,4 +1,4 @@
-import { CNDIConfig, CNDINetworkConfigInsert } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { ccolors, path } from "deps";
 
 import { stageFile } from "src/utils.ts";
@@ -44,106 +44,20 @@ import cndi_aws_eks_node_group from "../shared/resource/cndi_aws_eks_node_group.
 // AWS EKS Classic Terraform Kubernetes Resources
 import cndi_kubernetes_storage_class from "../shared/resource/cndi_kubernetes_storage_class.tf.json.ts";
 
-const label = ccolors.faded(
+const _label = ccolors.faded(
   "src/outputs/terraform/aws/eks/classic/network-mode-insert/stage.ts:\n",
 );
 
 export async function stageAWSEKSClassicNetworkModeInsertTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
-  const networkSpec = cndi_config?.infrastructure?.cndi
-    ?.network as CNDINetworkConfigInsert;
-
-  const { vnet_identifier, subnet_identifiers } = networkSpec;
-
-  if (!vnet_identifier) {
-    return new ErrOut([
-      ccolors.warn("cndi_config.yaml:"),
-      ccolors.error("vnet_identifier"),
-      ccolors.error(
-        "must be defined in",
-      ),
-      ccolors.key_path("infrastructure.cndi.network"),
-      ccolors.error("when running cndi in"),
-      ccolors.key_name("'insert'"),
-      ccolors.error("network mode"),
-    ], {
-      label,
-      code: -1,
-      id: "vnet-identifier-not-defined",
-    });
-  }
-
-  if (!vnet_identifier.startsWith("vpc-")) {
-    return new ErrOut([
-      ccolors.warn("cndi_config.yaml:"),
-      ccolors.key_path("infrastructure.cndi.network.vnet_identifier"),
-      ccolors.error(
-        "must start with",
-      ),
-      ccolors.user_input("vpc-"),
-      ccolors.error("when running cndi in"),
-      ccolors.key_name("'insert'"),
-      ccolors.error("network mode"),
-    ], {
-      label,
-      code: -1,
-      id: "vnet-identifier-not-valid",
-    });
-  }
-
-  if (!Array.isArray(subnet_identifiers) || subnet_identifiers?.length < 2) {
-    return new ErrOut([
-      ccolors.warn("cndi_config.yaml:"),
-      ccolors.key_path("infrastructure.cndi.network.subnet_identifiers"),
-      ccolors.error(
-        "must be an array of at least",
-      ),
-      ccolors.user_input("2"),
-      ccolors.error("subnet identifiers"),
-      ccolors.error("when running cndi in"),
-      ccolors.key_name("'insert'"),
-      ccolors.error("network mode"),
-    ], {
-      label,
-      code: -1,
-      id: "subnet-identifiers-not-defined",
-    });
-  }
-
-  for (const subnet_id of subnet_identifiers) {
-    if (!subnet_id.startsWith("subnet-")) {
-      return new ErrOut([
-        ccolors.warn("cndi_config.yaml:"),
-
-        ccolors.error("each entry in"),
-        ccolors.key_path("infrastructure.cndi.network.subnet_identifiers"),
-        ccolors.error(
-          "must begin with",
-        ),
-        ccolors.user_input("subnet-"),
-        ccolors.error("when running cndi in"),
-        ccolors.key_name("'insert'"),
-        ccolors.error("network mode"),
-      ], {
-        label,
-        code: -1,
-        id: "subnet-identifiers-not-valid",
-      });
-    }
-  }
-
   const terraform = getTerraformTfJSON(cndi_config);
   const provider = getProviderTfJSON(cndi_config);
   const variable = getVariableTfJSON(cndi_config);
   const output = getOutputTfJSON(cndi_config);
 
   const data = getDataTfJSON(cndi_config);
-
-  const locals = getLocalsTfJSON(cndi_config, {
-    vnet_identifier,
-    subnet_identifiers,
-  });
+  const locals = getLocalsTfJSON(cndi_config);
 
   const cndi_aws_eks_module = getCndiAWSEKSModuleTfJSON(cndi_config);
   const cndi_aws_iam_assumable_role_ebs_with_oidc_module =

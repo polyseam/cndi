@@ -1,7 +1,7 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const azurerm_lb_backend_address_pool = {
     cndi_azurerm_lb_backend_address_pool: {
       name: "${local.cndi_project_name}-cndi-lb",

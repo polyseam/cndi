@@ -1,9 +1,9 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { SEALED_SECRETS_CHART_VERSION } from "versions";
 import { getDependsOnForClusterWithCNDIConfig } from "../utils.ts";
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const depends_on = getDependsOnForClusterWithCNDIConfig(cndi_config);
 
   depends_on.push(

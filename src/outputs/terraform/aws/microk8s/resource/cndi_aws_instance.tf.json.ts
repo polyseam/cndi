@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import {
   DEFAULT_INSTANCE_TYPES,
@@ -27,7 +27,7 @@ type AWSInstance = {
   depends_on: string[];
 };
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const _project_name = "${local.cndi_project_name}";
   const nodes = cndi_config.infrastructure.cndi.nodes;
   const instances: Record<string, AWSInstance> = {};

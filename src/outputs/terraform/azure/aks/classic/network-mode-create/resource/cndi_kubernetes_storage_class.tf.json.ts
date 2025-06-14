@@ -1,8 +1,8 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import type { KubernetesStorageClass } from "src/outputs/terraform/shared/resource/KubernetesStorageClass.ts";
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const kubernetes_storage_class: Record<string, KubernetesStorageClass> = {
     cndi_kubernetes_storage_class_rwo: {
       storage_provisioner: "disk.csi.azure.com",

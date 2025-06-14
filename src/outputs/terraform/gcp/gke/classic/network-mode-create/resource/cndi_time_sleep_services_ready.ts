@@ -1,8 +1,8 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
-export default function (_cndi_config: CNDIConfig): string | null {
+export default function (_cndi_config: NormalizedCNDIConfig): string | null {
   const time_sleep = {
     cndi_time_sleep_services_ready: {
       create_duration: "60s",

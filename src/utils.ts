@@ -1,7 +1,6 @@
 import {
   ccolors,
   copy,
-  exists,
   homedir,
   JSONC,
   path,
@@ -13,12 +12,12 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
-  CNDIConfig,
   CNDIDistribution,
   CNDIPort,
   CNDITaintEffect,
   NodeRole,
-} from "src/types.ts";
+  NormalizedCNDIConfig,
+} from "./cndi_config/types.ts";
 
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
@@ -88,101 +87,13 @@ const getTaintEffectForDistribution = (
 };
 
 type LoadConfigSuccessResult = {
-  config: CNDIConfig;
+  config: NormalizedCNDIConfig;
   pathToConfig: string;
 };
 
 export type PxSuccessResult<T> = [undefined, T];
 export type PxErrorResult = [ErrOut];
 export type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
-
-// attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
-const loadCndiConfig = async (
-  projectDirectory: string,
-): Promise<PxResult<LoadConfigSuccessResult>> => {
-  let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
-
-  if (!(await exists(pathToConfig))) {
-    pathToConfig = path.join(projectDirectory, "cndi_config.yml");
-  }
-
-  if (!(await exists(pathToConfig))) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("failed to find a"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
-        ],
-        {
-          id: "loadCndiConfig/not-found",
-          code: 500,
-          metadata: {
-            pathToConfig,
-          },
-          label,
-        },
-      ),
-    ];
-  }
-
-  let configText: string;
-
-  try {
-    configText = await Deno.readTextFile(pathToConfig);
-  } catch (errorReadingFile) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("could not read"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(`"${pathToConfig}"`),
-        ],
-        {
-          code: 504,
-          id: "loadCndiConfig/read-text-error",
-          metadata: {
-            pathToConfig,
-          },
-          label,
-          cause: errorReadingFile as Error,
-        },
-      ),
-    ];
-  }
-
-  let config: CNDIConfig;
-
-  try {
-    config = YAML.parse(configText) as CNDIConfig;
-  } catch (errorParsingFile) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("could not parse"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(`"${pathToConfig}"`),
-        ],
-        {
-          code: 1300,
-          id: "loadCndiConfig/parse-yaml-error",
-          metadata: {
-            pathToConfig,
-          },
-          label,
-          cause: errorParsingFile as Error,
-        },
-      ),
-    ];
-  }
-
-  return [undefined, { config, pathToConfig }];
-};
-
-// TODO: the following 2 functions can fail in 2 ways
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -301,7 +212,7 @@ function getPathToKubesealBinary() {
   return pathToKubesealBinary;
 }
 
-function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
+function resolveCNDIPorts(config: NormalizedCNDIConfig): CNDIPort[] {
   const user_ports = config.infrastructure?.cndi?.open_ports ?? [];
 
   const ports: CNDIPort[] = [...DEFAULT_OPEN_PORTS];
@@ -628,7 +539,6 @@ export {
   getUserDataTemplateFileString,
   getYAMLString,
   isSlug,
-  loadCndiConfig,
   loadJSONC,
   persistStagedFiles,
   removeOldBinaryIfRequired,

@@ -1,7 +1,7 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 export function getDependsOnForClusterWithCNDIConfig(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): string[] {
   switch (cndi_config.provider) {
     case "gcp":

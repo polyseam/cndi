@@ -1,6 +1,6 @@
 import { getPrettyJSONString, truncateString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface SecondaryIPRange {
   range_name: string;
@@ -16,7 +16,7 @@ interface GoogleComputeSubnetwork {
   secondary_ip_range: SecondaryIPRange[];
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const prefix = `cndi-subnet-`;
   const project_name = truncateString(
     cndi_config?.project_name || "x",

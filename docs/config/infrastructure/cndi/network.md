@@ -18,13 +18,13 @@ network also known as VNet will be created using the `10.0.0.0/16` address
 space.
 
 If you want to specify a different address space, you can do so by setting the
-`vnet_address_space` property in your `cndi_config.yaml` file like so:
+`network_address_space` property in your `cndi_config.yaml` file like so:
 
 ```yaml
 infrastructure:
   cndi:
     network:
-      vnet_address_space: 10.1.0.0/16
+      network_address_space: 10.1.0.0/16
 ```
 
 ## `insert` mode 🛠️
@@ -33,7 +33,7 @@ When using `insert` mode, CNDI will insert your cluster into an existing VNet.
 This is useful if the cluster will be communicating with some pre-existing
 infrastructure and should be kept close.
 
-To use `insert` mode, you need to specify the `vnet_identifier` in your
+To use `insert` mode, you need to specify the `network_identifier` in your
 `cndi_config.yaml` file. You can also optionally specify the
 `subnet_address_space` to be used for the new subnet we will create in the
 target VNet.
@@ -44,9 +44,9 @@ infrastructure:
     network:
       mode: insert
       # AWS:
-      vnet_identifier: vpc-0a1b2c3d4e5f6g7h8
+      network_identifier: vpc-0a1b2c3d4e5f6g7h8
       # Azure:
-      # vnet_identifier: /subscriptions/.../resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
+      # network_identifier: /subscriptions/.../resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet
       # GCP:
-      # vnet_identifier: my-network
+      # network_identifier: my-network
 ```

@@ -1,4 +1,4 @@
-import { CNDIConfig, CNDINetworkConfigCreate } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { path } from "deps";
 
 import { stageFile } from "src/utils.ts";
@@ -22,6 +22,7 @@ import cndi_helm_release_sealed_secrets from "src/outputs/terraform/shared/resou
 import cndi_kubernetes_secret_sealed_secrets_key from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_sealed_secrets_key.tf.json.ts";
 import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/shared/resource/cndi_kubernetes_secret_argocd_private_repo.tf.json.ts";
 import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
+import cndi_kubernetes_storage_class from "src/outputs/terraform/aws/eks/classic/shared/resource/cndi_kubernetes_storage_class.tf.json.ts";
 
 // AWS EKS Classic Terraform Modules
 import getCndiAWSEKSModuleTfJSON from "./module/cndi_aws_eks_module.tf.json.ts";
@@ -41,10 +42,9 @@ import cndi_aws_efs_mount_target from "../shared/resource/cndi_aws_efs_mount_tar
 import cndi_aws_eks_node_group from "../shared/resource/cndi_aws_eks_node_group.tf.json.ts";
 
 // AWS EKS Classic Terraform Kubernetes Resources
-import cndi_kubernetes_storage_class from "../shared/resource/cndi_kubernetes_storage_class.tf.json.ts";
 
 export async function stageAWSEKSClassicNetworkModeCreateTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const terraform = getTerraformTfJSON(cndi_config);
   const provider = getProviderTfJSON(cndi_config);
@@ -53,13 +53,11 @@ export async function stageAWSEKSClassicNetworkModeCreateTerraformFiles(
 
   const data = getDataTfJSON(cndi_config);
 
-  const networkSpec = cndi_config?.infrastructure?.cndi
-    ?.network as CNDINetworkConfigCreate;
+  const _network = cndi_config.infrastructure.cndi.network;
 
   const locals = getLocalsTfJSON(cndi_config, {
-    subnet_identifiers: "${module.cndi_aws_vpc_module.private_subnets}",
+    subnets: "${module.cndi_aws_vpc_module.private_subnets}",
     azs: "${data.aws_availability_zones.available-zones.names}",
-    vnet_cidr: networkSpec?.vnet_address_space || "10.0.0.0/16",
   });
 
   const cndi_aws_eks_module = getCndiAWSEKSModuleTfJSON(cndi_config);

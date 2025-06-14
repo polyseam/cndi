@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface AwsEfsAccessPoint {
   file_system_id: string;
@@ -14,7 +14,7 @@ interface AwsEfsAccessPoint {
   tags: Record<string, string>;
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const aws_efs_access_point: Record<string, AwsEfsAccessPoint> = {
     cndi_aws_efs_access_point: {
       file_system_id: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",

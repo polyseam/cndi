@@ -1,21 +1,21 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { getNodeResourceGroupName } from "src/outputs/terraform/azure/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { DEFAULT_K8S_VERSION } from "versions";
 
 const MODULE_SOURCE = "Azure/aks/azurerm//v4";
 
-export default function (cndi_config: CNDIConfig): string | null {
+export default function (cndi_config: NormalizedCNDIConfig): string | null {
   const node_resource_group = getNodeResourceGroupName(cndi_config);
 
-  // For network-mode-insert, we use the provided subnet_identifiers
+  // For network-mode-insert, we use the provided subnets
   // The first subnet is used for the control plane
-  const controlPlaneSubnetId = "${local.subnet_identifiers[0]}";
+  const controlPlaneSubnetId = "${local.subnets[0]}";
 
   // Additional subnets for node pools (if any)
-  // This will be a Terraform expression that slices the subnet_identifiers array
+  // This will be a Terraform expression that slices the subnets array
   const additionalNodePoolSubnetIds =
-    "${length(local.subnet_identifiers) > 1 ? jsonencode([for i in range(1, length(local.subnet_identifiers)) : local.subnet_identifiers[i]]) : '[]'}";
+    "${length(local.subnets) > 1 ? jsonencode([for i in range(1, length(local.subnets)) : local.subnets[i]]) : '[]'}";
 
   return getPrettyJSONString({
     module: {

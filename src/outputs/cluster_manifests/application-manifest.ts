@@ -1,62 +1,10 @@
 import { ccolors, deepMerge } from "deps";
 import { getYAMLString } from "src/utils.ts";
 
-type ArgoAppInfo = Array<{ name: string; value: string }>;
-
-type IgnoreDifferencesEntry = {
-  group: string;
-  kind: string;
-  managedFieldsManagers: string[];
-  name: string;
-  namespace: string;
-  jqPathExpressions: string[];
-  jsonPointers: string[];
-};
-
-type Meta = {
-  name?: string;
-  namespace?: string;
-  labels?: Record<string, string>;
-  finalizers?: string[];
-};
-
-type SyncPolicy = {
-  automated: {
-    prune: boolean;
-    selfHeal: boolean;
-  };
-  syncOptions: string[];
-  retry: {
-    limit: number;
-    backoff: {
-      duration: string;
-      factor: number;
-      maxDuration: string;
-    };
-  };
-};
-
-export interface CNDIApplicationSpec {
-  targetRevision: string;
-  repoURL: string;
-  destinationNamespace: string;
-  chart?: string;
-  path?: string;
-  values: {
-    [key: string]: unknown;
-  };
-  labels?: Record<string, string>;
-  finalizers?: string[];
-  directory?: {
-    include?: string;
-    exclude?: string;
-  };
-  info?: ArgoAppInfo;
-  syncPolicy?: SyncPolicy;
-  metadata?: Meta;
-  ignoreDifferences?: Array<IgnoreDifferencesEntry>;
-  revisionHistoryLimit?: number;
-}
+import type {
+  ApplicationMeta,
+  CNDIApplicationSpec,
+} from "src/types/CNDIConfig.ts";
 
 const DEFAULT_SYNC_POLICY = {
   automated: {
@@ -152,14 +100,14 @@ const getApplicationManifest = (
   const labelSpec = applicationSpec.labels || {};
   const name = releaseName;
 
-  const userMeta: Partial<Meta> = applicationSpec?.metadata || {};
+  const userMeta: Partial<ApplicationMeta> = applicationSpec?.metadata || {};
 
   const labels = {
     ...labelSpec,
     name,
   };
 
-  const metadata: Meta = {
+  const metadata: ApplicationMeta = {
     name,
     labels,
     finalizers: applicationSpec?.finalizers,

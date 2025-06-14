@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 import { DEFAULT_K8S_VERSION } from "versions";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 const SHA_36_3_0 = "ae3c8fe842c84f0f1b4c06dabd7d2992126b80ab";
 
@@ -8,7 +8,7 @@ const MODULE_SOURCE =
   "git::https://github.com/terraform-google-modules/terraform-google-kubernetes-engine.git?ref=" +
   SHA_36_3_0;
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const ip_range_pods = "cluster-pods";
   const ip_range_services = "cluster-services";
 

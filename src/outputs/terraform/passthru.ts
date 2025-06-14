@@ -1,4 +1,4 @@
-import { CNDIConfig, TFBlocks } from "src/types.ts";
+import { NormalizedCNDIConfig, TFBlocks } from "src/cndi_config/types.ts";
 import { ErrOut } from "src/ErrOut.ts";
 import { ccolors, deepMerge, path } from "src/deps.ts";
 import {
@@ -23,7 +23,7 @@ const TF_BLOCK_NAMES = [
 ] as const;
 
 export async function processAndStageTerraformPassthru(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const pathToTerraformObjects = path.join(
     "cndi",

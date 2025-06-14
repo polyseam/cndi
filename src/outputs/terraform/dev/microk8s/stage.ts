@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { ccolors, path } from "deps";
 import { ErrOut } from "errout";
 
@@ -26,7 +26,7 @@ import cndi_local_sensitive_file_microk8s_leader_cloud_init from "src/outputs/te
 import cndi_local_sensitive_file_microk8s_leader_cloud_init_template from "src/outputs/terraform/dev/microk8s/templatefiles/cndi_local_sensitive_file_microk8s_leader_cloud_init.template.yml.tftpl.ts";
 
 export default async function stageDevMicrok8sTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const locals = getLocalsTfJSON(cndi_config);
   const terraform = getTerraformTfJSON(cndi_config);

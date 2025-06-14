@@ -3,7 +3,7 @@ import {
   getTaintEffectForDistribution,
 } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 import { DEFAULT_AMI_TYPE, DEFAULT_INSTANCE_TYPES } from "consts";
 
@@ -33,7 +33,7 @@ interface AwsEksNodeGroup {
   subnet_ids: string;
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const aws_eks_node_group: Record<string, AwsEksNodeGroup> = {};
 
   if (cndi_config.infrastructure.cndi.nodes as unknown !== "automatic") {
@@ -94,7 +94,7 @@ export default function (cndi_config: CNDIConfig) {
         labels,
         tags,
         taint,
-        subnet_ids: "${local.subnet_identifiers}",
+        subnet_ids: "${local.subnets}",
       };
       i++;
     }

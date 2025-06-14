@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 import { DEFAULT_NODE_DISK_SIZE_MANAGED } from "consts";
 
@@ -22,7 +22,7 @@ interface AwsLaunchTemplate {
   }>;
 }
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const aws_launch_template: Record<string, AwsLaunchTemplate> = {};
 
   if (Array.isArray(cndi_config.infrastructure.cndi.nodes)) {

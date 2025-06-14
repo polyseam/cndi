@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { stageAWSEKSTerraformFiles } from "./eks/stage.ts";
 import { stageAWSMicrok8sTerraformFiles } from "./microk8s/stage.ts";
 import { ErrOut } from "errout";
@@ -9,7 +9,7 @@ const label = ccolors.faded(
 );
 
 export default async function stageTerraformFilesForAWSEKS(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const distribution = cndi_config?.distribution ?? "eks";
   switch (distribution) {

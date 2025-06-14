@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { path } from "deps";
 
 import { stageFile } from "src/utils.ts";
@@ -31,7 +31,7 @@ import cndi_kubernetes_secret_argocd_private_repo from "src/outputs/terraform/sh
 import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared/resource/cndi_time_static_argocd_admin_password.tf.json.ts";
 
 export async function stageAzureAKSClassicNetworkModeCreateTerraformFiles(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Promise<null | ErrOut> {
   const locals = getLocalsTfJSON(cndi_config);
   const terraform = getTerraformTfJSON(cndi_config);

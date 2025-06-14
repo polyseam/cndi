@@ -1,6 +1,6 @@
 import { getPrettyJSONString } from "src/utils.ts";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 interface AwsResourcegroupsGroup {
   name: string;
@@ -10,7 +10,7 @@ interface AwsResourcegroupsGroup {
   tags: Record<string, string>;
 }
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const aws_resourcegroups_group: Record<string, AwsResourcegroupsGroup> = {
     cndi_aws_resourcegroups_group: {
       name: "cndi-rg_${local.cndi_project_name}",

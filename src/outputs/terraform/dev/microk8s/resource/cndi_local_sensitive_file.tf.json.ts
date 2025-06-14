@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
 export const cndi_local_sensitive_file_microk8s_leader_cloud_init =
@@ -7,7 +7,7 @@ export const cndi_local_sensitive_file_microk8s_leader_cloud_init =
 export const filename =
   `${cndi_local_sensitive_file_microk8s_leader_cloud_init}.sensitive.template.yml.tftpl`;
 
-export default function (_cndi_config: CNDIConfig) {
+export default function (_cndi_config: NormalizedCNDIConfig) {
   const resource = {
     local_sensitive_file: {
       [cndi_local_sensitive_file_microk8s_leader_cloud_init]: {

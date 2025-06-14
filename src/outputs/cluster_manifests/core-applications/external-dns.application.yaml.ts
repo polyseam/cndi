@@ -1,5 +1,5 @@
 import { getYAMLString } from "src/utils.ts";
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import type { CNDIProvider, ExternalDNSProvider } from "src/types.ts";
 import { EXTERNAL_DNS_CHART_VERSION } from "versions";
 import { deepMerge } from "deps";
@@ -20,7 +20,7 @@ const getDefaultExternalDNSProviderForCNDIProvider = (
 };
 
 export default function getExternalDNSApplicationManifest(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): string {
   const releaseName = "external-dns";
   const cndiProvider = cndi_config.provider;

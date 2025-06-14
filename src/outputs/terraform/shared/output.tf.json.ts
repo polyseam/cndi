@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
@@ -7,7 +7,7 @@ const _label = ccolors.faded("\nsrc/outputs/terraform/output.tf.json.ts:\n");
 type Outputs = Record<string, { value: string }>;
 
 function getOutputsForProvider(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): Outputs {
   const { provider } = cndi_config;
   const get_argocd_port_forward_command = {
@@ -74,7 +74,7 @@ function getOutputsForProvider(
 }
 
 export default function getOutputTfJSON(
-  cndi_config: CNDIConfig,
+  cndi_config: NormalizedCNDIConfig,
 ): string {
   const output = getOutputsForProvider(cndi_config);
   return getPrettyJSONString({

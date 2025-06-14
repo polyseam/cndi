@@ -1,4 +1,7 @@
-import { CNDIConfig, MultipassNodeItemSpec } from "src/types.ts";
+import {
+  MultipassNodeItemSpec,
+  NormalizedCNDIConfig,
+} from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 import {
@@ -20,7 +23,7 @@ const isValidMultipassCapacityString = (str: string): boolean => {
   return false;
 };
 
-export default function (cndi_config: CNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const [node] = cndi_config.infrastructure.cndi
     .nodes as MultipassNodeItemSpec[];
 

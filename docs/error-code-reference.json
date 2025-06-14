@@ -411,12 +411,12 @@
   },
   {
     "code": 928,
-    "message": "cndi_config invalid: network vnet_address_space and subnet_address_space are incompatible",
+    "message": "cndi_config invalid: network network_address_space and subnet_address_space are incompatible",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1065"
   },
   {
     "code": 929,
-    "message": "cndi_config invalid: network vnet_address_space is not a valid CIDR",
+    "message": "cndi_config invalid: network network_address_space is not a valid CIDR",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1066"
   },
   {
@@ -426,12 +426,12 @@
   },
   {
     "code": 931,
-    "message": "cndi_config invalid: network is in insert mode but vnet_identifier is not supplied",
+    "message": "cndi_config invalid: network is in insert mode but network_identifier is not supplied",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1068"
   },
   {
     "code": 932,
-    "message": "cndi_config invalid: network is in create mode but vnet_identifier was supplied",
+    "message": "cndi_config invalid: network is in create mode but network_identifier was supplied",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1069"
   },
   {

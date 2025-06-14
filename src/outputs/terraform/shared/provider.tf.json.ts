@@ -1,4 +1,4 @@
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
@@ -39,7 +39,7 @@ const KUBERNETES_PROVIDER_CONFIG = {
 };
 
 export default function getProviderTfJSON(
-  { provider }: CNDIConfig,
+  { provider }: NormalizedCNDIConfig,
 ): string {
   const kubernetes = KUBERNETES_PROVIDER_CONFIG[provider];
 

@@ -1,6 +1,6 @@
 import { YAML } from "deps";
 
-import { CNDIConfig } from "src/types.ts";
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
 type WorkflowStep = {
   name?: string;
@@ -20,7 +20,7 @@ type WorkflowJob = {
 };
 
 const getWorkflowJob = (
-  _config: CNDIConfig,
+  _config: NormalizedCNDIConfig,
 ): WorkflowJob => {
   const steps: Array<WorkflowStep> = [
     {
@@ -76,7 +76,7 @@ const getWorkflowJob = (
 };
 
 const getWorkflowYaml = (
-  config: CNDIConfig,
+  config: NormalizedCNDIConfig,
   disable = false,
 ) => {
   const on = disable ? {} : {
