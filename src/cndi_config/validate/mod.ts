@@ -120,20 +120,22 @@ function validateCNDIConfigSpecComponentMetadata(
   }
 
   if (!configSpec.region && configSpec.provider !== "dev") {
-    return new ErrOut([
-      ccolors.error("cndi_config file found was at "),
-      ccolors.user_input(`"${pathToConfig}"\n`),
-      ccolors.error("but the"),
-      ccolors.key_name('"region"'),
-      ccolors.error("key is not defined"),
-      ccolors.error(
-        "the region property is required for all providers except 'dev'",
-      ),
-    ], {
-      code: 1,
-      id: "validateCndiConfig/region-required",
-      label,
-      metadata: { configSpec, pathToConfig },
-    });
+    if (configSpec.cndi_version === "v3") {
+      return new ErrOut([
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"\n`),
+        ccolors.error("but the"),
+        ccolors.key_name('"region"'),
+        ccolors.error("key is not defined"),
+        ccolors.error(
+          "the region property is required for all providers except 'dev'",
+        ),
+      ], {
+        code: 1,
+        id: "validateCndiConfig/region-required",
+        label,
+        metadata: { configSpec, pathToConfig },
+      });
+    }
   }
 }

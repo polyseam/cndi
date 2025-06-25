@@ -1,7 +1,8 @@
-cndi_version: v2
+cndi_version: v3
 project_name: mj-eks-example
 provider: aws
 distribution: eks
+region: us-east-1
 infrastructure:
   cndi:
     cert_manager:

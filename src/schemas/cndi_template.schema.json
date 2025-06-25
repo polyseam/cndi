@@ -54,6 +54,7 @@
             "project_name": { "type": "string" },
             "provider": { "type": "string" },
             "distribution": { "type": "string" },
+            "region": { "type": "string" },
             "infrastructure": {},
             "cluster_manifests": {},
             "applications": {}

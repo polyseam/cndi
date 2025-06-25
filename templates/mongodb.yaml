@@ -86,7 +86,7 @@ prompts:
 
 outputs:
   cndi_config:
-    cndi_version: v2
+    cndi_version: v3
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"

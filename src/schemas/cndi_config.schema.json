@@ -77,8 +77,12 @@
     "cndi_version": {
       "type": "string",
       "description": "The version of cndi config api to use.",
-      "pattern": "v2",
-      "default": "v2"
+      "pattern": "(v2|v3)",
+      "default": "v3"
+    },
+    "region": {
+      "type": "string",
+      "description": "The region to use for the infrastructure."
     },
     "provider": {
       "type": "string",
@@ -114,15 +118,23 @@
           "required": ["nodes"],
           "additionalProperties": false,
           "properties": {
-            "argocd": {
+            "gitops": {
               "type": "object",
-              "description": "An object which defines the ArgoCD resources CNDI should deploy.",
+              "description": "An object which defines the gitops resources CNDI should deploy.",
               "properties": {
-                "hostname": {
-                  "type": "string",
-                  "description": "The hostname on which to make your CNDI ArgoCD available."
+                "argocd": {
+                  "type": "object",
+                  "description": "An object which defines the ArgoCD resources CNDI should deploy.",
+                  "properties": {
+                    "hostname": {
+                      "type": "string",
+                      "description": "The hostname on which to make your CNDI ArgoCD available."
+                    }
+                  },
+                  "additionalProperties": false
                 }
-              }
+              },
+              "additionalProperties": false
             },
             "observability": {
               "type": "object",
