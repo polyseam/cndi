@@ -4,6 +4,7 @@ import { getProjectDirectoryFromFlag } from "src/utils.ts";
 import { ccolors, loadEnv, path } from "deps";
 
 import { loadCNDIConfig } from "src/cndi_config/load.ts";
+import { validateEnvironmentDuringCNDIOverwrite } from "src/environment/validate.ts";
 
 import {
   checkDirectoryForFileSuffix,
@@ -161,6 +162,12 @@ export const overwrite = async (options: OverwriteActionOptions) => {
   const config = result.config;
 
   await loadEnv({ export: true, envPath });
+
+  const errorValidatingEnvironment = validateEnvironmentDuringCNDIOverwrite(
+    config,
+  );
+
+  if (errorValidatingEnvironment) return await errorValidatingEnvironment.out();
 
   // TODO: implement keyless; needs upstream https://github.com/Azure/login/issues/467
   // const tryKeyless = config?.infrastructure?.cndi?.keyless === true;

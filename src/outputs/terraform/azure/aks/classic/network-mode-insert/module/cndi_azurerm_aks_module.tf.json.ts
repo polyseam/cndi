@@ -10,12 +10,12 @@ export default function (cndi_config: NormalizedCNDIConfig): string | null {
 
   // For network-mode-insert, we use the provided subnets
   // The first subnet is used for the control plane
-  const controlPlaneSubnetId = "${local.subnets[0]}";
+  const controlPlaneSubnetId = "${local.private_subnet_ids[0]}";
 
   // Additional subnets for node pools (if any)
   // This will be a Terraform expression that slices the subnets array
   const additionalNodePoolSubnetIds =
-    "${length(local.subnets) > 1 ? jsonencode([for i in range(1, length(local.subnets)) : local.subnets[i]]) : '[]'}";
+    "${length(local.private_subnet_ids) > 1 ? jsonencode([for i in range(1, length(local.private_subnet_ids)) : local.private_subnet_ids[i]]) : '[]'}";
 
   return getPrettyJSONString({
     module: {
@@ -33,8 +33,6 @@ export default function (cndi_config: NormalizedCNDIConfig): string | null {
         load_balancer_sku: "standard",
         network_plugin: "azure",
         network_policy: "azure",
-        net_profile_service_cidr: "192.168.0.0/16",
-        net_profile_dns_service_ip: "192.168.10.0",
         storage_profile_disk_driver_enabled: true,
         storage_profile_file_driver_enabled: true,
         log_analytics_workspace_enabled: false,

@@ -20,7 +20,7 @@ function getOutputsForProvider(
         get_argocd_port_forward_command,
         get_kubeconfig_command: {
           value:
-            "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.cndi_gcp_region} --project ${local.cndi_gcp_project_id}",
+            "gcloud container clusters get-credentials ${local.cndi_project_name} --region ${local.region} --project ${local.cndi_gcp_project_id}",
         },
         resource_group_url: {
           value:
@@ -32,11 +32,11 @@ function getOutputsForProvider(
         get_argocd_port_forward_command,
         get_kubeconfig_command: {
           value:
-            "aws eks update-kubeconfig --region ${local.cndi_aws_region} --name ${local.cndi_project_name}",
+            "aws eks update-kubeconfig --region ${local.region} --name ${local.cndi_project_name}",
         },
         resource_group_url: {
           value:
-            "https://${local.cndi_aws_region}.console.aws.amazon.com/resource-groups/group/cndi-rg_${local.cndi_project_name}",
+            "https://${local.region}.console.aws.amazon.com/resource-groups/group/cndi-rg_${local.cndi_project_name}",
         },
       };
     case "azure":

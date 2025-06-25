@@ -25,7 +25,8 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
         cluster_endpoint_public_access: true, // TODO: probably bad
         enable_cluster_creator_admin_permissions: true,
         vpc_id: "${module.cndi_aws_vpc_module.vpc_id}",
-        subnet_ids: "${module.cndi_aws_vpc_module.private_subnets}",
+        subnet_ids:
+          "${concat(module.cndi_aws_vpc_module.private_subnets, module.cndi_aws_vpc_module.public_subnets)}",
         source: MODULE_SOURCE,
       },
     },

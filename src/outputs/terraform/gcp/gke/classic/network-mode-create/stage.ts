@@ -7,7 +7,7 @@ import {
   // useSshRepoAuth,
 } from "src/utils.ts";
 
-import getDataTfJSON from "./data.tf.json.ts";
+import getDataTfJSON from "src/outputs/terraform/gcp/shared/data.tf.json.ts";
 
 import { ErrOut } from "errout";
 

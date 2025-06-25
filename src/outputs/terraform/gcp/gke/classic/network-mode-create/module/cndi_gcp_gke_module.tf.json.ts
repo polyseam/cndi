@@ -15,12 +15,13 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
   return getPrettyJSONString({
     module: {
       cndi_gcp_gke_module: {
+        depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
         source: MODULE_SOURCE,
         name: "${local.cndi_project_name}",
         service_account: "${local.cndi_gcp_client_email}",
         create_service_account: false,
         project_id: "${local.cndi_gcp_project_id}",
-        region: "${local.cndi_gcp_region}",
+        region: "${local.region}",
         network: "${google_compute_network.cndi_google_compute_network.name}",
         subnetwork:
           "${google_compute_subnetwork.cndi_google_compute_subnetwork.name}",

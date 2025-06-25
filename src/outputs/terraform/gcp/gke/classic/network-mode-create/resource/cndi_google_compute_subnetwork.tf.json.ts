@@ -14,6 +14,7 @@ interface GoogleComputeSubnetwork {
   network: string;
   private_ip_google_access: boolean;
   secondary_ip_range: SecondaryIPRange[];
+  depends_on?: string[];
 }
 
 export default function (cndi_config: NormalizedCNDIConfig) {
@@ -37,6 +38,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
   const google_compute_subnetwork: Record<string, GoogleComputeSubnetwork> = {
     cndi_google_compute_subnetwork: {
       name,
+      depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
       network: "${google_compute_network.cndi_google_compute_network.name}",
       private_ip_google_access: true,
       ip_cidr_range: "10.0.0.0/16",

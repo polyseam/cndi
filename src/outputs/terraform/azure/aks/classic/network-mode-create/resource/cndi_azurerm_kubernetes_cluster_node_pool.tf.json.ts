@@ -21,7 +21,8 @@ export interface AzurermKubernetesClusterNodePool {
   vm_size: string;
   node_taints: string[];
   kubernetes_cluster_id: string;
-  zones: string[];
+  // zones: string[];
+  zones: string; // local
 }
 
 export function getNodePools(
@@ -70,7 +71,7 @@ export function getNodePools(
           tags: {
             CNDIProject: "${local.cndi_project_name}",
           },
-          zones: ["1"],
+          zones: "${local.availability_zones}",
           kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
           node_taints,
           temporary_name_for_rotation,

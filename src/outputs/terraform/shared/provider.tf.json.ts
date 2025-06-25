@@ -69,14 +69,13 @@ export default function getProviderTfJSON(
             CNDIVersion: "v2",
           },
         }],
-        region: "${local.cndi_aws_region}",
+        region: "${local.region}",
       }];
       break;
     case "gcp":
       out.google = [{
         project: "${local.cndi_gcp_project_id}",
-        region: "${local.cndi_gcp_region}",
-        zone: "${local.cndi_gcp_zone}",
+        region: "${local.region}",
       }];
       break;
     case "azure":

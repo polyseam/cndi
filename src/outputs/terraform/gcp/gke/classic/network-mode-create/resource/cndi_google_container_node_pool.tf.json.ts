@@ -37,6 +37,7 @@ interface GoogleContainerNodePool {
       enable_secure_boot: boolean;
     };
   };
+  depends_on?: string[];
 }
 
 export default function (cndi_config: NormalizedCNDIConfig) {
@@ -76,6 +77,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
       const disk_type = nodeSpec?.disk_type || "pd-ssd";
 
       google_container_node_pool[key] = {
+        depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
         cluster,
         name,
         management: {

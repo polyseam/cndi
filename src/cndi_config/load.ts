@@ -109,25 +109,7 @@ export const loadCNDIConfig = async (
     pathToConfig,
   });
 
-  if (validationError) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("CNDIConfig validation failed"),
-          ccolors.user_input(`"${pathToConfig}"`),
-        ],
-        {
-          code: 400,
-          id: "loadCndiConfig/validation-error",
-          metadata: {
-            pathToConfig,
-            validationError,
-          },
-          label,
-        },
-      ),
-    ];
-  }
+  if (validationError) return [validationError];
 
   const config = normalizeCNDIConfig(configSpec);
 

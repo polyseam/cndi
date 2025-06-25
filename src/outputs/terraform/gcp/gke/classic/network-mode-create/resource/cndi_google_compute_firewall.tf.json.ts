@@ -14,11 +14,13 @@ interface GoogleComputeFirewall {
   network: string;
   source_ranges: string[];
   allow: GoogleAllowEntry[];
+  depends_on?: string[];
 }
 
 export default function (_cndi_config: NormalizedCNDIConfig) {
   const google_compute_firewall: Record<string, GoogleComputeFirewall> = {
     cndi_google_compute_firewall: {
+      depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
       allow: [
         {
           protocol: "icmp",
