@@ -36,6 +36,7 @@ outputs:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "{{ $cndi.get_prompt_response(deployment_target_distribution) }}"
+    region: "{{ $cndi.get_prompt_response(region) }}"
     infrastructure:
       cndi:
         $cndi.get_block(https://raw.githubusercontent.com/polyseam/cndi/main/blocks/common/cluster/observability-config.yaml):

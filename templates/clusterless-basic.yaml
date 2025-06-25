@@ -15,6 +15,7 @@ outputs:
     project_name: "{{ $cndi.get_prompt_response(project_name) }}"
     provider: "{{ $cndi.get_prompt_response(deployment_target_provider) }}"
     distribution: "clusterless"
+    region: "{{ $cndi.get_prompt_response(region) }}"
     infrastructure:
       terraform:
         variable:

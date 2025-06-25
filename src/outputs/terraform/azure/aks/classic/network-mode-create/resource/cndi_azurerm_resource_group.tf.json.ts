@@ -12,7 +12,7 @@ interface AzurermResourceGroup {
 export default function (_cndi_config: NormalizedCNDIConfig) {
   const azurerm_resource_group: Record<string, AzurermResourceGroup> = {
     cndi_azurerm_resource_group: {
-      location: "${local.cndi_arm_region}",
+      location: "${local.region}",
       name: "rg-cndi-${local.cndi_project_name}",
       tags: {
         CNDIProject: "${local.cndi_project_name}",

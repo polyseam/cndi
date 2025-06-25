@@ -17,7 +17,7 @@ export default function (cndi_config: NormalizedCNDIConfig): string | null {
         node_resource_group,
         automatic_channel_upgrade: "patch",
         prefix: "cndi-aks-${local.cndi_project_name}",
-        location: "${local.cndi_arm_region}",
+        location: "${local.region}",
         identity_type: "SystemAssigned",
         key_vault_secrets_provider_enabled: true,
         secret_rotation_enabled: true,
