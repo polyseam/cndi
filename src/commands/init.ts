@@ -26,8 +26,8 @@ import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types
 
 import { overwrite } from "src/commands/overwrite.ts";
 
-import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { createSshKeys } from "src/initialize/sshKeys.ts";
+import { createSealedSecretsKeys } from "../environment/sealedSecretsKeys.ts";
+import { createSshKeys } from "../environment/sshKeys.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";

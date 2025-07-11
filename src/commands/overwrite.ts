@@ -18,7 +18,7 @@ import {
 
 import { ErrOut } from "errout";
 
-import { loadSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
+import { loadSealedSecretsKeys } from "../environment/sealedSecretsKeys.ts";
 
 import getApplicationManifest from "src/outputs/cluster_manifests/application-manifest.ts";
 import RootChartYaml from "src/outputs/cluster_manifests/root-chart.ts";

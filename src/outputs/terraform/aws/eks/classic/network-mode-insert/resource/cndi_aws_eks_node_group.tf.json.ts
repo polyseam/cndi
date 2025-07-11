@@ -94,7 +94,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
         labels,
         tags,
         taint,
-        subnet_ids:"${local.private_subnet_ids}",
+        subnet_ids: "${local.private_subnet_ids}",
       };
       i++;
     }

@@ -15,12 +15,11 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
     cndi_aws_efs_mount_target: {
       count: "${length(local.private_subnet_ids)}",
       file_system_id: "${aws_efs_file_system.cndi_aws_efs_file_system.id}",
-      subnet_id:
-        "${element(local.private_subnet_ids, count.index)}",
+      subnet_id: "${element(local.private_subnet_ids, count.index)}",
       security_groups: [
         "${module.cndi_aws_eks_module.cluster_primary_security_group_id}",
       ],
-    }
+    },
   };
 
   return getPrettyJSONString({

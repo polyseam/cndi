@@ -22,8 +22,8 @@ import { overwrite } from "src/commands/overwrite.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { createSshKeys } from "src/initialize/sshKeys.ts";
+import { createSealedSecretsKeys } from "../environment/sealedSecretsKeys.ts";
+import { createSshKeys } from "../environment/sshKeys.ts";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
