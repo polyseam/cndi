@@ -13,7 +13,7 @@ export const LARSTOBI_MULTIPASS_PROVIDER_VERSION = "1.4.2";
 export const EDGE_RUNTIME_IMAGE_TAG = "1.67.4";
 
 // used in terraform output to create clusters
-export const DEFAULT_K8S_VERSION = "1.31";
+export const DEFAULT_K8S_VERSION = "1.33";
 
 // Root Application Chart Versions (terraform managed)
 export const ARGOCD_CHART_VERSION = "8.0.12";
