@@ -1,6 +1,6 @@
 {
   "version": "2.30.3",
-  "deno_version": "2.3.3",
+  "deno_version": "2.4.1",
   "tasks": {
     "checks": {
       "command": "deno lint && deno check . && deno fmt --check"
