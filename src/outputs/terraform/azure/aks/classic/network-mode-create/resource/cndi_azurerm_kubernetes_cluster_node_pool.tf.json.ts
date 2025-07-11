@@ -75,6 +75,7 @@ export function getNodePools(
           kubernetes_cluster_id: "${module.cndi_azurerm_aks_module.aks_id}",
           node_taints,
           temporary_name_for_rotation,
+          depends_on: ["module.cndi_azurerm_aks_module"],
         } as AzurermKubernetesClusterNodePool;
       },
     );
