@@ -39,7 +39,7 @@ import cndi_aws_resourcegroups_group from "../shared/resource/cndi_aws_resourceg
 
 // AWS EKS Classic Insert Terraform Resources
 import cndi_aws_efs_mount_target from "../shared/resource/cndi_aws_efs_mount_target.tf.json.ts";
-import cndi_aws_eks_node_group from "../network-mode-create/resource/cndi_aws_eks_node_group.tf.json.ts";
+import cndi_aws_eks_node_group from "./resource/cndi_aws_eks_node_group.tf.json.ts";
 
 // AWS EKS Classic Terraform Kubernetes Resources
 import cndi_kubernetes_storage_class from "../shared/resource/cndi_kubernetes_storage_class.tf.json.ts";
