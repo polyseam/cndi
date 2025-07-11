@@ -24,7 +24,6 @@ export default function (cndi_config: NormalizedCNDIConfig): string | null {
         load_balancer_sku: "standard",
         network_plugin: "azure",
         network_policy: "azure",
-        net_profile_pod_cidr: NETWORK_PROFILE.POD_ADDRESS_SPACE,
         net_profile_service_cidr: NETWORK_PROFILE.SERVICE_ADDRESS_SPACE,
         net_profile_dns_service_ip: NETWORK_PROFILE.DNS_ADDRESS,
         storage_profile_disk_driver_enabled: true,
