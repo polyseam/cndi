@@ -38,7 +38,7 @@ import cndi_aws_launch_template from "../shared/resource/cndi_aws_launch_templat
 import cndi_aws_resourcegroups_group from "../shared/resource/cndi_aws_resourcegroups_group.tf.json.ts";
 
 // AWS EKS Classic Insert Terraform Resources
-import cndi_aws_efs_mount_target from "../shared/resource/cndi_aws_efs_mount_target.tf.json.ts";
+import cndi_aws_efs_mount_target from "./resource/cndi_aws_efs_mount_target.tf.json.ts";
 import cndi_aws_eks_node_group from "./resource/cndi_aws_eks_node_group.tf.json.ts";
 
 // AWS EKS Classic Terraform Kubernetes Resources

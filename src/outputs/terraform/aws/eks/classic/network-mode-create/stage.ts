@@ -38,7 +38,7 @@ import cndi_aws_iam_role from "../shared/resource/cndi_aws_iam_role.tf.json.ts";
 import cndi_aws_iam_role_policy_attachment from "../shared/resource/cndi_aws_iam_role_policy_attachment.tf.json.ts";
 import cndi_aws_launch_template from "../shared/resource/cndi_aws_launch_template.tf.json.ts";
 import cndi_aws_resourcegroups_group from "../shared/resource/cndi_aws_resourcegroups_group.tf.json.ts";
-import cndi_aws_efs_mount_target from "../shared/resource/cndi_aws_efs_mount_target.tf.json.ts";
+import cndi_aws_efs_mount_target from "./resource/cndi_aws_efs_mount_target.tf.json.ts";
 import cndi_aws_eks_node_group from "./resource/cndi_aws_eks_node_group.tf.json.ts";
 
 // AWS EKS Classic Terraform Kubernetes Resources
@@ -56,11 +56,6 @@ export async function stageAWSEKSClassicNetworkModeCreateTerraformFiles(
   const _network = cndi_config.infrastructure.cndi.network;
 
   const locals = getLocalsTfJSON(cndi_config);
-
-  console.log(
-    `locals`,
-    locals,
-  );
 
   const cndi_aws_eks_module = getCndiAWSEKSModuleTfJSON(cndi_config);
   const cndi_aws_iam_assumable_role_ebs_with_oidc_module =
