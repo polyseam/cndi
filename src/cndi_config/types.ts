@@ -191,26 +191,26 @@ type CreateModeSubnetBareArraySpec = {
   private: Array<AddressSpaceString>;
 };
 
-interface CNDINetworkConfigCreate extends CNDINetworkConfigBase {
+export interface CNDINetworkConfigCreate extends CNDINetworkConfigBase {
   mode: "create";
 
   network_address_space?: AddressSpaceString;
   availability_zones?: AvailabilityZoneSpec;
-  subnets?:
+  subnet_address_spaces?:
     | CreateModeSubnetBareArraySpec
     | CreateModeSubnetAutomaticSpec;
 
   network_identifier?: never;
 }
 
-interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
+export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
   mode: "insert";
 
   network_identifier: string;
 
-  subnets?: {
-    public: Array<SubnetIdentifierString>;
-    private: Array<SubnetIdentifierString>;
+  subnet_identifiers?: {
+    public?: Array<SubnetIdentifierString>;
+    private?: Array<SubnetIdentifierString>;
   };
 
   network_address_space?: never;

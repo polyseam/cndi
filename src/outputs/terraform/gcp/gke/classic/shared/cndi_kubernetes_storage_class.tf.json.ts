@@ -29,7 +29,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
         name: "rwm",
       },
       parameters: {
-        network: "${google_compute_network.cndi_google_compute_network.name}",
+        network: "${local.network_identifier}",
       },
       reclaim_policy: "Delete",
       volume_binding_mode: "WaitForFirstConsumer",

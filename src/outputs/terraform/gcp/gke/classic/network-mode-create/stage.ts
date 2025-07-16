@@ -30,15 +30,15 @@ import cndi_time_static_argocd_admin_password from "src/outputs/terraform/shared
 import cndi_gcp_gke_module from "./module/cndi_gcp_gke_module.tf.json.ts";
 
 // GKE Classic Terraform Kubernetes Resources
-import cndi_kubernetes_storage_class from "./resource/cndi_kubernetes_storage_class.tf.json.ts";
+import cndi_kubernetes_storage_class from "../shared/cndi_kubernetes_storage_class.tf.json.ts";
 
 // GKE Classic Terraform Resources
 import cndi_google_compute_network from "./resource/cndi_google_compute_network.tf.json.ts";
 import cndi_google_compute_subnetwork from "./resource/cndi_google_compute_subnetwork.tf.json.ts";
-import cndi_google_container_node_pool from "./resource/cndi_google_container_node_pool.tf.json.ts";
+import cndi_google_container_node_pool from "../shared/cndi_google_container_node_pool.tf.json.ts";
 import cndi_google_compute_firewall from "./resource/cndi_google_compute_firewall.tf.json.ts";
-import cndi_google_project_service from "./resource/cndi_google_project_service.tf.json.ts";
-import cndi_time_sleep_services from "./resource/cndi_time_sleep_services_ready.ts";
+import cndi_google_project_service from "../shared/cndi_google_project_service.tf.json.ts";
+import cndi_time_sleep_services from "../shared/cndi_time_sleep_services_ready.ts";
 
 export async function stageGCPGKEClassicNetworkModeCreateTerraformFiles(
   cndi_config: NormalizedCNDIConfig,

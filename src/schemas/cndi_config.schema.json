@@ -244,6 +244,25 @@
                     "type": "string",
                     "enum": ["create"]
                   },
+                  "subnet_address_spaces": {
+                    "type": "object",
+                    "properties": {
+                      "public": {
+                        "type": "array",
+                        "description": "Address space to create for public cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "private": {
+                        "type": "array",
+                        "description": "Address space to create for private cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
                   "network_address_space": {
                     "type": "string",
                     "description": "The address space used to create your CNDI cluster virtual network in 'create' mode.",
@@ -262,11 +281,24 @@
                     "type": "string",
                     "description": "The identifier of the virtual network which to deploy your cluster."
                   },
-                  "subnets": {
-                    "type": "array",
-                    "description": "The identifiers of the subnets in which to deploy your cluster.",
-                    "items": {
-                      "type": "string"
+                  "subnet_identifiers": {
+                    "type": "object",
+                    "description": "Subnets in which to insert your cluster resources",
+                    "properties": {
+                      "private": {
+                        "type": "array",
+                        "description": "List of private subnet IDs in which to deploy private cluster resources.",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "public": {
+                        "type": "array",
+                        "description": "List of public subnet IDs in which to deploy public facing cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
                     }
                   }
                 }

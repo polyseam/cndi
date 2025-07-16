@@ -1,7 +1,12 @@
 import { ccolors } from "deps";
 import { ErrOut } from "errout";
-import { CNDIConfigSpec } from "../types.ts";
+import {
+  CNDIConfigSpec,
+  CNDINetworkConfigCreate,
+  CNDINetworkConfigInsert,
+} from "../types.ts";
 import * as netutils from "src/utils/net.ts";
+import { DEFAULT_NETWORK_ADDRESS_SPACE } from "consts";
 
 const label = ccolors.faded("\nsrc/cndi_config/validate/network.ts:");
 
@@ -16,7 +21,7 @@ export function validateCNDIConfigSpecComponentNetwork(
   const netconfigEmpty = Object.keys(netconfig).length < 1;
   if (netconfigEmpty) return;
 
-  if (!netconfig.mode || netconfig.mode === "create") {
+  if (!netconfig?.mode || netconfig.mode === "create") {
     return validateCNDIConfigSpecComponentNetworkModeCreate(
       configSpec,
       { pathToConfig },
@@ -59,7 +64,30 @@ function validateCNDIConfigSpecComponentNetworkModeCreate(
 ): ErrOut | void {
   let subnetError;
 
-  const nc = configSpec.infrastructure?.cndi?.network!;
+  const nc = configSpec.infrastructure?.cndi
+    ?.network! as CNDINetworkConfigCreate;
+
+  if (nc?.network_address_space) {
+    if (!netutils.isValidAddressSpace(nc.network_address_space)) {
+      return new ErrOut([
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"\nwith`),
+        ccolors.error(
+          "cndi_config.infrastructure.cndi.network",
+        ),
+        ccolors.error("in"),
+        ccolors.key_name('"create"'),
+        ccolors.error("mode"),
+        ccolors.error("but the"),
+        ccolors.key_name('"network_address_space"'),
+        ccolors.error("key contains an invalid address space"),
+      ], {
+        code: 1,
+        label,
+        id: "validate/cndi_config/network_address_space/!isValid",
+      });
+    }
+  }
 
   if (nc?.network_identifier) {
     return new ErrOut(
@@ -82,9 +110,9 @@ function validateCNDIConfigSpecComponentNetworkModeCreate(
         label,
       },
     );
-  } else if (nc?.subnets) {
-    if (nc.subnets.public) {
-      for (const subnet of nc.subnets.public) {
+  } else if (nc?.subnet_address_spaces) {
+    if (nc.subnet_address_spaces.public) {
+      for (const subnet of nc.subnet_address_spaces.public) {
         subnetError = validateCreateModeSubnetString(
           configSpec,
           { pathToConfig },
@@ -92,8 +120,8 @@ function validateCNDIConfigSpecComponentNetworkModeCreate(
         if (subnetError) return subnetError;
       }
     }
-    if (nc.subnets.private) {
-      for (const subnet of nc.subnets.private) {
+    if (nc.subnet_address_spaces.private) {
+      for (const subnet of nc.subnet_address_spaces.private) {
         subnetError = validateCreateModeSubnetString(
           configSpec,
           { pathToConfig },
@@ -106,13 +134,16 @@ function validateCNDIConfigSpecComponentNetworkModeCreate(
 
 const validateCreateModeSubnetString =
   (configSpec: CNDIConfigSpec, { pathToConfig }: { pathToConfig: string }) =>
-  (subnet: string): ErrOut | void => {
-    const nc = configSpec.infrastructure?.cndi?.network!;
-    const networkAddressSpace = nc.network_address_space;
+  (subnetAddressSpace: string): ErrOut | void => {
+    const nc = configSpec.infrastructure?.cndi
+      ?.network! as CNDINetworkConfigCreate;
+    const networkAddressSpace = nc.network_address_space ||
+      DEFAULT_NETWORK_ADDRESS_SPACE;
+
     let subnetError: ErrOut | undefined;
 
     const subnetIsValidAddressSpace = netutils.isValidAddressSpace(
-      subnet,
+      subnetAddressSpace,
     );
 
     if (!subnetIsValidAddressSpace) {
@@ -141,7 +172,7 @@ const validateCreateModeSubnetString =
     const isContainedInNetworkAddressSpace = !networkAddressSpace ||
       netutils.addressSpaceContainsSubspace(
         networkAddressSpace,
-        subnet,
+        subnetAddressSpace,
       );
 
     if (!isContainedInNetworkAddressSpace) {
@@ -158,7 +189,7 @@ const validateCreateModeSubnetString =
           ccolors.error("but the"),
           ccolors.key_name('"subnets"'),
           ccolors.error("key contains a subnet"),
-          ccolors.user_input(`"${subnet}"`),
+          ccolors.user_input(`"${subnetAddressSpace}"`),
           ccolors.error("that is not contained in the provided"),
           ccolors.error('"network.network_address_space"'),
           ccolors.user_input(
@@ -174,13 +205,13 @@ const validateCreateModeSubnetString =
     }
 
     const allSubnets = [
-      ...nc.subnets?.public || [],
-      ...nc.subnets?.private || [],
+      ...nc.subnet_address_spaces?.public || [],
+      ...nc.subnet_address_spaces?.private || [],
     ];
 
     const subnetsDoNotOverlap = allSubnets.every(
       (otherSubnet: string) => {
-        if (netutils.addressSpaceOverlaps(subnet, otherSubnet)) {
+        if (netutils.addressSpaceOverlaps(subnetAddressSpace, otherSubnet)) {
           subnetError = new ErrOut(
             [
               ccolors.error("cndi_config file found was at "),
@@ -194,7 +225,7 @@ const validateCreateModeSubnetString =
               ccolors.error("but the"),
               ccolors.key_name('"subnets"'),
               ccolors.error("key contains overlapping subnets"),
-              ccolors.user_input(`"${subnet}"`),
+              ccolors.user_input(`"${subnetAddressSpace}"`),
               ccolors.error("and"),
               ccolors.user_input(`"${otherSubnet}"`),
               ccolors.error("are overlapping"),
@@ -218,8 +249,8 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
   configSpec: CNDIConfigSpec,
   { pathToConfig }: { pathToConfig: string },
 ): ErrOut | void {
-  // deno-lint-ignore no-explicit-any
-  const nc = configSpec.infrastructure?.cndi?.network as any;
+  const nc = configSpec.infrastructure?.cndi
+    ?.network as CNDINetworkConfigInsert;
   const provider = configSpec.provider;
 
   if (!nc.network_identifier) {
@@ -246,8 +277,8 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
   }
 
   if (
-    !Object.keys(nc.subnets).includes("public") &&
-    !Object.keys(nc.subnets).includes("private")
+    !Object.keys(nc?.subnet_identifiers || {}).includes("public") &&
+    !Object.keys(nc?.subnet_identifiers || {}).includes("private")
   ) {
     return new ErrOut(
       [
@@ -260,7 +291,7 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
         ccolors.key_name('"insert"'),
         ccolors.error("mode"),
         ccolors.error("but the"),
-        ccolors.key_name('"subnets"'),
+        ccolors.key_name('"subnet_identifiers"'),
         ccolors.error("key is missing both"),
         ccolors.key_name('"public"'),
         ccolors.error("and"),
@@ -269,14 +300,19 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
       ],
       {
         code: 1,
-        id: "validate/cndi_config/!network[subnets]",
+        id: "validate/cndi_config/!network[subnet_identifiers]",
         label,
       },
     );
   }
 
-  for (const subnet of nc.subnets.private) {
-    if (typeof subnet !== "string") {
+  const insertModeSubnets: string[] = [];
+
+  const privateSubnetIdentifiers = nc?.subnet_identifiers?.private || [];
+  const publicSubnetIdentifiers = nc?.subnet_identifiers?.public || [];
+
+  for (const privateSubnetId of privateSubnetIdentifiers) {
+    if (typeof privateSubnetId !== "string") {
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
@@ -288,20 +324,20 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
           ccolors.key_name('"insert"'),
           ccolors.error("mode"),
           ccolors.error("but the"),
-          ccolors.key_name('"subnets.private"'),
+          ccolors.key_name('"subnet_identifiers.private"'),
           ccolors.error(
             "key contains a subnet identifier that is not a string",
           ),
         ],
         {
           code: 1,
-          id: "validate/cndi_config/!network[subnets]",
+          id: "validate/cndi_config/!network[subnet_identifiers]",
           label,
         },
       );
     }
 
-    if (netutils.isValidAddressSpace(subnet)) {
+    if (netutils.isValidAddressSpace(privateSubnetId)) {
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
@@ -313,21 +349,21 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
           ccolors.key_name('"insert"'),
           ccolors.error("mode"),
           ccolors.error("but the"),
-          ccolors.key_name('"subnets.private"'),
+          ccolors.key_name('"subnet_identifiers.private"'),
           ccolors.error(
             "key contains a subnet address space instead of a subnet identifier",
           ),
         ],
         {
           code: 1,
-          id: "validate/cndi_config/!network[subnets]",
+          id: "validate/cndi_config/!network[subnet_identifiers]",
           label,
         },
       );
     }
 
     if (
-      !subnetIdentifierIsValid(subnet, provider)
+      !subnetIdentifierIsValid(privateSubnetId, provider)
     ) {
       return new ErrOut(
         [
@@ -340,20 +376,23 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
           ccolors.key_name('"insert"'),
           ccolors.error("mode"),
           ccolors.error("but the"),
-          ccolors.key_name('"subnets.private"'),
+          ccolors.key_name('"subnet_identifiers.private"'),
           ccolors.error("key contains an invalid subnet identifier"),
-          ccolors.user_input(`"${subnet}"`),
+          ccolors.user_input(`"${privateSubnetId}"`),
         ],
         {
           code: 1,
-          id: "validate/cndi_config/!network[subnets]",
+          id: "validate/cndi_config/!network[subnet_identifiers]",
           label,
         },
       );
+    } else {
+      insertModeSubnets.push(privateSubnetId);
     }
   }
-  for (const subnet of nc.subnets.public) {
-    if (typeof subnet !== "string") {
+
+  for (const publicSubnetId of publicSubnetIdentifiers) {
+    if (typeof publicSubnetId !== "string") {
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
@@ -365,20 +404,20 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
           ccolors.key_name('"insert"'),
           ccolors.error("mode"),
           ccolors.error("but the"),
-          ccolors.key_name('"subnets.public"'),
+          ccolors.key_name('"subnet_identifiers.public"'),
           ccolors.error(
             "key contains a subnet identifier that is not a string",
           ),
         ],
         {
           code: 1,
-          id: "validate/cndi_config/!network[subnets]",
+          id: "validate/cndi_config/!network[subnet_identifiers]",
           label,
         },
       );
     }
 
-    if (netutils.isValidAddressSpace(subnet)) {
+    if (netutils.isValidAddressSpace(publicSubnetId)) {
       return new ErrOut(
         [
           ccolors.error("cndi_config file found was at "),
@@ -404,7 +443,7 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
     }
 
     if (
-      !subnetIdentifierIsValid(subnet, provider)
+      !subnetIdentifierIsValid(publicSubnetId, provider)
     ) {
       return new ErrOut(
         [
@@ -419,15 +458,42 @@ export function validateCNDIConfigSpecComponentNetworkModeInsert(
           ccolors.error("but the"),
           ccolors.key_name('"subnets.public"'),
           ccolors.error("key contains an invalid subnet identifier"),
-          ccolors.user_input(`"${subnet}"`),
+          ccolors.user_input(`"${publicSubnetId}"`),
         ],
         {
           code: 1,
-          id: "validate/cndi_config/!network[subnets]",
+          id: "validate/cndi_config/!network.subnet_identifiers.public",
           label,
         },
       );
+    } else {
+      insertModeSubnets.push(publicSubnetId);
     }
+  }
+
+  if (insertModeSubnets.length === 0) {
+    return new ErrOut(
+      [
+        ccolors.error("cndi_config file found was at "),
+        ccolors.user_input(`"${pathToConfig}"\nwith`),
+        ccolors.error(
+          "cndi_config.infrastructure.cndi.network",
+        ),
+        ccolors.error("in"),
+        ccolors.key_name('"insert"'),
+        ccolors.error("mode"),
+        ccolors.error("but the"),
+        ccolors.key_name("subnets.private"),
+        ccolors.error("and"),
+        ccolors.key_name("subnets.public"),
+        ccolors.error("do not contain subnet ids"),
+      ],
+      {
+        code: 1,
+        id: "validate/cndi_config/!network[subnets]",
+        label,
+      },
+    );
   }
 }
 

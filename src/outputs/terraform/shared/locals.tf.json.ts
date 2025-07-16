@@ -1,4 +1,8 @@
-import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
+import {
+  CNDINetworkConfigCreate,
+  CNDINetworkConfigInsert,
+  NormalizedCNDIConfig,
+} from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 import {
@@ -67,10 +71,12 @@ function getGoogleLocals(_cndi_config: NormalizedCNDIConfig): {
   const { project_id, client_email } = getGCPKey();
 
   if (!project_id || !client_email) {
-    throw new Error([
-      ccolors.key_name(`'GOOGLE_CREDENTIALS'`),
-      ccolors.error("is invalid"),
-    ].join(" "));
+    throw new Error(
+      [
+        ccolors.key_name(`'GOOGLE_CREDENTIALS'`),
+        ccolors.error("is invalid"),
+      ].join(" "),
+    );
   }
 
   return {
@@ -127,7 +133,8 @@ const getAvailabilityZones = (
   }
 
   let count = DEFAULT_AVAILABILITY_ZONE_COUNT;
-  if (typeof azs === "number") { // MUST BE STRICTLY NUMBER
+  if (typeof azs === "number") {
+    // MUST BE STRICTLY NUMBER
     count = azs;
   }
 
@@ -186,33 +193,29 @@ export default function getLocalsTfJSON(
     cndi_config.infrastructure?.cndi?.network?.mode === "insert";
 
   if (insert_mode) {
-    l.network_identifier = cndi_config.infrastructure.cndi.network
-      ?.network_identifier;
-    l.public_subnet_ids =
-      cndi_config.infrastructure.cndi.network?.subnets?.public || [];
-    l.private_subnet_ids =
-      cndi_config.infrastructure.cndi.network?.subnets?.private || [];
+    const nc = cndi_config.infrastructure.cndi
+      .network as CNDINetworkConfigInsert;
+
+    l.network_identifier = nc?.network_identifier;
+    l.public_subnet_ids = nc.subnet_identifiers?.public || [];
+    l.private_subnet_ids = nc?.subnet_identifiers?.private || [];
   } else {
     // assume network mode is "create"
-    l.network_address_space =
-      cndi_config.infrastructure.cndi.network?.network_address_space ||
+    const nc = cndi_config.infrastructure.cndi
+      .network as CNDINetworkConfigCreate;
+
+    l.network_address_space = nc?.network_address_space ||
       NETWORK_PROFILE.NETWORK_ADDRESS_SPACE;
 
-    if (
-      Array.isArray(cndi_config.infrastructure.cndi.network?.subnets?.private)
-    ) {
-      l.private_subnet_address_spaces = cndi_config.infrastructure.cndi.network
-        ?.subnets?.private;
+    if (Array.isArray(nc?.subnet_address_spaces?.private)) {
+      l.private_subnet_address_spaces = nc?.subnet_address_spaces?.private;
     } else {
       l.private_subnet_address_spaces =
         "${[for k, v in local.availability_zones : cidrsubnet(local.network_address_space, 4, k + length(local.availability_zones))]}";
     }
 
-    if (
-      Array.isArray(cndi_config.infrastructure.cndi.network?.subnets?.public)
-    ) {
-      l.public_subnet_address_spaces = cndi_config.infrastructure.cndi.network
-        ?.subnets?.public;
+    if (Array.isArray(nc?.subnet_address_spaces?.public)) {
+      l.public_subnet_address_spaces = nc?.subnet_address_spaces?.public;
     } else {
       l.public_subnet_address_spaces =
         "${[for k, v in local.availability_zones : cidrsubnet(local.network_address_space, 4, k)]}";

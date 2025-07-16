@@ -77,7 +77,10 @@ export default function (cndi_config: NormalizedCNDIConfig) {
       const disk_type = nodeSpec?.disk_type || "pd-ssd";
 
       google_container_node_pool[key] = {
-        depends_on: ["time_sleep.cndi_time_sleep_services_ready"],
+        depends_on: [
+          "time_sleep.cndi_time_sleep_services_ready",
+          "module.cndi_gcp_gke_module",
+        ],
         cluster,
         name,
         management: {

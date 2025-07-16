@@ -34,7 +34,7 @@ export function validateCNDIConfigSpecComponentNodes(
         ],
         {
           code: 1,
-          id: "validate/cndi_config/infrastructure.cndi.nodes.length>0",
+          id: "validate/cndi_config/infrastructure.cndi.nodes/undefined",
           label,
         },
       );
