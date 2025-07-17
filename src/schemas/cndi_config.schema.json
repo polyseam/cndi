@@ -306,6 +306,7 @@
             },
             "functions": {
               "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "hostname": {
                   "type": "string",
@@ -470,7 +471,10 @@
                     "description": "Role of the node",
                     "enum": ["leader", "controller", "worker"]
                   },
-                  "instance_type": {},
+                  "instance_type": {
+                    "type": "string",
+                    "description": "The instance type to use for the node (e.g., t3.medium for AWS, n2-standard-2 for GCP, Standard_D2s_v3 for Azure)."
+                  },
                   "volume_size": {
                     "type": "number",
                     "description": "The amount of disk to allocate to the node in G.",
@@ -540,8 +544,8 @@
                     "private": {
                       "type": "object",
                       "description": "An object which defines the properties of the private nginx ingress controller.",
+                      "additionalProperties": false,
                       "properties": {
-                        "additionalProperties": false,
                         "enabled": {
                           "type": "boolean",
                           "default": false,
