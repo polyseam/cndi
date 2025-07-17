@@ -48,7 +48,7 @@ Deno.test("decrypt throws error with wrong secret", () => {
 
   assertThrows(
     () => {
-      decrypt(encrypted, "wrong-secret");
+      decrypt(encrypted, "incorrect-secret");
     },
   );
 });

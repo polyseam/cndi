@@ -19,16 +19,6 @@ export default function decrypt(
   encryptedText: string,
   secret: string,
 ): string {
-  // Special case: if the encrypted text is empty, return empty string
-  if (encryptedText === "") {
-    return "";
-  }
-
-  // Handle our special marker for empty strings
-  if (encryptedText === "__EMPTY__") {
-    return "";
-  }
-
   const decrypted = CryptoJS.AES.decrypt(
     encryptedText,
     secret,
@@ -36,6 +26,8 @@ export default function decrypt(
 
   try {
     const str = decrypted.toString(CryptoJS.enc.Utf8);
+
+    if (str === "_EMPTY_") return "";
 
     // For non-empty encrypted text, if decryption results in empty string,
     // it's likely due to an incorrect secret
