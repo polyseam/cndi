@@ -9,7 +9,11 @@ function normalizeCNDIConfig(
   cndiConfigSpec: CNDIConfigSpec,
 ): NormalizedCNDIConfig {
   // Normalize the CNDIConfig structure by interpolating default values
-  const normalizedCNDIConfig = { ...cndiConfigSpec };
+  const normalizedCNDIConfig = {
+    cluster_manifests: {},
+    applications: {},
+    ...cndiConfigSpec,
+  };
   return normalizedCNDIConfig;
 }
 

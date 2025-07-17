@@ -28,7 +28,14 @@ export interface CNDIConfigSpec {
   };
 }
 
-export interface NormalizedCNDIConfig extends CNDIConfigSpec {}
+export interface NormalizedCNDIConfig extends CNDIConfigSpec {
+  applications: {
+    [key: string]: CNDIApplicationSpec;
+  };
+  cluster_manifests: {
+    [key: string]: unknown;
+  };
+}
 
 /**
  * CNDIConfig["infrastructure"]

@@ -612,7 +612,8 @@
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
-                    "enum": ["leader", "controller", "worker"]
+                    "enum": ["leader", "controller", "worker"],
+                    "default": "controller"
                   },
                   "instance_type": {
                     "type": "string",

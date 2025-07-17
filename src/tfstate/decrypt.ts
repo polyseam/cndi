@@ -12,7 +12,7 @@ const decryptionError = new Error(
       'your "TERRAFORM_STATE_PASSPHRASE" is likely incorrect, consider deleting your "_state" branch\n',
     ),
   ].join(" "),
-  { cause: 1000 },
+  {},
 );
 
 export default function decrypt(
