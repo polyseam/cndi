@@ -9,8 +9,7 @@ export type CNDIDistribution =
   | "clusterless"
   | "gke"
   | "aks"
-  | "microk8s"
-  | "rke2";
+  | "microk8s";
 
 export type CNDIVersion = "v2" | "v3";
 

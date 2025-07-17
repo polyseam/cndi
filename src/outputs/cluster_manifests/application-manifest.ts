@@ -4,7 +4,7 @@ import { getYAMLString } from "src/utils.ts";
 import type {
   ApplicationMeta,
   CNDIApplicationSpec,
-} from "src/types/CNDIConfig.ts";
+} from "src/cndi_config/types.ts";
 
 const DEFAULT_SYNC_POLICY = {
   automated: {
