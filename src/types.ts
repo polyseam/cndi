@@ -4,7 +4,7 @@ import { MANAGED_NODE_KINDS } from "./constants.ts";
 
 export type ManagedNodeKind = typeof MANAGED_NODE_KINDS[number];
 
-import type { CNDIApplicationSpec } from "src/cndi_config/types.ts"
+import type { CNDIApplicationSpec } from "src/cndi_config/types.ts";
 
 export const NODE_KIND = {
   aws: "aws",
@@ -77,7 +77,7 @@ interface Label {
   [key: string]: string;
 }
 
-type CNDITaintEffect = "NoSchedule" | "PreferNoSchedule" | "NoExecute";
+type CNDITaintEffect = "NoSchedule" | "PreferNoSchedule" | "NoExecute"; // Should match EFFECT_VALUES from constants.ts
 interface Taint {
   key: string;
   value: string;
@@ -241,7 +241,11 @@ export interface CNDINetworkConfigBase {
 export interface CNDINetworkConfigCreate extends CNDINetworkConfigBase {
   mode: "create";
   network_address_space?: string;
-  subnet_address_space?: string;
+  subnet_address_spaces?: {
+    public: Array<string>;
+    private: Array<string>;
+  };
+  availability_zones?: number | string[];
 }
 
 export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
@@ -253,7 +257,14 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
   /**
    * A set of one or more subnets to use for the cluster.
    */
-  subnets: string[];
+  subnets?: string[];
+  /**
+   * Alternative to subnets, structured by public/private
+   */
+  subnet_identifiers?: {
+    public?: Array<string>;
+    private?: Array<string>;
+  };
 }
 
 export type CNDINetworkConfig =
@@ -289,6 +300,7 @@ export type CNDIDistribution =
 
 type CNDIObservability = {
   enabled: boolean;
+  mode?: "in_cluster"; // Added mode property to match schema
   grafana?: {
     hostname?: string;
   };
@@ -321,12 +333,12 @@ export type CNDIFnsConfig = {
 
 export type CNDIInfrastructure = {
   cndi: {
-    network: CNDINetworkConfig;
+    network?: CNDINetworkConfig;
     functions?: CNDIFnsConfig;
     observability?: CNDIObservability;
     keyless?: boolean; // default: false
     deployment_target_configuration?: DeploymentTargetConfiguration;
-    ingress: {
+    ingress?: {
       nginx: {
         public: {
           enabled?: boolean; // default: true
@@ -338,53 +350,59 @@ export type CNDIInfrastructure = {
         };
       };
     };
-    external_dns: {
+    external_dns?: {
       enabled?: boolean; // default: true
       provider: ExternalDNSProvider;
       domain_filters: Array<string>;
       values?: Record<string, unknown>;
     };
-    reloader: {
+    reloader?: {
       enabled?: boolean; // default: true
       values?: Record<string, unknown>;
     };
-    cert_manager?: {
-      enabled?: boolean; // default: true
-      email: string;
-      self_signed?: boolean;
-      values?: Record<string, unknown>;
-    };
-    nodes: Array<CNDINodeSpec>;
-    microk8s: {
+    cert_manager?:
+      & {
+        enabled?: boolean; // default: true
+        email?: string;
+        self_signed?: boolean;
+        values?: Record<string, unknown>;
+      }
+      & (
+        | { email: string; self_signed?: false } // Email required when self_signed is false or undefined
+        | { self_signed: true; email?: never } // Email must not be present when self_signed is true
+      );
+    nodes: Array<CNDINodeSpec>; // Required in schema
+    microk8s?: {
       addons: Array<Microk8sAddon>;
       version?: string; // 1.27
       channel?: string; // stable
       "cloud-init": {
-        leader_before: Array<string>; //
+        leader_before: Array<string>;
         leader_after: Array<string>;
       };
     };
-    argocd: {
+    argocd?: {
       hostname?: string; // auto ingress if set
-      root_application: unknown; //
-      install_url?: string; //
+      root_application?: unknown;
+      install_url?: string;
     };
     open_ports?: Array<CNDIPort>;
   };
   terraform?: TFBlocks;
 };
 
-// incomplete type, config will have more options
+// Complete type definition for CNDIConfig
 interface CNDIConfig {
-  project_name?: string;
-  cndi_version?: string;
+  project_name: string;
+  cndi_version: "v2" | "v3"; // default: v3
+  region?: string;
   distribution: CNDIDistribution;
   provider: CNDIProvider;
   infrastructure: CNDIInfrastructure;
-  applications: {
+  applications?: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster_manifests: {
+  cluster_manifests?: {
     [key: string]: unknown;
   };
 }

@@ -1,4 +1,4 @@
-import { MANAGED_NODE_KINDS } from "consts";
+import { EFFECT_VALUES, MANAGED_NODE_KINDS } from "consts";
 
 type ObjectValues<T> = T[keyof T];
 
@@ -19,11 +19,11 @@ export interface CNDIConfigSpec {
   region?: string;
   provider: CNDIProvider;
   distribution: CNDIDistribution;
-  infrastructure: CNDIInfrastructureSpec;
-  applications: {
+  infrastructure: CNDIInfrastructureSpec; // Required in schema
+  applications?: {
     [key: string]: CNDIApplicationSpec;
   };
-  cluster_manifests: {
+  cluster_manifests?: {
     [key: string]: unknown;
   };
 }
@@ -46,12 +46,15 @@ export type CNDIInfrastructureSpec = {
       enabled?: boolean; // default: true
       values?: Record<string, unknown>;
     };
-    cert_manager?: {
-      enabled?: boolean; // default: true
-      values?: Record<string, unknown>;
-      email: string;
-      self_signed?: boolean;
-    };
+    cert_manager?:
+      & {
+        enabled?: boolean; // default: true
+        values?: Record<string, unknown>;
+      }
+      & (
+        | { email: string; self_signed?: false } // Email required when self_signed is false or undefined
+        | { self_signed: true; email?: never } // Email must not be present when self_signed is true
+      );
     microk8s: CNDIMicrok8sConfig;
     argocd: {
       hostname?: string; // auto ingress if set
@@ -212,6 +215,9 @@ export interface CNDINetworkConfigInsert extends CNDINetworkConfigBase {
     private?: Array<SubnetIdentifierString>;
   };
 
+  // Alternative to subnet_identifiers, for compatibility with src/types.ts
+  subnets?: Array<SubnetIdentifierString>;
+
   network_address_space?: never;
   availability_zones?: never;
 }
@@ -227,7 +233,7 @@ interface Label {
   [key: string]: string;
 }
 
-export type CNDITaintEffect = "NoSchedule" | "PreferNoSchedule" | "NoExecute";
+export type CNDITaintEffect = typeof EFFECT_VALUES[number];
 
 interface Taint {
   key: string;
@@ -274,9 +280,13 @@ export interface CNDINodeSpec {
   machine_type?: string;
   min_count?: number;
   max_count?: number;
-  count?: number;
+  count?: number; // default: 1
   labels?: Label;
   taints?: Taint[];
+  // Adding missing properties from schema
+  memory?: number | string; // If number, assumed to be in G
+  disk?: number | string; // If number, assumed to be in G
+  cpus?: number; // For dev/multipass nodes
 }
 
 export interface MultipassNodeItemSpec extends CNDINodeSpec {
@@ -385,6 +395,7 @@ export interface CNDIPort {
 
 export type CNDIObservability = {
   enabled: boolean;
+  mode?: "in_cluster"; // Added mode property to match schema
   grafana?: {
     hostname?: string;
   };

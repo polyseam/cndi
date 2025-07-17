@@ -1,11 +1,7 @@
 import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { stageAzureAKSTerraformFiles } from "./aks/stage.ts";
-import { ErrOut } from "src/ErrOut.ts";
-import { ccolors } from "src/deps.ts";
-
-const _useAKSAutomatic = (
-  cndi_config: NormalizedCNDIConfig,
-) => (cndi_config?.infrastructure?.cndi?.nodes as unknown === "automatic");
+import { ErrOut } from "errout";
+import { ccolors } from "deps";
 
 const label = ccolors.faded(
   "src/outputs/terraform/azure/stage.ts:",
