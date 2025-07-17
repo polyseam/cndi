@@ -97,7 +97,7 @@
     },
 
     "test": {
-      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+      "command": "deno test --allow-all --shuffle --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
     },
 
     "test-slow": {
