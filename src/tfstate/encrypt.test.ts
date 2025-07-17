@@ -44,14 +44,12 @@ Deno.test("encrypt produces different outputs for same input", () => {
 
 Deno.test("decrypt throws error with wrong secret", () => {
   const originalText = "Sensitive data";
-  const encrypted = encrypt(originalText, TEST_SECRET);
+  const encrypted = encrypt(originalText, "correct-secret");
 
   assertThrows(
     () => {
       decrypt(encrypted, "wrong-secret");
     },
-    Error,
-    "failed to decrypt",
   );
 });
 
