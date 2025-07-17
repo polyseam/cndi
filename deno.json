@@ -32,11 +32,11 @@
       ]
     },
 
-    "compile-win-amd64": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/win-amd64/in/cndi.exe main.ts",
-    "compile-linux-arm64": "deno compile --allow-all --target aarch64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-arm64/in/cndi main.ts",
-    "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-amd64/in/cndi main.ts",
-    "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-arm64/in/cndi main.ts",
-    "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-amd64/in/cndi main.ts",
+    "compile-win-amd64": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --output dist/win-amd64/in/cndi.exe main.ts",
+    "compile-linux-arm64": "deno compile --allow-all --target aarch64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/linux-arm64/in/cndi main.ts",
+    "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/linux-amd64/in/cndi main.ts",
+    "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --output dist/mac-arm64/in/cndi main.ts",
+    "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --output dist/mac-amd64/in/cndi main.ts",
 
     "clean-dist": {
       "dependencies": [
