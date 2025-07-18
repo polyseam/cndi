@@ -62,32 +62,7 @@ export default function validateConfig(
   config: CNDIConfig,
   pathToConfig: string,
 ): ErrOut | void {
-  let cndi_version = config?.cndi_version;
-  // CNDI Version must be undefined or "v2"
-  if (cndi_version) {
-    if (config.cndi_version !== "v2") {
-      console.log();
-      return new ErrOut(
-        [
-          ccolors.error("cndi_config file found was at "),
-          ccolors.user_input(`"${pathToConfig}"\n`),
-          ccolors.error("but it has an unsupported"),
-          ccolors.key_name('"cndi_version"'),
-          ccolors.error("value. Only"),
-          ccolors.key_name("v2"),
-          ccolors.error("is supported."),
-        ],
-        {
-          code: 914,
-          id: "validate/cndi_config/cndi_version!=v2",
-          metadata: { config },
-          label,
-        },
-      );
-    }
-  } else {
-    cndi_version = "v2";
-  }
+  const cndi_version = config?.cndi_version || "v3";
 
   // cndi_config must have a project_name
   if (!config?.project_name) {
