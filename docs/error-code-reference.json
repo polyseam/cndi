@@ -435,6 +435,51 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1069"
   },
   {
+    "code": 933,
+    "message": "cndi_config invalid: region is not defined",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1157"
+  },
+  {
+    "code": 934,
+    "message": "cndi_config invalid: network is in insert mode but there are no populated subnet identifiers",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1156"
+  },
+  {
+    "code": 935,
+    "message": "cndi_config invalid: network is in insert mode but one of your private subnet identifiers is invalid",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1158"
+  },
+  {
+    "code": 936,
+    "message": "cndi_config invalid: network is in insert mode but one of your public subnet identifiers is invalid",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1159"
+  },
+  {
+    "code": 937,
+    "message": "cndi_config invalid: network is in insert mode but there are no subnet identifiers",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1159"
+  },
+  {
+    "code": 938,
+    "message": "cndi_config invalid: infrastructure.cndi.nodes has no entries",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1161"
+  },
+  {
+    "code": 939,
+    "message": "cndi_config invalid: infrastructure.cndi.network.network_address_space is invalid in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1162"
+  },
+  {
+    "code": 940,
+    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an invalid subnet in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1163"
+  },
+  {
+    "code": 941,
+    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an invalid subnet in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1163"
+  },
+  {
     "code": 1000,
     "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/857"

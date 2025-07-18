@@ -8,6 +8,13 @@ import { ccolors } from "deps";
 
 const label = "\nsrc/cndi_config/validate/mod.ts:";
 
+export const cndiConfigFoundAtPath = (
+  filePath: string,
+) => ([
+  ccolors.error("cndi_config file was found at"),
+  ccolors.user_input(`"${filePath}"\n`),
+].join(" "));
+
 type ValidateCNDIConfigSpecOptions = {
   pathToConfig: string;
 };
@@ -39,10 +46,9 @@ function validateCNDIConfigSpecComponentMetadata(
     console.log();
     return new ErrOut(
       [
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
+        cndiConfigFoundAtPath(pathToConfig),
         ccolors.error("but it does not have the required"),
-        ccolors.key_name('"project_name"'),
+        ccolors.key_name("project_name"),
         ccolors.error("key"),
       ],
       {
@@ -58,10 +64,9 @@ function validateCNDIConfigSpecComponentMetadata(
     console.log();
     return new ErrOut(
       [
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
+        cndiConfigFoundAtPath(pathToConfig),
         ccolors.error("but the"),
-        ccolors.key_name('"project_name"'),
+        ccolors.key_name("project_name"),
         ccolors.error("is not a valid slug"),
         ccolors.error(
           "it must only contain lowercase letters, numbers, and hyphens",
@@ -80,10 +85,9 @@ function validateCNDIConfigSpecComponentMetadata(
     console.log();
     return new ErrOut(
       [
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
+        cndiConfigFoundAtPath(pathToConfig),
         ccolors.error("but the"),
-        ccolors.key_name('"project_name"'),
+        ccolors.key_name("project_name"),
         ccolors.error("value is too long.\n"),
         ccolors.error(
           "It must be",
@@ -104,10 +108,9 @@ function validateCNDIConfigSpecComponentMetadata(
   if (!configSpec?.provider) {
     return new ErrOut(
       [
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
+        cndiConfigFoundAtPath(pathToConfig),
         ccolors.error("but it does not have the required"),
-        ccolors.key_name('"provider"'),
+        ccolors.key_name("provider"),
         ccolors.error("key"),
       ],
       {
@@ -118,24 +121,25 @@ function validateCNDIConfigSpecComponentMetadata(
       },
     );
   }
-
-  if (!configSpec.region && configSpec.provider !== "dev") {
-    if (configSpec.cndi_version === "v3") {
-      return new ErrOut([
-        ccolors.error("cndi_config file found was at "),
-        ccolors.user_input(`"${pathToConfig}"\n`),
-        ccolors.error("but the"),
-        ccolors.key_name('"region"'),
-        ccolors.error("key is not defined"),
-        ccolors.error(
-          "the region property is required for all providers except 'dev'",
-        ),
-      ], {
-        code: 1,
-        id: "validateCndiConfig/region-required",
-        label,
-        metadata: { configSpec, pathToConfig },
-      });
-    }
+  if (configSpec.cndi_version !== "v3") {
+    console.warn(
+      cndiConfigFoundAtPath(pathToConfig),
+      ccolors.warn("but the required key"),
+      ccolors.key_name("cndi_version"),
+      ccolors.warn("has the unsupported value"),
+      ccolors.user_input(configSpec.cndi_version),
+    );
+  } else if (!configSpec?.region && configSpec?.provider !== "dev") {
+    return new ErrOut([
+      cndiConfigFoundAtPath(pathToConfig),
+      ccolors.error("but the required"),
+      ccolors.key_name("region"),
+      ccolors.error("key is not defined"),
+    ], {
+      code: 933,
+      id: "validate/cndi_config/!region",
+      label,
+      metadata: { configSpec, pathToConfig },
+    });
   }
 }
