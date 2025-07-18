@@ -2,8 +2,6 @@ import { getPrettyJSONString } from "src/utils.ts";
 
 import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 
-import { ccolors } from "deps";
-
 interface AwsEfsMountTarget {
   file_system_id: string;
   security_groups: string[];
