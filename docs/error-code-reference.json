@@ -475,6 +475,11 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1164"
   },
   {
+    "code": 943,
+    "message": "cndi_config invalid: v3 - microk8s distribution in cloud provider",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1166"
+  },
+  {
     "code": 1000,
     "message": "failed to decrypt tf state: 'TERRAFORM_STATE_PASSPHRASE' is likely incorrect",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/857"
