@@ -29,7 +29,7 @@ export class ErrOut extends Error {
   id: string;
 
   constructor(msg: Msg, options: ErrOutOptions) {
-    const message = `${options.label}${
+    const message = `${options.label} ${
       Array.isArray(msg) ? msg.join(" ") : msg
     }`;
     super(message, { cause: options.cause });
@@ -49,7 +49,7 @@ export class ErrOut extends Error {
   print(): void {
     console.error(this.message);
     const discussionMessage = this.discussionURL
-      ? `discussion: ${ccolors.prompt(this.discussionURL)}`
+      ? `\ndiscussion: ${ccolors.prompt(this.discussionURL)}\n`
       : "";
     console.error(discussionMessage);
   }

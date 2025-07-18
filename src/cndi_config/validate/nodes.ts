@@ -11,7 +11,7 @@ import {
 
 import { cndiConfigFoundAtPath } from "./mod.ts";
 
-const label = ccolors.faded("\nsrc/cndi_config/validate/nodes.ts:");
+const label = ccolors.faded("src/cndi_config/validate/nodes.ts:");
 
 export function validateCNDIConfigSpecComponentNodes(
   configSpec: CNDIConfigSpec,
