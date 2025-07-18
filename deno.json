@@ -1,5 +1,5 @@
 {
-  "version": "2.30.3",
+  "version": "2.30.4",
   "deno_version": "2.2.10",
   "tasks": {
     "checks": {
