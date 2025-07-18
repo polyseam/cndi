@@ -17,7 +17,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "eks", "clusterless"]
+            "enum": ["eks", "clusterless"]
           }
         }
       }
@@ -32,7 +32,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "gke", "clusterless"]
+            "enum": ["gke", "clusterless"]
           }
         }
       }
@@ -47,7 +47,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "aks", "clusterless"]
+            "enum": ["aks", "clusterless"]
           }
         }
       }

@@ -476,7 +476,7 @@
   },
   {
     "code": 943,
-    "message": "cndi_config invalid: v3 - microk8s distribution in cloud provider",
+    "message": "cndi_config invalid: microk8s distribution is not supported for cloud providers",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1166"
   },
   {
