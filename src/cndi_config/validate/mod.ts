@@ -1,5 +1,5 @@
 import { ErrOut } from "errout";
-import { CNDIConfigSpec } from "../types.ts";
+import { CNDIConfigSpec, CNDIProvider } from "../types.ts";
 
 import { validateCNDIConfigSpecComponentNetwork } from "./network.ts";
 import { PROJECT_NAME_MAX_LENGTH } from "consts";
@@ -7,6 +7,19 @@ import { isSlug } from "src/utils.ts";
 import { ccolors } from "deps";
 
 const label = "\nsrc/cndi_config/validate/mod.ts:";
+
+/**
+ * Maps each provider to its recommended distribution for microk8s deprecation warnings
+ */
+export function getRecommendedDistribution(provider: CNDIProvider): string {
+  const recommendations: Record<CNDIProvider, string> = {
+    aws: "eks",
+    azure: "aks",
+    gcp: "gke",
+    dev: "microk8s", // Still valid for dev provider
+  };
+  return recommendations[provider];
+}
 
 export const cndiConfigFoundAtPath = (
   filePath: string,
