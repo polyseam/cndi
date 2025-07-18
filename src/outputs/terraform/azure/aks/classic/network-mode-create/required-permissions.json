@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "roleName": "cndi-min-role",
+    "description": "minimum permissions required for deploying a CNDI cluster to AKS",
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.ContainerService/managedClusters/write",
+          "Microsoft.ContainerService/managedClusters/delete",
+          "Microsoft.ContainerService/managedClusters/read",
+          "Microsoft.ContainerService/managedClusters/listClusterUserCredential/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/delete",
+          "Microsoft.Resources/subscriptions/resourceGroups/write",
+          "Microsoft.Resources/subscriptions/resourceGroups/delete",
+          "Microsoft.Resources/subscriptions/resourceGroups/read",
+          "Microsoft.Network/virtualNetworks/write",
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/delete",
+          "Microsoft.Network/virtualNetworks/subnets/delete",
+          "Microsoft.Network/virtualNetworks/subnets/write",
+          "Microsoft.Network/virtualNetworks/subnets/read",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/dnszones/A/write",
+          "Microsoft.Network/dnszones/A/read",
+          "Microsoft.Network/dnszones/A/delete",
+          "Microsoft.Network/dnszones/TXT/write",
+          "Microsoft.Network/dnszones/TXT/read",
+          "Microsoft.Network/dnszones/TXT/delete",
+          "Microsoft.Network/dnszones/read",
+          "Microsoft.ContainerService/managedClusters/agentPools/read",
+          "Microsoft.ContainerService/managedClusters/agentPools/write",
+          "Microsoft.OperationsManagement/solutions/read",
+          "Microsoft.OperationsManagement/solutions/write",
+          "Microsoft.OperationalInsights/workspaces/read",
+          "Microsoft.OperationalInsights/workspaces/write",
+          "Microsoft.Network/dnszones/write"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}

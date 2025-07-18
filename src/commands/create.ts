@@ -18,12 +18,12 @@ import {
   stageFile,
 } from "src/utils.ts";
 
-import { owAction } from "src/commands/overwrite.ts";
+import { overwrite } from "src/commands/overwrite.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { createSshKeys } from "src/initialize/sshKeys.ts";
+import { createSealedSecretsKeys } from "../environment/sealedSecretsKeys.ts";
+import { createSshKeys } from "../environment/sshKeys.ts";
 import { useTemplate } from "src/use-template/mod.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
@@ -34,7 +34,7 @@ import getFinalEnvString from "src/outputs/dotenv.ts";
 import { ErrOut } from "errout";
 
 // Error Domain: 15XX
-const label = ccolors.faded("\nsrc/commands/create.ts:");
+const label = ccolors.faded("\nsrc/commands/create.ts:\n");
 
 function validateGitHubSlug(value: string): ValidateResult {
   if (!value.includes("/")) {
@@ -141,7 +141,7 @@ const createCommand = new Command()
     "Label in the form of <provider>/<distribution> slug to specifying a deployment target",
   )
   .option(
-    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
@@ -616,11 +616,11 @@ const createCommand = new Command()
 
     await persistStagedFiles(destinationDirectory);
 
-    await owAction({
+    await overwrite({
       output: destinationDirectory,
       initializing: true,
       create: true,
-      runWorkflowSourceRef: options.runWorkflowSourceRef,
+      workflowSourceRef: options?.workflowSourceRef,
       skipPush: !!skipPush,
     });
   });

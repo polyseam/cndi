@@ -1,3 +1,5 @@
+import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
+
 export function parseSubnetResourceId(networkResourceId: string) {
   // /subscriptions/16027ac8-8d35-45a5-9f0e-039ec792cfbe/resourceGroups/netconfig-insert-mode/providers/Microsoft.Network/virtualNetworks/insertion-target-vnet/subnets/my-subnet
   const [
@@ -19,4 +21,10 @@ export function parseSubnetResourceId(networkResourceId: string) {
   }
 
   return { resourceGroupName, vnetName, subnetName };
+}
+
+export function getNodeResourceGroupName(
+  { project_name }: NormalizedCNDIConfig,
+) {
+  return `nrg-cndi-${project_name}`;
 }

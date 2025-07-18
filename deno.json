@@ -1,6 +1,6 @@
 {
-  "version": "2.30.4",
-  "deno_version": "2.2.10",
+  "version": "3.0.0",
+  "deno_version": "2.4.1",
   "tasks": {
     "checks": {
       "command": "deno lint && deno check . && deno fmt --check"
@@ -32,11 +32,11 @@
       ]
     },
 
-    "compile-win-amd64": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/win-amd64/in/cndi.exe main.ts",
-    "compile-linux-arm64": "deno compile --allow-all --target aarch64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-arm64/in/cndi main.ts",
-    "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/linux-amd64/in/cndi main.ts",
-    "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-arm64/in/cndi main.ts",
-    "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --include src/actions/overwrite.worker.ts --output dist/mac-amd64/in/cndi main.ts",
+    "compile-win-amd64": "deno compile --allow-all --target x86_64-pc-windows-msvc --v8-flags=--max-old-space-size=8000 --output dist/win-amd64/in/cndi.exe main.ts",
+    "compile-linux-arm64": "deno compile --allow-all --target aarch64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/linux-arm64/in/cndi main.ts",
+    "compile-linux-amd64": "deno compile --allow-all --target x86_64-unknown-linux-gnu --v8-flags=--max-old-space-size=8000 --output dist/linux-amd64/in/cndi main.ts",
+    "compile-mac-arm64": "deno compile --allow-all --target aarch64-apple-darwin --v8-flags=--max-old-space-size=8000 --output dist/mac-arm64/in/cndi main.ts",
+    "compile-mac-amd64": "deno compile --allow-all --target x86_64-apple-darwin --v8-flags=--max-old-space-size=8000 --output dist/mac-amd64/in/cndi main.ts",
 
     "clean-dist": {
       "dependencies": [
@@ -97,7 +97,7 @@
     },
 
     "test": {
-      "command": "deno test --allow-all --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
+      "command": "deno test --allow-all --shuffle --env-file=test.env --v8-flags=--max-old-space-size=8000 --parallel --fail-fast --no-check"
     },
 
     "test-slow": {
@@ -119,49 +119,31 @@
     "lint-fix": "deno lint --fix"
   },
   "imports": {
-    "@cdktf/provider-aws": "npm:@cdktf/provider-aws@^19.57.0",
-    "@cdktf/provider-azurerm": "npm:@cdktf/provider-azurerm@^13.22.0",
-    "@cdktf/provider-google": "npm:@cdktf/provider-google@^14.24.0",
-    "@cdktf/provider-helm": "npm:@cdktf/provider-helm@^10.5.0",
-    "@cdktf/provider-kubernetes": "npm:@cdktf/provider-kubernetes@^11.11.0",
-    "@cdktf/provider-local": "npm:@cdktf/provider-local@^10.1.1",
-    "@cdktf/provider-random": "npm:@cdktf/provider-random@^11.1.0",
-    "@cdktf/provider-time": "npm:@cdktf/provider-time@^10.3.0",
-    "@cdktf/provider-tls": "npm:@cdktf/provider-tls@^10.0.1",
-    "netmask": "npm:netmask@2.0.2",
-    "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
-    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.5",
-    "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.5",
-    "@cndi/cdktf/modules/aws-eks-managed-node-group.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-eks-managed-node-group.ts",
-    "@cndi/cdktf/modules/aws-eks.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-eks.ts",
-    "@cndi/cdktf/modules/aws-iam-assumable-role-with-oidc.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-iam-assumable-role-with-oidc.ts",
-    "@cndi/cdktf/modules/aws-vpc.ts": "jsr:@cndi/cdktf@^0.4.0/modules/aws-vpc.ts",
+    "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.8",
+    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
+    "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.8",
     "@polyseam/cliffy-provider-gh-releases": "jsr:@polyseam/cliffy-provider-gh-releases@2.0.1",
     "@polyseam/silky": "jsr:@polyseam/silky@^1.1.2",
     "@std/assert": "jsr:@std/assert@^1.0.11",
-    "@std/async": "jsr:@std/async@^1.0.11",
-    "@std/cli": "jsr:@std/cli@^1.0.14",
-    "@std/collections": "jsr:@std/collections@^1.0.10",
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
-    "@std/fs": "jsr:@std/fs@^1.0.14",
+    "@std/async": "jsr:@std/async@^1.0.13",
+    "@std/cli": "jsr:@std/cli@^1.0.20",
+    "@std/collections": "jsr:@std/collections@^1.1.2",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
+    "@std/fs": "jsr:@std/fs@^1.0.19",
     "@std/io": "jsr:@std/io@^0.225.2",
     "@std/jsonc": "jsr:@std/jsonc@^1.0.1",
-    "@std/path": "jsr:@std/path@^1.0.8",
-    "@std/testing": "jsr:@std/testing@^1.0.9",
-    "@std/yaml": "jsr:@std/yaml@^1.0.5",
-    "cdktf": "npm:cdktf@^0.20.11",
-    "cdktf-deps": "./src/outputs/terraform/cdktf-deps.ts",
-    "child_process": "node:child_process",
-    "constructs": "npm:constructs@10.3.0",
+    "@std/path": "jsr:@std/path@^1.1.1",
+    "@std/testing": "jsr:@std/testing@^1.0.14",
+    "@std/yaml": "jsr:@std/yaml@^1.0.8",
     "consts": "./src/constants.ts",
     "crypto-js": "npm:crypto-js@4.2.0",
     "deps": "./src/deps.ts",
     "get-project-root": "./_here.ts",
+    "net-utils": "./src/utils/net.ts",
     "lodash.get": "npm:lodash.get@4.4.2",
     "lodash.set": "npm:lodash.set@4.3.2",
     "lodash.unset": "npm:lodash.unset@4.5.2",
     "simple-git": "npm:simple-git@3.27.0",
-    "shared-modules/": "./shared-modules/",
     "src/": "./src/",
     "test-deps": "./src/tests/deps.ts",
     "px": "./src/px/mod.ts",
