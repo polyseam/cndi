@@ -7,7 +7,7 @@ import { PROJECT_NAME_MAX_LENGTH } from "consts";
 import { isSlug } from "src/utils.ts";
 import { ccolors } from "deps";
 
-const label = "src/cndi_config/validate/mod.ts:";
+const label = ccolors.faded("src/cndi_config/validate/mod.ts:");
 
 /**
  * Maps each provider to its recommended distribution for microk8s deprecation warnings
