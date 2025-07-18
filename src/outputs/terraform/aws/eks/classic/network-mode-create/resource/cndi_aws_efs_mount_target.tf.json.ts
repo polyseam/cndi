@@ -25,12 +25,6 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
     },
   };
 
-  console.warn(
-    ccolors.warn(
-      "EFS Mount Targets are being created for each vpc private subnet using count!",
-    ),
-  );
-
   return getPrettyJSONString({
     resource: {
       aws_efs_mount_target,
