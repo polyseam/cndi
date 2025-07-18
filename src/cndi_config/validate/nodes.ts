@@ -34,7 +34,7 @@ export function validateCNDIConfigSpecComponentNodes(
           ccolors.error("entries. At least one node must be defined."),
         ],
         {
-          code: 938,
+          code: 942,
           id: "validate/cndi_config/infrastructure.cndi.nodes/undefined",
           label,
         },

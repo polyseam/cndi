@@ -405,9 +405,9 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1053"
   },
   {
-    "code": 927,
+    "code": 938,
     "message": "cndi_config invalid: network mode supplied does not exist",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/1064"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1060"
   },
   {
     "code": 928,
@@ -455,12 +455,7 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1159"
   },
   {
-    "code": 937,
-    "message": "cndi_config invalid: network is in insert mode but there are no subnet identifiers",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/1159"
-  },
-  {
-    "code": 938,
+    "code": 942,
     "message": "cndi_config invalid: infrastructure.cndi.nodes has no entries",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1161"
   },
@@ -476,8 +471,8 @@
   },
   {
     "code": 941,
-    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an invalid subnet in create mode",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/1163"
+    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an out-of-bounds subnet in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1164"
   },
   {
     "code": 1000,
