@@ -5,7 +5,7 @@ import { ErrOut } from "errout";
 
 const git = simpleGit();
 
-const label = ccolors.faded("\nsrc/tfstate/git/write-state.ts:");
+const label = ccolors.faded("\nsrc/tfstate/git/write-state.ts:\n");
 type PushStateForRunOptions = {
   pathToTerraformResources: string;
   cmd: string;
@@ -115,7 +115,30 @@ export async function pushStateFromTerraform({
     await git.checkout("_state");
   }
 
-  const encryptedState = encrypt(state!, secret);
+  // pull the latest changes from _state branch
+  // (required in environments where _state is persisted)
+  // eg. cndi show-outputs locally
+  try {
+    await git.pull("origin", "_state");
+  } catch (errorPullingState) {
+    if (errorPullingState instanceof Error) {
+      return new ErrOut(
+        [
+          ccolors.error("failed to pull state from _state branch"),
+          ccolors.error("likely because you have no _state branch"),
+          ccolors.error("or your _state branch is not up to date"),
+        ],
+        {
+          code: 1005,
+          label,
+          id: "read-state/pull-state/!pull",
+          metadata: { cmd, originalBranch },
+        },
+      );
+    }
+  }
+
+  const encryptedState = await encrypt(state!, secret);
 
   const pathToNewState = path.join(
     pathToTerraformResources,

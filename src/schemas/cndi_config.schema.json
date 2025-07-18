@@ -17,7 +17,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "eks", "clusterless"]
+            "enum": ["eks", "clusterless"]
           }
         }
       }
@@ -32,7 +32,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "gke", "clusterless"]
+            "enum": ["gke", "clusterless"]
           }
         }
       }
@@ -47,7 +47,7 @@
       "then": {
         "properties": {
           "distribution": {
-            "enum": ["microk8s", "aks", "clusterless"]
+            "enum": ["aks", "clusterless"]
           }
         }
       }
@@ -77,8 +77,12 @@
     "cndi_version": {
       "type": "string",
       "description": "The version of cndi config api to use.",
-      "pattern": "v2",
-      "default": "v2"
+      "pattern": "(v2|v3)",
+      "default": "v3"
+    },
+    "region": {
+      "type": "string",
+      "description": "The region to use for the infrastructure."
     },
     "provider": {
       "type": "string",
@@ -114,6 +118,24 @@
           "required": ["nodes"],
           "additionalProperties": false,
           "properties": {
+            "gitops": {
+              "type": "object",
+              "description": "An object which defines the gitops resources CNDI should deploy.",
+              "properties": {
+                "argocd": {
+                  "type": "object",
+                  "description": "An object which defines the ArgoCD resources CNDI should deploy.",
+                  "properties": {
+                    "hostname": {
+                      "type": "string",
+                      "description": "The hostname on which to make your CNDI ArgoCD available."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
             "argocd": {
               "type": "object",
               "description": "An object which defines the ArgoCD resources CNDI should deploy.",
@@ -121,8 +143,79 @@
                 "hostname": {
                   "type": "string",
                   "description": "The hostname on which to make your CNDI ArgoCD available."
+                },
+                "install_url": {
+                  "type": "string",
+                  "description": "The URL from which to install ArgoCD."
+                },
+                "root_application": {
+                  "type": "object",
+                  "description": "Configuration for the root ArgoCD application."
                 }
-              }
+              },
+              "additionalProperties": false
+            },
+            "microk8s": {
+              "type": "object",
+              "description": "An object which defines the MicroK8s configuration.",
+              "properties": {
+                "addons": {
+                  "type": "array",
+                  "description": "List of MicroK8s addons to enable.",
+                  "items": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the MicroK8s addon."
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the addon is enabled.",
+                        "default": true
+                      },
+                      "args": {
+                        "type": "array",
+                        "description": "Arguments to pass to the addon.",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "version": {
+                  "type": "string",
+                  "description": "The version of MicroK8s to install."
+                },
+                "channel": {
+                  "type": "string",
+                  "description": "The channel of MicroK8s to use.",
+                  "default": "stable"
+                },
+                "cloud-init": {
+                  "type": "object",
+                  "description": "Cloud-init configuration for MicroK8s nodes.",
+                  "properties": {
+                    "leader_before": {
+                      "type": "array",
+                      "description": "Commands to run before MicroK8s installation on leader nodes.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "leader_after": {
+                      "type": "array",
+                      "description": "Commands to run after MicroK8s installation on leader nodes.",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "additionalProperties": false
             },
             "observability": {
               "type": "object",
@@ -136,7 +229,9 @@
                 },
                 "mode": {
                   "type": "string",
-                  "enum": ["in_cluster"]
+                  "enum": ["in_cluster"],
+                  "description": "The deployment mode for observability components.",
+                  "default": "in_cluster"
                 },
                 "grafana": {
                   "type": "object",
@@ -232,7 +327,26 @@
                     "type": "string",
                     "enum": ["create"]
                   },
-                  "vnet_address_space": {
+                  "subnet_address_spaces": {
+                    "type": "object",
+                    "properties": {
+                      "public": {
+                        "type": "array",
+                        "description": "Address space to create for public cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "private": {
+                        "type": "array",
+                        "description": "Address space to create for private cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "network_address_space": {
                     "type": "string",
                     "description": "The address space used to create your CNDI cluster virtual network in 'create' mode.",
                     "default": "10.0.0.0/16"
@@ -246,20 +360,36 @@
                     "type": "string",
                     "enum": ["insert"]
                   },
-                  "vnet_identifier": {
+                  "network_identifier": {
                     "type": "string",
                     "description": "The identifier of the virtual network which to deploy your cluster."
                   },
-                  "subnet_address_space": {
-                    "type": "string",
-                    "description": "The address space used to create your CNDI cluster subnet in 'insert' mode.",
-                    "default": "10.0.0.0/20"
+                  "subnet_identifiers": {
+                    "type": "object",
+                    "description": "Subnets in which to insert your cluster resources",
+                    "properties": {
+                      "private": {
+                        "type": "array",
+                        "description": "List of private subnet IDs in which to deploy private cluster resources.",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "public": {
+                        "type": "array",
+                        "description": "List of public subnet IDs in which to deploy public facing cluster resources",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
                   }
                 }
               }
             },
             "functions": {
               "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "hostname": {
                   "type": "string",
@@ -302,7 +432,25 @@
                 },
                 "provider": {
                   "type": "string",
-                  "description": "The DNS provider the external-dns controller should send updates to."
+                  "description": "The DNS provider the external-dns controller should send updates to.",
+                  "enum": [
+                    "akamai",
+                    "alibabacloud",
+                    "aws",
+                    "azure",
+                    "azure-private-dns",
+                    "cloudflare",
+                    "coredns",
+                    "designate",
+                    "digitalocean",
+                    "google",
+                    "hetzner",
+                    "infoblox",
+                    "linode",
+                    "rfc2136",
+                    "transip",
+                    "oci"
+                  ]
                 },
                 "domain_filters": {
                   "description": "An array of domain name filters which the external-dns controller should apply updates to.",
@@ -323,16 +471,29 @@
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "default": true
+                  "default": true,
+                  "description": "Whether or not to deploy the reloader controller."
+                },
+                "values": {
+                  "type": "object",
+                  "description": "An object which defines the values to be passed to the reloader Helm Chart."
                 }
               },
               "additionalProperties": false
             },
+            "keyless": {
+              "type": "boolean",
+              "description": "Whether to use keyless authentication.",
+              "default": false
+            },
             "cert_manager": {
+              "type": "object",
+              "description": "An object which defines the cert-manager configuration.",
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "default": true
+                  "default": true,
+                  "description": "Whether or not to deploy the cert-manager controller."
                 },
                 "self_signed": {
                   "type": "boolean",
@@ -342,6 +503,10 @@
                 "email": {
                   "type": "string",
                   "description": "The email address let's encrypt should attach to your certificates.\n Can only be used if \"self_signed\" is false or undefined."
+                },
+                "values": {
+                  "type": "object",
+                  "description": "An object which defines the values to be passed to the cert-manager Helm Chart."
                 }
               },
               "oneOf": [
@@ -354,6 +519,9 @@
                     "enabled": {
                       "type": "boolean",
                       "default": true
+                    },
+                    "values": {
+                      "type": "object"
                     }
                   },
                   "required": ["self_signed"],
@@ -361,18 +529,40 @@
                 },
                 {
                   "properties": {
-                    "self_signed": { "enum": [false] },
-                    "email": {},
+                    "self_signed": { "enum": [false, null] },
+                    "email": {
+                      "type": "string"
+                    },
                     "enabled": {
                       "type": "boolean",
                       "default": true
+                    },
+                    "values": {
+                      "type": "object"
                     }
                   },
                   "required": ["email"],
                   "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "enum": [false]
+                    },
+                    "self_signed": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["enabled"],
+                  "additionalProperties": false
                 }
-              ],
-              "additionalProperties": false
+              ]
             },
             "open_ports": {
               "type": "array",
@@ -422,19 +612,73 @@
                   "role": {
                     "type": "string",
                     "description": "Role of the node",
-                    "enum": ["leader", "controller", "worker"]
+                    "enum": ["leader", "controller", "worker"],
+                    "default": "controller"
                   },
-                  "instance_type": {},
+                  "instance_type": {
+                    "type": "string",
+                    "description": "The instance type to use for the node (e.g., t3.medium for AWS, n2-standard-2 for GCP, Standard_D2s_v3 for Azure)."
+                  },
+                  "machine_type": {
+                    "type": "string",
+                    "description": "The machine type to use for the node (primarily for GCP)."
+                  },
+                  "vm_size": {
+                    "type": "string",
+                    "description": "The VM size to use for the node (primarily for Azure)."
+                  },
                   "volume_size": {
+                    "type": "number",
+                    "description": "The amount of disk to allocate to the node in G (primarily for AWS).",
+                    "minimum": 1
+                  },
+                  "disk_size": {
                     "type": "number",
                     "description": "The amount of disk to allocate to the node in G.",
                     "minimum": 1
+                  },
+                  "disk_size_gb": {
+                    "type": "number",
+                    "description": "The amount of disk to allocate to the node in G (primarily for Azure).",
+                    "minimum": 1
+                  },
+                  "disk_type": {
+                    "type": "string",
+                    "description": "The type of disk to allocate to the node."
+                  },
+                  "size": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "The size specification for the node (can be a machine type string)."
+                      },
+                      {
+                        "type": "number",
+                        "description": "The size specification for the node in G.",
+                        "minimum": 1
+                      }
+                    ]
                   },
                   "count": {
                     "type": "number",
                     "description": "The number of nodes to deploy.",
                     "minimum": 1,
                     "default": 1
+                  },
+                  "min_count": {
+                    "type": "number",
+                    "description": "The minimum number of nodes for auto-scaling.",
+                    "minimum": 0
+                  },
+                  "max_count": {
+                    "type": "number",
+                    "description": "The maximum number of nodes for auto-scaling.",
+                    "minimum": 1
+                  },
+                  "cpus": {
+                    "type": "number",
+                    "description": "The number of CPUs to allocate to the node (primarily for dev/multipass).",
+                    "minimum": 1
                   },
                   "disk": {
                     "oneOf": [
@@ -463,6 +707,40 @@
                         "minimum": 1
                       }
                     ]
+                  },
+                  "labels": {
+                    "type": "object",
+                    "description": "Kubernetes labels to apply to the node.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "taints": {
+                    "type": "array",
+                    "description": "Kubernetes taints to apply to the node.",
+                    "items": {
+                      "type": "object",
+                      "required": ["key", "value", "effect"],
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "description": "The taint key."
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "The taint value."
+                        },
+                        "effect": {
+                          "type": "string",
+                          "description": "The taint effect.",
+                          "enum": [
+                            "NoSchedule",
+                            "PreferNoSchedule",
+                            "NoExecute"
+                          ]
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -494,8 +772,8 @@
                     "private": {
                       "type": "object",
                       "description": "An object which defines the properties of the private nginx ingress controller.",
+                      "additionalProperties": false,
                       "properties": {
-                        "additionalProperties": false,
                         "enabled": {
                           "type": "boolean",
                           "default": false,

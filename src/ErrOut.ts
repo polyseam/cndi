@@ -1,7 +1,6 @@
 import { ccolors } from "deps";
 import { emitTelemetryEvent } from "src/telemetry/telemetry.ts";
 import { error_code_reference } from "consts";
-import { OverwriteWorkerMessageOutgoing } from "src/actions/overwrite.worker.ts";
 
 type Msg = Array<string> | string;
 
@@ -30,7 +29,7 @@ export class ErrOut extends Error {
   id: string;
 
   constructor(msg: Msg, options: ErrOutOptions) {
-    const message = `${options.label}  ${
+    const message = `${options.label}${
       Array.isArray(msg) ? msg.join(" ") : msg
     }`;
     super(message, { cause: options.cause });
@@ -82,14 +81,6 @@ export class ErrOut extends Error {
       // error persisting exit event to telemetry server
     }
     return this.exit();
-  }
-
-  get owWorkerErrorMessage() {
-    return {
-      type: "error-overwrite",
-      code: this.code,
-      message: this.message,
-    } as OverwriteWorkerMessageOutgoing;
   }
 
   exit = () => Deno.exit(this.code);

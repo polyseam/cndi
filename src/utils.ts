@@ -1,8 +1,6 @@
 import {
   ccolors,
   copy,
-  deepMerge,
-  exists,
   homedir,
   JSONC,
   path,
@@ -14,13 +12,12 @@ import {
 import { DEFAULT_OPEN_PORTS, error_code_reference } from "consts";
 
 import {
-  CNDIConfig,
   CNDIDistribution,
   CNDIPort,
   CNDITaintEffect,
   NodeRole,
-  TFBlocks,
-} from "src/types.ts";
+  NormalizedCNDIConfig,
+} from "./cndi_config/types.ts";
 
 import { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
@@ -28,7 +25,7 @@ import { ErrOut } from "errout";
 
 import { emitTelemetryEvent } from "src/telemetry/telemetry.ts";
 
-const label = ccolors.faded("src/utils.ts:");
+const label = ccolors.faded("\nsrc/utils.ts:\n");
 
 // YAML.stringify but easier to work with
 function getYAMLString(object: unknown, skipInvalid = true): string {
@@ -90,101 +87,13 @@ const getTaintEffectForDistribution = (
 };
 
 type LoadConfigSuccessResult = {
-  config: CNDIConfig;
+  config: NormalizedCNDIConfig;
   pathToConfig: string;
 };
 
 export type PxSuccessResult<T> = [undefined, T];
 export type PxErrorResult = [ErrOut];
 export type PxResult<T> = PxSuccessResult<T> | PxErrorResult;
-
-// attempts to find cndi_config.yaml or cndi_config.jsonc, then returns its value and location
-const loadCndiConfig = async (
-  projectDirectory: string,
-): Promise<PxResult<LoadConfigSuccessResult>> => {
-  let pathToConfig = path.join(projectDirectory, "cndi_config.yaml");
-
-  if (!(await exists(pathToConfig))) {
-    pathToConfig = path.join(projectDirectory, "cndi_config.yml");
-  }
-
-  if (!(await exists(pathToConfig))) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("failed to find a"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(path.join(projectDirectory, "cndi_config.yaml")),
-        ],
-        {
-          id: "loadCndiConfig/not-found",
-          code: 500,
-          metadata: {
-            pathToConfig,
-          },
-          label,
-        },
-      ),
-    ];
-  }
-
-  let configText: string;
-
-  try {
-    configText = await Deno.readTextFile(pathToConfig);
-  } catch (errorReadingFile) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("could not read"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(`"${pathToConfig}"`),
-        ],
-        {
-          code: 504,
-          id: "loadCndiConfig/read-text-error",
-          metadata: {
-            pathToConfig,
-          },
-          label,
-          cause: errorReadingFile as Error,
-        },
-      ),
-    ];
-  }
-
-  let config: CNDIConfig;
-
-  try {
-    config = YAML.parse(configText) as CNDIConfig;
-  } catch (errorParsingFile) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("could not parse"),
-          ccolors.key_name(`cndi_config.yaml`),
-          ccolors.error("file at"),
-          ccolors.user_input(`"${pathToConfig}"`),
-        ],
-        {
-          code: 1300,
-          id: "loadCndiConfig/parse-yaml-error",
-          metadata: {
-            pathToConfig,
-          },
-          label,
-          cause: errorParsingFile as Error,
-        },
-      ),
-    ];
-  }
-
-  return [undefined, { config, pathToConfig }];
-};
-
-// TODO: the following 2 functions can fail in 2 ways
 
 // helper function to load a JSONC file
 const loadJSONC = async (path: string) => {
@@ -271,49 +180,11 @@ function getStagingDirectory(): PxResult<string> {
   return [undefined, stagingDirectory];
 }
 
-// MUST be called after all other terraform files have been staged
-async function patchAndStageTerraformFilesWithInput(
-  input: TFBlocks,
-): Promise<ErrOut | void> {
-  const pathToTerraformObject = path.join("cndi", "terraform", "cdk.tf.json");
-
-  const [err, stagingDirectory] = getStagingDirectory();
-
-  if (err) return err;
-
-  const cdktfObj = (await loadJSONC(
-    path.join(stagingDirectory, pathToTerraformObject),
-  )) as TFBlocks;
-
-  // this is highly inefficient
-  const cdktfWithEmpties = {
-    ...cdktfObj,
-    resource: deepMerge(cdktfObj?.resource || {}, input?.resource || {}),
-    terraform: deepMerge(cdktfObj?.terraform || {}, input?.terraform || {}),
-    variable: deepMerge(cdktfObj?.variable || {}, input?.variable || {}),
-    locals: deepMerge(cdktfObj?.locals || {}, input?.locals || {}),
-    output: deepMerge(cdktfObj?.output || {}, input?.output || {}),
-    module: deepMerge(cdktfObj?.module || {}, input?.module || {}),
-    data: deepMerge(cdktfObj?.data || {}, input?.data || {}),
-    provider: deepMerge(cdktfObj?.provider || {}, input?.provider || {}),
-  };
-
-  const output: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(cdktfWithEmpties)) {
-    if (Object.keys(value).length) {
-      output[key] = value;
-    }
+function truncateString(str: string, num = 63) {
+  if (str.length <= num) {
+    return str;
   }
-
-  const errorStagingTFObj = await stageFile(
-    pathToTerraformObject,
-    getPrettyJSONString(output),
-  );
-
-  if (errorStagingTFObj) {
-    return errorStagingTFObj;
-  }
+  return str.slice(0, num);
 }
 
 function getPathToTerraformBinary() {
@@ -341,7 +212,7 @@ function getPathToKubesealBinary() {
   return pathToKubesealBinary;
 }
 
-function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
+function resolveCNDIPorts(config: NormalizedCNDIConfig): CNDIPort[] {
   const user_ports = config.infrastructure?.cndi?.open_ports ?? [];
 
   const ports: CNDIPort[] = [...DEFAULT_OPEN_PORTS];
@@ -370,8 +241,9 @@ function resolveCNDIPorts(config: CNDIConfig): CNDIPort[] {
 
 async function stageFile(
   relativePath: string,
-  fileContents: string,
+  fileContents: string | null,
 ): Promise<ErrOut | void> {
+  if (fileContents === null) return;
   const [err, stagingDirectory] = getStagingDirectory();
   if (err) return err;
   const stagingPath = path.join(stagingDirectory, relativePath);
@@ -423,35 +295,6 @@ async function checkDirectoryForFileSuffix(directory: string, suffix: string) {
     // directory doesn't exist
   }
   return false;
-}
-type CDKTFAppConfig = {
-  outdir: string;
-};
-
-async function getCDKTFAppConfig(): Promise<PxResult<CDKTFAppConfig>> {
-  const [err, stagingDirectory] = getStagingDirectory();
-  if (err) return [err];
-
-  const outdir = path.join(stagingDirectory, "cndi", "terraform");
-  try {
-    await Deno.mkdir(outdir, { recursive: true });
-  } catch (errorCreatingDirectory) {
-    return [
-      new ErrOut(
-        [
-          ccolors.error("failed to create staging directory for terraform at"),
-          ccolors.key_name(outdir),
-        ],
-        {
-          cause: errorCreatingDirectory as Error,
-          code: 510,
-          label,
-          id: "!getCDKTFAppConfig",
-        },
-      ),
-    ];
-  }
-  return [undefined, { outdir }];
 }
 
 type PersistStagedFilesOptions = {
@@ -681,7 +524,6 @@ export {
   checkInitialized,
   checkInstalled,
   emitExitEvent,
-  getCDKTFAppConfig,
   getCndiInstallPath,
   getFileSuffixForPlatform,
   getPathToCndiBinary,
@@ -697,9 +539,7 @@ export {
   getUserDataTemplateFileString,
   getYAMLString,
   isSlug,
-  loadCndiConfig,
   loadJSONC,
-  patchAndStageTerraformFilesWithInput,
   persistStagedFiles,
   removeOldBinaryIfRequired,
   replaceRange,
@@ -707,5 +547,6 @@ export {
   sha256Digest,
   stageDirectory,
   stageFile,
+  truncateString,
   useSshRepoAuth,
 };
