@@ -1,9 +1,8 @@
 import { ccolors, loadEnvSync, path } from "deps";
-import { type PxResult } from "src/utils.ts";
-import { loadCNDIConfig } from "./cndi_config/load.ts";
+import { loadCndiConfig, type PxResult } from "src/utils.ts";
 import { ErrOut } from "errout";
 
-const label = ccolors.faded("\nsrc/setTF_VARs.ts:\n");
+const label = ccolors.faded("\nsrc/setTF_VARs.ts:");
 
 const BACKWARDS_COMPATIBILITY = true;
 
@@ -14,7 +13,7 @@ export async function getTF_VARs(
 
   const env = new Map<string, string>();
 
-  const [errorLoadingConfig, loadConfigResult] = await loadCNDIConfig(
+  const [errorLoadingConfig, loadConfigResult] = await loadCndiConfig(
     projectDir,
   );
 
