@@ -405,18 +405,18 @@
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1053"
   },
   {
-    "code": 927,
+    "code": 938,
     "message": "cndi_config invalid: network mode supplied does not exist",
-    "discussion_link": "https://github.com/orgs/polyseam/discussions/1064"
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1060"
   },
   {
     "code": 928,
-    "message": "cndi_config invalid: network vnet_address_space and subnet_address_space are incompatible",
+    "message": "cndi_config invalid: network network_address_space and subnet_address_space are incompatible",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1065"
   },
   {
     "code": 929,
-    "message": "cndi_config invalid: network vnet_address_space is not a valid CIDR",
+    "message": "cndi_config invalid: network network_address_space is not a valid CIDR",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1066"
   },
   {
@@ -426,13 +426,58 @@
   },
   {
     "code": 931,
-    "message": "cndi_config invalid: network is in insert mode but vnet_identifier is not supplied",
+    "message": "cndi_config invalid: network is in insert mode but network_identifier is not supplied",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1068"
   },
   {
     "code": 932,
-    "message": "cndi_config invalid: network is in create mode but vnet_identifier was supplied",
+    "message": "cndi_config invalid: network is in create mode but network_identifier was supplied",
     "discussion_link": "https://github.com/orgs/polyseam/discussions/1069"
+  },
+  {
+    "code": 933,
+    "message": "cndi_config invalid: region is not defined",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1157"
+  },
+  {
+    "code": 934,
+    "message": "cndi_config invalid: network is in insert mode but there are no populated subnet identifiers",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1156"
+  },
+  {
+    "code": 935,
+    "message": "cndi_config invalid: network is in insert mode but one of your private subnet identifiers is invalid",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1158"
+  },
+  {
+    "code": 936,
+    "message": "cndi_config invalid: network is in insert mode but one of your public subnet identifiers is invalid",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1159"
+  },
+  {
+    "code": 942,
+    "message": "cndi_config invalid: infrastructure.cndi.nodes has no entries",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1161"
+  },
+  {
+    "code": 939,
+    "message": "cndi_config invalid: infrastructure.cndi.network.network_address_space is invalid in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1162"
+  },
+  {
+    "code": 940,
+    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an invalid subnet in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1163"
+  },
+  {
+    "code": 941,
+    "message": "cndi_config invalid: infrastructure.cndi.network.subnet_address_spaces contain an out-of-bounds subnet in create mode",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1164"
+  },
+  {
+    "code": 943,
+    "message": "cndi_config invalid: microk8s distribution is not supported for cloud providers",
+    "discussion_link": "https://github.com/orgs/polyseam/discussions/1166"
   },
   {
     "code": 1000,

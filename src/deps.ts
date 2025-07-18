@@ -68,34 +68,30 @@ export const PromptTypes = {
 } as const;
 
 //  - validator
-export { default as validator } from "validator";
+import * as validator from "validator";
+export { validator };
 
 // - lodash
 export { default as getValueFromKeyPath } from "lodash.get";
 export { default as setValueForKeyPath } from "lodash.set";
 export { default as unsetValueForKeyPath } from "lodash.unset";
 
-//  - netmask
-export { Netmask } from "netmask";
-
 //  - simple-git
 export { simpleGit } from "simple-git";
 
-//  - crypto-js
 import CryptoJS from "crypto-js";
-
-// import/export required
 export { CryptoJS };
 
 // custom colors
 export const ccolors = {
-  faded: colors.white,
+  faded: colors.gray,
   user_input: colors.brightWhite,
   warn: colors.yellow,
   error: colors.brightRed,
   prompt: colors.cyan,
   success: colors.green,
   key_name: colors.cyan,
+  key_path: colors.blue,
   caught: (e: Error, num?: number) => {
     const errCode = num ? `E${num}` : `E`;
     return `${colors.white(errCode)}: ${colors.red(e.toString())}`;

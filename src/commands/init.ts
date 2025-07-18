@@ -24,16 +24,16 @@ import { useTemplate } from "src/use-template/mod.ts";
 
 import type { CNDITemplatePromptResponsePrimitive } from "src/use-template/types.ts";
 
-import { owAction } from "src/commands/overwrite.ts";
+import { overwrite } from "src/commands/overwrite.ts";
 
-import { createSealedSecretsKeys } from "src/initialize/sealedSecretsKeys.ts";
-import { createSshKeys } from "src/initialize/sshKeys.ts";
+import { createSealedSecretsKeys } from "../environment/sealedSecretsKeys.ts";
+import { createSshKeys } from "../environment/sshKeys.ts";
 
 import getGitignoreContents from "src/outputs/gitignore.ts";
 import vscodeSettings from "src/outputs/vscode-settings.ts";
 import getFinalEnvString from "src/outputs/dotenv.ts";
 
-const label = ccolors.faded("\nsrc/commands/init.ts:");
+const label = ccolors.faded("\nsrc/commands/init.ts:\n");
 
 const defaultResponsesFilePath = path.join(Deno.cwd(), "cndi_responses.yaml");
 
@@ -110,7 +110,7 @@ const initCommand = new Command()
     },
   )
   .option(
-    "-w, --run-workflow-source-ref <workflow_source_ref:string>",
+    "-w, --workflow-source-ref <workflow_source_ref:string>",
     "Specify a ref to build a cndi-run workflow with",
     {
       hidden: true,
@@ -394,6 +394,7 @@ const initCommand = new Command()
       // .env must be extended using generated values
       if (key === ".env") {
         const env = value;
+        console.log("env out", env);
 
         // GENERATE ENV VARS
         const sealedSecretsKeys = isClusterless
@@ -521,10 +522,10 @@ const initCommand = new Command()
 
     await persistStagedFiles(destinationDirectory);
 
-    await owAction({
+    await overwrite({
       output: destinationDirectory,
       initializing: true,
-      runWorkflowSourceRef: options.runWorkflowSourceRef,
+      workflowSourceRef: options?.workflowSourceRef,
       create: !!options.create,
       skipPush: !!options.skipPush,
     });

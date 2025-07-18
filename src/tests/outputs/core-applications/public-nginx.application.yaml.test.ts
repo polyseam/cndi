@@ -1,10 +1,10 @@
 import { assert, describe, it } from "test-deps";
-import getNginxApplicationManifest from "src/outputs/core-applications/public-nginx.application.yaml.ts";
-import { loadCndiConfig } from "src/utils.ts";
+import getNginxApplicationManifest from "src/outputs/cluster_manifests/core-applications/public-nginx.application.yaml.ts";
+import { loadCNDIConfig } from "src/cndi_config/load.ts";
 import { YAML } from "deps";
 import getProjectRootDir from "get-project-root";
 
-const [err, loadConfigResult] = await loadCndiConfig(getProjectRootDir());
+const [err, loadConfigResult] = await loadCNDIConfig(getProjectRootDir());
 
 if (err) {
   throw err;
