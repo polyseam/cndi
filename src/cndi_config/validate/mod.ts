@@ -2,11 +2,12 @@ import { ErrOut } from "errout";
 import { CNDIConfigSpec, CNDIProvider } from "../types.ts";
 
 import { validateCNDIConfigSpecComponentNetwork } from "./network.ts";
+import { validateCNDIConfigSpecComponentNodes } from "./nodes.ts";
 import { PROJECT_NAME_MAX_LENGTH } from "consts";
 import { isSlug } from "src/utils.ts";
 import { ccolors } from "deps";
 
-const label = "\nsrc/cndi_config/validate/mod.ts:";
+const label = "src/cndi_config/validate/mod.ts:";
 
 /**
  * Maps each provider to its recommended distribution for microk8s deprecation warnings
@@ -25,7 +26,7 @@ export const cndiConfigFoundAtPath = (
   filePath: string,
 ) => ([
   ccolors.error("cndi_config file was found at"),
-  ccolors.user_input(`"${filePath}"\n`),
+  ccolors.user_input(`"${filePath}"`),
 ].join(" "));
 
 type ValidateCNDIConfigSpecOptions = {
@@ -47,6 +48,10 @@ export function validateCNDIConfigSpec(
     pathToConfig,
   });
   if (networkError) return networkError;
+  const nodesError = validateCNDIConfigSpecComponentNodes(cndiConfigSpec, {
+    pathToConfig,
+  });
+  if (nodesError) return nodesError;
 }
 
 function validateCNDIConfigSpecComponentMetadata(
@@ -56,7 +61,6 @@ function validateCNDIConfigSpecComponentMetadata(
   // Validate metadata fields like project_name, region, etc.
   // cndi_config must have a project_name
   if (!configSpec?.project_name) {
-    console.log();
     return new ErrOut(
       [
         cndiConfigFoundAtPath(pathToConfig),
@@ -74,7 +78,6 @@ function validateCNDIConfigSpecComponentMetadata(
   } else if (!isSlug(configSpec?.project_name)) {
     // project_name must be a valid slug
     // because it is used downstream when provisioning infrastructure
-    console.log();
     return new ErrOut(
       [
         cndiConfigFoundAtPath(pathToConfig),
@@ -95,7 +98,6 @@ function validateCNDIConfigSpecComponentMetadata(
   } else if (configSpec.project_name?.length > PROJECT_NAME_MAX_LENGTH) {
     // project_name must be less than 48 characters
     // because it is used downstream when provisioning infrastructure
-    console.log();
     return new ErrOut(
       [
         cndiConfigFoundAtPath(pathToConfig),

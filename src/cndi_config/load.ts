@@ -3,7 +3,7 @@ import { CNDIConfigSpec, NormalizedCNDIConfig } from "./types.ts";
 import { ErrOut } from "errout";
 import { validateCNDIConfigSpec } from "./validate/mod.ts";
 
-const label = ccolors.faded("\nsrc/cndi_config/load.ts:");
+const label = ccolors.faded("src/cndi_config/load.ts:");
 
 function normalizeCNDIConfig(
   cndiConfigSpec: CNDIConfigSpec,

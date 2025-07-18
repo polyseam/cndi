@@ -9,7 +9,7 @@ import * as netutils from "src/utils/net.ts";
 import { DEFAULT_NETWORK_ADDRESS_SPACE } from "consts";
 import { cndiConfigFoundAtPath } from "./mod.ts";
 
-const label = ccolors.faded("\nsrc/cndi_config/validate/network.ts:");
+const label = ccolors.faded("src/cndi_config/validate/network.ts:");
 
 export function validateCNDIConfigSpecComponentNetwork(
   configSpec: CNDIConfigSpec,
