@@ -30,16 +30,13 @@ This first block of config shows CNDI's metadata fields at the top.
 - `distribution` is the Kubernetes distribution you are using. This is used to
   determine which Kubernetes distribution's API to use.
 
-- `region` is the region to be used in your target provider
-
 Here's an example with those values configured:
 
 ```yaml
-cndi_version: v3
+cndi_version: v2
 project_name: my-cndi-project
 provider: aws
 distribution: eks
-region: us-east-1
 ```
 
 ## `infrastructure`
@@ -76,10 +73,9 @@ which specifies the hardware spec of the nodes.
 
 ```yaml
 project_name: my-postgres-project
-cndi_version: v3
+cndi_version: v2
 provider: aws
 distribution: eks
-region: us-east-1
 infrastructure:
   cndi:
     nodes:

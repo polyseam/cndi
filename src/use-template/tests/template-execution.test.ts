@@ -1,7 +1,7 @@
 import { path, YAML } from "deps";
 import { useTemplate, UseTemplateResult } from "../mod.ts";
 import { assert, parseDotEnv } from "test-deps";
-import { CNDIConfigSpec } from "src/cndi_config/types.ts";
+import { CNDIConfig } from "src/types.ts";
 import getProjectRoot from "get-project-root";
 import { describe, it } from "test-deps";
 
@@ -201,9 +201,7 @@ describe("Template Execution", () => {
       },
     });
     const template = templateResult[1] as UseTemplateResult;
-    const config = YAML.parse(
-      template.files["cndi_config.yaml"],
-    ) as CNDIConfigSpec;
+    const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
     assert(config?.infrastructure?.cndi?.functions?.hostname === fns_hostname);
     assert(config?.cluster_manifests?.kind === "Namespace");
   });
@@ -257,9 +255,7 @@ describe("Template Execution", () => {
       throw errUsingTemplate;
     }
 
-    const config = YAML.parse(
-      template.files["cndi_config.yaml"],
-    ) as CNDIConfigSpec;
+    const config = YAML.parse(template.files["cndi_config.yaml"]) as CNDIConfig;
 
     const values = config?.applications?.myapp?.values as {
       some_beta_content: { should_exist: boolean };

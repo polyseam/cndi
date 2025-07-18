@@ -2,7 +2,7 @@ import { assert, describe, it } from "test-deps";
 import { runCndi } from "src/tests/helpers/run-cndi.ts";
 
 describe("GCP MicroK8s initialization", () => {
-  it("should fail when targeting gcp/microk8s with basic template", async () => {
+  it("should succeed with basic template", async () => {
     const cwd = await Deno.makeTempDir();
 
     const { status } = await runCndi({
@@ -19,6 +19,6 @@ describe("GCP MicroK8s initialization", () => {
       ],
       cwd,
     });
-    assert(!status?.success);
+    assert(status.success);
   });
 });

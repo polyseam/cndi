@@ -5,8 +5,8 @@
   type: File
   default: ""
 
-- name: region
+- name: gcp_region
   message: >-
-    Please enter your GCP Region:
+    Please enter your gcp_region:
   type: Input
   default: "us-central1"
