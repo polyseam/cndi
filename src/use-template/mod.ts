@@ -33,7 +33,7 @@ import { ErrOut } from "errout";
 
 type CNDIValidator = keyof typeof CNDIValidators;
 
-const label = ccolors.faded("\n@cndi/use-template:\n");
+const label = ccolors.faded("\n@cndi/use-template:");
 
 type CNDIMode = "cli" | "webui";
 

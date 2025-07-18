@@ -6,7 +6,7 @@ import {
   setsAreEquivalent,
 } from "src/tests/helpers/util.ts";
 
-import { loadCNDIConfig } from "src/cndi_config/load.ts";
+import { loadCndiConfig } from "src/utils.ts";
 import { path, YAML } from "src/deps.ts";
 
 describe("cndi ow secrets", () => {
@@ -21,7 +21,7 @@ describe("cndi ow secrets", () => {
 
     // Test
     const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-      const [errorLoadingConfig, result] = await loadCNDIConfig(cwd);
+      const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
       if (errorLoadingConfig) {
         assert(false, errorLoadingConfig.message);
@@ -79,7 +79,7 @@ describe("cndi ow secrets", () => {
 
     // Test
     const { before, after } = await listFilepathsBeforeAndAfter(async () => {
-      const [errorLoadingConfig, result] = await loadCNDIConfig(cwd);
+      const [errorLoadingConfig, result] = await loadCndiConfig(cwd);
 
       if (errorLoadingConfig) {
         assert(false, errorLoadingConfig.message);

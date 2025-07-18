@@ -1,13 +1,11 @@
-cndi_version: v3
+cndi_version: v2
 project_name: basic-cluster
 provider: aws # or 'gcp', 'azure', 'dev'
-distribution: eks # or 'clusterless', 'gke', 'aks' (microk8s only for dev provider)
-region: us-east-1
+distribution: eks # or 'clusterless', 'gke', 'aks', 'microk8s'
 infrastructure:
   cndi:
-    gitops:
-      argocd:
-        hostname: argocd.polyseam.io
+    argocd:
+      hostname: argocd.polyseam.io
     observability:
       grafana:
         hostname: observability.polyseam.io

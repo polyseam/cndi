@@ -15,7 +15,7 @@
   # validators:
   #   - min_length: 40
 
-- name: region
+- name: aws_region
   default: us-east-1
   message: >-
     Please enter your AWS Region:

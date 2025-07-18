@@ -1,5 +1,5 @@
 # Azure Core prompts
-- name: region
+- name: arm_region
   message: >-
     Please enter your arm_region:
   type: Input
