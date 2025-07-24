@@ -42,6 +42,10 @@ export function validateCNDIConfigSpecComponentNodes(
     }
   }
 
+  if(!Array.isArray(nodes)) {
+    if(nodes === "auto") return;
+  }
+
   for (const node of nodes) {
     if (!node.name) {
       return new ErrOut(
