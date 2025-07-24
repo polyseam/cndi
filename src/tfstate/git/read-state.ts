@@ -86,7 +86,7 @@ export async function pullStateForTerraform({
   }
 
   // pull the latest changes from _state branch
-  // (required in environments where _state is persisted)
+  // (required in environments where _state is persisted to disk)
   // eg. cndi show-outputs locally
   try {
     await git.pull("origin", "_state");
