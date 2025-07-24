@@ -24,7 +24,7 @@ type CNDIAWSEKSModule = {
   vpc_id: string;
   subnet_ids: string;
   source: string;
-  compute_config?: AWSAutoModeComputeConfig; // if defined enroll in automode
+  cluster_compute_config?: AWSAutoModeComputeConfig; // if defined enroll in automode
 };
 
 export default function (cndi_config: NormalizedCNDIConfig) {
@@ -54,7 +54,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
   };
 
   if (autoMode) {
-    cndi_aws_eks_module["compute_config"] = {
+    cndi_aws_eks_module["cluster_compute_config"] = {
       enabled: true,
       node_pools: ["general-purpose"],
       node_role_arn: "${aws_iam_role.cndi_aws_iam_role.arn}", // extrapolated from non-auto
