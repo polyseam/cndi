@@ -2,7 +2,7 @@ import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
-const _label = ccolors.faded("\nsrc/outputs/terraform/output.tf.json.ts:\n");
+const label = ccolors.faded("\nsrc/outputs/terraform/output.tf.json.ts:\n");
 
 type Outputs = Record<string, { value: string }>;
 
@@ -53,7 +53,12 @@ function getOutputsForProvider(
         },
       };
     case "dev": {
-      const [node] = cndi_config.infrastructure.cndi.nodes;
+      const nodes = cndi_config.infrastructure.cndi.nodes;
+      if(nodes === "auto") {
+        console.error(label, ccolors.error("Nodes cannot be 'auto' in dev mode."));
+        throw new Error("Nodes cannot be 'auto' in dev mode.");
+      }
+      const [node] = nodes;
       return {
         cndi_dev_tutorial: {
           value: `Accessing ArgoCD UI

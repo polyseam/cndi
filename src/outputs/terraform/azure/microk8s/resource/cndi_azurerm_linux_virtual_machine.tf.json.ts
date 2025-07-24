@@ -2,6 +2,15 @@ import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
 export default function (cndi_config: NormalizedCNDIConfig) {
+  
+  if(cndi_config.infrastructure.cndi.nodes === "auto") {
+    console.error(
+      "src/outputs/terraform/azure/microk8s/resource/cndi_azurerm_linux_virtual_machine.tf.json.ts",
+      "Nodes cannot be 'auto' in Azure MicroK8s mode.",
+    );
+    throw new Error("Nodes cannot be 'auto' in Azure MicroK8s mode.");
+  }
+
   const nodeConfig = cndi_config.infrastructure?.cndi?.nodes?.[0] || {};
   const vmSize = nodeConfig.machine_type || nodeConfig.instance_type ||
     "Standard_D2s_v3";

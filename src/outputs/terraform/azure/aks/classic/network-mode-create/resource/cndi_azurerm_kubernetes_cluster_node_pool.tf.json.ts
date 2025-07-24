@@ -28,6 +28,9 @@ export interface AzurermKubernetesClusterNodePool {
 export function getNodePools(
   cndi_config: NormalizedCNDIConfig,
 ): AzurermKubernetesClusterNodePool[] {
+  if (cndi_config.infrastructure.cndi.nodes === "auto") {
+    throw new Error('Node Pools should not be generated for "auto" node clusters');
+  };
   const azurerm_kubernetes_cluster_node_pool = cndi_config.infrastructure.cndi
     .nodes.map(
       (nodeSpec: CNDINodeSpec, i: number) => {
@@ -84,6 +87,8 @@ export function getNodePools(
 }
 
 export default function (cndi_config: NormalizedCNDIConfig) {
+  if(cndi_config.infrastructure.cndi.nodes === "auto") return null;
+  
   const cndi_azurerm_kubernetes_cluster_node_pool = getNodePools(
     cndi_config,
   );
