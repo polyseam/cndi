@@ -88,9 +88,9 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   uses: "actions/checkout@v4",
   with: {
     "fetch-depth": 0,
-    repository: "${{ secrets.GIT_REPO }}",
+    repository: "${{ github.repository }}",
   },
-}];
+}, { name: "debug info", run: "git remote -v && git branch -a && git status" }];
 
 const GLOBAL_ENV = {
   GIT_USERNAME: "${{ secrets.GIT_USERNAME }}",
