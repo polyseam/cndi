@@ -67,7 +67,7 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   },
 }, {
   name: "checkout cndi repo",
-  uses: "actions/checkout@v3",
+  uses: "actions/checkout@v4",
   with: {
     repository: "polyseam/cndi",
     "fetch-depth": 0,
@@ -84,11 +84,11 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   run:
     "mkdir -p $HOME/.cndi/bin && mv ./dist/linux-amd64/in/* $HOME/.cndi/bin/",
 }, {
-  name: "checkout repo",
-  uses: "actions/checkout@v3",
+  name: "checkout cluster repo",
+  uses: "actions/checkout@v4",
   with: {
     "fetch-depth": 0,
-    repository: "${{ github.repository }}",
+    repository: "${{ secrets.GIT_REPO }}",
   },
 }];
 
