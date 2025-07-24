@@ -80,48 +80,19 @@ export async function pullStateForTerraform({
   try {
     // create new _state branch
     await git.checkout("_state");
-  } catch (errorCheckingOutState) {
-    const eCheckout = errorCheckingOutState as Error;
-    console.error(
-      label,
-      ccolors.error("ERROR CHECKING OUT _state BRANCH"),
-      ccolors.error(eCheckout.message),
-    );
+  } catch {
     // checkout existing _state branch
-    try {
-      await git.raw("switch", "--orphan", "_state");
-    } catch (errorSwitchingToState) {
-      const eSwitch = errorSwitchingToState as Error;
-      console.error(
-        label,
-        ccolors.error("ERROR SWITCHING TO _state BRANCH"),
-        ccolors.error(eSwitch.message),
-      );
-    }
+    await git.raw("switch", "--orphan", "_state");
   }
 
   // pull the latest changes from _state branch
   // (required in environments where _state is persisted)
   // eg. cndi show-outputs locally
   try {
-    await git.pull("origin", "_state", {});
-  } catch (errorPullingState) {
-    if (errorPullingState instanceof Error) {
-      return new ErrOut(
-        [
-          ccolors.error("failed to pull state from _state branch"),
-          ccolors.error("likely because you have no _state branch"),
-          ccolors.error("or your _state branch is not up to date"),
-        ],
-        {
-          code: 1005,
-          label,
-          id: "read-state/pull-state/!pull",
-          metadata: { cmd, originalBranch },
-          cause: errorPullingState,
-        },
-      );
-    }
+    await git.pull("origin", "_state");
+  } catch (_errorPullingState) {
+    // this can fail if _state branch does not exist
+    // carry on anyway
   }
 
   let state;
