@@ -97,12 +97,14 @@ export async function pullStateForTerraform({
           ccolors.error("failed to pull state from _state branch"),
           ccolors.error("likely because you have no _state branch"),
           ccolors.error("or your _state branch is not up to date"),
+          ccolors.error(errorPullingState.message),
         ],
         {
           code: 1005,
           label,
           id: "read-state/pull-state/!pull",
           metadata: { cmd, originalBranch },
+          cause: errorPullingState,
         },
       );
     }

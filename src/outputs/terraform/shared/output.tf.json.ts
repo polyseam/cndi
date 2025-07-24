@@ -54,8 +54,11 @@ function getOutputsForProvider(
       };
     case "dev": {
       const nodes = cndi_config.infrastructure.cndi.nodes;
-      if(nodes === "auto") {
-        console.error(label, ccolors.error("Nodes cannot be 'auto' in dev mode."));
+      if (nodes === "auto") {
+        console.error(
+          label,
+          ccolors.error("Nodes cannot be 'auto' in dev mode."),
+        );
         throw new Error("Nodes cannot be 'auto' in dev mode.");
       }
       const [node] = nodes;

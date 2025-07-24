@@ -81,7 +81,8 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   run: "deno task build-linux-amd64",
 }, {
   name: "persist cndi",
-  run: "mkdir -p $HOME/.cndi/bin && mv ./dist/linux-amd64/in/* $HOME/.cndi/bin/",
+  run:
+    "mkdir -p $HOME/.cndi/bin && mv ./dist/linux-amd64/in/* $HOME/.cndi/bin/",
 }, {
   name: "checkout repo",
   uses: "actions/checkout@v3",
