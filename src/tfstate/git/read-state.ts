@@ -89,15 +89,16 @@ export async function pullStateForTerraform({
   // (required in environments where _state is persisted)
   // eg. cndi show-outputs locally
   try {
-    await git.pull("origin", "_state");
+    await git.pull("origin", "_state", {
+      
+    });
   } catch (errorPullingState) {
     if (errorPullingState instanceof Error) {
       return new ErrOut(
         [
           ccolors.error("failed to pull state from _state branch"),
           ccolors.error("likely because you have no _state branch"),
-          ccolors.error("or your _state branch is not up to date"),
-          ccolors.error(errorPullingState.message),
+          ccolors.error("or your _state branch is not up to date")
         ],
         {
           code: 1005,

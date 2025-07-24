@@ -88,6 +88,7 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   uses: "actions/checkout@v3",
   with: {
     "fetch-depth": 0,
+    repository: "${{ github.repository }}",
   },
 }];
 
