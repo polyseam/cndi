@@ -78,7 +78,7 @@ const getSourceRefSteps = (sourceRef: string): Array<WorkflowStep> => [{
   uses: "denoland/setup-deno@v2",
 }, {
   name: "build cndi",
-  run: "deno task build-linux",
+  run: "deno task build-linux-amd64",
 }, {
   name: "persist cndi",
   run: "mkdir -p $HOME/.cndi/bin && mv ./dist/linux/in/* $HOME/.cndi/bin/",
