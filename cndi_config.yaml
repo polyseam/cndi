@@ -13,7 +13,7 @@ infrastructure:
         hostname: observability.polyseam.io
     cert_manager:
       email: matt.johnston@polyseam.io
-    nodes:
+    nodes: # or 'auto'
       - name: airflow-alpha
         instance_type: t3.medium # or 'n1-standard-2', 'Standard_D2_v2'
         disk_size: 100
