@@ -27,7 +27,7 @@
       "id": "cndiVerb",
       "type": "pickString",
       "description": "Which cndi subcommand?",
-      "options": ["ow","run","create","destroy","init"]
+      "options": ["ow", "run", "create", "destroy", "init"]
     },
     {
       "id": "workDir",
