@@ -38,14 +38,18 @@ const getBaseValues = (cndi_config: NormalizedCNDIConfig) => {
 
 const eksValues = (cndi_config: NormalizedCNDIConfig) => {
   const { project_name } = cndi_config;
+
+  const annotations: Record<string, string> = {
+    "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
+    "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
+      `CNDIProject=${project_name}`,
+    "service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing",
+  };
+
   return deepMerge(getBaseValues(cndi_config), {
     controller: {
       service: {
-        annotations: {
-          "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
-          "service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags":
-            `CNDIProject=${project_name}`,
-        },
+        annotations,
       },
     },
   });

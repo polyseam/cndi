@@ -44,7 +44,7 @@ export interface NormalizedCNDIConfig extends CNDIConfigSpec {
 export type CNDIInfrastructureSpec = {
   terraform?: TFBlocks;
   cndi: {
-    nodes: Array<CNDINodeSpec>; // only omitted if distribution is "clusterless"
+    nodes: Array<CNDINodeSpec> | "auto"; // only omitted if distribution is "clusterless"
     network?: CNDINetworkConfig;
     functions?: CNDIFnsConfig;
     ingress?: CNDIIngressConfig;

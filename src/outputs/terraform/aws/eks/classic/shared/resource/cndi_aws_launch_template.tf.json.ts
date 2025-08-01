@@ -57,8 +57,9 @@ export default function (cndi_config: NormalizedCNDIConfig) {
       };
       i++;
     }
-  } else if (cndi_config.infrastructure.cndi.nodes === "automatic") {
+  } else if (cndi_config.infrastructure.cndi.nodes === "auto") {
     // automatic node group
+    return null;
   }
 
   return getPrettyJSONString({

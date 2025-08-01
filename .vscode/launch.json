@@ -1,1 +1,39 @@
-{}
+// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug cndi CLI",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "deno",
+      "program": "${workspaceFolder}/main.ts",
+      "cwd": "${workspaceFolder}/../${input:workDir}", // prompt here
+      "args": ["${input:cndiVerb}"],
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--watch", // restart on changes
+        "--inspect"
+      ],
+      "console": "integratedTerminal",
+      "restart": true, // auto-restart the debug session
+      "internalConsoleOptions": "neverOpen",
+      "stopOnEntry": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cndiVerb",
+      "type": "pickString",
+      "description": "Which cndi subcommand?",
+      "options": ["ow", "run", "create", "destroy", "init"]
+    },
+    {
+      "id": "workDir",
+      "type": "promptString",
+      "description": "Choose working directory relative to theparent of the workspace root",
+      "default": "cndi-example"
+    }
+  ]
+}

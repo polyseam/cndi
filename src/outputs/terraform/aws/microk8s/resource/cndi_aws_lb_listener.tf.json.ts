@@ -23,6 +23,12 @@ type AWSLBTargetGroupAttachment = {
 
 export default function (cndi_config: NormalizedCNDIConfig) {
   const project_name = "${local.cndi_project_name}";
+  const nodes = cndi_config.infrastructure.cndi.nodes;
+  if (nodes === "auto") {
+    throw new Error(
+      "'auto' nodes are not supported in microk8s clusters",
+    );
+  }
   const open_ports = resolveCNDIPorts(cndi_config);
   const listeners: Record<string, AWSLBListener> = {};
   const attachments: Record<string, AWSLBTargetGroupAttachment> = {};
@@ -45,7 +51,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
     };
 
     // Add target group attachments for each node
-    cndi_config.infrastructure.cndi.nodes.forEach((node) => {
+    nodes.forEach((node) => {
       const count = node?.count || 1;
       for (let i = 0; i < count; i++) {
         const nodeName = `${node.name}-${i}`;
