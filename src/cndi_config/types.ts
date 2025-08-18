@@ -19,6 +19,7 @@ export interface CNDIConfigSpec {
   region?: string;
   provider: CNDIProvider;
   distribution: CNDIDistribution;
+  kubernetes_version?: string;
   infrastructure: CNDIInfrastructureSpec; // Required in schema
   applications?: {
     [key: string]: CNDIApplicationSpec;

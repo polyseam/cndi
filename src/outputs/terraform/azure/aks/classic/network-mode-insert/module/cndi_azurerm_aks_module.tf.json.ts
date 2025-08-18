@@ -17,12 +17,14 @@ export default function (cndi_config: NormalizedCNDIConfig): string | null {
   const additionalNodePoolSubnetIds =
     "${length(local.private_subnet_ids) > 1 ? jsonencode([for i in range(1, length(local.private_subnet_ids)) : local.private_subnet_ids[i]]) : '[]'}";
 
+  const kubernetes_version = cndi_config?.kubernetes_version ||
+    DEFAULT_K8S_VERSION;
   return getPrettyJSONString({
     module: {
       cndi_azurerm_aks_module: {
         version: "10.0.1",
         source: MODULE_SOURCE,
-        kubernetes_version: DEFAULT_K8S_VERSION,
+        kubernetes_version,
         node_resource_group,
         automatic_channel_upgrade: "patch",
         prefix: "cndi-aks-${local.cndi_project_name}",
