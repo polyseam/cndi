@@ -1,0 +1,9 @@
+# For TypeScript, JavaScript, Markdown, etc.
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.jsonc text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
