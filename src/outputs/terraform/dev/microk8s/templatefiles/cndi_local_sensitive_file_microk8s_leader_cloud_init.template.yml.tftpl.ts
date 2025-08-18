@@ -81,7 +81,7 @@ const getLeaderCloudInitYaml = (
 ) => {
   const addons = getMicrok8sAddons(config);
   const microk8sVersion = config.infrastructure.cndi?.microk8s?.version ||
-    DEFAULT_K8S_VERSION;
+    config?.kubernetes_version || DEFAULT_K8S_VERSION;
   const microk8sChannel = config.infrastructure.cndi?.microk8s?.channel ||
     "stable";
 

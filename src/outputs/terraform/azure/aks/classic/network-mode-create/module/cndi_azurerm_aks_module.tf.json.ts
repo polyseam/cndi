@@ -7,13 +7,15 @@ import { NETWORK_PROFILE } from "consts";
 const MODULE_SOURCE = "Azure/aks/azurerm//v4";
 
 export default function (cndi_config: NormalizedCNDIConfig): string | null {
+  const kubernetes_version = cndi_config?.kubernetes_version ||
+    DEFAULT_K8S_VERSION;
   const node_resource_group = getNodeResourceGroupName(cndi_config);
   return getPrettyJSONString({
     module: {
       cndi_azurerm_aks_module: {
         version: "10.0.1",
         source: MODULE_SOURCE,
-        kubernetes_version: DEFAULT_K8S_VERSION,
+        kubernetes_version,
         node_resource_group,
         automatic_channel_upgrade: "patch",
         prefix: "cndi-aks-${local.cndi_project_name}",

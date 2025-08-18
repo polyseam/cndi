@@ -8,10 +8,11 @@ const MODULE_SOURCE =
   "git::https://github.com/terraform-google-modules/terraform-google-kubernetes-engine.git?ref=" +
   SHA_36_3_0;
 
-export default function (_cndi_config: NormalizedCNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
   const ip_range_pods = "cluster-pods";
   const ip_range_services = "cluster-services";
-
+  const kubernetes_version = cndi_config?.kubernetes_version ||
+    DEFAULT_K8S_VERSION;
   return getPrettyJSONString({
     module: {
       cndi_gcp_gke_module: {
@@ -43,7 +44,7 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
         ip_range_pods,
         ip_range_services,
 
-        kubernetes_version: DEFAULT_K8S_VERSION,
+        kubernetes_version,
       },
     },
   });

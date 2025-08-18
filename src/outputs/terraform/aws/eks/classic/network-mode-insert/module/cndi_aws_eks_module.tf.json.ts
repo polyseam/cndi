@@ -4,7 +4,9 @@ import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 const MODULE_SOURCE =
   "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=a713f6f464eb579a39918f60f130a5fbb77a6b30";
 
-export default function (_cndi_config: NormalizedCNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
+  const cluster_version = cndi_config?.kubernetes_version ||
+    DEFAULT_K8S_VERSION;
   return getPrettyJSONString({
     module: {
       cndi_aws_eks_module: {
@@ -21,7 +23,7 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
           },
         },
         cluster_name: "${local.cndi_project_name}",
-        cluster_version: DEFAULT_K8S_VERSION,
+        cluster_version,
         cluster_endpoint_public_access: true, // TODO: probably bad
         enable_cluster_creator_admin_permissions: true,
         vpc_id: "${local.network_identifier}",
