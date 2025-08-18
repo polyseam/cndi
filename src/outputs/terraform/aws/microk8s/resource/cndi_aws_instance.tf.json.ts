@@ -31,7 +31,11 @@ export default function (cndi_config: NormalizedCNDIConfig) {
   const _project_name = "${local.cndi_project_name}";
   const nodes = cndi_config.infrastructure.cndi.nodes;
   const instances: Record<string, AWSInstance> = {};
-
+  if (nodes === "auto") {
+    throw new Error(
+      "'auto' nodes are not supported in microk8s clusters",
+    );
+  }
   nodes.forEach((node, index) => {
     const count = node?.count || 1;
     const role = index === 0

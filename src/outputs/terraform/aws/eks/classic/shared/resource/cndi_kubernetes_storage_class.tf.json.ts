@@ -2,7 +2,11 @@ import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import type { KubernetesStorageClass } from "src/outputs/terraform/shared/resource/KubernetesStorageClass.ts";
 
-export default function (_cndi_config: NormalizedCNDIConfig) {
+export default function (cndi_config: NormalizedCNDIConfig) {
+  const ebsStorageProvisioner = cndi_config.infrastructure.cndi.nodes === "auto"
+    ? "ebs.csi.eks.amazonaws.com"
+    : "ebs.csi.aws.com";
+
   const kubernetes_storage_class: Record<string, KubernetesStorageClass> = {
     cndi_kubernetes_storage_class_rwo: {
       allow_volume_expansion: true,
@@ -17,7 +21,7 @@ export default function (_cndi_config: NormalizedCNDIConfig) {
         type: "gp3",
       },
       reclaim_policy: "Delete",
-      storage_provisioner: "ebs.csi.aws.com",
+      storage_provisioner: ebsStorageProvisioner,
       volume_binding_mode: "WaitForFirstConsumer",
     },
     cndi_kubernetes_storage_class_rwm: {

@@ -36,7 +36,7 @@ interface AwsEksNodeGroup {
 export default function (cndi_config: NormalizedCNDIConfig) {
   const aws_eks_node_group: Record<string, AwsEksNodeGroup> = {};
 
-  if (cndi_config.infrastructure.cndi.nodes as unknown !== "automatic") {
+  if (cndi_config.infrastructure.cndi.nodes !== "auto") {
     // original non-automatic node group
     let i = 0;
     for (const nodeSpec of cndi_config.infrastructure.cndi.nodes) {
