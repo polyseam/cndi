@@ -32,6 +32,11 @@ This first block of config shows CNDI's metadata fields at the top.
 
 - `region` is the region to be used in your target provider
 
+- `kubernetes_version` is an optional field that lets you pick the Kubernetes
+  version for the control plane and nodes (for managed clusters like EKS/GKE/AKS
+  and for dev distributions when supported). Example:
+  `kubernetes_version: "1.33"`.
+
 Here's an example with those values configured:
 
 ```yaml
@@ -40,6 +45,7 @@ project_name: my-cndi-project
 provider: aws
 distribution: eks
 region: us-east-1
+kubernetes_version: "1.33"
 ```
 
 ## `infrastructure`

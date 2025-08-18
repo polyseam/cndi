@@ -94,6 +94,11 @@
       "description": "The distribution of Kubernetes to use for the infrastructure.",
       "enum": ["microk8s", "eks", "gke", "aks", "clusterless"]
     },
+    "kubernetes_version": {
+      "type": "string",
+      "description": "Optional Kubernetes version to use for the control plane and nodes (e.g. \"1.27\").",
+      "pattern": "^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?$"
+    },
     "infrastructure": {
       "type": "object",
       "description": "An object which defines the infrastructure resources CNDI should deploy.",

@@ -3,6 +3,7 @@ project_name: mj-eks-example
 provider: aws
 distribution: eks
 region: us-east-1
+kubernetes_version: "1.27"
 infrastructure:
   cndi:
     cert_manager:
