@@ -290,13 +290,14 @@ export type ExternalDNSProvider =
   | "transip"
   | "oci";
 
-export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
+export type CNDIProvider = "aws" | "azure" | "gcp" | "dev" | "bare";
 export type CNDIDistribution =
   | "microk8s"
   | "eks"
   | "gke"
   | "aks"
-  | "clusterless";
+  | "clusterless"
+  | "k3s";
 
 type CNDIObservability = {
   enabled: boolean;

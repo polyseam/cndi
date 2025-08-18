@@ -18,6 +18,7 @@ export function getRecommendedDistribution(provider: CNDIProvider): string {
     azure: "aks",
     gcp: "gke",
     dev: "microk8s", // Still valid for dev provider
+    bare: "k3s", // Recommended distribution for bare provider
   };
   return recommendations[provider];
 }
@@ -52,6 +53,14 @@ export function validateCNDIConfigSpec(
     pathToConfig,
   });
   if (nodesError) return nodesError;
+
+  // Validate bare/k3s specific configuration (non-node validation)
+  if (cndiConfigSpec.provider === "bare") {
+    const bareError = validateBareK3sConfiguration(cndiConfigSpec, {
+      pathToConfig,
+    });
+    if (bareError) return bareError;
+  }
 }
 
 function validateCNDIConfigSpecComponentMetadata(
@@ -145,7 +154,7 @@ function validateCNDIConfigSpecComponentMetadata(
       ccolors.user_input(configSpec.cndi_version),
     );
   } else {
-    if (configSpec?.provider !== "dev") {
+    if (configSpec?.provider !== "dev" && configSpec?.provider !== "bare") {
       if (!configSpec?.region) {
         return new ErrOut([
           cndiConfigFoundAtPath(pathToConfig),
@@ -176,5 +185,93 @@ function validateCNDIConfigSpecComponentMetadata(
         });
       }
     }
+  }
+}
+
+/**
+ * Validates bare/k3s specific configuration
+ */
+function validateBareK3sConfiguration(
+  configSpec: CNDIConfigSpec,
+  { pathToConfig }: { pathToConfig: string },
+): ErrOut | void {
+  // Validate that distribution is k3s for bare provider
+  if (configSpec.distribution !== "k3s") {
+    return new ErrOut(
+      [
+        cndiConfigFoundAtPath(pathToConfig),
+        ccolors.error("but the"),
+        ccolors.key_name("distribution"),
+        ccolors.user_input(`"${configSpec.distribution}"`),
+        ccolors.error("is not supported for"),
+        ccolors.key_name("provider"),
+        ccolors.user_input(`"bare"`),
+        ccolors.error(".\n"),
+        ccolors.error("The bare provider only supports"),
+        ccolors.user_input(`"k3s"`),
+        ccolors.error("distribution."),
+      ],
+      {
+        code: 950,
+        id: "validate/cndi_config/bare/unsupported-distribution",
+        metadata: { configSpec },
+        label,
+      },
+    );
+  }
+
+  // Validate Tailscale configuration is present
+  if (!configSpec.infrastructure?.tailscale) {
+    return new ErrOut(
+      [
+        cndiConfigFoundAtPath(pathToConfig),
+        ccolors.error("but it does not have the required"),
+        ccolors.key_path("infrastructure.tailscale"),
+        ccolors.error("configuration.\n"),
+        ccolors.error(
+          "The bare/k3s deployment target requires Tailscale configuration.",
+        ),
+      ],
+      {
+        code: 951,
+        id: "validate/cndi_config/bare/missing-tailscale-config",
+        metadata: { configSpec },
+        label,
+      },
+    );
+  }
+
+  // Validate tailnet is specified
+  if (!configSpec.infrastructure?.tailscale?.tailnet) {
+    return new ErrOut(
+      [
+        cndiConfigFoundAtPath(pathToConfig),
+        ccolors.error("but the"),
+        ccolors.key_path("infrastructure.tailscale.tailnet"),
+        ccolors.error("is not specified.\n"),
+        ccolors.error("A tailnet name is required for bare/k3s deployments."),
+        ccolors.error("Example:"),
+        ccolors.user_input(`"example-platypus.ts.net"`),
+      ],
+      {
+        code: 952,
+        id: "validate/cndi_config/bare/missing-tailnet",
+        metadata: { configSpec },
+        label,
+      },
+    );
+  }
+
+  // Node-specific validation for bare/k3s is handled in nodes.ts
+
+  // Validate region is not required for bare provider
+  if (configSpec.region) {
+    console.warn(
+      cndiConfigFoundAtPath(pathToConfig),
+      ccolors.warn("has a"),
+      ccolors.key_name("region"),
+      ccolors.warn("specified, but this is not used for bare/k3s deployments."),
+      ccolors.warn("The region field will be ignored."),
+    );
   }
 }

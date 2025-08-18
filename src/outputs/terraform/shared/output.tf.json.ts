@@ -1,4 +1,4 @@
-import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
+import { CNDINodeSpec, NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 import { ccolors } from "deps";
 
@@ -53,7 +53,7 @@ function getOutputsForProvider(
         },
       };
     case "dev": {
-      const [node] = cndi_config.infrastructure.cndi.nodes;
+      const [node] = cndi_config.infrastructure.cndi.nodes as CNDINodeSpec[];
       return {
         cndi_dev_tutorial: {
           value: `Accessing ArgoCD UI
@@ -68,6 +68,19 @@ function getOutputsForProvider(
         },
       };
     }
+    case "bare":
+      return {
+        get_argocd_port_forward_command: get_argocd_port_forward_command,
+        get_kubeconfig_command: {
+          value:
+            "ssh -i 'cndi_rsa' ${local.user}@${local.leader_ip} -t 'cat /etc/rancher/k3s/k3s.yaml'",
+        },
+        leader_ip: { value: "${local.leader_ip}" },
+        worker_ips: {
+          value:
+            "${[for id, n in local.nodes_by_id : n.ip if id != local.leader_id]}",
+        },
+      };
     default:
       throw "Unsupported provider";
   }

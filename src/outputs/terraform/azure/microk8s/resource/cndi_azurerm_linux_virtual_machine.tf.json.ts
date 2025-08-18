@@ -2,7 +2,10 @@ import { NormalizedCNDIConfig } from "src/cndi_config/types.ts";
 import { getPrettyJSONString } from "src/utils.ts";
 
 export default function (cndi_config: NormalizedCNDIConfig) {
-  const nodeConfig = cndi_config.infrastructure?.cndi?.nodes?.[0] || {};
+  const nodes = Array.isArray(cndi_config.infrastructure?.cndi?.nodes)
+    ? cndi_config.infrastructure?.cndi?.nodes
+    : [];
+  const nodeConfig = nodes[0] || {};
   const vmSize = nodeConfig.machine_type || nodeConfig.instance_type ||
     "Standard_D2s_v3";
   const diskSizeGb = nodeConfig.disk_size_gb || nodeConfig.volume_size || 100;
@@ -10,7 +13,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
   // deno-lint-ignore ban-types
   const azurerm_linux_virtual_machine: Record<string, {}> = {};
 
-  for (const n of cndi_config.infrastructure?.cndi?.nodes || []) {
+  for (const n of nodes) {
     const nodeName = `cndi_azurerm_linux_virtual_machine_${n.name}`;
 
     azurerm_linux_virtual_machine[nodeName] = {

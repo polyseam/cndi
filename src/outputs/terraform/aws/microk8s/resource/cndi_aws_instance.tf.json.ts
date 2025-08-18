@@ -29,7 +29,9 @@ type AWSInstance = {
 
 export default function (cndi_config: NormalizedCNDIConfig) {
   const _project_name = "${local.cndi_project_name}";
-  const nodes = cndi_config.infrastructure.cndi.nodes;
+  const nodes = cndi_config.infrastructure.cndi.nodes === "auto"
+    ? []
+    : cndi_config.infrastructure.cndi.nodes;
   const instances: Record<string, AWSInstance> = {};
 
   nodes.forEach((node, index) => {

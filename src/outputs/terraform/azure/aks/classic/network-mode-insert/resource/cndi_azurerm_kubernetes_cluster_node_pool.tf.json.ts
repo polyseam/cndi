@@ -27,6 +27,9 @@ export interface AzurermKubernetesClusterNodePool {
 export function getNodePools(
   cndi_config: NormalizedCNDIConfig,
 ): AzurermKubernetesClusterNodePool[] {
+  if (cndi_config?.infrastructure?.cndi?.nodes === "auto") {
+    throw new Error("Azure Automatic is not suppported yet!");
+  }
   const azurerm_kubernetes_cluster_node_pool = cndi_config.infrastructure.cndi
     .nodes.map(
       (nodeSpec: CNDINodeSpec, i) => {

@@ -69,4 +69,5 @@ export const DEFAULT_REGIONS = {
   gcp: "us-central1",
   azure: "eastus",
   dev: null,
+  bare: null,
 } as const;

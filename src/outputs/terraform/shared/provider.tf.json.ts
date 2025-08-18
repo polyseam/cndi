@@ -35,6 +35,25 @@ const KUBERNETES_PROVIDER_CONFIG = {
     cluster_ca_certificate:
       "${base64decode(module.cndi_gcp_gke_module.ca_certificate)}",
   },
+  bare: {
+    tailscale: {},
+    null: {},
+    local: {},
+    kubernetes: {
+      host: "${local.k3s_cluster_endpoint}",
+      cluster_ca_certificate:
+        "${base64decode(local.k3s_cluster_ca_certificate)}",
+      token: "${local.k3s_cluster_token}",
+    },
+    helm: {
+      kubernetes: {
+        host: "${local.k3s_cluster_endpoint}",
+        cluster_ca_certificate:
+          "${base64decode(local.k3s_cluster_ca_certificate)}",
+        token: "${local.k3s_cluster_token}",
+      },
+    },
+  },
   dev: {}, // TODO: actually solve
 };
 

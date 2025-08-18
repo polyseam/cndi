@@ -16,6 +16,7 @@ const getDefaultExternalDNSProviderForCNDIProvider = (
 ): ExternalDNSProvider => {
   if (cndiProvider === "gcp") return "google";
   if (cndiProvider === "dev") return "aws";
+  if (cndiProvider === "bare") return "cloudflare";
   return cndiProvider;
 };
 

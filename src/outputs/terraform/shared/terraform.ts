@@ -23,6 +23,11 @@ const REQUIRED_PROVIDERS = {
       version: "4.27.0",
     },
   },
+  bare: {
+    tailscale: { source: "tailscale/tailscale", version: "~> 0.21" },
+    local: {},
+    null: {},
+  },
   dev: {
     multipass: {
       source: "larstobi/multipass",

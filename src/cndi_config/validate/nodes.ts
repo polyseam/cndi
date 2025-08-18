@@ -459,4 +459,216 @@ export function validateCNDIConfigSpecComponentNodes(
       );
     }
   }
+
+  // Validate bare provider specific node requirements
+  if (provider === "bare") {
+    // Handle missing nodes configuration
+    if (!nodes) {
+      return new ErrOut(
+        [
+          cndiConfigFoundAtPath(pathToConfig),
+          ccolors.error("but it does not have any"),
+          ccolors.key_path("infrastructure.cndi.nodes"),
+          ccolors.error("configuration.\n"),
+          ccolors.error("For bare/k3s deployments, you must specify either:"),
+          ccolors.error("\n  - "),
+          ccolors.user_input(`"auto"`),
+          ccolors.error(" for automatic node discovery"),
+          ccolors.error("\n  - An array of node specifications"),
+        ],
+        {
+          code: 953,
+          id: "validate/cndi_config/bare/missing-nodes",
+          label,
+        },
+      );
+    }
+
+    // For bare provider, nodes can be "auto" or an array
+    if (Array.isArray(nodes)) {
+      // Validate leader node requirements
+      const leaderNodes = nodes.filter((node) => node.role === "leader");
+
+      if (leaderNodes.length === 0) {
+        return new ErrOut(
+          [
+            cndiConfigFoundAtPath(pathToConfig),
+            ccolors.error("but no node has"),
+            ccolors.key_name("role"),
+            ccolors.user_input(`"leader"`),
+            ccolors.error("specified.\n"),
+            ccolors.error(
+              "For bare/k3s deployments, exactly one node must be designated as the leader.",
+            ),
+          ],
+          {
+            code: 954,
+            id: "validate/cndi_config/bare/no-leader-node",
+            label,
+          },
+        );
+      }
+
+      if (leaderNodes.length > 1) {
+        return new ErrOut(
+          [
+            cndiConfigFoundAtPath(pathToConfig),
+            ccolors.error("but multiple nodes have"),
+            ccolors.key_name("role"),
+            ccolors.user_input(`"leader"`),
+            ccolors.error("specified.\n"),
+            ccolors.error(
+              "For bare/k3s deployments, exactly one node must be designated as the leader.",
+            ),
+          ],
+          {
+            code: 955,
+            id: "validate/cndi_config/bare/multiple-leader-nodes",
+            label,
+          },
+        );
+      }
+
+      // Validate individual node specifications
+      for (const node of nodes) {
+        // Validate tag format if specified
+        if (node.tag && !node.tag.startsWith("tag:")) {
+          return new ErrOut(
+            [
+              cndiConfigFoundAtPath(pathToConfig),
+              ccolors.error("but node"),
+              ccolors.user_input(`"${node.name}"`),
+              ccolors.error("has an invalid"),
+              ccolors.key_name("tag"),
+              ccolors.error("format.\n"),
+              ccolors.error("Tags must start with"),
+              ccolors.user_input(`"tag:"`),
+              ccolors.error("prefix. Example:"),
+              ccolors.user_input(`"tag:cndi--my-cluster"`),
+            ],
+            {
+              code: 956,
+              id: "validate/cndi_config/bare/invalid-tag-format",
+              metadata: { nodeName: node.name },
+              label,
+            },
+          );
+        }
+
+        // Validate that node has either host or tag
+        if (!node.host && !node.tag) {
+          return new ErrOut(
+            [
+              cndiConfigFoundAtPath(pathToConfig),
+              ccolors.error("but node"),
+              ccolors.user_input(`"${node.name}"`),
+              ccolors.error("is missing both"),
+              ccolors.key_name("host"),
+              ccolors.error("and"),
+              ccolors.key_name("tag"),
+              ccolors.error("properties.\n"),
+              ccolors.error("Each node must specify either a"),
+              ccolors.key_name("host"),
+              ccolors.error("(MagicDNS address or IP) or a"),
+              ccolors.key_name("tag"),
+              ccolors.error("for discovery."),
+            ],
+            {
+              code: 957,
+              id: "validate/cndi_config/bare/node-missing-host-and-tag",
+              metadata: { nodeName: node.name },
+              label,
+            },
+          );
+        }
+
+        // Validate host format if specified
+        if (node.host) {
+          const isIPv4 = /^100\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(node.host);
+          const isMagicDNS = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/.test(
+            node.host,
+          );
+
+          if (!isIPv4 && !isMagicDNS) {
+            return new ErrOut(
+              [
+                cndiConfigFoundAtPath(pathToConfig),
+                ccolors.error("but node"),
+                ccolors.user_input(`"${node.name}"`),
+                ccolors.error("has an invalid"),
+                ccolors.key_name("host"),
+                ccolors.error("format.\n"),
+                ccolors.error("Host must be either:"),
+                ccolors.error("\n  - A Tailscale IP (100.x.x.x)"),
+                ccolors.error(
+                  "\n  - A MagicDNS address (e.g., mynode.example.ts.net)",
+                ),
+              ],
+              {
+                code: 958,
+                id: "validate/cndi_config/bare/invalid-host-format",
+                metadata: { nodeName: node.name, host: node.host },
+                label,
+              },
+            );
+          }
+        }
+
+        // Validate that nodes don't use cloud-specific properties
+        const cloudSpecificProps = [
+          "instance_type",
+          "machine_type",
+          "vm_size",
+          "disk_type",
+          "min_count",
+          "max_count",
+          "count",
+          "volume_size",
+          "disk_size_gb",
+          "disk_size",
+          "size",
+          "cpus",
+          "memory",
+          "disk",
+        ];
+
+        for (const prop of cloudSpecificProps) {
+          // deno-lint-ignore no-explicit-any
+          const nx = node as unknown as any;
+          if (nx[prop] !== undefined) {
+            return new ErrOut(
+              [
+                cndiConfigFoundAtPath(pathToConfig),
+                ccolors.error("but node"),
+                ccolors.user_input(`"${node.name}"`),
+                ccolors.error("has property"),
+                ccolors.key_name(prop),
+                ccolors.error(
+                  "which is not supported for bare/k3s deployments.\n",
+                ),
+                ccolors.error(
+                  "Bare nodes are pre-existing machines discovered via Tailscale.",
+                ),
+                ccolors.error("Only"),
+                ccolors.key_name("name"),
+                ccolors.error(","),
+                ccolors.key_name("role"),
+                ccolors.error(","),
+                ccolors.key_name("host"),
+                ccolors.error(", and"),
+                ccolors.key_name("tag"),
+                ccolors.error("properties are supported."),
+              ],
+              {
+                code: 959,
+                id: "validate/cndi_config/bare/unsupported-node-property",
+                metadata: { nodeName: node.name, property: prop },
+                label,
+              },
+            );
+          }
+        }
+      }
+    }
+  }
 }

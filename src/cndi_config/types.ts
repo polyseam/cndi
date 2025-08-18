@@ -2,14 +2,15 @@ import { EFFECT_VALUES, MANAGED_NODE_KINDS } from "consts";
 
 type ObjectValues<T> = T[keyof T];
 
-export type CNDIProvider = "aws" | "azure" | "gcp" | "dev";
+export type CNDIProvider = "aws" | "azure" | "gcp" | "dev" | "bare";
 
 export type CNDIDistribution =
   | "eks"
   | "clusterless"
   | "gke"
   | "aks"
-  | "microk8s";
+  | "microk8s"
+  | "k3s";
 
 export type CNDIVersion = "v2" | "v3";
 
@@ -41,10 +42,18 @@ export interface NormalizedCNDIConfig extends CNDIConfigSpec {
  * CNDIConfig["infrastructure"]
  */
 
+/**
+ * CNDIConfig["infrastructure"]["tailscale"] - for bare/k3s deployments
+ */
+export interface CNDITailscaleConfig {
+  tailnet: string; // e.g., "example-platypus.ts.net"
+}
+
 export type CNDIInfrastructureSpec = {
   terraform?: TFBlocks;
+  tailscale?: CNDITailscaleConfig; // for bare/k3s deployments
   cndi: {
-    nodes: Array<CNDINodeSpec>; // only omitted if distribution is "clusterless"
+    nodes: Array<CNDINodeSpec> | "auto"; // only omitted if distribution is "clusterless"
     network?: CNDINetworkConfig;
     functions?: CNDIFnsConfig;
     ingress?: CNDIIngressConfig;
@@ -277,23 +286,30 @@ export type NodeKind = ObjectValues<typeof NODE_KIND>;
 export interface CNDINodeSpec {
   name: string;
   role?: NodeRole; // default: controller
+  labels?: Label;
+  taints?: Taint[];
+  count?: number; // default: 1
+  min_count?: number;
+  max_count?: number;
+
   volume_size?: number;
   size?: number | string; // number: 500 or string: az machine type
   vm_size?: string; // az machine type
+  instance_type?: string;
+  machine_type?: string;
+
   disk_size_gb?: number;
   disk_size?: number;
   disk_type?: string;
-  instance_type?: string;
-  machine_type?: string;
-  min_count?: number;
-  max_count?: number;
-  count?: number; // default: 1
-  labels?: Label;
-  taints?: Taint[];
+
   // Adding missing properties from schema
   memory?: number | string; // If number, assumed to be in G
   disk?: number | string; // If number, assumed to be in G
   cpus?: number; // For dev/multipass nodes
+
+  // For bare/k3s deployments
+  host?: string; // MagicDNS address or 100.x.x.x IPv4 address
+  tag?: string; // Tailscale tag for node selection
 }
 
 export interface MultipassNodeItemSpec extends CNDINodeSpec {

@@ -27,6 +27,10 @@ export default function (cndi_config: NormalizedCNDIConfig) {
   const listeners: Record<string, AWSLBListener> = {};
   const attachments: Record<string, AWSLBTargetGroupAttachment> = {};
 
+  const nodes = cndi_config.infrastructure.cndi.nodes === "auto"
+    ? []
+    : cndi_config.infrastructure.cndi.nodes;
+
   open_ports.forEach((port) => {
     listeners[`cndi_aws_lb_listener_${port.name}`] = {
       load_balancer_arn: "${aws_lb.cndi_aws_lb.arn}",
@@ -45,7 +49,7 @@ export default function (cndi_config: NormalizedCNDIConfig) {
     };
 
     // Add target group attachments for each node
-    cndi_config.infrastructure.cndi.nodes.forEach((node) => {
+    nodes.forEach((node) => {
       const count = node?.count || 1;
       for (let i = 0; i < count; i++) {
         const nodeName = `${node.name}-${i}`;

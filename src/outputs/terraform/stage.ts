@@ -5,6 +5,7 @@ import aws from "./aws/stage.ts";
 import gcp from "./gcp/stage.ts";
 import azure from "./azure/stage.ts";
 import dev from "./dev/stage.ts";
+import stageBareProviderTerraform from "./bare/stage.ts";
 
 import { ErrOut } from "errout";
 
@@ -25,6 +26,7 @@ const stagers: Stagers = {
   gcp,
   azure,
   dev,
+  bare: stageBareProviderTerraform,
 };
 
 export default async function stageTerraformFiles(
