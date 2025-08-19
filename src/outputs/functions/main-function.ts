@@ -1,4 +1,4 @@
-// import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";
+import { context, propagation } from "npm:@opentelemetry/api";
 
 const MAX_MEMORY_LIMIT_MB = 150;
 const WORKER_TIMEOUT_MS = 30000;
@@ -7,155 +7,148 @@ const CPU_TIME_SOFT_LIMIT_MS = 10000;
 const CPU_TIME_HARD_LIMIT_MS = 20000;
 
 function mainContent() {
+  console.log("main function started");
+  console.log(Deno.version);
+
+  addEventListener("beforeunload", () => {
+    console.log("main worker exiting");
+  });
+
+  addEventListener("unhandledrejection", (ev) => {
+    console.log(ev);
+    ev.preventDefault();
+  });
+
   Deno.serve(async (req: Request) => {
+    const ctx = propagation.extract(context.active(), req.headers, {
+      get(carrier, key) {
+        return carrier.get(key) ?? void 0;
+      },
+      keys(carrier) {
+        return [...carrier.keys()];
+      },
+    });
+
+    const baggage = propagation.getBaggage(ctx);
+    const requestId = baggage?.getEntry("cndi-request-id")?.value ?? null;
+
     const headers = new Headers({
       "Content-Type": "application/json",
     });
+
     const url = new URL(req.url);
     const { pathname } = url;
+
     // handle health checks
     if (pathname === "/_internal/health") {
       return new Response(
-        JSON.stringify({
-          "message": "ok",
-        }),
+        JSON.stringify({ "message": "ok" }),
         {
-          // @ts-ignore - downstream import provides STATUS_CODE
-          status: STATUS_CODE.OK,
+          status: 200,
           headers,
         },
       );
     }
+
     if (pathname === "/_internal/metric") {
-      // @ts-ignore - EdgeRuntime global is provided downstream
+      // @ts-ignore - EdgeRuntime defined downstream
       const metric = await EdgeRuntime.getRuntimeMetrics();
       return Response.json(metric);
     }
 
-    // NOTE: You can test WebSocket in the main worker by uncommenting below.
-    // if (pathname === '/_internal/ws') {
-    // 	const upgrade = req.headers.get("upgrade") || "";
-    // 	if (upgrade.toLowerCase() != "websocket") {
-    // 		return new Response("request isn't trying to upgrade to websocket.");
-    // 	}
-    // 	const { socket, response } = Deno.upgradeWebSocket(req);
-    // 	socket.onopen = () => console.log("socket opened");
-    // 	socket.onmessage = (e) => {
-    // 		console.log("socket message:", e.data);
-    // 		socket.send(new Date().toString());
-    // 	};
-    // 	socket.onerror = e => console.log("socket errored:", e.message);
-    // 	socket.onclose = () => console.log("socket closed");
-    // 	return response; // 101 (Switching Protocols)
-    // }
-
+    let servicePath = pathname;
     const path_parts = pathname.split("/");
     const service_name = path_parts[1];
+
     if (!service_name || service_name === "") {
-      const error = {
-        msg: "missing function name in request",
-      };
-      return new Response(JSON.stringify(error), {
-        // @ts-ignore - downstream import provides STATUS_CODE
-        status: STATUS_CODE.BadRequest,
-        headers: {
-          "Content-Type": "application/json",
+      const error = { msg: "missing function name in request" };
+      return new Response(
+        JSON.stringify(error),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
         },
-      });
+      );
     }
-    const servicePath = `./${service_name}`;
-    // console.error(`serving the request with ${servicePath}`);
-    const createWorker = async () => {
+
+    servicePath = `./${service_name}`;
+
+    const createWorker = async (otelAttributes?: { [_: string]: string }) => {
       const memoryLimitMb = MAX_MEMORY_LIMIT_MB;
       const workerTimeoutMs = WORKER_TIMEOUT_MS;
       const noModuleCache = NO_MODULE_CACHE;
       const cpuTimeSoftLimitMs = CPU_TIME_SOFT_LIMIT_MS;
       const cpuTimeHardLimitMs = CPU_TIME_HARD_LIMIT_MS;
-      // you can provide an import map inline
-      // const inlineImportMap = {
-      //   imports: {
-      //     "std/": "https://deno.land/std@0.131.0/",
-      //     "cors": "./examples/_shared/cors.ts"
-      //   }
-      // }
-      // const importMapPath = `data:${encodeURIComponent(JSON.stringify(importMap))}?${encodeURIComponent('/home/deno/functions/test')}`;
-      const importMapPath = null;
-      const envVarsObj = Deno.env.toObject();
-      const envVars = Object.keys(envVarsObj).map((k) => [
-        k,
-        envVarsObj[k],
-      ]);
       const forceCreate = false;
-      const netAccessDisabled = false;
 
-      // load source from an eszip
-      // const maybeEszip = await Deno.readFile('./bin.eszip');
-      // const maybeEntrypoint = 'file:///src/index.ts';
-      // const maybeEntrypoint = 'file:///src/index.ts';
-      // or load module source from an inline module
-      // const maybeModuleCode = 'Deno.serve((req) => new Response("Hello from Module Code"));';
+      const envVarsObj = Deno.env.toObject();
+      const envVars = Object.keys(envVarsObj).map((k) => [k, envVarsObj[k]]);
 
-      // @ts-ignore - EdgeRuntime global is provided downstream
+      // @ts-ignore - EdgeRuntime patched
       return await EdgeRuntime.userWorkers.create({
         servicePath,
         memoryLimitMb,
         workerTimeoutMs,
         noModuleCache,
-        importMapPath,
         envVars,
         forceCreate,
-        netAccessDisabled,
         cpuTimeSoftLimitMs,
         cpuTimeHardLimitMs,
+        staticPatterns: [],
+        context: {
+          useReadSyncFileAPI: true,
+          otel: otelAttributes,
+        },
+        otelConfig: {
+          tracing_enabled: true,
+          propagators: ["TraceContext", "Baggage"],
+        },
       });
     };
 
     const callWorker = async () => {
       try {
-        // If a worker for the given service path already exists,
+        // If a worker for the given service path already exists
         // it will be reused by default.
         // Update forceCreate option in createWorker to force create a new worker for each request.
-        const worker = await createWorker();
+        const worker = await createWorker(
+          requestId
+            ? {
+              "cndi-request-id": requestId,
+            }
+            : void 0,
+        );
+
         const controller = new AbortController();
+
         const signal = controller.signal;
-        // Optional: abort the request after a timeout
-        // setTimeout(() => controller.abort(), 2 * 60 * 1000);
-        return await worker.fetch(req, {
-          signal,
-        });
-      } catch (err) {
-        const e = err as Error;
-        console.error(e);
-        // @ts-ignore - EdgeRuntime seems to patch Deno.errors
+        // hard abort: setTimeout(() => controller.abort(), 2 * 60 * 1000);
+
+        return await worker.fetch(req, { signal });
+      } catch (e) {
+        // @ts-ignore - Patched by Runtime
+        if (e instanceof Deno.errors.WorkerAlreadyRetired) {
+          return await callWorker();
+        }
+        // @ts-ignore - Patched by Runtime
         if (e instanceof Deno.errors.WorkerRequestCancelled) {
           headers.append("Connection", "close");
-          // XXX(Nyannyacha): I can't think right now how to re-poll
-          // inside the worker pool without exposing the error to the
-          // surface.
-          // It is satisfied when the supervisor that handled the original
-          // request terminated due to reaches such as CPU time limit or
-          // Wall-clock limit.
-          //
-          // The current request to the worker has been canceled due to
-          // some internal reasons. We should repoll the worker and call
-          // `fetch` again.
-          // return await callWorker();
         }
-        const error = {
-          msg: e?.toString(),
-        };
-        return new Response(JSON.stringify(error), {
-          // @ts-ignore - downstream import provides STATUS_CODE
-          status: STATUS_CODE.InternalServerError,
-          headers,
-        });
+
+        const error = { msg: (e as Error).toString() };
+        return new Response(
+          JSON.stringify(error),
+          {
+            status: 500,
+            headers,
+          },
+        );
       }
     };
+
     return callWorker();
   });
 }
-
-// it's possible that this is all silly, and we should instead just fetch this from a URL
 
 type getFunctionsMainContentOptions = {
   noModuleCache?: boolean;
@@ -167,8 +160,8 @@ type getFunctionsMainContentOptions = {
 
 export function getFunctionsMainContent(
   {
-    noModuleCache = NO_MODULE_CACHE,
     maxMemoryLimitMb = MAX_MEMORY_LIMIT_MB,
+    noModuleCache = NO_MODULE_CACHE,
     workerTimeoutMs = WORKER_TIMEOUT_MS,
     cpuTimeHardLimitMs = CPU_TIME_HARD_LIMIT_MS,
     cpuTimeSoftLimitMs = CPU_TIME_SOFT_LIMIT_MS,
@@ -176,12 +169,10 @@ export function getFunctionsMainContent(
 ) {
   // divide typescript code into headings, imports and content
   const headings = [
-    "// https://github.com/supabase/edge-runtime/blob/main/examples/main/index.ts",
+    "// https://github.com/polyseam/cndi/blob/main/src/outputs/functions/main-function.ts",
   ];
 
-  const imports = [
-    `import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";`,
-  ];
+  const imports = ['import { context, propagation } from "npm:@opentelemetry/api";'];
 
   const constants = [
     `const NO_MODULE_CACHE = ${noModuleCache};`,

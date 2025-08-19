@@ -48,6 +48,7 @@
     "jsr:@std/path@0.214": "0.214.0",
     "jsr:@std/path@0.214.0": "0.214.0",
     "jsr:@std/path@0.221": "0.221.0",
+    "jsr:@std/path@1": "1.1.1",
     "jsr:@std/path@^1.1.0": "1.1.1",
     "jsr:@std/path@^1.1.1": "1.1.1",
     "jsr:@std/path@~1.0.6": "1.0.9",
@@ -56,6 +57,8 @@
     "jsr:@std/text@~1.0.7": "1.0.15",
     "jsr:@std/yaml@^1.0.8": "1.0.8",
     "npm:@octokit/types@^13.4.1": "13.10.0",
+    "npm:@opentelemetry/api@*": "1.9.0",
+    "npm:@opentelemetry/core@1": "1.30.1_@opentelemetry+api@1.9.0",
     "npm:@peculiar/x509@1.11.0": "1.11.0",
     "npm:@types/node@*": "22.15.15",
     "npm:crypto-js@4.2.0": "4.2.0",
@@ -517,6 +520,19 @@
         "aggregate-error"
       ]
     },
+    "@opentelemetry/api@1.9.0": {
+      "integrity": "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="
+    },
+    "@opentelemetry/core@1.30.1_@opentelemetry+api@1.9.0": {
+      "integrity": "sha512-OOCM2C/QIURhJMuKaekP3TRBxBKxG/TWWA0TL2J6nXUtDnuCtccy49LUJF8xPFXMX+0LMcxFpCo8M9cGY1W6rQ==",
+      "dependencies": [
+        "@opentelemetry/api",
+        "@opentelemetry/semantic-conventions"
+      ]
+    },
+    "@opentelemetry/semantic-conventions@1.28.0": {
+      "integrity": "sha512-lp4qAiMTD4sNWW4DbKLBkfiMZ4jbAboJIGOQr5DvciMRI494OapieI9qiODpOt0XBr1LjIDy1xAGAnVs5supTA=="
+    },
     "@peculiar/asn1-cms@2.3.15": {
       "integrity": "sha512-B+DoudF+TCrxoJSTjjcY8Mmu+lbv8e7pXGWrhNp2/EGJp9EEcpzjBCar7puU57sGifyzaRVM03oD5L7t7PghQg==",
       "dependencies": [
@@ -849,6 +865,12 @@
     "wrappy@1.0.2": {
       "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="
     }
+  },
+  "redirects": {
+    "https://deno.land/std/http/status.ts": "https://deno.land/std@0.224.0/http/status.ts"
+  },
+  "remote": {
+    "https://deno.land/std@0.224.0/http/status.ts": "ed61b4882af2514a81aefd3245e8df4c47b9a8e54929a903577643d2d1ebf514"
   },
   "workspace": {
     "dependencies": [
