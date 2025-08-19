@@ -221,12 +221,12 @@ function validateBareK3sConfiguration(
   }
 
   // Validate Tailscale configuration is present
-  if (!configSpec.infrastructure?.tailscale) {
+  if (!configSpec.infrastructure?.cndi?.tailscale) {
     return new ErrOut(
       [
         cndiConfigFoundAtPath(pathToConfig),
         ccolors.error("but it does not have the required"),
-        ccolors.key_path("infrastructure.tailscale"),
+        ccolors.key_path("infrastructure.cndi.tailscale"),
         ccolors.error("configuration.\n"),
         ccolors.error(
           "The bare/k3s deployment target requires Tailscale configuration.",
@@ -242,7 +242,7 @@ function validateBareK3sConfiguration(
   }
 
   // Validate tailnet is specified
-  if (!configSpec.infrastructure?.tailscale?.tailnet) {
+  if (!configSpec.infrastructure?.cndi?.tailscale?.tailnet) {
     return new ErrOut(
       [
         cndiConfigFoundAtPath(pathToConfig),

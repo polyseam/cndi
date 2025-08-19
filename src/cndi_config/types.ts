@@ -51,9 +51,9 @@ export interface CNDITailscaleConfig {
 
 export type CNDIInfrastructureSpec = {
   terraform?: TFBlocks;
-  tailscale?: CNDITailscaleConfig; // for bare/k3s deployments
   cndi: {
     nodes: Array<CNDINodeSpec> | "auto"; // only omitted if distribution is "clusterless"
+    tailscale?: CNDITailscaleConfig; // for bare/k3s deployments
     network?: CNDINetworkConfig;
     functions?: CNDIFnsConfig;
     ingress?: CNDIIngressConfig;

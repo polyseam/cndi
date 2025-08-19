@@ -11,8 +11,6 @@ export default function getVariableTfJSON(
     ssh_user: { type: "string", default: "ubuntu" },
     ssh_private_key: { type: "string", sensitive: true },
     k3s_version: { type: "string", default: "stable" },
-    disable_servicelb: { type: "bool", default: false },
-    disable_traefik: { type: "bool", default: true },
     server_extra_args: { type: ["list", "string"], default: [] },
     agent_extra_args: { type: ["list", "string"], default: [] },
     tls_sans: { type: ["list", "string"], default: [] },

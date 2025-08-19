@@ -102,6 +102,9 @@ export default function getProviderTfJSON(
         features: [{}],
       }];
       break;
+    case "bare":
+      out.bare = [{}];
+      break;
     case "dev":
       out.multipass = [{}];
       out.local = [{}];

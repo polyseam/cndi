@@ -68,6 +68,8 @@ export function validateEnvironmentDuringCNDIOverwrite(
       return ensureValidGoogleCredentials();
     case "azure":
       return;
+    case "bare":
+      return;
     case "dev":
       return;
     default:
