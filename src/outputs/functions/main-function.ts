@@ -172,7 +172,9 @@ export function getFunctionsMainContent(
     "// https://github.com/polyseam/cndi/blob/main/src/outputs/functions/main-function.ts",
   ];
 
-  const imports = ['import { context, propagation } from "npm:@opentelemetry/api";'];
+  const imports = [
+    'import { context, propagation } from "npm:@opentelemetry/api";',
+  ];
 
   const constants = [
     `const NO_MODULE_CACHE = ${noModuleCache};`,
