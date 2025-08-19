@@ -51,7 +51,7 @@ function mainContent() {
     }
 
     if (pathname === "/_internal/metric") {
-      // @ts-ignore - EdgeRuntime defined downstream
+      // @ts-ignore - EdgeRuntime defined in runtime
       const metric = await EdgeRuntime.getRuntimeMetrics();
       return Response.json(metric);
     }
@@ -71,6 +71,7 @@ function mainContent() {
       );
     }
 
+    // route functions traffic by pathname to the functions in ./cndi/functions/src/${service_name}/index.ts
     servicePath = `./${service_name}`;
 
     const createWorker = async (otelAttributes?: { [_: string]: string }) => {
