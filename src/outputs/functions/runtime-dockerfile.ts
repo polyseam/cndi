@@ -1,10 +1,12 @@
-import { EDGE_RUNTIME_IMAGE_TAG } from "versions";
+import { EDGE_RUNTIME_IMAGE_VERSION } from "versions";
 
 export function getFunctionsDockerfileContent(
-  version = EDGE_RUNTIME_IMAGE_TAG,
+  version = EDGE_RUNTIME_IMAGE_VERSION,
 ) {
   return `
 FROM ghcr.io/supabase/edge-runtime:v${version}
+
+ENV OTEL_DENO=true
 
 COPY ./src /home/deno/functions
 WORKDIR /home/deno/functions
